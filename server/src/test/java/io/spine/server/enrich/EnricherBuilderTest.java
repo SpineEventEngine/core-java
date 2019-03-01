@@ -22,6 +22,7 @@ package io.spine.server.enrich;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.enrich.given.event.EbtOrderCreated;
 import io.spine.server.enrich.given.event.EbtOrderEvent;
@@ -101,5 +102,14 @@ class EnricherBuilderTest {
         private void assertRejects(Executable runnable) {
             assertThrows(IllegalArgumentException.class, runnable);
         }
+    }
+
+    @Test
+    @DisplayName("do not allow passing an interface as enrichment class")
+    void prohibitInterface() {
+        assertThrows(IllegalArgumentException.class, () ->
+                builder.add(EbtOrderEvent.class, Message.class,
+                            (e, c) -> StringValue.getDefaultInstance())
+        );
     }
 }

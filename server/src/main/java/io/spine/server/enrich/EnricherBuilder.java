@@ -59,25 +59,32 @@ public final class EnricherBuilder {
      *         the type of the event message
      * @param <T>
      *         the type of the enrichment message
-     * @param eventClass
-     *         the class of the events the passed function enriches
+     * @param eventClassOrInterface
+     *         the class or common interface of the events the passed function enriches
      * @param enrichmentClass
      *         the class of the enrichments the passed function produces
      * @param func
      *         the enrichment function
      * @return {@code this} builder
-     * @throws IllegalStateException
-     *         if the builder already contains a function for this event class
+     * @throws IllegalArgumentException
+     *         if the builder already contains a function which produces instances of
+     *         {@code enrichmentClass} for the passed class or interface of events, or for
+     *         its super-interface, or a sub-interface, or a sub-class
      * @see #remove(Class, Class)
      */
     @CanIgnoreReturnValue
     public <M extends EventMessage, T extends Message>
-    EnricherBuilder add(Class<M> eventClass, Class<T> enrichmentClass,
+    EnricherBuilder add(Class<M> eventClassOrInterface, Class<T> enrichmentClass,
                         EventEnrichmentFn<M, T> func) {
-        checkNotNull(eventClass);
+        checkNotNull(eventClassOrInterface);
         checkNotNull(enrichmentClass);
+        checkArgument(!enrichmentClass.isInterface(),
+                      "The `enrichmentClass` argument must be a class, not an interface." +
+                              " `%s` is the interface. Please pass a class which" +
+                              " implements this interface.",
+                      enrichmentClass.getCanonicalName());
         checkNotNull(func);
-        Key key = new Key(eventClass, enrichmentClass);
+        Key key = new Key(eventClassOrInterface, enrichmentClass);
         checkDirectDuplication(key);
         checkInterfaceDuplication(key);
         functions.put(key, func);
