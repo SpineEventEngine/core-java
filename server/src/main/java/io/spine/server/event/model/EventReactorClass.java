@@ -21,11 +21,11 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -48,7 +48,8 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
         this.externalEvents = reactors.getMessageClasses(HandlerMethod::isExternal);
     }
 
-    public static <S extends AbstractEventReactor> EventReactorClass<S> asReactorClass(Class<S> cls) {
+    public static <S extends AbstractEventReactor> EventReactorClass<S> asReactorClass(
+            Class<S> cls) {
         checkNotNull(cls);
         EventReactorClass<S> result = (EventReactorClass<S>)
                 get(cls, EventReactorClass.class, () -> new EventReactorClass<>(cls));
@@ -65,17 +66,17 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public Set<EventClass> getReactionOutput() {
+    public Set<EventClass> reactionOutput() {
         return reactors.getProducedTypes();
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return domesticEvents;
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return externalEvents;
     }
 }

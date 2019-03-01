@@ -38,9 +38,9 @@ public interface EventReceiverClass {
      * <p>The returned set contains only event classes of the {@code BoundedContext}
      * to which the class belongs.
      *
-     * <p>For external events, please see {@link #getExternalEventClasses()}.
+     * <p>For external events, please see {@link #externalEventClasses()}.
      */
-    Set<EventClass> getEventClasses();
+    Set<EventClass> eventClasses();
 
     /**
      * Obtains a set of external events which this class receives.
@@ -48,7 +48,7 @@ public interface EventReceiverClass {
      * <p>External events are those that are delivered to the {@code BoundedContext}
      * to which this class belongs from outside.
      *
-     * <p>For domestic events, please see {@link #getEventClasses()}.
+     * <p>For domestic events, please see {@link #eventClasses()}.
      */
-    Set<EventClass> getExternalEventClasses();
+    Set<EventClass> externalEventClasses();
 }

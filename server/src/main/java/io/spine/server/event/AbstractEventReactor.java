@@ -24,8 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.logging.Logging;
@@ -36,6 +34,8 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.tenant.EventOperation;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +43,6 @@ import java.util.Set;
 
 /**
  * An abstract base for all event reactors.
- *
  *
  * @see React reactors
  */
@@ -56,10 +55,15 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         this.eventBus = eventBus;
     }
 
+    @Override
+    public Set<EventClass> messageClasses() {
+        return thisClass.eventClasses();
+    }
+
     @CanIgnoreReturnValue
     @Override
     public Set<String> dispatch(EventEnvelope envelope) {
-        EventOperation op = new EventOperation(envelope.getOuterObject()) {
+        EventOperation op = new EventOperation(envelope.outerObject()) {
             @Override
             public void run() {
                 handle(envelope);
@@ -79,11 +83,11 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     protected void handle(EventEnvelope envelope) {
         List<Event> events = reactTo(envelope);
         this.eventBus.post(events);
-
     }
+
     private List<Event> reactTo(EventEnvelope event) {
         EventReactorMethod method =
-                thisClass.getReactor(event.getMessageClass(), event.getOriginClass());
+                thisClass.getReactor(event.messageClass(), event.originClass());
         ReactorMethodResult result =
                 method.invoke(this, event);
         return result.produceEvents(event);
@@ -100,30 +104,25 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     }
 
     @Override
-    public Any getProducerId() {
+    public Any producerId() {
         return Any.getDefaultInstance();
     }
 
     @Override
-    public Version getVersion() {
+    public Version version() {
         return Versions.zero();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
-        return thisClass.getExternalEventClasses();
-    }
-
-    @Override
-    public Set<EventClass> getMessageClasses() {
-        return thisClass.getEventClasses();
+    public Set<EventClass> externalEventClasses() {
+        return thisClass.externalEventClasses();
     }
 
     private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            return ExternalMessageClass.fromEventClasses(getExternalEventClasses());
+        public Set<ExternalMessageClass> messageClasses() {
+            return ExternalMessageClass.fromEventClasses(externalEventClasses());
         }
 
         @CanIgnoreReturnValue

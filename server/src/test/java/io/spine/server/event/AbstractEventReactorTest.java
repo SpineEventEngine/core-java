@@ -20,20 +20,16 @@
 
 package io.spine.server.event;
 
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.given.AbstractReactorTestEnv.DefaultUserAssigner;
 import io.spine.server.event.given.AbstractReactorTestEnv.TaskDisruptor;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
-import io.spine.test.event.TaskBecameUnavailable;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.event.given.AbstractReactorTestEnv.addSomeTask;
 import static io.spine.server.event.given.AbstractReactorTestEnv.defaultUserAssigner;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someProjectId;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someTask;
@@ -45,45 +41,40 @@ import static junit.framework.TestCase.assertTrue;
 public class AbstractEventReactorTest {
 
     private BoundedContext projectsBc;
-    private BoundedContextBuilder projectsBcBuilder;
     private BoundedContext customersBc;
     private DefaultUserAssigner defaultUserAssigner;
     private TaskDisruptor taskDisruptor;
 
     @BeforeEach
     void setUp() {
-        projectsBcBuilder = BoundedContext.newBuilder();
-        projectsBc = projectsBcBuilder.build();
+        projectsBc = BoundedContext.newBuilder().build();
         customersBc = BoundedContext
                 .newBuilder()
                 .build();
-        defaultUserAssigner = defaultUserAssigner(projectsBc.getEventBus(), someUserId());
-        taskDisruptor = taskDisruptor(projectsBc.getEventBus());
+        defaultUserAssigner = defaultUserAssigner(projectsBc.eventBus(), someUserId());
+        taskDisruptor = taskDisruptor(projectsBc.eventBus());
         projectsBc.registerEventDispatcher(defaultUserAssigner);
         projectsBc.registerEventDispatcher(taskDisruptor);
     }
 
     @Test
     @DisplayName("react to domestic events")
-    void reactToDomesticEvent() {
+    void reactToDomesticEvents() {
         Task taskToAdd = someTask();
         TaskAdded taskAdded = TaskAdded
                 .newBuilder()
                 .setProjectId(someProjectId())
                 .setTask(taskToAdd)
                 .build();
-        projectsBc.getEventBus()
+        projectsBc.eventBus()
                   .post(GivenEvent.withMessage(taskAdded));
         assertTrue(defaultUserAssigner.assignedByThisAssigner()
                                       .contains(taskToAdd));
     }
 
     @Test
-    @DisplayName("emit events in response to domestic evenst")
-    void emitInResponseToDomesticEvents(){
-        BlackBoxBoundedContext blackBoxProjectsBc = BlackBoxBoundedContext.from(projectsBcBuilder);
-        TaskAdded taskAdded = addSomeTask();
-        projectsBc.getEventBus().post(GivenEvent.withMessage(taskAdded));
-        blackBoxProjectsBc.assertEmitted(TaskBecameUnavailable.class);
+    @DisplayName("react to external events")
+    void reactToExternalEvents(){
+
     }
 }

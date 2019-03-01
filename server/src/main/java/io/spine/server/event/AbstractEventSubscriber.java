@@ -123,12 +123,12 @@ public abstract class AbstractEventSubscriber
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> messageClasses() {
-        return thisClass.getEventClasses();
+        return thisClass.eventClasses();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return thisClass.getExternalEventClasses();
+        return thisClass.externalEventClasses();
     }
 
     @Override

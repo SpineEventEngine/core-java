@@ -79,17 +79,17 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         SetView<EventClass> result =
-                union(reactorDelegate.getEventClasses(), commanderDelegate.getEventClasses());
+                union(reactorDelegate.eventClasses(), commanderDelegate.eventClasses());
         return result;
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         SetView<EventClass> result =
-                union(reactorDelegate.getExternalEventClasses(),
-                      commanderDelegate.getExternalEventClasses());
+                union(reactorDelegate.externalEventClasses(),
+                      commanderDelegate.externalEventClasses());
         return result;
     }
 
@@ -97,7 +97,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
      * Obtains event classes produced by this process manager class.
      */
     public Set<EventClass> getProducedEvents() {
-        SetView<EventClass> result = union(getCommandOutput(), getReactionOutput());
+        SetView<EventClass> result = union(getCommandOutput(), reactionOutput());
         return result;
     }
 
@@ -107,8 +107,8 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<EventClass> getReactionOutput() {
-        return reactorDelegate.getReactionOutput();
+    public Set<EventClass> reactionOutput() {
+        return reactorDelegate.reactionOutput();
     }
 
     @Override

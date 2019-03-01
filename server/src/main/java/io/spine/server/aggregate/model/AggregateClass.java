@@ -70,20 +70,20 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final Set<EventClass> getEventClasses() {
-        return delegate.getEventClasses();
+    public final Set<EventClass> eventClasses() {
+        return delegate.eventClasses();
     }
 
     @Override
-    public final Set<EventClass> getExternalEventClasses() {
-        return delegate.getExternalEventClasses();
+    public final Set<EventClass> externalEventClasses() {
+        return delegate.externalEventClasses();
     }
 
     /**
      * Obtains event types produced by this aggregate class.
      */
     public Set<EventClass> getProducedEvents() {
-        Set<EventClass> result = union(getCommandOutput(), getReactionOutput());
+        Set<EventClass> result = union(getCommandOutput(), reactionOutput());
         return result;
     }
 
@@ -122,8 +122,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> getReactionOutput() {
-        return delegate.getReactionOutput();
+    public Set<EventClass> reactionOutput() {
+        return delegate.reactionOutput();
     }
 
     /**
