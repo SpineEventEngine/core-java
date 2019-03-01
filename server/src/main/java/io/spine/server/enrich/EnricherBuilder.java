@@ -26,6 +26,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.core.EnrichableMessageContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,7 +77,21 @@ public final class EnricherBuilder {
     public <M extends EventMessage, T extends Message>
     EnricherBuilder add(Class<M> eventClassOrInterface, Class<T> enrichmentClass,
                         EventEnrichmentFn<M, T> func) {
-        checkNotNull(eventClassOrInterface);
+        return doAdd(eventClassOrInterface, enrichmentClass, func);
+    }
+
+    /**
+     * Adds an enrichment function to the builder.
+     *
+     * @implNote This method does the real job of adding functions to the builder.
+     *         The binding of the generic parameters allows type-specific functions
+     *         (e.g. {@link #add(Class, Class, EventEnrichmentFn)} exposed in the public API to
+     *         call this method.
+     */
+    private <M extends Message, C extends EnrichableMessageContext, T extends Message>
+    EnricherBuilder doAdd(Class<M> messageClassOrInterface, Class<T> enrichmentClass,
+                          EnrichmentFn<M, C, T> func) {
+        checkNotNull(messageClassOrInterface);
         checkNotNull(enrichmentClass);
         checkArgument(!enrichmentClass.isInterface(),
                       "The `enrichmentClass` argument must be a class, not an interface." +
@@ -84,7 +99,7 @@ public final class EnricherBuilder {
                               " implements this interface.",
                       enrichmentClass.getCanonicalName());
         checkNotNull(func);
-        Key key = new Key(eventClassOrInterface, enrichmentClass);
+        Key key = new Key(messageClassOrInterface, enrichmentClass);
         checkDirectDuplication(key);
         checkInterfaceDuplication(key);
         functions.put(key, func);
