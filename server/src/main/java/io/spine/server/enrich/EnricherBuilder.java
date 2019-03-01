@@ -142,7 +142,7 @@ public final class EnricherBuilder {
             checkArgument(
                     !sourceInterface.isAssignableFrom(entryCls),
                     "Unable to add a function which produces enrichments of the class `%s`" +
-                    " via the interface `%s` because there is already a function which does" +
+                    " via the interface `%s`. There is already a function which does" +
                     " this via the class `%s` which implements this interface." +
                     SUGGEST_REMOVAL,
                     enrichmentClass.getCanonicalName(),
