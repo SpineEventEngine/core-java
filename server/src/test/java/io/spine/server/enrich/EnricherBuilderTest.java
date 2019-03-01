@@ -24,6 +24,8 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.server.enrich.given.event.EbtOrderCreated;
 import io.spine.server.enrich.given.event.EbtOrderEvent;
 import io.spine.server.enrich.given.event.EbtOrderLineAdded;
@@ -81,22 +83,39 @@ class EnricherBuilderTest {
             builder.add(EbtOrderLineAdded.class, BoolValue.class,
                         (e, c) -> BoolValue.of(true));
 
-            assertRejects(() ->
-                    builder.add(EbtOrderLineAdded.class, BoolValue.class,
-                                (e, c) -> BoolValue.of(false))
+            assertRejects(
+                    () -> builder.add(EbtOrderLineAdded.class, BoolValue.class,
+                                      (e, c) -> BoolValue.of(false))
             );
         }
 
-        @Test
-        @DisplayName("when a function is defined for implemened interface")
-        void interfaceEnrichment() {
-            builder.add(EbtOrderEvent.class, FloatValue.class,
-                        (e, c) -> FloatValue.of(3.14f));
+        @Nested
+        @DisplayName("when a function is already defined")
+        class AlreadyDefined {
 
-            assertRejects(() ->
-                    builder.add(EbtOrderCreated.class, FloatValue.class,
-                                (e, c) -> FloatValue.of(2.68f))
-            );
+            @Test
+            @DisplayName("for an interface which the passed class implements")
+            void interfaceEnrichment() {
+                builder.add(EbtOrderEvent.class, FloatValue.class,
+                            (e, c) -> FloatValue.of(3.14f));
+
+                assertRejects(
+                        () -> builder.add(EbtOrderCreated.class, FloatValue.class,
+                                          (e, c) -> FloatValue.of(2.68f))
+                );
+            }
+
+            @Test
+            @DisplayName("for a class which implements the passed interface")
+            void classImplements() {
+                builder.add(EbtOrderCreated.class, Timestamp.class,
+                            (e, c) -> Time.getCurrentTime());
+
+                assertRejects(
+                        () -> builder.add(EbtOrderEvent.class, Timestamp.class,
+                                          (e, c) -> Time.getCurrentTime())
+                );
+            }
         }
 
         private void assertRejects(Executable runnable) {

@@ -95,13 +95,14 @@ public final class EnricherBuilder {
         checkNotNull(enrichmentClass);
         checkArgument(!enrichmentClass.isInterface(),
                       "The `enrichmentClass` argument must be a class, not an interface." +
-                              " `%s` is the interface. Please pass a class which" +
-                              " implements this interface.",
+                      " `%s` is the interface. Please pass a class which" +
+                      " implements this interface.",
                       enrichmentClass.getCanonicalName());
         checkNotNull(func);
         Key key = new Key(messageClassOrInterface, enrichmentClass);
         checkDirectDuplication(key);
         checkInterfaceDuplication(key);
+        checkImplDuplication(key);
         functions.put(key, func);
         return this;
     }
@@ -123,10 +124,30 @@ public final class EnricherBuilder {
             Key keyByInterface = new Key(i, enrichmentClass);
             checkArgument(
                     !functions.containsKey(keyByInterface),
-                    "Enrichment message of the class `%s` is already available via a function" +
-                            " which accepts `%s`, which is a super interface of the class `%s`." +
-                            SUGGEST_REMOVAL,
-                    enrichmentClass, i.getCanonicalName(), sourceClass.getCanonicalName()
+                    "The builder already has the function which creates enrichments of the class" +
+                    " `%s` via the interface `%s` which is implemented by the class `%s`." +
+                    SUGGEST_REMOVAL,
+                    enrichmentClass.getCanonicalName(),
+                    i.getCanonicalName(),
+                    sourceClass.getCanonicalName()
+            );
+        });
+    }
+
+    private void checkImplDuplication(Key key) {
+        Class<? extends Message> sourceInterface = key.sourceClass();
+        Class<? extends Message> enrichmentClass = key.enrichmentClass();
+        functions.forEach((k, v) -> {
+            Class<? extends Message> entryCls = k.sourceClass();
+            checkArgument(
+                    !sourceInterface.isAssignableFrom(entryCls),
+                    "Unable to add a function which produces enrichments of the class `%s`" +
+                    " via the interface `%s` because there is already a function which does" +
+                    " this via the class `%s` which implements this interface." +
+                    SUGGEST_REMOVAL,
+                    enrichmentClass.getCanonicalName(),
+                    sourceInterface.getCanonicalName(),
+                    entryCls.getCanonicalName()
             );
         });
     }
