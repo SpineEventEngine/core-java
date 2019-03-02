@@ -22,7 +22,6 @@ package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
@@ -40,7 +39,7 @@ import static io.spine.type.MessageClass.interfacesOf;
  * The {@code Builder} allows to register enrichment functions used by
  * the {@code Enricher}.
  */
-public final class EnricherBuilder {
+public abstract class EnricherBuilder<B extends EnricherBuilder<B>> {
 
     private static final String SUGGEST_REMOVAL = " Please call `remove(Class, Class)` first.";
 
@@ -50,46 +49,19 @@ public final class EnricherBuilder {
     private final Map<Key, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
-    EnricherBuilder() {
+    protected EnricherBuilder() {
     }
 
-    /**
-     * Adds event enrichment function to the builder.
-     *
-     * @param <M>
-     *         the type of the event message
-     * @param <T>
-     *         the type of the enrichment message
-     * @param eventClassOrInterface
-     *         the class or common interface of the events the passed function enriches
-     * @param enrichmentClass
-     *         the class of the enrichments the passed function produces
-     * @param func
-     *         the enrichment function
-     * @return {@code this} builder
-     * @throws IllegalArgumentException
-     *         if the builder already contains a function which produces instances of
-     *         {@code enrichmentClass} for the passed class or interface of events, or for
-     *         its super-interface, or a sub-interface, or a sub-class
-     * @see #remove(Class, Class)
-     */
-    @CanIgnoreReturnValue
-    public <M extends EventMessage, T extends Message>
-    EnricherBuilder add(Class<M> eventClassOrInterface, Class<T> enrichmentClass,
-                        EventEnrichmentFn<M, T> func) {
-        return doAdd(eventClassOrInterface, enrichmentClass, func);
-    }
 
     /**
      * Adds an enrichment function to the builder.
      *
      * @implNote This method does the real job of adding functions to the builder.
      *         The binding of the generic parameters allows type-specific functions
-     *         (e.g. {@link #add(Class, Class, EventEnrichmentFn)} exposed in the public API to
-     *         call this method.
+     *         exposed in the public API to call this method.
      */
-    private <M extends Message, C extends EnrichableMessageContext, T extends Message>
-    EnricherBuilder doAdd(Class<M> messageClassOrInterface, Class<T> enrichmentClass,
+    protected final <M extends Message, C extends EnrichableMessageContext, T extends Message>
+    B doAdd(Class<M> messageClassOrInterface, Class<T> enrichmentClass,
                           EnrichmentFn<M, C, T> func) {
         checkNotNull(messageClassOrInterface);
         checkNotNull(enrichmentClass);
@@ -104,7 +76,12 @@ public final class EnricherBuilder {
         checkInterfaceDuplication(key);
         checkImplDuplication(key);
         functions.put(key, func);
-        return this;
+        return self();
+    }
+
+    @SuppressWarnings("unchecked")
+    private B self() {
+        return (B) this;
     }
 
     private void checkDirectDuplication(Key key) {
@@ -158,16 +135,13 @@ public final class EnricherBuilder {
      * <p>If the function for this class was not added, the call has no effect.
      */
     public <M extends EventMessage, T extends Message>
-    EnricherBuilder remove(Class<M> eventClass, Class<T> enrichmentClass) {
+    B remove(Class<M> eventClass, Class<T> enrichmentClass) {
         functions.remove(new Key(eventClass, enrichmentClass));
-        return this;
+        return self();
     }
 
     /** Creates a new {@code Enricher}. */
-    public Enricher build() {
-        Enricher result = new Enricher(this);
-        return result;
-    }
+    public abstract Enricher build();
 
     /**
      * Obtains immutable functions of functions added to the builder by the time of the call.

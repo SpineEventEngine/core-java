@@ -30,32 +30,15 @@ import java.util.Optional;
 
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
- *
- * <p>Enrichment schema is constructed like this:
- * <pre>{@code
- *   Enricher enricher = Enricher
- *       .newBuilder()
- *       .add(MyEvent.class, MyEnrichment.class,
- *            new EventEnrichmentFn<MyEvent, EventContext, MyEnrichment> { ... } )
- *       ...
- *       .build();
- * }</pre>
  */
-public final class Enricher implements EnrichmentService {
+public abstract class Enricher implements EnrichmentService {
 
     private final Schema schema;
 
     /**
-     * Creates a new builder.
-     */
-    public static EnricherBuilder newBuilder() {
-        return new EnricherBuilder();
-    }
-
-    /**
      * Creates a new instance taking functions from the passed builder.
      */
-    Enricher(EnricherBuilder builder) {
+    protected Enricher(EnricherBuilder builder) {
         this.schema = Schema.newInstance(builder);
     }
 

@@ -27,6 +27,7 @@ import io.spine.server.enrich.given.event.EitTaskCreated;
 import io.spine.server.enrich.given.event.EitUserAccountCreated;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.EventEnricher;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -39,7 +40,7 @@ public class EitEnricherSetup {
     public static Enricher createEnricher(EitUserRepository users,
                                           EitProjectRepository projects,
                                           EitTaskRepository tasks) {
-        Enricher enricher = Enricher
+        EventEnricher enricher = EventEnricher
                 .newBuilder()
                 .add(EitUserAccountCreated.class, EitUserAccount.class,
                      (e, c) -> find(users, e.getUser()))

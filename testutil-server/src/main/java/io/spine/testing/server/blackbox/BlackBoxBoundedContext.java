@@ -38,6 +38,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -586,9 +587,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                .build();
     }
 
-    private static Enricher emptyEnricher() {
-        return Enricher.newBuilder()
-                       .build();
+    private static EventEnricher emptyEnricher() {
+        return EventEnricher.newBuilder()
+                            .build();
     }
 
     /**

@@ -60,7 +60,7 @@ class EventBusEnrichmentTest {
     @Test
     @DisplayName("for event that cannot be enriched")
     void forNonEnrichable() {
-        Enricher enricher = Enricher
+        EventEnricher enricher = EventEnricher
                 .newBuilder()
                 .build();
 

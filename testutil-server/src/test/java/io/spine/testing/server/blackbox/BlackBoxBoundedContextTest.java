@@ -29,6 +29,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventEnricher;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
@@ -319,11 +320,13 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         @BeforeEach
         void setUp() {
-            enricher = Enricher.newBuilder()
-                               .build();
-            builder = BoundedContext.newBuilder()
-                                    .setEventBus(EventBus.newBuilder()
-                                                         .setEnricher(enricher));
+            enricher = EventEnricher
+                    .newBuilder()
+                    .build();
+            builder = BoundedContext
+                    .newBuilder()
+                    .setEventBus(EventBus.newBuilder()
+                                         .setEnricher(enricher));
             repositories.forEach(builder::add);
         }
 

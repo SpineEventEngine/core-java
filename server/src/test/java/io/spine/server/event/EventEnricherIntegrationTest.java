@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.enrich;
+package io.spine.server.event;
 
 import io.spine.server.enrich.given.EitEnricherSetup;
 import io.spine.server.enrich.given.EitProjectRepository;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("Enricher should")
 @Disabled("Until new enrichment implementation is finalized")
-public class EnricherIntegrationTest {
+public class EventEnricherIntegrationTest {
 
     private BlackBoxBoundedContext context;
 
@@ -59,6 +59,6 @@ public class EnricherIntegrationTest {
     @Test
     @DisplayName("have builder")
     void haveBuilder() {
-        assertNotNull(Enricher.newBuilder());
+        assertNotNull(EventEnricher.newBuilder());
     }
 }

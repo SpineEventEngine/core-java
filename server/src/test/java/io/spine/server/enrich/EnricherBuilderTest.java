@@ -29,6 +29,7 @@ import io.spine.base.Time;
 import io.spine.server.enrich.given.event.EbtOrderCreated;
 import io.spine.server.enrich.given.event.EbtOrderEvent;
 import io.spine.server.enrich.given.event.EbtOrderLineAdded;
+import io.spine.server.event.EventEnricher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,11 +42,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
 
-    private EnricherBuilder builder;
+    private EventEnricher.Builder builder;
 
     @BeforeEach
     void setUp() {
-        builder = Enricher.newBuilder();
+        builder = EventEnricher.newBuilder();
     }
 
     @Nested

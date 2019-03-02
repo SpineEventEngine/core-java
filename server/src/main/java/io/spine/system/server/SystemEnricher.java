@@ -26,6 +26,7 @@ import io.spine.core.CommandId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.EventEnrichmentFn;
+import io.spine.server.event.EventEnricher;
 
 import java.util.Optional;
 
@@ -46,26 +47,27 @@ final class SystemEnricher {
     /**
      * Creates a new {@link Enricher} for the system bounded context.
      *
-     * @param commandRepository repository to find enrichment values in
+     * @param repo the repository for obtaining scheduled command instances
      * @return new {@link Enricher}
      */
-    public static Enricher create(CommandLifecycleRepository commandRepository) {
-        checkNotNull(commandRepository);
-        Enricher enricher = Enricher
+    public static Enricher create(CommandLifecycleRepository repo) {
+        checkNotNull(repo);
+        EventEnricher enricher = EventEnricher
                 .newBuilder()
+                //TODO:2019-03-02:alexander.yevsyukov: We can use simply Command.
                 .add(CommandScheduled.class, CommandEnrichment.class,
-                     commandLookup(commandRepository))
+                     commandLookup(repo))
                 .build();
         return enricher;
     }
 
     private static EventEnrichmentFn<CommandScheduled, CommandEnrichment>
-    commandLookup(CommandLifecycleRepository repository) {
-        return (commandScheduled, context) -> findCommand(repository, commandScheduled.getId());
+    commandLookup(CommandLifecycleRepository repo) {
+        return (commandScheduled, context) -> findCommand(repo, commandScheduled.getId());
     }
 
-    private static CommandEnrichment findCommand(CommandLifecycleRepository repository, CommandId id) {
-        Optional<CommandLifecycleAggregate> commandLifecycle = repository.find(id);
+    private static CommandEnrichment findCommand(CommandLifecycleRepository repo, CommandId id) {
+        Optional<CommandLifecycleAggregate> commandLifecycle = repo.find(id);
         Command command = commandLifecycle.map(Aggregate::state)
                                           .map(CommandLifecycle::getCommand)
                                           .orElse(Command.getDefaultInstance());

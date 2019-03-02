@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environment for {@link io.spine.server.enrich.EnricherIntegrationTest}.
+ * Test environment for {@link io.spine.server.event.EventEnricherIntegrationTest}.
  */
 
 @CheckReturnValue
