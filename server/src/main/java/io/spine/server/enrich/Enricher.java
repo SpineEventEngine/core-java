@@ -21,13 +21,12 @@
 package io.spine.server.enrich;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.SPI;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
 import io.spine.server.type.EnrichableMessageEnvelope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
@@ -36,13 +35,12 @@ import java.util.Set;
  * <pre>{@code
  *   Enricher enricher = Enricher
  *       .newBuilder()
- *       .add(MyEvent.class,
+ *       .add(MyEvent.class, MyEnrichment.class,
  *            new EventEnrichmentFn<MyEvent, EventContext, MyEnrichment> { ... } )
  *       ...
  *       .build();
  * }</pre>
  */
-@SPI
 public final class Enricher implements EnrichmentService {
 
     private final Schema schema;
@@ -58,11 +56,7 @@ public final class Enricher implements EnrichmentService {
      * Creates a new instance taking functions from the passed builder.
      */
     Enricher(EnricherBuilder builder) {
-        this.schema = new Schema(builder.functions());
-    }
-
-    Set<EnrichmentFn<?, ?, ?>> enrichmentOf(Class<? extends Message> cls) {
-        return schema.enrichmentOf(cls);
+        this.schema = Schema.newInstance(builder);
     }
 
     /**
@@ -85,6 +79,9 @@ public final class Enricher implements EnrichmentService {
      *         if the passed message cannot be enriched
      */
     public <E extends EnrichableMessageEnvelope<?, ?, ?, E>> E enrich(E source) {
+        if (schema.isEmpty()) {
+            return source;
+        }
         E result = source.toEnriched(this);
         return  result;
     }
@@ -92,8 +89,13 @@ public final class Enricher implements EnrichmentService {
     @Override
     public
     Optional<Enrichment> createEnrichment(Message message, EnrichableMessageContext context) {
-        Action action = new Action(this, message, context);
-        Enrichment result = action.perform();
-        return Optional.of(result);
+        @Nullable SchemaFn fn = schema.enrichmentOf(message.getClass());
+        if (fn == null) {
+            return Optional.empty();
+        }
+
+        @SuppressWarnings("unchecked")
+        Enrichment enrichment = fn.apply(message, context);
+        return Optional.of(enrichment);
     }
 }
