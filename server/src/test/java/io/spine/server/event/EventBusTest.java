@@ -283,9 +283,9 @@ public class EventBusTest {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
+        EnvelopeValidator<EventEnvelope> validator = eventBus.validator();
         assertNotNull(validator);
-        assertSame(validator, eventBus.getValidator());
+        assertSame(validator, eventBus.validator());
     }
 
     @Nested

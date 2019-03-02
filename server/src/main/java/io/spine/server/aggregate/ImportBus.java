@@ -94,12 +94,12 @@ public final class ImportBus
     }
 
     @Override
-    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<EventEnvelope> deadMessageHandler() {
         return deadImportEventHandler;
     }
 
     @Override
-    protected EnvelopeValidator<EventEnvelope> getValidator() {
+    protected EnvelopeValidator<EventEnvelope> validator() {
         return validator;
     }
 

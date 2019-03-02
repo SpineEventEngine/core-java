@@ -109,7 +109,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     private final StreamObserver<Ack> streamObserver;
 
     /**
-     * The validator for events posted to the bus, lazily {@linkplain #getValidator() initialized}.
+     * The validator for events posted to the bus, lazily {@linkplain #validator() initialized}.
      */
     @LazyInit
     private @MonotonicNonNull EventValidator eventValidator;
@@ -144,12 +144,12 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<EventEnvelope> deadMessageHandler() {
         return deadMessageHandler;
     }
 
     @Override
-    protected EnvelopeValidator<EventEnvelope> getValidator() {
+    protected EnvelopeValidator<EventEnvelope> validator() {
         if (eventValidator == null) {
             eventValidator = new EventValidator();
         }

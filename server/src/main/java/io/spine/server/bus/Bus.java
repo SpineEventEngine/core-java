@@ -198,12 +198,12 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the instance of {@link DeadMessageHandler} for this bus.
      */
-    protected abstract DeadMessageHandler<E> getDeadMessageHandler();
+    protected abstract DeadMessageHandler<E> deadMessageHandler();
 
     /**
      * Obtains the instance of {@link EnvelopeValidator} for this bus.
      */
-    protected abstract EnvelopeValidator<E> getValidator();
+    protected abstract EnvelopeValidator<E> validator();
 
     /**
      * Obtains the dispatcher registry.
@@ -243,8 +243,8 @@ public abstract class Bus<T extends Message,
         Collection<BusFilter<E>> tail = filterChainTail();
         tail.forEach(chainBuilder::append);
 
-        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(), registry());
-        BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(deadMessageHandler(), registry());
+        BusFilter<E> validatingFilter = new ValidatingFilter<>(validator());
 
         chainBuilder.prepend(deadMsgFilter);
         chainBuilder.prepend(validatingFilter);
