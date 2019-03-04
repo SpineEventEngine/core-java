@@ -21,7 +21,7 @@
 package io.spine.core;
 
 import com.google.protobuf.Any;
-import io.spine.base.EnrichmentMessage;
+import com.google.protobuf.Message;
 import io.spine.core.Enrichment.Container;
 import io.spine.core.Enrichment.ModeCase;
 import io.spine.type.TypeName;
@@ -29,6 +29,7 @@ import io.spine.type.TypeName;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Utility class for working with event enrichments.
@@ -55,12 +56,30 @@ final class Enrichments {
     /**
      * Obtains enrichment from the passed container.
      */
-    static <E extends EnrichmentMessage>
-    Optional<E> find(Class<E> enrichmentClass, Container enrichments) {
-        String typeName = TypeName.of(enrichmentClass)
-                                  .value();
-        Any any = enrichments.getItemsMap()
-                             .get(typeName);
+    static <E extends Message>
+    Optional<E> find(Class<E> enrichmentClass, Container container) {
+        TypeName typeName = TypeName.of(enrichmentClass);
+        return findType(typeName, enrichmentClass, container);
+    }
+
+    /**
+     * Obtains enrichment of the passed class from the container.
+     *
+     * @throws IllegalStateException if there is no enrichment of this class in the passed container
+     */
+    static <E extends Message> E get(Class<E> enrichmentClass, Container container) {
+        TypeName typeName = TypeName.of(enrichmentClass);
+        E result = findType(typeName, enrichmentClass, container)
+                .orElseThrow(() -> newIllegalStateException(
+                        "Unable to get enrichment of the type `%s` from the container `%s`.",
+                        typeName, container));
+        return result;
+    }
+
+    private static <E extends Message> Optional<E>
+    findType(TypeName typeName, Class<E> enrichmentClass, Container container) {
+        Any any = container.getItemsMap()
+                           .get(typeName.value());
         Optional<E> result = Optional.ofNullable(any)
                                      .map(packed -> unpack(packed, enrichmentClass));
         return result;

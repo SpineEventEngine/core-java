@@ -20,8 +20,8 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Message;
 import io.spine.base.EnrichmentContainer;
-import io.spine.base.EnrichmentMessage;
 import io.spine.base.MessageContext;
 import io.spine.core.Enrichment.Container;
 
@@ -41,10 +41,21 @@ public interface EnrichableMessageContext extends EnrichmentContainer, MessageCo
     Enrichment getEnrichment();
 
     @Override
-    default <E extends EnrichmentMessage> Optional<E> find(Class<E> cls) {
+    default <E extends Message> Optional<E> find(Class<E> cls) {
         Enrichment enrichment = getEnrichment();
         Optional<Container> container = container(enrichment);
         Optional<E> result = container.flatMap(c -> Enrichments.find(cls, c));
         return result;
     }
-}
+
+    /**
+     * Obtains enrichment of the passed class.
+     *
+     * @throws IllegalStateException if the enrichment is not found
+     */
+    default <E extends Message> E get(Class<E> cls) {
+        Container container = container(getEnrichment()).orElse(Container.getDefaultInstance());
+        E result = Enrichments.get(cls, container);
+        return result;
+    }
+ }
