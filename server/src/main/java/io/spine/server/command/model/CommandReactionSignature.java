@@ -56,11 +56,6 @@ public class CommandReactionSignature
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
-    }
-
-    @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
         return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
     }

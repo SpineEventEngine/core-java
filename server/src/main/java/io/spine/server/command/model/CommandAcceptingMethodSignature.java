@@ -55,11 +55,6 @@ abstract class CommandAcceptingMethodSignature
         return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
     }
 
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
-    }
-
     /**
      * {@inheritDoc}
      *

@@ -40,11 +40,6 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PUBLIC);
-    }
-
-    @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
         return ImmutableSet.of(void.class);
     }
