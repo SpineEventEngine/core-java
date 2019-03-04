@@ -46,7 +46,8 @@ final class Enrichments {
      *
      * <p>Otherwise, empty {@code Optional} is returned.
      */
-    static Optional<Container> container(Enrichment enrichment) {
+    static Optional<Container> containerIn(EnrichableMessageContext context) {
+        Enrichment enrichment = context.getEnrichment();
         if (enrichment.getModeCase() == ModeCase.CONTAINER) {
             return Optional.of(enrichment.getContainer());
         }
@@ -59,7 +60,8 @@ final class Enrichments {
     static <E extends Message>
     Optional<E> find(Class<E> enrichmentClass, Container container) {
         TypeName typeName = TypeName.of(enrichmentClass);
-        return findType(typeName, enrichmentClass, container);
+        Optional<E> result = findType(typeName, enrichmentClass, container);
+        return result;
     }
 
     /**

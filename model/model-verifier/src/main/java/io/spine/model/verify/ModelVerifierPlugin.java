@@ -38,9 +38,9 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import static io.spine.tools.gradle.TaskName.CLASSES;
-import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
-import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
+import static io.spine.tools.gradle.TaskName.classes;
+import static io.spine.tools.gradle.TaskName.compileJava;
+import static io.spine.tools.gradle.TaskName.verifyModel;
 import static io.spine.tools.gradle.compiler.Extension.getMainDescriptorSet;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
@@ -59,16 +59,16 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         Path rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
         if (project.getTasks()
-                   .findByPath(CLASSES.getValue()) != null) {
+                   .findByPath(classes.value()) != null) {
             createTask(rawModelStorage, project);
         }
     }
 
     private void createTask(Path rawModelStorage, Project project) {
-        log().debug("Adding task {}", VERIFY_MODEL.getValue());
-        newTask(VERIFY_MODEL, action(rawModelStorage))
-                .insertBeforeTask(CLASSES)
-                .insertAfterTask(COMPILE_JAVA)
+        log().debug("Adding task {}", verifyModel);
+        newTask(verifyModel, action(rawModelStorage))
+                .insertBeforeTask(classes)
+                .insertAfterTask(compileJava)
                 .withInputFiles(rawModelStorage)
                 .applyNowTo(project);
     }

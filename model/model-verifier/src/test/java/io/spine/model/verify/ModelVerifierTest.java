@@ -59,7 +59,7 @@ import java.util.Queue;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
+import static io.spine.tools.gradle.TaskName.compileJava;
 import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -204,7 +204,7 @@ class ModelVerifierTest {
     void getCompilationDestDir() throws MalformedURLException {
         JavaCompile compileTask = actualProject().getTasks()
                                                  .withType(JavaCompile.class)
-                                                 .getByName(COMPILE_JAVA.getValue());
+                                                 .getByName(compileJava.name());
         File dest = Files.createTempDir();
         compileTask.setDestinationDir(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
