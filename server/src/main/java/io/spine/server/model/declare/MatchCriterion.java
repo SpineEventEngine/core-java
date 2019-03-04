@@ -158,7 +158,7 @@ public enum MatchCriterion {
      * Creates an instance with the given severity and the template of the signature
      * mismatch message.
      */
-    MatchCriterion(SignatureMismatch.Severity severity, @FormatString String format) {
+    MatchCriterion(SignatureMismatch.Severity severity, String format) {
         this.severity = severity;
         this.format = format;
     }
