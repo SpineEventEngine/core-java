@@ -21,135 +21,216 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.core.UserId;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.React;
-import io.spine.test.event.ProjectId;
-import io.spine.test.event.Task;
-import io.spine.test.event.TaskAdded;
-import io.spine.test.event.TaskAssigned;
-import io.spine.test.event.TaskBecameUnavailable;
-import io.spine.test.event.TaskId;
+import io.spine.test.event.AppointmentMade;
+import io.spine.test.event.Dish;
+import io.spine.test.event.DishCooked;
+import io.spine.test.event.DishFoundToBePoisonous;
+import io.spine.test.event.DishReturnedToKitchen;
+import io.spine.test.event.DishServed;
+import io.spine.test.event.HeadChefGotSad;
+import io.spine.test.event.RestaurantWarningMade;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.Timestamps2.fromInstant;
 import static java.lang.String.format;
+import static java.time.Instant.now;
 
 public class AbstractReactorTestEnv {
 
-    /* Prevent instantiation. */
+    /** Prevent instantiation. */
     private AbstractReactorTestEnv() {
     }
 
-    public static DefaultUserAssigner defaultUserAssigner(EventBus eventBus, UserId defaultUser) {
-        return new DefaultUserAssigner(eventBus, defaultUser);
+    /** Returns a dish with a random ID. */
+    public static Dish someDish() {
+        String dishId = Identifier.newUuid();
+        String dishName = format("Name of dish `%s`.", dishId);
+
+        Dish result = Dish
+                .newBuilder()
+                .setDishId(dishId)
+                .setDishName(dishName)
+                .build();
+        return result;
     }
 
-    public static TaskDisruptor taskDisruptor(EventBus eventBus) {
-        return new TaskDisruptor(eventBus);
+    /** Obtains an event that signifies that the specified dish got returned to the kitchen. */
+    public static DishReturnedToKitchen returnDish(Dish dishToReturn) {
+        DishReturnedToKitchen result = DishReturnedToKitchen
+                .newBuilder()
+                .setReturnedDish(dishToReturn)
+                .build();
+        return result;
+    }
+
+    /** Obtains a dish that is considered poisonous by the {@link HealthInspector}. */
+    public static Dish poisonousDish() {
+        String dishId = Identifier.newUuid();
+        String dishName = format("Gluten-containing dish `%s`.", dishId);
+        Dish result = Dish
+                .newBuilder()
+                .setDishId(dishId)
+                .setDishName(dishName)
+                .build();
+        return result;
     }
 
     /**
-     * Disrupts task by making them unavailable as soon as they are assigned, emitting a
-     * respective event.
-     *
-     * <p>Does so for all tasks, even those beyond its bounded context. Very evil.
+     * Oversees mental health of the restaurant workers by appointing a counseling session
+     * once any of them get sad.
      */
-    public static class TaskDisruptor extends AbstractEventReactor {
+    public static class RestaurantPsychologicalCounselor extends AbstractEventReactor {
 
-        protected TaskDisruptor(EventBus eventBus) {
+        private int appointmentsScheduled = 0;
+
+        public RestaurantPsychologicalCounselor(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @React
+        AppointmentMade makeAnAppointment(HeadChefGotSad headChefGotSad) {
+            Timestamp timeOfAppointment = fromInstant(now().plus(1, ChronoUnit.DAYS));
+            AppointmentMade result = AppointmentMade
+                    .newBuilder()
+                    .setAppointmentTime(timeOfAppointment)
+                    .build();
+            appointmentsScheduled++;
+            return result;
+        }
+
+        public int appointmentsScheduled() {
+            return appointmentsScheduled;
+        }
+    }
+
+    /**
+     * Serves dishes as soon as they have been cooked and makes the head chef sad if the dish got
+     * returned.
+     *
+     * <p>Does so by emitting a respective events.
+     */
+    public static class KitchenFront extends AbstractEventReactor {
+
+        /** IDs of dishes served by this server. */
+        private final List<String> dishesServed = new ArrayList<>();
+        private static final int CHEF_COOLDOWN = 5;
+        private int secondsWastedBeingSad = 0;
+
+        public KitchenFront(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @React
+        DishServed serveDish(DishCooked dishCooked) {
+            Dish dish = dishCooked.getDish();
+            dishesServed.add(dish.getDishId());
+            DishServed result = DishServed
+                    .newBuilder()
+                    .setDish(dish)
+                    .build();
+            return result;
+        }
+
+        @React
+        HeadChefGotSad getSad(DishReturnedToKitchen dishReturned) {
+            HeadChefGotSad result = HeadChefGotSad
+                    .newBuilder()
+                    .setSadnessDuration(CHEF_COOLDOWN)
+                    .build();
+            secondsWastedBeingSad += CHEF_COOLDOWN;
+            return result;
+        }
+
+        public ImmutableList<String> dishesServed() {
+            return ImmutableList.copyOf(dishesServed);
+        }
+
+        public int secondsWastedBeingSad() {
+            return secondsWastedBeingSad;
+        }
+    }
+
+    /**
+     * Labels dishes as poisonous as soon as they get served by emitting a respective event.
+     */
+    public static class HealthInspector extends AbstractEventReactor {
+
+        /** IDs of dishes that have been found to be poisonous. */
+        private final List<String> dishesFoundPoisonous = new ArrayList<>();
+
+        public HealthInspector(EventBus eventBus) {
             super(eventBus);
         }
 
         @React(external = true)
-        TaskBecameUnavailable makeUnavailable(TaskAssigned assigned) {
-            TaskId id = assigned.getTask()
-                                .getTaskId();
-            TaskBecameUnavailable result = TaskBecameUnavailable
+        Optional<DishFoundToBePoisonous> inspectDish(DishServed dishServed) {
+            if (isPoisonous(dishServed)) {
+                String id = dishServed.getDish()
+                                      .getDishId();
+                dishesFoundPoisonous.add(id);
+                return Optional.of(poisonousDish(dishServed));
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        /** Returns a list of all dishes that have been found to be poisonous. */
+        public ImmutableList<String> dishesFoundPoisonous() {
+            return ImmutableList.copyOf(dishesFoundPoisonous);
+        }
+
+        private static DishFoundToBePoisonous poisonousDish(DishServed served) {
+            DishFoundToBePoisonous result = DishFoundToBePoisonous
                     .newBuilder()
-                    .setId(id)
+                    .setDish(served.getDish())
                     .build();
             return result;
+        }
+
+        private static boolean isPoisonous(DishServed served) {
+            String name = served.getDish()
+                                .getDishName();
+            // Very suspicious.
+            return name.toLowerCase()
+                       .contains("gluten");
         }
     }
 
     /**
-     * When a task is added, this class automatically assigns it to the default user,
-     * emitting a respective event.
+     * Issues warnings to the restaurant if it has been found to serve poisonous food.
      */
-    public static class DefaultUserAssigner extends AbstractEventReactor {
+    public static class FoodSafetyDepartment extends AbstractEventReactor {
 
-        private final UserId defaultUser;
-        private final List<Task> assignedByThisAssigner = new ArrayList<>();
+        private int warningsIssued = 0;
 
-        private DefaultUserAssigner(EventBus eventBus, UserId defaultUser) {
+        public FoodSafetyDepartment(EventBus eventBus) {
             super(eventBus);
-            this.defaultUser = defaultUser;
         }
 
         @React
-        TaskAssigned taskAssigned(TaskAdded added) {
-            Task task = added.getTask();
-            assignedByThisAssigner.add(task);
-            TaskAssigned result = TaskAssigned
+        RestaurantWarningMade makeWarning(DishFoundToBePoisonous foundToBePoisonous) {
+            String warning =
+                    format("The restaurant has been found to serve poisonous food. " +
+                                   "This is the warning number %s.", warningsIssued);
+            RestaurantWarningMade result = RestaurantWarningMade
                     .newBuilder()
-                    .setTask(task)
-                    .setAssignee(defaultUser)
+                    .setWarningText(warning)
                     .build();
+            warningsIssued++;
             return result;
         }
 
-        /** Obtains a list of all tasks that we assigned by this assigner. */
-        public ImmutableList<Task> assignedByThisAssigner() {
-            return ImmutableList.copyOf(assignedByThisAssigner);
+        public int warningsIssued(){
+            return warningsIssued;
         }
-    }
-
-    /** Returns a random unique user identifier. */
-    public static UserId someUserId() {
-        UserId result = UserId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
-        return result;
-    }
-
-    public static ProjectId someProjectId() {
-        ProjectId result = ProjectId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
-        return result;
-    }
-
-    public static Task someTask() {
-        @SuppressWarnings("UnsecureRandomNumberGeneration")/* does not matter for testing purposes.*/
-        int randomInt = new Random().nextInt();
-        String description = format("Some irrelevant description of task %s", randomInt);
-        TaskId taskId = TaskId
-                .newBuilder()
-                .setId(randomInt)
-                .build();
-        Task result = Task
-                .newBuilder()
-                .setTaskId(taskId)
-                .setDescription(description)
-                .setDone(false)
-                .build();
-        return result;
-    }
-
-    public static TaskAdded addSomeTask() {
-        Task taskToAdd = someTask();
-        TaskAdded result = TaskAdded
-                .newBuilder()
-                .setProjectId(someProjectId())
-                .setTask(taskToAdd)
-                .build();
-        return result;
     }
 }

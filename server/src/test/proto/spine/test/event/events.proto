@@ -32,6 +32,8 @@ import "spine/core/user_id.proto";
 import "spine/net/email_address.proto";
 import "spine/test/event/project.proto";
 import "spine/test/event/team.proto";
+import "spine/test/event/restaurant.proto";
+import "google/protobuf/timestamp.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;
@@ -41,15 +43,6 @@ message ProjectCreated {
 message TaskAdded {
     ProjectId project_id = 1;
     Task task = 2;
-}
-
-message TaskAssigned {
-    Task task = 1;
-    core.UserId assignee = 2;
-}
-
-message TaskBecameUnavailable {
-    TaskId id = 1;
 }
 
 message ProjectStarted {
@@ -105,4 +98,39 @@ message EBTaskAdded {
 
 message ProjectFinished {
     ProjectId project_id = 1;
+}
+
+message DishCooked {
+
+    Dish dish = 1;
+}
+
+message DishServed {
+
+    Dish dish = 1;
+}
+
+message DishFoundToBePoisonous {
+
+    Dish dish = 1;
+}
+
+message DishReturnedToKitchen {
+
+    Dish returnedDish = 1;
+}
+
+message HeadChefGotSad {
+
+    int32 sadness_duration = 1;
+}
+
+message AppointmentMade {
+
+    google.protobuf.Timestamp appointmentTime = 1;
+}
+
+message RestaurantWarningMade {
+
+    string warning_text = 1;
 }

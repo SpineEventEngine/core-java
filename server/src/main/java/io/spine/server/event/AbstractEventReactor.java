@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import io.spine.core.Event;
@@ -33,20 +32,23 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.ReactorMethodResult;
-import io.spine.server.tenant.EventOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.type.MessageClass;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * An abstract base for all event reactors.
  *
  * @see React reactors
  */
-public abstract class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
+public class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
     private final EventBus eventBus;
@@ -62,40 +64,24 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
 
     @CanIgnoreReturnValue
     @Override
-    public Set<String> dispatch(EventEnvelope envelope) {
-        EventOperation op = new EventOperation(envelope.outerObject()) {
-            @Override
-            public void run() {
-                handle(envelope);
-            }
-        };
-        op.run();
-        try {
-            op.execute();
-        } catch (RuntimeException exception) {
-            onError(envelope, exception);
-            return ImmutableSet.of();
-        }
-
+    public Set<String> dispatch(EventEnvelope event) {
+        EventReactorMethod method = thisClass.getReactor(event.messageClass(), event.originClass());
+        ReactorMethodResult result = method.invoke(this, event);
+        List<Event> events = result.produceEvents(event);
+        eventBus.post(events);
         return identity();
     }
 
-    protected void handle(EventEnvelope envelope) {
-        List<Event> events = reactTo(envelope);
-        this.eventBus.post(events);
-    }
-
-    private List<Event> reactTo(EventEnvelope event) {
-        EventReactorMethod method =
-                thisClass.getReactor(event.messageClass(), event.originClass());
-        ReactorMethodResult result =
-                method.invoke(this, event);
-        return result.produceEvents(event);
-    }
-
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        _debug("bad");
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
+        checkNotNull(exception);
+        MessageClass messageClass = event.messageClass();
+        String messageId = event.idAsString();
+        String errorMessage =
+                format("Error handling event reaction (class: %s id: %s) in %s.",
+                       messageClass, messageId, thisClass);
+        log().error(errorMessage, exception);
     }
 
     @Override
@@ -128,13 +114,14 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         @CanIgnoreReturnValue
         @Override
         public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
             return AbstractEventReactor.this.dispatch(eventEnvelope);
         }
 
         @Override
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            _debug("bad");
+            System.out.println("BAD EX");
         }
     }
 }
