@@ -26,7 +26,6 @@ import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
@@ -316,7 +315,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private BlackBoxBoundedContext<?> blackBox;
         private BoundedContextBuilder builder;
-        private Enricher enricher;
+        private EventEnricher enricher;
 
         @BeforeEach
         void setUp() {

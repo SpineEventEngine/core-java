@@ -31,14 +31,15 @@ import java.util.Optional;
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
  */
-public abstract class Enricher implements EnrichmentService {
+public abstract class Enricher<M extends Message, C extends EnrichableMessageContext>
+        implements EnrichmentService<M, C> {
 
-    private final Schema schema;
+    private final Schema<M, C> schema;
 
     /**
      * Creates a new instance taking functions from the passed builder.
      */
-    protected Enricher(EnricherBuilder builder) {
+    protected Enricher(EnricherBuilder<M, C, ?> builder) {
         this.schema = Schema.newInstance(builder);
     }
 
@@ -61,7 +62,7 @@ public abstract class Enricher implements EnrichmentService {
      * @throws IllegalArgumentException
      *         if the passed message cannot be enriched
      */
-    public <E extends EnrichableMessageEnvelope<?, ?, ?, E>> E enrich(E source) {
+    public <E extends EnrichableMessageEnvelope<?, ?, M, C, E>> E enrich(E source) {
         if (schema.isEmpty()) {
             return source;
         }
@@ -70,9 +71,10 @@ public abstract class Enricher implements EnrichmentService {
     }
 
     @Override
-    public
-    Optional<Enrichment> createEnrichment(Message message, EnrichableMessageContext context) {
-        @Nullable SchemaFn fn = schema.enrichmentOf(message.getClass());
+    public Optional<Enrichment> createEnrichment(M message, C context) {
+        @SuppressWarnings("unchecked") // correct type is ensured by a Bus which uses the Enricher.
+        Class<? extends M> cls = (Class<? extends M>) message.getClass();
+        @Nullable SchemaFn fn = schema.enrichmentOf(cls);
         if (fn == null) {
             return Optional.empty();
         }

@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
@@ -39,7 +38,7 @@ class EventBusEnrichmentTest {
     private EventBus eventBus;
     private BoundedContext bc;
 
-    private void setUp(Enricher enricher) {
+    private void setUp(EventEnricher enricher) {
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
         bc = BoundedContext
                 .newBuilder()

@@ -83,7 +83,7 @@ class EventBusBuilderTest
     @DisplayName("accept null Enricher")
     void acceptNullEnricher() {
         assertNull(builder().setEnricher(Tests.nullRef())
-                            .getEnricher()
+                            .enricher()
                             .orElse(null));
     }
 
@@ -125,7 +125,7 @@ class EventBusBuilderTest
                     .build();
             assertSame(enricher, builder().setStorageFactory(storageFactory)
                                           .setEnricher(enricher)
-                                          .getEnricher()
+                                          .enricher()
                                           .get());
         }
     }

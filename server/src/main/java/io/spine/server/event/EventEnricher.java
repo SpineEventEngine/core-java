@@ -23,7 +23,7 @@ package io.spine.server.event;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.core.EnrichableMessageContext;
+import io.spine.core.EventContext;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.EnricherBuilder;
 import io.spine.server.enrich.EventEnrichmentFn;
@@ -41,7 +41,7 @@ import io.spine.server.enrich.EventEnrichmentFn;
  *       .build();
  * }</pre>
  */
-public final class EventEnricher extends Enricher {
+public final class EventEnricher extends Enricher<EventMessage, EventContext> {
 
     private EventEnricher(Builder builder) {
         super(builder);
@@ -57,7 +57,8 @@ public final class EventEnricher extends Enricher {
     /**
      * The builder for {@link EventEnricher}.
      */
-    public static final class Builder extends EnricherBuilder<Message, EnrichableMessageContext, Builder> {
+    public static final class Builder
+            extends EnricherBuilder<EventMessage, EventContext, Builder> {
 
         /**
          * Adds event enrichment function to the builder.

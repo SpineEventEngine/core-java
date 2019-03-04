@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.EnrichableMessageContext;
 
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public abstract class EnricherBuilder<M extends Message,
     /**
      * Maps a pair of [source class, enrichment class] to a function which produces this enrichment.
      */
-    private final Map<Key, EnrichmentFn<M, C, ?>> functions = new HashMap<>();
+    private final Map<Key, EnrichmentFn<? extends M, C, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
     protected EnricherBuilder() {
@@ -62,10 +61,10 @@ public abstract class EnricherBuilder<M extends Message,
      *         The binding of the generic parameters allows type-specific functions
      *         exposed in the public API to call this method.
      */
-    protected final <T extends Message>
-    B doAdd(Class<M> messageClassOrInterface,
+    protected final <S extends M, T extends Message>
+    B doAdd(Class<S> messageClassOrInterface,
             Class<T> enrichmentClass,
-            EnrichmentFn<M, C, T> func) {
+            EnrichmentFn<S, C, T> func) {
         checkNotNull(messageClassOrInterface);
         checkNotNull(enrichmentClass);
         checkArgument(!enrichmentClass.isInterface(),
@@ -137,7 +136,7 @@ public abstract class EnricherBuilder<M extends Message,
      *
      * <p>If the function for this class was not added, the call has no effect.
      */
-    public <M extends EventMessage, T extends Message>
+    public <T extends Message>
     B remove(Class<M> eventClass, Class<T> enrichmentClass) {
         functions.remove(new Key(eventClass, enrichmentClass));
         return self();
@@ -149,7 +148,7 @@ public abstract class EnricherBuilder<M extends Message,
     /**
      * Obtains immutable functions of functions added to the builder by the time of the call.
      */
-    ImmutableMap<Key, EnrichmentFn<M, C, ?>> functions() {
+    ImmutableMap<Key, EnrichmentFn<? extends M, C, ?>> functions() {
         return ImmutableMap.copyOf(functions);
     }
 

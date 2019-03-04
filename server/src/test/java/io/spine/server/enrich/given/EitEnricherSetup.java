@@ -21,7 +21,6 @@
 package io.spine.server.enrich.given;
 
 import com.google.protobuf.Message;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.given.event.EitProjectCreated;
 import io.spine.server.enrich.given.event.EitTaskCreated;
 import io.spine.server.enrich.given.event.EitUserAccountCreated;
@@ -37,9 +36,9 @@ public class EitEnricherSetup {
     }
 
     @SuppressWarnings("OverlyCoupledMethod") // because we match many event to enrichments
-    public static Enricher createEnricher(EitUserRepository users,
-                                          EitProjectRepository projects,
-                                          EitTaskRepository tasks) {
+    public static EventEnricher createEnricher(EitUserRepository users,
+                                               EitProjectRepository projects,
+                                               EitTaskRepository tasks) {
         EventEnricher enricher = EventEnricher
                 .newBuilder()
                 .add(EitUserAccountCreated.class, EitUserAccount.class,

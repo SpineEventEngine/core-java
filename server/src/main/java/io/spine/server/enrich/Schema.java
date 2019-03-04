@@ -42,13 +42,14 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
 
     private final int size;
 
-    static Schema newInstance(EnricherBuilder eBuilder) {
-        Factory factory = new Factory(eBuilder);
-        Schema result = factory.create();
+    static <M extends Message, C extends EnrichableMessageContext>
+    Schema<M, C> newInstance(EnricherBuilder<? extends M, C, ?> eBuilder) {
+        Factory<M, C> factory = new Factory<>(eBuilder);
+        Schema<M, C> result = factory.create();
         return result;
     }
 
-    private Schema(Factory factory) {
+    private Schema(Factory<M, C> factory) {
         this.map = ImmutableMap.copyOf(factory.schemaMap);
         this.size = factory.functions.size();
         _debug("Created enrichment schema with {} entries.", this.size);
@@ -58,10 +59,8 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
         return size == 0;
     }
 
-    <M extends Message> @Nullable SchemaFn<M, ? extends EnrichableMessageContext>
-    enrichmentOf(Class<M> cls) {
-        @SuppressWarnings("unchecked") // The type is ensured when we put entries.
-        SchemaFn<M, ?> fn = (SchemaFn<M, ?>) map.get(cls);
+    @Nullable SchemaFn<? extends M, C> enrichmentOf(Class<? extends M> cls) {
+        SchemaFn<? extends M, C> fn = map.get(cls);
         return fn;
     }
 
@@ -74,37 +73,38 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
     private static class Factory<M extends Message, C extends EnrichableMessageContext> {
 
         /** Functions we got from {@link EnricherBuilder}. */
-        private final ImmutableMap<EnricherBuilder.Key, EnrichmentFn<M, C, ?>> functions;
+        private final ImmutableMap<EnricherBuilder.Key, EnrichmentFn<? extends M, C, ?>> functions;
 
         /** The types of messages that these functions enrich. */
-        private final ImmutableSet<Class<? extends Message>> sourceTypes;
+        private final ImmutableSet<Class<? extends M>> sourceTypes;
 
         /** The map from a class of the enrichable message to the schema function. */
-        private final Map<Class<? extends M>, SchemaFn<? extends M, ?>> schemaMap =
+        private final Map<Class<? extends M>, SchemaFn<? extends M, C>> schemaMap =
                 new HashMap<>();
 
-        private Factory(EnricherBuilder<M, C, ?> eBuilder) {
+        @SuppressWarnings("unchecked")
+        private Factory(EnricherBuilder<? extends M, C, ?> eBuilder) {
             checkNotNull(eBuilder);
             this.functions = ImmutableMap.copyOf(eBuilder.functions());
             this.sourceTypes =
                     functions.keySet()
                              .stream()
                              .map(EnricherBuilder.Key::sourceClass)
+                             .map(c -> (Class<M>) c)
                              .collect(toImmutableSet());
         }
 
-        Schema create() {
-            for (Class<? extends Message> sourceType : sourceTypes) {
-                SchemaFn<?, ?> fn = createFn(sourceType);
+        Schema<M, C> create() {
+            for (Class<? extends M> sourceType : sourceTypes) {
+                SchemaFn<? extends M, C> fn = createFn(sourceType);
                 schemaMap.put(sourceType, fn);
             }
 
-            return new Schema(this);
+            return new Schema<>(this);
         }
 
-        private <M extends Message, C extends EnrichableMessageContext>
-        SchemaFn<M, C> createFn(Class<M> sourceType) {
-            @SuppressWarnings("unchecked") // we check the type when filtering.
+        @SuppressWarnings("unchecked")
+        SchemaFn<? extends M, C> createFn(Class<? extends M> sourceType) {
             ImmutableSet<EnrichmentFn<M, C, ?>> fns =
                     functions.entrySet()
                              .stream()

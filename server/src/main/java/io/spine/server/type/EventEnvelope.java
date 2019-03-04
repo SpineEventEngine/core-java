@@ -43,8 +43,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EventEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
-        implements ActorMessageEnvelope<EventId, Event, EventContext>,
-                    EnrichableMessageEnvelope<EventId, Event, EventContext, EventEnvelope> {
+        implements
+            ActorMessageEnvelope<EventId, Event, EventContext>,
+            EnrichableMessageEnvelope<EventId, Event, EventMessage, EventContext, EventEnvelope> {
 
     private final EventMessage eventMessage;
     private final EventClass eventClass;
@@ -177,7 +178,7 @@ public final class EventEnvelope
     }
 
     @Override
-    public EventEnvelope toEnriched(EnrichmentService service) {
+    public EventEnvelope toEnriched(EnrichmentService<EventMessage, EventContext> service) {
         if (!isEnrichmentEnabled()) {
             return this;
         }

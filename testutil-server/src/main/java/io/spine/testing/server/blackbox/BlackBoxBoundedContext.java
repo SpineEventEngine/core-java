@@ -35,7 +35,6 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
@@ -114,7 +113,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     private final Set<Message> postedEvents;
 
-    protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
+    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
         this.commandTap = new CommandMemoizingTap();
         EventBus.Builder eventBus = EventBus
                 .newBuilder()
@@ -153,7 +152,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a single-tenant instance with the specified enricher.
      */
-    public static SingleTenantBlackBoxContext singleTenant(Enricher enricher) {
+    public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
         return new SingleTenantBlackBoxContext(enricher);
     }
 
@@ -167,7 +166,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a multitenant instance with the specified enricher.
      */
-    public static MultitenantBlackBoxContext multiTenant(Enricher enricher) {
+    public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
         return new MultitenantBlackBoxContext(enricher);
     }
 
@@ -182,13 +181,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
-        Optional<EventBus.Builder> eventBus = builder.getEventBus();
-        Enricher enricher =
-                eventBus.isPresent()
-                ? eventBus.get()
-                          .getEnricher()
-                          .orElse(emptyEnricher())
-                : emptyEnricher();
+        Optional<EventBus.Builder> eventBus = builder.eventBus();
+        EventEnricher enricher =
+                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
+                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
 
         BlackBoxBoundedContext<?> result = builder.isMultitenant()
                                            ? multiTenant(enricher)

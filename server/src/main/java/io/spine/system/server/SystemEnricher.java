@@ -50,7 +50,7 @@ final class SystemEnricher {
      * @param repo the repository for obtaining scheduled command instances
      * @return new {@link Enricher}
      */
-    public static Enricher create(CommandLifecycleRepository repo) {
+    public static EventEnricher create(CommandLifecycleRepository repo) {
         checkNotNull(repo);
         EventEnricher enricher = EventEnricher
                 .newBuilder()
