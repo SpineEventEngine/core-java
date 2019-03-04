@@ -23,12 +23,14 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.given.AbstractReactorTestEnv;
 import io.spine.server.event.given.AbstractReactorTestEnv.FoodSafetyDepartment;
 import io.spine.server.event.given.AbstractReactorTestEnv.HealthInspector;
 import io.spine.server.event.given.AbstractReactorTestEnv.KitchenFront;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantPsychologicalCounselor;
+import io.spine.server.event.given.AbstractReactorTestEnv.UnluckyFoodServer;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
@@ -40,17 +42,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
+import static io.spine.server.event.given.AbstractReactorTestEnv.FaultyHealthInspector;
 import static io.spine.server.event.given.AbstractReactorTestEnv.poisonousDish;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someDish;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.slf4j.event.Level.ERROR;
 
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
-
-    private TransportFactory commonTransport;
 
     private BoundedContext restaurantContext;
     private BoundedContext foodSafetyContext;
@@ -62,7 +69,7 @@ class AbstractEventReactorTest {
 
     @BeforeEach
     void setUp() {
-        commonTransport = InMemoryTransportFactory.newInstance();
+        TransportFactory commonTransport = InMemoryTransportFactory.newInstance();
         restaurantContext = BoundedContext
                 .newBuilder()
                 .setName("Restaurant context")
@@ -128,7 +135,20 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("log an error")
         void logError() {
+            UnluckyFoodServer server = new UnluckyFoodServer(restaurantContext.eventBus());
 
+            Queue<SubstituteLoggingEvent> loggedMessages =
+                    redirectLogging((SubstituteLogger) server.log());
+
+            restaurantContext.registerEventDispatcher(server);
+            DishCooked cooked = DishCooked
+                    .newBuilder()
+                    .setDish(someDish())
+                    .build();
+            restaurantContext.eventBus()
+                             .post(GivenEvent.withMessage(cooked));
+
+            assertLoggedCorrectly(loggedMessages);
         }
 
         @Test
@@ -189,11 +209,52 @@ class AbstractEventReactorTest {
                     .newBuilder()
                     .setDish(poisonousDish)
                     .build();
-            int warningsBefore = foodSafetyDepartment.warningsIssued();
             restaurantContext.eventBus()
                              .post(GivenEvent.withMessage(served));
-            boolean warningIssued = foodSafetyDepartment.warningsIssued() == warningsBefore + 1;
+            boolean warningIssued = foodSafetyDepartment.poisonousDishes()
+                                                        .contains(poisonousDish);
             assertTrue(warningIssued);
         }
+
+        @DisplayName("log an error")
+        @Test
+        void logAnError() {
+            FaultyHealthInspector healthInspector
+                    = new FaultyHealthInspector(foodSafetyContext.eventBus());
+            foodSafetyContext.registerEventDispatcher(healthInspector);
+
+            Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
+                    (SubstituteLogger) healthInspector.log());
+            Dish dishToServe = someDish();
+            DishServed dishServed = DishServed
+                    .newBuilder()
+                    .setDish(dishToServe)
+                    .build();
+            restaurantContext.eventBus()
+                             .post(GivenEvent.withMessage(dishServed));
+            assertLoggedCorrectly(loggedMessages);
+        }
+    }
+
+    /** Redirects the specified logging to a new queue, then returns the queue. */
+    private static Queue<SubstituteLoggingEvent> redirectLogging(SubstituteLogger logger) {
+        Queue<SubstituteLoggingEvent> result = new ArrayDeque<>();
+        Logging.redirect(logger, result);
+        return result;
+    }
+
+    /**
+     * Makes sure that the error has been correctly logged.
+     *
+     * <p>Checks that:
+     * <ul>
+     * <li>only 1 message has been logged;
+     * <li>logged message is of the {@code ERROR} level.
+     * </ul>
+     */
+    private static void assertLoggedCorrectly(Queue<SubstituteLoggingEvent> messages) {
+        assertEquals(1, messages.size());
+        SubstituteLoggingEvent loggedWarning = messages.poll();
+        assertEquals(ERROR, loggedWarning.getLevel());
     }
 }

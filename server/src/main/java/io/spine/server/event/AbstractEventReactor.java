@@ -65,10 +65,15 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
     @CanIgnoreReturnValue
     @Override
     public Set<String> dispatch(EventEnvelope event) {
-        EventReactorMethod method = thisClass.getReactor(event.messageClass(), event.originClass());
-        ReactorMethodResult result = method.invoke(this, event);
-        List<Event> events = result.produceEvents(event);
-        eventBus.post(events);
+        try {
+            EventReactorMethod method = thisClass.getReactor(event.messageClass(),
+                                                             event.originClass());
+            ReactorMethodResult result = method.invoke(this, event);
+            List<Event> events = result.produceEvents(event);
+            eventBus.post(events);
+        } catch (RuntimeException ex) {
+            onError(event, ex);
+        }
         return identity();
     }
 
@@ -114,14 +119,18 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
         @CanIgnoreReturnValue
         @Override
         public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            return AbstractEventReactor.this.dispatch(eventEnvelope);
+            try {
+                EventEnvelope eventEnvelope = envelope.toEventEnvelope();
+                return AbstractEventReactor.this.dispatch(eventEnvelope);
+            } catch (RuntimeException ex) {
+                onError(envelope, ex);
+            }
+            return identity();
         }
 
         @Override
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            System.out.println("BAD EX");
+            AbstractEventReactor.this.onError(envelope.toEventEnvelope(), exception);
         }
     }
 }

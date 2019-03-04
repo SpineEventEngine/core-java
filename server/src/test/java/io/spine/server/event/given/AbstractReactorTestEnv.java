@@ -44,6 +44,7 @@ import static io.spine.protobuf.Timestamps2.fromInstant;
 import static java.lang.String.format;
 import static java.time.Instant.now;
 
+/** Environment for abstract event reactor testing. */
 public class AbstractReactorTestEnv {
 
     /** Prevent instantiation. */
@@ -210,7 +211,7 @@ public class AbstractReactorTestEnv {
      */
     public static class FoodSafetyDepartment extends AbstractEventReactor {
 
-        private int warningsIssued = 0;
+        private final List<Dish> poisonousDishes = new ArrayList<>();
 
         public FoodSafetyDepartment(EventBus eventBus) {
             super(eventBus);
@@ -218,19 +219,45 @@ public class AbstractReactorTestEnv {
 
         @React
         RestaurantWarningMade makeWarning(DishFoundToBePoisonous foundToBePoisonous) {
-            String warning =
-                    format("The restaurant has been found to serve poisonous food. " +
-                                   "This is the warning number %s.", warningsIssued);
+            String warning = "The restaurant has been found to serve poisonous food.";
             RestaurantWarningMade result = RestaurantWarningMade
                     .newBuilder()
                     .setWarningText(warning)
                     .build();
-            warningsIssued++;
+            poisonousDishes.add(foundToBePoisonous.getDish());
             return result;
         }
 
-        public int warningsIssued(){
-            return warningsIssued;
+        public ImmutableList<Dish> poisonousDishes() {
+            return ImmutableList.copyOf(poisonousDishes);
+        }
+    }
+
+    /** Throws an exception whenever a dish is cooked. */
+    public static class UnluckyFoodServer extends AbstractEventReactor {
+
+        public UnluckyFoodServer(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for testing. */
+        @React
+        DishServed created (DishCooked cooked) {
+            throw new RuntimeException();
+        }
+    }
+
+    /** Throws an exception whenever a dish is served. */
+    public static class FaultyHealthInspector extends AbstractEventReactor{
+
+        public FaultyHealthInspector(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @SuppressWarnings("NewExceptionWithoutArguments") /* Does ont matter for testing. */
+        @React(external = true)
+        Optional<DishFoundToBePoisonous> inspectDish(DishServed dishServed){
+            throw new RuntimeException();
         }
     }
 }
