@@ -21,11 +21,14 @@
 package io.spine.server.model.declare;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isProtected;
 import static java.lang.reflect.Modifier.isPublic;
@@ -68,6 +71,27 @@ public class AccessModifier implements Predicate<Method> {
     private AccessModifier(Predicate<Integer> checkingMethod, String name) {
         this.checkingMethod = checkingMethod;
         this.name = name;
+    }
+
+    /**
+     * Obtains the access modifier of the given method.
+     *
+     * @param method
+     *         the method to analyze
+     * @return the access modifier of the given method
+     */
+    static AccessModifier fromMethod(Method method) {
+        checkNotNull(method);
+        AccessModifier matchedModifier = ImmutableList
+                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, PUBLIC)
+                .stream()
+                .filter(modifier -> modifier.test(method))
+                .findFirst()
+                .orElseThrow(() -> newIllegalArgumentException(
+                        "Could not determine the access level of method %s.",
+                        method
+                ));
+        return matchedModifier;
     }
 
     /**
