@@ -36,9 +36,9 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 /**
  * Contains enrichment functions.
  */
-final class Schema implements Logging {
+final class Schema<M extends Message, C extends EnrichableMessageContext> implements Logging {
 
-    private final ImmutableMap<Class<? extends Message>, SchemaFn<? extends Message, ?>> map;
+    private final ImmutableMap<Class<? extends M>, SchemaFn<? extends M, C>> map;
 
     private final int size;
 
@@ -71,19 +71,19 @@ final class Schema implements Logging {
      * <p>Transforms functions obtained from {@link EnricherBuilder} into functions
      * used by {@code Schema}, and then creates the instance.
      */
-    private static class Factory {
+    private static class Factory<M extends Message, C extends EnrichableMessageContext> {
 
         /** Functions we got from {@link EnricherBuilder}. */
-        private final ImmutableMap<EnricherBuilder.Key, EnrichmentFn<?, ?, ?>> functions;
+        private final ImmutableMap<EnricherBuilder.Key, EnrichmentFn<M, C, ?>> functions;
 
         /** The types of messages that these functions enrich. */
         private final ImmutableSet<Class<? extends Message>> sourceTypes;
 
         /** The map from a class of the enrichable message to the schema function. */
-        private final Map<Class<? extends Message>, SchemaFn<? extends Message, ?>> schemaMap =
+        private final Map<Class<? extends M>, SchemaFn<? extends M, ?>> schemaMap =
                 new HashMap<>();
 
-        private Factory(EnricherBuilder eBuilder) {
+        private Factory(EnricherBuilder<M, C, ?> eBuilder) {
             checkNotNull(eBuilder);
             this.functions = ImmutableMap.copyOf(eBuilder.functions());
             this.sourceTypes =

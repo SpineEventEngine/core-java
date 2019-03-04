@@ -39,14 +39,16 @@ import static io.spine.type.MessageClass.interfacesOf;
  * The {@code Builder} allows to register enrichment functions used by
  * the {@code Enricher}.
  */
-public abstract class EnricherBuilder<B extends EnricherBuilder<B>> {
+public abstract class EnricherBuilder<M extends Message,
+                                      C extends EnrichableMessageContext,
+                                      B extends EnricherBuilder<M, C, B>> {
 
     private static final String SUGGEST_REMOVAL = " Please call `remove(Class, Class)` first.";
 
     /**
      * Maps a pair of [source class, enrichment class] to a function which produces this enrichment.
      */
-    private final Map<Key, EnrichmentFn<?, ?, ?>> functions = new HashMap<>();
+    private final Map<Key, EnrichmentFn<M, C, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
     protected EnricherBuilder() {
@@ -60,9 +62,10 @@ public abstract class EnricherBuilder<B extends EnricherBuilder<B>> {
      *         The binding of the generic parameters allows type-specific functions
      *         exposed in the public API to call this method.
      */
-    protected final <M extends Message, C extends EnrichableMessageContext, T extends Message>
-    B doAdd(Class<M> messageClassOrInterface, Class<T> enrichmentClass,
-                          EnrichmentFn<M, C, T> func) {
+    protected final <T extends Message>
+    B doAdd(Class<M> messageClassOrInterface,
+            Class<T> enrichmentClass,
+            EnrichmentFn<M, C, T> func) {
         checkNotNull(messageClassOrInterface);
         checkNotNull(enrichmentClass);
         checkArgument(!enrichmentClass.isInterface(),
@@ -146,7 +149,7 @@ public abstract class EnricherBuilder<B extends EnricherBuilder<B>> {
     /**
      * Obtains immutable functions of functions added to the builder by the time of the call.
      */
-    ImmutableMap<Key, EnrichmentFn<?, ?, ?>> functions() {
+    ImmutableMap<Key, EnrichmentFn<M, C, ?>> functions() {
         return ImmutableMap.copyOf(functions);
     }
 
