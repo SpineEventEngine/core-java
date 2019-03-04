@@ -44,13 +44,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * An abstract base for all event reactors.
+ * An abstract base for all classes that may produce events in response to other events.
+ *
+ * <p>Events may be produced in response to both domestic and external events.
  *
  * @see React reactors
+ * @see io.spine.server.BoundedContext#registerEventDispatcher(EventDispatcher)
  */
 public class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
+
+    /** The event bus to which the emitted events are posted. */
     private final EventBus eventBus;
 
     protected AbstractEventReactor(EventBus eventBus) {

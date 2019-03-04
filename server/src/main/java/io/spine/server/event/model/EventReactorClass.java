@@ -32,6 +32,12 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Provides information on an {@link AbstractEventReactor} class.
+ *
+ * @param <S>
+ *         the type of event reactors
+ */
 public final class EventReactorClass<S extends AbstractEventReactor> extends ModelClass<S>
         implements ReactingClass {
 
@@ -48,16 +54,13 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
         this.externalEvents = reactors.getMessageClasses(HandlerMethod::isExternal);
     }
 
+    /** Creates new instance for the given raw class. */
     public static <S extends AbstractEventReactor> EventReactorClass<S> asReactorClass(
             Class<S> cls) {
         checkNotNull(cls);
         EventReactorClass<S> result = (EventReactorClass<S>)
                 get(cls, EventReactorClass.class, () -> new EventReactorClass<>(cls));
         return (result);
-    }
-
-    public MessageHandlerMap<EventClass, EventClass, EventReactorMethod> reactors() {
-        return reactors;
     }
 
     @Override

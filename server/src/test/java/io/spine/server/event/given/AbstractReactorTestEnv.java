@@ -88,6 +88,8 @@ public class AbstractReactorTestEnv {
     /**
      * Oversees mental health of the restaurant workers by appointing a counseling session
      * once any of them get sad.
+     *
+     * <p>Emits {@code AppointmentMade} events.
      */
     public static class RestaurantPsychologicalCounselor extends AbstractEventReactor {
 
@@ -108,6 +110,7 @@ public class AbstractReactorTestEnv {
             return result;
         }
 
+        /** Obtains an amount of appointments scheduled by this counselor. */
         public int appointmentsScheduled() {
             return appointmentsScheduled;
         }
@@ -151,10 +154,12 @@ public class AbstractReactorTestEnv {
             return result;
         }
 
+        /** Obtains IDs of all dishes served by this kitchen. */
         public ImmutableList<String> dishesServed() {
             return ImmutableList.copyOf(dishesServed);
         }
 
+        /** Obtains the amount of seconds the head chef had spent sad because of returned dishes. */
         public int secondsWastedBeingSad() {
             return secondsWastedBeingSad;
         }
@@ -228,6 +233,7 @@ public class AbstractReactorTestEnv {
             return result;
         }
 
+        /** Obtains a list of all dishes that have been found to be poisonous. */
         public ImmutableList<Dish> poisonousDishes() {
             return ImmutableList.copyOf(poisonousDishes);
         }
