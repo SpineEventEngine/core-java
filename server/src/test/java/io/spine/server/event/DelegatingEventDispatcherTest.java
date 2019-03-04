@@ -79,7 +79,7 @@ class DelegatingEventDispatcherTest {
         ExternalMessageDispatcher<String> extMessageDispatcher =
                 delegatingDispatcher
                         .createExternalDispatcher()
-                        .orElseThrow(() -> newIllegalStateException("No external events in %s",
+                        .orElseThrow(() -> newIllegalStateException("No external events in `%s`.",
                                                                     delegatingDispatcher));
         StringValue eventMsg = newUuidValue();
         Event event = GivenEvent.arbitrary();
