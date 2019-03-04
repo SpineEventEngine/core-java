@@ -54,25 +54,22 @@ final class SystemEnricher {
         checkNotNull(repo);
         EventEnricher enricher = EventEnricher
                 .newBuilder()
-                //TODO:2019-03-02:alexander.yevsyukov: We can use simply Command.
-                .add(CommandScheduled.class, CommandEnrichment.class,
+                .add(CommandScheduled.class, Command.class,
                      commandLookup(repo))
                 .build();
         return enricher;
     }
 
-    private static EventEnrichmentFn<CommandScheduled, CommandEnrichment>
+    private static EventEnrichmentFn<CommandScheduled, Command>
     commandLookup(CommandLifecycleRepository repo) {
         return (commandScheduled, context) -> findCommand(repo, commandScheduled.getId());
     }
 
-    private static CommandEnrichment findCommand(CommandLifecycleRepository repo, CommandId id) {
+    private static Command findCommand(CommandLifecycleRepository repo, CommandId id) {
         Optional<CommandLifecycleAggregate> commandLifecycle = repo.find(id);
         Command command = commandLifecycle.map(Aggregate::state)
                                           .map(CommandLifecycle::getCommand)
                                           .orElse(Command.getDefaultInstance());
-        return CommandEnrichmentVBuilder.newBuilder()
-                                        .setCommand(command)
-                                        .build();
+        return command;
     }
 }

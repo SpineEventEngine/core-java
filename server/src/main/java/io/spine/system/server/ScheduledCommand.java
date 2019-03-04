@@ -39,9 +39,8 @@ final class ScheduledCommand
 
     @Subscribe
     public void on(CommandScheduled event, EventContext context) {
-        CommandEnrichment enrichment = context.get(CommandEnrichment.class);
-
-        Command commandWithSchedule = withSchedule(enrichment.getCommand(), event.getSchedule());
+        Command command = context.get(Command.class);
+        Command commandWithSchedule = withSchedule(command, event.getSchedule());
         builder().setId(event.getId())
                  .setCommand(commandWithSchedule)
                  .setSchedulingTime(context.getTimestamp());
