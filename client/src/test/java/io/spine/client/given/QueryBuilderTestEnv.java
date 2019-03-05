@@ -26,10 +26,7 @@ import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
 import io.spine.test.client.TestEntity;
-import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
-
-import static java.util.concurrent.ThreadLocalRandom.current;
 
 public class QueryBuilderTestEnv {
 
@@ -42,16 +39,6 @@ public class QueryBuilderTestEnv {
 
     /** Prevents instantiation of this test environment class. */
     private QueryBuilderTestEnv() {
-    }
-
-    public static TestEntityId newMessageId() {
-        int randomNumber = current().nextInt(-1000, 1000);
-        randomNumber = randomNumber != 0
-                       ? randomNumber
-                       : 314;
-        return TestEntityId.newBuilder()
-                           .setValue(randomNumber)
-                           .build();
     }
 
     public static Pagination pagination(int pageSize) {
