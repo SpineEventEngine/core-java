@@ -35,8 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.type.MessageClass.interfacesOf;
 
 /**
- * The {@code Builder} allows to register enrichment functions used by
- * the {@code Enricher}.
+ * Allows to register enrichment functions used by the {@link Enricher}.
  */
 public abstract class EnricherBuilder<M extends Message,
                                       C extends EnrichableMessageContext,
