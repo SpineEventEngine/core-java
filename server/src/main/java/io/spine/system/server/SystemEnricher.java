@@ -54,8 +54,7 @@ final class SystemEnricher {
         checkNotNull(repo);
         EventEnricher enricher = EventEnricher
                 .newBuilder()
-                .add(CommandScheduled.class, Command.class,
-                     commandLookup(repo))
+                .add(CommandScheduled.class, Command.class, commandLookup(repo))
                 .build();
         return enricher;
     }
