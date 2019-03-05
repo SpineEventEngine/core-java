@@ -22,7 +22,6 @@ package io.spine.server.model.declare;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.FormatString;
 import io.spine.annotation.Internal;
 import io.spine.server.model.MethodExceptionChecker;
 

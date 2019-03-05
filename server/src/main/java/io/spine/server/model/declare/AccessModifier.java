@@ -47,13 +47,14 @@ public class AccessModifier implements Predicate<Method> {
             new AccessModifier(Modifier::isProtected, "protected");
 
     public static final AccessModifier PACKAGE_PRIVATE =
-            new AccessModifier(
-                    methodModifier -> !(isPublic(methodModifier)
-                            || isProtected(methodModifier)
-                            || isPrivate(methodModifier)), "package-private");
+            new AccessModifier(methodModifier ->
+                                       !(isPublic(methodModifier)
+                                      || isProtected(methodModifier)
+                                      || isPrivate(methodModifier)),
+                               "package-private");
 
     public static final AccessModifier PRIVATE =
-            new AccessModifier(Modifier::isProtected, "private");
+            new AccessModifier(Modifier::isPrivate, "private");
 
     /**
      * The predicate which works with the {@linkplain Method#getModifiers() raw representation }
