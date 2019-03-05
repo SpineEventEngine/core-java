@@ -28,6 +28,7 @@ import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
@@ -382,7 +383,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {
-                Collection<Any> readResult = queryProcessor.process(query());
+                Collection<EntityStateWithVersion> readResult = queryProcessor.process(query());
                 QueryResponse response = QueryResponse
                         .newBuilder()
                         .addAllMessages(readResult)

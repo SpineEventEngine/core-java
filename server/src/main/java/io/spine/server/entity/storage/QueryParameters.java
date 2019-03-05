@@ -36,8 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.client.Filters.eq;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.Filters.eq;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 

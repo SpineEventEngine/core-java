@@ -20,10 +20,6 @@
 
 package io.spine.server.entity.storage.given;
 
-import io.spine.client.OrderBy;
-import io.spine.client.OrderByVBuilder;
-import io.spine.client.Pagination;
-import io.spine.client.PaginationVBuilder;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.storage.LifecycleFlagField;
 

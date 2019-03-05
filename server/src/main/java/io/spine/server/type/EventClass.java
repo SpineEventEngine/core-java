@@ -71,6 +71,15 @@ public final class EventClass extends MessageClass<EventMessage> {
     }
 
     /**
+     * Creates a new {@code EventClass} from the given event.
+     *
+     * <p>Named {@code from} to avoid collision with {@link #of(Message)}.
+     */
+    public static EventClass from(Event event) {
+        return from(event.typeUrl());
+    }
+
+    /**
      * Creates a new instance of the event class by passed event instance.
      *
      * <p>If an instance of {@link Event} is passed to this method, enclosing event message will be
