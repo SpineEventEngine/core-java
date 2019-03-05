@@ -37,9 +37,6 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class AggregateCommandEndpointTestEnv {
 
     /** Prevent instantiation of this utility class. */
