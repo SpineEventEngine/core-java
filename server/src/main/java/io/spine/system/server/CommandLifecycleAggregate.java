@@ -177,7 +177,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    private void event(CommandTransformed event) {
+    private void on(CommandTransformed event) {
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setCommand(event.getId());
@@ -189,7 +189,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    private void event(CommandSplit event) {
+    private void on(CommandSplit event) {
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setSequence(Sequence.newBuilder()
