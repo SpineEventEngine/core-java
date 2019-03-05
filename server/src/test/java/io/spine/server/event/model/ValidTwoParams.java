@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.server.event.model;
 
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
@@ -29,7 +30,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
  *
  * @author Alexander Yevsyukov
  */
-public class ValidTwoParams extends TestEventSubscriber {
+class ValidTwoParams extends TestEventSubscriber {
 
     @Subscribe
     void handle(RefProjectCreated event, EventContext context) {

@@ -36,7 +36,6 @@ import io.spine.server.event.model.given.subscriber.InvalidTwoParamsSecondInvali
 import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
 import io.spine.server.event.model.given.subscriber.ValidButPrivate;
 import io.spine.server.event.model.given.subscriber.ValidOneParam;
-import io.spine.server.event.model.given.subscriber.ValidTwoParams;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.server.type.EventEnvelope;
