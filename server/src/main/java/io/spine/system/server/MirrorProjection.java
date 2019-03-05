@@ -69,14 +69,14 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(EntityStateChanged event) {
+    void on(EntityStateChanged event) {
         builder().setId(id())
                  .setState(event.getNewState())
                  .setVersion(event.getNewVersion());
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") EntityArchived event) {
+    void on(@SuppressWarnings("unused") EntityArchived event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -90,7 +90,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") EntityDeleted event) {
+    void on(@SuppressWarnings("unused") EntityDeleted event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -104,7 +104,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
+    void on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -118,7 +118,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") EntityRestored event) {
+    void on(@SuppressWarnings("unused") EntityRestored event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()

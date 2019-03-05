@@ -31,7 +31,7 @@ public class EBProjectArchivedSubscriber extends AbstractEventSubscriber {
     private Message eventMessage;
 
     @Subscribe
-    public void on(EBProjectArchived message, EventContext ignored) {
+    void on(EBProjectArchived message, EventContext ignored) {
         this.eventMessage = message;
     }
 

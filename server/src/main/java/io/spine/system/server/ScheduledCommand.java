@@ -41,7 +41,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandScheduled event, EventContext context) {
+    void on(CommandScheduled event, EventContext context) {
         CommandEnrichment enrichment =
                 context.find(CommandEnrichment.class)
                        .orElseThrow(() -> newIllegalStateException(
@@ -68,7 +68,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

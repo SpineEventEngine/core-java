@@ -33,16 +33,16 @@ public class TestEventSubscriber extends AbstractEventSubscriber {
     private Message handledEvent;
 
     @Subscribe
-    public void on(BcProjectCreated event, EventContext context) {
+    void on(BcProjectCreated event, EventContext context) {
         this.handledEvent = event;
     }
 
     @Subscribe
-    public void on(BcTaskAdded event, EventContext context) {
+    void on(BcTaskAdded event, EventContext context) {
     }
 
     @Subscribe
-    public void on(BcProjectStarted event, EventContext context) {
+    void on(BcProjectStarted event, EventContext context) {
     }
 
     public Message getHandledEvent() {

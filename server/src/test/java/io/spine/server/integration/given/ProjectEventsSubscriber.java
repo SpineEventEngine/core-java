@@ -41,7 +41,7 @@ public class ProjectEventsSubscriber extends AbstractEventSubscriber {
     }
 
     @Subscribe
-    public void on(ItgProjectStarted msg) {
+    void on(ItgProjectStarted msg) {
         domesticEvent = msg;
     }
 

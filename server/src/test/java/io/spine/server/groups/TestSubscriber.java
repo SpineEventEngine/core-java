@@ -35,7 +35,7 @@ public final class TestSubscriber extends AbstractEventSubscriber {
     private Organization external;
 
     @Subscribe
-    public void domestic(Group group) {
+    void domestic(Group group) {
         this.domestic = group;
     }
 

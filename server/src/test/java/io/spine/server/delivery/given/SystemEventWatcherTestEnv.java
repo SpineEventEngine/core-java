@@ -56,7 +56,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
+        void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("Only spine.system.server events are allowed.");
         }
     }
@@ -68,7 +68,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(@SuppressWarnings("unused") EntityCreated unused) {
+        void on(@SuppressWarnings("unused") EntityCreated unused) {
             // NoOp.
         }
     }

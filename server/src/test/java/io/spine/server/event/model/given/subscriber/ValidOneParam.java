@@ -31,6 +31,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 public class ValidOneParam extends TestEventSubscriber {
 
     @Subscribe
-    public void handle(RefProjectCreated event) {
+    void handle(RefProjectCreated event) {
     }
 }

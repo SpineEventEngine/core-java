@@ -32,6 +32,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 public class ValidTwoParams extends TestEventSubscriber {
 
     @Subscribe
-    public void handle(RefProjectCreated event, EventContext context) {
+    void handle(RefProjectCreated event, EventContext context) {
     }
 }

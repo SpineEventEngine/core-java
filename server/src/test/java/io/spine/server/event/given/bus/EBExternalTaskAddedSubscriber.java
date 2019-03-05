@@ -53,7 +53,7 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
      * @param event ignored
      */
     @Subscribe
-    public void on(ProjectCreated event) {
+    void on(ProjectCreated event) {
         fail("Unexpected event " + Json.toJson(event));
     }
 

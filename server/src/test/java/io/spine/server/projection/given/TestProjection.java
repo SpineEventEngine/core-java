@@ -83,7 +83,7 @@ public class TestProjection
     }
 
     @Subscribe
-    public void on(PrjProjectCreated event) {
+    void on(PrjProjectCreated event) {
         // Keep the event message for further inspection in tests.
         keep(event);
 
@@ -96,7 +96,7 @@ public class TestProjection
     }
 
     @Subscribe
-    public void on(PrjTaskAdded event) {
+    void on(PrjTaskAdded event) {
         keep(event);
         builder().addTask(event.getTask());
     }
@@ -111,7 +111,7 @@ public class TestProjection
      *         can have two parameters
      */
     @Subscribe
-    public void on(PrjProjectStarted event,
+    void on(PrjProjectStarted event,
                    @SuppressWarnings("UnusedParameters") EventContext ignored) {
         keep(event);
         Project newState = state().toBuilder()
@@ -121,13 +121,13 @@ public class TestProjection
     }
 
     @Subscribe
-    public void on(PrjProjectArchived event) {
+    void on(PrjProjectArchived event) {
         keep(event);
         setArchived(true);
     }
 
     @Subscribe
-    public void on(PrjProjectDeleted event) {
+    void on(PrjProjectDeleted event) {
         keep(event);
         setDeleted(true);
     }

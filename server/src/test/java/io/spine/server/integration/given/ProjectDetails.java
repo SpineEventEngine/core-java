@@ -46,7 +46,7 @@ public class ProjectDetails
     }
 
     @Subscribe
-    public void on(ItgProjectStarted event) {
+    void on(ItgProjectStarted event) {
         domesticEvent = event;
     }
 
