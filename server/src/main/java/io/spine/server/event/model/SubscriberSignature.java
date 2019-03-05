@@ -40,20 +40,20 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
         return ImmutableSet.of(AccessModifier.PUBLIC);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(void.class);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         ImmutableSet<? extends ParameterSpec<EventEnvelope>> result = ImmutableSet
                 .<ParameterSpec<EventEnvelope>>builder()
-                .addAll(super.getParamSpecs())
+                .addAll(super.paramSpecs())
                 .addAll(ImmutableList.copyOf(EntityStateSubscriberSpec.values()))
                 .build();
         return result;

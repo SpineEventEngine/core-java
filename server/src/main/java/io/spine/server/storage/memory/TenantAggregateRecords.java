@@ -45,9 +45,8 @@ import static io.spine.validate.Validate.isDefault;
  * The events for for a tenant.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
- * @author Alexander Yevsyukov
  */
-class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
+final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
 
     private final Multimap<I, AggregateEventRecord> records = TreeMultimap.create(
             new AggregateStorageKeyComparator<>(), // key comparator

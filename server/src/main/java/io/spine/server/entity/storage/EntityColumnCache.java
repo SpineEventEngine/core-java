@@ -37,13 +37,13 @@ import static java.util.Collections.synchronizedMap;
  * A class designated to store cached {@linkplain EntityColumn entity column metadata} for a single
  * {@link Entity} class.
  *
- * <p>The cache remains empty on creation. The {@linkplain EntityColumn column metadata} is retrieved
- * on the first access to the {@linkplain EntityColumnCache cache} instance and then stored in it.
+ * <p>The cache remains empty on creation. The {@linkplain EntityColumn column metadata} is
+ * retrieved on the first access to the {@linkplain EntityColumnCache cache} instance and then
+ * stored in it.
  *
  * <p>The order in which {@link EntityColumn entity columns} are stored, is retained for
  * the access operations.
  *
- * @author Dmytro Kuzmin
  * @see EntityColumn
  * @see Columns
  */
@@ -64,7 +64,7 @@ public class EntityColumnCache {
      * <p>This container is mutable and thread-safe.
      */
     private final Map<String, EntityColumn> entityColumnData =
-            synchronizedMap(new LinkedHashMap<String, EntityColumn>());
+            synchronizedMap(new LinkedHashMap<>());
 
     private EntityColumnCache(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
@@ -73,15 +73,15 @@ public class EntityColumnCache {
     }
 
     /**
-     * Creates an instance of {@link EntityColumnCache} for the given {@link Entity} class.
+     * Creates a new instance for the given {@link Entity} class.
      *
      * <p>The {@linkplain EntityColumn column metadata} will not be retrieved and stored on creation.
-     * Instead, the {@linkplain EntityColumnCache cache instance} will wait for the first access to it
-     * to cache {@linkplain EntityColumn entity columns}.
+     * Instead, the cache instance will wait for the first access to it to cache
+     * {@linkplain EntityColumn entity columns}.
      *
      * @param entityClass the class for which {@linkplain EntityColumn entity columns} should
      *                    be obtained and cached
-     * @return new {@link EntityColumnCache} instance
+     * @return new instance
      */
     public static EntityColumnCache initializeFor(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
@@ -96,8 +96,7 @@ public class EntityColumnCache {
      * will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
      *
      * <p>If there is no {@link EntityColumn column} with the given name in the {@link Entity}
-     * class managed by this {@linkplain EntityColumnCache cache}, the method will throw
-     * {@link IllegalArgumentException}.
+     * class managed by this cache, the method will throw {@link IllegalArgumentException}.
      *
      * @param columnName the {@linkplain EntityColumn#getName() name} of the searched column
      * @return {@linkplain EntityColumn found entity column}
@@ -118,10 +117,10 @@ public class EntityColumnCache {
 
     /**
      * Retrieves all {@linkplain EntityColumn entity columns} for the {@link Entity} class managed
-     * by this {@linkplain EntityColumnCache cache}.
+     * by this cache.
      *
-     * <p>If the {@linkplain EntityColumn column metadata} is not yet obtained and cached, this method
-     * will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
+     * <p>If the {@linkplain EntityColumn column metadata} is not yet obtained and cached, this
+     * method will {@linkplain EntityColumnCache#ensureColumnsCached() retrieve and cache it}.
      *
      * @return {@linkplain EntityColumn entity column} {@link Collection} for the managed
      *         {@link Entity} class
@@ -132,8 +131,8 @@ public class EntityColumnCache {
     }
 
     /**
-     * {@linkplain Columns#getAllColumns(Class) Obtains} and caches {@link EntityColumn} data if it is not
-     * yet cached.
+     * {@linkplain Columns#getAllColumns(Class) Obtains} and caches {@link EntityColumn} data if it
+     * is not yet cached.
      *
      * <p>If the data is already retrieved and cached, this method does nothing.
      */
@@ -145,7 +144,7 @@ public class EntityColumnCache {
     }
 
     /**
-     * Checks if the current {@link EntityColumnCache} instance has already retrieved and cached
+     * Checks if the current cache instance has already retrieved and cached
      * {@linkplain EntityColumn column metadata}.
      *
      * @return {@code true} if columns are cached and {@code false} otherwise

@@ -25,16 +25,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Verifies that a command or an event was handled responding with an error matching a provided
  * {@link ErrorCriterion error criterion}.
- *
- * @author Mykhailo Drachuk
  */
 final class SpecificErrorPresenceVerify extends VerifyAcknowledgements {
 
     private final ErrorCriterion criterion;
 
     /**
-     * @param criterion an error criterion specifying which kind of error should be a part
-     *                 of acknowledgement
+     * Creates a new instance.
+     *
+     * @param criterion
+     *         an error criterion specifying which kind of error should be a part
+     *         of acknowledgement
      */
     SpecificErrorPresenceVerify(ErrorCriterion criterion) {
         super();

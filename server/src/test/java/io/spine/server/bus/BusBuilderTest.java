@@ -34,7 +34,6 @@ import static org.mockito.Mockito.mock;
 /**
  * The abstract test suite for the tests of the builders of buses.
  *
- * @author Dmytro Dashenkov
  * @see io.spine.server.commandbus.CommandBusBuilderTest
  * @see io.spine.server.event.EventBusBuilderTest
  * @see io.spine.server.rejection.RejectionBusBuilderTest

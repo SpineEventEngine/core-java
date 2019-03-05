@@ -20,9 +20,6 @@
 
 package io.spine.server.model.given;
 
-/**
- * @author Dmytro Kuzmin
- */
 public class MethodAccessCheckerTestEnv {
 
     /** Prevents instantiation of this utility class. */

@@ -31,9 +31,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("MethodResult should")
 class MethodResultTest {
 

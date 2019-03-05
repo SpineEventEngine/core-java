@@ -41,7 +41,7 @@ abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelo
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(EventAcceptingMethodParams.values());
     }
 }

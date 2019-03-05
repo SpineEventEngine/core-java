@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <M> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- * @author Alexander Yevsyukov
  */
 public abstract
 class PmCommandOnEventTest<I,

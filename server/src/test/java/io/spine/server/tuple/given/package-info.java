@@ -20,8 +20,6 @@
 
 /**
  * Test environment for the {@link io.spine.server.tuple}.
- *
- * @author Alexander Yevsyukov
  */
 
 @CheckReturnValue

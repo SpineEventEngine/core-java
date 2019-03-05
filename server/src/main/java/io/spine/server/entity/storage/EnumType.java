@@ -27,7 +27,6 @@ package io.spine.server.entity.storage;
  * storage as well as the conversion function between the {@link Enum} value and the persistence
  * value.
  *
- * @author Dmytro Kuzmin
  * @see Enumerated
  */
 public enum EnumType {

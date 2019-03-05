@@ -32,8 +32,6 @@ import static java.lang.String.format;
 /**
  * A special {@link ErrorCriterion error criterion} that checks the errors 
  * {@link Error#getAttributes() attributes}.
- *
- * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 public final class ErrorAttributeCriterion implements ErrorCriterion {

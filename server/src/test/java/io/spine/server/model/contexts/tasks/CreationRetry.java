@@ -35,10 +35,8 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
- * A {@link io.spine.server.command.Commander Commander} which retries the task creation if it
- * fails.
- *
- * @author Dmytro Dashenkov
+ * A {@link io.spine.server.command.Commander Commander} which retries the task
+ * creation if it fails.
  */
 public final class CreationRetry extends AbstractCommander {
 

@@ -192,20 +192,6 @@ public abstract class Aggregate<I,
      * <p>In {@code Aggregate}, this method must be called only from within an event applier.
      *
      * @throws IllegalStateException if the method is called from outside an event applier
-     * @deprecated use {@link #builder()}
-     */
-    @Deprecated
-    @Override
-    protected B getBuilder() {
-        return builder();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>In {@code Aggregate}, this method must be called only from within an event applier.
-     *
-     * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
     protected final B builder() {
@@ -224,7 +210,7 @@ public abstract class Aggregate<I,
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
-        CommandHandlerMethod method = thisClass().getHandler(command.messageClass());
+        CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
         EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);
     }

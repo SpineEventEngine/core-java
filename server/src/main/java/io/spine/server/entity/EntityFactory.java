@@ -24,8 +24,6 @@ import java.io.Serializable;
 
 /**
  * Base interface for objects that can create entities.
- *
- * @author Alexander Yevsyukov
  */
 public interface EntityFactory<I, E extends Entity<I, ?>> extends Serializable {
 

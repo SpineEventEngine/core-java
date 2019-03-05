@@ -35,8 +35,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@link OrderBy order}.
- *
- * @author Mykhailo Drachuk
  */
 @SuppressWarnings("ComparatorNotSerializable")
 final class EntityRecordComparator implements Comparator<EntityRecordWithColumns> {

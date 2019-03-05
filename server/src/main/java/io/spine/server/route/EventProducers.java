@@ -29,8 +29,6 @@ import java.util.Set;
 
 /**
  * Provides default {@link EventRoute}s for obtaining a producer ID from an event.
- *
- * @author Alexander Yevsyukov
  */
 final class EventProducers {
 

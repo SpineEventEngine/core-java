@@ -33,8 +33,6 @@ import io.spine.type.TypeUrl;
 
 /**
  * An aggregate handling company-related commands.
- *
- * @author Dmytro Dashenkov
  */
 public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuilder> {
 

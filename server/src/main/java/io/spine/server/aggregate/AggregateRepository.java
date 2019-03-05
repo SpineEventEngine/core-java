@@ -186,7 +186,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Set<CommandClass> messageClasses() {
-        return aggregateClass().getCommands();
+        return aggregateClass().commands();
     }
 
     /**

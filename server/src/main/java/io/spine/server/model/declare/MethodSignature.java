@@ -45,10 +45,10 @@ import static java.util.stream.Collectors.toList;
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},
- *     <li>{@linkplain #getParamSpecs() the specification of method parameters},
- *     <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},
- *     <li>{@linkplain #getValidReturnTypes() the set of valid return types},
- *     <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
+ *     <li>{@linkplain #paramSpecs() the specification of method parameters},
+ *     <li>{@linkplain #allowedModifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #validReturnTypes() the set of valid return types},
+ *     <li>{@linkplain #allowedExceptions() the set of allowed exceptions}, that the method
  * declares to throw (empty by default),
  * </ul>
  *
@@ -73,22 +73,22 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
     /**
      * Obtains the specification of handler parameters to meet.
      */
-    public abstract ImmutableSet<? extends ParameterSpec<E>> getParamSpecs();
+    public abstract ImmutableSet<? extends ParameterSpec<E>> paramSpecs();
 
     /**
      * Obtains the set of allowed access modifiers for the method.
      */
-    protected abstract ImmutableSet<AccessModifier> getAllowedModifiers();
+    protected abstract ImmutableSet<AccessModifier> allowedModifiers();
 
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
+    protected abstract ImmutableSet<Class<?>> validReturnTypes();
 
     /**
      * Obtains the set of allowed exceptions that method may declare to throw.
      */
-    protected ImmutableSet<Class<? extends Throwable>> getAllowedExceptions() {
+    protected ImmutableSet<Class<? extends Throwable>> allowedExceptions() {
         return ImmutableSet.of();
     }
 
@@ -135,7 +135,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
      *
      * <p>Such an approach allows to improve performance by skipping the methods, that a priori
      * cannot be qualified as message handler methods, such as methods with no
-     * {@linkplain #getAnnotation() required annotation}.
+     * {@linkplain #annotation() required annotation}.
      *
      * @param method
      *         the method to determine if it should be inspected at all
@@ -165,7 +165,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
      */
-    public Class<? extends Annotation> getAnnotation() {
+    public Class<? extends Annotation> annotation() {
         return annotation;
     }
 
@@ -187,7 +187,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
+        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, paramSpecs());
         return matchingSpec.map(spec -> {
             H handler = doCreate(method, spec);
             handler.discoverAttributes();

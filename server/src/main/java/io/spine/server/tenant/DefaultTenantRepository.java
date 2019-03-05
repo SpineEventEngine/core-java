@@ -27,8 +27,6 @@ import io.spine.core.TenantId;
 /**
  * Default implementation of {code TenantRepository} that stores timestamps
  * of tenant ID registration.
- *
- * @author Alexander Yevsyukov
  */
 final class DefaultTenantRepository
       extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {

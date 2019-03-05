@@ -201,7 +201,7 @@ class ProcessManagerRepositoryTest
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        setCurrentTenant(requestFactory.getTenantId());
+        setCurrentTenant(requestFactory.tenantId());
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();

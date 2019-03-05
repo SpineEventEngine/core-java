@@ -29,10 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Static utilities for movement DSL.
- *
- * @author Alexander Yevsyukov
  */
-public class MoveMessages {
+public final class MoveMessages {
 
     /** Prevents instantiation of this utility class. */
     private MoveMessages() {

@@ -34,8 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A set of callbacks invoked when a command processing reaches a given point.
- *
- * @author Dmytro Dashenkov
  */
 final class CommandFlowWatcher {
 

@@ -35,10 +35,6 @@ import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Vladyslav Lubenskyi
- */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("EventHandlerExpected should")
 class EventReactorExpectedTest {
 
@@ -46,9 +42,7 @@ class EventReactorExpectedTest {
     @DisplayName("validate state")
     void validateState() {
         EventReactorExpected<UInt64Value> expected = expected();
-        expected.hasState(state -> {
-            assertEquals(newState(), state);
-        });
+        expected.hasState(state -> assertEquals(newState(), state));
     }
 
     @Test
@@ -66,9 +60,7 @@ class EventReactorExpectedTest {
                                                .setValue("single produced event")
                                                .build();
         EventReactorExpected<UInt64Value> expected = expectedWithEvent(expectedEvent);
-        expected.producesMessage(StringValue.class, event -> {
-            assertEquals(expectedEvent, event);
-        });
+        expected.producesMessage(StringValue.class, event -> assertEquals(expectedEvent, event));
     }
 
     @Test
@@ -76,7 +68,9 @@ class EventReactorExpectedTest {
     void trackCommands() {
         EventReactorExpected<UInt64Value> expected = expected();
         expected.producesCommands(StringValue.class, StringValue.class);
-        assertThrows(AssertionFailedError.class, () -> expected.producesCommands(StringValue.class));
+        assertThrows(AssertionFailedError.class, () ->
+                expected.producesCommands(StringValue.class)
+        );
     }
 
     @Test
@@ -86,9 +80,8 @@ class EventReactorExpectedTest {
                                                  .setValue("single routed command")
                                                  .build();
         EventReactorExpected<UInt64Value> expected = expectedWithCommand(expectedCommand);
-        expected.producesCommand(StringValue.class, command -> {
-            assertEquals(expectedCommand, command);
-        });
+        expected.producesCommand(StringValue.class, command ->
+                assertEquals(expectedCommand, command));
     }
 
     @Test

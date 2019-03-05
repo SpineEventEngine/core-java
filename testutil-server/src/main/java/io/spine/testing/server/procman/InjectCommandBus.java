@@ -32,8 +32,6 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * Injects the given {@link CommandBus command bus} into the process manager for unit tests.
- *
- * @author Vladyslav Lubenskyi
  */
 public class InjectCommandBus {
 

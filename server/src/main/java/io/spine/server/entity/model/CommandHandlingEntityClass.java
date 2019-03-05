@@ -46,12 +46,12 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public Set<CommandClass> getCommands() {
+    public Set<CommandClass> commands() {
         return commands.getMessageClasses();
     }
 
     @Override
-    public Set<EventClass> getCommandOutput() {
+    public Set<EventClass> commandOutput() {
         return commands.getProducedTypes();
     }
 
@@ -60,7 +60,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     }
 
     @Override
-    public CommandHandlerMethod getHandler(CommandClass commandClass) {
+    public CommandHandlerMethod handlerOf(CommandClass commandClass) {
         return commands.getSingleMethod(commandClass);
     }
 }

@@ -35,7 +35,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * states in a {@link Stand}.
  *
  * @param <I> the type for IDs of the source aggregate
- * @author Alex Tymchenko
  */
 public final class AggregateStateId<I> {
 

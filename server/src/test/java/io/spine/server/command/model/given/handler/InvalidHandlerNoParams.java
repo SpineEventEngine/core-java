@@ -25,10 +25,8 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * Provides a method which is annotated, but does not accept parameters.
- *
- * @author Alexander Yevsyukov
  */
-public class InvalidHandlerNoParams extends TestCommandHandler {
+public final class InvalidHandlerNoParams extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest() {
         return RefProjectCreated.getDefaultInstance();

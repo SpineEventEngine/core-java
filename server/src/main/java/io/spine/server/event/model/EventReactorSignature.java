@@ -40,12 +40,12 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
         return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
     }
 

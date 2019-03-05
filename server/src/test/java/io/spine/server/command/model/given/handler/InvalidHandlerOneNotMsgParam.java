@@ -25,8 +25,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * Provides a method with incorrect type of the parameter.
- * 
- * @author Alexander Yevsyukov
  */
 public class InvalidHandlerOneNotMsgParam extends TestCommandHandler {
     @Assign

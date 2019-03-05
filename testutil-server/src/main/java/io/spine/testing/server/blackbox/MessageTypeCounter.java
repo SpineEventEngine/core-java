@@ -41,10 +41,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         the type of objects that contain messages
  * @param <M>
  *         the type of the messages to count
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
  */
-class MessageTypeCounter<C extends MessageClass, W extends Message, M extends Message> {
+final class MessageTypeCounter<C extends MessageClass, W extends Message, M extends Message> {
 
     private final Map<C, Integer> countByType;
     private final Function<Class<? extends M>, C> rawClassFn;

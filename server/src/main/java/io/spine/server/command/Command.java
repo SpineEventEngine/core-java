@@ -77,7 +77,6 @@ import java.lang.annotation.Target;
  * by another method, a run-time error will occur. This also means that an application cannot have
  * two commanding methods that accept the same command type.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.command.Assign Handling Commands
  */
 @Retention(RetentionPolicy.RUNTIME)

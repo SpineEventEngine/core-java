@@ -34,7 +34,6 @@ import io.spine.validate.ValidatingBuilder;
  * @param <P> the type of the projection to build
  * @param <I> the type of projection IDs
  * @param <S> the type of the projection state
- * @author Alexander Yevsyukov
  */
 public class ProjectionBuilder<P extends Projection<I, S, B>,
                                I,

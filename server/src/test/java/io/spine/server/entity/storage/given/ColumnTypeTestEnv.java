@@ -22,10 +22,6 @@ package io.spine.server.entity.storage.given;
 
 import io.spine.server.entity.storage.ColumnType;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
 public class ColumnTypeTestEnv {
 
     /** Prevents instantiation of this utility class. */

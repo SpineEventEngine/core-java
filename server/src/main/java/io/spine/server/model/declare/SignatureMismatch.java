@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The mismatch of a signature.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public final class SignatureMismatch {

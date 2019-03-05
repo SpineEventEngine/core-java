@@ -37,9 +37,6 @@ import static io.spine.base.Time.getCurrentTime;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
- *
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
  */
 public class ActorRequestFactory {
 
@@ -98,21 +95,21 @@ public class ActorRequestFactory {
     /**
      * Obtains the ID of the user on behalf of whom the requests are created.
      */
-    public UserId getActor() {
+    public UserId actor() {
         return actor;
     }
 
     /**
      * Obtains the offset of the time zone in which the actor works.
      */
-    public ZoneOffset getZoneOffset() {
+    public ZoneOffset zoneOffset() {
         return zoneOffset;
     }
 
     /**
      * Obtains the ID of the time zone in which the actor works.
      */
-    public ZoneId getZoneId() {
+    public ZoneId zoneId() {
         return zoneId;
     }
 
@@ -120,7 +117,7 @@ public class ActorRequestFactory {
      * Obtains the ID of the tenant to which the actor belongs, or {@code null}
      * for single-tenant execution context.
      */
-    public @Nullable TenantId getTenantId() {
+    public @Nullable TenantId tenantId() {
         return tenantId;
     }
 
@@ -137,10 +134,10 @@ public class ActorRequestFactory {
         checkNotNull(zoneOffset);
         checkNotNull(zoneId);
         ActorRequestFactory result =
-                newBuilder().setActor(getActor())
+                newBuilder().setActor(actor())
                             .setZoneOffset(zoneOffset)
                             .setZoneId(zoneId)
-                            .setTenantId(getTenantId())
+                            .setTenantId(tenantId())
                             .build();
         return result;
     }

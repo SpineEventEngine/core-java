@@ -49,7 +49,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide handled command classes")
     void commandClasses() {
-        assertThat(aggregateClass.getCommands())
+        assertThat(aggregateClass.commands())
                 .containsExactlyElementsIn(CommandClass.setOf(
                         StartEngine.class, StopEngine.class
                 ));

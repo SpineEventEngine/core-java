@@ -51,12 +51,12 @@ abstract class CommandAcceptingMethodSignature
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
         return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
@@ -67,7 +67,7 @@ abstract class CommandAcceptingMethodSignature
      * ThrowableMessage command rejections} which are based on {@code ThrowableMessage}.
      */
     @Override
-    protected ImmutableSet<Class<? extends Throwable>> getAllowedExceptions() {
+    protected ImmutableSet<Class<? extends Throwable>> allowedExceptions() {
         return ImmutableSet.of(ThrowableMessage.class);
     }
 

@@ -23,8 +23,5 @@ package io.spine.server.model.contexts.tasks;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.model.contexts.tasks.TaskId;
 
-/**
- * @author Alexander Yevsyukov
- */
-class TaskRepository extends AggregateRepository<TaskId, TaskAggregate> {
+final class TaskRepository extends AggregateRepository<TaskId, TaskAggregate> {
 }

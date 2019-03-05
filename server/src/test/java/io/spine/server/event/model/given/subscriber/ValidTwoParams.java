@@ -26,8 +26,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * A class with a method that accepts event message and context.
- *
- * @author Alexander Yevsyukov
  */
 public class ValidTwoParams extends TestEventSubscriber {
 

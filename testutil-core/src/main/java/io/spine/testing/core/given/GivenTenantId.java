@@ -27,8 +27,6 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Collection of factory methods for creating identifiers for tests.
- *
- * @author Alexander Yevsyukov
  */
 public final class GivenTenantId {
 

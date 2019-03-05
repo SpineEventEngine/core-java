@@ -44,7 +44,6 @@ import java.util.List;
  * @param <M> the type of the event message to test
  * @param <S> state message of the handling entity
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
- * @author Dmytro Dashenkov
  */
 public abstract class EventReactionTest<I,
                                         M extends EventMessage,

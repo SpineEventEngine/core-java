@@ -51,17 +51,17 @@ public class CommandReactionSignature
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(CommandReactionParams.values());
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
         return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
     }
 

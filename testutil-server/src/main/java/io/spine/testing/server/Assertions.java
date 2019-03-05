@@ -38,10 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Common assertions for server-side testing.
- *
- * @author Alexander Yevsyukov
  */
-public class Assertions {
+public final class Assertions {
 
     /** Prevents instantiation of this utility class. */
     private Assertions() {

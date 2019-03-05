@@ -33,9 +33,6 @@ import static io.spine.testing.server.procman.given.SamplePmCommandOnEventTest.T
 import static io.spine.testing.server.procman.given.pm.CommandingPm.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Vladyslav Lubenskyi
- */
 @DisplayName("PmCommandOnCommandTest should")
 class PmCommandOnEventTestShould {
 

@@ -28,9 +28,6 @@ import io.spine.test.model.ModProjectStarted;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-/**
- * @author Alexander Yevsyukov
- */
 @SuppressWarnings("UnusedParameters") // OK for test methods.
 public class StubHandler {
 

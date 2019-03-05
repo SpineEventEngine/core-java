@@ -31,8 +31,6 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 /**
  * An aggregate part with {@link Task} state, which belongs to the aggregate
  * represented by {@link AnAggregateRoot}.
- *
- * @author Alexander Yevsyukov
  */
 public class TaskPart
         extends AggregatePart<String, Task, TaskVBuilder, AnAggregateRoot> {

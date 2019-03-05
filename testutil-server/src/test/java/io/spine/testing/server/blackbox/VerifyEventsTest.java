@@ -40,9 +40,6 @@ import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.taskAd
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Mykhailo Drachuk
- */
 @DisplayName("Emitted Events Verifier should")
 class VerifyEventsTest {
 

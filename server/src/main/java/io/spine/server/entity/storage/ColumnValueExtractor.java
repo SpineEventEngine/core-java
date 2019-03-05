@@ -35,7 +35,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Each {@code ColumnValueExtractor} instance is created for the specific {@link Entity} and
  * the specific set of {@linkplain EntityColumn columns}.
  *
- * @author Dmytro Kuzmin
  * @see Columns
  * @see EntityColumn
  */
@@ -50,7 +49,7 @@ class ColumnValueExtractor {
     }
 
     /**
-     * Creates an instance of {@link ColumnValueExtractor} for the given {@link Entity} and
+     * Creates an instance of {@code ColumnValueExtractor} for the given {@link Entity} and
      * {@link Collection} of {@linkplain EntityColumn entity columns}.
      *
      * <p>This instance can be further used to

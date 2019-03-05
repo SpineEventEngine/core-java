@@ -30,9 +30,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Two BoundedContexts")
 class TwoBoundedContextsTest {
 

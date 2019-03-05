@@ -41,8 +41,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * The test environment for {@link io.spine.server.model.declare.MethodParamsTest MethodParamsTest}
  * class.
- *
- * @author Alex Tymchenko
  */
 public class MethodParamsTestEnv {
 

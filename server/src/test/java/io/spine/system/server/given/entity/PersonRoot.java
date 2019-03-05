@@ -26,8 +26,6 @@ import io.spine.system.server.PersonId;
 
 /**
  * A root of the person aggregate.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonRoot extends AggregateRoot<PersonId> {
 

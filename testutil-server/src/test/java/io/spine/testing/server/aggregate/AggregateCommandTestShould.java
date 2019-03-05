@@ -43,10 +43,6 @@ import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Vladyslav Lubenskyi
- */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateCommandTest should")
 class AggregateCommandTestShould {
 

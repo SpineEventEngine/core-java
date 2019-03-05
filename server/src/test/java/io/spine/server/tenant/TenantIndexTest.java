@@ -29,9 +29,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("TenantIndex should")
 class TenantIndexTest {
 

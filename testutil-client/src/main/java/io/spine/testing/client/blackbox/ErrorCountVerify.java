@@ -27,14 +27,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Verifies that a command or an event was handled responding with specified number of
  * {@link Error errors}.
- *
- * @author Mykhailo Drachuk
  */
 final class ErrorCountVerify extends VerifyAcknowledgements {
 
     private final Count expectedCount;
 
-    /** @param expectedCount an amount of errors that are expected to be observed in acks */
+    /**
+     * Creates a new instance.
+     *
+     * @param expectedCount an amount of errors that are expected to be observed in acks
+     */
     ErrorCountVerify(Count expectedCount) {
         super();
         this.expectedCount = expectedCount;

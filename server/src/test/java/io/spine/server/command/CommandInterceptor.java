@@ -32,10 +32,8 @@ import static io.spine.server.type.CommandClass.setOf;
 
 /**
  * Utility class that remembers all commands issued by a commander class.
- *
- * @author Alexander Yevsyukov
  */
-public class CommandInterceptor extends AbstractCommandHandler {
+public final class CommandInterceptor extends AbstractCommandHandler {
 
     private final Set<CommandClass> intercept;
     private final CommandHistory history = new CommandHistory();

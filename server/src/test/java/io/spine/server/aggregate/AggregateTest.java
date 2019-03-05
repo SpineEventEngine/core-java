@@ -185,7 +185,7 @@ public class AggregateTest {
         void handledCommandClasses() {
             Set<CommandClass> commandClasses =
                     asAggregateClass(TestAggregate.class)
-                            .getCommands();
+                            .commands();
 
             assertEquals(3, commandClasses.size());
 

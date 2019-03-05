@@ -27,9 +27,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Grankin
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("RecordReadRequest should")
 class RecordReadRequestTest {

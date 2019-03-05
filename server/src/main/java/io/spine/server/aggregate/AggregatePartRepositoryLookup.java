@@ -33,9 +33,10 @@ import static java.lang.String.format;
  *
  * <p>This class is used by {@link AggregateRoot} to find repositories for its parts.
  *
- * @param <I> the type of the IDs of the repository to find
- * @param <S> the type of the state of aggregate parts of managed by the target repository
- * @author Alexander Yevsyukov
+ * @param <I>
+ *         the type of the IDs of the repository to find
+ * @param <S>
+ *         the type of the state of aggregate parts of managed by the target repository
  */
 final class AggregatePartRepositoryLookup<I, S extends Message> {
 

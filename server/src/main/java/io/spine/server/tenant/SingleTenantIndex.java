@@ -28,8 +28,6 @@ import java.util.Set;
 /**
  * A null-object implementation of {@code TenantIndex} for being used in single-tenant
  * execution context.
- *
- * @author Alexander Yevsyukov
  */
 enum SingleTenantIndex implements TenantIndex {
 

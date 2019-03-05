@@ -25,13 +25,10 @@ import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
 
-/**
- * @author Mykhahilo Drachuhk
- */
 public class EntityQueriesTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private EntityQueriesTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static Pagination pagination(int size) {

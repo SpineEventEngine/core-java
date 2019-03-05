@@ -23,9 +23,7 @@ package tres.quattro;
 /**
  * This class is a part of test environment for
  * {@link io.spine.server.model.ModelTest#findBoundedContextAnnotation()}.
- *
- * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"unused", "EmptyClass"})
+@SuppressWarnings("unused")
 public class Counter {
 }

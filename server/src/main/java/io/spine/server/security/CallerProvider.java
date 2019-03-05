@@ -22,8 +22,6 @@ package io.spine.server.security;
 
 /**
  * Provides information about the class calling a method.
- *
- * @author Alexander Yevsyukov
  */
 final class CallerProvider extends SecurityManager {
 

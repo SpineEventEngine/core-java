@@ -27,8 +27,6 @@ import io.spine.server.transport.Subscriber;
  * An in-memory implementation of the {@link Subscriber}.
  *
  * <p>To use only in scope of the same JVM as {@linkplain InMemoryPublisher publishers}.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public class InMemorySubscriber extends Subscriber {

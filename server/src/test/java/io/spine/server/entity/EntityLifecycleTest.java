@@ -46,9 +46,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EntityLifecycle should")
 class EntityLifecycleTest {
 

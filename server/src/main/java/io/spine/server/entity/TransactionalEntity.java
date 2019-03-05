@@ -113,20 +113,6 @@ public abstract class TransactionalEntity<I,
      *
      * @return the instance of the new state builder
      * @throws IllegalStateException if the method is called not within a transaction
-     * @deprecated use {@link #builder()}
-     */
-    @Deprecated
-    protected B getBuilder() {
-        return builder();
-    }
-
-    /**
-     * Obtains the instance of the state builder.
-     *
-     * <p>This method must be called only from within an active transaction.
-     *
-     * @return the instance of the new state builder
-     * @throws IllegalStateException if the method is called not within a transaction
      */
     protected B builder() {
         return tx().builder();

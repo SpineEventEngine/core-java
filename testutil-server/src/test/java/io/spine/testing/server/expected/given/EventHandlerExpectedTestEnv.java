@@ -32,34 +32,33 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-/**
- * @author Vladyslav Lubenskyi
- */
 public class EventHandlerExpectedTestEnv {
 
-    /**
-     * Prevents direct instantiation.
-     */
+    /** Prevents instantiation of this utility class. */
     private EventHandlerExpectedTestEnv() {
     }
 
     public static List<Message> events() {
-        StringValue firstEvent = StringValue.newBuilder()
-                                            .setValue("event 1")
-                                            .build();
-        StringValue secondEvent = StringValue.newBuilder()
-                                             .setValue("event 2")
-                                             .build();
+        StringValue firstEvent = StringValue
+                .newBuilder()
+                .setValue("event 1")
+                .build();
+        StringValue secondEvent = StringValue
+                .newBuilder()
+                .setValue("event 2")
+                .build();
         return asList(firstEvent, secondEvent);
     }
 
-    public static List<Message> interceptedCommands() {
-        StringValue firstCommand = StringValue.newBuilder()
-                                              .setValue("command 1")
-                                              .build();
-        StringValue secondCommand = StringValue.newBuilder()
-                                               .setValue("command 2")
-                                               .build();
+    private static List<Message> interceptedCommands() {
+        StringValue firstCommand = StringValue
+                .newBuilder()
+                .setValue("command 1")
+                .build();
+        StringValue secondCommand = StringValue
+                .newBuilder()
+                .setValue("command 2")
+                .build();
         return asList(firstCommand, secondCommand);
     }
 

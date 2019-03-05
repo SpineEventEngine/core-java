@@ -25,10 +25,8 @@ import io.spine.server.route.EventRoute;
 
 /**
  * A repository for {@link Dot} objects.
- *
- * @author Alexander Yevsyukov
  */
-public class DotSpace extends AggregateRepository<ObjectId, Dot> {
+public final class DotSpace extends AggregateRepository<ObjectId, Dot> {
 
     /**
      * Replaces event import routing to take first message field.

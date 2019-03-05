@@ -23,12 +23,10 @@ import io.spine.core.ActorContext;
 
 /**
  * A tenant-aware operation performed in relation to a request sent by an actor.
- *
- * @author Alex Tymchenko
  */
 abstract class ActorRequestOperation extends TenantAwareOperation {
 
-    protected ActorRequestOperation(ActorContext context) {
+    ActorRequestOperation(ActorContext context) {
         super(context.getTenantId());
     }
 }

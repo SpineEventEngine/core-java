@@ -40,8 +40,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Abstract base for tuple classes.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class Tuple implements Iterable<Message>, Serializable {
 
@@ -94,7 +92,6 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return value;
     }
 
-    @SuppressWarnings("ConstantConditions") // Cannot return null if passed value is non-null.
     @CanIgnoreReturnValue
     static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {

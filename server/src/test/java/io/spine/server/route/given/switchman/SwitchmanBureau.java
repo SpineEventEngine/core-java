@@ -29,8 +29,6 @@ import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
 /**
  * A repository which fires a rejection in response to a command with a particular value of the
  * target aggregate ID.
- *
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 public final class SwitchmanBureau extends AggregateRepository<String, Switchman> {

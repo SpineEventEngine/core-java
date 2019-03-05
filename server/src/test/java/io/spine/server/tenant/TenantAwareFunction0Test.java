@@ -27,9 +27,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("TenantAwareFunction0 should")
 class TenantAwareFunction0Test {
 

@@ -78,8 +78,8 @@ public class EventRootCommandIdTestEnv {
     private static final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(EventRootCommandIdTest.class, TENANT_ID);
 
+    /** Prevents instantiation of this utility class. */
     private EventRootCommandIdTestEnv() {
-        // Prevent instantiation.
     }
 
     public static ProjectId projectId() {

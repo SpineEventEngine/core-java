@@ -32,8 +32,6 @@ import static java.lang.reflect.Modifier.isPublic;
 
 /**
  * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
- *
- * @author Alex Tymchenko
  */
 public class AccessModifier implements Predicate<Method> {
 

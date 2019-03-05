@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link io.spine.server.projection.ProjectionTransaction}.
- *
- * @author Alex Tymchenko
  */
 @DisplayName("ProjectionTransaction should")
 class ProjectionTransactionTest

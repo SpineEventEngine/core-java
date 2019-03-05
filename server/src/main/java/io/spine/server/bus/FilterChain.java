@@ -39,11 +39,8 @@ import static java.util.stream.Collectors.joining;
  * the order direct of the initial {@link Deque}.
  *
  * <p>The {@link #close() close()} method closes all the underlying filters.
- *
- * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>>
-        implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
 
     private final Deque<BusFilter<E>> chain;
 

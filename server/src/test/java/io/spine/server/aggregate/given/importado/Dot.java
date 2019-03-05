@@ -30,12 +30,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An object moving in a 2-D space.
- *
- * @author Alexander Yevsyukov
  */
-public class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
+final class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
 
-    protected Dot(ObjectId id) {
+    Dot(ObjectId id) {
         super(id);
     }
 

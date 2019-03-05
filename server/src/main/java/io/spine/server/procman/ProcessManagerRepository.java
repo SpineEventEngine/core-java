@@ -199,7 +199,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<CommandClass> getCommandClasses() {
-        return processManagerClass().getCommands();
+        return processManagerClass().commands();
     }
 
     /**
