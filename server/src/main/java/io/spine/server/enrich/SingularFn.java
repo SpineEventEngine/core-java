@@ -30,9 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Creates {@link Enrichment} instance by applying one enrichment function for
  * an enrichable message.
- *
- * @param <M> the type of the enrichable message
- * @param <C> the type of the message context
  */
 final class SingularFn<M extends Message, C extends EnrichableMessageContext>
         extends SchemaFn<M, C> {
