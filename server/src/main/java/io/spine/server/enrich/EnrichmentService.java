@@ -29,7 +29,7 @@ import java.util.Optional;
 /**
  * Creates enrichments for messages.
  */
-public interface EnrichmentService {
+public interface EnrichmentService<M extends Message, C extends EnrichableMessageContext> {
 
     /**
      * Creates an enrichment for the passed message.
@@ -41,5 +41,5 @@ public interface EnrichmentService {
      * @return an instance with all available enrichments for the passed message, or
      *         empty {@code Optional} if the passed message cannot be enriched
      */
-    Optional<Enrichment> createEnrichment(Message message, EnrichableMessageContext context);
+    Optional<Enrichment> createEnrichment(M message, C context);
 }

@@ -20,89 +20,178 @@
 
 package io.spine.server.enrich;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.EnrichableMessageContext;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.type.MessageClass.interfacesOf;
 
 /**
- * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by
- * the {@code Enricher} and set a custom translation function, if needed.
+ * Allows to register enrichment functions used by the {@link Enricher}.
  */
-public final class EnricherBuilder {
+public abstract class EnricherBuilder<M extends Message,
+                                      C extends EnrichableMessageContext,
+                                      B extends EnricherBuilder<M, C, B>> {
 
-    /** Functions which perform the enrichment. */
-    private final Set<EnrichmentFunction<?, ?, ?>> functions = Sets.newHashSet();
+    private static final String SUGGEST_REMOVAL = " Please call `remove(Class, Class)` first.";
+
+    /**
+     * Maps a pair of [source class, enrichment class] to a function which produces this enrichment.
+     */
+    private final Map<Key, EnrichmentFn<? extends M, C, ?>> functions = new HashMap<>();
 
     /** Creates new instance. */
-    EnricherBuilder() {
+    protected EnricherBuilder() {
+    }
+
+
+    /**
+     * Adds an enrichment function to the builder.
+     *
+     * @implNote This method does the real job of adding functions to the builder.
+     *         The binding of the generic parameters allows type-specific functions
+     *         exposed in the public API to call this method.
+     */
+    protected final <S extends M, T extends Message>
+    B doAdd(Class<S> messageClassOrInterface,
+            Class<T> enrichmentClass,
+            EnrichmentFn<S, C, T> func) {
+        checkNotNull(messageClassOrInterface);
+        checkNotNull(enrichmentClass);
+        checkArgument(!enrichmentClass.isInterface(),
+                      "The `enrichmentClass` argument must be a class, not an interface." +
+                      " `%s` is the interface. Please pass a class which" +
+                      " implements this interface.",
+                      enrichmentClass.getCanonicalName());
+        checkNotNull(func);
+        Key key = new Key(messageClassOrInterface, enrichmentClass);
+        checkDirectDuplication(key);
+        checkInterfaceDuplication(key);
+        checkImplDuplication(key);
+        functions.put(key, func);
+        return self();
+    }
+
+    @SuppressWarnings("unchecked")
+    private B self() {
+        return (B) this;
+    }
+
+    private void checkDirectDuplication(Key key) {
+        checkArgument(
+                !functions.containsKey(key),
+                "The function which enriches `%s` with `%s` is already added." + SUGGEST_REMOVAL,
+                key.sourceClass().getCanonicalName(),
+                key.enrichmentClass().getCanonicalName()
+        );
+    }
+
+    private void checkInterfaceDuplication(Key key) {
+        Class<? extends Message> sourceClass = key.sourceClass();
+        Class<? extends Message> enrichmentClass = key.enrichmentClass();
+        ImmutableSet<Class<? extends Message>> interfaces = interfacesOf(sourceClass);
+        interfaces.forEach(i -> {
+            Key keyByInterface = new Key(i, enrichmentClass);
+            checkArgument(
+                    !functions.containsKey(keyByInterface),
+                    "The builder already has the function which creates enrichments of the class" +
+                    " `%s` via the interface `%s` which is implemented by the class `%s`." +
+                    SUGGEST_REMOVAL,
+                    enrichmentClass.getCanonicalName(),
+                    i.getCanonicalName(),
+                    sourceClass.getCanonicalName()
+            );
+        });
+    }
+
+    private void checkImplDuplication(Key key) {
+        Class<? extends Message> sourceInterface = key.sourceClass();
+        Class<? extends Message> enrichmentClass = key.enrichmentClass();
+        functions.forEach((k, v) -> {
+            Class<? extends Message> entryCls = k.sourceClass();
+            checkArgument(
+                    !sourceInterface.isAssignableFrom(entryCls),
+                    "Unable to add a function which produces enrichments of the class `%s`" +
+                    " via the interface `%s`. There is already a function which does" +
+                    " this via the class `%s` which implements this interface." +
+                    SUGGEST_REMOVAL,
+                    enrichmentClass.getCanonicalName(),
+                    sourceInterface.getCanonicalName(),
+                    entryCls.getCanonicalName()
+            );
+        });
     }
 
     /**
-     * Adds a new field enrichment function.
+     * Removes the enrichment function for the passed event class.
      *
-     * @param sourceFieldClass
-     *         a class of the field in the source message
-     * @param enrichmentFieldClass
-     *         a class of the field in the enrichment message
-     * @param func
-     *         a function which converts fields
-     * @return the builder instance
+     * <p>If the function for this class was not added, the call has no effect.
      */
-    public <S, T> EnricherBuilder add(Class<S> sourceFieldClass,
-                                      Class<T> enrichmentFieldClass,
-                                      BiFunction<S, ? extends EnrichableMessageContext, T> func) {
-        checkNotNull(sourceFieldClass);
-        checkNotNull(enrichmentFieldClass);
-        checkNotNull(func);
-
-        EnrichmentFunction<S, ?, T> newEntry =
-                FieldEnrichment.of(sourceFieldClass, enrichmentFieldClass, func);
-        checkDuplicate(newEntry);
-        functions.add(newEntry);
-        return this;
-    }
-
-    /** Removes a translation for the passed type. */
-    public EnricherBuilder remove(EnrichmentFunction entry) {
-        functions.remove(entry);
-        return this;
+    public <T extends Message>
+    B remove(Class<M> eventClass, Class<T> enrichmentClass) {
+        functions.remove(new Key(eventClass, enrichmentClass));
+        return self();
     }
 
     /** Creates a new {@code Enricher}. */
-    public Enricher build() {
-        Enricher result = new Enricher(this);
-        return result;
-    }
+    public abstract Enricher build();
 
     /**
-     * Obtains immutable set of functions added to the builder by the time of the call.
+     * Obtains functions added to the builder by the time of the call.
      */
-    ImmutableSet<EnrichmentFunction<?, ?, ?>> functions() {
-        return ImmutableSet.copyOf(functions);
+    ImmutableMap<Key, EnrichmentFn<? extends M, C, ?>> functions() {
+        return ImmutableMap.copyOf(functions);
     }
 
     /**
-     * Ensures that the passed enrichment function is not yet registered in this builder.
+     * A pair of source message class and enrichment message class, which is used to match
+     * the pair to a function which produces the enrichment.
      *
-     * @throws IllegalArgumentException
-     *         if the builder already has a function, which has the same couple of
-     *         source message and target enrichment classes
+     * @see EnricherBuilder#functions
      */
-    private void checkDuplicate(EnrichmentFunction<?, ?, ?> candidate) {
-        Optional<EnrichmentFunction<?, ?, ?>> duplicate =
-                EnrichmentFunction.firstThat(functions, SameTransition.asFor(candidate));
-        if (duplicate.isPresent()) {
-            throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
-                                              candidate.sourceClass(),
-                                              candidate.targetClass(),
-                                              duplicate.get());
+    @Immutable
+    static class Key {
+
+        private final Class<? extends Message> sourceClass;
+        private final Class<? extends Message> enrichmentClass;
+
+        Key(Class<? extends Message> sourceClass, Class<? extends Message> enrichmentClass) {
+            this.sourceClass = checkNotNull(sourceClass);
+            this.enrichmentClass = checkNotNull(enrichmentClass);
+        }
+
+        Class<? extends Message> sourceClass() {
+            return sourceClass;
+        }
+
+        Class<? extends Message> enrichmentClass() {
+            return enrichmentClass;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(sourceClass, enrichmentClass);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            return Objects.equals(this.sourceClass, other.sourceClass)
+                    && Objects.equals(this.enrichmentClass, other.enrichmentClass);
         }
     }
 }

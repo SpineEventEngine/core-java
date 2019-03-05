@@ -29,6 +29,7 @@ import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
@@ -112,8 +112,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     private static class TenantRegistry implements SubscriptionRegistry {
 
-        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = newHashMap();
-        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
+        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = new HashMap<>();
+        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
 
         @Override
         public synchronized void activate(Subscription subscription,

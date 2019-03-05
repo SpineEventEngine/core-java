@@ -17,34 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.event.user;
+package io.spine.server.enrich;
 
-import "spine/options.proto";
+import com.google.protobuf.Message;
+import io.spine.core.EnrichableMessageContext;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event.user";
-option java_multiple_files = true;
+import java.util.function.BiFunction;
 
-
-message UserLoggedInEvent {
-    string user_uid = 1;
-}
-
-message UserMentionedEvent {
-    string user_uid = 1;
-    string title = 2;
-}
-
-message UserLoggedOutEvent {
-    string user_uid = 1;
-    string owner_email = 2;
-}
-
-// Used only in enrichment EnrichmentBoundWithMultipleFieldsWithDifferentNames.
-//
-// Do not reuse this event type to avoid test collisions.
-message UserDeletedEvent {
-    string deleted_uid = 1;
+/**
+ * Base interface for enrichment functions.
+ *
+ * @param <M> the type of the enrichable message
+ * @param <C> the type of the message context
+ * @param <E> the type of the enrichment message
+ */
+public interface EnrichmentFn<M extends Message,
+                              C extends EnrichableMessageContext,
+                              E extends Message>
+        extends BiFunction<M, C, E> {
 }

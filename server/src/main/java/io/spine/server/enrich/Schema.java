@@ -20,137 +20,102 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.LinkedListMultimap;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
-import io.spine.type.KnownTypes;
-import io.spine.type.enrichment.EnrichmentType;
+import io.spine.core.EnrichableMessageContext;
+import io.spine.logging.Logging;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Multimaps.toMultimap;
-import static io.spine.server.enrich.SupportsFieldConversion.supportsConversion;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
- * Provides enrichment functions for a {@linkplain #get(Class) source message Java class}.
+ * Contains enrichment functions.
  */
-final class Schema {
+final class Schema<M extends Message, C extends EnrichableMessageContext> implements Logging {
 
-    /** Available enrichment functions per Java class. */
-    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> multimap;
+    private final ImmutableMap<Class<? extends M>, SchemaFn<? extends M, C>> map;
 
-    static Schema create(Enricher enricher, EnricherBuilder builder) {
-        Builder schemaBuilder = new Builder(enricher, builder);
-        return schemaBuilder.build();
-    }
+    private final int size;
 
-    private Schema(ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> multimap) {
-        this.multimap = checkNotNull(multimap);
-    }
-
-    /**
-     * Activates all enrichment functions, and compresses the schema to contain only
-     * active functions.
-     */
-    void activate() {
-        multimap.values()
-                .forEach(EnrichmentFunction::activate);
-        LinkedListMultimap<? extends Class<?>, ? extends EnrichmentFunction<?, ?, ?>> compacted =
-                multimap.values()
-                        .stream()
-                        .filter(EnrichmentFunction::isActive)
-                        .collect(toMultimap(EnrichmentFunction::sourceClass,
-                                            Function.identity(),
-                                            LinkedListMultimap::create));
-        multimap = ImmutableMultimap.copyOf(compacted);
-    }
-
-    /**
-     * Obtains a field enrichment function for the passed source/target couple of classes.
-     */
-    Optional<FieldEnrichment<?, ?, ?>> transition(Class<?> fieldClass,
-                                                  Class<?> enrichmentFieldClass) {
-        Optional<EnrichmentFunction<?, ?, ?>> found =
-                multimap.values()
-                        .stream()
-                        .filter(supportsConversion(fieldClass, enrichmentFieldClass))
-                        .findFirst();
-        Optional<FieldEnrichment<?, ?, ?>> result =
-                found.filter(f -> f instanceof FieldEnrichment)
-                     .map(f -> (FieldEnrichment<?, ?, ?>) f);
+    static <M extends Message, C extends EnrichableMessageContext>
+    Schema<M, C> newInstance(EnricherBuilder<? extends M, C, ?> eBuilder) {
+        Factory<M, C> factory = new Factory<>(eBuilder);
+        Schema<M, C> result = factory.create();
         return result;
     }
 
-    /**
-     * Obtains active-only functions for enriching the passed message class.
-     */
-    ImmutableCollection<EnrichmentFunction<?, ?, ?>> get(Class<? extends Message> messageClass) {
-        return multimap.get(messageClass);
+    private Schema(Factory<M, C> factory) {
+        this.map = ImmutableMap.copyOf(factory.schemaMap);
+        this.size = factory.functions.size();
+        _debug("Created enrichment schema with {} entries.", this.size);
+    }
+
+    boolean isEmpty() {
+        return size == 0;
+    }
+
+    @Nullable SchemaFn<? extends M, C> enrichmentOf(Class<? extends M> cls) {
+        SchemaFn<? extends M, C> fn = map.get(cls);
+        return fn;
     }
 
     /**
-     * Verifies if there is at least one enrichment for instances the passed class.
-     */
-    boolean supports(Class<?> sourceClass) {
-        boolean result = multimap.containsKey(sourceClass);
-        return result;
-    }
-
-    /**
-     * Creates new {@code Schema}
+     * Creates new {@code Schema}.
      *
-     * <p>{@link MessageEnrichment} requires reference to a parent {@link Enricher}.
-     * This class uses the reference to the {@code Enricher} being constructed for this.
+     * <p>Transforms functions obtained from {@link EnricherBuilder} into functions
+     * used by {@code Schema}, and then creates the instance.
      */
-    private static final class Builder {
+    private static class Factory<M extends Message, C extends EnrichableMessageContext> {
 
-        private final Enricher enricher;
-        private final EnricherBuilder builder;
-        private final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> multimap;
+        /** Functions we got from {@link EnricherBuilder}. */
+        private final ImmutableMap<EnricherBuilder.Key, EnrichmentFn<? extends M, C, ?>> functions;
 
-        private Builder(Enricher enricher, EnricherBuilder builder) {
-            this.enricher = enricher;
-            this.builder = builder;
-            this.multimap = ImmutableMultimap.builder();
+        /** The types of messages that these functions enrich. */
+        private final ImmutableSet<Class<? extends M>> sourceTypes;
+
+        /** The map from a class of the enrichable message to the schema function. */
+        private final Map<Class<? extends M>, SchemaFn<? extends M, C>> schemaMap =
+                new HashMap<>();
+
+        @SuppressWarnings("unchecked")
+        private Factory(EnricherBuilder<? extends M, C, ?> eBuilder) {
+            checkNotNull(eBuilder);
+            this.functions = ImmutableMap.copyOf(eBuilder.functions());
+            this.sourceTypes =
+                    functions.keySet()
+                             .stream()
+                             .map(EnricherBuilder.Key::sourceClass)
+                             .map(c -> (Class<M>) c)
+                             .collect(toImmutableSet());
         }
 
-        private Schema build() {
-            addFieldEnrichments();
-            loadEventEnrichments();
-            Schema result = new Schema(multimap.build());
-            return result;
-        }
-
-        private void addFieldEnrichments() {
-            for (EnrichmentFunction<?, ?, ?> fn : builder.functions()) {
-                multimap.put(fn.sourceClass(), fn);
+        Schema<M, C> create() {
+            for (Class<? extends M> sourceType : sourceTypes) {
+                SchemaFn<? extends M, C> fn = createFn(sourceType);
+                schemaMap.put(sourceType, fn);
             }
+
+            return new Schema<>(this);
         }
 
-        private void loadEventEnrichments() {
-            ImmutableSet<EnrichmentType> enrichments =
-                    KnownTypes.instance()
-                              .enrichments();
-            enrichments.forEach(
-                    e -> e.sourceClasses()
-                          .forEach(sourceClass -> addEventEnrichment(sourceClass, e.javaClass()))
-            );
-        }
-
-        private void addEventEnrichment(Class<? extends Message> sourceClass,
-                                        Class<? extends Message> enrichmentClass) {
-            @SuppressWarnings("unchecked") /* It is relatively safe to cast since currently
-            only event enrichment is available via proto definitions, and the source types loaded by
-            EnrichmentMap are all event messages. Schema composition should be extended with
-            checking the returned class for enrichments of message other than EnrichmentMessage. */
-            Class<EventMessage> eventClass = (Class<EventMessage>) sourceClass;
-            MessageEnrichment fn = EventEnrichment.create(enricher, eventClass, enrichmentClass);
-            multimap.put(sourceClass, fn);
+        @SuppressWarnings("unchecked")
+        SchemaFn<? extends M, C> createFn(Class<? extends M> sourceType) {
+            ImmutableSet<EnrichmentFn<M, C, ?>> fns =
+                    functions.entrySet()
+                             .stream()
+                             .filter(e -> sourceType.equals(e.getKey().sourceClass()))
+                             .map(e -> (EnrichmentFn<M, C, ?>) e.getValue())
+                             .collect(toImmutableSet());
+            if (fns.size() == 1) {
+                return new SingularFn<>(fns.iterator().next());
+            } else {
+                return new CompositeFn<M, C>(fns);
+            }
         }
     }
 }

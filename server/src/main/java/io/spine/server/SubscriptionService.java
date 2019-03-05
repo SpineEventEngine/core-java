@@ -72,8 +72,8 @@ public class SubscriptionService
             Target target = topic.getTarget();
             Optional<BoundedContext> selected = selectBoundedContext(target);
             BoundedContext context = selected.orElseThrow(
-                    () -> newIllegalArgumentException("Trying to subscribe to an unknown type: %s",
-                                                      target.getType())
+                    () -> newIllegalArgumentException(
+                            "Trying to subscribe to an unknown type: `%s`.", target.getType())
             );
             Stand stand = context.stand();
 
@@ -92,7 +92,7 @@ public class SubscriptionService
             Optional<BoundedContext> selected = selectBoundedContext(subscription);
             BoundedContext context = selected.orElseThrow(
                     () -> newIllegalArgumentException(
-                            "Target subscription %s could not be found for activation",
+                            "Target subscription `%s` could not be found for activation.",
                             toShortString(subscription))
             );
             Stand.NotifySubscriptionAction notifyAction = update -> {

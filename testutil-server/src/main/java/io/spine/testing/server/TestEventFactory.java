@@ -40,8 +40,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The factory or producing events for tests.
- *
- * @author Alexander Yevsyukov
  */
 @CheckReturnValue
 public class TestEventFactory extends EventFactory {
