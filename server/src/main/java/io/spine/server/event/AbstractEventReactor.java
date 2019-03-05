@@ -55,9 +55,9 @@ import static java.lang.String.format;
  *
  * <p>To use one, do the following:
  * <ol>
- *     <li>Create an instance, specifying the event bus which receives emitted events.
- *     <li>Register the reactor in a desired bounded context via
- *         {@link BoundedContext#registerEventDispatcher(EventDispatcher)}.
+ * <li>Create an instance, specifying the event bus which receives emitted events.
+ * <li>Register the reactor in a desired bounded context via
+ * {@link BoundedContext#registerEventDispatcher(EventDispatcher)}.
  * </ol>
  *
  * @see React reactors
@@ -111,7 +111,7 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
         MessageClass messageClass = event.messageClass();
         String messageId = event.idAsString();
         String errorMessage =
-                format("Error handling event reaction (class: %s id: %s) in %s.",
+                format("Error reacting to event (class: %s id: %s) in %s.",
                        messageClass, messageId, thisClass);
         log().error(errorMessage, exception);
     }
