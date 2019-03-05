@@ -26,11 +26,14 @@ import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.given.AbstractReactorTestEnv;
+import io.spine.server.event.given.AbstractReactorTestEnv.CourtOfficer;
+import io.spine.server.event.given.AbstractReactorTestEnv.CourtOfficerOverseer;
+import io.spine.server.event.given.AbstractReactorTestEnv.FaultyFoodServer;
 import io.spine.server.event.given.AbstractReactorTestEnv.FoodSafetyDepartment;
 import io.spine.server.event.given.AbstractReactorTestEnv.HealthInspector;
+import io.spine.server.event.given.AbstractReactorTestEnv.IgnorantReactor;
 import io.spine.server.event.given.AbstractReactorTestEnv.KitchenFront;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantPsychologicalCounselor;
-import io.spine.server.event.given.AbstractReactorTestEnv.UnluckyFoodServer;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
@@ -48,12 +51,16 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.event.given.AbstractReactorTestEnv.FaultyHealthInspector;
 import static io.spine.server.event.given.AbstractReactorTestEnv.poisonousDish;
+import static io.spine.server.event.given.AbstractReactorTestEnv.serveDish;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someDish;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.slf4j.event.Level.ERROR;
 
 @DisplayName("Abstract event reactor should")
@@ -89,6 +96,19 @@ class AbstractEventReactorTest {
         foodSafetyDepartment = new FoodSafetyDepartment(foodSafetyContext.eventBus());
         foodSafetyContext.registerEventDispatcher(healthInspector);
         foodSafetyContext.registerEventDispatcher(foodSafetyDepartment);
+    }
+
+    @Test
+    @DisplayName("throw upon a null event bus")
+    void throwOnNullEventBus() {
+        assertThrows(NullPointerException.class, () -> new KitchenFront(null));
+    }
+
+    @Test
+    @DisplayName("be successfully created in registered even if no events are reacted to")
+    void notThrowOnNoEvents() {
+        IgnorantReactor ignorantReactor = new IgnorantReactor(restaurantContext.eventBus());
+        restaurantContext.registerEventDispatcher(ignorantReactor);
     }
 
     @DisplayName("while dealing with domestic events")
@@ -135,7 +155,7 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("log an error")
         void logError() {
-            UnluckyFoodServer server = new UnluckyFoodServer(restaurantContext.eventBus());
+            FaultyFoodServer server = new FaultyFoodServer(restaurantContext.eventBus());
 
             Queue<SubstituteLoggingEvent> loggedMessages =
                     redirectLogging((SubstituteLogger) server.log());
@@ -173,11 +193,41 @@ class AbstractEventReactorTest {
                                 .stream()
                                 .map(AbstractReactorTestEnv::returnDish)
                                 .map(GivenEvent::withMessage)
-                                .collect(ImmutableList.toImmutableList());
+                                .collect(toImmutableList());
             restaurantContext.eventBus()
                              .post(dishesReturned);
 
             assertEquals(dishesReturned.size(), counselor.appointmentsScheduled());
+        }
+
+        @Test
+        @DisplayName("react with several events")
+        void reactWithSeveral() {
+            CourtOfficer courtOfficer = new CourtOfficer(foodSafetyContext.eventBus());
+            foodSafetyContext.registerEventDispatcher(courtOfficer);
+
+            CourtOfficerOverseer officerOverseer = new CourtOfficerOverseer();
+            foodSafetyContext.registerEventDispatcher(officerOverseer);
+            String restaurantToShutDown = newUuid();
+
+            shutTheRestaurantDown(restaurantToShutDown);
+            boolean premisesGotCleared = officerOverseer.premisesCleared()
+                                                        .contains(restaurantToShutDown);
+            boolean staffGotEscorted = officerOverseer.restaurantsEscorted()
+                                                      .contains(restaurantToShutDown);
+            assertTrue(premisesGotCleared && staffGotEscorted);
+        }
+
+        /** Shuts down the restaurant by serving 3 poisonous dishes. */
+        private void shutTheRestaurantDown(String restaurantId) {
+            ImmutableList<Event> threePoisonousDishesServed =
+                    ImmutableList.of(poisonousDish(), poisonousDish(), poisonousDish())
+                                 .stream()
+                                 .map((Dish dishToServe) -> serveDish(dishToServe, restaurantId))
+                                 .map(GivenEvent::withMessage)
+                                 .collect(toImmutableList());
+            restaurantContext.eventBus()
+                             .post(threePoisonousDishesServed);
         }
     }
 
@@ -248,8 +298,8 @@ class AbstractEventReactorTest {
      *
      * <p>Checks that:
      * <ul>
-     * <li>only 1 message has been logged;
-     * <li>logged message is of the {@code ERROR} level.
+     *     <li>only 1 message has been logged;
+     *     <li>logged message is of the {@code ERROR} level.
      * </ul>
      */
     private static void assertLoggedCorrectly(Queue<SubstituteLoggingEvent> messages) {

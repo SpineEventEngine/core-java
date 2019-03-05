@@ -26,6 +26,8 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.logging.Logging;
+import io.spine.protobuf.TypeConverter;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.integration.ExternalMessageClass;
@@ -39,8 +41,10 @@ import io.spine.type.MessageClass;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static java.lang.String.format;
 
 /**
@@ -48,8 +52,15 @@ import static java.lang.String.format;
  *
  * <p>Events may be produced in response to both domestic and external events.
  *
+ * <p>To use one, do the following:
+ * <ol>
+ *     <li>Create an instance, specifying the event bus which receives emitted events.
+ *     <li>Register the reactor in a desired bounded context via
+ *         {@link BoundedContext#registerEventDispatcher(EventDispatcher)}.
+ * </ol>
+ *
  * @see React reactors
- * @see io.spine.server.BoundedContext#registerEventDispatcher(EventDispatcher)
+ * @see BoundedContext#registerEventDispatcher(EventDispatcher)
  */
 public class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
 
@@ -58,7 +69,11 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
     /** The event bus to which the emitted events are posted. */
     private final EventBus eventBus;
 
+    private final Supplier<Any> producerId =
+            memoize(() -> TypeConverter.toAny(getClass().getName()));
+
     protected AbstractEventReactor(EventBus eventBus) {
+        checkNotNull(eventBus);
         this.eventBus = eventBus;
     }
 
@@ -99,9 +114,14 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
         return Optional.of(new ExternalDispatcher());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * For event reactors, obtains the class name.
+     */
     @Override
     public Any producerId() {
-        return Any.getDefaultInstance();
+        return producerId.get();
     }
 
     @Override

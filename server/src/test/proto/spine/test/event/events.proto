@@ -108,11 +108,13 @@ message DishCooked {
 message DishServed {
 
     Dish dish = 1;
+    string restaurant_id = 2;
 }
 
 message DishFoundToBePoisonous {
 
     Dish dish = 1;
+    string restaurant_id = 2;
 }
 
 message DishReturnedToKitchen {
@@ -133,4 +135,22 @@ message AppointmentMade {
 message RestaurantWarningMade {
 
     string warning_text = 1;
+    string restaurant_id = 2;
+}
+
+message RestaurantShutDown {
+
+    string reason = 1;
+    string health_inspection_id = 2;
+    string restaurant_id = 3;
+}
+
+message StaffEscorted {
+
+    string restaurant_id = 1;
+}
+
+message RestaurantPremisesCleared {
+
+    string restaurant_id = 1;
 }
