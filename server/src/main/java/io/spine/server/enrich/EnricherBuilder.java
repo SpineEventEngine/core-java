@@ -145,7 +145,7 @@ public abstract class EnricherBuilder<M extends Message,
     public abstract Enricher build();
 
     /**
-     * Obtains immutable functions of functions added to the builder by the time of the call.
+     * Obtains functions added to the builder by the time of the call.
      */
     ImmutableMap<Key, EnrichmentFn<? extends M, C, ?>> functions() {
         return ImmutableMap.copyOf(functions);
