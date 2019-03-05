@@ -45,8 +45,12 @@ public class QueryBuilderTestEnv {
     }
 
     public static TestEntityId newMessageId() {
+        int randomNumber = current().nextInt(-1000, 1000);
+        randomNumber = randomNumber != 0
+                       ? randomNumber
+                       : 314;
         return TestEntityId.newBuilder()
-                           .setValue(current().nextInt(-1000, 1000))
+                           .setValue(randomNumber)
                            .build();
     }
 
