@@ -28,6 +28,9 @@ import io.spine.core.Enrichment.Container;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A schema function which contains two or more functions on the same enrichable message type.
+ */
 final class CompositeFn<M extends Message, C extends EnrichableMessageContext>
         extends SchemaFn<M, C> {
 

@@ -21,6 +21,7 @@ package io.spine.server.type;
 
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.type.MessageClass;
 
@@ -41,7 +42,8 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     /**
      * Creates a new instance of the rejection class.
      *
-     * @param value a value to hold
+     * @param value
+     *         a value to hold
      * @return new instance
      */
     public static RejectionClass of(Class<? extends RejectionMessage> value) {
@@ -55,12 +57,21 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
      * passed to this method, enclosing rejection message will be un-wrapped to determine
      * the class of the rejection.
      *
-     * @param rejectionOrMessage a rejection instance
+     * @param rejectionOrMessage
+     *         a rejection instance
      * @return new instance
      */
     public static RejectionClass of(Message rejectionOrMessage) {
         RejectionMessage message = (RejectionMessage) ensureMessage(rejectionOrMessage);
         RejectionClass result = of(message.getClass());
         return result;
+    }
+
+    /**
+     * Creates a new instance from the given {@code ThrowableMessage}.
+     */
+    public static RejectionClass of(ThrowableMessage rejection) {
+        RejectionMessage rejectionMessage = rejection.getMessageThrown();
+        return of(rejectionMessage);
     }
 }

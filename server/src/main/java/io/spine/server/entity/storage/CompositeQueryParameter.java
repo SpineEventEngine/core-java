@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
-import io.spine.client.Filter;
 import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
 
 import java.io.Serializable;
 import java.util.function.Predicate;

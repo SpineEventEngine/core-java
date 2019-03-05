@@ -22,9 +22,9 @@ package io.spine.server.procman.given.repo;
 
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmArchiveProcess;
+import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmDeleteProcess;
+import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -63,16 +63,16 @@ public class GivenCommandMessage {
                 .build();
     }
 
-    public static PmArchiveProcess archiveProcess() {
-        return PmArchiveProcess.newBuilder()
-                               .setProjectId(ID)
-                               .build();
+    public static PmArchiveProject archiveProject() {
+        return ((PmArchiveProject.Builder) builderForType(PmArchiveProject.class))
+                .setProjectId(ID)
+                .build();
     }
 
-    public static PmDeleteProcess deleteProcess() {
-        return PmDeleteProcess.newBuilder()
-                              .setProjectId(ID)
-                              .build();
+    public static PmDeleteProject deleteProject() {
+        return ((PmDeleteProject.Builder) builderForType(PmDeleteProject.class))
+                .setProjectId(ID)
+                .build();
     }
 
     public static PmDoNothing doNothing() {

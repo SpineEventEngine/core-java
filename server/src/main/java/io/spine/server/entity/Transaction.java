@@ -336,11 +336,21 @@ public abstract class Transaction<I,
      *         the reason of the rollback
      */
     void rollback(Throwable cause) {
+        beforeRollback(cause);
         S currentState = currentBuilderState();
         TransactionListener<I, E, S, B> listener = getListener();
         listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
+    }
+
+    /**
+     * Does necessary preparations before the transaction is marked as inactive and released.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass")
+    // Do not force descendants to override the method.
+    protected void beforeRollback(Throwable cause) {
+        // NO-OP.
     }
 
     /**
@@ -379,7 +389,10 @@ public abstract class Transaction<I,
         entity.releaseTransaction();
     }
 
-    private void commitAttributeChanges() {
+    /**
+     * Applies lifecycle flag modifications to the entity under transaction.
+     */
+    protected void commitAttributeChanges() {
         entity.setLifecycleFlags(lifecycleFlags());
         entity.updateStateChanged();
     }

@@ -23,6 +23,7 @@ package io.spine.testing.server.blackbox.verify.state;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
@@ -64,6 +65,7 @@ public abstract class VerifyState {
         QueryResponse response = observer.firstResponse();
         ImmutableList<? extends Message> entities = response.getMessagesList()
                                                             .stream()
+                                                            .map(EntityStateWithVersion::getState)
                                                             .map(AnyPacker::unpack)
                                                             .collect(toImmutableList());
         verify(entities);

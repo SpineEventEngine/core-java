@@ -34,8 +34,9 @@ option java_multiple_files = true;
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-import "spine/core/event.proto";
 import "spine/core/command.proto";
+import "spine/core/event.proto";
+import "spine/core/version.proto";
 import "spine/system/server/entity_history.proto";
 
 // An event emitted when an entity is created.
@@ -139,6 +140,9 @@ message EntityStateChanged {
 
     // The instant when the entity was changed.
     google.protobuf.Timestamp when = 4;
+
+    // The new version of the entity.
+    core.Version new_version = 5;
 }
 
 // An event emitted when an entity is marked as archived.
@@ -153,6 +157,9 @@ message EntityArchived {
 
     // The instant when the entity was archived.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon archivation.
+    core.Version version = 4;
 }
 
 // An event emitted when an entity is marked as deleted.
@@ -167,6 +174,9 @@ message EntityDeleted {
 
     // The instant when the entity was deleted.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon deletion.
+    core.Version version = 4;
 }
 
 // An event emitted when an entity is marked as NOT archived.
@@ -181,6 +191,9 @@ message EntityExtractedFromArchive {
 
     // The instant when the entity was extracted.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon extraction.
+    core.Version version = 4;
 }
 
 // An event emitted when an entity is marked as NOT deleted.
@@ -195,4 +208,7 @@ message EntityRestored {
 
     // The instant when the entity was restored.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon restoration.
+    core.Version version = 4;
 }
