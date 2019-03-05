@@ -53,7 +53,7 @@ class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
     }
 
     @Apply
-    void event(TaskCreated event) {
+    private void event(TaskCreated event) {
         Task task = event.getTask();
         builder()
                 .setId(event.getId())
@@ -71,7 +71,7 @@ class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
     }
 
     @Apply
-    void event(TaskRenamed event) {
+    private void event(TaskRenamed event) {
         builder().setName(event.getNewName());
     }
 }

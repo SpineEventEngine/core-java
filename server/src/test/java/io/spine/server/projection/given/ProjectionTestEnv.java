@@ -85,12 +85,12 @@ public class ProjectionTestEnv {
         }
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_A))
-        public void onReserved(StringImported event) {
+        void onReserved(StringImported event) {
             builder().setValue("A");
         }
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = SET_B))
-        public void onSecret(StringImported event) {
+        void onSecret(StringImported event) {
             builder().setValue("B");
         }
 
@@ -110,7 +110,7 @@ public class ProjectionTestEnv {
         }
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = ACCEPTED_VALUE))
-        public void on(StringImported event) {
+        void on(StringImported event) {
             builder().setValue(event.getValue());
         }
     }
@@ -123,12 +123,12 @@ public class ProjectionTestEnv {
         }
 
         @Subscribe(filter = @ByField(path = "integer", value = "42"))
-        public void onInt(PairImported event) {
+        void onInt(PairImported event) {
             halt();
         }
 
         @Subscribe(filter = @ByField(path = "str", value = "42"))
-        public void onString(PairImported event) {
+        void onString(PairImported event) {
             halt();
         }
 
@@ -145,12 +145,12 @@ public class ProjectionTestEnv {
         }
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "1"))
-        public void onString1(Int32Imported event) {
+        void onString1(Int32Imported event) {
             halt();
         }
 
         @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "+1"))
-        public void onStringOne(Int32Imported event) {
+        void onStringOne(Int32Imported event) {
             halt();
         }
 

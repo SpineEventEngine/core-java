@@ -40,7 +40,7 @@ public final class TestSubscriber extends AbstractEventSubscriber {
     }
 
     @Subscribe(external = true)
-    public void external(Organization organization) {
+    void external(Organization organization) {
         this.external = organization;
     }
 

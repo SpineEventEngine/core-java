@@ -73,7 +73,7 @@ final class CommandLifecycleAggregate
      * {@link io.spine.server.commandbus.CommandBus CommandBus}.
      */
     @Apply(allowImport = true)
-    void on(CommandReceived event) {
+    private void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
                 .newBuilder()
                 .setWhenReceived(getCurrentTime())
@@ -90,7 +90,7 @@ final class CommandLifecycleAggregate
      * {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
      */
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") CommandAcknowledged event) {
+    private void on(@SuppressWarnings("unused") CommandAcknowledged event) {
         CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(getCurrentTime())
                 .build();
@@ -98,7 +98,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    void on(CommandScheduled event) {
+    private void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
                 .setWhenScheduled(getCurrentTime())
@@ -113,7 +113,7 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command is passed to a dispatcher after acknowledgement.
      */
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") CommandDispatched event) {
+    private void on(@SuppressWarnings("unused") CommandDispatched event) {
         CommandTimeline status = statusBuilder()
                 .setWhenDispatched(getCurrentTime())
                 .build();
@@ -126,7 +126,7 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command target is determined.
      */
     @Apply(allowImport = true)
-    void on(TargetAssignedToCommand event) {
+    private void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
         CommandLifecycleVBuilder builder = builder();
         CommandTimeline status =
@@ -144,7 +144,7 @@ final class CommandLifecycleAggregate
      * <p>The event is generated after a command is successfully handled.
      */
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") CommandHandled event) {
+    private void on(@SuppressWarnings("unused") CommandHandled event) {
         setStatus(Responses.statusOk());
     }
 
@@ -154,7 +154,7 @@ final class CommandLifecycleAggregate
      * <p>The event is generated if the command caused a runtime error during handling.
      */
     @Apply(allowImport = true)
-    void on(CommandErrored event) {
+    private void on(CommandErrored event) {
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
@@ -168,7 +168,7 @@ final class CommandLifecycleAggregate
      * <p>The event is generated if the command handler rejected the command.
      */
     @Apply(allowImport = true)
-    void on(CommandRejected event) {
+    private void on(CommandRejected event) {
         Status status = Status
                 .newBuilder()
                 .setRejection(event.getRejectionEvent())
@@ -177,7 +177,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    void event(CommandTransformed event) {
+    private void event(CommandTransformed event) {
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setCommand(event.getId());
@@ -189,7 +189,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    void event(CommandSplit event) {
+    private void event(CommandSplit event) {
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setSequence(Sequence.newBuilder()

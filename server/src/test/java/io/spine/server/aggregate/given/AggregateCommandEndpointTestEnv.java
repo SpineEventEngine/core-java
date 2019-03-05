@@ -74,7 +74,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Apply
-        void apply(AggProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             builder().setId(event.getProjectId())
                      .setName(event.getName());
         }
@@ -88,7 +88,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Apply
-        void apply(AggTaskAdded event) {
+        private void apply(AggTaskAdded event) {
             builder().setId(event.getProjectId());
         }
 
@@ -101,7 +101,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Apply
-        void apply(AggProjectStarted event) {
+        private void apply(AggProjectStarted event) {
         }
     }
 

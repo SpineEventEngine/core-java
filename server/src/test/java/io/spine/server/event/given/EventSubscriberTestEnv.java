@@ -62,7 +62,7 @@ public final class EventSubscriberTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(TaskAdded message) {
+        void on(TaskAdded message) {
             // Do nothing. Just expose the method.
         }
 

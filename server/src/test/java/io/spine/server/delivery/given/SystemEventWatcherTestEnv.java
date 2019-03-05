@@ -44,7 +44,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
+        void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("External events are not allowed in SystemEventWatchers.");
         }
     }

@@ -46,7 +46,7 @@ public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLo
     }
 
     @Apply
-    void event(SwitchPositionConfirmed event) {
+    private void event(SwitchPositionConfirmed event) {
         builder()
                 .setName(event.getSwitchmanName())
                 .setSwitchCount(state().getSwitchCount() + 1);

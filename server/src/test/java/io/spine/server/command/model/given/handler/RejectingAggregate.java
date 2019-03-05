@@ -48,7 +48,7 @@ public class RejectingAggregate extends Aggregate<ProjectId, EmptyAggregate, Emp
     }
 
     @Apply
-    void event(RefProjectCreated evt) {
+    private void event(RefProjectCreated evt) {
         // Do nothing.
     }
 }

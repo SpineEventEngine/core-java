@@ -59,7 +59,7 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggProjectCreated event) {
+    private void apply(AggProjectCreated event) {
         builder().setId(event.getProjectId())
                     .setName(event.getName());
     }
@@ -73,7 +73,7 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggTaskAdded event) {
+    private void apply(AggTaskAdded event) {
         builder().setId(event.getProjectId())
                     .addTask(event.getTask());
     }
@@ -86,7 +86,7 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggProjectStarted event) {
+    private void apply(AggProjectStarted event) {
         builder().setStatus(Status.STARTED);
     }
 
@@ -109,7 +109,7 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggProjectArchived event) {
+    private void apply(AggProjectArchived event) {
         setArchived(true);
     }
 

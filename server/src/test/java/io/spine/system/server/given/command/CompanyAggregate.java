@@ -62,7 +62,7 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
     }
 
     @Apply
-    void on(CompanyEstablished event) {
+    private void on(CompanyEstablished event) {
         builder().setId(event.getId())
                  .setName(event.getName());
     }
