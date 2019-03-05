@@ -59,7 +59,6 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.serveDish;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someDish;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.slf4j.event.Level.ERROR;
 
@@ -105,7 +104,7 @@ class AbstractEventReactorTest {
     }
 
     @Test
-    @DisplayName("be successfully created in registered even if no events are reacted to")
+    @DisplayName("be successfully created and registered even if no events are reacted to")
     void notThrowOnNoEvents() {
         IgnorantReactor ignorantReactor = new IgnorantReactor(restaurantContext.eventBus());
         restaurantContext.registerEventDispatcher(ignorantReactor);
@@ -140,8 +139,7 @@ class AbstractEventReactorTest {
                     .build();
             restaurantContext.eventBus()
                              .post(GivenEvent.withMessage(cooked));
-            assertFalse(kitchenFront.dishesServed()
-                                    .isEmpty());
+            assertTrue(kitchenFront.dishesServed().contains(dishToCook.getDishId()));
 
             DishReturnedToKitchen returned = DishReturnedToKitchen
                     .newBuilder()
@@ -149,7 +147,7 @@ class AbstractEventReactorTest {
                     .build();
             restaurantContext.eventBus()
                              .post(GivenEvent.withMessage(returned));
-            assertTrue(kitchenFront.secondsWastedBeingSad() > 0);
+            assertEquals(KitchenFront.CHEF_COOLDOWN, kitchenFront.secondsWastedBeingSad());
         }
 
         @Test
@@ -223,7 +221,7 @@ class AbstractEventReactorTest {
             ImmutableList<Event> threePoisonousDishesServed =
                     ImmutableList.of(poisonousDish(), poisonousDish(), poisonousDish())
                                  .stream()
-                                 .map((Dish dishToServe) -> serveDish(dishToServe, restaurantId))
+                                 .map(dishToServe -> serveDish(dishToServe, restaurantId))
                                  .map(GivenEvent::withMessage)
                                  .collect(toImmutableList());
             restaurantContext.eventBus()

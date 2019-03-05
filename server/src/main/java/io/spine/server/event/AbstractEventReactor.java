@@ -34,6 +34,7 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.ReactorMethodResult;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
@@ -85,6 +86,13 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
     @CanIgnoreReturnValue
     @Override
     public Set<String> dispatch(EventEnvelope event) {
+        TenantAwareRunner.with(event.tenantId())
+                         .run(() -> reactAndPost(event));
+
+        return identity();
+    }
+
+    private void reactAndPost(EventEnvelope event) {
         try {
             EventReactorMethod method = thisClass.getReactor(event.messageClass(),
                                                              event.originClass());
@@ -94,7 +102,6 @@ public class AbstractEventReactor implements EventReactor, EventDispatcher<Strin
         } catch (RuntimeException ex) {
             onError(event, ex);
         }
-        return identity();
     }
 
     @Override

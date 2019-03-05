@@ -20,6 +20,7 @@
 
 package io.spine.server.event.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Subscribe;
@@ -145,7 +146,8 @@ public class AbstractReactorTestEnv {
      */
     public static class KitchenFront extends AbstractEventReactor {
 
-        private static final int CHEF_COOLDOWN = 5;
+        @VisibleForTesting
+        public static final int CHEF_COOLDOWN = 5;
 
         /** IDs of dishes served by this server. */
         private final List<String> dishesServed = new ArrayList<>();

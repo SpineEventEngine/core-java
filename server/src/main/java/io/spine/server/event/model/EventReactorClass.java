@@ -55,8 +55,8 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     /** Creates new instance for the given raw class. */
-    public static <S extends AbstractEventReactor> EventReactorClass<S> asReactorClass(
-            Class<S> cls) {
+    public static <S extends AbstractEventReactor> EventReactorClass<S>
+    asReactorClass(Class<S> cls) {
         checkNotNull(cls);
         EventReactorClass<S> result = (EventReactorClass<S>)
                 get(cls, EventReactorClass.class, () -> new EventReactorClass<>(cls));
