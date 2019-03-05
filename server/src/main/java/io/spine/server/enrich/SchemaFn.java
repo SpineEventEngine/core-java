@@ -78,7 +78,7 @@ abstract class SchemaFn<M extends Message, C extends EnrichableMessageContext>
                      EnrichmentFn function) {
         checkNotNull(
                 output,
-                "EnrichmentFn `%s` produced `null` for the source message `%s` (context: `%s`).",
+                "`%s` produced `null` for the source message `%s` (context: `%s`).",
                 function, sourceMessage, context
         );
     }
