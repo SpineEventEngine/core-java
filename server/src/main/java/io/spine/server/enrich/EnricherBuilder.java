@@ -154,6 +154,8 @@ public abstract class EnricherBuilder<M extends Message,
     /**
      * A pair of source message class and enrichment message class, which is used to match
      * the pair to a function which produces the enrichment.
+     *
+     * @see EnricherBuilder#functions
      */
     @Immutable
     static class Key {
