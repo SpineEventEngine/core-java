@@ -107,7 +107,7 @@ public class TestAggregate
     }
 
     @Apply
-    void event(AggProjectCreated event) {
+    private void event(AggProjectCreated event) {
         builder().setId(event.getProjectId())
                  .setStatus(Status.CREATED);
 
@@ -115,13 +115,13 @@ public class TestAggregate
     }
 
     @Apply
-    void event(AggTaskAdded event) {
+    private void event(AggTaskAdded event) {
         isTaskAddedEventApplied = true;
         builder().addTask(event.getTask());
     }
 
     @Apply
-    void event(AggProjectStarted event) {
+    private void event(AggProjectStarted event) {
         builder().setId(event.getProjectId())
                  .setStatus(Status.STARTED);
 

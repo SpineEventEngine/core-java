@@ -245,17 +245,17 @@ public class Given {
         }
 
         @Apply
-        void event(AggProjectCreated event) {
+        private void event(AggProjectCreated event) {
             builder().setId(event.getProjectId())
                      .setStatus(Status.CREATED);
         }
 
         @Apply
-        void event(AggTaskAdded event) {
+        private void event(AggTaskAdded event) {
         }
 
         @Apply
-        void event(AggProjectStarted event) {
+        private void event(AggProjectStarted event) {
             builder().setId(event.getProjectId())
                      .setStatus(Status.STARTED);
         }
@@ -292,7 +292,7 @@ public class Given {
         }
 
         @Apply
-        void event(CustomerCreated event) {
+        private void event(CustomerCreated event) {
             builder().mergeFrom(event.getCustomer());
         }
     }
@@ -320,7 +320,7 @@ public class Given {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        public void on(BcProjectCreated event, EventContext context) {
+        void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
         }
     }

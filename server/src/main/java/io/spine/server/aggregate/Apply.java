@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
  * <p>An event applier method:
  * <ul>
  *     <li>is annotated with {@link Apply};
+ *     <li>is {@code private};
  *     <li>is {@code void};
  *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *         as the only parameter.

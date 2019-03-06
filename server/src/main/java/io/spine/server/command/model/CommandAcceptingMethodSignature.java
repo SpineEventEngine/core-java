@@ -26,7 +26,6 @@ import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -53,11 +52,6 @@ abstract class CommandAcceptingMethodSignature
     @Override
     public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> getParamSpecs() {
         return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
-    }
-
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     /**

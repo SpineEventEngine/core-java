@@ -65,12 +65,12 @@ public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilde
     }
 
     @Apply
-    void on(AggProjectPaused event) {
+    private void on(AggProjectPaused event) {
         // do nothing.
     }
 
     @Apply
-    void on(AggProjectCancelled event) {
+    private void on(AggProjectCancelled event) {
         // do nothing.
     }
 }

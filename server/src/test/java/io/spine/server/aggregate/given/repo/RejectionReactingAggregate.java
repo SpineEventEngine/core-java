@@ -59,7 +59,7 @@ public class RejectionReactingAggregate
     }
 
     @Apply
-    void event(AggProjectArchived event) {
+    private void event(AggProjectArchived event) {
         builder().setValue(PARENT_ARCHIVED);
     }
 }

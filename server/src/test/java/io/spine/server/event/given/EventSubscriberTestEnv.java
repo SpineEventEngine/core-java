@@ -44,7 +44,7 @@ public final class EventSubscriberTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        public void on(FailRequested message, EventContext context) {
+        void on(FailRequested message, EventContext context) {
             methodCalled = true;
             if (!message.getShouldFail()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
@@ -52,17 +52,17 @@ public final class EventSubscriberTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectCreated message) {
+        void on(ProjectCreated message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe
-        public void on(ProjectStarted message) {
+        void on(ProjectStarted message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe(external = true)
-        public void on(TaskAdded message) {
+        void on(TaskAdded message) {
             // Do nothing. Just expose the method.
         }
 

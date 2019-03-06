@@ -61,18 +61,18 @@ public class ProjectAggregate
     }
 
     @Apply
-    void event(BcProjectCreated event) {
+    private void event(BcProjectCreated event) {
         builder().setId(event.getProjectId())
                  .setStatus(Project.Status.CREATED);
     }
 
     @Apply
-    void event(@SuppressWarnings("unused") BcTaskAdded event) {
+    private void event(@SuppressWarnings("unused") BcTaskAdded event) {
         // NOP
     }
 
     @Apply
-    void event(BcProjectStarted event) {
+    private void event(BcProjectStarted event) {
         builder().setId(event.getProjectId())
                  .setStatus(Project.Status.STARTED);
     }

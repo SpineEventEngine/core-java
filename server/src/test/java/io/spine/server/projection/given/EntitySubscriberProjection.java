@@ -43,7 +43,7 @@ public final class EntitySubscriberProjection
     }
 
     @Subscribe
-    public void onUpdate(Project aggregateState) {
+    void onUpdate(Project aggregateState) {
         List<String> taskNames = aggregateState.getTaskList()
                                                .stream()
                                                .map(Task::getTitle)

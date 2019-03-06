@@ -127,28 +127,28 @@ public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProj
     }
 
     @Apply
-    void on(BbProjectCreated event) {
+    private void on(BbProjectCreated event) {
         builder().setId(event.getProjectId())
                  .setStatus(CREATED);
     }
 
     @Apply
-    void on(BbProjectStarted event) {
+    private void on(BbProjectStarted event) {
         builder().setStatus(STARTED);
     }
 
     @Apply
-    void on(BbTaskAdded event) {
+    private void on(BbTaskAdded event) {
         builder().addTask(event.getTask());
     }
 
     @Apply
-    void on(BbAssigneeAdded event) {
+    private void on(BbAssigneeAdded event) {
         builder().addAssignee(event.getUserId());
     }
 
     @Apply
-    void on(BbAssigneeRemoved event) {
+    private void on(BbAssigneeRemoved event) {
         BbProjectVBuilder builder = builder();
         List<UserId> assignees = builder.getAssignee();
         int index = assignees.indexOf(event.getUserId());

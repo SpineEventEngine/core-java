@@ -42,7 +42,7 @@ public class MemoizingProjectDetails2
     }
 
     @Subscribe(external = true)
-    public void on(ItgProjectCreated event) {
+    void on(ItgProjectCreated event) {
         memoize(event);
     }
 }

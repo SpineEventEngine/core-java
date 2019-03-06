@@ -18,20 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
+package io.spine.client.given;
 
-import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.test.client.TestEntityId;
+
+import static java.util.concurrent.ThreadLocalRandom.current;
 
 /**
- * A class with a method that accepts event message and context.
- *
- * @author Alexander Yevsyukov
+ * A set of utilities working with test entities.
  */
-public class ValidTwoParams extends TestEventSubscriber {
+public final class TestEntities {
 
-    @Subscribe
-    public void handle(RefProjectCreated event, EventContext context) {
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private TestEntities() {
+    }
+
+    /**
+     * Creates a new random {@code TestEntityId}.
+     *
+     * <p>The numeric value of the ID is between {@code -1000} (inclusive)
+     * and {@code 1000} (exclusive) and is never equal to {@code 0};
+     *
+     * @return new random ID
+     */
+    public static TestEntityId randomId() {
+        int randomNumber = current().nextInt(-1000, 1000);
+        randomNumber = randomNumber != 0
+                       ? randomNumber
+                       : 314;
+        return TestEntityId.newBuilder()
+                           .setValue(randomNumber)
+                           .build();
     }
 }

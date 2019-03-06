@@ -201,7 +201,7 @@ class DefaultSystemReadSideTest {
         private EventMessage lastEvent;
 
         @Subscribe
-        public void on(SMProjectCreated event) {
+        void on(SMProjectCreated event) {
             lastEvent = event;
         }
 

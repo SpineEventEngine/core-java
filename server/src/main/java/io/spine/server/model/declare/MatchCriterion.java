@@ -20,17 +20,16 @@
 
 package io.spine.server.model.declare;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.model.MethodExceptionChecker;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-import static com.google.common.base.Joiner.on;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
@@ -95,7 +94,7 @@ public enum MatchCriterion {
                         create(this,
                                methodAsString(method),
                                AccessModifier.asString(allowedModifiers),
-                               Modifier.toString(method.getModifiers()));
+                               AccessModifier.fromMethod(method));
                 return Optional.of(mismatch);
 
             }
@@ -149,6 +148,8 @@ public enum MatchCriterion {
         }
     };
 
+    private static final Joiner PARAMETER_TYPE_JOINER = Joiner.on(", ");
+
     private final SignatureMismatch.Severity severity;
     private final String format;
 
@@ -183,13 +184,10 @@ public enum MatchCriterion {
     abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
 
     private static String methodAsString(Method method) {
-        String result =
-                on(".").join(method.getDeclaringClass()
-                                   .getCanonicalName(),
-                             method.getName()) + '(' +
-                        on(", ")
-                                .join(method.getParameterTypes()) +
-                        ')';
+        String declaringClassName = method.getDeclaringClass()
+                                          .getCanonicalName();
+        String parameterTypes = PARAMETER_TYPE_JOINER.join(method.getParameterTypes());
+        String result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
     }
 }
