@@ -50,6 +50,15 @@ message OrderCannotBeServed {
 message CustomerNotified {
 
     event.Order order = 1;
+
+    NotificationMethod notification_method = 2;
+
+    enum NotificationMethod {
+        UNDEFINED = 0;
+        SMS = 1;
+        PHONE = 2;
+        MESSENGER = 3;
+    }
 }
 
 message OrderServed {

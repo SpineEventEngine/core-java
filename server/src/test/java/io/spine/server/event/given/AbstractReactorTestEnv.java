@@ -21,27 +21,34 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
+import io.spine.protobuf.Durations2;
+import io.spine.protobuf.Timestamps2;
 import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.CustomerNotified;
+import io.spine.server.event.CustomerNotified.NotificationMethod;
+import io.spine.server.event.DeliveryServiceNotified;
+import io.spine.server.event.DonationMade;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.OrderPaidFor;
+import io.spine.server.event.OrderReadyToBeServed;
+import io.spine.server.event.OrderServed;
+import io.spine.server.event.OrderServedLate;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
-import io.spine.server.tuple.EitherOf3;
-import io.spine.test.event.CharityDonationOffered;
-import io.spine.test.event.ChefPraised;
-import io.spine.test.event.ChefWarningSent;
-import io.spine.test.event.Dish;
-import io.spine.test.event.DishCooked;
-import io.spine.test.event.DishReviewLeft;
-import io.spine.test.event.DishServed;
-import io.spine.test.event.FoodDelivered;
-import io.spine.test.event.UserNotified;
-import io.spine.test.event.UserNotified.NotificationMethod;
+import io.spine.server.tuple.Pair;
+import io.spine.test.event.Order;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.Durations2.isGreaterThan;
+import static io.spine.server.event.CustomerNotified.NotificationMethod.SMS;
 import static java.lang.String.format;
 
 /** Environment for abstract event reactor testing. */
@@ -51,217 +58,227 @@ public class AbstractReactorTestEnv {
     private AbstractReactorTestEnv() {
     }
 
-    /** Obtains a dish with a random ID. */
-    public static Dish someDish() {
-        String dishId = newUuid();
-        String dishName = format("Name of dish `%s`.", dishId);
+    /** Obtains an event that signifies that some order was served in time. */
+    public static OrderServed someOrderServedInTime() {
+        Timestamp now = Timestamps2.fromInstant(Instant.now());
+        return someOrderServedOn(now);
+    }
 
-        Dish result = Dish
+    /** Obtains an event that signifies that some order was sered late. */
+    public static OrderServed someOrderServedLate() {
+        Timestamp now = Timestamps2.fromInstant(Instant.now());
+        Timestamp twoHoursAfter = Timestamps.add(now, Durations2.fromHours(2));
+        return someOrderServedOn(twoHoursAfter);
+    }
+
+    private static OrderServed someOrderServedOn(Timestamp timeServed) {
+        OrderServed result = OrderServed
                 .newBuilder()
-                .setDishId(dishId)
-                .setDishName(dishName)
+                .setServedOn(timeServed)
+                .setOrder(someOrder())
+                .build();
+        return result;
+    }
+
+    private static Order someOrder() {
+        Timestamp now = Timestamps2.fromInstant(Instant.now());
+        Order result = Order
+                .newBuilder()
+                .setOrderId(newUuid())
+                .setPriceInUsd(somePrice())
+                .setTimePlaced(now)
+                .build();
+        return result;
+    }
+
+    private static double somePrice() {
+        @SuppressWarnings("UnsecureRandomNumberGeneration") /* Does not matter for this test case.*/
+                Random random = new Random();
+        double min = 10.0d;
+        double max = 100.0d;
+        double result = min + (max - min) * random.nextDouble();
+        return result;
+    }
+
+    /** Obtains an event that signifies that some order got paid for. */
+    public static OrderPaidFor someOrderPaidFor() {
+        OrderPaidFor result = OrderPaidFor
+                .newBuilder()
+                .setOrder(someOrder())
                 .build();
         return result;
     }
 
     /**
-     * Returns an event that signifies that the specified restaurant has served the specified dish.
+     * Makes a charity donation every time an order is payed for.
+     *
+     * <p>Donation amount is 2% of the order price.
      */
-    public static DishServed dishServed(Dish dishToServe, String restaurantId) {
-        DishServed result = DishServed
-                .newBuilder()
-                .setDish(dishToServe)
-                .setRestaurantId(restaurantId)
-                .build();
-        return result;
+    public static class AutoCharityDonor extends AbstractEventReactor {
+
+        private static final double DONATION_PERCENTAGE = 0.02d;
+
+        /** Total USDs donated by this donor. */
+        private double totalDonated = 0.0d;
+
+        public AutoCharityDonor(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @React(external = true)
+        DonationMade donateToCharity(OrderPaidFor orderPaidFor) {
+            Order order = orderPaidFor.getOrder();
+            double orderPrice = order.getPriceInUsd();
+            double donationAmount = orderPrice * DONATION_PERCENTAGE;
+            totalDonated += donationAmount;
+            DonationMade result = DonationMade
+                    .newBuilder()
+                    .setUsdsDonated(donationAmount)
+                    .build();
+            return result;
+        }
+
+        public double totalDonated() {
+            return totalDonated;
+        }
     }
 
-    /** Returns an event that signifies that the specified dish has been delivered. */
-    public static FoodDelivered foodDelivered(Dish dishToDeliver) {
-        FoodDelivered result = FoodDelivered
-                .newBuilder()
-                .setDish(dishToDeliver)
-                .build();
-        return result;
+    /**
+     * Tracks the performance of the restaurant servers.
+     *
+     * <p>If an order was served late i.e. after more than 50 minutes after it was placed,
+     * emits a respective event.
+     */
+    public static class ServicePerformanceTracker extends AbstractEventReactor {
+
+        /** If the order is not served in 50 minutes, it is considered to be late. */
+        private static final Duration BEFORE_SERVED_LATE = Durations2.fromMinutes(50);
+
+        private final List<OrderServed> ordersServed = new ArrayList<>();
+        private final List<OrderServedLate> ordersServedLate = new ArrayList<>();
+
+        public ServicePerformanceTracker(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @React
+        Optional<OrderServedLate> accept(OrderServed served) {
+            ordersServed.add(served);
+            Timestamp now = now();
+            Timestamp servedOn = served.getServedOn();
+            Duration timeToServe = Timestamps.between(now, servedOn);
+            boolean servedLate = isGreaterThan(timeToServe, BEFORE_SERVED_LATE);
+            if (servedLate) {
+                Order servedOrder = served.getOrder();
+                OrderServedLate result = OrderServedLate
+                        .newBuilder()
+                        .setOrder(servedOrder)
+                        .setServedOn(now)
+                        .build();
+                ordersServedLate.add(result);
+                return Optional.of(result);
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        /** Obtains all of the served orders. */
+        public ImmutableList<OrderServed> ordersServed() {
+            return ImmutableList.copyOf(ordersServed);
+        }
+
+        /** Obtains all of the orders that were served late. */
+        public ImmutableList<OrderServedLate> ordersServedLate() {
+            return ImmutableList.copyOf(ordersServedLate);
+        }
+
+        private static Timestamp now() {
+            Instant currentInstant = Instant.now();
+            Timestamp result = Timestamps2.fromInstant(currentInstant);
+            return result;
+        }
     }
 
-    /** Obtains an event that signifies that a perfect review was left about the specified dish. */
-    public static DishReviewLeft exceptionalReviewLeft(Dish dish) {
-        DishReviewLeft result = DishReviewLeft
-                .newBuilder()
-                .setDish(dish)
-                .setScore(10)
-                .build();
-        return result;
-    }
+    /**
+     * Notifies customers and the delivery service when an order is ready to be served by emitting
+     * a respective event.
+     *
+     * <p>By default, uses SMS to notify customers.
+     */
+    public static class RestaurantNotifier extends AbstractEventReactor {
 
-    /** Obtains an event that signifies that a negative review was left about the specified dish. */
-    public static DishReviewLeft badReviewLeft(Dish dish) {
-        DishReviewLeft result = DishReviewLeft
-                .newBuilder()
-                .setDish(dish)
-                .setScore(3)
-                .build();
-        return result;
-    }
-
-    /** Notifies user that the dish has been served and is ready for delivery. */
-    public static class DeliveryNotifier extends AbstractEventReactor {
-
-        private final List<UserNotified> notificationsSent = new ArrayList<>();
         private final NotificationMethod notificationMethod;
 
-        public DeliveryNotifier(EventBus eventBus, NotificationMethod notificationMethod) {
+        public RestaurantNotifier(EventBus eventBus) {
             super(eventBus);
-            this.notificationMethod = notificationMethod;
+            notificationMethod = SMS;
         }
 
         @React
-        UserNotified notify(DishCooked cooked) {
-            String dishName = cooked.getDish()
-                                    .getDishName();
-            String message = format("Dish `%s` is on its way.", dishName);
+        Pair<CustomerNotified, DeliveryServiceNotified>
+        notifyAboutOrder(OrderReadyToBeServed orderReady) {
+            Order order = orderReady.getOrder();
+            CustomerNotified customerNotified = notifyCustomer(order);
+            DeliveryServiceNotified deliveryNotified = notifyDelivery(order);
+            Pair<CustomerNotified, DeliveryServiceNotified> result = Pair.of(customerNotified,
+                                                                             deliveryNotified);
+            return result;
+        }
 
-            UserNotified result = UserNotified
+        private CustomerNotified notifyCustomer(Order order) {
+            CustomerNotified result = CustomerNotified
                     .newBuilder()
-                    .setNotificationMessage(message)
+                    .setOrder(order)
                     .setNotificationMethod(notificationMethod)
                     .build();
-            notificationsSent.add(result);
             return result;
         }
 
-        public ImmutableList<UserNotified> notificationsSent() {
-            return ImmutableList.copyOf(notificationsSent);
-        }
-    }
-
-    /**
-     * Praises the chef whenever a positive dish review was left by emitting a
-     * respective event.
-     */
-    public static class ChefPerformanceTracker extends AbstractEventReactor {
-
-        private final DoubleSummaryStatistics chefStats = new DoubleSummaryStatistics();
-        private static final String PRAISE_MESSAGE_FORMAT = "Customer has left a review" +
-                "of %s out of 10 for %s. Good job! Your average score is `%s`.";
-
-        private static final String WARNING_MESSAGE_FORMAT = "Your score is %s, it has dipped" +
-                "below 5. Try harder.";
-
-        public ChefPerformanceTracker(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @React
-        EitherOf3<ChefPraised, ChefWarningSent, Nothing> acceptReview(DishReviewLeft reviewLeft) {
-            int score = reviewLeft.getScore();
-            chefStats.accept(score);
-            if (score >= 8) {
-                Dish dish = reviewLeft.getDish();
-                String dishName = dish.getDishName();
-                double currentAverage = chefStats.getAverage();
-                String message = format(PRAISE_MESSAGE_FORMAT, score, dishName, currentAverage);
-                ChefPraised chefPraised = praiseChef(dish, message, score);
-                return EitherOf3.withA(chefPraised);
-            }
-            if (chefStats.getAverage() <= 3) {
-                ChefWarningSent warningSent = warnChef();
-                return EitherOf3.withB(warningSent);
-            }
-            return EitherOf3.withC(nothing());
-        }
-
-        private ChefWarningSent warnChef() {
-            ChefWarningSent result = ChefWarningSent
+        private static DeliveryServiceNotified notifyDelivery(Order order) {
+            String messageFormat = "Order %s is ready to be delivered.";
+            DeliveryServiceNotified result = DeliveryServiceNotified
                     .newBuilder()
-                    .setMessage(format(WARNING_MESSAGE_FORMAT, chefStats.getAverage()))
+                    .setMessage(format(messageFormat, order.getOrderId()))
+                    .setOrder(order)
                     .build();
             return result;
         }
-
-        private static ChefPraised praiseChef(Dish dish, String message, int score) {
-            ChefPraised result = ChefPraised
-                    .newBuilder()
-                    .setDish(dish)
-                    .setMessage(message)
-                    .setUserReview(score)
-                    .build();
-            return result;
-        }
-
-        /**
-         * Obtains the stats of the scores of the chef, i.e. amount of reviews and the average
-         * score.
-         */
-        public DoubleSummaryStatistics chefStats() {
-            return chefStats;
-        }
     }
 
-    /** Offers to donate to charity each time a dish is paid for by emitting a respective event. */
-    public static class CharityAgent extends AbstractEventReactor {
-
-        private static final String MESSAGE = "Would you like to donate to charity?";
-
-        private int offersMade = 0;
-
-        public CharityAgent(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @React(external = true)
-        CharityDonationOffered offerToDonate(DishServed served) {
-            return offerDonation();
-        }
-
-        @React(external = true)
-        CharityDonationOffered offerToDonate(FoodDelivered delivered) {
-            return offerDonation();
-        }
-
-        private CharityDonationOffered offerDonation() {
-            CharityDonationOffered result = CharityDonationOffered
-                    .newBuilder()
-                    .setMessage(MESSAGE)
-                    .build();
-            offersMade++;
-            return result;
-        }
-
-        public int offersMade() {
-            return offersMade;
-        }
+    /** Obtains an event that signgifes that some order is ready to be served. */
+    public static OrderReadyToBeServed someOrderReady() {
+        OrderReadyToBeServed result = OrderReadyToBeServed
+                .newBuilder()
+                .setOrder(someOrder())
+                .build();
+        return result;
     }
 
-    /** In an attempt to offer a charity donation, stutters and throws an exception. */
-    public static class StutteringCharityAgent extends AbstractEventReactor {
+    /** Throws an exception whenever an order is ready. */
+    public static class FaultyNotifier extends AbstractEventReactor {
 
-        public StutteringCharityAgent(EventBus eventBus) {
+        public FaultyNotifier(EventBus eventBus) {
             super(eventBus);
-        }
-
-        @React(external = true)
-        CharityDonationOffered offerToDonate(DishServed served) {
-            return stutter();
         }
 
         @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for this test case. */
-        private static CharityDonationOffered stutter() {
+        @React
+        Pair<CustomerNotified, DeliveryServiceNotified>
+        notifyAboutOrder(OrderReadyToBeServed orderReady) {
             throw new RuntimeException();
         }
     }
 
-    /** Throws an exception whenever a dish is cooked. */
-    public static class FaultyDeliveryNotifier extends AbstractEventReactor {
+    /** In an attempt to donate to charity, throws an exception every time an order is payed for. */
+    public static class FaultyCharityDonor extends AbstractEventReactor {
 
-        public FaultyDeliveryNotifier(EventBus eventBus) {
+        public FaultyCharityDonor(EventBus eventBus) {
             super(eventBus);
         }
 
-        @SuppressWarnings("NewExceptionWithoutArguments")/* Does not matter for this test case. */
-        @React
-        UserNotified notifyUser(DishCooked cooked) {
+        @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for this test case. */
+        @React(external = true)
+        DonationMade makeDonation(OrderPaidFor orderPaidFor) {
             throw new RuntimeException();
         }
     }
