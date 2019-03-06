@@ -36,6 +36,8 @@ import "spine/core/actor_context.proto";
 
 // Command identifier.
 message CommandId {
+    option (is).java_type = "io.spine.core.MessageId";
+
     string uuid = 1;
 }
 

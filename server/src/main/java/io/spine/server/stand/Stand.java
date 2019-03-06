@@ -34,6 +34,7 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
+import io.spine.core.EventId;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -89,6 +90,11 @@ import static java.util.Collections.singleton;
  */
 @SuppressWarnings("OverlyCoupledClass")
 public class Stand extends AbstractEventSubscriber implements AutoCloseable {
+
+    private static final EventId STAND_POST_ORIGIN = EventId
+            .newBuilder()
+            .setValue("Stand-received-entity-update")
+            .build();
 
     /**
      * Used to return an empty result collection for {@link Query}.
@@ -171,7 +177,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setNewValue(record)
                 .build();
-        lifecycle.onStateChanged(change, ImmutableSet.of());
+        lifecycle.onStateChanged(change, ImmutableSet.of(STAND_POST_ORIGIN));
     }
 
     /**

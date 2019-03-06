@@ -20,9 +20,9 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.server.command.DispatchCommand;
 
 import java.util.List;
@@ -61,7 +61,7 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     }
 
     @Override
-    public Message getMessageId() {
+    public MessageId getMessageId() {
         return dispatch.command()
                        .id();
     }

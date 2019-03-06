@@ -18,49 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.core;
 
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.MessageId;
-import io.spine.server.event.EventDispatch;
 
 /**
- * A phase that dispatches an event to the entity in transaction.
+ * An identifier of a message.
  *
- * @param <I>
- *         the type of entity ID
- * @param <E>
- *         the type of the entity
- * @param <R>
- *         the type of the event dispatch result
+ * @see CommandId
+ * @see EventId
  */
 @Internal
-public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
-        extends Phase<I, R> {
-
-    private final EventDispatch<I, E, R> dispatch;
-
-    public EventDispatchingPhase(EventDispatch<I, E, R> dispatch,
-                                 VersionIncrement versionIncrement) {
-        super(versionIncrement);
-        this.dispatch = dispatch;
-    }
-
-    @Override
-    protected R performDispatch() {
-        R result = dispatch.perform();
-        return result;
-    }
-
-    @Override
-    public I getEntityId() {
-        return dispatch.entity()
-                       .id();
-    }
-
-    @Override
-    public MessageId getMessageId() {
-        return dispatch.event()
-                       .id();
-    }
+public interface MessageId extends Message {
 }
