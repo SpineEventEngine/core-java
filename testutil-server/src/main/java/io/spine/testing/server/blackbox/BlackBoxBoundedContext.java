@@ -38,6 +38,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -199,6 +200,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return result;
     }
 
+    /** Obtains the name of this bounded context */
+    public BoundedContextName name() {
+        return boundedContext.name();
+    }
+
     /**
      * Obtains set of type names of entities known to this Bounded Context.
      */
@@ -214,8 +220,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return result.build();
     }
 
-    @VisibleForTesting
-    EventBus getEventBus() {
+    /** Obtains {@code event bus} instance used by this bounded context. */
+    public EventBus eventBus() {
         return boundedContext.eventBus();
     }
 
@@ -234,6 +240,21 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
             boundedContext.register(repository);
         }
         return thisRef();
+    }
+
+    /**
+     * Registers the specified event dispatchers with the {@code event bus} of this
+     * bounded context.
+     *
+     * @param dispatchers
+     *         dispatchers to register with the event bus of this bounded context
+     */
+    public final void registerEventDispatchers(EventDispatcher<?>... dispatchers) {
+        checkNotNull(dispatchers);
+        for (EventDispatcher<?> dispatcher : dispatchers) {
+            checkNotNull(dispatcher);
+            boundedContext.registerEventDispatcher(dispatcher);
+        }
     }
 
     /**

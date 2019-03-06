@@ -342,7 +342,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         private void assertEnricher() {
-            Truth8.assertThat(blackBox.getEventBus()
+            Truth8.assertThat(blackBox.eventBus()
                                       .enricher())
                   .hasValue(enricher);
         }
