@@ -19,19 +19,19 @@
  */
 syntax = "proto3";
 
-package spine.test.event;
+package spine.test.entity;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.event";
+option java_package = "io.spine.server.event";
 option java_multiple_files = true;
 
-import "google/protobuf/timestamp.proto";
+// Events in this file serve the charity bounded context.
 
-message Order {
+message DonationMade {
 
-    string order_id = 1;
-    google.protobuf.Timestamp time_placed = 2;
-    double price_in_usd = 3;
+    // Donation amount in The United States dollars.
+    double usds_donated = 1;
+
 }

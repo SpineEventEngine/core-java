@@ -20,21 +20,19 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.logging.Logging;
-import io.spine.server.event.given.AbstractReactorTestEnv.CharityAgent;
-import io.spine.server.event.given.AbstractReactorTestEnv.ChefPerformanceTracker;
-import io.spine.server.event.given.AbstractReactorTestEnv.DeliveryNotifier;
-import io.spine.server.event.given.AbstractReactorTestEnv.FaultyDeliveryNotifier;
-import io.spine.server.event.given.AbstractReactorTestEnv.StutteringCharityAgent;
-import io.spine.test.event.CharityDonationOffered;
-import io.spine.test.event.ChefPraised;
-import io.spine.test.event.Dish;
-import io.spine.test.event.DishCooked;
-import io.spine.test.event.DishReviewLeft;
-import io.spine.test.event.DishServed;
-import io.spine.test.event.FoodDelivered;
-import io.spine.test.event.UserNotified;
-import io.spine.test.event.UserNotified.NotificationMethod;
+import io.spine.protobuf.Durations2;
+import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
+import io.spine.server.event.given.AbstractReactorTestEnv.FaultyCharityDonor;
+import io.spine.server.event.given.AbstractReactorTestEnv.FaultyNotifier;
+import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
+import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
+import io.spine.test.event.Order;
+import io.spine.testing.client.blackbox.Count;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,63 +43,49 @@ import org.slf4j.event.SubstituteLoggingEvent;
 import org.slf4j.helpers.SubstituteLogger;
 
 import java.util.ArrayDeque;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
 import java.util.Queue;
 
+import static com.google.common.base.Predicates.not;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.server.event.given.AbstractReactorTestEnv.badReviewLeft;
-import static io.spine.server.event.given.AbstractReactorTestEnv.dishServed;
-import static io.spine.server.event.given.AbstractReactorTestEnv.exceptionalReviewLeft;
-import static io.spine.server.event.given.AbstractReactorTestEnv.foodDelivered;
-import static io.spine.server.event.given.AbstractReactorTestEnv.someDish;
-import static io.spine.test.event.UserNotified.NotificationMethod.SMS;
-import static io.spine.testing.client.blackbox.Count.count;
+import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderPaidFor;
+import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderReady;
+import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServedInTime;
+import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServedLate;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static java.util.Collections.nCopies;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.slf4j.event.Level.ERROR;
 
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
 
-    private static final NotificationMethod DESIRED_NOTIFICATION_METHOD = SMS;
-
     private BlackBoxBoundedContext<SingleTenantBlackBoxContext> restaurantContext;
     private BlackBoxBoundedContext<SingleTenantBlackBoxContext> deliveryContext;
     private BlackBoxBoundedContext<SingleTenantBlackBoxContext> charityContext;
 
-    private CharityAgent charityAgent;
-    private ChefPerformanceTracker chefPerformanceTracker;
-    private DeliveryNotifier notifier;
-
-    AbstractEventReactorTest() {
-    }
+    private AutoCharityDonor charityDonor;
+    private ServicePerformanceTracker performanceTracker;
 
     @BeforeEach
     void setUp() {
         restaurantContext = BlackBoxBoundedContext.singleTenant();
-        notifier = new DeliveryNotifier(restaurantContext.eventBus(), DESIRED_NOTIFICATION_METHOD);
-        chefPerformanceTracker = new ChefPerformanceTracker(restaurantContext.eventBus());
-        restaurantContext.withEventDispatchers(notifier);
-        restaurantContext.withEventDispatchers(chefPerformanceTracker);
-
-        charityContext = BlackBoxBoundedContext.singleTenant();
-        charityAgent = new CharityAgent(charityContext.eventBus());
-        charityContext.withEventDispatchers(charityAgent);
-
         deliveryContext = BlackBoxBoundedContext.singleTenant();
+        charityContext = BlackBoxBoundedContext.singleTenant();
+
+        charityDonor = new AutoCharityDonor(charityContext.eventBus());
+        charityContext.withEventDispatchers(charityDonor);
+
+        performanceTracker = new ServicePerformanceTracker(restaurantContext.eventBus());
+        RestaurantNotifier notifier = new RestaurantNotifier(restaurantContext.eventBus());
+        restaurantContext.withEventDispatchers(performanceTracker, notifier);
     }
 
     @Test
     @DisplayName("throw upon a null event bus")
     void throwOnNullEventBus() {
-        assertThrows(NullPointerException.class, () -> new CharityAgent(null));
+        assertThrows(NullPointerException.class, () -> new AutoCharityDonor(null));
     }
 
     @DisplayName("while dealing with domestic events")
@@ -111,89 +95,80 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("receive one")
         void receive() {
-            Dish dishToCook = someDish();
-            DishCooked dishCooked = DishCooked
-                    .newBuilder()
-                    .setDish(dishToCook)
-                    .build();
-
-            restaurantContext.receivesEvent(dishCooked);
-            boolean exactlyOneReceived = notifier.notificationsSent()
-                                                 .size() == 1;
-            UserNotified notification = notifier.notificationsSent()
-                                                .get(0);
-            boolean ofCorrectType =
-                    notification.getNotificationMethod() == DESIRED_NOTIFICATION_METHOD;
-
-            assertTrue(exactlyOneReceived && ofCorrectType);
+            OrderServed orderServed = someOrderServedInTime();
+            restaurantContext.receivesEvent(orderServed);
+            ImmutableList<OrderServed> ordersServed = performanceTracker.ordersServed();
+            ImmutableList<OrderServedLate> ordersServedLate = performanceTracker.ordersServedLate();
+            assertThat(ordersServed).containsExactly(orderServed);
+            assertThat(ordersServedLate).isEmpty();
         }
 
         @Test
         @DisplayName("receive several")
         void receiveSeveral() {
-            Dish dishToReview = someDish();
-            DishReviewLeft exceptionalReview = exceptionalReviewLeft(dishToReview);
-            DishReviewLeft badReview = badReviewLeft(dishToReview);
-            restaurantContext.receivesEvents(exceptionalReview, badReview);
+            ImmutableList<OrderServed> eventsToEmit = ImmutableList.of(
+                    someOrderServedInTime(), someOrderServedInTime(), someOrderServedLate()
+            );
+            eventsToEmit.forEach(restaurantContext::receivesEvent);
+            ImmutableList<OrderServed> ordersServed = performanceTracker.ordersServed();
+            ImmutableList<OrderServedLate> ordersServedLate = performanceTracker.ordersServedLate();
+            assertThat(ordersServed).hasSize(eventsToEmit.size());
+            @SuppressWarnings("Guava") /* provides a prettier API. */
+                    long ordersInTime = ordersServed
+                    .stream()
+                    .filter(not(this::isServedLate))
+                    .count();
+            assertThat(ordersInTime).isEqualTo(2);
+            assertThat(ordersServedLate).hasSize(1);
+        }
 
-            double expectedScore = (exceptionalReview.getScore() + badReview.getScore()) * 0.5;
-            DoubleSummaryStatistics stats = chefPerformanceTracker.chefStats();
-            boolean twoReviewsReceived = stats.getCount() == 2;
-            assertTrue(twoReviewsReceived);
-            assertThat(expectedScore).isEqualTo(expectedScore);
+        private boolean isServedLate(OrderServed orderServed) {
+            Order order = orderServed.getOrder();
+            Timestamp placedOn = order.getTimePlaced();
+            Timestamp servedOn = orderServed.getServedOn();
+
+            Duration difference = Timestamps.between(placedOn, servedOn);
+            long differenceInMins = Durations2.toMinutes(difference);
+            return differenceInMins > 50;
+
         }
 
         @Test
         @DisplayName("log an error")
         void logError() {
-            FaultyDeliveryNotifier faultyNotifier =
-                    new FaultyDeliveryNotifier(restaurantContext.eventBus());
+            FaultyNotifier faultyNotifier = new FaultyNotifier(restaurantContext.eventBus());
             restaurantContext.withEventDispatchers(faultyNotifier);
-            Queue<SubstituteLoggingEvent> loggedMessages =
-                    redirectLogging((SubstituteLogger) faultyNotifier.log());
 
-            DishCooked cooked = DishCooked
-                    .newBuilder()
-                    .setDish(someDish())
-                    .build();
-            restaurantContext.receivesEvent(cooked);
+            Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
+                    (SubstituteLogger) faultyNotifier.log());
+
+            restaurantContext.receivesEvent(someOrderReady());
             assertLoggedCorrectly(loggedMessages);
         }
 
-        /**
-         * See {@link ChefPerformanceTracker#praiseChef(DishReviewLeft)}.
-         */
         @Test
-        @DisplayName("react on one")
+        @DisplayName("react with one")
         void react() {
-            Dish dishToReview = someDish();
-            restaurantContext.receivesEvents(exceptionalReviewLeft(dishToReview),
-                                             badReviewLeft(dishToReview),
-                                             badReviewLeft(dishToReview))
-                             .assertThat(emittedEvent(ChefPraised.class, once()));
+            OrderServed servedLate = someOrderServedLate();
+            restaurantContext.receivesEvent(servedLate)
+                             .assertThat(emittedEvent(OrderServedLate.class, once()));
         }
 
         @Test
-        @DisplayName("react on several")
-        void reactOnSeveral() {
-            Dish dishToReview = someDish();
-            int expectedPraisesAmount = 5;
-            List<DishReviewLeft> positiveReviews = nCopies(5, exceptionalReviewLeft(dishToReview));
-            positiveReviews.forEach(restaurantContext::receivesEvent);
-            restaurantContext.assertThat(emittedEvent(ChefPraised.class,
-                                                      count(expectedPraisesAmount)));
+        @DisplayName("react with none")
+        void reactWithNone() {
+            OrderServed orderServed = someOrderServedInTime();
+            restaurantContext.receivesEvent(orderServed)
+                             .assertThat(emittedEvent(OrderServedLate.class, Count.none()));
         }
 
         @Test
-        @DisplayName("react with either of some events")
+        @DisplayName("react with several events")
         void reactWithSeveral() {
-            Dish dishToReview = someDish();
-            DishReviewLeft exceptionalReview = exceptionalReviewLeft(dishToReview);
-            restaurantContext.receivesEvent(exceptionalReview)
-                             .assertThat(emittedEvent(ChefPraised.class, once()));
-
-            List<DishReviewLeft> badReviews = nCopies(3, badReviewLeft(dishToReview));
-            badReviews.forEach(restaurantContext::receivesEvent);
+            OrderReadyToBeServed orderIsReady = someOrderReady();
+            restaurantContext.receivesEvent(orderIsReady)
+                             .assertThat(emittedEvent(CustomerNotified.class, once()))
+                             .assertThat(emittedEvent(DeliveryServiceNotified.class, once()));
         }
     }
 
@@ -204,54 +179,45 @@ class AbstractEventReactorTest {
         @DisplayName("receive one")
         @Test
         void receive() {
-            Dish poisonousDish = someDish();
-            DishServed served = DishServed
-                    .newBuilder()
-                    .setDish(poisonousDish)
-                    .build();
-            charityContext.receivesExternalEvent(restaurantContext.name(), served);
-            assertEquals(1, charityAgent.offersMade());
+            OrderPaidFor orderPaidFor = someOrderPaidFor();
+            charityContext.receivesExternalEvent(restaurantContext.name(), orderPaidFor);
+
+            double orderCost = orderPaidFor.getOrder()
+                                           .getPriceInUsd();
+            double expectedDonationAmount = orderCost * 0.02;
+            assertThat(charityDonor.totalDonated()).isEqualTo(expectedDonationAmount);
         }
 
         @DisplayName("react to one")
         @Test
         void reactToOne() {
-            Dish dishToServe = someDish();
-            DishServed dishServed = dishServed(dishToServe, newUuid());
-
-            charityContext.receivesExternalEvent(charityContext.name(), dishServed)
-                          .assertThat(emittedEvent(CharityDonationOffered.class, once()));
+            OrderPaidFor orderPaidFor = someOrderPaidFor();
+            charityContext.receivesExternalEvent(deliveryContext.name(), orderPaidFor)
+                          .assertThat(emittedEvent(DonationMade.class, once()));
         }
 
         @DisplayName("react to several")
         @Test
         void reactToSeveral() {
-            Dish dishToServe = someDish();
-            DishServed dishServed = dishServed(dishToServe, newUuid());
+            OrderPaidFor paidInRestaurant = someOrderPaidFor();
+            OrderPaidFor paidToDelivery = someOrderPaidFor();
 
-            Dish dishToDeliver = someDish();
-            FoodDelivered foodDelivered = foodDelivered(dishToDeliver);
-
-            charityContext.receivesExternalEvent(restaurantContext.name(), dishServed)
-                          .receivesExternalEvent(deliveryContext.name(), foodDelivered)
-                          .assertThat(emittedEvent(CharityDonationOffered.class, twice()));
+            charityContext.receivesExternalEvent(deliveryContext.name(), paidToDelivery)
+                          .receivesExternalEvent(restaurantContext.name(), paidInRestaurant)
+                          .assertThat(emittedEvent(DonationMade.class, twice()));
         }
 
         @DisplayName("log an error")
         @Test
         void logAnError() {
-            StutteringCharityAgent stutteringAgent =
-                    new StutteringCharityAgent(charityContext.eventBus());
-            charityContext.withEventDispatchers(stutteringAgent);
+            FaultyCharityDonor faultyDonor = new FaultyCharityDonor(charityContext.eventBus());
+            charityContext.withEventDispatchers(faultyDonor);
+            OrderPaidFor orderPaidFor = someOrderPaidFor();
 
             Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
-                    (SubstituteLogger) stutteringAgent.log());
-            Dish dishToServe = someDish();
-            DishServed dishServed = DishServed
-                    .newBuilder()
-                    .setDish(dishToServe)
-                    .build();
-            charityContext.receivesExternalEvent(restaurantContext.name(), dishServed);
+                    (SubstituteLogger) faultyDonor.log());
+
+            charityContext.receivesExternalEvent(deliveryContext.name(), orderPaidFor);
             assertLoggedCorrectly(loggedMessages);
         }
     }
@@ -273,7 +239,7 @@ class AbstractEventReactorTest {
      * </ul>
      */
     private static void assertLoggedCorrectly(Queue<SubstituteLoggingEvent> messages) {
-        assertEquals(1, messages.size());
+        assertThat(messages).hasSize(1);
         SubstituteLoggingEvent loggedWarning = messages.poll();
         assertEquals(ERROR, loggedWarning.getLevel());
     }

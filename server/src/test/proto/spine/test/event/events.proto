@@ -32,8 +32,6 @@ import "spine/core/user_id.proto";
 import "spine/net/email_address.proto";
 import "spine/test/event/project.proto";
 import "spine/test/event/team.proto";
-import "spine/test/event/restaurant.proto";
-import "google/protobuf/timestamp.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;
@@ -98,106 +96,4 @@ message EBTaskAdded {
 
 message ProjectFinished {
     ProjectId project_id = 1;
-}
-
-message DishCooked {
-
-    Dish dish = 1;
-}
-
-message DishServed {
-
-    Dish dish = 1;
-    string restaurant_id = 2;
-}
-
-message DishFoundToBePoisonous {
-
-    Dish dish = 1;
-    string restaurant_id = 2;
-}
-
-message DishReturnedToKitchen {
-
-    Dish returnedDish = 1;
-}
-
-message HeadChefGotSad {
-
-    int32 sadness_duration = 1;
-}
-
-message AppointmentMade {
-
-    google.protobuf.Timestamp appointmentTime = 1;
-}
-
-message RestaurantWarningMade {
-
-    string warning_text = 1;
-    string restaurant_id = 2;
-}
-
-message RestaurantShutDown {
-
-    string reason = 1;
-    string health_inspection_id = 2;
-    string restaurant_id = 3;
-}
-
-message StaffEscorted {
-
-    string restaurant_id = 1;
-}
-
-message RestaurantPremisesCleared {
-
-    string restaurant_id = 1;
-}
-
-message UserNotified {
-
-    string notification_message = 1;
-
-    NotificationMethod notification_method = 2;
-
-    enum NotificationMethod {
-        UNDEFINED = 0;
-        SMS = 1;
-        CALL = 2;
-        MESSENGER = 3;
-    }
-}
-
-message CharityDonationOffered {
-    string message = 1;
-}
-
-message DishReviewRequested {
-
-    Dish dish = 1;
-    string message = 2;
-}
-
-message DishReviewLeft {
-
-    Dish dish = 1;
-    int32 score = 2 [(range) = "[0..10]"];
-}
-
-message FoodDelivered {
-
-    Dish dish = 1;
-}
-
-message ChefPraised {
-
-    Dish dish = 1;
-    int32 user_review = 2 [(range) = "[0..10]"];
-    string message = 3;
-}
-
-message ChefWarningSent {
-
-    string message = 1;
 }

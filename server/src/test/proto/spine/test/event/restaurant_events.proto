@@ -19,19 +19,53 @@
  */
 syntax = "proto3";
 
-package spine.test.event;
+package spine.test.entity;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.event";
+option java_package = "io.spine.server.event";
 option java_multiple_files = true;
 
+import "spine/test/event/restaurant.proto";
 import "google/protobuf/timestamp.proto";
 
-message Order {
+// Events defined in this file serve the restaurant bounded context.
 
-    string order_id = 1;
-    google.protobuf.Timestamp time_placed = 2;
-    double price_in_usd = 3;
+message OrderReadyToBeServed {
+
+    event.Order order = 1;
+}
+
+message OrderPaidFor {
+
+    event.Order order = 1;
+}
+
+message OrderCannotBeServed {
+
+    event.Order order = 1;
+}
+
+message CustomerNotified {
+
+    event.Order order = 1;
+}
+
+message OrderServed {
+
+    event.Order order = 1;
+    google.protobuf.Timestamp served_on = 2;
+}
+
+message OrderServedLate {
+
+    event.Order order = 1;
+    google.protobuf.Timestamp served_on = 2;
+}
+
+message DeliveryServiceNotified {
+
+    event.Order order = 1;
+    string message = 2;
 }

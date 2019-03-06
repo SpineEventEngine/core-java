@@ -56,8 +56,7 @@ import static java.lang.String.format;
  * <p>To use one, do the following:
  * <ol>
  *     <li>Create an instance, specifying the event bus which receives emitted events.
- *     <li>Register the reactor in a desired bounded context via
- *         {@link BoundedContext#registerEventDispatcher(EventDispatcher)}.
+ *     <li>{@linkplain BoundedContext#registerEventDispatcher(EventDispatcher) Register}.
  * </ol>
  *
  * @see React reactors
@@ -127,9 +126,7 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>For event reactors, obtains the class name.
+     * Obtains the name of this reactor, {@linkplain TypeConverter#toAny(Object) packed to Any}.
      */
     @Override
     public Any producerId() {
@@ -137,9 +134,7 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>For event reactors, returns a {@linkplain Versions#zero() zero} version.
+     * For event reactors, returns a {@linkplain Versions#zero() zero} version.
      */
     @Override
     public Version version() {
