@@ -36,10 +36,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -116,7 +116,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     private final Set<Message> postedEvents;
 
-    protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
+    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
         this.commandTap = new CommandMemoizingTap();
         EventBus.Builder eventBus = EventBus
                 .newBuilder()
@@ -155,7 +155,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a single-tenant instance with the specified enricher.
      */
-    public static SingleTenantBlackBoxContext singleTenant(Enricher enricher) {
+    public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
         return new SingleTenantBlackBoxContext(enricher);
     }
 
@@ -186,7 +186,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
         Optional<EventBus.Builder> eventBus = builder.eventBus();
         EventEnricher enricher =
-                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
+                eventBus.map(b -> b.enricher()
+                                   .orElse(emptyEnricher()))
                         .orElseGet(BlackBoxBoundedContext::emptyEnricher);
 
         BlackBoxBoundedContext<?> result = builder.isMultitenant()
@@ -199,7 +200,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return result;
     }
 
-    /** Obtains the name of this bounded context */
+    /** Obtains the name of this bounded context. */
     public BoundedContextName name() {
         return boundedContext.name();
     }
@@ -619,9 +620,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                .build();
     }
 
-    private static Enricher emptyEnricher() {
-        return Enricher.newBuilder()
-                       .build();
+    private static EventEnricher emptyEnricher() {
+        return EventEnricher.newBuilder()
+                            .build();
     }
 
     /**
@@ -649,8 +650,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return boundedContext.findRepository(stateClass)
                              .orElseThrow(
                                      () -> newIllegalStateException(
-                                         "Unable to find repository for entities with state `%s`.",
-                                         stateClass.getCanonicalName()
+                                             "Unable to find repository for entities with state `%s`.",
+                                             stateClass.getCanonicalName()
                                      )
                              );
     }
