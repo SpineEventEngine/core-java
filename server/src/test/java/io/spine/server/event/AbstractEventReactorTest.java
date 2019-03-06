@@ -87,12 +87,12 @@ class AbstractEventReactorTest {
         restaurantContext = BlackBoxBoundedContext.singleTenant();
         notifier = new DeliveryNotifier(restaurantContext.eventBus(), DESIRED_NOTIFICATION_METHOD);
         chefPerformanceTracker = new ChefPerformanceTracker(restaurantContext.eventBus());
-        restaurantContext.registerEventDispatchers(notifier);
-        restaurantContext.registerEventDispatchers(chefPerformanceTracker);
+        restaurantContext.withEventDispatchers(notifier);
+        restaurantContext.withEventDispatchers(chefPerformanceTracker);
 
         charityContext = BlackBoxBoundedContext.singleTenant();
         charityAgent = new CharityAgent(charityContext.eventBus());
-        charityContext.registerEventDispatchers(charityAgent);
+        charityContext.withEventDispatchers(charityAgent);
 
         deliveryContext = BlackBoxBoundedContext.singleTenant();
     }
@@ -147,7 +147,7 @@ class AbstractEventReactorTest {
         void logError() {
             FaultyDeliveryNotifier faultyNotifier =
                     new FaultyDeliveryNotifier(restaurantContext.eventBus());
-            restaurantContext.registerEventDispatchers(faultyNotifier);
+            restaurantContext.withEventDispatchers(faultyNotifier);
             Queue<SubstituteLoggingEvent> loggedMessages =
                     redirectLogging((SubstituteLogger) faultyNotifier.log());
 
@@ -241,7 +241,7 @@ class AbstractEventReactorTest {
         void logAnError() {
             StutteringCharityAgent stutteringAgent =
                     new StutteringCharityAgent(charityContext.eventBus());
-            charityContext.registerEventDispatchers(stutteringAgent);
+            charityContext.withEventDispatchers(stutteringAgent);
 
             Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
                     (SubstituteLogger) stutteringAgent.log());
