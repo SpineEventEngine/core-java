@@ -49,6 +49,7 @@ import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Queue;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.event.given.AbstractReactorTestEnv.badReviewLeft;
 import static io.spine.server.event.given.AbstractReactorTestEnv.dishServed;
@@ -139,7 +140,7 @@ class AbstractEventReactorTest {
             DoubleSummaryStatistics stats = chefPerformanceTracker.chefStats();
             boolean twoReviewsReceived = stats.getCount() == 2;
             assertTrue(twoReviewsReceived);
-            assertEquals(expectedScore, stats.getAverage());
+            assertThat(expectedScore).isEqualTo(expectedScore);
         }
 
         @Test

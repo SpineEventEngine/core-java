@@ -243,6 +243,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param dispatchers
      *         dispatchers to register with the event bus of this bounded context
      */
+    @CanIgnoreReturnValue
     public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
         return registerAll(boundedContext::registerEventDispatcher, dispatchers);
     }
