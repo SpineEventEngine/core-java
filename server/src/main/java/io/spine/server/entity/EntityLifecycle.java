@@ -115,7 +115,7 @@ public class EntityLifecycle {
      *
      * <p>Use this constructor for test purposes <b>only</b>.
      *
-     * @see Builder
+     * @see EntityLifecycle.Builder
      */
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
