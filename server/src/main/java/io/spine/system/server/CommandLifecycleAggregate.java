@@ -59,7 +59,7 @@ final class CommandLifecycleAggregate
     }
 
     @Assign
-    TargetAssignedToCommand on(AssignTargetToCommand event) {
+    TargetAssignedToCommand handle(AssignTargetToCommand event) {
         return TargetAssignedToCommand.newBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
@@ -94,7 +94,8 @@ final class CommandLifecycleAggregate
         CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(getCurrentTime())
                 .build();
-        builder().setStatus(status);
+        builder().setId(event.getId())
+                 .setStatus(status);
     }
 
     @Apply(allowImport = true)
@@ -103,7 +104,8 @@ final class CommandLifecycleAggregate
         CommandTimeline status = statusBuilder()
                 .setWhenScheduled(getCurrentTime())
                 .build();
-        builder().setCommand(updatedCommand)
+        builder().setId(event.getId())
+                 .setCommand(updatedCommand)
                  .setStatus(status);
     }
 
@@ -117,7 +119,8 @@ final class CommandLifecycleAggregate
         CommandTimeline status = statusBuilder()
                 .setWhenDispatched(getCurrentTime())
                 .build();
-        builder().setStatus(status);
+        builder().setId(event.getId())
+                 .setStatus(status);
     }
 
     /**
@@ -132,9 +135,10 @@ final class CommandLifecycleAggregate
         CommandTimeline status =
                 builder.getStatus()
                        .toBuilder()
-                       .setWhenTargetAssgined(getCurrentTime())
+                       .setWhenTargetAssigned(getCurrentTime())
                        .build();
-        builder.setStatus(status)
+        builder.setId(event.getId())
+               .setStatus(status)
                .setTarget(target);
     }
 
@@ -184,7 +188,7 @@ final class CommandLifecycleAggregate
         CommandTimeline.Builder newStatus =
                 state().getStatus()
                        .toBuilder()
-                       .setSubstitued(substituted);
+                       .setSubstituted(substituted);
         builder().setStatus(newStatus.build());
     }
 
@@ -197,7 +201,7 @@ final class CommandLifecycleAggregate
         CommandTimeline.Builder newStatus =
                 state().getStatus()
                        .toBuilder()
-                       .setSubstitued(substituted);
+                       .setSubstituted(substituted);
         builder().setStatus(newStatus.build());
     }
 
