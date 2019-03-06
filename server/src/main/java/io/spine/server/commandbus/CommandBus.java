@@ -99,7 +99,7 @@ public class CommandBus extends UnicastBus<Command,
      *
      * <p>The value is effectively final, though should be initialized lazily.
      *
-     * @see #getValidator() to getreive the non-null value of the validator
+     * @see #validator() to getreive the non-null value of the validator
      */
     @LazyInit
     private @MonotonicNonNull CommandValidator commandValidator;
@@ -229,12 +229,12 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     @Override
-    protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<CommandEnvelope> deadMessageHandler() {
         return deadCommandHandler;
     }
 
     @Override
-    protected EnvelopeValidator<CommandEnvelope> getValidator() {
+    protected EnvelopeValidator<CommandEnvelope> validator() {
         if (commandValidator == null) {
             commandValidator = new CommandValidator(this);
         }

@@ -149,9 +149,9 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
+        EnvelopeValidator<CommandEnvelope> validator = commandBus.validator();
         assertNotNull(validator);
-        assertSame(validator, commandBus.getValidator());
+        assertSame(validator, commandBus.validator());
     }
 
     @Override

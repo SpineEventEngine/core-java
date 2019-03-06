@@ -166,10 +166,6 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         return repository().findOrCreate(id);
     }
 
-    private Iterator<EntityRecord> loadAllRecords() {
-        return repository.loadAllRecords();
-    }
-
     /*
      * Tests
      ************/
@@ -240,6 +236,10 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     @Nested
     @DisplayName("find multiple entities")
     class FindMultiple {
+
+        private Iterator<EntityRecord> loadAllRecords() {
+            return repository.loadAllRecords();
+        }
 
         @Test
         @DisplayName("by IDs")

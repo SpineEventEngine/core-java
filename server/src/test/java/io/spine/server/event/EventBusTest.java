@@ -29,7 +29,6 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.event.given.bus.BareDispatcher;
 import io.spine.server.event.given.bus.EBExternalTaskAddedSubscriber;
 import io.spine.server.event.given.bus.EBProjectArchivedSubscriber;
@@ -91,7 +90,7 @@ public class EventBusTest {
     private CommandBus commandBus;
     private BoundedContext bc;
 
-    private void setUp(@Nullable Enricher enricher) {
+    private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
@@ -283,9 +282,9 @@ public class EventBusTest {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
+        EnvelopeValidator<EventEnvelope> validator = eventBus.validator();
         assertNotNull(validator);
-        assertSame(validator, eventBus.getValidator());
+        assertSame(validator, eventBus.validator());
     }
 
     @Nested

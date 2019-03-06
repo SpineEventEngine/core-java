@@ -209,10 +209,10 @@ public final class Server implements Logging {
          * Bounded Context to be built and assigns its supplier.
          */
         private void ensureStorageFactory(BoundedContextBuilder builder) {
-            Optional<Supplier<StorageFactory>> supplier = builder.getStorageFactorySupplier();
+            Optional<Supplier<StorageFactory>> supplier = builder.storageFactorySupplier();
             if (!supplier.isPresent()) {
                 boolean multitenant = builder.isMultitenant();
-                BoundedContextName name = builder.getName();
+                BoundedContextName name = builder.name();
 
                 StorageFactory newFactory = storageFactory.copyFor(name, multitenant);
                 builder.setStorageFactorySupplier(() -> newFactory);

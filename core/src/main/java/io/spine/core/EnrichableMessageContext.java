@@ -20,19 +20,18 @@
 
 package io.spine.core;
 
-import io.spine.base.EnrichmentContainer;
-import io.spine.base.EnrichmentMessage;
+import com.google.protobuf.Message;
 import io.spine.base.MessageContext;
 import io.spine.core.Enrichment.Container;
 
 import java.util.Optional;
 
-import static io.spine.core.Enrichments.container;
+import static io.spine.core.Enrichments.containerIn;
 
 /**
  * A common interface for message contexts that hold enrichments.
  */
-public interface EnrichableMessageContext extends EnrichmentContainer, MessageContext {
+public interface EnrichableMessageContext extends MessageContext {
 
     /**
      * Obtains an instance of {@link Enrichment} from the context of the message.
@@ -40,11 +39,21 @@ public interface EnrichableMessageContext extends EnrichmentContainer, MessageCo
     @SuppressWarnings("override") // in generated code.
     Enrichment getEnrichment();
 
-    @Override
-    default <E extends EnrichmentMessage> Optional<E> find(Class<E> cls) {
-        Enrichment enrichment = getEnrichment();
-        Optional<Container> container = container(enrichment);
+    default <E extends Message> Optional<E> find(Class<E> cls) {
+        Optional<Container> container = containerIn(this);
         Optional<E> result = container.flatMap(c -> Enrichments.find(cls, c));
         return result;
     }
+
+    /**
+     * Obtains enrichment of the passed class.
+     *
+     * @throws IllegalStateException if the enrichment is not found
+     */
+    default <E extends Message> E get(Class<E> cls) {
+        Container container = containerIn(this).orElse(Container.getDefaultInstance());
+        E result = Enrichments.get(cls, container);
+        return result;
+    }
 }
+

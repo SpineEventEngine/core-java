@@ -123,7 +123,7 @@ final class EntityRecordComparator implements Comparator<EntityRecordWithColumns
                           .filter((value) -> value.matches(direction))
                           .findFirst()
                           .orElseThrow(() -> newIllegalArgumentException(
-                                  "An invalid order direction provided to TenantRecords."));
+                                  "An invalid order direction provided to `TenantRecords`."));
 
             return result;
         }

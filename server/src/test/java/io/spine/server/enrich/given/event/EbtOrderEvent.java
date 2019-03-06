@@ -18,25 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.enrich;
+package io.spine.server.enrich.given.event;
 
-import com.google.protobuf.Message;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
 
 /**
- * A function which enriches an event message.
+ * Common interface for order events in the test environment of
+ * {@link io.spine.server.enrich.EnricherBuilderTest}.
+ *
+ * @apiNote
+ * This interface is handwritten (instead of being generated) because of
+ * <a href="https://github.com/SpineEventEngine/base/issues/348">this issue</a>
+ * in the Model Compiler.
+ *
+ * <p>Once the issue is resolved, please set the option {@code (is).generate} to {@code true}
+ * in event types declared in the {@code enrichment_builder_test_events.proto} file,
+ * and then remove this interface in favor of the generated one.
  */
-final class EventEnrichment<S extends EventMessage, T extends Message>
-        extends MessageEnrichment<S, EventContext, T> {
-
-    private EventEnrichment(Enricher enricher, Class<S> sourceClass, Class<T> enrichmentClass) {
-        super(enricher, sourceClass, enrichmentClass);
-    }
-
-    /** Creates a new message enricher instance. */
-    static <S extends EventMessage, T extends Message>
-    EventEnrichment<S, T> create(Enricher parent, Class<S> messageClass, Class<T> enrichmentClass) {
-        return new EventEnrichment<>(parent, messageClass, enrichmentClass);
-    }
+@Immutable
+public interface EbtOrderEvent extends EventMessage {
 }

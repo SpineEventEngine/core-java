@@ -20,49 +20,33 @@
 
 package io.spine.server.enrich;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.FloatValue;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import io.spine.core.EventContext;
-import io.spine.core.UserId;
-import io.spine.server.event.given.EnricherBuilderTestEnv.Enrichment;
-import io.spine.test.event.ProjectId;
-import io.spine.testing.Tests;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.base.Time;
+import io.spine.server.enrich.given.event.EbtOrderCreated;
+import io.spine.server.enrich.given.event.EbtOrderEvent;
+import io.spine.server.enrich.given.event.EbtOrderLineAdded;
+import io.spine.server.event.EventEnricher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
-import java.util.function.BiFunction;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
 
-    private EnricherBuilder builder;
-    private BiFunction<Timestamp, EventContext, StringValue> function;
-    private FieldEnrichment<Timestamp, ?, StringValue> fieldEnrichment;
+    private EventEnricher.Builder builder;
 
     @BeforeEach
     void setUp() {
-        this.builder = Enricher.newBuilder();
-        this.function = new BiFunction<Timestamp, EventContext, StringValue>() {
-            @Override
-            public @Nullable StringValue apply(@Nullable Timestamp input, EventContext context) {
-                if (input == null) {
-                    return null;
-                }
-                String rawTimestamp = Timestamps.toString(input);
-                return StringValue.of(rawTimestamp);
-            }
-        };
-        this.fieldEnrichment = FieldEnrichment.of(Timestamp.class, StringValue.class, function);
+        builder = EventEnricher.newBuilder();
     }
 
     @Nested
@@ -70,102 +54,88 @@ class EnricherBuilderTest {
     class BuildEnricher {
 
         @Test
-        @DisplayName("if all functions have been registered")
-        void forAllFunctionsRegistered() {
-            Enricher enricher = Enrichment.newEnricher();
-
-            assertNotNull(enricher);
-        }
-
-        @Test
         @DisplayName("if no functions have been registered")
-        void forNoFunctionsRegistered() {
-            Enricher enricher = Enricher.newBuilder()
-                                        .build();
-            assertNotNull(enricher);
+        void noFunctions() {
+            assertBuilt(builder.build());
         }
 
         @Test
-        @DisplayName("if only some of expected functions have been registered")
-        void forSomeFunctionsRegistered() {
-            builder.add(ProjectId.class, UserId.class,
-                        new Enrichment.GetProjectOwnerId())
-                   .add(ProjectId.class, String.class,
-                        new Enrichment.GetProjectName());
-            Enricher enricher = builder.build();
-            assertNotNull(enricher);
+        @DisplayName("if functions added")
+        void functionsAdded() {
+            builder.add(EbtOrderCreated.class, StringValue.class,
+                        (e, c) -> StringValue.getDefaultInstance())
+                   .add(EbtOrderLineAdded.class, BoolValue.class,
+                        (e, c) -> BoolValue.of(true));
+            assertBuilt(builder.build());
         }
-    }
 
-    @Test
-    @DisplayName("add field enrichment")
-    void addFieldEnrichment() {
-        builder.add(Timestamp.class, StringValue.class, function);
-
-        assertTrue(builder.functions()
-                          .contains(fieldEnrichment));
-    }
-
-    @Test
-    @DisplayName("remove enrichment function")
-    void removeEnrichmentFunction() {
-        builder.add(Timestamp.class, StringValue.class, function);
-
-        builder.remove(fieldEnrichment);
-
-        assertTrue(builder.functions()
-                          .isEmpty());
+        void assertBuilt(Enricher enricher) {
+            assertThat(enricher).isNotNull();
+        }
     }
 
     @Nested
-    @DisplayName("not accept")
-    class NotAccept {
+    @DisplayName("not allow duplicating entries")
+    class DupEntries {
 
         @Test
-        @DisplayName("null source class")
-        void nullSourceClass() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.add(Tests.nullRef(),
-                                           StringValue.class,
-                                           function));
+        @DisplayName("of source and enrichment class pair")
+        void classPair() {
+            builder.add(EbtOrderLineAdded.class, BoolValue.class,
+                        (e, c) -> BoolValue.of(true));
+
+            assertRejects(
+                    () -> builder.add(EbtOrderLineAdded.class, BoolValue.class,
+                                      (e, c) -> BoolValue.of(false))
+            );
         }
 
-        @Test
-        @DisplayName("null target class")
-        void nullTargetClass() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.add(Timestamp.class,
-                                           Tests.nullRef(),
-                                           function));
+        @Nested
+        @DisplayName("when a function is already defined")
+        class AlreadyDefined {
+
+            @Test
+            @DisplayName("for an interface which the passed class implements")
+            void interfaceEnrichment() {
+                // Adding a function via an interface.
+                builder.add(EbtOrderEvent.class, FloatValue.class,
+                            (e, c) -> FloatValue.of(3.14f));
+
+                assertRejects(
+                        // Attempting to add a function via the class which implements the
+                        // interface in the entry added above.
+                        () -> builder.add(EbtOrderCreated.class, FloatValue.class,
+                                          (e, c) -> FloatValue.of(2.68f))
+                );
+            }
+
+            @Test
+            @DisplayName("for a class which implements the passed interface")
+            void classImplements() {
+                // Adding a function via a class.
+                builder.add(EbtOrderCreated.class, Timestamp.class,
+                            (e, c) -> Time.getCurrentTime());
+
+                assertRejects(
+                        // Attempting to add a function via the interface which the class
+                        // from the entry added above implements.
+                        () -> builder.add(EbtOrderEvent.class, Timestamp.class,
+                                          (e, c) -> Time.getCurrentTime())
+                );
+            }
         }
 
-        @Test
-        @DisplayName("null function")
-        void nullFunction() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.add(Timestamp.class,
-                                           StringValue.class,
-                                           Tests.nullRef()));
-        }
-
-        @Test
-        @DisplayName("duplicate field enrichment function")
-        void duplicates() {
-            builder.add(Timestamp.class, StringValue.class, function);
-            assertThrows(IllegalArgumentException.class,
-                         () -> builder.add(Timestamp.class, StringValue.class, function));
+        private void assertRejects(Executable runnable) {
+            assertThrows(IllegalArgumentException.class, runnable);
         }
     }
 
     @Test
-    @DisplayName("assure that function performs same transition")
-    void assureSameTransition() {
-        assertTrue(SameTransition.asFor(fieldEnrichment).test(fieldEnrichment));
-    }
-
-    @Test
-    @DisplayName("return false if input to SameTransition predicate is null")
-    void assureNotSameForNull() {
-        assertFalse(SameTransition.asFor(fieldEnrichment).test(null));
+    @DisplayName("do not allow passing an interface as enrichment class")
+    void prohibitInterface() {
+        assertThrows(IllegalArgumentException.class, () ->
+                builder.add(EbtOrderEvent.class, Message.class,
+                            (e, c) -> StringValue.getDefaultInstance())
+        );
     }
 }

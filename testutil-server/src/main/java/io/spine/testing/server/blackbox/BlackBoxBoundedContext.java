@@ -169,7 +169,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a multitenant instance with the specified enricher.
      */
-    public static MultitenantBlackBoxContext multiTenant(Enricher enricher) {
+    public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
         return new MultitenantBlackBoxContext(enricher);
     }
 
@@ -178,19 +178,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *
      * <p>In particular:
      * <ul>
-     * <li>multi-tenancy status;
-     * <li>{@code Enricher};
-     * <li>added repositories.
+     *     <li>multi-tenancy status;
+     *     <li>{@code Enricher};
+     *     <li>added repositories.
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
-        Optional<EventBus.Builder> eventBus = builder.getEventBus();
-        Enricher enricher =
-                eventBus.isPresent()
-                ? eventBus.get()
-                          .getEnricher()
-                          .orElse(emptyEnricher())
-                : emptyEnricher();
+        Optional<EventBus.Builder> eventBus = builder.eventBus();
+        EventEnricher enricher =
+                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
+                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
 
         BlackBoxBoundedContext<?> result = builder.isMultitenant()
                                            ? multiTenant(enricher)
@@ -652,8 +649,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return boundedContext.findRepository(stateClass)
                              .orElseThrow(
                                      () -> newIllegalStateException(
-                                             "Unable to find repository for entities with state `%s`.",
-                                             stateClass.getCanonicalName()
+                                         "Unable to find repository for entities with state `%s`.",
+                                         stateClass.getCanonicalName()
                                      )
                              );
     }

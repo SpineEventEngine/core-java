@@ -131,7 +131,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @return the current state or default state value
      */
     @Override
-    public S state() {
+    public final S state() {
         S result = state;
         if (result == null) {
             synchronized (this) {

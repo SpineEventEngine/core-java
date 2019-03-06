@@ -23,12 +23,12 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.enrich.Enricher;
+import io.spine.server.enrich.EventEnrichmentFn;
+import io.spine.server.event.EventEnricher;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,25 +47,25 @@ final class SystemEnricher {
     /**
      * Creates a new {@link Enricher} for the system bounded context.
      *
-     * @param commandRepository repository to find enrichment values in
+     * @param repo the repository for obtaining scheduled command instances
      * @return new {@link Enricher}
      */
-    public static Enricher create(CommandLifecycleRepository commandRepository) {
-        checkNotNull(commandRepository);
-        Enricher enricher = Enricher
+    public static EventEnricher create(CommandLifecycleRepository repo) {
+        checkNotNull(repo);
+        EventEnricher enricher = EventEnricher
                 .newBuilder()
-                .add(CommandId.class, Command.class, commandLookup(commandRepository))
+                .add(CommandScheduled.class, Command.class, commandLookup(repo))
                 .build();
         return enricher;
     }
 
-    private static BiFunction<CommandId, EventContext, Command>
-    commandLookup(CommandLifecycleRepository repository) {
-        return (commandId, context) -> findCommand(repository, commandId);
+    private static EventEnrichmentFn<CommandScheduled, Command>
+    commandLookup(CommandLifecycleRepository repo) {
+        return (commandScheduled, context) -> findCommand(repo, commandScheduled.getId());
     }
 
-    private static Command findCommand(CommandLifecycleRepository repository, CommandId id) {
-        Optional<CommandLifecycleAggregate> commandLifecycle = repository.find(id);
+    private static Command findCommand(CommandLifecycleRepository repo, CommandId id) {
+        Optional<CommandLifecycleAggregate> commandLifecycle = repo.find(id);
         Command command = commandLifecycle.map(Aggregate::state)
                                           .map(CommandLifecycle::getCommand)
                                           .orElse(Command.getDefaultInstance());
