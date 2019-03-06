@@ -62,6 +62,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -149,6 +150,7 @@ class ProjectionEndToEndTest {
                 .setId(historyId)
                 .setNewState(pack(newState))
                 .setWhen(getCurrentTime())
+                .addMessageId(dispatchedMessageId())
                 .build();
         Timestamp producedAt = Time.getCurrentTime();
         EventContext eventContext = EventContext
