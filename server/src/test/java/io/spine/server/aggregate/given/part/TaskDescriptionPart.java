@@ -52,7 +52,7 @@ public class TaskDescriptionPart
     }
 
     @Apply
-    void apply(AggTaskAdded event) {
+    private void apply(AggTaskAdded event) {
         builder().setValue("Description value");
     }
 }

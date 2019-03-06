@@ -36,12 +36,12 @@ public class ProjectEventsSubscriber extends AbstractEventSubscriber {
     private static ItgProjectStarted domesticEvent = null;
 
     @Subscribe(external = true)
-    public void on(ItgProjectCreated msg) {
+    void on(ItgProjectCreated msg) {
         externalEvent = msg;
     }
 
     @Subscribe
-    public void on(ItgProjectStarted msg) {
+    void on(ItgProjectStarted msg) {
         domesticEvent = msg;
     }
 

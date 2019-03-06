@@ -63,7 +63,7 @@ public final class TuReactingAggregate
     }
 
     @Apply
-    void on(@SuppressWarnings("unused") TuProjectAssigned event) {
+    private void on(@SuppressWarnings("unused") TuProjectAssigned event) {
         builder().setTimestamp(fromMillis(123456));
     }
 }

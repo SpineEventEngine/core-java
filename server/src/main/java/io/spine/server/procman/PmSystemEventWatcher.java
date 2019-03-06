@@ -47,14 +47,14 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     }
 
     @Subscribe
-    public void on(CommandDispatchedToHandler event) {
+    void on(CommandDispatchedToHandler event) {
         I id = extract(event.getReceiver());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }
 
     @Subscribe
-    public void on(HistoryRejections.CannotDispatchCommandTwice event) {
+    void on(HistoryRejections.CannotDispatchCommandTwice event) {
         Command command = event.getPayload();
         DuplicateCommandException exception = DuplicateCommandException.of(command);
         CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -62,14 +62,14 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     }
 
     @Subscribe
-    public void on(EventDispatchedToReactor event) {
+    void on(EventDispatchedToReactor event) {
         I id = extract(event.getReceiver());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
     }
 
     @Subscribe
-    public void on(HistoryRejections.CannotDispatchEventTwice event) {
+    void on(HistoryRejections.CannotDispatchEventTwice event) {
         Event payload = event.getPayload();
         DuplicateEventException exception = new DuplicateEventException(payload);
         EventEnvelope envelope = EventEnvelope.of(payload);

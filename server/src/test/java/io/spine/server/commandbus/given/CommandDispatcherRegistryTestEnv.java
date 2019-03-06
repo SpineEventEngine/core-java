@@ -75,7 +75,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(CmdProjectCreated event) {
+        void on(CmdProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -91,7 +91,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(CmdTaskAdded event) {
+        void on(CmdTaskAdded event) {
             keep(event);
 
             Task task = event.getTask();
@@ -106,7 +106,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        public void on(CmdProjectStarted event) {
+        void on(CmdProjectStarted event) {
             keep(event);
 
             handleProjectStarted();

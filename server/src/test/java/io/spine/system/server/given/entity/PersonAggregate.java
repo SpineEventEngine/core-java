@@ -79,23 +79,23 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     }
 
     @Apply
-    void on(PersonCreated event) {
+    private void on(PersonCreated event) {
         builder().setId(event.getId())
                  .setName(event.getName());
     }
 
     @Apply
-    void on(PersonHidden event) {
+    private void on(PersonHidden event) {
         setArchived(true);
     }
 
     @Apply
-    void on(PersonExposed event) {
+    private void on(PersonExposed event) {
         setArchived(false);
     }
 
     @Apply
-    void on(PersonRenamed event) {
+    private void on(PersonRenamed event) {
         PersonVBuilder builder = builder();
         PersonName newName =
                 builder.getName()

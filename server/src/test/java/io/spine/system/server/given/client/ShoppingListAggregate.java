@@ -57,23 +57,23 @@ public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, Shopp
     }
 
     @Apply
-    void on(ShoppingListCreated event) {
+    private void on(ShoppingListCreated event) {
         builder().setId(event.getId());
     }
 
     @Apply
-    void on(ListItemAdded event) {
+    private void on(ListItemAdded event) {
         builder().addItem(event.getItem());
     }
 
     @Apply(allowImport = true)
-    void on(HardCopyPrinted event) {
+    private void on(HardCopyPrinted event) {
         int newCount = builder().getHardCopiesCount() + 1;
         builder().setHardCopiesCount(newCount);
     }
 
     @Apply(allowImport = true)
-    void on(HardCopyLost event) {
+    private void on(HardCopyLost event) {
         ShoppingListVBuilder builder = builder();
         int newCount = builder.getHardCopiesCount() - 1;
         if (newCount >= 0) {

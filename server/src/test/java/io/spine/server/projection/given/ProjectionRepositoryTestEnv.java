@@ -66,12 +66,12 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectCreated event) {
+        void on(PrjProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(PrjTaskAdded event) {
+        void on(PrjTaskAdded event) {
             // do nothing
         }
     }
@@ -84,7 +84,7 @@ public class ProjectionRepositoryTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        public void apply(PrjProjectCreated event, EventContext eventContext) {
+        void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
         }
 

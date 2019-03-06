@@ -33,7 +33,7 @@ public class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void on(EBTaskAdded message, EventContext context) {
+    void on(EBTaskAdded message, EventContext context) {
         // Do nothing.
     }
 }

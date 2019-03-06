@@ -134,12 +134,12 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     }
 
     @Apply
-    void event(AggTaskCreated event) {
+    private void event(AggTaskCreated event) {
         builder().setId(event.getTaskId());
     }
 
     @Apply
-    void event(AggTaskAssigned event) {
+    private void event(AggTaskAssigned event) {
         builder().setAssignee(event.getNewAssignee());
     }
 
@@ -179,7 +179,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     }
 
     @Apply
-    void event(AggUserNotified event) {
+    private void event(AggUserNotified event) {
         // Do nothing.
     }
 }

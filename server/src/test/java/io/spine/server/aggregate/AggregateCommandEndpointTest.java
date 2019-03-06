@@ -141,7 +141,7 @@ class AggregateCommandEndpointTest {
         private AggProjectCreated remembered;
 
         @Subscribe
-        public void on(AggProjectCreated msg) {
+        void on(AggProjectCreated msg) {
             remembered = msg;
         }
     }

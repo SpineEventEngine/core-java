@@ -28,7 +28,6 @@ import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;
-import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
@@ -53,11 +52,6 @@ public class CommandReactionSignature
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
         return ImmutableSet.copyOf(CommandReactionParams.values());
-    }
-
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override

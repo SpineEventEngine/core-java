@@ -35,7 +35,7 @@ public class RememberingSubscriber extends AbstractEventSubscriber {
     private EventContext eventContext;
 
     @Subscribe
-    public void on(ProjectCreated eventMsg, EventContext context) {
+    void on(ProjectCreated eventMsg, EventContext context) {
         this.eventMessage = eventMsg;
         this.eventContext = context;
     }

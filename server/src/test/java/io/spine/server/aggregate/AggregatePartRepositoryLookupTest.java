@@ -128,7 +128,7 @@ class AggregatePartRepositoryLookupTest {
         }
 
         @Apply
-        void apply(AggProjectCreated event) {
+        private void apply(AggProjectCreated event) {
             builder().setId(event.getProjectId())
                      .setName(event.getName());
         }
@@ -169,7 +169,7 @@ class AggregatePartRepositoryLookupTest {
         }
 
         @Apply
-        void apply(AggTaskAdded event) {
+        private void apply(AggTaskAdded event) {
             Task task = event.getTask();
             builder().setTitle(task.getTitle())
                      .setDescription(task.getDescription());

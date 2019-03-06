@@ -193,7 +193,7 @@ class EventApplierTest {
         private RefProjectCreated eventApplied;
 
         @Apply
-        void apply(RefProjectCreated event) {
+        private void apply(RefProjectCreated event) {
             this.eventApplied = event;
         }
     }

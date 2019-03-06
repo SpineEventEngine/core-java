@@ -18,18 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.delivery.given;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-public class HiddenEntitySubscriber extends AbstractEventSubscriber {
-
-    @Subscribe
-    void on(HiddenParticipant organization) {
-        fail(HiddenEntitySubscriber.class.getSimpleName() +
-                     " should not be able to receive updates from hidden entities.");
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

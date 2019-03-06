@@ -29,6 +29,6 @@ import io.spine.core.Subscribe;
  */
 public class InvalidNoParams extends TestEventSubscriber {
     @Subscribe
-    public void handle() {
+    void handle() {
     }
 }

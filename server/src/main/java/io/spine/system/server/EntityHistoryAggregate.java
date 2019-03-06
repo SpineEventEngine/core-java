@@ -96,64 +96,64 @@ final class EntityHistoryAggregate
     }
 
     @Apply(allowImport = true)
-    void on(EntityCreated event) {
+    private void on(EntityCreated event) {
         builder().setId(event.getId());
     }
 
     @Apply
-    void on(EventDispatchedToSubscriber event) {
+    private void on(EventDispatchedToSubscriber event) {
         builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
-    void on(EventDispatchedToReactor event) {
+    private void on(EventDispatchedToReactor event) {
         builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
-    void on(CommandDispatchedToHandler event) {
+    private void on(CommandDispatchedToHandler event) {
         builder().setId(event.getReceiver());
         updateLastCommandTime(event.getWhenDispatched());
     }
 
     @Apply(allowImport = true)
-    void on(EntityStateChanged event) {
+    private void on(EntityStateChanged event) {
         builder().setId(event.getId())
                  .setLastStateChange(event.getWhen());
     }
 
     @Apply(allowImport = true)
-    void on(EntityArchived event) {
+    private void on(EntityArchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityDeleted event) {
+    private void on(EntityDeleted event) {
         updateLifecycleFlags(builder -> builder.setDeleted(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityExtractedFromArchive event) {
+    private void on(EntityExtractedFromArchive event) {
         updateLifecycleFlags(builder -> builder.setArchived(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityRestored event) {
+    private void on(EntityRestored event) {
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EventImported event) {
+    private void on(EventImported event) {
         updateLastEventTime(event.getWhenImported());
     }
 

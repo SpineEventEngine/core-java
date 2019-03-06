@@ -51,7 +51,7 @@ public class TuMessageLog extends Aggregate<Long, TuString, TuStringVBuilder> {
     }
 
     @Apply
-    void newLine(ValueLogged line) {
+    private void newLine(ValueLogged line) {
         String current = state().getValue();
         builder().setValue(current + System.lineSeparator() + line.getValue());
     }

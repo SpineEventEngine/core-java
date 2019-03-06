@@ -18,14 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.event.model;
+
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
+import io.spine.test.reflect.event.RefProjectCreated;
+
 /**
- * This package contains tests for event-related signatures.
+ * A class with a method that accepts event message and context.
+ *
+ * @author Alexander Yevsyukov
  */
+class ValidTwoParams extends TestEventSubscriber {
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.event.model.declare;
-
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Subscribe
+    void handle(RefProjectCreated event, EventContext context) {
+    }
+}

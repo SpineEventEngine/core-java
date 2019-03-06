@@ -62,7 +62,7 @@ public final class TuReactingAggregatePart
     }
 
     @Apply
-    void on(TuCommentLimitReached event) {
+    private void on(TuCommentLimitReached event) {
         builder().setCommentLimitReached(true);
     }
 }
