@@ -35,6 +35,7 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -57,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -176,9 +178,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      *
      * <p>In particular:
      * <ul>
-     *     <li>multi-tenancy status;
-     *     <li>{@code Enricher};
-     *     <li>added repositories.
+     * <li>multi-tenancy status;
+     * <li>{@code Enricher};
+     * <li>added repositories.
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
@@ -234,12 +236,18 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
-        checkNotNull(repositories);
-        for (Repository<?, ?> repository : repositories) {
-            checkNotNull(repository);
-            boundedContext.register(repository);
-        }
-        return thisRef();
+        return registerAll(boundedContext::register, repositories);
+    }
+
+    /**
+     * Registers passed command dispatchers with the Bounded Context under the test.
+     *
+     * @param dispatchers
+     *         dispatchers to register with the Bounded Context.
+     * @return current instance
+     */
+    public final T with(CommandDispatcher<?>... dispatchers) {
+        return registerAll(boundedContext::registerCommandDispatcher, dispatchers);
     }
 
     /**
@@ -249,12 +257,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * @param dispatchers
      *         dispatchers to register with the event bus of this bounded context
      */
+    @CanIgnoreReturnValue
     public final void registerEventDispatchers(EventDispatcher<?>... dispatchers) {
-        checkNotNull(dispatchers);
-        for (EventDispatcher<?> dispatcher : dispatchers) {
-            checkNotNull(dispatcher);
-            boundedContext.registerEventDispatcher(dispatcher);
+        registerAll(boundedContext::registerEventDispatcher, dispatchers);
+    }
+
+    @SafeVarargs
+    private final <S> T registerAll(Consumer<S> registerFn, S... itemsToRegister) {
+        checkNotNull(itemsToRegister);
+        for (S item : itemsToRegister) {
+            checkNotNull(item);
+            registerFn.accept(item);
         }
+        return thisRef();
     }
 
     /**
@@ -637,8 +652,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return boundedContext.findRepository(stateClass)
                              .orElseThrow(
                                      () -> newIllegalStateException(
-                                         "Unable to find repository for entities with state `%s`.",
-                                         stateClass.getCanonicalName()
+                                             "Unable to find repository for entities with state `%s`.",
+                                             stateClass.getCanonicalName()
                                      )
                              );
     }
