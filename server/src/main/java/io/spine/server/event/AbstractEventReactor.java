@@ -116,6 +116,11 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         log().error(errorMessage, exception);
     }
 
+    /**
+     * Obtains an external message dispatcher to deliver external messages.
+     *
+     * <p>Never returns an empty {@code Optional}.
+     */
     @Override
     public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
         return Optional.of(new ExternalDispatcher());
@@ -124,13 +129,18 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     /**
      * {@inheritDoc}
      *
-     * For event reactors, obtains the class name.
+     * <p>For event reactors, obtains the class name.
      */
     @Override
     public Any producerId() {
         return producerId.get();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>For event reactors, returns a {@linkplain Versions#zero() zero} version.
+     */
     @Override
     public Version version() {
         return Versions.zero();
