@@ -91,7 +91,7 @@ public class SubscriberSignatureTestEnv {
         return method;
     }
 
-    public static Method findThrowsUnchckedException() {
+    public static Method findThrowsUncheckedException() {
         Method method = findInvalidMethod("throwsUncheckedException");
         return method;
     }
