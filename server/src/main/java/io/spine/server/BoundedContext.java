@@ -121,7 +121,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         super();
         checkInheritance();
 
-        this.name = builder.getName();
+        this.name = builder.name();
         this.multitenant = builder.isMultitenant();
         this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
                                                    .get());
@@ -149,7 +149,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
-        Optional<CommandBus.Builder> busBuilder = builder.getCommandBus();
+        Optional<CommandBus.Builder> busBuilder = builder.commandBus();
         checkState(busBuilder.isPresent());
         CommandBus result = busBuilder.get()
                                       .injectEventBus(eventBus)
@@ -169,7 +169,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
                                                       EventBus eventBus,
                                                       BoundedContextName name) {
-        Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
+        Optional<IntegrationBus.Builder> busBuilder = builder.integrationBus();
         checkArgument(busBuilder.isPresent());
         IntegrationBus result =
                 busBuilder.get()

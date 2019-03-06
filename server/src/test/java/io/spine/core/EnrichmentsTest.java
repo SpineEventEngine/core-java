@@ -23,8 +23,8 @@ package io.spine.core;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.OptionalSubject;
 import com.google.common.truth.Truth8;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.EnrichmentMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Enrichment.Container;
 import io.spine.server.type.EventEnvelope;
@@ -44,7 +44,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Enrichments.container;
+import static io.spine.core.Enrichments.containerIn;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.type.given.GivenEvent.context;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -77,7 +77,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
      * See {@link Container#getItemsMap()} or {@code Enrichment} proto type definition
      * for details.
      */
-    private static EventContext givenContextEnrichedWith(EnrichmentMessage enrichment) {
+    private static EventContext givenContextEnrichedWith(Message enrichment) {
         String enrichmentKey = TypeName.of(enrichment)
                                        .value();
         Enrichment.Builder enrichments = Enrichment
@@ -140,7 +140,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     }
 
     private static
-    OptionalSubject assertEnrichment(EventContext ctx, Class<? extends EnrichmentMessage> cls) {
+    OptionalSubject assertEnrichment(EventContext ctx, Class<? extends Message> cls) {
         return Truth8.assertThat(ctx.find(cls));
     }
 
@@ -178,7 +178,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
      * Verifies if the passed event context has at least one enrichment.
      */
     private static boolean hasEnrichments(EventContext context) {
-        Optional<Container> optional = container(context.getEnrichment());
+        Optional<Container> optional = containerIn(context);
         if (!optional.isPresent()) {
             return false;
         }

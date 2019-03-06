@@ -174,12 +174,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected DeadMessageHandler<ExternalMessageEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<ExternalMessageEnvelope> deadMessageHandler() {
         return DeadExternalMessageHandler.INSTANCE;
     }
 
     @Override
-    protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
+    protected EnvelopeValidator<ExternalMessageEnvelope> validator() {
         return ExternalMessageValidator.INSTANCE;
     }
 

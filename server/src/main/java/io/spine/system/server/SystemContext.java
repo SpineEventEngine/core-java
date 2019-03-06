@@ -23,8 +23,8 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.enrich.Enricher;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventEnricher;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -68,9 +68,9 @@ public final class SystemContext extends BoundedContext {
 
     private static BoundedContextBuilder prepareEnricher(BoundedContextBuilder builder,
                                                          CommandLifecycleRepository repository) {
-        EventBus.Builder busBuilder = builder.getEventBus()
+        EventBus.Builder busBuilder = builder.eventBus()
                                              .orElseGet(EventBus::newBuilder);
-        Enricher enricher = SystemEnricher.create(repository);
+        EventEnricher enricher = SystemEnricher.create(repository);
         EventBus.Builder builderWithEnricher = busBuilder.setEnricher(enricher);
         return builder.setEventBus(builderWithEnricher);
     }

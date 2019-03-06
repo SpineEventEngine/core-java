@@ -29,11 +29,11 @@ import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -100,8 +100,8 @@ public final class ClassScanner {
             this.declaringClass = declaringClass;
             this.signature = signature;
             this.handlers = HashMultimap.create();
-            this.seenMethods = newHashMap();
-            this.fieldFilters = newHashMap();
+            this.seenMethods = new HashMap<>();
+            this.fieldFilters = new HashMap<>();
         }
 
         /**

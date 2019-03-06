@@ -17,23 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.event.user.sharing;
+/**
+ * Test environment for {@link io.spine.server.event.EventEnricherIntegrationTest}.
+ */
 
-import "spine/options.proto";
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.enrich.given;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.event.user.sharing";
-option java_multiple_files = true;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-message SharingRequestSent {
-    string user_uid = 1;
-    string second_user_uid = 2;
-}
-
-message SharingRequestApproved {
-    string user_uid = 1;
-    string second_user_uid = 2;
-    int64 timestamp = 3;
-}
+import javax.annotation.ParametersAreNonnullByDefault;

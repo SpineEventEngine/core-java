@@ -65,7 +65,7 @@ final class DefaultSystemReadSide implements SystemReadSide {
                 context.findRepository(Mirror.class)
                        .orElseThrow(
                                () -> newIllegalStateException(
-                                       "Mirror projection repository is not registered in %s.",
+                                       "Mirror projection repository is not registered in `%s`.",
                                        context.name()
                                               .getValue()
                                )

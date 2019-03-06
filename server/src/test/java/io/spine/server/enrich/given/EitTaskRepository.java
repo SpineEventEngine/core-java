@@ -18,32 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-syntax = "proto3";
+package io.spine.server.enrich.given;
 
-package spine.system.server;
+import io.spine.server.aggregate.AggregateRepository;
 
-import "spine/options.proto";
-
-option (type_url_prefix) = "type.spine.io";
-option (internal_all) = true;
-
-option java_package = "io.spine.system.server";
-option java_outer_classname = "EnrichmentsProto";
-option java_multiple_files = true;
-
-import "spine/core/command.proto";
-
-// The enrichment for system events.
-//
-// Enriches the `CommandScheduled` event with an instance of `Command`.
-//
-message CommandEnrichment {
-    option (enrichment_for) = "spine.system.server.CommandScheduled";
-
-    // `Command` which enriches the `CommandScheduled` event.
-    //
-    // The purpose of using an enrichment in the `CommandScheduled` event is to avoid storing
-    // an instance of `Command` in the event stream multiple times.
-    //
-    spine.core.Command command = 1 [(by) = "id"];
+public class EitTaskRepository extends AggregateRepository<EitTaskId, EitTaskAggregate> {
 }

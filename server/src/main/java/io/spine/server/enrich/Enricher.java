@@ -20,60 +20,27 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.annotation.SPI;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.core.Enrichment;
 import io.spine.server.type.EnrichableMessageEnvelope;
-import io.spine.server.type.MessageEnvelope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
- *
- * <p>Enrichment schema is constructed like this:
- * <pre>{@code
- *   Enricher enricher = Enricher
- *       .newBuilder()
- *       .add(ProjectId.class, String.class,
- *            new BiFunction<ProjectId, EventContext, String> { ... } )
- *       .add(ProjectId.class, UserId.class,
- *            new BiFunction<ProjectId, EventContext, UserId> { ... } )
- *       ...
- *       .build();
- * }</pre>
  */
-@SPI
-public final class Enricher implements EnrichmentService {
+public abstract class Enricher<M extends Message, C extends EnrichableMessageContext>
+        implements EnrichmentService<M, C> {
 
-    /** Enrichment schema used by this enricher. */
-    private final Schema schema;
-
-    /**
-     * Creates a new builder.
-     */
-    public static EnricherBuilder newBuilder() {
-        return new EnricherBuilder();
-    }
+    private final Schema<M, C> schema;
 
     /**
      * Creates a new instance taking functions from the passed builder.
-     *
-     * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
-    Enricher(EnricherBuilder builder) {
-        this.schema = createSchema(builder);
-        this.schema.activate();
-    }
-
-    private Schema createSchema(EnricherBuilder builder) {
-        return Schema.create(this, builder);
-    }
-
-    Schema schema() {
-        return schema;
+    protected Enricher(EnricherBuilder<M, C, ?> builder) {
+        this.schema = Schema.newInstance(builder);
     }
 
     /**
@@ -95,30 +62,25 @@ public final class Enricher implements EnrichmentService {
      * @throws IllegalArgumentException
      *         if the passed message cannot be enriched
      */
-    public <E extends EnrichableMessageEnvelope<?, ?, ?, E>> E enrich(E source) {
+    public <E extends EnrichableMessageEnvelope<?, ?, M, C, E>> E enrich(E source) {
+        if (schema.isEmpty()) {
+            return source;
+        }
         E result = source.toEnriched(this);
         return  result;
     }
 
-    /**
-     * Verifies if the passed message can be enriched.
-     */
-    @VisibleForTesting
-    boolean canBeEnriched(MessageEnvelope message) {
-        boolean supported = schema.supports(message.messageClass()
-                                                   .value());
-        return supported;
-    }
-
     @Override
-    public Optional<Enrichment> createEnrichment(Message message,
-                                                 EnrichableMessageContext context) {
-        if (!schema.supports(message.getClass())) {
+    public Optional<Enrichment> createEnrichment(M message, C context) {
+        @SuppressWarnings("unchecked") // correct type is ensured by a Bus which uses the Enricher.
+        Class<? extends M> cls = (Class<? extends M>) message.getClass();
+        @Nullable SchemaFn fn = schema.enrichmentOf(cls);
+        if (fn == null) {
             return Optional.empty();
         }
 
-        Action action = new Action(this, message, context);
-        Enrichment result = action.perform();
-        return Optional.of(result);
+        @SuppressWarnings("unchecked")
+        Enrichment enrichment = fn.apply(message, context);
+        return Optional.of(enrichment);
     }
 }

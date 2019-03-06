@@ -17,24 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.enrich;
+package spine.test.enrichment;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import "spine/options.proto";
 
-import static io.spine.server.enrich.SupportsFieldConversion.supportsConversion;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.enrich.given.event";
+option java_multiple_files = true;
+option java_outer_classname = "SchemaFnTestsProto";
 
-@DisplayName("SupportsFieldConversion should")
-class SupportsFieldConversionTest {
+// Types defined in this file are shared among `SingularFnTest` and `CompositeFnTest`.
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        SupportsFieldConversion predicate = supportsConversion(StringValue.class, String.class);
-        new NullPointerTester().testAllPublicInstanceMethods(predicate);
-    }
+option (every_is).java_type = "SfnTestEvent";
+
+message SfnTestStarted {
+    string test_name = 1;
+}
+
+message SfnTestPassed {
+    string test_name = 1;
+}
+
+message SfnTestFailed {
+    string test_name = 2;
 }

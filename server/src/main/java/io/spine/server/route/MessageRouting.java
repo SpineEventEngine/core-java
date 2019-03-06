@@ -20,7 +20,6 @@
 
 package io.spine.server.route;
 
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
@@ -48,7 +47,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
 
     private static final long serialVersionUID = 0L;
 
-    private final HashMap<K, Route<M, C, R>> routes = Maps.newHashMap();
+    private final HashMap<K, Route<M, C, R>> routes = new HashMap<>();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
     private Route<M, C, R> defaultRoute;
