@@ -54,7 +54,6 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.badReviewLeft;
 import static io.spine.server.event.given.AbstractReactorTestEnv.dishServed;
 import static io.spine.server.event.given.AbstractReactorTestEnv.exceptionalReviewLeft;
 import static io.spine.server.event.given.AbstractReactorTestEnv.foodDelivered;
-import static io.spine.server.event.given.AbstractReactorTestEnv.poisonousDish;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someDish;
 import static io.spine.test.event.UserNotified.NotificationMethod.SMS;
 import static io.spine.testing.client.blackbox.Count.count;
@@ -204,7 +203,7 @@ class AbstractEventReactorTest {
         @DisplayName("receive one")
         @Test
         void receive() {
-            Dish poisonousDish = poisonousDish();
+            Dish poisonousDish = someDish();
             DishServed served = DishServed
                     .newBuilder()
                     .setDish(poisonousDish)

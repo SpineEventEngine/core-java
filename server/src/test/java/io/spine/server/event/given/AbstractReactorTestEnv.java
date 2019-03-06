@@ -31,8 +31,6 @@ import io.spine.test.event.ChefPraised;
 import io.spine.test.event.ChefWarningSent;
 import io.spine.test.event.Dish;
 import io.spine.test.event.DishCooked;
-import io.spine.test.event.DishFoundToBePoisonous;
-import io.spine.test.event.DishReturnedToKitchen;
 import io.spine.test.event.DishReviewLeft;
 import io.spine.test.event.DishServed;
 import io.spine.test.event.FoodDelivered;
@@ -42,7 +40,6 @@ import io.spine.test.event.UserNotified.NotificationMethod;
 import java.util.ArrayList;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
-import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 import static java.lang.String.format;
@@ -67,15 +64,6 @@ public class AbstractReactorTestEnv {
         return result;
     }
 
-    /** Returns an event that signifies that the specified dish got returned to the kitchen. */
-    public static DishReturnedToKitchen returnDish(Dish dishToReturn) {
-        DishReturnedToKitchen result = DishReturnedToKitchen
-                .newBuilder()
-                .setReturnedDish(dishToReturn)
-                .build();
-        return result;
-    }
-
     /**
      * Returns an event that signifies that the specified restaurant has served the specified dish.
      */
@@ -93,18 +81,6 @@ public class AbstractReactorTestEnv {
         FoodDelivered result = FoodDelivered
                 .newBuilder()
                 .setDish(dishToDeliver)
-                .build();
-        return result;
-    }
-
-    /** Obtains a dish that is considered poisonous by the {@link HealthInspector}. */
-    public static Dish poisonousDish() {
-        String dishId = newUuid();
-        String dishName = format("Gluten-containing dish `%s`.", dishId);
-        Dish result = Dish
-                .newBuilder()
-                .setDishId(dishId)
-                .setDishName(dishName)
                 .build();
         return result;
     }
@@ -157,54 +133,6 @@ public class AbstractReactorTestEnv {
 
         public ImmutableList<UserNotified> notificationsSent() {
             return ImmutableList.copyOf(notificationsSent);
-        }
-    }
-
-    /**
-     * Labels dishes as poisonous as soon as they get served by emitting a respective event.
-     */
-    public static class HealthInspector extends AbstractEventReactor {
-
-        /** IDs of dishes that have been found to be poisonous. */
-        private final List<String> dishesFoundPoisonous = new ArrayList<>();
-
-        public HealthInspector(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @React(external = true)
-        Optional<DishFoundToBePoisonous> inspectDish(DishServed dishServed) {
-            if (isPoisonous(dishServed)) {
-                String id = dishServed.getDish()
-                                      .getDishId();
-                dishesFoundPoisonous.add(id);
-                return Optional.of(poisonousDish(dishServed));
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        /** Returns a list of all dishes that have been found to be poisonous. */
-        public ImmutableList<String> dishesFoundPoisonous() {
-            return ImmutableList.copyOf(dishesFoundPoisonous);
-        }
-
-        private static DishFoundToBePoisonous poisonousDish(DishServed served) {
-            String restaurantId = served.getRestaurantId();
-            DishFoundToBePoisonous result = DishFoundToBePoisonous
-                    .newBuilder()
-                    .setDish(served.getDish())
-                    .setRestaurantId(restaurantId)
-                    .build();
-            return result;
-        }
-
-        private static boolean isPoisonous(DishServed served) {
-            String name = served.getDish()
-                                .getDishName();
-            // Very suspicious.
-            return name.toLowerCase()
-                       .contains("gluten");
         }
     }
 
