@@ -54,6 +54,9 @@ public class ProjectionRepositoryTestEnv {
     private ProjectionRepositoryTestEnv() {
     }
 
+    /**
+     * Creates a new {@code DispatchedMessageId} with a random {@code EventId}.
+     */
     public static DispatchedMessageId dispatchedMessageId() {
         EventId eventId = EventId
                 .newBuilder()
