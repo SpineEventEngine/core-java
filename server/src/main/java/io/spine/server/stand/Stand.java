@@ -91,6 +91,14 @@ import static java.util.Collections.singleton;
 @SuppressWarnings("OverlyCoupledClass")
 public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
+    /**
+     * The event ID used as the origin of entity state change system events.
+     *
+     * @deprecated This {@code EventId} is used in {@link #post} in order to satisfy the system
+     *             event validation rules. Do not use this value in other places and/or for other
+     *             purposes.
+     */
+    @Deprecated
     private static final EventId STAND_POST_ORIGIN = EventId
             .newBuilder()
             .setValue("Stand-received-entity-update")
