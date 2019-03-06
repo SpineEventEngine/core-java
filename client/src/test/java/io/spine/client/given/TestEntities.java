@@ -24,6 +24,9 @@ import io.spine.test.client.TestEntityId;
 
 import static java.util.concurrent.ThreadLocalRandom.current;
 
+/**
+ * A set of utilities working with test entities.
+ */
 public final class TestEntities {
 
     /**
@@ -32,6 +35,14 @@ public final class TestEntities {
     private TestEntities() {
     }
 
+    /**
+     * Creates a new random {@code TestEntityId}.
+     *
+     * <p>The numeric value of the ID is between {@code -1000} (inclusive)
+     * and {@code 1000} (exclusive) and is never equal to {@code 0};
+     *
+     * @return new random ID
+     */
     public static TestEntityId randomId() {
         int randomNumber = current().nextInt(-1000, 1000);
         randomNumber = randomNumber != 0
