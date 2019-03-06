@@ -114,13 +114,13 @@ class EnricherBuilderTest {
             void classImplements() {
                 // Adding a function via a class.
                 builder.add(EbtOrderCreated.class, Timestamp.class,
-                            (e, c) -> Time.getCurrentTime());
+                            (e, c) -> Time.currentTime());
 
                 assertRejects(
                         // Attempting to add a function via the interface which the class
                         // from the entry added above implements.
                         () -> builder.add(EbtOrderEvent.class, Timestamp.class,
-                                          (e, c) -> Time.getCurrentTime())
+                                          (e, c) -> Time.currentTime())
                 );
             }
         }

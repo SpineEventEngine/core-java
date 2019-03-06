@@ -51,8 +51,8 @@ class MethodResultTest {
 
         private FailingDoubleSetResult(@Nullable Object output) {
             super(output);
-            setMessages(ImmutableList.of(Time.getCurrentTime()));
-            setMessages(ImmutableList.of(Time.getCurrentTime()));
+            setMessages(ImmutableList.of(Time.currentTime()));
+            setMessages(ImmutableList.of(Time.currentTime()));
         }
     }
 }

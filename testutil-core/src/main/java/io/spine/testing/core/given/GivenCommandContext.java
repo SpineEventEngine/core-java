@@ -28,7 +28,7 @@ import io.spine.core.CommandContext.Schedule;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 /**
  * Factory methods to create {@code CommandContext} instances for test purposes.
@@ -47,7 +47,7 @@ public final class GivenCommandContext {
      */
     public static CommandContext withRandomActor() {
         UserId userId = GivenUserId.newUuid();
-        Timestamp now = getCurrentTime();
+        Timestamp now = currentTime();
         return withActorAndTime(userId, now);
     }
 

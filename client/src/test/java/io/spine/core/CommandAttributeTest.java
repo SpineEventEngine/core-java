@@ -53,7 +53,7 @@ class CommandAttributeTest {
                 .newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
-        Command command = factory.createCommand(commandMessage, Time.getCurrentTime());
+        Command command = factory.createCommand(commandMessage, Time.currentTime());
         contextBuilder = command.getContext().toBuilder();
     }
 

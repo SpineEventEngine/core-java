@@ -52,7 +52,7 @@ class EitherOf5Test {
 
     private final StringValue a = TestValues.newUuidValue();
     private final BoolValue b = BoolValue.of(true);
-    private final Timestamp c = Time.getCurrentTime();
+    private final Timestamp c = Time.currentTime();
     private final UInt32Value d = UInt32Value.newBuilder()
                                              .setValue(512)
                                              .build();

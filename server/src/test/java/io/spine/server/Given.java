@@ -63,9 +63,8 @@ import io.spine.time.LocalDates;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 public class Given {
 
@@ -135,7 +134,7 @@ public class Given {
         }
 
         static Command createProject() {
-            return createProject(getCurrentTime());
+            return createProject(currentTime());
         }
 
         private static Command createProject(Timestamp when) {
@@ -172,7 +171,7 @@ public class Given {
                     .setCustomer(customer)
                     .build();
             UserId userId = GivenUserId.of(Identifier.newUuid());
-            Command result = create(msg, userId, getCurrentTime());
+            Command result = create(msg, userId, currentTime());
             return result;
         }
 

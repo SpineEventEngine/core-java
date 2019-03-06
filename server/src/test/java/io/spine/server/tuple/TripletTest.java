@@ -66,7 +66,7 @@ class TripletTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
-                               .setDefault(Optional.class, Optional.of(Time.getCurrentTime()))
+                               .setDefault(Optional.class, Optional.of(Time.currentTime()))
                                .testAllPublicStaticMethods(Triplet.class);
     }
 

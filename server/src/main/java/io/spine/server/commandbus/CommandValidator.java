@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
+import io.spine.core.Commands;
 import io.spine.core.MessageInvalid;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
@@ -36,7 +37,6 @@ import io.spine.validate.MessageValidator;
 import java.util.List;
 import java.util.Optional;
 
-import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.server.commandbus.InvalidCommandException.inapplicableTenantId;
 import static io.spine.server.commandbus.InvalidCommandException.missingTenantId;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
@@ -135,9 +135,9 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateId() {
-            String commandId = Identifier.toString(command.id());
-            if (commandId.equals(EMPTY_ID)) {
-                addViolation("Command ID cannot be empty or blank.");
+            List<ConstraintViolation> violations = Commands.validateId(command.id());
+            if (!violations.isEmpty()) {
+                result.addAll(violations);
             }
         }
 
@@ -161,9 +161,9 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             CommandMessage message = command.message();
             Optional<?> targetId = DefaultCommandRoute.asOptional(message);
             if (targetId.isPresent()) {
-                String targetIdString = Identifier.toString(targetId.get());
-                if (targetIdString.equals(EMPTY_ID)) {
-                    addViolation("Command target entity ID cannot be empty or blank.");
+                Object target = targetId.get();
+                if (Identifier.isEmpty(target)) {
+                    addViolation("Command target entity ID cannot be empty.");
                 }
             }
         }

@@ -53,7 +53,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -190,7 +189,7 @@ class CommandLifecycleTest {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
             CommandId commandId = Commands.generateId();
             UserId actor = GivenUserId.newUuid();
-            Timestamp now = Time.getCurrentTime();
+            Timestamp now = Time.currentTime();
             ActorContext actorContext = ActorContext
                     .newBuilder()
                     .setTimestamp(now)

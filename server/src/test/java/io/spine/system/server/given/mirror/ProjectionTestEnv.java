@@ -35,7 +35,7 @@ import io.spine.system.server.MirrorId;
 import io.spine.test.system.server.Video;
 import io.spine.type.TypeUrl;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
 
@@ -51,7 +51,7 @@ public final class ProjectionTestEnv {
     public static final Version VERSION = Version
             .newBuilder()
             .setNumber(42)
-            .setTimestamp(getCurrentTime())
+            .setTimestamp(currentTime())
             .build();
 
     private static final TypeUrl AGGREGATE_TYPE_URL = TypeUrl.of(Video.class);
@@ -67,7 +67,7 @@ public final class ProjectionTestEnv {
                 .newBuilder()
                 .setId(historyId(RAW_ID))
                 .setNewState(pack(Empty.getDefaultInstance()))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .setNewVersion(VERSION)
                 .build();
@@ -78,7 +78,7 @@ public final class ProjectionTestEnv {
         EntityArchived event = EntityArchived
                 .newBuilder()
                 .setId(historyId(RAW_ID))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .setVersion(VERSION)
                 .build();
@@ -89,7 +89,7 @@ public final class ProjectionTestEnv {
         EntityDeleted event = EntityDeleted
                 .newBuilder()
                 .setId(historyId(RAW_ID))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .setVersion(VERSION)
                 .build();
@@ -100,7 +100,7 @@ public final class ProjectionTestEnv {
         EntityExtractedFromArchive event = EntityExtractedFromArchive
                 .newBuilder()
                 .setId(historyId(RAW_ID))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .setVersion(VERSION)
                 .build();
@@ -111,7 +111,7 @@ public final class ProjectionTestEnv {
         EntityRestored event = EntityRestored
                 .newBuilder()
                 .setId(historyId(RAW_ID))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .setVersion(VERSION)
                 .build();

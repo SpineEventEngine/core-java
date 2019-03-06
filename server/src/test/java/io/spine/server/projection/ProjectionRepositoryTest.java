@@ -73,9 +73,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.testing.TestValues.randomString;
@@ -347,7 +346,7 @@ class ProjectionRepositoryTest
             EntityStateChanged changedEvent = EntityStateChanged
                     .newBuilder()
                     .setId(historyId)
-                    .setWhen(getCurrentTime())
+                    .setWhen(currentTime())
                     .setNewState(newState)
                     .build();
             EntitySubscriberProjection.Repository repository =
@@ -483,7 +482,7 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("convert null timestamp to default")
     void convertNullTimestamp() {
-        Timestamp timestamp = getCurrentTime();
+        Timestamp timestamp = currentTime();
         assertThat(nullToDefault(timestamp)).isEqualTo(timestamp);
         assertThat(nullToDefault(null)).isEqualTo(Timestamp.getDefaultInstance());
     }
@@ -498,7 +497,7 @@ class ProjectionRepositoryTest
         assertFalse(repo.loadAll()
                         .hasNext());
 
-        Event event = createEvent(tenantId(), projectCreated(), getCurrentTime());
+        Event event = createEvent(tenantId(), projectCreated(), currentTime());
         repo.dispatch(EventEnvelope.of(event));
 
         Iterator<?> items = repo.loadAll();
@@ -515,7 +514,7 @@ class ProjectionRepositoryTest
     void getSetLastHandled() {
         TestProjectionRepository repository = repository();
         assertThat(repository.readLastHandledEventTime()).isNotNull();
-        Timestamp time = getCurrentTime();
+        Timestamp time = currentTime();
         repository.writeLastHandledEventTime(time);
         assertThat(repository.readLastHandledEventTime()).isEqualTo(time);
     }

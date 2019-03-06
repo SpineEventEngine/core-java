@@ -50,7 +50,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -92,7 +91,7 @@ class AbstractEventSubscriberTest {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setId(historyId(Group.class))
-                .setWhen(Time.getCurrentTime())
+                .setWhen(Time.currentTime())
                 .setNewState(pack(state))
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
@@ -118,7 +117,7 @@ class AbstractEventSubscriberTest {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setId(historyId(Organization.class))
-                .setWhen(Time.getCurrentTime())
+                .setWhen(Time.currentTime())
                 .setNewState(pack(state))
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)

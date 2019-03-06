@@ -57,7 +57,7 @@ public class TuMessageLog extends Aggregate<Long, TuString, TuStringVBuilder> {
     }
 
     private static ValueLogged logItem(String digitalPart) {
-        String str = Timestamps.toString(Time.getCurrentTime())
+        String str = Timestamps.toString(Time.currentTime())
                 + " - "
                 + digitalPart;
         return ValueLogged.newBuilder()

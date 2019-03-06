@@ -34,7 +34,7 @@ final class DefaultTenantRepository
     static class Entity extends TenantRepository.Entity<Timestamp> {
 
         protected Entity(TenantId id) {
-            super(id, (i) -> Time.getCurrentTime());
+            super(id, (i) -> Time.currentTime());
         }
     }
 }

@@ -86,7 +86,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -110,7 +110,6 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -522,7 +521,7 @@ class ProcessManagerRepositoryTest
         assertTrue(filter.filter(arbitraryEvent)
                          .isPresent());
 
-        Any newState = pack(getCurrentTime());
+        Any newState = pack(currentTime());
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState).value())

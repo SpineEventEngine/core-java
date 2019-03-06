@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
@@ -123,7 +123,7 @@ public abstract class Aggregate<I,
         implements EventPlayer, EventReactor {
 
     /**
-     * The count of events stored to the {@linkplain AggregateStorage storage} since the last
+     * The count of events stored to the {@linkplain AggregateStorage storage} sincee last
      * snapshot.
      *
      * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
@@ -376,7 +376,7 @@ public abstract class Aggregate<I,
                 .newBuilder()
                 .setState(state)
                 .setVersion(version())
-                .setTimestamp(getCurrentTime());
+                .setTimestamp(currentTime());
         return builder.build();
     }
 

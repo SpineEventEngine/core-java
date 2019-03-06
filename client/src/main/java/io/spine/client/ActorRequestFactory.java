@@ -33,7 +33,7 @@ import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
@@ -202,7 +202,7 @@ public class ActorRequestFactory {
      * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
      *
      * <p>Sets the timestamp value to the
-     * {@linkplain io.spine.base.Time#getCurrentTime() current time}.
+     * {@linkplain io.spine.base.Time#currentTime() current time}.
      */
     @Internal
     @SuppressWarnings("CheckReturnValue") // calling builder
@@ -210,7 +210,7 @@ public class ActorRequestFactory {
         ActorContext.Builder builder = ActorContext
                 .newBuilder()
                 .setActor(actor)
-                .setTimestamp(getCurrentTime())
+                .setTimestamp(currentTime())
                 .setZoneOffset(zoneOffset)
                 .setZoneId(zoneId);
         if (tenantId != null) {

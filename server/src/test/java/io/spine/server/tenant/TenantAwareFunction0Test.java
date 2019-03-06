@@ -37,7 +37,7 @@ class TenantAwareFunction0Test {
                      () -> new TenantAwareFunction0<Timestamp>() {
                          @Override
                          public Timestamp apply() {
-                             return Time.getCurrentTime();
+                             return Time.currentTime();
                          }
                      });
     }

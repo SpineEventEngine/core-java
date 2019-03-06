@@ -31,13 +31,14 @@ import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageValidator;
 
 import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Timestamps2.isBetween;
@@ -52,7 +53,7 @@ public final class Commands {
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
 
     static {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(idStringifier(), CommandId.class);
     }
 
@@ -214,9 +215,18 @@ public final class Commands {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        String idStr = Identifier.toString(id);
-        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
+        List<ConstraintViolation> violations = validateId(id);
+        checkArgument(violations.isEmpty(), "Command ID is not valid. Violations: %s.", violations);
         return id;
+    }
+
+    /**
+     * Validates the passed command ID.
+     */
+    @Internal
+    public static List<ConstraintViolation> validateId(CommandId id) {
+        MessageValidator validator = MessageValidator.newInstance(id);
+        return validator.validate();
     }
 
     /**

@@ -61,10 +61,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
-import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
 import static io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection.ACCEPTED_VALUE;
@@ -74,7 +72,6 @@ import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.TestValues.random;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispatch;
-import static java.lang.String.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -167,7 +164,7 @@ class ProjectionShould {
                 .newBuilder()
                 .setId(historyId)
                 .setNewState(pack(aggregateState))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(DispatchedMessageId
                                       .newBuilder()
                                       .setEventId(EventId.newBuilder().setValue(newUuid())))

@@ -71,7 +71,7 @@ class EntityClassTest {
         EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
         AbstractEntity<Long, StringValue> entity = entityClass.createEntity(id);
 
-        Timestamp after = Time.getCurrentTime();
+        Timestamp after = Time.currentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));

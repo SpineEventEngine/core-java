@@ -31,7 +31,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.system.server.Substituted.Sequence;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 /**
  * The aggregate representing the lifecycle of a command.
@@ -76,7 +76,7 @@ final class CommandLifecycleAggregate
     void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
                 .newBuilder()
-                .setWhenReceived(getCurrentTime())
+                .setWhenReceived(currentTime())
                 .build();
         builder().setId(event.getId())
                  .setCommand(event.getPayload())
@@ -92,7 +92,7 @@ final class CommandLifecycleAggregate
     @Apply(allowImport = true)
     void on(@SuppressWarnings("unused") CommandAcknowledged event) {
         CommandTimeline status = statusBuilder()
-                .setWhenAcknowledged(getCurrentTime())
+                .setWhenAcknowledged(currentTime())
                 .build();
         builder().setStatus(status);
     }
@@ -101,7 +101,7 @@ final class CommandLifecycleAggregate
     void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
-                .setWhenScheduled(getCurrentTime())
+                .setWhenScheduled(currentTime())
                 .build();
         builder().setCommand(updatedCommand)
                  .setStatus(status);
@@ -115,7 +115,7 @@ final class CommandLifecycleAggregate
     @Apply(allowImport = true)
     void on(@SuppressWarnings("unused") CommandDispatched event) {
         CommandTimeline status = statusBuilder()
-                .setWhenDispatched(getCurrentTime())
+                .setWhenDispatched(currentTime())
                 .build();
         builder().setStatus(status);
     }
@@ -132,7 +132,7 @@ final class CommandLifecycleAggregate
         CommandTimeline status =
                 builder.getStatus()
                        .toBuilder()
-                       .setWhenTargetAssgined(getCurrentTime())
+                       .setWhenTargetAssgined(currentTime())
                        .build();
         builder.setStatus(status)
                .setTarget(target);
@@ -222,7 +222,7 @@ final class CommandLifecycleAggregate
 
     private void setStatus(Status status) {
         CommandTimeline commandStatus = statusBuilder()
-                .setWhenHandled(getCurrentTime())
+                .setWhenHandled(currentTime())
                 .setHowHandled(status)
                 .build();
         builder().setStatus(commandStatus);

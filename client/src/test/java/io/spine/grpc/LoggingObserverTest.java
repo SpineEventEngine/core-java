@@ -87,7 +87,7 @@ class LoggingObserverTest {
         assertContains(loggingEvent, value);
         assertContains(loggingEvent, "onNext");
 
-        Timestamp currentTime = Time.getCurrentTime();
+        Timestamp currentTime = Time.currentTime();
         String timeStr = Timestamps.toString(currentTime);
         observer.onNext(currentTime);
         loggingEvent = queue.poll();

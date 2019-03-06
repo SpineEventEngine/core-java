@@ -236,6 +236,6 @@ final class EntityHistoryAggregate
     }
 
     private static Timestamp now() {
-        return Time.getCurrentTime();
+        return Time.currentTime();
     }
 }

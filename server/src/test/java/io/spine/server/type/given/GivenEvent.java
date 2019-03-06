@@ -31,7 +31,7 @@ import io.spine.test.core.given.EtProjectCreated;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 
@@ -61,7 +61,7 @@ public final class GivenEvent {
     }
 
     private static Version someVersion() {
-        return Versions.newVersion(42, getCurrentTime());
+        return Versions.newVersion(42, currentTime());
     }
 
     public static Event arbitrary() {

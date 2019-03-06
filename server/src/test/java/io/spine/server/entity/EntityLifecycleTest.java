@@ -99,7 +99,7 @@ class EntityLifecycleTest {
                 .build();
         EntityRecord newRecord = previousRecord
                 .toBuilder()
-                .setState(pack(Time.getCurrentTime()))
+                .setState(pack(Time.currentTime()))
                 .build();
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()

@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -248,7 +248,7 @@ class TopicBuilderTest {
             String countryColumn = "country";
             String countryName = "Ukraine";
 
-            Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
+            Timestamp twoDaysAgo = subtract(currentTime(), fromHours(-48));
 
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .where(all(ge(companySizeColumn, 50),

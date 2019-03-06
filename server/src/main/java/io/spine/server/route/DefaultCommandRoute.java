@@ -28,9 +28,7 @@ import io.spine.protobuf.MessageFieldException;
 import java.util.Optional;
 
 /**
- * Obtains a command target entity ID based on a command message and context.
- *
- * <p>The command target must be the first field defined in the command message.
+ * Obtains an ID of a command target entity from the first field of the command message.
  *
  * @param <I> the type of target entity IDs
  */

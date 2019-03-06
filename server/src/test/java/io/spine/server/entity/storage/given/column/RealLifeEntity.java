@@ -37,7 +37,7 @@ public class RealLifeEntity extends AbstractEntity<ProjectId, Project> {
 
     @Column
     public Timestamp getSomeTime() {
-        return Time.getCurrentTime();
+        return Time.currentTime();
     }
 
     @Column

@@ -201,7 +201,7 @@ public class RecordStorageTestEnv {
 
         @Column
         public Timestamp getNow() {
-            return Time.getCurrentTime();
+            return Time.currentTime();
         }
 
         @Column
