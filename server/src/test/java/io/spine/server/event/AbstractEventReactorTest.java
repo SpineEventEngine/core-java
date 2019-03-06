@@ -20,27 +20,23 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.Event;
 import io.spine.logging.Logging;
-import io.spine.server.BoundedContext;
-import io.spine.server.event.given.AbstractReactorTestEnv;
-import io.spine.server.event.given.AbstractReactorTestEnv.CourtOfficer;
-import io.spine.server.event.given.AbstractReactorTestEnv.CourtOfficerOverseer;
-import io.spine.server.event.given.AbstractReactorTestEnv.FaultyFoodServer;
-import io.spine.server.event.given.AbstractReactorTestEnv.FoodSafetyDepartment;
-import io.spine.server.event.given.AbstractReactorTestEnv.HealthInspector;
-import io.spine.server.event.given.AbstractReactorTestEnv.IgnorantReactor;
-import io.spine.server.event.given.AbstractReactorTestEnv.KitchenFront;
-import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantPsychologicalCounselor;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.server.type.given.GivenEvent;
+import io.spine.server.event.given.AbstractReactorTestEnv.CharityAgent;
+import io.spine.server.event.given.AbstractReactorTestEnv.ChefPerformanceTracker;
+import io.spine.server.event.given.AbstractReactorTestEnv.DeliveryNotifier;
+import io.spine.server.event.given.AbstractReactorTestEnv.FaultyDeliveryNotifier;
+import io.spine.server.event.given.AbstractReactorTestEnv.StutteringCharityAgent;
+import io.spine.test.event.CharityDonationOffered;
+import io.spine.test.event.ChefPraised;
 import io.spine.test.event.Dish;
 import io.spine.test.event.DishCooked;
-import io.spine.test.event.DishReturnedToKitchen;
+import io.spine.test.event.DishReviewLeft;
 import io.spine.test.event.DishServed;
+import io.spine.test.event.FoodDelivered;
+import io.spine.test.event.UserNotified;
+import io.spine.test.event.UserNotified.NotificationMethod;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,14 +45,23 @@ import org.slf4j.event.SubstituteLoggingEvent;
 import org.slf4j.helpers.SubstituteLogger;
 
 import java.util.ArrayDeque;
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
 import java.util.Queue;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.server.event.given.AbstractReactorTestEnv.FaultyHealthInspector;
+import static io.spine.server.event.given.AbstractReactorTestEnv.badReviewLeft;
+import static io.spine.server.event.given.AbstractReactorTestEnv.dishServed;
+import static io.spine.server.event.given.AbstractReactorTestEnv.exceptionalReviewLeft;
+import static io.spine.server.event.given.AbstractReactorTestEnv.foodDelivered;
 import static io.spine.server.event.given.AbstractReactorTestEnv.poisonousDish;
-import static io.spine.server.event.given.AbstractReactorTestEnv.serveDish;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someDish;
+import static io.spine.test.event.UserNotified.NotificationMethod.SMS;
+import static io.spine.testing.client.blackbox.Count.count;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.twice;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static java.util.Collections.nCopies;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,49 +70,38 @@ import static org.slf4j.event.Level.ERROR;
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
 
-    private BoundedContext restaurantContext;
-    private BoundedContext foodSafetyContext;
+    private static final NotificationMethod DESIRED_NOTIFICATION_METHOD = SMS;
 
-    private KitchenFront kitchenFront;
-    private RestaurantPsychologicalCounselor counselor;
-    private HealthInspector healthInspector;
-    private FoodSafetyDepartment foodSafetyDepartment;
+    private BlackBoxBoundedContext<SingleTenantBlackBoxContext> restaurantContext;
+    private BlackBoxBoundedContext<SingleTenantBlackBoxContext> deliveryContext;
+    private BlackBoxBoundedContext<SingleTenantBlackBoxContext> charityContext;
+
+    private CharityAgent charityAgent;
+    private ChefPerformanceTracker chefPerformanceTracker;
+    private DeliveryNotifier notifier;
+
+    AbstractEventReactorTest() {
+    }
 
     @BeforeEach
     void setUp() {
-        TransportFactory commonTransport = InMemoryTransportFactory.newInstance();
-        restaurantContext = BoundedContext
-                .newBuilder()
-                .setName("Restaurant context")
-                .setTransportFactory(commonTransport)
-                .build();
-        kitchenFront = new KitchenFront(restaurantContext.eventBus());
-        restaurantContext.registerEventDispatcher(kitchenFront);
-        counselor = new RestaurantPsychologicalCounselor(restaurantContext.eventBus());
-        restaurantContext.registerEventDispatcher(counselor);
+        restaurantContext = BlackBoxBoundedContext.singleTenant();
+        notifier = new DeliveryNotifier(restaurantContext.eventBus(), DESIRED_NOTIFICATION_METHOD);
+        chefPerformanceTracker = new ChefPerformanceTracker(restaurantContext.eventBus());
+        restaurantContext.registerEventDispatchers(notifier);
+        restaurantContext.registerEventDispatchers(chefPerformanceTracker);
 
-        foodSafetyContext = BoundedContext
-                .newBuilder()
-                .setName("Health inspector context")
-                .setTransportFactory(commonTransport)
-                .build();
-        healthInspector = new HealthInspector(foodSafetyContext.eventBus());
-        foodSafetyDepartment = new FoodSafetyDepartment(foodSafetyContext.eventBus());
-        foodSafetyContext.registerEventDispatcher(healthInspector);
-        foodSafetyContext.registerEventDispatcher(foodSafetyDepartment);
+        charityContext = BlackBoxBoundedContext.singleTenant();
+        charityAgent = new CharityAgent(charityContext.eventBus());
+        charityContext.registerEventDispatchers(charityAgent);
+
+        deliveryContext = BlackBoxBoundedContext.singleTenant();
     }
 
     @Test
     @DisplayName("throw upon a null event bus")
     void throwOnNullEventBus() {
-        assertThrows(NullPointerException.class, () -> new KitchenFront(null));
-    }
-
-    @Test
-    @DisplayName("be successfully created and registered even if no events are reacted to")
-    void notThrowOnNoEvents() {
-        IgnorantReactor ignorantReactor = new IgnorantReactor(restaurantContext.eventBus());
-        restaurantContext.registerEventDispatcher(ignorantReactor);
+        assertThrows(NullPointerException.class, () -> new CharityAgent(null));
     }
 
     @DisplayName("while dealing with domestic events")
@@ -118,114 +112,88 @@ class AbstractEventReactorTest {
         @DisplayName("receive one")
         void receive() {
             Dish dishToCook = someDish();
-            DishCooked cooked = DishCooked
+            DishCooked dishCooked = DishCooked
                     .newBuilder()
                     .setDish(dishToCook)
                     .build();
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(cooked));
-            boolean dishServed = kitchenFront.dishesServed()
-                                             .contains(dishToCook.getDishId());
-            assertTrue(dishServed);
+
+            restaurantContext.receivesEvent(dishCooked);
+            boolean exactlyOneReceived = notifier.notificationsSent()
+                                                 .size() == 1;
+            UserNotified notification = notifier.notificationsSent()
+                                                .get(0);
+            boolean ofCorrectType =
+                    notification.getNotificationMethod() == DESIRED_NOTIFICATION_METHOD;
+
+            assertTrue(exactlyOneReceived && ofCorrectType);
         }
 
         @Test
         @DisplayName("receive several")
         void receiveSeveral() {
-            Dish dishToCook = someDish();
-            DishCooked cooked = DishCooked
-                    .newBuilder()
-                    .setDish(dishToCook)
-                    .build();
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(cooked));
-            assertTrue(kitchenFront.dishesServed().contains(dishToCook.getDishId()));
+            Dish dishToReview = someDish();
+            DishReviewLeft exceptionalReview = exceptionalReviewLeft(dishToReview);
+            DishReviewLeft badReview = badReviewLeft(dishToReview);
+            restaurantContext.receivesEvents(exceptionalReview, badReview);
 
-            DishReturnedToKitchen returned = DishReturnedToKitchen
-                    .newBuilder()
-                    .setReturnedDish(dishToCook)
-                    .build();
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(returned));
-            assertEquals(KitchenFront.CHEF_COOLDOWN, kitchenFront.secondsWastedBeingSad());
+            double expectedScore = (exceptionalReview.getScore() + badReview.getScore()) * 0.5;
+            DoubleSummaryStatistics stats = chefPerformanceTracker.chefStats();
+            boolean twoReviewsReceived = stats.getCount() == 2;
+            assertTrue(twoReviewsReceived);
+            assertEquals(expectedScore, stats.getAverage());
         }
 
         @Test
         @DisplayName("log an error")
         void logError() {
-            FaultyFoodServer server = new FaultyFoodServer(restaurantContext.eventBus());
-
+            FaultyDeliveryNotifier faultyNotifier =
+                    new FaultyDeliveryNotifier(restaurantContext.eventBus());
+            restaurantContext.registerEventDispatchers(faultyNotifier);
             Queue<SubstituteLoggingEvent> loggedMessages =
-                    redirectLogging((SubstituteLogger) server.log());
+                    redirectLogging((SubstituteLogger) faultyNotifier.log());
 
-            restaurantContext.registerEventDispatcher(server);
             DishCooked cooked = DishCooked
                     .newBuilder()
                     .setDish(someDish())
                     .build();
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(cooked));
-
+            restaurantContext.receivesEvent(cooked);
             assertLoggedCorrectly(loggedMessages);
         }
 
+        /**
+         * See {@link ChefPerformanceTracker#praiseChef(DishReviewLeft)}.
+         */
         @Test
         @DisplayName("react on one")
         void react() {
-            Dish returnedDish = someDish();
-            DishReturnedToKitchen dishReturnedToKitchen = DishReturnedToKitchen
-                    .newBuilder()
-                    .setReturnedDish(returnedDish)
-                    .build();
-
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(dishReturnedToKitchen));
-            assertEquals(1, counselor.appointmentsScheduled());
+            Dish dishToReview = someDish();
+            restaurantContext.receivesEvents(exceptionalReviewLeft(dishToReview),
+                                             badReviewLeft(dishToReview),
+                                             badReviewLeft(dishToReview))
+                             .assertThat(emittedEvent(ChefPraised.class, once()));
         }
 
         @Test
         @DisplayName("react on several")
         void reactOnSeveral() {
-            ImmutableList<Event> dishesReturned =
-                    ImmutableSet.of(someDish(), someDish(), someDish())
-                                .stream()
-                                .map(AbstractReactorTestEnv::returnDish)
-                                .map(GivenEvent::withMessage)
-                                .collect(toImmutableList());
-            restaurantContext.eventBus()
-                             .post(dishesReturned);
-
-            assertEquals(dishesReturned.size(), counselor.appointmentsScheduled());
+            Dish dishToReview = someDish();
+            int expectedPraisesAmount = 5;
+            List<DishReviewLeft> positiveReviews = nCopies(5, exceptionalReviewLeft(dishToReview));
+            positiveReviews.forEach(restaurantContext::receivesEvent);
+            restaurantContext.assertThat(emittedEvent(ChefPraised.class,
+                                                      count(expectedPraisesAmount)));
         }
 
         @Test
-        @DisplayName("react with several events")
+        @DisplayName("react with either of some events")
         void reactWithSeveral() {
-            CourtOfficer courtOfficer = new CourtOfficer(foodSafetyContext.eventBus());
-            foodSafetyContext.registerEventDispatcher(courtOfficer);
+            Dish dishToReview = someDish();
+            DishReviewLeft exceptionalReview = exceptionalReviewLeft(dishToReview);
+            restaurantContext.receivesEvent(exceptionalReview)
+                             .assertThat(emittedEvent(ChefPraised.class, once()));
 
-            CourtOfficerOverseer officerOverseer = new CourtOfficerOverseer();
-            foodSafetyContext.registerEventDispatcher(officerOverseer);
-            String restaurantToShutDown = newUuid();
-
-            shutTheRestaurantDown(restaurantToShutDown);
-            boolean premisesGotCleared = officerOverseer.premisesCleared()
-                                                        .contains(restaurantToShutDown);
-            boolean staffGotEscorted = officerOverseer.restaurantsEscorted()
-                                                      .contains(restaurantToShutDown);
-            assertTrue(premisesGotCleared && staffGotEscorted);
-        }
-
-        /** Shuts down the restaurant by serving 3 poisonous dishes. */
-        private void shutTheRestaurantDown(String restaurantId) {
-            ImmutableList<Event> threePoisonousDishesServed =
-                    ImmutableList.of(poisonousDish(), poisonousDish(), poisonousDish())
-                                 .stream()
-                                 .map(dishToServe -> serveDish(dishToServe, restaurantId))
-                                 .map(GivenEvent::withMessage)
-                                 .collect(toImmutableList());
-            restaurantContext.eventBus()
-                             .post(threePoisonousDishesServed);
+            List<DishReviewLeft> badReviews = nCopies(3, badReviewLeft(dishToReview));
+            badReviews.forEach(restaurantContext::receivesEvent);
         }
     }
 
@@ -241,45 +209,49 @@ class AbstractEventReactorTest {
                     .newBuilder()
                     .setDish(poisonousDish)
                     .build();
-
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(served));
-            boolean poisonousDishFound = healthInspector.dishesFoundPoisonous()
-                                                        .contains(poisonousDish.getDishId());
-            assertTrue(poisonousDishFound);
+            charityContext.receivesExternalEvent(restaurantContext.name(), served);
+            assertEquals(1, charityAgent.offersMade());
         }
 
         @DisplayName("react to one")
         @Test
-        void react() {
-            Dish poisonousDish = poisonousDish();
-            DishServed served = DishServed
-                    .newBuilder()
-                    .setDish(poisonousDish)
-                    .build();
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(served));
-            boolean warningIssued = foodSafetyDepartment.poisonousDishes()
-                                                        .contains(poisonousDish);
-            assertTrue(warningIssued);
+        void reactToOne() {
+            Dish dishToServe = someDish();
+            DishServed dishServed = dishServed(dishToServe, newUuid());
+
+            charityContext.receivesExternalEvent(charityContext.name(), dishServed)
+                          .assertThat(emittedEvent(CharityDonationOffered.class, once()));
+        }
+
+        @DisplayName("react to several")
+        @Test
+        void reactToSeveral() {
+            Dish dishToServe = someDish();
+            DishServed dishServed = dishServed(dishToServe, newUuid());
+
+            Dish dishToDeliver = someDish();
+            FoodDelivered foodDelivered = foodDelivered(dishToDeliver);
+
+            charityContext.receivesExternalEvent(restaurantContext.name(), dishServed)
+                          .receivesExternalEvent(deliveryContext.name(), foodDelivered)
+                          .assertThat(emittedEvent(CharityDonationOffered.class, twice()));
         }
 
         @DisplayName("log an error")
         @Test
         void logAnError() {
-            FaultyHealthInspector healthInspector
-                    = new FaultyHealthInspector(foodSafetyContext.eventBus());
-            foodSafetyContext.registerEventDispatcher(healthInspector);
+            StutteringCharityAgent stutteringAgent =
+                    new StutteringCharityAgent(charityContext.eventBus());
+            charityContext.registerEventDispatchers(stutteringAgent);
 
             Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
-                    (SubstituteLogger) healthInspector.log());
+                    (SubstituteLogger) stutteringAgent.log());
             Dish dishToServe = someDish();
             DishServed dishServed = DishServed
                     .newBuilder()
                     .setDish(dishToServe)
                     .build();
-            restaurantContext.eventBus()
-                             .post(GivenEvent.withMessage(dishServed));
+            charityContext.receivesExternalEvent(restaurantContext.name(), dishServed);
             assertLoggedCorrectly(loggedMessages);
         }
     }

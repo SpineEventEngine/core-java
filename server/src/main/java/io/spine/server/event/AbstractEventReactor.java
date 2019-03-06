@@ -55,15 +55,15 @@ import static java.lang.String.format;
  *
  * <p>To use one, do the following:
  * <ol>
- * <li>Create an instance, specifying the event bus which receives emitted events.
- * <li>Register the reactor in a desired bounded context via
- * {@link BoundedContext#registerEventDispatcher(EventDispatcher)}.
+ *     <li>Create an instance, specifying the event bus which receives emitted events.
+ *     <li>Register the reactor in a desired bounded context via
+ *         {@link BoundedContext#registerEventDispatcher(EventDispatcher)}.
  * </ol>
  *
  * @see React reactors
  * @see BoundedContext#registerEventDispatcher(EventDispatcher)
  */
-public class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
+public abstract class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
 

@@ -20,37 +20,32 @@
 
 package io.spine.server.event.given;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Timestamp;
-import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventReactor;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.React;
-import io.spine.server.tuple.EitherOf2;
-import io.spine.server.tuple.Pair;
-import io.spine.test.event.AppointmentMade;
+import io.spine.server.model.Nothing;
+import io.spine.server.tuple.EitherOf3;
+import io.spine.test.event.CharityDonationOffered;
+import io.spine.test.event.ChefPraised;
+import io.spine.test.event.ChefWarningSent;
 import io.spine.test.event.Dish;
 import io.spine.test.event.DishCooked;
 import io.spine.test.event.DishFoundToBePoisonous;
 import io.spine.test.event.DishReturnedToKitchen;
+import io.spine.test.event.DishReviewLeft;
 import io.spine.test.event.DishServed;
-import io.spine.test.event.HeadChefGotSad;
-import io.spine.test.event.RestaurantPremisesCleared;
-import io.spine.test.event.RestaurantShutDown;
-import io.spine.test.event.RestaurantWarningMade;
-import io.spine.test.event.StaffEscorted;
+import io.spine.test.event.FoodDelivered;
+import io.spine.test.event.UserNotified;
+import io.spine.test.event.UserNotified.NotificationMethod;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.Timestamps2.fromInstant;
 import static java.lang.String.format;
-import static java.time.Instant.now;
 
 /** Environment for abstract event reactor testing. */
 public class AbstractReactorTestEnv {
@@ -84,11 +79,20 @@ public class AbstractReactorTestEnv {
     /**
      * Returns an event that signifies that the specified restaurant has served the specified dish.
      */
-    public static DishServed serveDish(Dish dishToServe, String restaurantId) {
+    public static DishServed dishServed(Dish dishToServe, String restaurantId) {
         DishServed result = DishServed
                 .newBuilder()
                 .setDish(dishToServe)
                 .setRestaurantId(restaurantId)
+                .build();
+        return result;
+    }
+
+    /** Returns an event that signifies that the specified dish has been delivered. */
+    public static FoodDelivered foodDelivered(Dish dishToDeliver) {
+        FoodDelivered result = FoodDelivered
+                .newBuilder()
+                .setDish(dishToDeliver)
                 .build();
         return result;
     }
@@ -105,94 +109,54 @@ public class AbstractReactorTestEnv {
         return result;
     }
 
-    /**
-     * Oversees mental health of the restaurant workers by appointing a counseling session
-     * once any of them get sad.
-     *
-     * <p>Emits {@code AppointmentMade} events.
-     */
-    public static class RestaurantPsychologicalCounselor extends AbstractEventReactor {
-
-        private int appointmentsScheduled = 0;
-
-        public RestaurantPsychologicalCounselor(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @SuppressWarnings("unused") /* Event is ignored since the reaction result
-                                       does not depend on it. */
-        @React
-        AppointmentMade makeAnAppointment(HeadChefGotSad headChefGotSad) {
-            Timestamp timeOfAppointment = fromInstant(now().plus(1, ChronoUnit.DAYS));
-            AppointmentMade result = AppointmentMade
-                    .newBuilder()
-                    .setAppointmentTime(timeOfAppointment)
-                    .build();
-            appointmentsScheduled++;
-            return result;
-        }
-
-        /** Obtains an amount of appointments scheduled by this counselor. */
-        public int appointmentsScheduled() {
-            return appointmentsScheduled;
-        }
+    /** Obtains an event that signifies that a perfect review was left about the specified dish. */
+    public static DishReviewLeft exceptionalReviewLeft(Dish dish) {
+        DishReviewLeft result = DishReviewLeft
+                .newBuilder()
+                .setDish(dish)
+                .setScore(10)
+                .build();
+        return result;
     }
 
-    /**
-     * Serves dishes as soon as they have been cooked and makes the head chef sad if the dish got
-     * returned.
-     *
-     * <p>Does so by emitting a respective events.
-     */
-    public static class KitchenFront extends AbstractEventReactor {
+    /** Obtains an event that signifies that a negative review was left about the specified dish. */
+    public static DishReviewLeft badReviewLeft(Dish dish) {
+        DishReviewLeft result = DishReviewLeft
+                .newBuilder()
+                .setDish(dish)
+                .setScore(3)
+                .build();
+        return result;
+    }
 
-        @VisibleForTesting
-        public static final int CHEF_COOLDOWN = 5;
+    /** Notifies user that the dish has been served and is ready for delivery. */
+    public static class DeliveryNotifier extends AbstractEventReactor {
 
-        /** IDs of dishes served by this server. */
-        private final List<String> dishesServed = new ArrayList<>();
+        private final List<UserNotified> notificationsSent = new ArrayList<>();
+        private final NotificationMethod notificationMethod;
 
-        private int secondsWastedBeingSad = 0;
-
-        private final String restaurantId;
-
-        public KitchenFront(EventBus eventBus) {
+        public DeliveryNotifier(EventBus eventBus, NotificationMethod notificationMethod) {
             super(eventBus);
-            this.restaurantId = newUuid();
+            this.notificationMethod = notificationMethod;
         }
 
         @React
-        DishServed serveDish(DishCooked dishCooked) {
-            Dish dish = dishCooked.getDish();
-            dishesServed.add(dish.getDishId());
-            DishServed result = DishServed
+        UserNotified notify(DishCooked cooked) {
+            String dishName = cooked.getDish()
+                                    .getDishName();
+            String message = format("Dish `%s` is on its way.", dishName);
+
+            UserNotified result = UserNotified
                     .newBuilder()
-                    .setDish(dish)
-                    .setRestaurantId(restaurantId)
+                    .setNotificationMessage(message)
+                    .setNotificationMethod(notificationMethod)
                     .build();
+            notificationsSent.add(result);
             return result;
         }
 
-        @SuppressWarnings("unused") /* Event is unused since the reaction result
-                                       does not depend on it. */
-        @React
-        HeadChefGotSad getSad(DishReturnedToKitchen dishReturned) {
-            HeadChefGotSad result = HeadChefGotSad
-                    .newBuilder()
-                    .setSadnessDuration(CHEF_COOLDOWN)
-                    .build();
-            secondsWastedBeingSad += CHEF_COOLDOWN;
-            return result;
-        }
-
-        /** Obtains IDs of all dishes served by this kitchen. */
-        public ImmutableList<String> dishesServed() {
-            return ImmutableList.copyOf(dishesServed);
-        }
-
-        /** Obtains the amount of seconds the head chef had spent sad because of returned dishes. */
-        public int secondsWastedBeingSad() {
-            return secondsWastedBeingSad;
+        public ImmutableList<UserNotified> notificationsSent() {
+            return ImmutableList.copyOf(notificationsSent);
         }
     }
 
@@ -245,146 +209,133 @@ public class AbstractReactorTestEnv {
     }
 
     /**
-     * Issues warnings to the restaurant if it has been found to serve poisonous food.
-     *
-     * <p>If the restaurant has served more than three poisonous dishes, shuts the restaurant down,
-     * emitting a respective event.
+     * Praises the chef whenever a positive dish review was left by emitting a
+     * respective event.
      */
-    public static class FoodSafetyDepartment extends AbstractEventReactor {
+    public static class ChefPerformanceTracker extends AbstractEventReactor {
 
-        private final List<Dish> poisonousDishes = new ArrayList<>();
+        private final DoubleSummaryStatistics chefStats = new DoubleSummaryStatistics();
+        private static final String PRAISE_MESSAGE_FORMAT = "Customer has left a review" +
+                "of %s out of 10 for %s. Good job! Your average score is `%s`.";
 
-        public FoodSafetyDepartment(EventBus eventBus) {
+        private static final String WARNING_MESSAGE_FORMAT = "Your score is %s, it has dipped" +
+                "below 5. Try harder.";
+
+        public ChefPerformanceTracker(EventBus eventBus) {
             super(eventBus);
         }
 
         @React
-        EitherOf2<RestaurantWarningMade, RestaurantShutDown>
-        makeWarning(DishFoundToBePoisonous foundToBePoisonous) {
-            poisonousDishes.add(foundToBePoisonous.getDish());
-            String restaurantId = foundToBePoisonous.getRestaurantId();
-            if (poisonousDishes.size() >= 3) {
-                String reasonFormat =
-                        "The restaurant has served %s poisonous dishes and has been shut down.";
-                RestaurantShutDown result = RestaurantShutDown
-                        .newBuilder()
-                        .setReason(format(reasonFormat, poisonousDishes.size()))
-                        .setHealthInspectionId(newUuid())
-                        .setRestaurantId(restaurantId)
-                        .build();
-                return EitherOf2.withB(result);
-            } else {
-                String warning = "The restaurant has been found to serve poisonous food.";
-                RestaurantWarningMade result = RestaurantWarningMade
-                        .newBuilder()
-                        .setWarningText(warning)
-                        .setRestaurantId(restaurantId)
-                        .build();
-                return EitherOf2.withA(result);
+        EitherOf3<ChefPraised, ChefWarningSent, Nothing> acceptReview(DishReviewLeft reviewLeft) {
+            int score = reviewLeft.getScore();
+            chefStats.accept(score);
+            if (score >= 8) {
+                Dish dish = reviewLeft.getDish();
+                String dishName = dish.getDishName();
+                double currentAverage = chefStats.getAverage();
+                String message = format(PRAISE_MESSAGE_FORMAT, score, dishName, currentAverage);
+                ChefPraised chefPraised = praiseChef(dish, message, score);
+                return EitherOf3.withA(chefPraised);
             }
+            if (chefStats.getAverage() <= 3) {
+                ChefWarningSent warningSent = warnChef();
+                return EitherOf3.withB(warningSent);
+            }
+            return EitherOf3.withC(nothing());
         }
 
-        /** Obtains a list of all dishes that have been found to be poisonous. */
-        public ImmutableList<Dish> poisonousDishes() {
-            return ImmutableList.copyOf(poisonousDishes);
+        private ChefWarningSent warnChef() {
+            ChefWarningSent result = ChefWarningSent
+                    .newBuilder()
+                    .setMessage(format(WARNING_MESSAGE_FORMAT, chefStats.getAverage()))
+                    .build();
+            return result;
+        }
+
+        private static ChefPraised praiseChef(Dish dish, String message, int score) {
+            ChefPraised result = ChefPraised
+                    .newBuilder()
+                    .setDish(dish)
+                    .setMessage(message)
+                    .setUserReview(score)
+                    .build();
+            return result;
+        }
+
+        /**
+         * Obtains the stats of the scores of the chef, i.e. amount of reviews and the average
+         * score.
+         */
+        public DoubleSummaryStatistics chefStats() {
+            return chefStats;
+        }
+    }
+
+    /** Offers to donate to charity each time a dish is paid for by emitting a respective event. */
+    public static class CharityAgent extends AbstractEventReactor {
+
+        private static final String MESSAGE = "Would you like to donate to charity?";
+
+        private int offersMade = 0;
+
+        public CharityAgent(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @React(external = true)
+        CharityDonationOffered offerToDonate(DishServed served) {
+            return offerDonation();
+        }
+
+        @React(external = true)
+        CharityDonationOffered offerToDonate(FoodDelivered delivered) {
+            return offerDonation();
+        }
+
+        private CharityDonationOffered offerDonation() {
+            CharityDonationOffered result = CharityDonationOffered
+                    .newBuilder()
+                    .setMessage(MESSAGE)
+                    .build();
+            offersMade++;
+            return result;
+        }
+
+        public int offersMade() {
+            return offersMade;
+        }
+    }
+
+    /** In an attempt to offer a charity donation, stutters and throws an exception. */
+    public static class StutteringCharityAgent extends AbstractEventReactor {
+
+        public StutteringCharityAgent(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @React(external = true)
+        CharityDonationOffered offerToDonate(DishServed served) {
+            return stutter();
+        }
+
+        @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for this test case. */
+        private static CharityDonationOffered stutter() {
+            throw new RuntimeException();
         }
     }
 
     /** Throws an exception whenever a dish is cooked. */
-    public static class FaultyFoodServer extends AbstractEventReactor {
+    public static class FaultyDeliveryNotifier extends AbstractEventReactor {
 
-        public FaultyFoodServer(EventBus eventBus) {
+        public FaultyDeliveryNotifier(EventBus eventBus) {
             super(eventBus);
         }
 
-        @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for testing. */
+        @SuppressWarnings("NewExceptionWithoutArguments")/* Does not matter for this test case. */
         @React
-        DishServed created(DishCooked cooked) {
+        UserNotified notifyUser(DishCooked cooked) {
             throw new RuntimeException();
-        }
-    }
-
-    /**
-     * Oversees the proper shut down of the restaurant by escorting the staff and
-     * clearing the restaurant premises.
-     */
-    public static class CourtOfficer extends AbstractEventReactor {
-
-        public CourtOfficer(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @React
-        Pair<StaffEscorted, RestaurantPremisesCleared> shutDown(RestaurantShutDown shutDown) {
-            String restaurantId = shutDown.getRestaurantId();
-            StaffEscorted escorted = escortStaff(restaurantId);
-            RestaurantPremisesCleared cleared = clearPremises(restaurantId);
-            Pair<StaffEscorted, RestaurantPremisesCleared> result = Pair.of(escorted, cleared);
-            return result;
-        }
-
-        private static RestaurantPremisesCleared clearPremises(String restaurantId) {
-            RestaurantPremisesCleared result = RestaurantPremisesCleared
-                    .newBuilder()
-                    .setRestaurantId(restaurantId)
-                    .build();
-            return result;
-        }
-
-        private static StaffEscorted escortStaff(String restaurantId) {
-            StaffEscorted result = StaffEscorted
-                    .newBuilder()
-                    .setRestaurantId(restaurantId)
-                    .build();
-            return result;
-        }
-    }
-
-    public static class CourtOfficerOverseer extends AbstractEventSubscriber {
-
-        private final List<String> restaurantsEscorted = new ArrayList<>();
-        private final List<String> premisesCleared = new ArrayList<>();
-
-        @Subscribe
-        public void on(StaffEscorted escorted) {
-            String restaurantId = escorted.getRestaurantId();
-            restaurantsEscorted.add(restaurantId);
-        }
-
-        @Subscribe
-        public void on(RestaurantPremisesCleared restaurantPremisesCleared) {
-            String restaurantId = restaurantPremisesCleared.getRestaurantId();
-            premisesCleared.add(restaurantId);
-        }
-
-        public ImmutableList<String> restaurantsEscorted() {
-            return ImmutableList.copyOf(restaurantsEscorted);
-        }
-
-        public ImmutableList<String> premisesCleared() {
-            return ImmutableList.copyOf(premisesCleared);
-        }
-    }
-
-    /** Throws an exception whenever a dish is served. */
-    public static class FaultyHealthInspector extends AbstractEventReactor {
-
-        public FaultyHealthInspector(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @SuppressWarnings("NewExceptionWithoutArguments") /* Does ont matter for testing. */
-        @React(external = true)
-        Optional<DishFoundToBePoisonous> inspectDish(DishServed dishServed) {
-            throw new RuntimeException();
-        }
-    }
-
-    /** Does not react to any events. */
-    public static class IgnorantReactor extends AbstractEventReactor {
-
-        public IgnorantReactor(EventBus eventBus) {
-            super(eventBus);
         }
     }
 }
+
