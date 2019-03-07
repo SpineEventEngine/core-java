@@ -136,7 +136,7 @@ message EntityStateChanged {
     google.protobuf.Any new_state = 2 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 3;
+    repeated DispatchedMessageId message_id = 3 [(required) = true, (valid) = true];
 
     // The instant when the entity was changed.
     google.protobuf.Timestamp when = 4;
@@ -153,7 +153,7 @@ message EntityArchived {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was archived.
     google.protobuf.Timestamp when = 3;
@@ -170,7 +170,7 @@ message EntityDeleted {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was deleted.
     google.protobuf.Timestamp when = 3;
@@ -187,7 +187,7 @@ message EntityExtractedFromArchive {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was extracted.
     google.protobuf.Timestamp when = 3;
@@ -204,7 +204,7 @@ message EntityRestored {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was restored.
     google.protobuf.Timestamp when = 3;

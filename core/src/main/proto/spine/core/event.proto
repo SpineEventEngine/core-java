@@ -39,6 +39,7 @@ import "spine/core/enrichment.proto";
 
 // Event identifier.
 message EventId {
+    option (is).java_type = "io.spine.core.MessageId";
 
     // A value of the event identifier.
     //

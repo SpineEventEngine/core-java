@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -66,7 +67,7 @@ public final class EntityLifecycleMonitor<I,
         implements TransactionListener<I, E, S, B> {
 
     private final Repository<I, ?> repository;
-    private final List<Message> acknowledgedMessageIds;
+    private final List<MessageId> acknowledgedMessageIds;
 
     private @MonotonicNonNull I entityId;
 
@@ -99,7 +100,7 @@ public final class EntityLifecycleMonitor<I,
     @Override
     public void onAfterPhase(Phase<I, ?> phase) {
         checkSameEntity(phase.getEntityId());
-        Message messageId = phase.getMessageId();
+        MessageId messageId = phase.getMessageId();
         acknowledgedMessageIds.add(messageId);
     }
 
@@ -115,7 +116,7 @@ public final class EntityLifecycleMonitor<I,
      */
     @Override
     public void onAfterCommit(EntityRecordChange change) {
-        Set<Message> messageIds = ImmutableSet.copyOf(acknowledgedMessageIds);
+        Set<MessageId> messageIds = ImmutableSet.copyOf(acknowledgedMessageIds);
         Any newEntityId = change.getPreviousValue()
                                 .getEntityId();
         I id = Identifier.unpack(newEntityId, repository.idClass());

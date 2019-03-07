@@ -59,7 +59,7 @@ final class CommandLifecycleAggregate
     }
 
     @Assign
-    TargetAssignedToCommand on(AssignTargetToCommand event) {
+    TargetAssignedToCommand handle(AssignTargetToCommand event) {
         return TargetAssignedToCommand.newBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
@@ -74,12 +74,12 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(CommandReceived event) {
+        ensureId();
         CommandTimeline status = CommandTimeline
                 .newBuilder()
                 .setWhenReceived(getCurrentTime())
                 .build();
-        builder().setId(event.getId())
-                 .setCommand(event.getPayload())
+        builder().setCommand(event.getPayload())
                  .setStatus(status);
     }
 
@@ -91,6 +91,7 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(@SuppressWarnings("unused") CommandAcknowledged event) {
+        ensureId();
         CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(getCurrentTime())
                 .build();
@@ -99,6 +100,7 @@ final class CommandLifecycleAggregate
 
     @Apply(allowImport = true)
     private void on(CommandScheduled event) {
+        ensureId();
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
                 .setWhenScheduled(getCurrentTime())
@@ -114,6 +116,7 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(@SuppressWarnings("unused") CommandDispatched event) {
+        ensureId();
         CommandTimeline status = statusBuilder()
                 .setWhenDispatched(getCurrentTime())
                 .build();
@@ -127,12 +130,13 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(TargetAssignedToCommand event) {
+        ensureId();
         CommandTarget target = event.getTarget();
         CommandLifecycleVBuilder builder = builder();
         CommandTimeline status =
                 builder.getStatus()
                        .toBuilder()
-                       .setWhenTargetAssgined(getCurrentTime())
+                       .setWhenTargetAssigned(getCurrentTime())
                        .build();
         builder.setStatus(status)
                .setTarget(target);
@@ -145,6 +149,7 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(@SuppressWarnings("unused") CommandHandled event) {
+        ensureId();
         setStatus(Responses.statusOk());
     }
 
@@ -155,6 +160,7 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(CommandErrored event) {
+        ensureId();
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
@@ -169,6 +175,7 @@ final class CommandLifecycleAggregate
      */
     @Apply(allowImport = true)
     private void on(CommandRejected event) {
+        ensureId();
         Status status = Status
                 .newBuilder()
                 .setRejection(event.getRejectionEvent())
@@ -178,18 +185,20 @@ final class CommandLifecycleAggregate
 
     @Apply(allowImport = true)
     private void on(CommandTransformed event) {
+        ensureId();
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setCommand(event.getId());
         CommandTimeline.Builder newStatus =
                 state().getStatus()
                        .toBuilder()
-                       .setSubstitued(substituted);
+                       .setSubstituted(substituted);
         builder().setStatus(newStatus.build());
     }
 
     @Apply(allowImport = true)
     private void on(CommandSplit event) {
+        ensureId();
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setSequence(Sequence.newBuilder()
@@ -197,7 +206,7 @@ final class CommandLifecycleAggregate
         CommandTimeline.Builder newStatus =
                 state().getStatus()
                        .toBuilder()
-                       .setSubstitued(substituted);
+                       .setSubstituted(substituted);
         builder().setStatus(newStatus.build());
     }
 
@@ -226,5 +235,9 @@ final class CommandLifecycleAggregate
                 .setHowHandled(status)
                 .build();
         builder().setStatus(commandStatus);
+    }
+
+    private void ensureId() {
+        builder().setId(id());
     }
 }

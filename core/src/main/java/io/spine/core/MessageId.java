@@ -18,19 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.core;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-public class WronglyDomesticSubscriber extends AbstractEventSubscriber {
-
-    @Subscribe // <-- Error here. Should be external.
-    void on(Organization organization) {
-        fail(WronglyDomesticSubscriber.class.getSimpleName() +
-                     " should not be able to receive external updates.");
-    }
+/**
+ * An identifier of a message.
+ *
+ * @see CommandId
+ * @see EventId
+ */
+@Internal
+public interface MessageId extends Message {
 }
