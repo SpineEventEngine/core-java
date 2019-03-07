@@ -34,12 +34,13 @@ import java.lang.annotation.Target;
  * <p>An event applier method:
  * <ul>
  *     <li>is annotated with {@link Apply};
+ *     <li>is {@code private};
  *     <li>is {@code void};
  *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *         as the only parameter.
  * </ul>
  *
- * <p>In order to update the state of the aggregate, the {@link Aggregate#getBuilder()} method
+ * <p>In order to update the state of the aggregate, the {@link Aggregate#builder()} method
  * should be used.
  *
  * <p>If the annotation comes with the attribute {@link #allowImport() allowImport} set to
@@ -57,7 +58,7 @@ public @interface Apply {
      * defined as the first parameter of the annotated method.
      *
      * @see ImportBus
-     * @see AggregateRepository#getEventImportRouting()
+     * @see AggregateRepository#eventImportRouting()
      */
     boolean allowImport() default false;
 }

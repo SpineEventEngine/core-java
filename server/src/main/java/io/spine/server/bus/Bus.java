@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,9 +47,6 @@ import static java.util.Collections.singleton;
  * @param <E> the type of envelopes for outer objects used by this bus
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
- * @author Alex Tymchenko
- * @author Alexander Yevsyukov
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
@@ -81,7 +78,7 @@ public abstract class Bus<T extends Message,
      *
      * @param dispatcher the dispatcher to register
      * @throws IllegalArgumentException
-     *         if the set of message classes {@linkplain MessageDispatcher#getMessageClasses()
+     *         if the set of message classes {@linkplain MessageDispatcher#messageClasses()
      *         exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {
@@ -201,12 +198,12 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the instance of {@link DeadMessageHandler} for this bus.
      */
-    protected abstract DeadMessageHandler<E> getDeadMessageHandler();
+    protected abstract DeadMessageHandler<E> deadMessageHandler();
 
     /**
      * Obtains the instance of {@link EnvelopeValidator} for this bus.
      */
-    protected abstract EnvelopeValidator<E> getValidator();
+    protected abstract EnvelopeValidator<E> validator();
 
     /**
      * Obtains the dispatcher registry.
@@ -246,8 +243,8 @@ public abstract class Bus<T extends Message,
         Collection<BusFilter<E>> tail = filterChainTail();
         tail.forEach(chainBuilder::append);
 
-        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(), registry());
-        BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(deadMessageHandler(), registry());
+        BusFilter<E> validatingFilter = new ValidatingFilter<>(validator());
 
         chainBuilder.prepend(deadMsgFilter);
         chainBuilder.prepend(validatingFilter);

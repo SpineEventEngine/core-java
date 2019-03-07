@@ -33,8 +33,6 @@ import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * Signals that invocation of a message handling method failed with an exception.
- *
- * @author Alexander Yevsyukov
  */
 public class HandlerMethodFailedException extends RuntimeException {
 
@@ -93,12 +91,12 @@ public class HandlerMethodFailedException extends RuntimeException {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static Any idOf(Object target) {
         if (target instanceof Entity) {
-            Object entityId = ((Entity) target).getId();
+            Object entityId = ((Entity) target).id();
             return Identifier.pack(entityId);
         }
 
         if (target instanceof EventProducer) {
-            return ((EventProducer) target).getProducerId();
+            return ((EventProducer) target).producerId();
         }
 
         return Identifier.pack(target.toString());

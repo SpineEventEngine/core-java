@@ -34,7 +34,7 @@ import io.spine.test.event.EBProjectCreated;
 public class EBProjectCreatedNoOpSubscriber extends AbstractEventSubscriber {
 
     @Subscribe
-    public void on(EBProjectCreated message, EventContext context) {
+    void on(EBProjectCreated message, EventContext context) {
         // Do nothing.
     }
 }

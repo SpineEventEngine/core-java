@@ -35,9 +35,9 @@ public final class GroupNameProjection
     }
 
     @Subscribe(external = true)
-    public void onUpdate(Organization organization) {
-        getBuilder()
-                .setId(getId())
+    void onUpdate(Organization organization) {
+        builder()
+                .setId(id())
                 .setName(organization.getName());
     }
 
@@ -54,7 +54,7 @@ public final class GroupNameProjection
                            .setUuid(org.getId()
                                        .getUuid())
                            .build()));
-            getEventRouting().routeEntityStateUpdates(routing);
+            eventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

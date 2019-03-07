@@ -29,11 +29,11 @@ import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -72,7 +72,7 @@ public final class ClassScanner {
      *         the type of the handler methods
      * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
      */
-    <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
+    <H extends HandlerMethod<?, ?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
     findMethodsBy(MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
         ImmutableMultimap<HandlerTypeInfo, H> result = operation.perform();
@@ -87,7 +87,7 @@ public final class ClassScanner {
      * @param <H>
      *         the type of handler method to find
      */
-    private static final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
+    private static final class MethodScan<H extends HandlerMethod<?, ?, ?, ?, ?>> {
 
         private final Class<?> declaringClass;
         private final Multimap<HandlerTypeInfo, H> handlers;
@@ -100,8 +100,8 @@ public final class ClassScanner {
             this.declaringClass = declaringClass;
             this.signature = signature;
             this.handlers = HashMultimap.create();
-            this.seenMethods = newHashMap();
-            this.fieldFilters = newHashMap();
+            this.seenMethods = new HashMap<>();
+            this.fieldFilters = new HashMap<>();
         }
 
         /**
@@ -138,9 +138,9 @@ public final class ClassScanner {
             HandlerId id = handler.id();
             if (seenMethods.containsKey(id)) {
                 Method alreadyPresent = seenMethods.get(id)
-                                                   .getRawMethod();
+                                                   .rawMethod();
                 String methodName = alreadyPresent.getName();
-                String duplicateMethodName = handler.getRawMethod().getName();
+                String duplicateMethodName = handler.rawMethod().getName();
                 throw new DuplicateHandlerMethodError(declaringClass, id,
                                                       methodName, duplicateMethodName);
             } else {
@@ -158,8 +158,8 @@ public final class ClassScanner {
                 );
                 if (previousValue != null && previousValue.fieldDiffersFrom(field)) {
                     throw new HandlerFieldFilterClashError(declaringClass,
-                                                           handler.getRawMethod(),
-                                                           previousValue.handler.getRawMethod());
+                                                           handler.rawMethod(),
+                                                           previousValue.handler.rawMethod());
                 }
             }
         }
@@ -171,7 +171,7 @@ public final class ClassScanner {
      * @param <H>
      *         the type of handler method
      */
-    private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?>> {
+    private static final class FilteredHandler<H extends HandlerMethod<?, ?, ?, ?, ?>> {
 
         private final H handler;
         private final FieldPath filteredField;

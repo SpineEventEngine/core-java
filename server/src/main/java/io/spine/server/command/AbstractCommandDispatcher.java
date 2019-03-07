@@ -21,12 +21,12 @@
 package io.spine.server.command;
 
 import com.google.protobuf.Any;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.function.Supplier;
 
@@ -67,7 +67,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     /**
      * Obtains {@linkplain #getId() ID} packed into {@code Any} for being used in generated events.
      */
-    public Any getProducerId() {
+    public Any producerId() {
         return producerId.get();
     }
 
@@ -89,7 +89,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
         checkNotNull(exception);
         _error(exception,
                "Error handling command (class: `{}` id: `{}`).",
-               envelope.getMessageClass(),
+               envelope.messageClass(),
                envelope.idAsString());
     }
 
@@ -100,7 +100,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      *
      * @return if the passed {@code CommandHandler} handles the same
      * set of command classes.
-     * @see #getMessageClasses()
+     * @see #messageClasses()
      */
     @Override
     public boolean equals(Object o) {

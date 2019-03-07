@@ -57,11 +57,11 @@ message PmThrowEntityAlreadyArchived {
     ProjectId project_id = 1;
 }
 
-message PmArchiveProcess {
+message PmArchiveProject {
     ProjectId project_id = 1;
 }
 
-message PmDeleteProcess {
+message PmDeleteProject {
     ProjectId project_id = 1;
 }
 

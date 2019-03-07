@@ -22,10 +22,10 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
-import static java.lang.String.format;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A bus which delivers a message to one dispatcher.
@@ -47,10 +47,10 @@ public abstract class UnicastBus<T extends Message,
     }
 
     private static IllegalStateException noDispatcherFound(MessageEnvelope envelope) {
-        String id = Identifier.toString(envelope.getId());
-        String msg = format("No dispatcher found for the command (class: %s id: %s).",
-                            envelope.getMessageClass(),
-                            id);
-        throw new IllegalStateException(msg);
+        String id = Identifier.toString(envelope.id());
+        throw newIllegalStateException(
+                "No dispatcher found for the command (class: `%s` id: `%s`).",
+                envelope.messageClass(), id
+        );
     }
 }

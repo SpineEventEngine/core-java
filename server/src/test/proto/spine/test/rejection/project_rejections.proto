@@ -37,9 +37,3 @@ message InvalidProjectName {
 message MissingOwner {
     ProjectId project_id = 1;
 }
-
-message ProjectInfo {
-    option (enrichment_for) = "InvalidProjectName";
-
-    string project_name = 1 [(by) = "InvalidProjectName.project_id"];
-}

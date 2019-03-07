@@ -20,9 +20,9 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.ProjectId;
 
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;

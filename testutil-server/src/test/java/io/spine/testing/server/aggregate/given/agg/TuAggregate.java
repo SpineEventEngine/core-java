@@ -69,17 +69,17 @@ public final class TuAggregate
     TuProjectAssigned handle(TuAssignProject command) throws TuFailedToAssignProject {
         throw TuFailedToAssignProject
                 .newBuilder()
-                .setId(getId())
+                .setId(id())
                 .build();
     }
 
     @Apply
     private void on(@SuppressWarnings("unused") TuProjectCreated event) {
-        getBuilder().setTimestamp(fromMillis(1234567));
+        builder().setTimestamp(fromMillis(1234567));
     }
 
     @Apply(allowImport = true)
     private void on(@SuppressWarnings("unused") TuTrelloProjectCreated event) {
-        getBuilder().setTimestamp(fromMillis(1234567));
+        builder().setTimestamp(fromMillis(1234567));
     }
 }

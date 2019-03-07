@@ -23,12 +23,10 @@ package io.spine.server.projection;
 import com.google.common.collect.ImmutableList;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.model.DuplicateHandlerMethodError;
 import io.spine.server.model.HandlerFieldFilterClashError;
 import io.spine.server.projection.given.EntitySubscriberProjection;
@@ -38,6 +36,8 @@ import io.spine.server.projection.given.ProjectionTestEnv.MalformedProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.server.projection.given.SavedString;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.DispatchedMessageId;
@@ -64,12 +64,12 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.given.GivenEvent.withMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
 import static io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection.ACCEPTED_VALUE;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.TestValues.random;
 import static io.spine.testing.TestValues.randomString;
@@ -121,7 +121,7 @@ class ProjectionShould {
                 .setValue(newUuid())
                 .build();
         dispatch(projection, stringEvent, EventContext.getDefaultInstance());
-        assertTrue(projection.getState()
+        assertTrue(projection.state()
                              .getValue()
                              .contains(stringEvent.getValue()));
         assertTrue(projection.isChanged());
@@ -131,7 +131,7 @@ class ProjectionShould {
                 .setValue(42)
                 .build();
         dispatch(projection, integerEvent, EventContext.getDefaultInstance());
-        assertTrue(projection.getState()
+        assertTrue(projection.state()
                              .getValue()
                              .contains(valueOf(integerEvent.getValue())));
         assertTrue(projection.isChanged());
@@ -174,7 +174,7 @@ class ProjectionShould {
                 .build();
         EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
         dispatch(projection, withMessage(systemEvent));
-        assertThat(projection.getState())
+        assertThat(projection.state())
                 .isEqualTo(ProjectTaskNames
                                    .newBuilder()
                                    .setProjectId(id)
@@ -196,7 +196,7 @@ class ProjectionShould {
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
         Set<EventClass> classes =
-                asProjectionClass(TestProjection.class).getEventClasses();
+                asProjectionClass(TestProjection.class).eventClasses();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.from(StringImported.class)));
@@ -214,13 +214,13 @@ class ProjectionShould {
                 .newBuilder()
                 .setValue(123)
                 .build();
-        Version nextVersion = Versions.increment(projection.getVersion());
+        Version nextVersion = Versions.increment(projection.version());
         Event e1 = eventFactory.createEvent(stringImported, nextVersion);
         Event e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
 
         boolean projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
 
-        String projectionState = projection.getState().getValue();
+        String projectionState = projection.state().getValue();
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
         assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
@@ -249,13 +249,13 @@ class ProjectionShould {
                      .withState(SavedString.getDefaultInstance())
                      .build();
         dispatch(projection, eventFactory.createEvent(setB));
-        assertThat(projection.getState().getValue()).isEqualTo("B");
+        assertThat(projection.state().getValue()).isEqualTo("B");
 
         dispatch(projection, eventFactory.createEvent(setA));
-        assertThat(projection.getState().getValue()).isEqualTo("A");
+        assertThat(projection.state().getValue()).isEqualTo("A");
 
         dispatch(projection, eventFactory.createEvent(setText));
-        assertThat(projection.getState().getValue()).isEqualTo(setText.getValue());
+        assertThat(projection.state().getValue()).isEqualTo(setText.getValue());
     }
 
     @Test
@@ -276,14 +276,14 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        assertThat(projection.getState()).isEqualTo(SavedString.getDefaultInstance());
+        assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()
                 .setValue(ACCEPTED_VALUE)
                 .build();
         dispatch(projection, eventFactory.createEvent(dispatched));
-        assertThat(projection.getState().getValue()).isEqualTo(ACCEPTED_VALUE);
+        assertThat(projection.state().getValue()).isEqualTo(ACCEPTED_VALUE);
     }
 
     @Test

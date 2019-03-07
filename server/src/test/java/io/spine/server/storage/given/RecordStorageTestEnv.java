@@ -25,12 +25,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -137,17 +135,8 @@ public class RecordStorageTestEnv {
         assertEquals(expected, singleRecord);
     }
 
-    public static EntityId toEntityId(ProjectId id) {
-        Any packed = Identifier.pack(id);
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(packed)
-                .build();
-        return entityId;
-    }
-
-    public static <T> EntityQuery<T> newEntityQuery(EntityFilters filters,
-                                                    RecordStorage<T> storage) {
+    public static <T> EntityQuery<T>
+    newEntityQuery(TargetFilters filters, RecordStorage<T> storage) {
         return EntityQueries.from(filters, emptyOrderBy(), emptyPagination(), storage);
     }
 
@@ -159,8 +148,8 @@ public class RecordStorageTestEnv {
         return Pagination.getDefaultInstance();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static TargetFilters emptyFilters() {
+        return TargetFilters.getDefaultInstance();
     }
 
     public static <E> void assertIteratorsEqual(Iterator<? extends E> first,
@@ -199,7 +188,7 @@ public class RecordStorageTestEnv {
 
         @Column
         public String getCounterName() {
-            return getId().toString();
+            return id().toString();
         }
 
         @Column(name = "COUNTER_VERSION" /* Custom name for storing
@@ -217,30 +206,30 @@ public class RecordStorageTestEnv {
 
         @Column
         public Project getCounterState() {
-            return getState();
+            return state();
         }
 
         @Column
         public int getProjectStatusValue() {
-            return getState().getStatusValue();
+            return state().getStatusValue();
         }
 
         @Column
         public Project.Status getProjectStatusOrdinal() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus()
-                                                                .name());
+            return Enum.valueOf(Project.Status.class, state().getStatus()
+                                                             .name());
         }
 
         @Column
         @Enumerated(STRING)
         public Project.Status getProjectStatusString() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus()
-                                                                .name());
+            return Enum.valueOf(Project.Status.class, state().getStatus()
+                                                             .name());
         }
 
         public void assignStatus(Project.Status status) {
             Project newState = Project
-                    .newBuilder(getState())
+                    .newBuilder(state())
                     .setStatus(status)
                     .build();
             injectState(this, newState, getCounterVersion());

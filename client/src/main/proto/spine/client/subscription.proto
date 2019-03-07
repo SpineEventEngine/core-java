@@ -34,8 +34,9 @@ import "google/protobuf/field_mask.proto";
 import "spine/core/user_id.proto";
 import "spine/core/tenant_id.proto";
 import "spine/core/actor_context.proto";
+import "spine/core/event.proto";
 import "spine/core/response.proto";
-import "spine/client/entities.proto";
+import "spine/client/filters.proto";
 
 // Topic identifier.
 message TopicId {
@@ -49,20 +50,19 @@ message TopicId {
 
 // An object defining a unit of subscription.
 //
-// Defines the target (entities and criteria) of subscription.
+// Defines the target (type and criteria) of subscription.
 //
 message Topic {
 
     TopicId id = 1 [(required) = true];
 
-    // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
+    // Defines the target of interest, e.g. event/entity type URL and a set of subscription
+    // criteria.
     Target target = 2 [(required) = true,
                        (valid) = true,
                        (if_invalid).msg_format = "Invalid topic target"];
 
-    // Field mask to be applied to the entity updates applicable to this topic.
-    //
-    // Applied to each of the entity state messages before returning in scope of SubscriptionUpdate.
+    // Field mask to be applied to the subscription updates.
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the topic was created.
@@ -81,7 +81,7 @@ message SubscriptionUpdate {
     Subscription subscription = 1 [(required) = true];
 
     // Represents the base part of the response,
-    //   i.e. whether the Topic subscription has been acked or not.
+    // i.e. whether the Topic subscription has been acked or not.
     core.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.
@@ -89,18 +89,33 @@ message SubscriptionUpdate {
 
     // Deleted field `updates`.
     //
-    // Use `entity_state_updates` instead.
+    // Use new `update` field instead.
     //
     reserved 10;
 
-    // The updates of the entity states.
+    // Deleted field `entity_state_updates`.
     //
-    // Each update is a pair of an entity ID and state.
+    // Use new `update` field instead.
     //
-    // Each of the update state messages is affected by the field mask set for the current
-    // subscription.
-    //
-    repeated EntityStateUpdate entity_state_updates = 11 [(valid) = true];
+    reserved 11;
+
+    // Each subscription update delivers either entity state updates or events that occurred in the
+    // system.
+    oneof update {
+
+        // The entity state updates if it's an entity subscription.
+        EntityUpdates entity_updates = 12;
+
+        // The new events occurred in the system if it's an event subscription.
+        EventUpdates event_updates = 13;
+    }
+}
+
+// The updates on the observed entity state.
+message EntityUpdates {
+
+    // The entity state update list.
+    repeated EntityStateUpdate updates = 1 [(valid) = true];
 }
 
 // The pair of the entity ID and the entity state both packed as Any.
@@ -114,6 +129,13 @@ message EntityStateUpdate {
     // May be affected by a field mask specified in the subscription Topic.
     //
     google.protobuf.Any state = 2 [(required) = true];
+}
+
+// The new events of the observed type that occurred in the system.
+message EventUpdates {
+
+    // The event list.
+    repeated core.Event events = 1 [(valid) = true];
 }
 
 // Subscription identifier.

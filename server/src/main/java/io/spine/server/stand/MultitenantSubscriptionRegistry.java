@@ -21,14 +21,15 @@ package io.spine.server.stand;
 
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
+import io.spine.client.SubscriptionVBuilder;
 import io.spine.client.Subscriptions;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,12 +37,10 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
  * Registry for subscription management in a multi-tenant context.
- *
- * @author Alex Tymchenko
  */
 final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
@@ -60,8 +59,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public synchronized void activate(Subscription subscription,
-                                      Stand.EntityUpdateCallback callback) {
-        registrySlice().activate(subscription, callback);
+                                      Stand.NotifySubscriptionAction notifyAction) {
+        registrySlice().activate(subscription, notifyAction);
     }
 
     @Override
@@ -113,32 +112,31 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     private static class TenantRegistry implements SubscriptionRegistry {
 
-        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = newHashMap();
-        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
+        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = new HashMap<>();
+        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
 
         @Override
         public synchronized void activate(Subscription subscription,
-                                          Stand.EntityUpdateCallback callback) {
+                                          Stand.NotifySubscriptionAction notifyAction) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
             SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-            subscriptionRecord.activate(callback);
+            subscriptionRecord.activate(notifyAction);
         }
 
         @Override
         public synchronized Subscription add(Topic topic) {
             SubscriptionId subscriptionId = Subscriptions.generateId();
-            Target target = topic.getTarget();
-            String typeAsString = target.getType();
-            TypeUrl type = TypeUrl.parse(typeAsString);
-            Subscription subscription = Subscription.newBuilder()
-                                                    .setId(subscriptionId)
-                                                    .setTopic(topic)
-                                                    .build();
-            SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
+            Subscription subscription = SubscriptionVBuilder
+                    .newBuilder()
+                    .setId(subscriptionId)
+                    .setTopic(topic)
+                    .build();
+            SubscriptionRecord record = newRecordFor(subscription);
+            TypeUrl type = record.getType();
 
             if (!typeToRecord.containsKey(type)) {
-                typeToRecord.put(type, new HashSet<SubscriptionRecord>());
+                typeToRecord.put(type, new HashSet<>());
             }
             typeToRecord.get(type)
                         .add(record);

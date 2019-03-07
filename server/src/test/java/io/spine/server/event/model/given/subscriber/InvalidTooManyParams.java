@@ -31,6 +31,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
  */
 public class InvalidTooManyParams extends TestEventSubscriber {
     @Subscribe
-    public void handle(RefProjectCreated event, EventContext context, Object redundant) {
+    void handle(RefProjectCreated event, EventContext context, Object redundant) {
     }
 }

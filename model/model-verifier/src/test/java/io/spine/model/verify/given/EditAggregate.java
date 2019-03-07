@@ -45,7 +45,7 @@ public class EditAggregate extends Aggregate<String, EditState, EditStateVBuilde
     }
 
     @Apply
-    void on(PhotoEdited event) {
-        getBuilder().setEditor(event.getEditor());
+    private void on(PhotoEdited event) {
+        builder().setEditor(event.getEditor());
     }
 }

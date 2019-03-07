@@ -36,38 +36,36 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.client.ColumnFilter.Operator.EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
-import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
-import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.either;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.ColumnFilters.ge;
-import static io.spine.client.ColumnFilters.gt;
-import static io.spine.client.ColumnFilters.le;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
+import static io.spine.client.Filter.Operator.EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.Filter.Operator.GREATER_THAN;
+import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.either;
+import static io.spine.client.Filters.eq;
+import static io.spine.client.Filters.ge;
+import static io.spine.client.Filters.gt;
+import static io.spine.client.Filters.le;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
 import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.EntityIdUnpacker.unpacker;
 import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER_BY;
 import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_PAGINATION;
 import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
-import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
 import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
 import static io.spine.client.given.QueryBuilderTestEnv.pagination;
+import static io.spine.client.given.TestEntities.randomId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
@@ -217,13 +215,13 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            EntityFilters entityFilters = target.getFilters();
-            EntityIdFilter idFilter = entityFilters.getIdFilter();
-            Collection<EntityId> idValues = idFilter.getIdsList();
-            Function<EntityId, Integer> transformer = unpacker(int.class);
-            Collection<Integer> intIdValues = idValues.stream()
-                                                      .map(transformer)
-                                                      .collect(toList());
+            TargetFilters entityFilters = target.getFilters();
+            IdFilter idFilter = entityFilters.getIdFilter();
+            Collection<Any> idValues = idFilter.getIdsList();
+            Collection<Integer> intIdValues = idValues
+                    .stream()
+                    .map(id -> toObject(id, int.class))
+                    .collect(toList());
 
             Truth.assertThat(idValues)
                  .hasSize(2);
@@ -262,16 +260,15 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            EntityFilters entityFilters = target.getFilters();
-            List<CompositeColumnFilter> aggregatingColumnFilters =
-                    entityFilters.getFilterList();
-            Truth.assertThat(aggregatingColumnFilters)
+            TargetFilters entityFilters = target.getFilters();
+            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
-            CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
-            Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
-            Truth.assertThat(columnFilters)
+            CompositeFilter aggregatingFilter = aggregatingFilters.get(0);
+            Collection<Filter> filters = aggregatingFilter.getFilterList();
+            Truth.assertThat(filters)
                  .hasSize(1);
-            Any actualValue = findByName(columnFilters, columnName).getValue();
+            Any actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
             Int32Value messageValue = unpack(actualValue, Int32Value.class);
             int actualGenericValue = messageValue.getValue();
@@ -284,7 +281,7 @@ class QueryBuilderTest {
             String columnName1 = "myColumn";
             Object columnValue1 = 42;
             String columnName2 = "oneMore";
-            Object columnValue2 = newMessageId();
+            Object columnValue2 = randomId();
 
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .where(eq(columnName1, columnValue1),
@@ -294,19 +291,18 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            EntityFilters entityFilters = target.getFilters();
-            List<CompositeColumnFilter> aggregatingColumnFilters =
-                    entityFilters.getFilterList();
-            Truth.assertThat(aggregatingColumnFilters)
+            TargetFilters entityFilters = target.getFilters();
+            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
-            Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
-                                                                             .getFilterList();
-            Any actualValue1 = findByName(columnFilters, columnName1).getValue();
+            Collection<Filter> filters = aggregatingFilters.get(0)
+                                                           .getFilterList();
+            Any actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(columnFilters, columnName2).getValue();
+            Any actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
             assertEquals(columnValue2, actualGenericValue2);
@@ -331,51 +327,59 @@ class QueryBuilderTest {
                                                eq(countryColumn, countryName)))
                                  .build();
             Target target = query.getTarget();
-            List<CompositeColumnFilter> filters = target.getFilters()
-                                                        .getFilterList();
+            List<CompositeFilter> filters = target.getFilters()
+                                                  .getFilterList();
             Truth.assertThat(filters)
                  .hasSize(2);
 
-            CompositeColumnFilter firstFilter = filters.get(0);
-            CompositeColumnFilter secondFilter = filters.get(1);
+            CompositeFilter firstFilter = filters.get(0);
+            CompositeFilter secondFilter = filters.get(1);
 
-            List<ColumnFilter> allColumnFilters;
-            List<ColumnFilter> eitherColumnFilters;
+            List<Filter> allFilters;
+            List<Filter> eitherFilters;
             if (firstFilter.getOperator() == ALL) {
                 assertEquals(EITHER, secondFilter.getOperator());
-                allColumnFilters = firstFilter.getFilterList();
-                eitherColumnFilters = secondFilter.getFilterList();
+                allFilters = firstFilter.getFilterList();
+                eitherFilters = secondFilter.getFilterList();
             } else {
                 assertEquals(ALL, secondFilter.getOperator());
-                eitherColumnFilters = firstFilter.getFilterList();
-                allColumnFilters = secondFilter.getFilterList();
+                eitherFilters = firstFilter.getFilterList();
+                allFilters = secondFilter.getFilterList();
             }
 
-            Truth.assertThat(allColumnFilters)
+            Truth.assertThat(allFilters)
                  .hasSize(2);
-            Truth.assertThat(eitherColumnFilters)
+            Truth.assertThat(eitherFilters)
                  .hasSize(2);
 
-            ColumnFilter companySizeLowerBound = allColumnFilters.get(0);
-            assertEquals(companySizeColumn, companySizeLowerBound.getColumnName());
+            Filter companySizeLowerBound = allFilters.get(0);
+            String columnName1 = companySizeLowerBound.getFieldPath()
+                                                      .getFieldName(0);
+            assertEquals(companySizeColumn, columnName1);
             assertEquals(50L,
                          (long) toObject(companySizeLowerBound.getValue(), int.class));
             assertEquals(GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
 
-            ColumnFilter companySizeHigherBound = allColumnFilters.get(1);
-            assertEquals(companySizeColumn, companySizeHigherBound.getColumnName());
+            Filter companySizeHigherBound = allFilters.get(1);
+            String columnName2 = companySizeHigherBound.getFieldPath()
+                                                       .getFieldName(0);
+            assertEquals(companySizeColumn, columnName2);
             assertEquals(1000L,
                          (long) toObject(companySizeHigherBound.getValue(), int.class));
             assertEquals(LESS_OR_EQUAL, companySizeHigherBound.getOperator());
 
-            ColumnFilter establishedTimeFilter = eitherColumnFilters.get(0);
-            assertEquals(establishedTimeColumn, establishedTimeFilter.getColumnName());
+            Filter establishedTimeFilter = eitherFilters.get(0);
+            String columnName3 = establishedTimeFilter.getFieldPath()
+                                                      .getFieldName(0);
+            assertEquals(establishedTimeColumn, columnName3);
             assertEquals(twoDaysAgo,
                          toObject(establishedTimeFilter.getValue(), Timestamp.class));
             assertEquals(GREATER_THAN, establishedTimeFilter.getOperator());
 
-            ColumnFilter countryFilter = eitherColumnFilters.get(1);
-            assertEquals(countryColumn, countryFilter.getColumnName());
+            Filter countryFilter = eitherFilters.get(1);
+            String columnName4 = countryFilter.getFieldPath()
+                                              .getFieldName(0);
+            assertEquals(countryColumn, columnName4);
             assertEquals(countryName,
                          toObject(countryFilter.getValue(), String.class));
             assertEquals(EQUAL, countryFilter.getOperator());
@@ -392,7 +396,7 @@ class QueryBuilderTest {
             String columnName1 = "column1";
             Object columnValue1 = 42;
             String columnName2 = "column2";
-            Object columnValue2 = newMessageId();
+            Object columnValue2 = randomId();
             String fieldName = "TestEntity.secondField";
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .withMask(fieldName)
@@ -415,37 +419,37 @@ class QueryBuilderTest {
 
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
-            EntityFilters entityFilters = target.getFilters();
+            TargetFilters entityFilters = target.getFilters();
 
             // Check IDs
-            EntityIdFilter idFilter = entityFilters.getIdFilter();
-            Collection<EntityId> idValues = idFilter.getIdsList();
-            Function<EntityId, Integer> transformer = unpacker(int.class);
-            Collection<Integer> intIdValues = idValues.stream()
-                                                      .map(transformer)
-                                                      .collect(toList());
+            IdFilter idFilter = entityFilters.getIdFilter();
+            Collection<Any> idValues = idFilter.getIdsList();
+            Collection<Integer> intIdValues = idValues
+                    .stream()
+                    .map(id -> toObject(id, int.class))
+                    .collect(toList());
 
             Truth.assertThat(idValues)
                  .hasSize(2);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
             // Check query params
-            List<CompositeColumnFilter> aggregatingColumnFilters =
+            List<CompositeFilter> aggregatingFilters =
                     entityFilters.getFilterList();
 
-            Truth.assertThat(aggregatingColumnFilters)
+            Truth.assertThat(aggregatingFilters)
                  .hasSize(1);
-            Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
-                                                                             .getFilterList();
-            Truth.assertThat(columnFilters)
+            Collection<Filter> filters = aggregatingFilters.get(0)
+                                                           .getFilterList();
+            Truth.assertThat(filters)
                  .hasSize(2);
 
-            Any actualValue1 = findByName(columnFilters, columnName1).getValue();
+            Any actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(columnFilters, columnName2).getValue();
+            Any actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
             assertEquals(columnValue2, actualGenericValue2);
@@ -457,14 +461,15 @@ class QueryBuilderTest {
             assertEquals(expectedPagination, query.getPagination());
         }
 
-        private ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
-            for (ColumnFilter filter : filters) {
-                if (filter.getColumnName()
+        private Filter findByName(Iterable<Filter> filters, String name) {
+            for (Filter filter : filters) {
+                if (filter.getFieldPath()
+                          .getFieldName(0)
                           .equals(name)) {
                     return filter;
                 }
             }
-            fail(format("No ColumnFilter found for %s.", name));
+            fail(format("No Filter found for %s.", name));
             // avoid returning `null`
             throw new RuntimeException("never happens unless JUnit is broken");
         }
@@ -477,9 +482,9 @@ class QueryBuilderTest {
         @Test
         @DisplayName("IDs clause")
         void lastIds() {
-            Iterable<?> genericIds = asList(newUuid(), -1, newMessageId());
+            Iterable<?> genericIds = asList(newUuid(), -1, randomId());
             Long[] longIds = {1L, 2L, 3L};
-            Message[] messageIds = {newMessageId(), newMessageId(), newMessageId()};
+            Message[] messageIds = {randomId(), randomId(), randomId()};
             String[] stringIds = {newUuid(), newUuid(), newUuid()};
             Integer[] intIds = {4, 5, 6};
 
@@ -493,15 +498,15 @@ class QueryBuilderTest {
             assertNotNull(query);
 
             Target target = query.getTarget();
-            EntityFilters filters = target.getFilters();
-            Collection<EntityId> entityIds = filters.getIdFilter()
-                                                    .getIdsList();
+            TargetFilters filters = target.getFilters();
+            Collection<Any> entityIds = filters.getIdFilter()
+                                               .getIdsList();
             Truth.assertThat(entityIds)
                  .hasSize(messageIds.length);
-            Function<EntityId, TestEntityId> transformer = unpacker(TestEntityId.class);
-            Iterable<? extends Message> actualValues = entityIds.stream()
-                                                                .map(transformer)
-                                                                .collect(toList());
+            Iterable<? extends Message> actualValues = entityIds
+                    .stream()
+                    .map(id -> toObject(id, TestEntityId.class))
+                    .collect(toList());
             assertThat(actualValues, containsInAnyOrder(messageIds));
         }
 
@@ -561,7 +566,7 @@ class QueryBuilderTest {
         String columnName1 = "column1";
         Object columnValue1 = 42;
         String columnName2 = "column2";
-        Message columnValue2 = newMessageId();
+        Message columnValue2 = randomId();
         String fieldName = "TestEntity.secondField";
         QueryBuilder builder = factory.select(TEST_ENTITY_TYPE)
                                       .withMask(fieldName)

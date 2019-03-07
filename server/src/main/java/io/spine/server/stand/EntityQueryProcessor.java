@@ -21,16 +21,16 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.Target;
-import io.spine.protobuf.AnyPacker;
+import io.spine.client.TargetFilters;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
 
 import java.util.Iterator;
@@ -40,8 +40,6 @@ import static com.google.common.collect.Streams.stream;
 
 /**
  * Processes the queries targeting {@link io.spine.server.entity.Entity Entity} objects.
- *
- * @author Alex Tymchenko
  */
 class EntityQueryProcessor implements QueryProcessor {
 
@@ -52,24 +50,32 @@ class EntityQueryProcessor implements QueryProcessor {
     }
 
     @Override
-    public ImmutableCollection<Any> process(Query query) {
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         Target target = query.getTarget();
         FieldMask fieldMask = query.getFieldMask();
 
-        Iterator<? extends Entity<?, ?>> entities;
+        Iterator<EntityRecord> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
-            entities = repository.loadAll();
+            entities = repository.loadAllRecords();
         } else {
-            EntityFilters filters = target.getFilters();
+            TargetFilters filters = target.getFilters();
             OrderBy orderBy = query.getOrderBy();
             Pagination pagination = query.getPagination();
-            entities = repository.find(filters, orderBy, pagination, fieldMask);
+            entities = repository.findRecords(filters, orderBy, pagination, fieldMask);
         }
-        ImmutableList<Any> result = stream(entities)
-                .map(Entity::getState)
-                .map(AnyPacker::pack)
+        ImmutableList<EntityStateWithVersion> result = stream(entities)
+                .map(EntityQueryProcessor::toEntityState)
                 .collect(toImmutableList());
+        return result;
+    }
+
+    private static EntityStateWithVersion toEntityState(EntityRecord record) {
+        EntityStateWithVersion result = EntityStateWithVersion
+                .newBuilder()
+                .setState(record.getState())
+                .setVersion(record.getVersion())
+                .build();
         return result;
     }
 }

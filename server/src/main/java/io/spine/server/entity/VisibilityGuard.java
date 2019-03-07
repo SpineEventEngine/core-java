@@ -28,6 +28,7 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,7 +36,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Maps.filterValues;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -43,13 +43,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A registry of repositories that controls access to them depending on the visibility of
  * corresponding entity states.
  *
- * @author Alexander Yevsyukov
  * @see EntityOptions
  */
 @Internal
 public final class VisibilityGuard {
 
-    private final Map<Class<? extends Message>, RepositoryAccess> repositories = newHashMap();
+    private final Map<Class<? extends Message>, RepositoryAccess> repositories = new HashMap<>();
 
     /** Prevent instantiation from outside. */
     private VisibilityGuard() {
@@ -67,8 +66,8 @@ public final class VisibilityGuard {
      */
     public void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        EntityClass<?> entityClass = repository.entityClass();
-        Class<? extends Message> stateClass = entityClass.getStateClass();
+        EntityClass<?> entityClass = repository.entityModelClass();
+        Class<? extends Message> stateClass = entityClass.stateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
@@ -132,8 +131,8 @@ public final class VisibilityGuard {
         // Get type names for entities of the filtered repositories.
         Set<TypeName> entityTypes =
                 repos.stream()
-                     .map(input -> input.repository.getEntityStateType()
-                                                   .toName())
+                     .map(input -> input.repository.entityStateType()
+                                                   .toTypeName())
                      .collect(toImmutableSet());
         return entityTypes;
     }
@@ -159,8 +158,8 @@ public final class VisibilityGuard {
         private RepositoryAccess(Repository repository) {
             this.repository = repository;
             @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
-            Class<? extends Message> stateClass = repository.entityClass()
-                                                            .getStateClass();
+            Class<? extends Message> stateClass = repository.entityModelClass()
+                                                            .stateClass();
             this.visibility = EntityOptions.getVisibility(stateClass);
         }
 

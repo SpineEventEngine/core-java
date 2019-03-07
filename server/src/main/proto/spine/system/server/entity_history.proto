@@ -37,6 +37,7 @@ import "google/protobuf/timestamp.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/client/entities.proto";
+import "spine/client/filters.proto";
 import "spine/server/entity/entity.proto";
 
 // An identifier of an entity history.
@@ -60,7 +61,7 @@ message EntityHistoryId {
 message EntityHistory {
     option (entity).kind = AGGREGATE;
 
-    EntityHistoryId id = 1 [(set_once) = false];
+    EntityHistoryId id = 1;
 
     // The kind of the entity.
     EntityOption.Kind kind = 2;

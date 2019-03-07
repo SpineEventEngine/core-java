@@ -23,9 +23,9 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
-import io.spine.client.EntityFilters;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
@@ -57,7 +57,7 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
         Predicate<Event> predicate = new MatchesStreamQuery(query);
         Iterator<Event> result =
                 Streams.stream(entities)
-                       .map(EEntity::getState)
+                       .map(EEntity::state)
                        .filter(predicate)
                        .sorted(eventComparator())
                        .iterator();
@@ -68,7 +68,7 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
-        EntityFilters filters = QueryToFilters.convert(query);
+        TargetFilters filters = QueryToFilters.convert(query);
         return find(filters, OrderBy.getDefaultInstance(),
                     Pagination.getDefaultInstance(),
                     FieldMask.getDefaultInstance());

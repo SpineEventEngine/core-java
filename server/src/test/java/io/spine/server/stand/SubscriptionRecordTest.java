@@ -20,72 +20,179 @@
 
 package io.spine.server.stand;
 
-import com.google.protobuf.Any;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
-import io.spine.protobuf.AnyPacker;
+import io.spine.client.Target;
+import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.event.EvTeamId;
+import io.spine.test.event.ProjectCreated;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
+import static io.spine.client.Targets.composeTarget;
+import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
-import static io.spine.server.stand.given.SubscriptionRecordTestEnv.TYPE;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.projectCreatedEnvelope;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.stateChangedEnvelope;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription;
-import static io.spine.server.stand.given.SubscriptionRecordTestEnv.target;
+import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("SubscriptionRecord should")
 class SubscriptionRecordTest {
 
-    @Test
-    @DisplayName("match record to given parameters")
-    void matchRecordToParams() {
-        SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(), target(), TYPE);
-        Project entityState = Project.getDefaultInstance();
-        Any wrappedState = AnyPacker.pack(entityState);
-        ProjectId redundantId = ProjectId.getDefaultInstance();
-
-        boolean matchResult = matchingRecord.matches(TYPE, redundantId, wrappedState);
-        assertTrue(matchResult);
-    }
+    private static final String TARGET_ID = "target-ID";
 
     @Test
     @DisplayName("fail to match improper type")
     void notMatchImproperType() {
-        SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
-                                                                      target(),
-                                                                      TYPE);
-        Project entityState = Project.getDefaultInstance();
-        Any wrappedState = AnyPacker.pack(entityState);
-        ProjectId redundantId = ProjectId.getDefaultInstance();
+        SubscriptionRecord record = newRecordFor(subscription());
+        ProjectId id = ProjectId.getDefaultInstance();
+        Project state = Project.getDefaultInstance();
 
-        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId, wrappedState);
-        assertFalse(matchResult);
+        EventEnvelope envelope = stateChangedEnvelope(id, state);
+        assertTrue(record.matches(envelope));
+
+        EventEnvelope envelope2 = stateChangedEnvelope(id, state, OTHER_TYPE);
+        assertFalse(record.matches(envelope2));
     }
 
-    @Test
-    @DisplayName("fail to match improper target")
-    void notMatchImproperTarget() {
-        ProjectId nonExistingId = ProjectId.newBuilder()
-                                           .setId("never-existed")
-                                           .build();
-        SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
-                                                                      target(nonExistingId),
-                                                                      TYPE);
-        Project entityState = Project.getDefaultInstance();
-        Any wrappedState = AnyPacker.pack(entityState);
-        ProjectId redundantId = ProjectId.getDefaultInstance();
+    @Nested
+    @DisplayName("fail to match improper ID")
+    class MatchById {
 
-        boolean matchResult = notMatchingRecord.matches(TYPE, redundantId, wrappedState);
-        assertFalse(matchResult);
+        @Test
+        @DisplayName("in case of entity subscription")
+        void entitySubscription() {
+            ProjectId targetId = ProjectId
+                    .newBuilder()
+                    .setId(TARGET_ID)
+                    .build();
+            Project state = Project.getDefaultInstance();
+            SubscriptionRecord record = newRecordFor(subscription(targetId));
+
+            EventEnvelope envelope = stateChangedEnvelope(targetId, state);
+            assertTrue(record.matches(envelope));
+
+            ProjectId otherId = ProjectId
+                    .newBuilder()
+                    .setId("some-other-ID")
+                    .build();
+            EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
+            assertFalse(record.matches(envelope2));
+        }
+
+        @Test
+        @DisplayName("in case of event subscription")
+        void eventSubscription() {
+            EventId targetId = EventId
+                    .newBuilder()
+                    .setValue(TARGET_ID)
+                    .build();
+            Target target = composeTarget(ProjectCreated.class, singleton(targetId), null);
+            Subscription subscription = subscription(target);
+            SubscriptionRecord record = newRecordFor(subscription);
+
+            EventEnvelope envelope = projectCreatedEnvelope(targetId);
+            assertTrue(record.matches(envelope));
+
+            EventId otherId = EventId
+                    .newBuilder()
+                    .setValue("other-event-ID")
+                    .build();
+            EventEnvelope nonMatching = projectCreatedEnvelope(otherId);
+            assertFalse(record.matches(nonMatching));
+        }
+    }
+
+    @Nested
+    @DisplayName("fail to match improper state")
+    class MatchByState {
+
+        @Test
+        @DisplayName("in case of entity subscription")
+        void entitySubscription() {
+            ProjectId targetId = ProjectId
+                    .newBuilder()
+                    .setId(TARGET_ID)
+                    .build();
+            String targetName = "super-project";
+
+            Filter filter = Filters.eq("name", targetName);
+            CompositeFilter compositeFilter = Filters.all(filter);
+            Set<CompositeFilter> filters = singleton(compositeFilter);
+            Target target = composeTarget(Project.class, singleton(targetId), filters);
+
+            Subscription subscription = subscription(target);
+            SubscriptionRecord record = newRecordFor(subscription);
+
+            Project matching = Project
+                    .newBuilder()
+                    .setName(targetName)
+                    .build();
+            EventEnvelope envelope = stateChangedEnvelope(targetId, matching);
+            assertTrue(record.matches(envelope));
+
+            Project nonMatching = Project
+                    .newBuilder()
+                    .setName("some-other-name")
+                    .build();
+            EventEnvelope envelope2 = stateChangedEnvelope(targetId, nonMatching);
+            assertFalse(record.matches(envelope2));
+        }
+
+        @Test
+        @DisplayName("in case of event subscription")
+        void eventSubscription() {
+            EventId targetId = EventId
+                    .newBuilder()
+                    .setValue(TARGET_ID)
+                    .build();
+            String targetTeamId = "target-team-ID";
+
+            Filter filter = Filters.eq("team_id.id", targetTeamId);
+            CompositeFilter compositeFilter = Filters.all(filter);
+            Set<CompositeFilter> filters = singleton(compositeFilter);
+            Target target = composeTarget(ProjectCreated.class, singleton(targetId), filters);
+
+            Subscription subscription = subscription(target);
+            SubscriptionRecord record = newRecordFor(subscription);
+
+            EvTeamId matchingTeamId = EvTeamId
+                    .newBuilder()
+                    .setId(targetTeamId)
+                    .build();
+            ProjectCreated matching = ProjectCreated
+                    .newBuilder()
+                    .setTeamId(matchingTeamId)
+                    .build();
+            EventEnvelope envelope = projectCreatedEnvelope(targetId, matching);
+            assertTrue(record.matches(envelope));
+
+            EvTeamId otherTeamId = EvTeamId
+                    .newBuilder()
+                    .setId("some-other-team-ID")
+                    .build();
+            ProjectCreated other = ProjectCreated
+                    .newBuilder()
+                    .setTeamId(otherTeamId)
+                    .build();
+            EventEnvelope nonMatching = projectCreatedEnvelope(targetId, other);
+            assertFalse(record.matches(nonMatching));
+        }
     }
 
     @Test
@@ -93,13 +200,14 @@ class SubscriptionRecordTest {
     void beEqualToSame() {
         Subscription oneSubscription = subscription();
         SubscriptionId breakingId = Subscriptions.newId("breaking-id");
-        Subscription otherSubscription = Subscription.newBuilder()
-                                                     .setId(breakingId)
-                                                     .build();
+        Subscription otherSubscription = oneSubscription
+                .toBuilder()
+                .setId(breakingId)
+                .build();
         @SuppressWarnings("QuestionableName")
-        SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE);
-        SubscriptionRecord similar = new SubscriptionRecord(otherSubscription, target(), TYPE);
-        SubscriptionRecord same = new SubscriptionRecord(oneSubscription, target(), TYPE);
+        SubscriptionRecord one = newRecordFor(oneSubscription);
+        SubscriptionRecord similar = newRecordFor(otherSubscription);
+        SubscriptionRecord same = newRecordFor(oneSubscription);
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }

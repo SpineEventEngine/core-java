@@ -22,10 +22,10 @@ package io.spine.server.event.store;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.util.Timestamps;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
-import io.spine.client.EntityFilters;
+import io.spine.client.CompositeFilter;
+import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
+import io.spine.client.TargetFilters;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +46,7 @@ class ERepositoryTest {
     void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
-        EntityFilters entityFilters = convert(query);
+        TargetFilters entityFilters = convert(query);
         assertTrue(entityFilters.getFilterList()
                                 .isEmpty());
     }
@@ -59,13 +59,13 @@ class ERepositoryTest {
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        EntityFilters entityFilters = convert(query);
+        TargetFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
-        CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
-        List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
+        CompositeFilter compositeFilter = entityFilters.getFilter(0);
+        List<Filter> filters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.ALL, compositeFilter.getOperator());
-        assertEquals(2, columnFilters.size());
+        assertEquals(2, filters.size());
     }
 
     @Test
@@ -79,15 +79,15 @@ class ERepositoryTest {
                 .addFilter(validFilter)
                 .addFilter(invalidFilter)
                 .build();
-        EntityFilters entityFilters = convert(query);
+        TargetFilters entityFilters = convert(query);
         assertEquals(1, entityFilters.getFilterCount());
 
-        CompositeColumnFilter compositeFilter = entityFilters.getFilter(0);
-        List<ColumnFilter> columnFilters = compositeFilter.getFilterList();
+        CompositeFilter compositeFilter = entityFilters.getFilter(0);
+        List<Filter> filters = compositeFilter.getFilterList();
         assertEquals(CompositeOperator.EITHER, compositeFilter.getOperator());
-        assertEquals(1, columnFilters.size());
-        Any typeNameAsAny = columnFilters.get(0)
-                                         .getValue();
+        assertEquals(1, filters.size());
+        Any typeNameAsAny = filters.get(0)
+                                   .getValue();
         assertEquals(typeName.trim(), toObject(typeNameAsAny, String.class));
     }
 

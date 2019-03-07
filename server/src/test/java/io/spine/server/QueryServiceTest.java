@@ -20,13 +20,13 @@
 package io.spine.server;
 
 import com.google.common.truth.ThrowableSubject;
-import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectDetailsRepository;
 import io.spine.server.model.UnknownEntityTypeException;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,15 +138,17 @@ class QueryServiceTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
+        when(projectDetailsRepository.loadAllRecords()).thenThrow(RuntimeException.class);
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
     }
 
     @Test
+    @MuteLogging
     @DisplayName("throw an IllegalStateException if the requested entity type is unknown")
     void failOnUnknownType() {
         Query query = Given.AQuery.readUnknownType();

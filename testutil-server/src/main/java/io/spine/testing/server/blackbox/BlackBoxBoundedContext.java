@@ -37,8 +37,9 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.enrich.Enricher;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.transport.TransportFactory;
@@ -56,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -113,7 +115,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     private final Set<Message> postedEvents;
 
-    protected BlackBoxBoundedContext(boolean multitenant, Enricher enricher) {
+    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
         this.commandTap = new CommandMemoizingTap();
         EventBus.Builder eventBus = EventBus
                 .newBuilder()
@@ -152,7 +154,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a single-tenant instance with the specified enricher.
      */
-    public static SingleTenantBlackBoxContext singleTenant(Enricher enricher) {
+    public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
         return new SingleTenantBlackBoxContext(enricher);
     }
 
@@ -166,7 +168,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Creates a multitenant instance with the specified enricher.
      */
-    public static MultitenantBlackBoxContext multiTenant(Enricher enricher) {
+    public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
         return new MultitenantBlackBoxContext(enricher);
     }
 
@@ -181,13 +183,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
-        Optional<EventBus.Builder> eventBus = builder.getEventBus();
-        Enricher enricher =
-                eventBus.isPresent()
-                ? eventBus.get()
-                          .getEnricher()
-                          .orElse(emptyEnricher())
-                : emptyEnricher();
+        Optional<EventBus.Builder> eventBus = builder.eventBus();
+        EventEnricher enricher =
+                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
+                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
 
         BlackBoxBoundedContext<?> result = builder.isMultitenant()
                                            ? multiTenant(enricher)
@@ -197,6 +196,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                .forEach(result::with);
 
         return result;
+    }
+
+    /** Obtains the name of this bounded context. */
+    public BoundedContextName name() {
+        return boundedContext.name();
     }
 
     /**
@@ -209,14 +213,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
             if (visibility == Visibility.VISIBILITY_UNKNOWN) {
                 continue;
             }
-            result.addAll(boundedContext.getEntityStateTypes(visibility));
+            result.addAll(boundedContext.entityStateTypes(visibility));
         }
         return result.build();
     }
 
-    @VisibleForTesting
-    EventBus getEventBus() {
-        return boundedContext.getEventBus();
+    /** Obtains {@code event bus} instance used by this bounded context. */
+    public EventBus eventBus() {
+        return boundedContext.eventBus();
     }
 
     /**
@@ -228,10 +232,27 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
-        checkNotNull(repositories);
-        for (Repository<?, ?> repository : repositories) {
-            checkNotNull(repository);
-            boundedContext.register(repository);
+        return registerAll(boundedContext::register, repositories);
+    }
+
+    /**
+     * Registers the specified event dispatchers with the {@code event bus} of this
+     * bounded context.
+     *
+     * @param dispatchers
+     *         dispatchers to register with the event bus of this bounded context
+     */
+    @CanIgnoreReturnValue
+    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
+        return registerAll(boundedContext::registerEventDispatcher, dispatchers);
+    }
+
+    @SafeVarargs
+    private final <S> T registerAll(Consumer<S> registerFn, S... itemsToRegister) {
+        checkNotNull(itemsToRegister);
+        for (S item : itemsToRegister) {
+            checkNotNull(item);
+            registerFn.accept(item);
         }
         return thisRef();
     }
@@ -567,8 +588,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     protected EmittedEvents emittedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
-        boundedContext.getEventBus()
-                      .getEventStore()
+        boundedContext.eventBus()
+                      .eventStore()
                       .read(allEventsQuery(), queryObserver);
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         List<Event> responses = queryObserver.responses()
@@ -586,9 +607,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
                                .build();
     }
 
-    private static Enricher emptyEnricher() {
-        return Enricher.newBuilder()
-                       .build();
+    private static EventEnricher emptyEnricher() {
+        return EventEnricher.newBuilder()
+                            .build();
     }
 
     /**
@@ -603,7 +624,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     public <I, S extends Message, P extends ProcessManager<I, S, ?>>
     PmSubject<S, P> assertThat(Class<? extends P> pmClass, I id) {
-        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).getStateClass();
+        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).stateClass();
         Repository repo = repositoryOf(stateClass);
         @SuppressWarnings("unchecked")
         ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;

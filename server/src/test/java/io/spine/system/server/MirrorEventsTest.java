@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.VERSION;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityArchived;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityDeleted;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityExtracted;
@@ -41,9 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("Mirror projection should on")
 class MirrorEventsTest {
 
@@ -70,6 +68,7 @@ class MirrorEventsTest {
                         assertFalse(mirror.getLifecycle().getArchived());
                         assertFalse(mirror.getLifecycle().getDeleted());
                         assertTrue(mirror.getColumns().getColumnsMap().isEmpty());
+                        assertEquals(VERSION, mirror.getVersion());
                     });
         }
     }

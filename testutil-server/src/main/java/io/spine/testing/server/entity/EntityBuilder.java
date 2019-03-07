@@ -116,7 +116,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
     /** Returns the class of IDs used by entities. */
     @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the builder.
     public Class<I> getIdClass() {
-        return (Class<I>) entityClass().getIdClass();
+        return (Class<I>) entityClass().idClass();
     }
 
     private I createDefaultId() {
@@ -155,7 +155,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
         }
         checkNotNull(entityClass, "Entity class is not set");
         @SuppressWarnings("unchecked") // The cast is preserved by generic params of this class.
-        S result = (S) entityClass.getDefaultState();
+        S result = (S) entityClass.defaultState();
         return result;
     }
 
@@ -170,7 +170,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
 
     @Override
     protected Constructor<E> getConstructor() {
-        Constructor<E> constructor = entityClass().getConstructor();
+        Constructor<E> constructor = entityClass().constructor();
         constructor.setAccessible(true);
         return constructor;
     }

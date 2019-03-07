@@ -30,8 +30,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -45,6 +43,8 @@ import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -99,7 +99,7 @@ public class CommandBus extends UnicastBus<Command,
      *
      * <p>The value is effectively final, though should be initialized lazily.
      *
-     * @see #getValidator() to getreive the non-null value of the validator
+     * @see #validator() to getreive the non-null value of the validator
      */
     @LazyInit
     private @MonotonicNonNull CommandValidator commandValidator;
@@ -213,7 +213,7 @@ public class CommandBus extends UnicastBus<Command,
     private void onError(CommandEnvelope envelope, RuntimeException exception) {
         Optional<Event> rejection = errorHandler.handle(envelope, exception)
                                                 .asRejection()
-                                                .map(RejectionEnvelope::getOuterObject);
+                                                .map(RejectionEnvelope::outerObject);
         rejection.ifPresent(eventBus::post);
     }
 
@@ -229,12 +229,12 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     @Override
-    protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<CommandEnvelope> deadMessageHandler() {
         return deadCommandHandler;
     }
 
     @Override
-    protected EnvelopeValidator<CommandEnvelope> getValidator() {
+    protected EnvelopeValidator<CommandEnvelope> validator() {
         if (commandValidator == null) {
             commandValidator = new CommandValidator(this);
         }
@@ -395,7 +395,7 @@ public class CommandBus extends UnicastBus<Command,
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
-            Command command = message.getCommand();
+            Command command = message.command();
             UnsupportedCommandException exception = new UnsupportedCommandException(command);
             return exception;
         }

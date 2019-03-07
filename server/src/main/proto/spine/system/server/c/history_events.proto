@@ -34,8 +34,9 @@ option java_multiple_files = true;
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-import "spine/core/event.proto";
 import "spine/core/command.proto";
+import "spine/core/event.proto";
+import "spine/core/version.proto";
 import "spine/system/server/entity_history.proto";
 
 // An event emitted when an entity is created.
@@ -135,10 +136,13 @@ message EntityStateChanged {
     google.protobuf.Any new_state = 2 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 3;
+    repeated DispatchedMessageId message_id = 3 [(required) = true, (valid) = true];
 
     // The instant when the entity was changed.
     google.protobuf.Timestamp when = 4;
+
+    // The new version of the entity.
+    core.Version new_version = 5;
 }
 
 // An event emitted when an entity is marked as archived.
@@ -149,10 +153,13 @@ message EntityArchived {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was archived.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon archivation.
+    core.Version version = 4;
 }
 
 // An event emitted when an entity is marked as deleted.
@@ -163,10 +170,13 @@ message EntityDeleted {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was deleted.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon deletion.
+    core.Version version = 4;
 }
 
 // An event emitted when an entity is marked as NOT archived.
@@ -177,10 +187,13 @@ message EntityExtractedFromArchive {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was extracted.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon extraction.
+    core.Version version = 4;
 }
 
 // An event emitted when an entity is marked as NOT deleted.
@@ -191,8 +204,11 @@ message EntityRestored {
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2;
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
 
     // The instant when the entity was restored.
     google.protobuf.Timestamp when = 3;
+
+    // The version received by the entity upon restoration.
+    core.Version version = 4;
 }

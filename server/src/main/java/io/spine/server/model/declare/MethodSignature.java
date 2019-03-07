@@ -21,9 +21,9 @@
 package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.type.MessageEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
 import static io.spine.server.model.declare.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
@@ -52,12 +53,12 @@ import static java.util.stream.Collectors.toList;
  * declares to throw (empty by default),
  * </ul>
  *
- * @param <H> the type of the handler method
- * @param <E> the type of envelope, which is used to invoke the handler method
- *
- * @author Alex Tymchenko
+ * @param <H>
+ *         the type of the handler method
+ * @param <E>
+ *         the type of envelope, which is used to invoke the handler method
  */
-public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
+public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
@@ -77,8 +78,14 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
 
     /**
      * Obtains the set of allowed access modifiers for the method.
+     *
+     * <p>By default, obtains a set of single value {@link AccessModifier#PACKAGE_PRIVATE}. Most of
+     * the implementations should be fine with this behaviour. Override this method to change
+     * the allowed access modifiers.
      */
-    protected abstract ImmutableSet<AccessModifier> getAllowedModifiers();
+    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+        return ImmutableSet.of(PACKAGE_PRIVATE);
+    }
 
     /**
      * Obtains the set of valid return types.

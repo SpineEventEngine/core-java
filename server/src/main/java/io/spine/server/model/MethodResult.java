@@ -38,8 +38,6 @@ import static java.util.stream.Collectors.toList;
  * A result of a {@link HandlerMethod} execution.
  *
  * @param <V> the type of the messages produced by the method
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
  */
 public abstract class MethodResult<V extends Message> {
 

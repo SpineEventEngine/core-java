@@ -22,8 +22,6 @@ package io.spine.system.server;
 
 /**
  * The repository for {@link EntityHistoryAggregate}s.
- *
- * @author Dmytro Dashenkov
  */
 final class EntityHistoryRepository
         extends SystemRepository<EntityHistoryId, EntityHistoryAggregate> {

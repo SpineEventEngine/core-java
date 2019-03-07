@@ -128,7 +128,7 @@ public final class BoundedContextBuilder implements Logging {
      * Returns the previously set name or {@link BoundedContextNames#assumingTests()}
      * if the name was not explicitly set.
      */
-    public BoundedContextName getName() {
+    public BoundedContextName name() {
         return name;
     }
 
@@ -156,7 +156,7 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
-    public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
+    public Optional<Supplier<StorageFactory>> storageFactorySupplier() {
         return Optional.ofNullable(storageFactorySupplier);
     }
 
@@ -171,15 +171,18 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
-    Optional<IntegrationBus.Builder> getIntegrationBus() {
+    Optional<IntegrationBus.Builder> integrationBus() {
         return Optional.ofNullable(integrationBus);
     }
 
-    public Optional<CommandBus.Builder> getCommandBus() {
+    public Optional<CommandBus.Builder> commandBus() {
         return Optional.ofNullable(commandBus);
     }
 
-    public Optional<? extends TenantIndex> getTenantIndex() {
+    /**
+     * Obtains {@code TenantIndex} implementation associated with the Bounded Context.
+     */
+    public Optional<? extends TenantIndex> tenantIndex() {
         return Optional.ofNullable(tenantIndex);
     }
 
@@ -196,7 +199,7 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
-    public Optional<EventBus.Builder> getEventBus() {
+    public Optional<EventBus.Builder> eventBus() {
         return Optional.ofNullable(eventBus);
     }
 
@@ -210,7 +213,7 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
-    public Optional<Stand.Builder> getStand() {
+    public Optional<Stand.Builder> stand() {
         return Optional.ofNullable(stand);
     }
 
@@ -224,7 +227,7 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
-    public Optional<TransportFactory> getTransportFactory() {
+    public Optional<TransportFactory> transportFactory() {
         return Optional.ofNullable(transportFactory);
     }
 
@@ -289,9 +292,9 @@ public final class BoundedContextBuilder implements Logging {
      * <p>The System Bounded Context shares some configuration with the Domain Bounded Context,
      * such as:
      * <ul>
-     *     <li>{@linkplain #getTenantIndex()} tenancy;
-     *     <li>{@linkplain #getStorageFactory()} storage facilities;
-     *     <li>{@linkplain #getTransportFactory()} transport facilities.
+     *     <li>{@linkplain #tenantIndex()} tenancy;
+     *     <li>{@linkplain #storageFactory()} storage facilities;
+     *     <li>{@linkplain #transportFactory()} transport facilities.
      * </ul>
      *
      * <p>All the other configuration is NOT shared.
@@ -302,7 +305,7 @@ public final class BoundedContextBuilder implements Logging {
      * @return new {@code BoundedContext}
      */
     public BoundedContext build() {
-        TransportFactory transport = getTransportFactory()
+        TransportFactory transport = transportFactory()
                 .orElseGet(InMemoryTransportFactory::newInstance);
         SystemContext system = buildSystem(transport);
         BoundedContext result = buildDefault(system, transport);
@@ -334,9 +337,9 @@ public final class BoundedContextBuilder implements Logging {
                 .newBuilder()
                 .setMultitenant(multitenant)
                 .setName(name);
-        Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
+        Optional<? extends Supplier<StorageFactory>> storage = storageFactorySupplier();
         storage.ifPresent(system::setStorageFactorySupplier);
-        Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
+        Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
         SystemContext result = system.buildPartial(SystemContext::newInstance,
@@ -349,7 +352,7 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
                    SystemClient client,
                    TransportFactory transport) {
-        StorageFactory storageFactory = getStorageFactory();
+        StorageFactory storageFactory = storageFactory();
 
         initTenantIndex(storageFactory);
         initCommandBus(client.writeSide());
@@ -361,7 +364,7 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
-    private StorageFactory getStorageFactory() {
+    private StorageFactory storageFactory() {
         if (storageFactorySupplier == null) {
             storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
         }

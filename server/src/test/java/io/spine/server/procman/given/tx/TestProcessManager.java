@@ -36,7 +36,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
-@SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
 public class TestProcessManager
         extends ProcessManager<ProjectId, Project, PatchedProjectBuilder> {
 
@@ -65,10 +64,10 @@ public class TestProcessManager
     @React
     Nothing event(PmProjectCreated event) {
         receivedEvents.add(event);
-        Project newState = Project.newBuilder(getState())
+        Project newState = Project.newBuilder(state())
                                   .setId(event.getProjectId())
                                   .build();
-        getBuilder().mergeFrom(newState);
+        builder().mergeFrom(newState);
         return nothing();
     }
 

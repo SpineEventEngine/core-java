@@ -42,7 +42,7 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
         super(BoundedContext.newBuilder()
                             .setMultitenant(true)
                             .build()
-                            .getEventBus());
+                            .eventBus());
     }
 
     public Method getHandler() {

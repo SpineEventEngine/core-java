@@ -62,14 +62,11 @@ import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("CommandLifecycle should")
 class CommandLifecycleTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EntityHistoryTest.class);
+            new TestActorRequestFactory(EntityHistoryTest.class);
 
     private BoundedContext context;
     private BoundedContext system;
@@ -101,7 +98,7 @@ class CommandLifecycleTest {
         @BeforeEach
         void setUp() {
             this.eventAccumulator = new CommandLifecycleWatcher();
-            system.getEventBus().register(eventAccumulator);
+            system.eventBus().register(eventAccumulator);
             id = Identifier.generate(CompanyId.class);
         }
 
@@ -255,7 +252,7 @@ class CommandLifecycleTest {
             CommandRejected rejected = eventAccumulator.assertNextEventIs(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
-            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejectionEvent.getMessage());
+            TypeUrl rejectionType = rejectionEvent.typeUrl();
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }
@@ -266,7 +263,7 @@ class CommandLifecycleTest {
         }
 
         private CommandId postBuiltCommand(Command command) {
-            CommandBus commandBus = context.getCommandBus();
+            CommandBus commandBus = context.commandBus();
             commandBus.post(command, noOpObserver());
             return command.getId();
         }

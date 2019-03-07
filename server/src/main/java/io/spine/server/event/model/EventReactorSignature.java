@@ -22,10 +22,9 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
-import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -37,11 +36,6 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
 
     EventReactorSignature() {
         super(React.class);
-    }
-
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override

@@ -22,9 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.event.model.EventSubscriberClass;
@@ -33,6 +30,9 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.EventOperation;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Optional;
@@ -59,41 +59,55 @@ public abstract class AbstractEventSubscriber
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
 
     /**
-     * Dispatches event to the handling method.
+     * Dispatches the event to the handling method.
      *
-     * @param envelope the envelope with the message
-     * @return a one element set with the result of {@link #toString()}
-     * as the identify of the subscriber, or empty set if dispatching failed
+     * @param event
+     *         the envelope with the event
+     * @return a one element set with the result of {@link #toString()} as the identify of the
+     *         subscriber, or empty set if dispatching failed
      */
     @Override
-    public final Set<String> dispatch(EventEnvelope envelope) {
-        EventOperation op = new EventOperation(envelope.getOuterObject()) {
+    public final Set<String> dispatch(EventEnvelope event) {
+        EventOperation op = new EventOperation(event.outerObject()) {
             @Override
             public void run() {
-                handle(envelope);
+                handle(event);
             }
         };
         try {
             op.execute();
         } catch (RuntimeException exception) {
-            onError(envelope, exception);
+            onError(event, exception);
             return ImmutableSet.of();
         }
         return identity();
     }
 
     /**
+     * Handles an event dispatched to this subscriber instance.
+     *
+     * <p>By default passes the event to the corresponding {@linkplain io.spine.core.Subscribe
+     * subscriber} method of the entity.
+     */
+    protected void handle(EventEnvelope event) {
+        thisClass.getSubscriber(event)
+                 .ifPresent(method -> method.invoke(this, event));
+    }
+
+    /**
      * Logs the error into the subscriber {@linkplain #log() log}.
      *
-     * @param envelope  the message which caused the error
-     * @param exception the error
+     * @param event
+     *         the event which caused the error
+     * @param exception
+     *         the error
      */
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        checkNotNull(event);
         checkNotNull(exception);
-        MessageClass messageClass = envelope.getMessageClass();
-        String messageId = envelope.idAsString();
+        MessageClass messageClass = event.messageClass();
+        String messageId = event.idAsString();
         String errorMessage =
                 format("Error handling event subscription (class: %s id: %s) in %s.",
                        messageClass, messageId, thisClass);
@@ -101,30 +115,25 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(event);
         return subscriber.isPresent();
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
-    public Set<EventClass> getMessageClasses() {
-        return thisClass.getEventClasses();
+    public Set<EventClass> messageClasses() {
+        return thisClass.eventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
-        return thisClass.getExternalEventClasses();
+    public Set<EventClass> externalEventClasses() {
+        return thisClass.externalEventClasses();
     }
 
     @Override
     public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
         return Optional.of(new ExternalDispatcher());
-    }
-
-    private void handle(EventEnvelope envelope) {
-        thisClass.getSubscriber(envelope)
-                 .ifPresent(method -> method.invoke(this, envelope));
     }
 
     /**
@@ -133,8 +142,8 @@ public abstract class AbstractEventSubscriber
     private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            return ExternalMessageClass.fromEventClasses(getExternalEventClasses());
+        public Set<ExternalMessageClass> messageClasses() {
+            return ExternalMessageClass.fromEventClasses(externalEventClasses());
         }
 
         @CanIgnoreReturnValue
@@ -162,7 +171,7 @@ public abstract class AbstractEventSubscriber
         private void logError(String msgFormat,
                               MessageEnvelope envelope,
                               RuntimeException exception) {
-            MessageClass messageClass = envelope.getMessageClass();
+            MessageClass messageClass = envelope.messageClass();
             String messageId = envelope.idAsString();
             String errorMessage = format(msgFormat, messageClass, messageId);
             _error(errorMessage, exception);

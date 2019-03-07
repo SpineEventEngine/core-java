@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -31,6 +30,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
+import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.AssignTargetToCommandVBuilder;
@@ -114,7 +115,7 @@ public class EntityLifecycle {
      *
      * <p>Use this constructor for test purposes <b>only</b>.
      *
-     * @see io.spine.server.entity.EntityLifecycle.Builder
+     * @see EntityLifecycle.Builder
      */
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
@@ -265,8 +266,8 @@ public class EntityLifecycle {
      *         the IDs of the messages which caused the {@code change}; typically,
      *         {@link EventId EventId}s or {@link CommandId}s
      */
-    final void onStateChanged(EntityRecordChange change,
-                              Set<? extends Message> messageIds) {
+    public final void onStateChanged(EntityRecordChange change,
+                                     Set<? extends MessageId> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -283,11 +284,14 @@ public class EntityLifecycle {
         Any newState = change.getNewValue()
                              .getState();
         if (!oldState.equals(newState)) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setNewVersion(newVersion)
                     .build();
             postEvent(event);
         }
@@ -302,10 +306,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (newValue && !oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityArchived event = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -320,10 +327,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (newValue && !oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityDeleted event = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -338,10 +348,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -356,10 +369,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityRestored event = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -375,7 +391,7 @@ public class EntityLifecycle {
     }
 
     private static Collection<DispatchedMessageId>
-    toDispatched(Collection<? extends Message> messageIds) {
+    toDispatched(Collection<? extends MessageId> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds =
                 messageIds.stream()
                           .map(EntityLifecycle::dispatchedMessageId)
@@ -384,7 +400,7 @@ public class EntityLifecycle {
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")
-    private static DispatchedMessageId dispatchedMessageId(Message messageId) {
+    private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
         checkNotNull(messageId);
         DispatchedMessageIdVBuilder builder = DispatchedMessageIdVBuilder.newBuilder();
         if (messageId instanceof EventId) {

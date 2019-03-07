@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.PostConstruct;
@@ -34,16 +34,23 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Describes a method that accepts a message and optionally its context.
  *
- * @param <T> the type of the target object
- * @param <C> the type of the incoming message class
- * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <R> the type of the method result object
+ * @param <T>
+ *         the type of the target object
+ * @param <C>
+ *         the type of the incoming message class
+ * @param <E>
+ *         the type of the {@link MessageEnvelope} wrapping the method arguments
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method result object
  */
 @Immutable
 public interface HandlerMethod<T,
                                C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
-                               R extends MethodResult> {
+                               P extends MessageClass<?>,
+                               R extends MethodResult<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -63,12 +70,19 @@ public interface HandlerMethod<T,
     /**
      * Obtains the set of method attributes configured for this method.
      */
-    Set<MethodAttribute<?>> getAttributes();
+    Set<MethodAttribute<?>> attributes();
 
     /**
      * Obtains the handling method.
      */
-    Method getRawMethod();
+    Method rawMethod();
+
+    /**
+     * Retrieves the message classes produced by this handler method.
+     *
+     * @see MethodResult#toMessages(Object).
+     */
+    Set<P> producedMessages();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.
@@ -86,7 +100,7 @@ public interface HandlerMethod<T,
      * Tells if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
      */
     default boolean isExternal() {
-        return getAttributes().contains(ExternalAttribute.EXTERNAL);
+        return attributes().contains(ExternalAttribute.EXTERNAL);
     }
 
     /**

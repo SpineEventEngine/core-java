@@ -50,7 +50,7 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
         if (TAKEN_NAME.equals(command.getFinalName())) {
             throw CompanyNameAlreadyTaken
                     .newBuilder()
-                    .setId(getId())
+                    .setId(id())
                     .setTakenName(TAKEN_NAME)
                     .build();
         }
@@ -62,8 +62,8 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
     }
 
     @Apply
-    void on(CompanyEstablished event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName());
+    private void on(CompanyEstablished event) {
+        builder().setId(event.getId())
+                 .setName(event.getName());
     }
 }

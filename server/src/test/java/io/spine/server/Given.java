@@ -35,6 +35,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.model.Nothing;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -128,7 +129,7 @@ public class Given {
                                                  .setValue(newUuid())
                                                  .build();
             TestActorRequestFactory factory =
-                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+                    new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
             return result;
         }
@@ -186,7 +187,7 @@ public class Given {
     static class AQuery {
 
         private static final ActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AQuery.class);
+                new TestActorRequestFactory(AQuery.class);
 
         private AQuery() {
         }
@@ -210,6 +211,11 @@ public class Given {
 
         ProjectAggregateRepository() {
             super();
+        }
+
+        @Override
+        protected EntityLifecycle lifecycleOf(ProjectId id) {
+            return super.lifecycleOf(id);
         }
     }
 
@@ -239,21 +245,19 @@ public class Given {
         }
 
         @Apply
-        void event(AggProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Status.CREATED);
+        private void event(AggProjectCreated event) {
+            builder().setId(event.getProjectId())
+                     .setStatus(Status.CREATED);
         }
 
         @Apply
-        void event(AggTaskAdded event) {
+        private void event(AggTaskAdded event) {
         }
 
         @Apply
-        void event(AggProjectStarted event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Status.STARTED);
+        private void event(AggProjectStarted event) {
+            builder().setId(event.getProjectId())
+                     .setStatus(Status.STARTED);
         }
     }
 
@@ -262,6 +266,11 @@ public class Given {
 
         public CustomerAggregateRepository() {
             super();
+        }
+
+        @Override
+        public EntityLifecycle lifecycleOf(CustomerId id) {
+            return super.lifecycleOf(id);
         }
     }
 
@@ -283,8 +292,8 @@ public class Given {
         }
 
         @Apply
-        void event(CustomerCreated event) {
-            getBuilder().mergeFrom(event.getCustomer());
+        private void event(CustomerCreated event) {
+            builder().mergeFrom(event.getCustomer());
         }
     }
 
@@ -311,7 +320,7 @@ public class Given {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        public void on(BcProjectCreated event, EventContext context) {
+        void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
         }
     }

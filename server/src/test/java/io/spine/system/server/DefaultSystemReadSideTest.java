@@ -25,6 +25,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
@@ -34,6 +35,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.system.server.given.client.ShoppingListAggregate;
 import io.spine.system.server.given.client.ShoppingListRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
@@ -71,7 +73,7 @@ class DefaultSystemReadSideTest {
         domainContext = BoundedContext
                 .newBuilder()
                 .build();
-        systemReadSide = domainContext.getSystemClient().readSide();
+        systemReadSide = domainContext.systemClient().readSide();
     }
 
     @AfterEach
@@ -136,7 +138,7 @@ class DefaultSystemReadSideTest {
                     .setName("System Bus test project")
                     .build();
             Event event = events.createEvent(systemEvent);
-            systemContext.getEventBus().post(event);
+            systemContext.eventBus().post(event);
             return systemEvent;
         }
     }
@@ -146,7 +148,7 @@ class DefaultSystemReadSideTest {
     class ReadDomainAggregates {
 
         private final TestActorRequestFactory actorRequestFactory =
-                TestActorRequestFactory.newInstance(DefaultSystemWriteSideTest.class);
+                new TestActorRequestFactory(DefaultSystemWriteSideTest.class);
 
         private ListId aggregateId;
 
@@ -163,13 +165,18 @@ class DefaultSystemReadSideTest {
         @Test
         @DisplayName("by the given query")
         void query() {
-            Query query = actorRequestFactory.query()
-                                             .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
-            Message foundMessage = unpack(systemReadSide.readDomainAggregate(query).next());
-            assertEquals(aggregate(), foundMessage);
+            Query query =
+                    actorRequestFactory.query()
+                                       .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
+            EntityStateWithVersion next = systemReadSide.readDomainAggregate(query)
+                                                        .next();
+            Message foundMessage = unpack(next.getState());
+
+            assertEquals(aggregate().state(), foundMessage);
+            assertEquals(aggregate().version(), next.getVersion());
         }
 
-        private ShoppingList aggregate() {
+        private ShoppingListAggregate aggregate() {
             return findAggregate(aggregateId, domainContext);
         }
 
@@ -179,7 +186,7 @@ class DefaultSystemReadSideTest {
                     .setId(aggregateId)
                     .build();
             Command cmd = actorRequestFactory.createCommand(command);
-            domainContext.getCommandBus()
+            domainContext.commandBus()
                          .post(cmd, noOpObserver());
         }
     }
@@ -194,7 +201,7 @@ class DefaultSystemReadSideTest {
         private EventMessage lastEvent;
 
         @Subscribe
-        public void on(SMProjectCreated event) {
+        void on(SMProjectCreated event) {
             lastEvent = event;
         }
 

@@ -22,16 +22,16 @@ package io.spine.server.event.model;
 
 import com.google.protobuf.Any;
 import io.spine.base.FieldPath;
+import io.spine.base.FieldPaths;
 import io.spine.core.ByField;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.FieldPaths;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
-import static io.spine.protobuf.FieldPaths.typeOfFieldAt;
+import static io.spine.base.FieldPaths.typeOfFieldAt;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.string.Stringifiers.fromString;
 
@@ -47,7 +47,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
 
     @Override
     public MessageFilter filter() {
-        Subscribe annotation = getRawMethod().getAnnotation(Subscribe.class);
+        Subscribe annotation = rawMethod().getAnnotation(Subscribe.class);
         ByField byFieldFilter = annotation.filter();
         String rawFieldPath = byFieldFilter.path();
         if (rawFieldPath.isEmpty()) {
@@ -66,8 +66,8 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     }
 
     @Override
-    protected void checkAttributesMatch(EventEnvelope envelope) throws IllegalArgumentException {
-        super.checkAttributesMatch(envelope);
-        ensureExternalMatch(envelope.getEventContext().getExternal());
+    protected void checkAttributesMatch(EventEnvelope event) throws IllegalArgumentException {
+        super.checkAttributesMatch(event);
+        ensureExternalMatch(event.context().getExternal());
     }
 }

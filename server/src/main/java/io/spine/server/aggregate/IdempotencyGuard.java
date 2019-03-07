@@ -21,22 +21,17 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.event.DuplicateEventException;
-
-import java.util.Iterator;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
  * If it was, the exception is thrown.
- *
- * @author Mykhailo Drachuk
- * @author Dmytro Dashenkov
  */
 final class IdempotencyGuard {
 
@@ -51,13 +46,15 @@ final class IdempotencyGuard {
      *
      * <p>If it was a {@link DuplicateCommandException} is thrown.
      *
-     * @param envelope an envelope with a command to check
-     * @throws DuplicateCommandException if the command was dispatched to the aggregate
+     * @param command
+     *         an envelope with a command to check
+     * @throws DuplicateCommandException
+     *         if the command was dispatched to the aggregate
      */
-    void check(CommandEnvelope envelope) {
-        if (didHandleRecently(envelope)) {
-            Command command = envelope.getOuterObject();
-            throw DuplicateCommandException.of(command);
+    void check(CommandEnvelope command) {
+        if (didHandleRecently(command)) {
+            Command outerObject = command.outerObject();
+            throw DuplicateCommandException.of(outerObject);
         }
     }
 
@@ -66,13 +63,15 @@ final class IdempotencyGuard {
      *
      * <p>If it was a {@link DuplicateEventException} is thrown.
      *
-     * @param envelope an envelope with an event to check
-     * @throws DuplicateEventException if the event was dispatched to the aggregate
+     * @param event
+     *         an envelope with an event to check
+     * @throws DuplicateEventException
+     *         if the event was dispatched to the aggregate
      */
-    void check(EventEnvelope envelope) {
-        if (didHandleRecently(envelope)) {
-            Event event = envelope.getOuterObject();
-            throw new DuplicateEventException(event);
+    void check(EventEnvelope event) {
+        if (didHandleRecently(event)) {
+            Event outerObject = event.outerObject();
+            throw new DuplicateEventException(outerObject);
         }
     }
 
@@ -85,20 +84,16 @@ final class IdempotencyGuard {
      * <p>This functionality supports the ability to stop duplicate events from being dispatched
      * to the aggregate.
      *
-     * @param envelope the event to check
+     * @param event
+     *         the event to check
      * @return {@code true} if the event was handled since last snapshot, {@code false} otherwise
      */
-    private boolean didHandleRecently(EventEnvelope envelope) {
-        EventId eventId = envelope.getId();
-        Iterator<Event> iterator = aggregate.historyBackward();
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-            EventId originEventId = event.getContext().getEventId();
-            if (eventId.equals(originEventId)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean didHandleRecently(EventEnvelope event) {
+        EventId eventId = event.id();
+        boolean found = aggregate.historyContains(
+                e -> eventId.equals(e.getContext().getEventId())
+        );
+        return found;
     }
 
     /**
@@ -110,19 +105,15 @@ final class IdempotencyGuard {
      * <p>This functionality supports the ability to stop duplicate commands from being dispatched
      * to the aggregate.
      *
-     * @param envelope the command to check
+     * @param command
+     *         the command to check
      * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
      */
-    private boolean didHandleRecently(CommandEnvelope envelope) {
-        CommandId newCommandId = envelope.getId();
-        Iterator<Event> iterator = aggregate.historyBackward();
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-            CommandId originCommandId = event.getContext().getCommandId();
-            if (newCommandId.equals(originCommandId)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean didHandleRecently(CommandEnvelope command) {
+        CommandId commandId = command.id();
+        boolean found = aggregate.historyContains(
+                e -> commandId.equals(e.getContext().getCommandId())
+        );
+        return found;
     }
 }

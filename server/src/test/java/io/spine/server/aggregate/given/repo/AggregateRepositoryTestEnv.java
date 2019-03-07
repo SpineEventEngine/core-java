@@ -73,7 +73,7 @@ public class AggregateRepositoryTestEnv {
         ProjectId id = Sample.messageOfType(ProjectId.class);
         ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(id);
 
-        repository.store(aggregate);
+        repository.storeAggregate(aggregate);
         return aggregate;
     }
 
@@ -81,12 +81,12 @@ public class AggregateRepositoryTestEnv {
         ProjectId projectId = givenAggregateId(id);
         ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents(projectId);
 
-        repository.store(aggregate);
+        repository.storeAggregate(aggregate);
     }
 
     private static TestActorRequestFactory newRequestFactory() {
         TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
+                new TestActorRequestFactory(AggregateRepositoryTest.class);
         return requestFactory;
     }
 

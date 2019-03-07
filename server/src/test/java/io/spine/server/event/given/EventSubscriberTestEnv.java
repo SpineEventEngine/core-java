@@ -21,19 +21,16 @@
 package io.spine.server.event.given;
 
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.FailRequested;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.TaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class EventSubscriberTestEnv {
+public final class EventSubscriberTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private EventSubscriberTestEnv() {
@@ -47,7 +44,7 @@ public class EventSubscriberTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        public void on(FailRequested message, EventContext context) {
+        void on(FailRequested message, EventContext context) {
             methodCalled = true;
             if (!message.getShouldFail()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
@@ -55,12 +52,12 @@ public class EventSubscriberTestEnv {
         }
 
         @Subscribe
-        public void on(ProjectCreated message) {
+        void on(ProjectCreated message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe
-        public void on(ProjectStarted message) {
+        void on(ProjectStarted message) {
             // Do nothing. Just expose the method.
         }
 
@@ -74,9 +71,9 @@ public class EventSubscriberTestEnv {
         }
 
         @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            super.onError(envelope, exception);
-            lastErrorEnvelope = envelope;
+        public void onError(EventEnvelope event, RuntimeException exception) {
+            super.onError(event, exception);
+            lastErrorEnvelope = event;
             lastException = exception;
         }
 

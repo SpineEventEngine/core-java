@@ -22,13 +22,15 @@ package io.spine.server.projection.given;
 
 import io.spine.base.Identifier;
 import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.organizations.OrganizationEstablished;
 import io.spine.server.organizations.OrganizationId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.system.server.DispatchedMessageId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -43,12 +45,27 @@ import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.TestValues.randomString;
 
 public class ProjectionRepositoryTestEnv {
 
     /** Prevent instantiation of this utility class. */
     private ProjectionRepositoryTestEnv() {
+    }
+
+    /**
+     * Creates a new {@code DispatchedMessageId} with a random {@code EventId}.
+     */
+    public static DispatchedMessageId dispatchedMessageId() {
+        EventId eventId = EventId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
+        return DispatchedMessageId
+                .newBuilder()
+                .setEventId(eventId)
+                .build();
     }
 
     /**
@@ -66,12 +83,12 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectCreated event) {
+        void on(PrjProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(PrjTaskAdded event) {
+        void on(PrjTaskAdded event) {
             // do nothing
         }
     }
@@ -84,7 +101,7 @@ public class ProjectionRepositoryTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        public void apply(PrjProjectCreated event, EventContext eventContext) {
+        void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
         }
 

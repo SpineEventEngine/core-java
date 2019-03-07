@@ -25,10 +25,10 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeInt;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,7 +48,7 @@ public class FailingAggregateRepository
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public FailingAggregateRepository() {
         super();
-        getCommandRouting().replaceDefault(
+        commandRouting().replaceDefault(
                 // Simplistic routing function that takes absolute value as ID.
                 new CommandRoute<Long, CommandMessage>() {
                     private static final long serialVersionUID = 0L;
@@ -64,7 +64,7 @@ public class FailingAggregateRepository
                 }
         );
 
-        getEventRouting().replaceDefault(
+        eventRouting().replaceDefault(
                 new EventRoute<Long, EventMessage>() {
                     private static final long serialVersionUID = 0L;
 

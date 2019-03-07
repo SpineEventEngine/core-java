@@ -21,10 +21,10 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventEnvelope;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.annotation.Annotation;
 
@@ -33,7 +33,7 @@ import java.lang.annotation.Annotation;
  *
  * @param <H> the type of {@link HandlerMethod} which signature this is
  */
-abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?>>
+abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?, ?>>
         extends MethodSignature<H, EventEnvelope> {
 
     EventAcceptingSignature(Class<? extends Annotation> annotation) {

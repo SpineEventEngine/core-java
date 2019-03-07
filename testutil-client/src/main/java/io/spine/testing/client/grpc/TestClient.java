@@ -61,7 +61,7 @@ public class TestClient implements Logging {
     public TestClient(UserId userId, String host, int port) {
         checkNotNull(userId);
         checkNotNull(host);
-        this.requestFactory = TestActorRequestFactory.newInstance(userId);
+        this.requestFactory = new TestActorRequestFactory(userId);
         this.channel = ManagedChannelBuilder
                 .forAddress(host, port)
                 .usePlaintext()

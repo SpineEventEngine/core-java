@@ -87,7 +87,7 @@ public class Buses {
         checkNotNull(id);
         checkNotNull(cause);
 
-        Event event = cause.getOuterObject();
+        Event event = cause.outerObject();
         checkArgument(isNotDefault(event));
         Status status = Status
                 .newBuilder()

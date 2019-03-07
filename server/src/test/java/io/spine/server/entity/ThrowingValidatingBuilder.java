@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
  * during the state building.
- *
- * @author Alex Tymchenko
  */
 public abstract class ThrowingValidatingBuilder<M extends Message, B extends Message.Builder>
         extends AbstractValidatingBuilder<M, B> {

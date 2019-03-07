@@ -55,8 +55,8 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     }
 
     @Apply
-    void event(SwitchmanAbsenceRecorded event) {
-        getBuilder().addMissingSwitchman(event.getSwitchmanName());
+    private void event(SwitchmanAbsenceRecorded event) {
+        builder().addMissingSwitchman(event.getSwitchmanName());
     }
 
     @React
@@ -69,12 +69,12 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     }
 
     @Apply
-    void event(SwitchWorkRecorded event) {
+    private void event(SwitchWorkRecorded event) {
         String switchmanName = event.getSwitchmanName();
-        Integer currentCount = getState().getCountersMap()
-                                         .get(switchmanName);
-        getBuilder().putCounters(switchmanName,
-                                 currentCount == null ? 1 : currentCount + 1);
+        Integer currentCount = state().getCountersMap()
+                                      .get(switchmanName);
+        builder().putCounters(switchmanName,
+                              currentCount == null ? 1 : currentCount + 1);
     }
 
     /**
@@ -91,7 +91,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
+            eventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
         }
     }
 }

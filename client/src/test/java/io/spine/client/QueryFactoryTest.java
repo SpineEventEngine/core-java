@@ -45,9 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alex Tymchenko
- */
 @SuppressWarnings({"LocalVariableNamingConvention",
                    "DuplicateStringLiteralInspection"}) // A lot of similar test display names.
 @DisplayName("Query factory should")

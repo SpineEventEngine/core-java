@@ -23,13 +23,13 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.integration.IntegrationBus;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
@@ -73,16 +73,16 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     @Override
-    public boolean canDispatch(EventEnvelope envelope) {
-        return producerOfCorrectType(envelope) && super.canDispatch(envelope);
+    public boolean canDispatch(EventEnvelope event) {
+        return producerOfCorrectType(event) && super.canDispatch(event);
     }
 
     @Override
-    public final Set<EventClass> getMessageClasses() {
-        Set<EventClass> classes = super.getMessageClasses();
+    public final Set<EventClass> messageClasses() {
+        Set<EventClass> classes = super.messageClasses();
         Optional<String> invalidEventTypeName =
                 classes.stream()
-                       .map(EventClass::getTypeName)
+                       .map(EventClass::typeName)
                        .map(TypeName::value)
                        .filter(typeName -> !typeName.startsWith(SYSTEM_TYPE_PACKAGE))
                        .findAny();
@@ -96,8 +96,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     }
 
     @Override
-    public final Set<EventClass> getExternalEventClasses() {
-        Set<EventClass> classes = super.getExternalEventClasses();
+    public final Set<EventClass> externalEventClasses() {
+        Set<EventClass> classes = super.externalEventClasses();
         checkState(classes.isEmpty(),
                    "A %s subclass cannot subscribe to external events.",
                    SystemEventWatcher.class.getSimpleName());
@@ -115,7 +115,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      *         of this watcher
      */
     private boolean producerOfCorrectType(EventEnvelope event) {
-        EventContext context = event.getEventContext();
+        EventContext context = event.context();
         Any anyId = context.getProducerId();
         Object producerId = Identifier.unpack(anyId);
         EntityHistoryId historyId = (EntityHistoryId) producerId;
@@ -141,7 +141,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
      *         the domain bounded context to register the subscriber in
      */
     protected void registerIn(BoundedContext context) {
-        context.getSystemClient()
+        context.systemClient()
                .readSide()
                .register(this);
     }

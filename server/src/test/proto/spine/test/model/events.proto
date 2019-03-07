@@ -35,3 +35,8 @@ message ModProjectCreated {
 message ModProjectStarted {
     string id = 1;
 }
+
+message ModProjectOwnerAssigned {
+    string project_id = 1;
+    string owner_id = 2;
+}

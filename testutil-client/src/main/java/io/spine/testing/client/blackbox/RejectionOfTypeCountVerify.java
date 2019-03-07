@@ -20,27 +20,20 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
-import io.spine.core.RejectionClass;
+import io.spine.type.RejectionType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Verifies that a command was handled with a {@link io.spine.base.ThrowableMessage rejection} of
  * a provided type specified amount of times.
- *
- * @author Mykhailo Drachuk
  */
 final class RejectionOfTypeCountVerify extends VerifyAcknowledgements {
 
-    private final RejectionClass type;
+    private final RejectionType type;
     private final Count expectedCount;
 
-    /**
-     * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
-     */
-    RejectionOfTypeCountVerify(RejectionClass type, Count expectedCount) {
+    RejectionOfTypeCountVerify(RejectionType type, Count expectedCount) {
         super();
         this.type = type;
         this.expectedCount = expectedCount;
@@ -48,9 +41,14 @@ final class RejectionOfTypeCountVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
-        Class<? extends Message> rejectionClass = type.value();
-        assertEquals(expectedCount.value(), acks.countRejections(type),
-                     "Bounded Context did not contain " + rejectionClass.getSimpleName() +
-                             "rejection expected amount of times.");
+        int expectedValue = expectedCount.value();
+        int actual = acks.countRejections(type);
+        assertEquals(
+                expectedValue,
+                actual,
+                "The rejection of type `" + type.descriptor().getFullName() +
+                "` was not created expected number of times (" + expectedValue + ")." +
+                " The actual count is: " + actual + '.'
+        );
     }
 }

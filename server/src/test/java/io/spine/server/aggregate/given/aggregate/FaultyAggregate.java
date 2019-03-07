@@ -62,11 +62,10 @@ public class FaultyAggregate
     }
 
     @Apply
-    void event(AggProjectCreated event) {
+    private void event(AggProjectCreated event) {
         if (brokenApplier) {
             throw new IllegalStateException(BROKEN_APPLIER);
         }
-
-        getBuilder().setStatus(Status.CREATED);
+        builder().setStatus(Status.CREATED);
     }
 }

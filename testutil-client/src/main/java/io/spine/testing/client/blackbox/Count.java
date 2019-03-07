@@ -26,8 +26,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * An integer Tiny Type representing a numeric value that can not be negative.
- *
- * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 public final class Count {
@@ -43,7 +41,9 @@ public final class Count {
         this.value = value;
     }
 
-    /** @return an integer value of the current count. */
+    /**
+     * Obtains an integer value of the current count.
+     */
     public int value() {
         return value;
     }
@@ -96,5 +96,10 @@ public final class Count {
      */
     public static Count thrice() {
         return THRICE;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
 }

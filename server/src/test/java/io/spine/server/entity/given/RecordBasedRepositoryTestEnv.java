@@ -22,11 +22,11 @@ package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
 import io.spine.client.OrderBy;
 import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
 import io.spine.client.PaginationVBuilder;
+import io.spine.client.TargetFilters;
 import io.spine.server.entity.AbstractEntity;
 
 import static io.spine.testing.Tests.assertMatchesMask;
@@ -41,7 +41,7 @@ public final class RecordBasedRepositoryTestEnv {
 
     public static <E extends AbstractEntity<?, ?>>
     void assertMatches(E entity, FieldMask fieldMask) {
-        Message state = entity.getState();
+        Message state = entity.state();
         assertMatchesMask(state, fieldMask);
     }
 
@@ -69,8 +69,8 @@ public final class RecordBasedRepositoryTestEnv {
                               .build();
     }
 
-    public static EntityFilters emptyFilters() {
-        return EntityFilters.getDefaultInstance();
+    public static TargetFilters emptyFilters() {
+        return TargetFilters.getDefaultInstance();
     }
 
     public static FieldMask emptyFieldMask() {

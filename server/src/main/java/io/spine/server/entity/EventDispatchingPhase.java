@@ -20,8 +20,8 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.MessageId;
 import io.spine.server.event.EventDispatch;
 
 /**
@@ -55,12 +55,12 @@ public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
     @Override
     public I getEntityId() {
         return dispatch.entity()
-                       .getId();
+                       .id();
     }
 
     @Override
-    public Message getMessageId() {
+    public MessageId getMessageId() {
         return dispatch.event()
-                       .getId();
+                       .id();
     }
 }

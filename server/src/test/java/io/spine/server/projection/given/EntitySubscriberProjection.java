@@ -43,15 +43,15 @@ public final class EntitySubscriberProjection
     }
 
     @Subscribe
-    public void onUpdate(Project aggregateState) {
+    void onUpdate(Project aggregateState) {
         List<String> taskNames = aggregateState.getTaskList()
                                                .stream()
                                                .map(Task::getTitle)
                                                .collect(toList());
-        getBuilder().setProjectId(aggregateState.getId())
-                    .setProjectName(aggregateState.getName())
-                    .clearTaskName()
-                    .addAllTaskName(taskNames);
+        builder().setProjectId(aggregateState.getId())
+                 .setProjectName(aggregateState.getName())
+                 .clearTaskName()
+                 .addAllTaskName(taskNames);
     }
 
     public static final class Repository
@@ -60,7 +60,7 @@ public final class EntitySubscriberProjection
         @Override
         public void onRegistered() {
             super.onRegistered();
-            getEventRouting().routeEntityStateUpdates(
+            eventRouting().routeEntityStateUpdates(
                     StateUpdateRouting
                             .<ProjectId>newInstance()
                             .route(Project.class,

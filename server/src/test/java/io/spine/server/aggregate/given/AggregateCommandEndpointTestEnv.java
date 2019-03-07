@@ -37,9 +37,6 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class AggregateCommandEndpointTestEnv {
 
     /** Prevent instantiation of this utility class. */
@@ -74,9 +71,9 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Apply
-        void apply(AggProjectCreated event) {
-            getBuilder().setId(event.getProjectId())
-                        .setName(event.getName());
+        private void apply(AggProjectCreated event) {
+            builder().setId(event.getProjectId())
+                     .setName(event.getName());
         }
 
         @Assign
@@ -88,8 +85,8 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Apply
-        void apply(AggTaskAdded event) {
-            getBuilder().setId(event.getProjectId());
+        private void apply(AggTaskAdded event) {
+            builder().setId(event.getProjectId());
         }
 
         @Assign
@@ -101,7 +98,7 @@ public class AggregateCommandEndpointTestEnv {
         }
 
         @Apply
-        void apply(AggProjectStarted event) {
+        private void apply(AggProjectStarted event) {
         }
     }
 

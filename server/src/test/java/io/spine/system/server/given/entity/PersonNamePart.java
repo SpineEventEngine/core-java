@@ -61,8 +61,8 @@ public class PersonNamePart
     }
 
     @Apply
-    void on(PersonNameCreated event) {
-        getBuilder().setId(event.getId())
-                    .setFirstName(event.getFirstName());
+    private void on(PersonNameCreated event) {
+        builder().setId(event.getId())
+                 .setFirstName(event.getFirstName());
     }
 }

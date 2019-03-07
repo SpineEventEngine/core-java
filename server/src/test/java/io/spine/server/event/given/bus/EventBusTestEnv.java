@@ -28,8 +28,8 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.enrich.Enricher;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
@@ -54,10 +54,10 @@ public class EventBusTestEnv {
     static final ProjectId PROJECT_ID = projectId();
 
     public static final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventBusTest.class, TENANT_ID);
+            new TestActorRequestFactory(EventBusTest.class, TENANT_ID);
 
+    /** Prevent instantiation of this utility class. */
     private EventBusTestEnv() {
-        // Prevent instantiation.
     }
 
     private static ProjectId projectId() {
@@ -121,7 +121,7 @@ public class EventBusTestEnv {
         TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
-                eventBus.getEventStore()
+                eventBus.eventStore()
                         .read(allEventsQuery(), observer);
             }
         };
@@ -132,7 +132,7 @@ public class EventBusTestEnv {
     }
 
     @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
-    public static EventBus.Builder eventBusBuilder(@Nullable Enricher enricher) {
+    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
         EventBus.Builder busBuilder = EventBus
                 .newBuilder()
                 .appendFilter(new TaskCreatedFilter());

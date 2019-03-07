@@ -91,7 +91,7 @@ class BoundedContextBuilderTest {
             CommandBus.Builder expected = CommandBus.newBuilder();
             builder = BoundedContext.newBuilder()
                                     .setCommandBus(expected);
-            assertEquals(expected, builder.getCommandBus()
+            assertEquals(expected, builder.commandBus()
                                           .get());
         }
 
@@ -100,7 +100,7 @@ class BoundedContextBuilderTest {
         void eventBusBuilder() {
             EventBus.Builder expected = EventBus.newBuilder();
             builder.setEventBus(expected);
-            assertEquals(expected, builder.getEventBus()
+            assertEquals(expected, builder.eventBus()
                                           .get());
         }
 
@@ -110,7 +110,7 @@ class BoundedContextBuilderTest {
             String nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.newBuilder()
                                                    .setName(nameString)
-                                                   .getName()
+                                                   .name()
                                                    .getValue());
         }
 
@@ -121,7 +121,7 @@ class BoundedContextBuilderTest {
                     Supplier<StorageFactory> mock = mock(Supplier.class);
 
             assertEquals(mock, builder.setStorageFactorySupplier(mock)
-                                      .getStorageFactorySupplier()
+                                      .storageFactorySupplier()
                                       .get());
         }
 
@@ -131,7 +131,7 @@ class BoundedContextBuilderTest {
             TransportFactory factory = InMemoryTransportFactory.newInstance();
 
             assertEquals(factory, builder.setTransportFactory(factory)
-                                         .getTransportFactory()
+                                         .transportFactory()
                                          .get());
         }
     }
@@ -140,7 +140,7 @@ class BoundedContextBuilderTest {
     @DisplayName("allow clearing storage factory supplier")
     void clearStorageFactorySupplier() {
         assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
-                           .getStorageFactorySupplier()
+                           .storageFactorySupplier()
                            .isPresent());
     }
 
@@ -154,7 +154,7 @@ class BoundedContextBuilderTest {
             assertNotNull(BoundedContext.newBuilder()
                                         .setMultitenant(true)
                                         .build()
-                                        .getTenantIndex());
+                                        .tenantIndex());
         }
 
         @Test
@@ -163,7 +163,7 @@ class BoundedContextBuilderTest {
             // Pass EventBus to builder initialization, and do NOT pass CommandBus.
             BoundedContext boundedContext = builder.setEventBus(EventBus.newBuilder())
                                                    .build();
-            assertNotNull(boundedContext.getCommandBus());
+            assertNotNull(boundedContext.commandBus());
         }
 
         @Test
@@ -173,15 +173,15 @@ class BoundedContextBuilderTest {
             BoundedContext boundedContext = builder.setMultitenant(true)
                                                    .setCommandBus(CommandBus.newBuilder())
                                                    .build();
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.eventBus());
         }
 
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {
             BoundedContext boundedContext = builder.build();
-            assertNotNull(boundedContext.getCommandBus());
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.commandBus());
+            assertNotNull(boundedContext.eventBus());
         }
     }
 
@@ -205,7 +205,7 @@ class BoundedContextBuilderTest {
         TenantIndex tenantIndex = mock(TenantIndex.class);
         assertEquals(tenantIndex, BoundedContext.newBuilder()
                                                 .setTenantIndex(tenantIndex)
-                                                .getTenantIndex()
+                                                .tenantIndex()
                                                 .get());
     }
 

@@ -22,9 +22,10 @@ package io.spine.model.verify;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
+import io.spine.tools.gradle.testing.GradleProject;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -37,7 +38,7 @@ import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
-import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
+import static io.spine.tools.gradle.TaskName.verifyModel;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -69,17 +70,18 @@ class ModelVerifierPluginTest {
         newProjectWithJava(VALID_AGGREGATE_JAVA,
                            "io/spine/model/verify/ValidProcMan.java",
                            "io/spine/model/verify/ValidCommandHandler.java")
-                .executeTask(VERIFY_MODEL);
+                .executeTask(verifyModel);
     }
 
     @Test
+    @MuteLogging
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
         BuildResult result = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
                 "io/spine/model/verify/DuplicateCommandHandler.java")
-                .executeAndFail(VERIFY_MODEL);
-        BuildTask task = result.task(toPath(VERIFY_MODEL));
+                .executeAndFail(verifyModel);
+        BuildTask task = result.task(toPath(verifyModel));
         assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult, result.getOutput());
@@ -89,16 +91,16 @@ class ModelVerifierPluginTest {
     @DisplayName("ignore duplicate entries in a Gradle project")
     void ignoreDuplicateEntries() {
         GradleProject project = newProjectWithJava(VALID_AGGREGATE_JAVA);
-        project.executeTask(VERIFY_MODEL);
-        project.executeTask(VERIFY_MODEL);
+        project.executeTask(verifyModel);
+        project.executeTask(verifyModel);
     }
 
     @Test
     @DisplayName("halt build on malformed command handling methods")
     void rejectMalformedHandlingMethods() {
         BuildResult result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
-                .executeAndFail(VERIFY_MODEL);
-        BuildTask task = result.task(toPath(VERIFY_MODEL));
+                .executeAndFail(verifyModel);
+        BuildTask task = result.task(toPath(verifyModel));
         assertNotNull(task, result.getOutput());
         TaskOutcome generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult, result.getOutput());
@@ -114,6 +116,6 @@ class ModelVerifierPluginTest {
     }
 
     private static String toPath(TaskName name) {
-        return ':' + name.getValue();
+        return ":" + name;
     }
 }

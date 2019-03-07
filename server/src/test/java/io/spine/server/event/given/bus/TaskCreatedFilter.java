@@ -24,9 +24,9 @@ import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Task;
 
@@ -45,12 +45,12 @@ public class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
     @Override
     public Optional<Ack> accept(EventEnvelope envelope) {
-        if (TASK_ADDED_CLASS.equals(envelope.getMessageClass())) {
-            EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
+        if (TASK_ADDED_CLASS.equals(envelope.messageClass())) {
+            EBTaskAdded message = (EBTaskAdded) envelope.message();
             Task task = message.getTask();
             if (task.getDone()) {
                 Error error = error();
-                Any packedId = Identifier.pack(envelope.getId());
+                Any packedId = Identifier.pack(envelope.id());
                 Ack result = reject(packedId, error);
                 return Optional.of(result);
             }

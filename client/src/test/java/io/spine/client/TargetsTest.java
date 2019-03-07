@@ -58,14 +58,14 @@ class TargetsTest extends UtilityClassTest<Targets> {
     }
 
     @Test
-    @DisplayName("compose Target with Messagee IDs")
+    @DisplayName("compose Target with Message IDs")
     void composeWithMessageIds() {
         TaskId taskId = newTaskId();
         Target target = someOf(TestEntity.class, newSet(taskId));
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(taskId);
+        TargetFilters expected = filtersForIds(taskId);
         assertEquals(expected, target.getFilters());
     }
 
@@ -80,7 +80,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(StringValue.of(firstId),
+        TargetFilters expected = filtersForIds(StringValue.of(firstId),
                                                StringValue.of(secondId),
                                                StringValue.of(thirdId));
         assertEquals(expected, target.getFilters());
@@ -97,7 +97,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(Int32Value.of(firstId),
+        TargetFilters expected = filtersForIds(Int32Value.of(firstId),
                                                Int32Value.of(secondId),
                                                Int32Value.of(thirdId));
         assertEquals(expected, target.getFilters());
@@ -114,7 +114,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        EntityFilters expected = filtersForIds(Int64Value.of(firstId),
+        TargetFilters expected = filtersForIds(Int64Value.of(firstId),
                                                Int64Value.of(secondId),
                                                Int64Value.of(thirdId));
         assertEquals(expected, target.getFilters());

@@ -69,12 +69,16 @@ public final class Events {
     }
 
     /** Prevents instantiation of this utility class. */
-    private Events() {}
+    private Events() {
+    }
 
     /**
      * Creates a new {@link EventId} based on random UUID.
      *
      * @return new UUID-based event ID
+     * @implNote This method does not use the {@link Identifier#generate(Class)} API because
+     *         {@code EventId} does not conform to the contract of {@link io.spine.base.UuidValue}.
+     *         This is done so for being able to have event identifiers with non-UUID values.
      */
     public static EventId generateId() {
         String value = UUID.randomUUID()
@@ -407,19 +411,23 @@ public final class Events {
 
         while (actorContext == null) {
             switch (ctx.getOriginCase()) {
-                case EVENT_CONTEXT:
-                    ctx = ctx.getEventContext();
-                    break;
                 case COMMAND_CONTEXT:
                     actorContext = ctx.getCommandContext()
                                       .getActorContext();
+                    break;
+                case EVENT_CONTEXT:
+                    ctx = ctx.getEventContext();
                     break;
                 case IMPORT_CONTEXT:
                     actorContext = ctx.getImportContext();
                     break;
                 case ORIGIN_NOT_SET:
+                default:
                     throw newIllegalArgumentException(
-                            "The provided event context has no origin set");
+                            "The provided event context (id: %s) has no origin defined.",
+                            eventContext.getEventId()
+                                        .getValue()
+                    );
             }
         }
         return actorContext;

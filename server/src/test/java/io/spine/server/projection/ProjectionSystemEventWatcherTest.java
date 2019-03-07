@@ -25,10 +25,10 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.EntityHistoryIds;
 import io.spine.server.event.DuplicateEventException;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.EventDispatchedToSubscriberVBuilder;
@@ -62,7 +62,7 @@ class ProjectionSystemEventWatcherTest {
     @BeforeEach
     void setUp() {
         repository = mock(ProjectionRepository.class);
-        when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+        when(repository.entityStateType()).thenReturn(REPOSITORY_TYPE);
     }
 
     @Test
@@ -128,7 +128,6 @@ class ProjectionSystemEventWatcherTest {
 
         private ProjectionSystemEventWatcher<?> watcher;
 
-        @SuppressWarnings("unchecked") // `clearInvocations` expects a vararg. OK for tests.
         @BeforeEach
         void setUp() {
             watcher = new ProjectionSystemEventWatcher<>(repository);

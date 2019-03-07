@@ -36,6 +36,12 @@ buildscript { final scriptHandler ->
     }
 
     forceConfiguration(scriptHandler)
+    configurations.all {
+        resolutionStrategy {
+            //noinspection GroovyAssignabilityCheck
+            force "io.spine:spine-base:$spineBaseVersion"
+        }
+    }
 }
 
 apply from: 'version.gradle'
@@ -104,6 +110,7 @@ subprojects {
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'pmd'
     apply plugin: spineProtobufPluginId
 
     apply from: deps.scripts.javacArgs
@@ -157,10 +164,17 @@ subprojects {
         testImplementation deps.test.guavaTestlib
         testImplementation deps.test.junit5Api
         testImplementation deps.test.junit5Runner
+        testImplementation "io.spine.tools:spine-mute-logging:$spineBaseVersion"
     }
 
     forceConfiguration(project)
     configurations {
+        all {
+            resolutionStrategy {
+                //noinspection GroovyAssignabilityCheck
+                force "io.spine:spine-base:$spineBaseVersion"
+            }
+        }
         // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
         runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
         testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
@@ -235,6 +249,8 @@ subprojects {
     if (shouldPublishJavadoc(project)) {
         apply from: updateDocsPlugin
     }
+    
+    apply from: deps.scripts.pmd
 }
 
 apply from: publishPlugin

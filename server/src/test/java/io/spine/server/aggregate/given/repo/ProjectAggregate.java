@@ -59,8 +59,8 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
+    private void apply(AggProjectCreated event) {
+        builder().setId(event.getProjectId())
                     .setName(event.getName());
     }
 
@@ -73,8 +73,8 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggTaskAdded event) {
-        getBuilder().setId(event.getProjectId())
+    private void apply(AggTaskAdded event) {
+        builder().setId(event.getProjectId())
                     .addTask(event.getTask());
     }
 
@@ -86,8 +86,8 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggProjectStarted event) {
-        getBuilder().setStatus(Status.STARTED);
+    private void apply(AggProjectStarted event) {
+        builder().setStatus(Status.STARTED);
     }
 
     /**
@@ -97,10 +97,10 @@ public class ProjectAggregate
     @React
     Optional<AggProjectArchived> on(AggProjectArchived event) {
         if (event.getChildProjectIdList()
-                 .contains(getId())) {
+                 .contains(id())) {
             AggProjectArchived reaction = AggProjectArchived
                     .newBuilder()
-                    .setProjectId(getId())
+                    .setProjectId(id())
                     .build();
             return Optional.of(reaction);
         } else {
@@ -109,7 +109,7 @@ public class ProjectAggregate
     }
 
     @Apply
-    void apply(AggProjectArchived event) {
+    private void apply(AggProjectArchived event) {
         setArchived(true);
     }
 
@@ -120,10 +120,10 @@ public class ProjectAggregate
     @React
     Optional<AggProjectDeleted> on(AggProjectDeleted event) {
         if (event.getChildProjectIdList()
-                 .contains(getId())) {
+                 .contains(id())) {
             AggProjectDeleted reaction = AggProjectDeleted
                     .newBuilder()
-                    .setProjectId(getId())
+                    .setProjectId(id())
                     .build();
             return Optional.of(reaction);
         } else {

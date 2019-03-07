@@ -32,12 +32,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.unsupported;
 import static io.spine.validate.Validate.isDefault;
 
@@ -54,8 +54,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private final Map<I, LifecycleFlags> statuses = newHashMap();
-    private final Map<I, Integer> eventCounts = newHashMap();
+    private final Map<I, LifecycleFlags> statuses = new HashMap<>();
+    private final Map<I, Integer> eventCounts = new HashMap<>();
 
     @Override
     public Iterator<I> index() {

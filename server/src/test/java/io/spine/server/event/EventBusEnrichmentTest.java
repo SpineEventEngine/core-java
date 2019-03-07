@@ -20,20 +20,11 @@
 
 package io.spine.server.event;
 
-import com.google.common.truth.MapSubject;
-import com.google.protobuf.Message;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
-import io.spine.test.event.EnrichmentByContextFields;
-import io.spine.test.event.EnrichmentForSeveralEvents;
-import io.spine.test.event.ProjectCreatedSeparateEnrichment;
-import io.spine.test.event.ProjectId;
-import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +38,7 @@ class EventBusEnrichmentTest {
     private EventBus eventBus;
     private BoundedContext bc;
 
-    private void setUp(Enricher enricher) {
+    private void setUp(EventEnricher enricher) {
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
         bc = BoundedContext
                 .newBuilder()
@@ -57,7 +48,7 @@ class EventBusEnrichmentTest {
 
         ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
-        eventBus = bc.getEventBus();
+        eventBus = bc.eventBus();
     }
 
     @AfterEach
@@ -66,42 +57,9 @@ class EventBusEnrichmentTest {
     }
 
     @Test
-    @DisplayName("for event that can be enriched")
-    void forEnrichable() {
-        EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
-        Enricher enricher = Enricher
-                .newBuilder()
-                // This enrichment function turns on enrichments that map `ProjectId` to `String`.
-                // See `proto/spine/test/event/events.proto` for the declaration of `ProtoCreated`
-                // event and its enrichments.
-                .add(ProjectId.class, String.class,
-                     (id, context) -> String.valueOf(id.getId()))
-                .build();
-
-        setUp(enricher);
-        RememberingSubscriber subscriber = new RememberingSubscriber();
-        eventBus.register(subscriber);
-
-        eventBus.post(event.getOuterObject());
-
-        MapSubject assertMap =
-                assertThat(subscriber.getEventContext()
-                                     .getEnrichment()
-                                     .getContainer()
-                                     .getItemsMap());
-        assertMap.containsKey(ofType(EnrichmentByContextFields.class));
-        assertMap.containsKey(ofType(EnrichmentForSeveralEvents.class));
-        assertMap.containsKey(ofType(ProjectCreatedSeparateEnrichment.class));
-    }
-
-    private static String ofType(Class<? extends Message> enrichmentClass) {
-        return TypeName.of(enrichmentClass).value();
-    }
-
-    @Test
     @DisplayName("for event that cannot be enriched")
     void forNonEnrichable() {
-        Enricher enricher = Enricher
+        EventEnricher enricher = EventEnricher
                 .newBuilder()
                 .build();
 

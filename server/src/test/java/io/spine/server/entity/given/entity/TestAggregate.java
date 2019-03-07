@@ -39,10 +39,10 @@ public class TestAggregate
     public static TestAggregate copyOf(TestAggregate entity) {
         TestAggregate result =
                 Given.aggregateOfClass(TestAggregate.class)
-                     .withId(entity.getId())
-                     .withState(entity.getState())
+                     .withId(entity.id())
+                     .withState(entity.state())
                      .modifiedOn(entity.whenModified())
-                     .withVersion(entity.getVersion()
+                     .withVersion(entity.version()
                                         .getNumber())
                      .build();
         return result;

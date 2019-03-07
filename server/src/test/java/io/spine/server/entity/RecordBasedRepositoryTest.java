@@ -25,16 +25,18 @@ import com.google.common.truth.IterableSubject;
 import com.google.common.truth.OptionalSubject;
 import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.client.ColumnFilter;
-import io.spine.client.CompositeColumnFilter;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
+import io.spine.client.CompositeFilter;
+import io.spine.client.Filter;
+import io.spine.client.IdFilter;
+import io.spine.client.TargetFilters;
+import io.spine.client.TargetFiltersVBuilder;
 import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.entity.given.GivenLifecycleFlags;
@@ -56,9 +58,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
-import static io.spine.client.ColumnFilters.all;
-import static io.spine.client.ColumnFilters.eq;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.eq;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -117,7 +119,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     protected abstract I createId(int value);
 
     /**
-     * Sets the {@code package-local} {@link AbstractEntity#getState() state} property of an entity.
+     * Sets the {@code package-local} {@link AbstractEntity#state() state} property of an entity.
      */
     protected void setEntityState(E entity, S state) {
         entity.setState(state);
@@ -174,7 +176,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         I id = createId(5);
         E projectEntity = repository().create(id);
         assertNotNull(projectEntity);
-        assertEquals(id, projectEntity.getId());
+        assertEquals(id, projectEntity.id());
     }
 
     protected RecordBasedRepository<I, E, S> repository() {
@@ -184,7 +186,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     @Nested
     @DisplayName("find one entity")
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    class FineOne {
+    class FindOne {
 
         private E entity;
 
@@ -217,7 +219,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         }
 
         private void assertFound() {
-            assertResult(find(entity.getId()));
+            assertResult(find(entity.id()));
         }
 
         private void assertResult(Optional<E> optional) {
@@ -235,6 +237,10 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     @DisplayName("find multiple entities")
     class FindMultiple {
 
+        private Iterator<EntityRecord> loadAllRecords() {
+            return repository.loadAllRecords();
+        }
+
         @Test
         @DisplayName("by IDs")
         void multipleEntitiesByIds() {
@@ -246,7 +252,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             // Find some of the records (half of them in this case)
             for (int i = 0; i < count / 2; i++) {
                 ids.add(entities.get(i)
-                                .getId());
+                                .id());
             }
 
             Collection<E> found = newArrayList(loadMany(ids));
@@ -269,13 +275,13 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             StringValue fieldValue = StringValue.newBuilder()
                                                 .setValue(id1.toString())
                                                 .build();
-            ColumnFilter filter = eq(fieldPath, fieldValue);
-            CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+            Filter filter = eq(fieldPath, fieldValue);
+            CompositeFilter aggregatingFilter = CompositeFilter
                     .newBuilder()
                     .addFilter(filter)
                     .setOperator(ALL)
                     .build();
-            EntityFilters filters = EntityFilters
+            TargetFilters filters = TargetFiltersVBuilder
                     .newBuilder()
                     .addFilter(aggregatingFilter)
                     .build();
@@ -297,9 +303,9 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
             // Find some of the entities (half of them in this case).
             int idsToObtain = count / 2;
-            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
+            List<Any> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            EntityFilters filters = createEntityIdFilters(ids);
+            TargetFilters filters = createIdFilters(ids);
             FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
@@ -373,13 +379,26 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         }
 
         @Test
+        @DisplayName("all entity records")
+        void allEntityRecords() {
+            List<E> entities = createAndStoreEntities(repository, 150);
+            Collection<EntityRecord> found = newArrayList(loadAllRecords());
+            assertThat(found).hasSize(entities.size());
+
+            for (E entity : entities) {
+                EntityRecordWithColumns record = repository.toRecord(entity);
+                assertThat(found).contains(record.getRecord());
+            }
+        }
+
+        @Test
         @DisplayName("no entities if repository is empty")
         void noEntitiesIfEmpty() {
             Collection<E> found = newArrayList(loadAll());
             assertThat(found).isEmpty();
         }
 
-        private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
+        private Iterator<E> find(TargetFilters filters, FieldMask firstFieldOnly) {
             return repository().find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
         }
 
@@ -390,25 +409,23 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             return entities;
         }
 
-        private List<EntityId> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
-            List<EntityId> ids = Lists.newLinkedList();
+        private List<Any> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
+            List<Any> ids = Lists.newLinkedList();
             for (int i = 0; i < count; i++) {
                 Message entityId = (Message) entities.get(i)
-                                                     .getId();
-                EntityId id = EntityId.newBuilder()
-                                      .setId(pack(entityId))
-                                      .build();
+                                                     .id();
+                Any id = pack(entityId);
                 ids.add(id);
             }
             return ids;
         }
 
-        private EntityFilters createEntityIdFilters(List<EntityId> ids) {
-            EntityIdFilter filter = EntityIdFilter
+        private TargetFilters createIdFilters(List<Any> ids) {
+            IdFilter filter = IdFilter
                     .newBuilder()
                     .addAllIds(ids)
                     .build();
-            EntityFilters filters = EntityFilters
+            TargetFilters filters = TargetFiltersVBuilder
                     .newBuilder()
                     .setIdFilter(filter)
                     .build();
@@ -417,7 +434,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
         private FieldMask createFirstFieldOnlyMask(List<E> entities) {
             E firstEntity = entities.get(0);
-            FieldMask fieldMask = fromFieldNumbers(firstEntity.getDefaultState()
+            FieldMask fieldMask = fromFieldNumbers(firstEntity.defaultState()
                                                               .getClass(), 1);
             return fieldMask;
         }
@@ -437,7 +454,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         E entity = loadOrCreate(id);
 
         assertNotNull(entity);
-        assertEquals(id, entity.getId());
+        assertEquals(id, entity.id());
     }
 
     @Test
@@ -448,10 +465,10 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         List<I> ids = Lists.newLinkedList();
         for (int i = 0; i < count; i++) {
             ids.add(entities.get(i)
-                            .getId());
+                            .id());
         }
         Entity<I, S> sideEntity = createEntity(375);
-        ids.add(sideEntity.getId());
+        ids.add(sideEntity.id());
 
         Collection<E> found = newArrayList(loadMany(ids));
         IterableSubject assertThatFound = assertThat(found);
@@ -467,7 +484,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         @DisplayName("archived")
         void archived() {
             E entity = createEntity(821);
-            I id = entity.getId();
+            I id = entity.id();
 
             storeEntity(entity);
 
@@ -483,7 +500,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         @DisplayName("deleted")
         void deleted() {
             E entity = createEntity(822);
-            I id = entity.getId();
+            I id = entity.id();
 
             storeEntity(entity);
 
@@ -538,10 +555,10 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
-        EntityFilters filters = EntityFilters
+        CompositeFilter filter = all(eq(archived.name(), false));
+        TargetFilters filters = TargetFiltersVBuilder
                 .newBuilder()
-                .addFilter(columnFilter)
+                .addFilter(filter)
                 .build();
 
         Iterator<E> found = repository().find(filters, emptyOrder(), emptyPagination(),

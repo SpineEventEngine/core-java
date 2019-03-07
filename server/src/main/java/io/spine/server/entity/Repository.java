@@ -20,18 +20,20 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -69,7 +71,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Model class of entities managed by this repository.
      *
-     * <p>This field is null if {@link #entityClass()} is never called.
+     * <p>This field is null if {@link #entityModelClass()} is never called.
      */
     private volatile @MonotonicNonNull EntityClass<E> entityClass;
 
@@ -129,11 +131,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains model class for the entities managed by this repository.
      */
-    protected final EntityClass<E> entityClass() {
+    protected final EntityClass<E> entityModelClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            Class<E> cast = (Class<E>) GenericParameter.ENTITY.getArgumentIn(getClass());
-            entityClass = getModelClass(cast);
+            Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
+            entityClass = toModelClass(cast);
         }
         return entityClass;
     }
@@ -142,28 +144,38 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Obtains a model class for the passed entity class value.
      */
     @Internal
-    protected EntityClass<E> getModelClass(Class<E> cls) {
+    protected EntityClass<E> toModelClass(Class<E> cls) {
         return asEntityClass(cls);
     }
 
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<I> getIdClass() {
-        return (Class<I>) entityClass().getIdClass();
+    public Class<I> idClass() {
+        return (Class<I>) entityModelClass().idClass();
     }
 
     /** Returns the class of entities managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<E> getEntityClass() {
-        return (Class<E>) entityClass().value();
+    public Class<E> entityClass() {
+        return (Class<E>) entityModelClass().value();
     }
 
     /**
      * Obtains the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository.
      */
-    public TypeUrl getEntityStateType() {
-        return entityClass().getStateType();
+    public TypeUrl entityStateType() {
+        return entityModelClass().stateType();
+    }
+
+    /**
+     * Obtains classes of the events produced by this {@code Repository}.
+     *
+     * <p>For convenience, the default version returns empty collection. This method should be
+     * overridden by repositories which actually produce events.
+     */
+    public ImmutableSet<EventClass> producibleEventClasses() {
+        return ImmutableSet.of();
     }
 
     /**
@@ -177,7 +189,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     public final void setBoundedContext(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
         if (!isStorageAssigned()) {
-            initStorage(boundedContext.getStorageFactory());
+            initStorage(boundedContext.storageFactory());
         }
     }
 
@@ -192,10 +204,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Obtains {@code BoundedContext} to which this repository belongs.
      *
      * @return parent {@code BoundedContext}
-     * @throws IllegalStateException if the repository is not registered {@linkplain
-     *                               BoundedContext#register(Repository) registered} yet
+     * @throws IllegalStateException
+     *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
+     *         registered} yet
      */
-    protected final BoundedContext getBoundedContext() {
+    protected final BoundedContext boundedContext() {
         checkState(boundedContext != null,
                    "The repository (class: %s) is not registered with a BoundedContext.",
                    getClass().getName());
@@ -208,8 +221,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        getBoundedContext().getStand()
-                           .registerTypeSupplier(this);
+        boundedContext().stand()
+                        .registerTypeSupplier(this);
     }
 
     /**
@@ -234,7 +247,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    protected final Storage<I, ?, ?> getStorage() {
+    protected final Storage<I, ?, ?> storage() {
         return checkStorage(this.storage);
     }
 
@@ -304,8 +317,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected void logError(String msgFormat,
                             MessageEnvelope envelope,
                             RuntimeException exception) {
-        MessageClass messageClass = envelope.getMessageClass();
-        String stateType = getEntityStateType().value();
+        MessageClass messageClass = envelope.messageClass();
+        String stateType = entityStateType().value();
         String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
         _error(errorMessage, exception);
     }
@@ -322,9 +335,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @Internal
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        TypeUrl stateType = getEntityStateType();
-        SystemWriteSide writeSide = getBoundedContext().getSystemClient()
-                                                       .writeSide();
+        TypeUrl stateType = entityStateType();
+        SystemWriteSide writeSide = boundedContext().systemClient()
+                                                    .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
@@ -392,7 +405,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.getStorage()
+            this.index = repository.storage()
                                    .index();
         }
 

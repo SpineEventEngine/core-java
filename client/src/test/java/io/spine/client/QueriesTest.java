@@ -32,9 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("Queries utility should")
 class QueriesTest {
 

@@ -30,13 +30,11 @@ import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Utility class for working with string values in ValueMismatches.
- *
- * @author Alexander Yevsyukov
  */
 public final class StringMismatch {
 
+    /** Prevent instantiation of this utility class. */
     private StringMismatch() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

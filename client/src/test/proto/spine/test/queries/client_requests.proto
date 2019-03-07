@@ -28,8 +28,6 @@ option java_package="io.spine.test.client";
 option java_multiple_files = true;
 option java_outer_classname = "ClientRequestsProto";
 
-
-
 // Sample objects for testing Queries and Topics.
 
 // Simple ID for tests.

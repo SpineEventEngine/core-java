@@ -28,6 +28,6 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
  */
 public class ARejectionSubscriber extends TestEventSubscriber {
     @Subscribe
-    public void handle(EntityAlreadyArchived rejection) {
+    void handle(EntityAlreadyArchived rejection) {
     }
 }

@@ -23,10 +23,9 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
@@ -37,11 +36,6 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
 
     public SubscriberSignature() {
         super(Subscribe.class);
-    }
-
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PUBLIC);
     }
 
     @Override

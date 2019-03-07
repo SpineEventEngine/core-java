@@ -79,26 +79,26 @@ public class TestProjection
     }
 
     private void keep(Message eventMessage) {
-        eventMessagesDelivered.put(getId(), eventMessage);
+        eventMessagesDelivered.put(id(), eventMessage);
     }
 
     @Subscribe
-    public void on(PrjProjectCreated event) {
+    void on(PrjProjectCreated event) {
         // Keep the event message for further inspection in tests.
         keep(event);
 
-        Project newState = getState().toBuilder()
-                                     .setId(event.getProjectId())
-                                     .setStatus(Project.Status.CREATED)
-                                     .setName(event.getName())
-                                     .build();
-        getBuilder().mergeFrom(newState);
+        Project newState = state().toBuilder()
+                                  .setId(event.getProjectId())
+                                  .setStatus(Project.Status.CREATED)
+                                  .setName(event.getName())
+                                  .build();
+        builder().mergeFrom(newState);
     }
 
     @Subscribe
-    public void on(PrjTaskAdded event) {
+    void on(PrjTaskAdded event) {
         keep(event);
-        getBuilder().addTask(event.getTask());
+        builder().addTask(event.getTask());
     }
 
     /**
@@ -111,35 +111,35 @@ public class TestProjection
      *         can have two parameters
      */
     @Subscribe
-    public void on(PrjProjectStarted event,
+    void on(PrjProjectStarted event,
                    @SuppressWarnings("UnusedParameters") EventContext ignored) {
         keep(event);
-        Project newState = getState().toBuilder()
-                                     .setStatus(Project.Status.STARTED)
-                                     .build();
-        getBuilder().mergeFrom(newState);
+        Project newState = state().toBuilder()
+                                  .setStatus(Project.Status.STARTED)
+                                  .build();
+        builder().mergeFrom(newState);
     }
 
     @Subscribe
-    public void on(PrjProjectArchived event) {
+    void on(PrjProjectArchived event) {
         keep(event);
         setArchived(true);
     }
 
     @Subscribe
-    public void on(PrjProjectDeleted event) {
+    void on(PrjProjectDeleted event) {
         keep(event);
         setDeleted(true);
     }
 
     @Column
     public String getName() {
-        return getState().getName();
+        return state().getName();
     }
 
     @Override
     public String getIdString() {
-        return getId().toString();
+        return id().toString();
     }
 
     public static class Repository

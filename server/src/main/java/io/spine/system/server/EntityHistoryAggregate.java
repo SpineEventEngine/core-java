@@ -50,8 +50,6 @@ import static com.google.protobuf.util.Timestamps.compare;
  *
  * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
  * an entity history of its own.
- *
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
 final class EntityHistoryAggregate
@@ -98,63 +96,64 @@ final class EntityHistoryAggregate
     }
 
     @Apply(allowImport = true)
-    void on(EntityCreated event) {
-        getBuilder().setId(event.getId());
+    private void on(EntityCreated event) {
+        builder().setId(event.getId());
     }
 
     @Apply
-    void on(EventDispatchedToSubscriber event) {
-        getBuilder().setId(event.getReceiver());
+    private void on(EventDispatchedToSubscriber event) {
+        builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
-    void on(EventDispatchedToReactor event) {
-        getBuilder().setId(event.getReceiver());
+    private void on(EventDispatchedToReactor event) {
+        builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
-    void on(CommandDispatchedToHandler event) {
-        getBuilder().setId(event.getReceiver());
+    private void on(CommandDispatchedToHandler event) {
+        builder().setId(event.getReceiver());
         updateLastCommandTime(event.getWhenDispatched());
     }
 
     @Apply(allowImport = true)
-    void on(EntityStateChanged event) {
-        getBuilder().setLastStateChange(event.getWhen());
+    private void on(EntityStateChanged event) {
+        builder().setId(event.getId())
+                 .setLastStateChange(event.getWhen());
     }
 
     @Apply(allowImport = true)
-    void on(EntityArchived event) {
+    private void on(EntityArchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityDeleted event) {
+    private void on(EntityDeleted event) {
         updateLifecycleFlags(builder -> builder.setDeleted(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityExtractedFromArchive event) {
+    private void on(EntityExtractedFromArchive event) {
         updateLifecycleFlags(builder -> builder.setArchived(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityRestored event) {
+    private void on(EntityRestored event) {
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EventImported event) {
+    private void on(EventImported event) {
         updateLastEventTime(event.getWhenImported());
     }
 
@@ -164,7 +163,7 @@ final class EntityHistoryAggregate
         if (duplicate) {
             throw CannotDispatchEventTwice
                     .newBuilder()
-                    .setReceiver(getId())
+                    .setReceiver(id())
                     .setPayload(event)
                     .setWhenDispatched(now())
                     .build();
@@ -177,7 +176,7 @@ final class EntityHistoryAggregate
         if (duplicate) {
             throw CannotDispatchCommandTwice
                     .newBuilder()
-                    .setReceiver(getId())
+                    .setReceiver(id())
                     .setPayload(command)
                     .setWhenDispatched(now())
                     .build();
@@ -185,47 +184,55 @@ final class EntityHistoryAggregate
     }
 
     private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
-        LifecycleHistory oldLifecycleHistory = getBuilder().getLifecycle();
-        LifecycleFlags.Builder flagsBuilder = oldLifecycleHistory.getLifecycleFlags()
-                                                                 .toBuilder();
+        LifecycleHistory oldLifecycleHistory = builder().getLifecycle();
+        LifecycleFlags.Builder flagsBuilder =
+                oldLifecycleHistory.getLifecycleFlags()
+                                   .toBuilder();
         LifecycleFlags newFlags = mutation.apply(flagsBuilder)
                                           .build();
-        LifecycleHistory newLifecycleHistory = oldLifecycleHistory.toBuilder()
-                                                                  .setLifecycleFlags(newFlags)
-                                                                  .build();
-        getBuilder().setLifecycle(newLifecycleHistory);
+        LifecycleHistory newLifecycleHistory =
+                oldLifecycleHistory.toBuilder()
+                                   .setLifecycleFlags(newFlags)
+                                   .build();
+        builder().setLifecycle(newLifecycleHistory);
     }
 
     private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistory.Builder> mutation) {
-        LifecycleHistory.Builder builder = getBuilder().getLifecycle()
-                                                       .toBuilder();
-        LifecycleHistory newHistory = mutation.apply(builder)
-                                              .build();
-        getBuilder().setLifecycle(newHistory);
+        EntityHistoryVBuilder builder = builder();
+        LifecycleHistory.Builder history =
+                builder.getLifecycle()
+                       .toBuilder();
+        LifecycleHistory newHistory =
+                mutation.apply(history)
+                        .build();
+        builder.setLifecycle(newHistory);
     }
 
     private void updateLastEventTime(Timestamp newEvent) {
-        Timestamp lastEvent = getBuilder().getDispatching()
-                                          .getWhenEvent();
+        Timestamp lastEvent = builder().getDispatching()
+                                       .getWhenEvent();
         if (compare(newEvent, lastEvent) > 0) {
             updateDispatchingHistory(builder -> builder.setWhenEvent(newEvent));
         }
     }
 
     private void updateLastCommandTime(Timestamp newCommand) {
-        Timestamp lastCommand = getBuilder().getDispatching()
-                                            .getWhenCommand();
+        Timestamp lastCommand = builder().getDispatching()
+                                         .getWhenCommand();
         if (compare(newCommand, lastCommand) > 0) {
             updateDispatchingHistory(builder -> builder.setWhenCommand(newCommand));
         }
     }
 
     private void updateDispatchingHistory(UnaryOperator<DispatchingHistory.Builder> mutation) {
-        DispatchingHistory.Builder builder = getBuilder().getDispatching()
-                                                         .toBuilder();
-        DispatchingHistory newHistory = mutation.apply(builder)
-                                                .build();
-        getBuilder().setDispatching(newHistory);
+        EntityHistoryVBuilder builder = builder();
+        DispatchingHistory.Builder history =
+                builder.getDispatching()
+                       .toBuilder();
+        DispatchingHistory newHistory =
+                mutation.apply(history)
+                        .build();
+        builder.setDispatching(newHistory);
     }
 
     private static Timestamp now() {

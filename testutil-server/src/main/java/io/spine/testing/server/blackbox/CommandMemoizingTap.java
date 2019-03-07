@@ -25,15 +25,15 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.CommandEnvelope;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -41,12 +41,10 @@ import static org.hamcrest.Matchers.instanceOf;
 /**
  * A {@link BusFilter} which remembers all the accepted command messages and never halts the command
  * processing.
- *
- * @author Dmytro Dashenkov
  */
 public final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
 
-    private final Map<CommandId, Message> commandMessages = newHashMap();
+    private final Map<CommandId, Message> commandMessages = new HashMap<>();
     private final List<Command> commands = Lists.newArrayList();
 
     /**
@@ -62,8 +60,8 @@ public final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        commandMessages.put(envelope.getId(), envelope.getMessage());
-        commands.add(envelope.getCommand());
+        commandMessages.put(envelope.id(), envelope.message());
+        commands.add(envelope.command());
         return Optional.empty();
     }
 

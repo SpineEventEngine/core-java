@@ -30,6 +30,6 @@ import io.spine.core.Subscribe;
  */
 public class InvalidTwoParamsFirstInvalid extends TestEventSubscriber {
     @Subscribe
-    public void handle(Exception invalid, EventContext context) {
+    void handle(Exception invalid, EventContext context) {
     }
 }

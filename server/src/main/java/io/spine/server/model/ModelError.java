@@ -22,8 +22,6 @@ package io.spine.server.model;
 
 /**
  * A programming error of message processing definition.
- *
- * @author Alexander Yevsyukov
  */
 public class ModelError extends Error {
 

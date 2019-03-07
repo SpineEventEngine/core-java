@@ -59,7 +59,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Lazily initialized reference to the model class of this entity.
      *
      * @see #thisClass()
-     * @see #getModelClass()
+     * @see #modelClass()
      */
     @LazyInit
     private volatile @MonotonicNonNull EntityClass<?> thisClass;
@@ -74,8 +74,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * The state of the entity.
      *
-     * <p>Lazily initialized to the {@linkplain #getDefaultState() default state},
-     * if {@linkplain #getState() accessed} before {@linkplain #setState(Message)}
+     * <p>Lazily initialized to the {@linkplain #defaultState() default state},
+     * if {@linkplain #state() accessed} before {@linkplain #setState(Message)}
      * initialization}.
      */
     @LazyInit
@@ -118,7 +118,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     @Override
-    public I getId() {
+    public I id() {
         return id;
     }
 
@@ -126,18 +126,18 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * {@inheritDoc}
      *
      * <p>If the state of the entity was not initialized, it is set to
-     * {@linkplain #getDefaultState() default value} and returned.
+     * {@linkplain #defaultState() default value} and returned.
      *
      * @return the current state or default state value
      */
     @Override
-    public S getState() {
+    public final S state() {
         S result = state;
         if (result == null) {
             synchronized (this) {
                 result = state;
                 if (result == null) {
-                    state = getDefaultState();
+                    state = defaultState();
                     result = state;
                 }
             }
@@ -154,7 +154,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = thisClass;
                 if (result == null) {
-                    thisClass = getModelClass();
+                    thisClass = modelClass();
                     result = thisClass;
                 }
             }
@@ -166,7 +166,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Obtains the model class.
      */
     @Internal
-    protected EntityClass<?> getModelClass() {
+    protected EntityClass<?> modelClass() {
         return EntityClass.asEntityClass(getClass());
     }
 
@@ -180,10 +180,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains the default state of the entity.
      */
-    protected final S getDefaultState() {
+    protected final S defaultState() {
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        S result = (S) thisClass().getDefaultState();
+        S result = (S) thisClass().defaultState();
         return result;
     }
 
@@ -248,7 +248,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = stringId;
                 if (result == null) {
-                    stringId = Stringifiers.toString(getId());
+                    stringId = Stringifiers.toString(id());
                     result = stringId;
                 }
             }
@@ -328,7 +328,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
-            Any packedId = Identifier.pack(getId());
+            Any packedId = Identifier.pack(id());
             throw CannotModifyArchivedEntity
                     .newBuilder()
                     .setEntityId(packedId)
@@ -345,7 +345,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
-            Any packedId = Identifier.pack(getId());
+            Any packedId = Identifier.pack(id());
             throw CannotModifyDeletedEntity
                     .newBuilder()
                     .setEntityId(packedId)
@@ -392,7 +392,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Obtains the version number of the entity.
      */
     protected int versionNumber() {
-        int result = getVersion().getNumber();
+        int result = version().getNumber();
         return result;
     }
 
@@ -437,7 +437,18 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     private Version incrementedVersion() {
-        return Versions.increment(getVersion());
+        return Versions.increment(version());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to simplify implementation of entities implementing
+     * {@link io.spine.server.EventProducer}.
+     */
+    @Override
+    public Version version() {
+        return getVersion();
     }
 
     /**
@@ -466,14 +477,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             return false;
         }
         AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
-        return Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getState(), that.getState()) &&
-                Objects.equals(getVersion(), that.getVersion()) &&
+        return Objects.equals(id(), that.id()) &&
+                Objects.equals(state(), that.state()) &&
+                Objects.equals(version(), that.version()) &&
                 Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getState(), getVersion(), getLifecycleFlags());
+        return Objects.hash(id(), state(), version(), getLifecycleFlags());
     }
 }

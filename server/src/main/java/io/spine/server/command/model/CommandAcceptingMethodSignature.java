@@ -24,13 +24,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.lang.annotation.Annotation;
 
@@ -43,7 +42,7 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
  * @param <H> the type of {@link HandlerMethod} which signature this is
  */
 abstract class CommandAcceptingMethodSignature
-        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
+        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
     CommandAcceptingMethodSignature(Class<? extends Annotation> annotation) {
@@ -53,11 +52,6 @@ abstract class CommandAcceptingMethodSignature
     @Override
     public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> getParamSpecs() {
         return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
-    }
-
-    @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     /**
@@ -85,7 +79,7 @@ abstract class CommandAcceptingMethodSignature
 
             @Override
             public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.getMessage()};
+                return new Object[]{envelope.message()};
             }
         },
 
@@ -96,8 +90,8 @@ abstract class CommandAcceptingMethodSignature
             }
 
             @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.getMessage(), envelope.getCommandContext()};
+            public Object[] extractArguments(CommandEnvelope cmd) {
+                return new Object[]{cmd.message(), cmd.context()};
             }
         }
     }

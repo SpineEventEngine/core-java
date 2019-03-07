@@ -107,23 +107,23 @@ public class TestAggregate
     }
 
     @Apply
-    void event(AggProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Status.CREATED);
+    private void event(AggProjectCreated event) {
+        builder().setId(event.getProjectId())
+                 .setStatus(Status.CREATED);
 
         isProjectCreatedEventApplied = true;
     }
 
     @Apply
-    void event(AggTaskAdded event) {
+    private void event(AggTaskAdded event) {
         isTaskAddedEventApplied = true;
-        getBuilder().addTask(event.getTask());
+        builder().addTask(event.getTask());
     }
 
     @Apply
-    void event(AggProjectStarted event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Status.STARTED);
+    private void event(AggProjectStarted event) {
+        builder().setId(event.getProjectId())
+                 .setStatus(Status.STARTED);
 
         isProjectStartedEventApplied = true;
     }

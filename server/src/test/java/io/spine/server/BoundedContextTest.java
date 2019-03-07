@@ -65,10 +65,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests of {@link BoundedContext}.
@@ -107,7 +111,7 @@ class BoundedContextTest {
     @AfterEach
     void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus()
+            boundedContext.eventBus()
                           .unregister(subscriber);
         }
         boundedContext.close();
@@ -117,7 +121,7 @@ class BoundedContextTest {
     private void registerAll() {
         ProjectAggregateRepository repo = new ProjectAggregateRepository();
         boundedContext.register(repo);
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(subscriber);
         handlersRegistered = true;
     }
@@ -129,19 +133,19 @@ class BoundedContextTest {
         @Test
         @DisplayName("EventBus")
         void eventBus() {
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.eventBus());
         }
 
         @Test
         @DisplayName("IntegrationBus")
         void integrationBus() {
-            assertNotNull(boundedContext.getIntegrationBus());
+            assertNotNull(boundedContext.integrationBus());
         }
 
         @Test
         @DisplayName("CommandDispatcher")
         void commandDispatcher() {
-            assertNotNull(boundedContext.getCommandBus());
+            assertNotNull(boundedContext.commandBus());
         }
 
         @Test
@@ -187,11 +191,25 @@ class BoundedContextTest {
     void propagateRepositoriesToStand() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
         assertTrue(stand.getExposedTypes().isEmpty());
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
+        assertThat(stand.getExposedTypes(), contains(repository.entityStateType()));
+    }
+
+    @Test
+    @DisplayName("re-register Stand as event dispatcher when registering repository")
+    void registerStandAsEventDispatcher() {
+        EventBus eventBusMock = mock(EventBus.class);
+        EventBus.Builder builderMock = mock(EventBus.Builder.class);
+        when(builderMock.build()).thenReturn(eventBusMock);
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setEventBus(builderMock)
+                                                      .build();
+        boundedContext.register(new ProjectAggregateRepository());
+        verify(eventBusMock, times(1))
+                .register(eq(boundedContext.stand()));
     }
 
     @ParameterizedTest
@@ -262,7 +280,7 @@ class BoundedContextTest {
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setEventBus(EventBus.newBuilder())
                                           .build();
-        assertNotNull(bc.getEventBus());
+        assertNotNull(bc.eventBus());
     }
 
     @Test
@@ -273,8 +291,8 @@ class BoundedContextTest {
                                           .setEventBus(EventBus.newBuilder()
                                                                .setEventStore(eventStore))
                                           .build();
-        assertEquals(eventStore, bc.getEventBus()
-                                   .getEventStore());
+        assertEquals(eventStore, bc.eventBus()
+                                   .eventStore());
     }
 
     @Nested
@@ -315,14 +333,14 @@ class BoundedContextTest {
                                               .setMultitenant(true)
                                               .build();
 
-            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+            assertEquals(bc.isMultitenant(), bc.commandBus()
                                                .isMultitenant());
 
             bc = BoundedContext.newBuilder()
                                .setMultitenant(false)
                                .build();
 
-            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+            assertEquals(bc.isMultitenant(), bc.commandBus()
                                                .isMultitenant());
         }
 
@@ -333,14 +351,14 @@ class BoundedContextTest {
                                               .setMultitenant(true)
                                               .build();
 
-            assertEquals(bc.isMultitenant(), bc.getStand()
+            assertEquals(bc.isMultitenant(), bc.stand()
                                                .isMultitenant());
 
             bc = BoundedContext.newBuilder()
                                .setMultitenant(false)
                                .build();
 
-            assertEquals(bc.isMultitenant(), bc.getStand()
+            assertEquals(bc.isMultitenant(), bc.stand()
                                                .isMultitenant());
         }
     }
@@ -355,12 +373,12 @@ class BoundedContextTest {
     @Test
     @DisplayName("obtain entity types by visibility")
     void getEntityTypesByVisibility() {
-        assertTrue(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
+        assertTrue(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
                                  .isEmpty());
 
         registerAll();
 
-        assertFalse(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
+        assertFalse(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
                                   .isEmpty());
     }
 
@@ -394,7 +412,7 @@ class BoundedContextTest {
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
                     @Internal
                     @Override
-                    public SystemClient getSystemClient() {
+                    public SystemClient systemClient() {
                         return null;
                     }
                 }

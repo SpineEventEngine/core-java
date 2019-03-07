@@ -72,7 +72,7 @@ public final class Handlers {
     }
 
     private static String typeUrl(MessageClass<?> messageClass) {
-        TypeName typeName = messageClass.getTypeName();
+        TypeName typeName = messageClass.typeName();
         TypeUrl typeUrl = typeName.toUrl();
         return typeUrl.value();
     }

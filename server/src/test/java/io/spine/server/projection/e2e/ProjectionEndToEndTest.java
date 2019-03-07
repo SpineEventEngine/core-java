@@ -27,7 +27,6 @@ import io.spine.client.EntityId;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
@@ -43,6 +42,7 @@ import io.spine.server.organizations.OrganizationProjection;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.TestProjection;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.test.projection.ProjectId;
@@ -62,6 +62,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -149,6 +150,7 @@ class ProjectionEndToEndTest {
                 .setId(historyId)
                 .setNewState(pack(newState))
                 .setWhen(getCurrentTime())
+                .addMessageId(dispatchedMessageId())
                 .build();
         Timestamp producedAt = Time.getCurrentTime();
         EventContext eventContext = EventContext
@@ -171,7 +173,7 @@ class ProjectionEndToEndTest {
         GroupProjection singleGroup = allGroups.next();
         assertFalse(allGroups.hasNext());
 
-        Group actualGroup = singleGroup.getState();
+        Group actualGroup = singleGroup.state();
         assertEquals(actualGroup.getName(), organizationName + producedAt);
         IterableSubject assertParticipants = assertThat(actualGroup.getParticipantsList());
         assertParticipants.containsAllIn(newState.getMembersList());

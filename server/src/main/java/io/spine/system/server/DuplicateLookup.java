@@ -29,13 +29,10 @@ import io.spine.server.entity.RecentHistory;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.type.TypeUrl.parse;
 
 /**
  * Performs a lookup over a given recent history to tell whether or not a given message has already
  * been dispatched to the given entity.
- *
- * @author Dmytro Dashenkov
  */
 final class DuplicateLookup {
 
@@ -132,8 +129,7 @@ final class DuplicateLookup {
     }
 
     private static boolean instanceOf(Event event, TypeUrl type) {
-        String typeRaw = event.getMessage().getTypeUrl();
-        TypeUrl actualType = parse(typeRaw);
+        TypeUrl actualType = event.typeUrl();
         return type.equals(actualType);
     }
 }

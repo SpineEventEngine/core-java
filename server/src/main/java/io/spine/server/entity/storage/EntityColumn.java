@@ -61,7 +61,7 @@ import static java.lang.String.format;
  *
  * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
  * is determined by a name of column getter, e.g. {@code value} for {@code getValue()}.
- * A client should specify this value to a {@linkplain io.spine.client.ColumnFilters
+ * A client should specify this value to a {@linkplain io.spine.client.TargetFilters
  * column filters}.
  *
  * <p>A {@linkplain #getStoredName() stored name} is used as a {@code Storage} column name
@@ -358,7 +358,8 @@ public class EntityColumn implements Serializable {
      * the {@code null} input argument this method will always return {@code null}.
      *
      * <p>The method is accessible outside of the {@code EntityColumn} class to enable the proper
-     * {@link io.spine.client.ColumnFilter} conversion for the {@link Enumerated} column values.
+     * {@linkplain io.spine.client.Filter filters} conversion for the {@link Enumerated} column
+     * values.
      *
      * @param columnValue
      *         the column value to convert

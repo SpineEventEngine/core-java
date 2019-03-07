@@ -27,13 +27,8 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 
-import static io.spine.core.Enrichments.getEnrichment;
-import static io.spine.util.Exceptions.newIllegalStateException;
-
 /**
  * Information about a scheduled command.
- *
- * @author Dmytro Dashenkov
  */
 final class ScheduledCommand
         extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecordVBuilder> {
@@ -43,15 +38,12 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandScheduled event, EventContext context) {
-        CommandEnrichment enrichment =
-                getEnrichment(CommandEnrichment.class, context)
-                .orElseThrow(() -> newIllegalStateException("Command enrichment must be present."));
-
-        Command commandWithSchedule = withSchedule(enrichment.getCommand(), event.getSchedule());
-        getBuilder().setId(event.getId())
-                    .setCommand(commandWithSchedule)
-                    .setSchedulingTime(context.getTimestamp());
+    void on(CommandScheduled event, EventContext context) {
+        Command command = context.get(Command.class);
+        Command commandWithSchedule = withSchedule(command, event.getSchedule());
+        builder().setId(event.getId())
+                 .setCommand(commandWithSchedule)
+                 .setSchedulingTime(context.getTimestamp());
     }
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
@@ -68,7 +60,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

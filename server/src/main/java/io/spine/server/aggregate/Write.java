@@ -67,8 +67,8 @@ final class Write<I> {
         checkNotNull(aggregate);
 
         AggregateStorage<I> storage = repository.aggregateStorage();
-        int snapshotTrigger = repository.getSnapshotTrigger();
-        I id = aggregate.getId();
+        int snapshotTrigger = repository.snapshotTrigger();
+        I id = aggregate.id();
         return new Write<>(storage, aggregate, id, snapshotTrigger);
     }
 
@@ -126,7 +126,7 @@ final class Write<I> {
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
         aggregate.setEventCountAfterLastSnapshot(eventCount);
         if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
+            storage.writeLifecycleFlags(aggregate.id(), aggregate.lifecycleFlags());
         }
     }
 }

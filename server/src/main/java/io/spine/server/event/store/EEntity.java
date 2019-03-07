@@ -23,13 +23,13 @@ package io.spine.server.event.store;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.EventVBuilder;
 import io.spine.core.Events;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -72,8 +72,8 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
      */
     @Column
     public Timestamp getCreated() {
-        return getState().getContext()
-                         .getTimestamp();
+        return state().getContext()
+                      .getTimestamp();
     }
 
     /**
@@ -87,8 +87,8 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
     @Column
     public String getType() {
         if (typeName == null) {
-            typeName = EventEnvelope.of(getState())
-                                    .getTypeName();
+            typeName = EventEnvelope.of(state())
+                                    .messageTypeName();
         }
         return typeName.value();
     }
@@ -107,8 +107,9 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
 
         private EEntity create() {
             Event eventWithoutEnrichments = clearEnrichments(event);
-            EEntity entity = getEntity();
-            entity.getBuilder().mergeFrom(eventWithoutEnrichments);
+            EEntity entity = entity();
+            entity.builder()
+                  .mergeFrom(eventWithoutEnrichments);
             commit();
             return entity;
         }

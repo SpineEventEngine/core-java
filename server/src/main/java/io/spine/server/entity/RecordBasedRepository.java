@@ -25,10 +25,11 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.EntityFilters;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
@@ -91,7 +92,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        RecordStorage<I> storage = (RecordStorage<I>) getStorage();
+        RecordStorage<I> storage = (RecordStorage<I>) storage();
         return storage;
     }
 
@@ -118,7 +119,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public void store(E entity) {
         EntityRecordWithColumns record = toRecord(entity);
         RecordStorage<I> storage = recordStorage();
-        storage.write(entity.getId(), record);
+        storage.write(entity.id(), record);
     }
 
     @Override
@@ -130,7 +131,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
+        RecordStorage<I> result = factory.createRecordStorage(entityClass());
         return result;
     }
 
@@ -145,7 +146,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
         for (E entity : entities) {
             EntityRecordWithColumns recordWithColumns = toRecord(entity);
-            records.put(entity.getId(), recordWithColumns);
+            records.put(entity.id(), recordWithColumns);
         }
         recordStorage().write(records);
     }
@@ -273,11 +274,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     public Iterator<E> loadAll() {
-        RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll();
+        Iterator<EntityRecord> records = loadAllRecords();
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
+    }
+
+    /**
+     * Obtains iterator over all present {@linkplain EntityRecord entity records}.
+     *
+     * @return an iterator over all records
+     */
+    @Internal
+    public Iterator<EntityRecord> loadAllRecords() {
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll();
+        return records;
     }
 
     /**
@@ -305,8 +317,35 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(EntityFilters filters, OrderBy orderBy,
+    public Iterator<E> find(TargetFilters filters, OrderBy orderBy,
                             Pagination pagination, FieldMask fieldMask) {
+        checkNotNull(filters);
+        checkNotNull(orderBy);
+        checkNotNull(pagination);
+        checkNotNull(fieldMask);
+
+        Iterator<EntityRecord> records = findRecords(filters, orderBy, pagination, fieldMask);
+        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Iterator<E> result = transform(records, toEntity::apply);
+        return result;
+    }
+
+    /**
+     * Obtains iterator over {@linkplain EntityRecord entity records} matching the passed filters.
+     *
+     * @param filters
+     *         entity filters
+     * @param orderBy
+     *         an orderBy to sort the filtered results before pagination
+     * @param pagination
+     *         a pagination to apply to the sorted result set
+     * @param fieldMask
+     *         a mask to apply to the entities
+     * @return an iterator over the matching records
+     */
+    @Internal
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, OrderBy orderBy,
+                                              Pagination pagination, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(orderBy);
         checkNotNull(pagination);
@@ -315,15 +354,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         RecordStorage<I> storage = recordStorage();
         EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
         Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
-        Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
-        return result;
+        return records;
     }
 
     /**
      * Converts the passed entity into the record.
      */
-    private EntityRecordWithColumns toRecord(E entity) {
+    @VisibleForTesting
+    EntityRecordWithColumns toRecord(E entity) {
         EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
         EntityRecordWithColumns result =
@@ -388,7 +426,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Any idAsAny = input.getId();
 
             TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            Class messageClass = typeUrl.getJavaClass();
+            Class messageClass = typeUrl.toJavaClass();
             checkIdClass(messageClass);
 
             Message idAsMessage = unpack(idAsAny);

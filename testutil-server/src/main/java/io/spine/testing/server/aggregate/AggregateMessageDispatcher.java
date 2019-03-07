@@ -22,12 +22,12 @@ package io.spine.testing.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateTestSupport;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
@@ -88,7 +88,7 @@ public class AggregateMessageDispatcher {
     private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
         TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.getIdClass()).thenReturn(Object.class);
+        when(mockedRepo.idClass()).thenReturn(Object.class);
         return mockedRepo;
     }
 

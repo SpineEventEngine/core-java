@@ -30,12 +30,17 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.logging.Logging;
+import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
 import io.spine.server.stand.Stand;
+import io.spine.system.server.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
@@ -43,12 +48,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,7 +64,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.slf4j.event.Level.WARN;
 
+@SuppressWarnings("deprecation")
+// The deprecated `Stand.post()` method will become test-only in the future.
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
 
@@ -152,58 +162,89 @@ class SubscriptionServiceTest {
      * ------------------
      */
 
-    @Test
-    @DisplayName("subscribe to topic")
-    void subscribeToTopic() {
-        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+    @Nested
+    @DisplayName("subscribe to")
+    class SubscribeTo {
 
+        @Test
+        @DisplayName("entity updates")
+        void entityTopic() {
+            checkSubscribesTo(Project.class);
+        }
+
+        @Test
+        @DisplayName("events")
+        void eventTopic() {
+            checkSubscribesTo(AggProjectCreated.class);
+        }
+
+        private void checkSubscribesTo(Class<? extends Message> aClass) {
+            Target target = Targets.allOf(aClass);
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
+
+            SubscriptionService subscriptionService = SubscriptionService
+                    .newBuilder()
+                    .add(boundedContext)
+                    .build();
+
+            Topic topic = requestFactory.topic()
+                                        .forTarget(target);
+
+            MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
+
+            subscriptionService.subscribe(topic, observer);
+
+            Subscription response = observer.firstResponse();
+            ProtoSubject<?, Message> assertResponse = ProtoTruth.assertThat(response);
+            assertResponse
+                    .isNotNull();
+            assertResponse
+                    .hasAllRequiredFields();
+            assertThat(response.getTopic()
+                               .getTarget()
+                               .getType())
+                    .isEqualTo(target.getType());
+            assertThat(observer.getError())
+                    .isNull();
+            assertThat(observer.isCompleted())
+                    .isTrue();
+        }
+    }
+
+    @Test
+    @MuteLogging
+    @DisplayName("receive IAE in observer error callback on subscribing to system event")
+    void failOnSystemEventSubscribe() {
+        BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
                 .add(boundedContext)
                 .build();
-        String type = boundedContext.getStand()
-                                    .getExposedTypes()
-                                    .iterator()
-                                    .next()
-                                    .value();
-        Target target = getProjectQueryTarget();
-
-        assertEquals(type, target.getType());
-
-        Topic topic = requestFactory.topic().forTarget(target);
-
+        Topic topic = requestFactory.topic()
+                                    .allOf(EntityStateChanged.class);
         MemoizingObserver<Subscription> observer = new MemoizingObserver<>();
 
         subscriptionService.subscribe(topic, observer);
 
-        Subscription response = observer.firstResponse();
-        ProtoSubject<?, Message> assertResponse = ProtoTruth.assertThat(response);
-        assertResponse
-                .isNotNull();
-        assertResponse
-                .hasAllRequiredFields();
-        assertThat(response.getTopic()
-                           .getTarget()
-                           .getType())
-                .isEqualTo(type);
-        assertThat(observer.getError())
-                .isNull();
-        assertThat(observer.isCompleted())
-                .isTrue();
+        assertThat(observer.responses()).isEmpty();
+        assertThat(observer.isCompleted()).isFalse();
+        assertThat(observer.getError()).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("activate subscription")
     void activateSubscription() {
-        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
 
-        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                     .add(boundedContext)
-                                                                     .build();
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
         Target target = getProjectQueryTarget();
 
-        Topic topic = requestFactory.topic().forTarget(target);
-
+        Topic topic = requestFactory.topic()
+                                    .forTarget(target);
         // Subscribe to the topic.
         MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
@@ -225,10 +266,8 @@ class SubscriptionServiceTest {
         int version = 1;
 
         Entity entity = newEntity(projectId, projectState, version);
-        boundedContext.getStand()
-                      .post(requestFactory.createCommandContext()
-                                          .getActorContext()
-                                          .getTenantId(), entity);
+        boundedContext.stand()
+                      .post(entity, repository.lifecycleOf(projectId));
 
         // `isCompleted` set to false since we don't expect
         // activationObserver::onCompleted to be called.
@@ -242,13 +281,44 @@ class SubscriptionServiceTest {
     }
 
     @Test
+    @MuteLogging
+    @DisplayName("receive IAE in error callback when activating non-existent subscription")
+    void failOnActivatingNonExistent() {
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
+
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
+
+        // Try activating a subscription to `Customer` entity which is not present in BC.
+        Topic invalidTopic = requestFactory.topic()
+                                           .allOf(Customer.class);
+        Subscription invalidSubscription = Subscription
+                .newBuilder()
+                .setTopic(invalidTopic)
+                .build();
+
+        MemoizingObserver<SubscriptionUpdate> activationObserver = new MemoizingObserver<>();
+        subscriptionService.activate(invalidSubscription, activationObserver);
+
+        // Check observer is not completed and contains an error.
+        assertThat(activationObserver.responses()).isEmpty();
+        assertThat(activationObserver.isCompleted()).isFalse();
+        assertThat(activationObserver.getError()).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     @DisplayName("cancel subscription")
     void cancelSubscription() {
-        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
 
-        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                     .add(boundedContext)
-                                                                     .build();
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
 
         Target target = getProjectQueryTarget();
 
@@ -276,25 +346,60 @@ class SubscriptionServiceTest {
                 .build();
         int version = 1;
         Entity entity = newEntity(projectId, projectState, version);
-        boundedContext.getStand()
-                      .post(requestFactory.createCommandContext()
-                                          .getActorContext()
-                                          .getTenantId(), entity);
+        boundedContext.stand()
+                      .post(entity, repository.lifecycleOf(projectId));
 
         // The update must not be handled by the observer.
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
         verify(activateSubscription, never()).onCompleted();
     }
 
+    @Test
+    @DisplayName("produce a warning and complete silently on cancelling non-existent subscription")
+    void warnOnCancellingNonExistent() {
+        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        BoundedContext boundedContext = boundedContextWith(repository);
+
+        SubscriptionService subscriptionService = SubscriptionService
+                .newBuilder()
+                .add(boundedContext)
+                .build();
+
+        // Try cancelling a subscription to `Customer` entity which is not present in BC.
+        Topic invalidTopic = requestFactory.topic()
+                                           .allOf(Customer.class);
+        Subscription invalidSubscription = Subscription
+                .newBuilder()
+                .setTopic(invalidTopic)
+                .build();
+
+        // Redirect `SubscriptionService` logging so we can check it.
+        SubstituteLogger serviceLogger = (SubstituteLogger) Logging.get(SubscriptionService.class);
+        ArrayDeque<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
+        Logging.redirect(serviceLogger, loggedMessages);
+
+        MemoizingObserver<Response> cancellationObserver = new MemoizingObserver<>();
+        subscriptionService.cancel(invalidSubscription, cancellationObserver);
+
+        // Check observer is completed and contains nothing.
+        assertThat(cancellationObserver.isCompleted()).isTrue();
+        assertThat(cancellationObserver.responses()).isEmpty();
+        assertThat(cancellationObserver.getError()).isNull();
+
+        // Check the last logged message is a warning.
+        SubstituteLoggingEvent lastMessage = loggedMessages.getLast();
+        assertThat(lastMessage.getLevel()).isEqualTo(WARN);
+    }
+
     @Nested
-    @MuteLogging
     @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
         @Test
+        @MuteLogging
         @DisplayName("subscription process")
         void subscription() {
-            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
             SubscriptionService subscriptionService = SubscriptionService
                     .newBuilder()
@@ -309,9 +414,10 @@ class SubscriptionServiceTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("activation process")
         void activation() {
-            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
             SubscriptionService subscriptionService = SubscriptionService
                     .newBuilder()
@@ -326,9 +432,10 @@ class SubscriptionServiceTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("cancellation process")
         void cancellation() {
-            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = boundedContextWith(new ProjectAggregateRepository());
 
             SubscriptionService subscriptionService = SubscriptionService
                     .newBuilder()
@@ -336,7 +443,8 @@ class SubscriptionServiceTest {
                     .build();
             Target target = getProjectQueryTarget();
 
-            Topic topic = requestFactory.topic().forTarget(target);
+            Topic topic = requestFactory.topic()
+                                        .forTarget(target);
 
             MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
             subscriptionService.subscribe(topic, subscriptionObserver);
@@ -368,14 +476,12 @@ class SubscriptionServiceTest {
         return entity;
     }
 
-    private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setStand(Stand.newBuilder())
-                                                      .build();
-        Stand stand = boundedContext.getStand();
-
-        stand.registerTypeSupplier(new Given.ProjectAggregateRepository());
-
+    private static BoundedContext boundedContextWith(ProjectAggregateRepository repository) {
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .setStand(Stand.newBuilder())
+                .build();
+        boundedContext.register(repository);
         return boundedContext;
     }
 

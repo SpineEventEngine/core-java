@@ -103,7 +103,7 @@ final class AggregatePartRepositoryLookup<I, S extends Message> {
      */
     private <A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> checkIdClass(AggregatePartRepository<?, ?, ?> repo) {
-        Class<?> repoIdClass = repo.getIdClass();
+        Class<?> repoIdClass = repo.idClass();
         if (!idClass.equals(repoIdClass)) {
             String errMsg = format("The ID class of the aggregate part repository (%s) " +
                                    "does not match the ID class of the AggregateRoot (%s)",

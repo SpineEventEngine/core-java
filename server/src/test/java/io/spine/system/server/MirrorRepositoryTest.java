@@ -21,16 +21,16 @@
 package io.spine.system.server;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.system.server.IncompleteAudio;
 import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;
@@ -52,13 +52,14 @@ import java.util.Map;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.archived;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.cause;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.deleted;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.entityStateChanged;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.event;
@@ -84,7 +85,7 @@ class MirrorRepositoryTest {
         repository = (MirrorRepository) systemContext
                 .findRepository(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
-        queries = TestActorRequestFactory.newInstance(MirrorRepositoryTest.class).query();
+        queries = new TestActorRequestFactory(MirrorRepositoryTest.class).query();
 
         givenPhotos = givenPhotos();
         prepareAggregates(givenPhotos);
@@ -262,11 +263,12 @@ class MirrorRepositoryTest {
                     .setEntityId(entityId)
                     .setTypeUrl(type.value())
                     .build();
-            EntityStateChanged event = EntityStateChanged
+            EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setWhen(getCurrentTime())
                     .setNewState(pack(state))
+                    .addMessageId(cause())
                     .build();
             dispatchEvent(event(event));
         }
@@ -292,8 +294,9 @@ class MirrorRepositoryTest {
     }
 
     private List<? extends Message> execute(Query query) {
-        Iterator<Any> result = repository.execute(query);
+        Iterator<EntityStateWithVersion> result = repository.execute(query);
         List<? extends Message> readMessages = stream(result)
+                .map(EntityStateWithVersion::getState)
                 .map(unpackFunc())
                 .collect(toList());
         return readMessages;

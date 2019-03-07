@@ -20,15 +20,13 @@
 
 package io.spine.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
@@ -46,6 +44,10 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.dataflow.qual.Pure;
@@ -89,6 +91,17 @@ public abstract class ProcessManagerRepository<I,
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
     /**
+     * The configurable lifecycle rules of the repository.
+     *
+     * <p>The rules allow to automatically mark entities as archived/deleted upon certain event and
+     * rejection types emitted.
+     *
+     * @see LifecycleRules#archiveOn(Class[])
+     * @see LifecycleRules#deleteOn(Class[])
+     */
+    private final LifecycleRules lifecycleRules = new LifecycleRules();
+
+    /**
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
@@ -99,12 +112,12 @@ public abstract class ProcessManagerRepository<I,
      * Obtains class information of process managers managed by this repository.
      */
     private ProcessManagerClass<P> processManagerClass() {
-        return (ProcessManagerClass<P>) entityClass();
+        return (ProcessManagerClass<P>) entityModelClass();
     }
 
     @Internal
     @Override
-    protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
+    protected final ProcessManagerClass<P> toModelClass(Class<P> cls) {
         return asProcessManagerClass(cls);
     }
 
@@ -132,7 +145,7 @@ public abstract class ProcessManagerRepository<I,
     public void onRegistered() {
         super.onRegistered();
 
-        BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = boundedContext();
         boundedContext.registerCommandDispatcher(this);
 
         checkNotDeaf();
@@ -162,8 +175,8 @@ public abstract class ProcessManagerRepository<I,
      *         domestic events
      */
     @Override
-    public Set<EventClass> getMessageClasses() {
-        return processManagerClass().getEventClasses();
+    public Set<EventClass> messageClasses() {
+        return processManagerClass().eventClasses();
     }
 
     /**
@@ -174,8 +187,8 @@ public abstract class ProcessManagerRepository<I,
      *         external events
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
-        return processManagerClass().getExternalEventClasses();
+    public Set<EventClass> externalEventClasses() {
+        return processManagerClass().externalEventClasses();
     }
 
     /**
@@ -197,6 +210,29 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
+     * Obtains configurable lifecycle rules of this repository.
+     *
+     * <p>The rules allow to automatically archive/delete entities upon certain event and rejection
+     * types produced.
+     *
+     * <p>The rules can be set as follows:
+     * <pre>{@code
+     *   repository.lifecycle()
+     *             .archiveOn(Event1.class, Rejection1.class)
+     *             .deleteOn(Rejection2.class)
+     * }</pre>
+     */
+    public final LifecycleRules lifecycle() {
+        return lifecycleRules;
+    }
+
+    @Override
+    public ImmutableSet<EventClass> producibleEventClasses() {
+        Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
+        return ImmutableSet.copyOf(eventClasses);
+    }
+
+    /**
      * Dispatches the command to a corresponding process manager.
      *
      * <p>If there is no stored process manager with such an ID,
@@ -207,20 +243,20 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I target = with(command.getTenantId()).evaluate(() -> doDispatch(command));
+        I target = with(command.tenantId()).evaluate(() -> doDispatch(command));
         return target;
     }
 
     private I doDispatch(CommandEnvelope command) {
         I target = route(command);
-        lifecycleOf(target).onDispatchCommand(command.getCommand());
+        lifecycleOf(target).onDispatchCommand(command.command());
         return target;
     }
 
-    private I route(CommandEnvelope envelope) {
+    private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = getCommandRouting();
-        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
-        lifecycleOf(target).onTargetAssignedToCommand(envelope.getId());
+        I target = routing.apply(cmd.message(), cmd.context());
+        lifecycleOf(target).onTargetAssignedToCommand(cmd.id());
         return target;
     }
 
@@ -266,8 +302,10 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
-    PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        PmTransaction<I, S, ?> tx = PmTransaction.start((ProcessManager<I, S, ?>) manager);
+    @VisibleForTesting
+    protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+        PmTransaction<I, S, ?> tx =
+                PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
         tx.setListener(listener);
         return tx;
@@ -278,7 +316,7 @@ public abstract class ProcessManagerRepository<I,
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = getBoundedContext().getEventBus();
+        EventBus bus = boundedContext().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -306,7 +344,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected P findOrCreate(I id) {
         P result = super.findOrCreate(id);
-        CommandBus commandBus = getBoundedContext().getCommandBus();
+        CommandBus commandBus = boundedContext().commandBus();
         result.setCommandBus(commandBus);
         return result;
     }
@@ -349,9 +387,9 @@ public abstract class ProcessManagerRepository<I,
     private class PmExternalEventDispatcher extends AbstractExternalEventDispatcher {
 
         @Override
-        public Set<ExternalMessageClass> getMessageClasses() {
-            ProcessManagerClass<?> pmClass = asProcessManagerClass(getEntityClass());
-            Set<EventClass> eventClasses = pmClass.getExternalEventClasses();
+        public Set<ExternalMessageClass> messageClasses() {
+            ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
+            Set<EventClass> eventClasses = pmClass.externalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

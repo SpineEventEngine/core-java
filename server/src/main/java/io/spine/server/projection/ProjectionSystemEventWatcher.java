@@ -21,11 +21,11 @@
 package io.spine.server.projection;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.HistoryRejections;
@@ -41,12 +41,12 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     private final ProjectionRepository<I, ?, ?> repository;
 
     ProjectionSystemEventWatcher(ProjectionRepository<I, ?, ?> repository) {
-        super(repository.getEntityStateType());
+        super(repository.entityStateType());
         this.repository = repository;
     }
 
     @Subscribe
-    public void on(EventDispatchedToSubscriber event) {
+    void on(EventDispatchedToSubscriber event) {
         EntityHistoryId receiver = event.getReceiver();
         I id = extract(receiver);
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
@@ -54,7 +54,7 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     }
 
     @Subscribe
-    public void on(HistoryRejections.CannotDispatchEventTwice event) {
+    void on(HistoryRejections.CannotDispatchEventTwice event) {
         onError(event.getPayload());
     }
 

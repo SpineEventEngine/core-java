@@ -26,9 +26,7 @@ import io.spine.type.MessageClass;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
- * @author Alex Tymchenko
+ * A value object holding a class of an {@linkplain Entity#state() entity state}.
  */
 public final class EntityStateClass extends MessageClass<Message> {
 
@@ -43,7 +41,7 @@ public final class EntityStateClass extends MessageClass<Message> {
      */
     public static EntityStateClass of(Entity entity) {
         checkNotNull(entity);
-        Message state = entity.getState();
+        Message state = entity.state();
         return of(state);
     }
 

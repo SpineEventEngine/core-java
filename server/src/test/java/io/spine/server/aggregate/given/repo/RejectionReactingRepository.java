@@ -34,7 +34,7 @@ public class RejectionReactingRepository
 
     public RejectionReactingRepository() {
         super();
-        getEventRouting()
+        eventRouting()
                 .route(AggCannotStartArchivedProject.class, routeRejection());
     }
 

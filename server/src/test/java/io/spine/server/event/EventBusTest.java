@@ -23,15 +23,12 @@ package io.spine.server.event;
 import com.google.protobuf.Int32Value;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.enrich.Enricher;
 import io.spine.server.event.given.bus.BareDispatcher;
 import io.spine.server.event.given.bus.EBExternalTaskAddedSubscriber;
 import io.spine.server.event.given.bus.EBProjectArchivedSubscriber;
@@ -41,10 +38,11 @@ import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
-import io.spine.server.event.given.bus.UnsupportedEventAckObserver;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -92,7 +90,7 @@ public class EventBusTest {
     private CommandBus commandBus;
     private BoundedContext bc;
 
-    private void setUp(@Nullable Enricher enricher) {
+    private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
@@ -104,8 +102,8 @@ public class EventBusTest {
         ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
 
-        this.commandBus = bc.getCommandBus();
-        this.eventBus = bc.getEventBus();
+        this.commandBus = bc.commandBus();
+        this.eventBus = bc.eventBus();
     }
 
     @BeforeEach
@@ -132,7 +130,7 @@ public class EventBusTest {
         EventBus result = EventBus.newBuilder()
                                   .setEventStore(eventStore)
                                   .build();
-        assertEquals(eventStore, result.getEventStore());
+        assertEquals(eventStore, result.eventStore());
     }
 
     @Test
@@ -284,9 +282,9 @@ public class EventBusTest {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
+        EnvelopeValidator<EventEnvelope> validator = eventBus.validator();
         assertNotNull(validator);
-        assertSame(validator, eventBus.getValidator());
+        assertSame(validator, eventBus.validator());
     }
 
     @Nested
@@ -421,7 +419,8 @@ public class EventBusTest {
     @Test
     @DisplayName("not dispatch domestic event to external handler")
     void domesticEventToExternalMethod() {
-        eventBus.register(new EBExternalTaskAddedSubscriber());
+        EBExternalTaskAddedSubscriber subscriber = new EBExternalTaskAddedSubscriber();
+        eventBus.register(subscriber);
 
         ProjectId projectId = Sample.messageOfType(ProjectId.class);
         Task task = Sample.messageOfType(Task.class);
@@ -431,10 +430,8 @@ public class EventBusTest {
                 .setTask(task)
                 .build();
         Event event = eventFactory.createEvent(eventMessage);
-        UnsupportedEventAckObserver observer = new UnsupportedEventAckObserver();
-        eventBus.post(event, observer);
-        assertTrue(observer.observedUnsupportedEvent());
-        assertTrue(observer.isCompleted());
+        eventBus.post(event, StreamObservers.noOpObserver());
+        assertFalse(subscriber.receivedExternalMessage());
     }
 
     /**
