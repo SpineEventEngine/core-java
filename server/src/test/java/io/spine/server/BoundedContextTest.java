@@ -91,10 +91,6 @@ import static org.slf4j.event.Level.DEBUG;
  *     <li>spine/test/bc/command_factory_test.proto — commands
  *     <li>spine/test/bc/events.proto — events.
  * </ul>
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
