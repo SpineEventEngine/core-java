@@ -64,7 +64,7 @@ public final class Events {
     private static final Stringifier<EventId> idStringifier = new EventIdStringifier();
 
     static {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(idStringifier(), EventId.class);
     }
 
