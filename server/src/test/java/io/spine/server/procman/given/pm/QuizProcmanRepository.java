@@ -24,8 +24,5 @@ import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.quiz.PmQuiz;
 import io.spine.test.procman.quiz.PmQuizId;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class QuizProcmanRepository extends ProcessManagerRepository<PmQuizId, QuizProcman, PmQuiz> {
 }

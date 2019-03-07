@@ -24,13 +24,10 @@ import io.spine.server.entity.EntityRecord;
 
 import java.util.Map;
 
-/**
- * @author Dmytro Dashenkov
- */
 public final class TestEntityRecordWithColumnsFactory {
 
+    /** Prevent utility class instantiation. */
     private TestEntityRecordWithColumnsFactory() {
-        // Prevent utility class instantiation.
     }
 
     /**

@@ -31,9 +31,6 @@ import static io.spine.testing.server.blackbox.AbstractVerify.countAndClass;
 /**
  * Verifies that a {@link BlackBoxBoundedContext Bounded Context} emitted events that satisfy
  * criteria defined by a factory method that returns an instance of this class.
- *
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public class VerifyEvents extends DelegatingVerify<EmittedEvents> {

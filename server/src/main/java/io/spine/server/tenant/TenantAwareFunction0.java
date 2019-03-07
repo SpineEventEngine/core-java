@@ -29,7 +29,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * A tenant-aware function that takes no parameters.
  *
  * @param <T> the type of the result returned by the function
- * @author Alexander Yevsyukov
  */
 @SPI
 public abstract class TenantAwareFunction0<T> extends TenantAwareFunction<Empty, T> {

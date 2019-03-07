@@ -31,7 +31,6 @@ import java.util.function.Function;
  * value depending on the current tenant set.
  *
  * @param <T> the type of the result returned by the function
- * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class TenantFunction<T> extends TenantAware implements Function<TenantId, T> {

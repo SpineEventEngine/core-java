@@ -57,7 +57,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.protobuf.Durations2.seconds;
@@ -255,7 +255,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read one record")
     void writeAndReadRecord() {
-        AggregateEventRecord expected = StorageRecords.create(getCurrentTime());
+        AggregateEventRecord expected = StorageRecords.create(currentTime());
 
         storage.writeRecord(id, expected);
 
@@ -312,7 +312,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                .setArchived(true)
                                                                .build();
-            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(currentTime()));
             storage.writeLifecycleFlags(id, archivedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -324,7 +324,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                               .setDeleted(true)
                                                               .build();
-            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(currentTime()));
             storage.writeLifecycleFlags(id, deletedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -391,7 +391,7 @@ public abstract class AggregateStorageTest
         void sortedByVersion() {
             int eventsNumber = 5;
             List<AggregateEventRecord> records = newLinkedList();
-            Timestamp timestamp = getCurrentTime();
+            Timestamp timestamp = currentTime();
             Version currentVersion = zero();
             for (int i = 0; i < eventsNumber; i++) {
                 Project state = Project.getDefaultInstance();
@@ -433,7 +433,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read snapshot")
     void writeAndReadSnapshot() {
-        Snapshot expected = newSnapshot(getCurrentTime());
+        Snapshot expected = newSnapshot(currentTime());
 
         storage.writeSnapshot(id, expected);
 
@@ -451,14 +451,14 @@ public abstract class AggregateStorageTest
         @Test
         @DisplayName("if there are no snapshots available")
         void withNoSnapshots() {
-            testWriteRecordsAndLoadHistory(getCurrentTime());
+            testWriteRecordsAndLoadHistory(currentTime());
         }
 
         @Test
         @DisplayName("till last snapshot available")
         void tillLastSnapshot() {
             Duration delta = seconds(10);
-            Timestamp time1 = getCurrentTime();
+            Timestamp time1 = currentTime();
             Timestamp time2 = add(time1, delta);
             Timestamp time3 = add(time2, delta);
 
@@ -612,7 +612,7 @@ public abstract class AggregateStorageTest
     }
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(event(Time.getCurrentTime()));
+        Event expectedEvent = eventFactory.createEvent(event(Time.currentTime()));
 
         storage.writeEvent(id, expectedEvent);
 

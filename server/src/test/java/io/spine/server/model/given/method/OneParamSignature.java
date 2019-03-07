@@ -41,17 +41,17 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(OneParamSpec.values());
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
         return allModifiers();
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(void.class);
     }
 

@@ -40,8 +40,6 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
 /**
  * The abstract base for classes that generate commands in response to incoming messages.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
@@ -57,13 +55,13 @@ public abstract class AbstractCommander
 
     @Override
     public Set<CommandClass> messageClasses() {
-        return thisClass.getCommands();
+        return thisClass.commands();
     }
 
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope command) {
-        CommandSubstituteMethod method = thisClass.getHandler(command.messageClass());
+        CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
         CommandingMethod.Result result = method.invoke(this, command);
         result.transformOrSplitAndPost(command, commandBus);
         return getId();

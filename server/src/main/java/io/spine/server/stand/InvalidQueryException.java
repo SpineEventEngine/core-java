@@ -25,10 +25,8 @@ import io.spine.client.Query;
 /**
  * An exception thrown if the {@linkplain Query} instance
  * cannot be submitted to {@linkplain Stand} due to a technical error, such as validation error.
- *
- * @author Alex Tymchenko
  */
-class InvalidQueryException extends InvalidRequestException {
+final class InvalidQueryException extends InvalidRequestException {
 
     private static final long serialVersionUID = 0L;
 
@@ -39,7 +37,7 @@ class InvalidQueryException extends InvalidRequestException {
      * @param query       a related query
      * @param error       an error occurred
      */
-    protected InvalidQueryException(String messageText, Query query, Error error) {
+    InvalidQueryException(String messageText, Query query, Error error) {
         super(messageText, query, error);
     }
 

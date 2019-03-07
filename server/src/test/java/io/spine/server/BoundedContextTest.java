@@ -92,9 +92,6 @@ import static org.slf4j.event.Level.DEBUG;
  *     <li>spine/test/bc/events.proto — events.
  * </ul>
  */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext should")
 class BoundedContextTest {
 

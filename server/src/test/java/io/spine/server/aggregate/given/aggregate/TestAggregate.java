@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -44,7 +45,6 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
@@ -103,7 +103,7 @@ public class TestAggregate
     List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
         isStartProjectCommandHandled = true;
         AggProjectStarted message = projectStarted(cmd.getProjectId());
-        return newArrayList(message);
+        return ImmutableList.of(message);
     }
 
     @Apply

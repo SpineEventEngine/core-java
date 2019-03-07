@@ -31,8 +31,6 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * A special kind of a {@link VerifyAcknowledgements Acknowledgements Verifier} that
  * executes a list of assertions one by one.
- * 
- * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 final class CombinationVerify extends VerifyAcknowledgements {
@@ -49,7 +47,7 @@ final class CombinationVerify extends VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new {@link CombinationVerify AcksVerifierCombination} from two regular
+     * Creates a new {@code CombinationVerify} from two regular
      * {@link VerifyAcknowledgements ack verifiers}.
      *
      * @param first  a verifier that will be executed first upon {@link #verify(Acknowledgements)}
@@ -65,7 +63,7 @@ final class CombinationVerify extends VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new {@link CombinationVerify AcksVerifierCombination} from a list of
+     * Creates a new {@code CombinationVerify} from a list of
      * {@link VerifyAcknowledgements verifiers} and a new verifier.
      *
      * @param items       verifiers that will be executed first upon

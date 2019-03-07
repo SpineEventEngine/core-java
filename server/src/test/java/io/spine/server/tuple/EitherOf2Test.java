@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class EitherOf2Test {
 
     private final StringValue a = TestValues.newUuidValue();
-    private final Timestamp b = Time.getCurrentTime();
+    private final Timestamp b = Time.currentTime();
 
     private EitherOf2<StringValue, Timestamp> eitherWithA;
     private EitherOf2<StringValue, Timestamp> eitherWithB;

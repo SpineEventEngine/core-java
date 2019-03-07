@@ -39,11 +39,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Litus
- * @author Dmytro Grankin
- * @author Dmytro Dashenkov
- */
 @DisplayName("Statuses utility should")
 class StatusesTest {
 
@@ -69,6 +64,7 @@ class StatusesTest {
         MessageRejection rejection =
                 new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
         StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
         Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
                                              .get();
         assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()

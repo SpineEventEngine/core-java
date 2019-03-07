@@ -24,8 +24,6 @@ import io.spine.server.integration.ChannelId;
 
 /**
  * An abstract base for {@linkplain MessageChannel message channels}.
- *
- * @author Alex Tymchenko
  */
 @SPI
 public abstract class AbstractChannel implements MessageChannel {

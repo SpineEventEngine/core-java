@@ -32,8 +32,6 @@ import io.spine.test.model.contexts.archiver.ArchiverVBuilder;
 
 /**
  * A test process manager which emits empty events and commands.
- *
- * @author Dmytro Dashenkov
  */
 public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, ArchiverVBuilder> {
 

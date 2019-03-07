@@ -28,10 +28,12 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
- * @param <I> the type of part identifiers
- * @param <A> the type of aggregate parts
- * @param <R> the type of the aggregate root associated with the type of parts
- * @author Alexander Yevsyukov
+ * @param <I>
+ *         the type of part identifiers
+ * @param <A>
+ *         the type of aggregate parts
+ * @param <R>
+ *         the type of the aggregate root associated with the type of parts
  */
 public abstract class AggregatePartRepository<I,
                                               A extends AggregatePart<I, ?, ?, R>,

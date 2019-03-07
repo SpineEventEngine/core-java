@@ -106,7 +106,7 @@ class ActorRequestFactoryTest {
     @Test
     @DisplayName("be single tenant by default")
     void beSingleTenant() {
-        assertNull(factory.getTenantId());
+        assertNull(factory.tenantId());
     }
 
     @Nested
@@ -122,17 +122,17 @@ class ActorRequestFactoryTest {
                     .setActor(ACTOR)
                     .build();
 
-            assertEquals(ACTOR, aFactory.getActor());
-            assertEquals(currentOffset, aFactory.getZoneOffset()
+            assertEquals(ACTOR, aFactory.actor());
+            assertEquals(currentOffset, aFactory.zoneOffset()
                                                 .getAmountSeconds());
         }
 
         @Test
         @DisplayName("given user and timezone")
         void givenUserAndTimezone() {
-            assertEquals(ACTOR, factory.getActor());
-            assertEquals(ZONE_OFFSET, factory.getZoneOffset());
-            assertEquals(ZONE_ID, factory.getZoneId());
+            assertEquals(ACTOR, factory.actor());
+            assertEquals(ZONE_OFFSET, factory.zoneOffset());
+            assertEquals(ZONE_ID, factory.zoneId());
         }
     }
 
@@ -152,11 +152,11 @@ class ActorRequestFactoryTest {
 
             ActorRequestFactory movedFactory = factory.switchTimeZone(zoneOffset, zoneId);
 
-            assertNotEquals(factory.getZoneOffset(), movedFactory.getZoneOffset());
-            assertEquals(zoneOffset, movedFactory.getZoneOffset());
+            assertNotEquals(factory.zoneOffset(), movedFactory.zoneOffset());
+            assertEquals(zoneOffset, movedFactory.zoneOffset());
 
-            assertNotEquals(factory.getZoneId(), movedFactory.getZoneId());
-            assertEquals(zoneId, movedFactory.getZoneId());
+            assertNotEquals(factory.zoneId(), movedFactory.zoneId());
+            assertEquals(zoneId, movedFactory.zoneId());
         }
 
         @Test
@@ -167,9 +167,9 @@ class ActorRequestFactoryTest {
             ZoneId zoneId = ZoneIds.of(id);
             ActorRequestFactory movedFactory = factory.switchTimeZone(zoneId);
 
-            assertNotEquals(factory.getZoneOffset(), movedFactory.getZoneOffset());
-            assertNotEquals(factory.getZoneId(), movedFactory.getZoneId());
-            assertEquals(zoneId, movedFactory.getZoneId());
+            assertNotEquals(factory.zoneOffset(), movedFactory.zoneOffset());
+            assertNotEquals(factory.zoneId(), movedFactory.zoneId());
+            assertEquals(zoneId, movedFactory.zoneId());
         }
     }
 }

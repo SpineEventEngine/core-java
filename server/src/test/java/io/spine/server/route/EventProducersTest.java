@@ -29,9 +29,6 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("EventProducers utility should")
 class EventProducersTest {
 

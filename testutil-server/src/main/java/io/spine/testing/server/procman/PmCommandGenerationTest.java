@@ -37,8 +37,6 @@ import java.util.List;
  * @param <M> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- *
- * @author Alexander Yevsyukov
  */
 public abstract
 class PmCommandGenerationTest<I,

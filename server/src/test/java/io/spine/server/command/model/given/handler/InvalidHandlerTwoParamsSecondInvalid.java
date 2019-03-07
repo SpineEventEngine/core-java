@@ -28,8 +28,6 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
  * Provides a method with two parameters with the second parameter of incorrect type.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidHandlerTwoParamsSecondInvalid extends TestCommandHandler {
     @Assign

@@ -56,7 +56,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * @param <R> the type of the result generated when the command sequence is posted
  * @param <B> the type of the result builder
  * @param <S> the type of the sequence for the return type covariance
- * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class CommandSequence<O extends Message,

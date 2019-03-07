@@ -28,12 +28,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Andrey Lavrov
- * @author Alex Tymchenko
- * @author Alexander Aleksandrov
- * @author Alexander Yevsyukov
- */
 public class Given {
 
     /** Prevents instantiation of this utility class. */

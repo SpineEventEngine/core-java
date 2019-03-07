@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Verifies that a command or an event was handled responding with an error matching a provided
  * {@link ErrorCriterion error criterion}.
- *
- * @author Mykhailo Drachuk
  */
 final class SpecificErrorCountVerify extends VerifyAcknowledgements {
 
@@ -34,9 +32,13 @@ final class SpecificErrorCountVerify extends VerifyAcknowledgements {
     private final ErrorCriterion criterion;
 
     /**
-     * @param criterion      an error criterion specifying which kind of error should be a part
-     *                      of acknowledgement
-     * @param expectedCount an amount of errors that are expected to match the criterion
+     * Creates a new instance.
+     *
+     * @param criterion
+     *         an error criterion specifying which kind of error should be a part
+     *         of acknowledgement
+     * @param expectedCount
+     *         an amount of errors that are expected to match the criterion
      */
     SpecificErrorCountVerify(ErrorCriterion criterion, Count expectedCount) {
         super();

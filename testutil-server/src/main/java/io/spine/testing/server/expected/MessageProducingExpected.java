@@ -42,7 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @param <S> the type of the tested entity state
  * @param <X> the type of {@code MessageProducingExpected} for type covariance of returned values
- * @author Vladyslav Lubenskyi
  */
 public abstract class MessageProducingExpected<S extends Message,
                                                X extends MessageProducingExpected<S, X>>
@@ -82,7 +81,6 @@ public abstract class MessageProducingExpected<S extends Message,
      * @param <M>
      *         class of the event's Protobuf message
      */
-    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     @CanIgnoreReturnValue
     protected <M extends Message> X producesMessage(Class<M> messageClass, Consumer<M> validator) {
         assertNotNull(validator);
@@ -128,7 +126,6 @@ public abstract class MessageProducingExpected<S extends Message,
      * @param <M>
      *         class of the command's Protobuf message
      */
-    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     @CanIgnoreReturnValue
     protected <M extends Message> X producesCommand(Class<M> commandClass, Consumer<M> validator) {
         assertNotNull(validator);

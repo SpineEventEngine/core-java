@@ -35,7 +35,6 @@ import io.spine.validate.ValidatingBuilder;
  * @param <P> the type of process managers
  * @param <I> the type of process manager identifier
  * @param <S> the type of the process manager state
- * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,

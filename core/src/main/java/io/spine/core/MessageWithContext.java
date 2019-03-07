@@ -26,6 +26,8 @@ import io.spine.type.TypeUrl;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
+ *
+ * @apiNote Some methods use the {@code 'get'} prefix to mix-in with the generated code.
  */
 public interface MessageWithContext extends Message {
 

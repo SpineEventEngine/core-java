@@ -27,8 +27,6 @@ import static io.spine.core.Events.getTenantId;
 
 /**
  * A tenant-aware operation performed in relation to an event.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class EventOperation extends TenantAwareOperation {

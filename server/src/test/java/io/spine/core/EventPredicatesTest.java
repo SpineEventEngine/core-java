@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Predicate;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -47,7 +47,7 @@ class EventPredicatesTest extends UtilityClassTest<EventPredicates> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        tester.setDefault(Timestamp.class, getCurrentTime());
+        tester.setDefault(Timestamp.class, currentTime());
     }
 
     @Nested

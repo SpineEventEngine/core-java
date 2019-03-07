@@ -47,8 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * test data other than default Protobuf types, and for some fun.
  *
  * <p>In a real app a {@link Quintet} should have only event messages, and not value objects.
- *
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Quintet should")

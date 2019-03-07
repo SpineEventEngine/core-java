@@ -42,7 +42,6 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  * An event-sourced storage of aggregate part events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
- * @author Alexander Yevsyukov
  */
 @SPI
 public abstract class AggregateStorage<I>
@@ -58,7 +57,6 @@ public abstract class AggregateStorage<I>
      *
      * <p>Opens the method for the package.
      */
-    @SuppressWarnings("RedundantMethodOverride")
     @Override
     protected void checkNotClosed() throws IllegalStateException {
         super.checkNotClosed();

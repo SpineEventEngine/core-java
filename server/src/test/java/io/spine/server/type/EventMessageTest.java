@@ -86,7 +86,7 @@ class EventMessageTest {
         Any wrappedMessage = AnyPacker.pack(message);
         EventContext context = EventContext
                 .newBuilder()
-                .setTimestamp(Time.getCurrentTime())
+                .setTimestamp(Time.currentTime())
                 .build();
         Event result = Event
                 .newBuilder()

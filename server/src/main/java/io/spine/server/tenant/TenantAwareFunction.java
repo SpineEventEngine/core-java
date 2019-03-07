@@ -29,9 +29,10 @@ import java.util.function.Function;
 /**
  * A function, which is calculated in a tenant context.
  *
- * @param <F> the type of the input
- * @param <T> the type of the output
- * @author Alexander Yevsykov
+ * @param <F>
+ *         the type of the input
+ * @param <T>
+ *         the type of the output
  */
 @SPI
 public abstract class TenantAwareFunction<F, T> extends TenantAware implements Function<F, T> {

@@ -31,8 +31,6 @@ import java.lang.reflect.Method;
  *
  * <p>Derived classes must declare a method called {@linkplain #METHOD_NAME commandOn} so that
  * the method can be {@linkplain #getMethod() obtained} from the code of tests.
- *
- * @author Alexander Yevsyukov
  */
 public class TestCommandReactor implements EventReceiver {
 

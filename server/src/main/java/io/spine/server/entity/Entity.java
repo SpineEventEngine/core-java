@@ -128,7 +128,7 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
         }
 
         @Override
-        public int getIndex() {
+        public int index() {
             return index;
         }
     }

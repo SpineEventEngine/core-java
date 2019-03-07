@@ -30,17 +30,16 @@ import java.lang.reflect.Method;
 
 /**
  * The signature of {@code Command} handler method.
- *
- * @author Alex Tymchenko
  */
-public class CommandHandlerSignature extends CommandAcceptingMethodSignature<CommandHandlerMethod> {
+public final class CommandHandlerSignature
+        extends CommandAcceptingMethodSignature<CommandHandlerMethod> {
 
     public CommandHandlerSignature() {
         super(Assign.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(EventMessage.class, Iterable.class);
     }
 

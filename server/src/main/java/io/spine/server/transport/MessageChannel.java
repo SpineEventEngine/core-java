@@ -26,8 +26,6 @@ import io.spine.server.integration.ChannelId;
  *
  * <p>Equipped with a channel identifier, serving to distinguish this channel among other channels
  * in the application.
- *
- * @author Alex Tymchenko
  */
 public interface MessageChannel extends AutoCloseable {
 

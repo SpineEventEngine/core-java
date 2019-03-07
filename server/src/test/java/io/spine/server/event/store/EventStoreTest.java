@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
@@ -86,7 +86,7 @@ public class EventStoreTest {
         @DisplayName("time bounds")
         void timeBounds() {
             Duration delta = seconds(111);
-            Timestamp present = getCurrentTime();
+            Timestamp present = currentTime();
             Timestamp past = subtract(present, delta);
             Timestamp future = add(present, delta);
 
@@ -118,7 +118,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("type")
         void type() {
-            Timestamp now = getCurrentTime();
+            Timestamp now = currentTime();
 
             Event taskAdded1 = taskAdded(now);
             Event projectCreated = projectCreated(now);
@@ -151,7 +151,7 @@ public class EventStoreTest {
         @DisplayName("time bounds and type")
         void timeBoundsAndType() {
             Duration delta = seconds(111);
-            Timestamp present = getCurrentTime();
+            Timestamp present = currentTime();
             Timestamp past = subtract(present, delta);
             Timestamp future = add(present, delta);
 
@@ -245,7 +245,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("EventContext")
         void eventContext() {
-            Event event = projectCreated(Time.getCurrentTime());
+            Event event = projectCreated(Time.currentTime());
             Event enriched = event.toBuilder()
                                   .setContext(event.getContext()
                                                    .toBuilder()
@@ -263,7 +263,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
-            Event event = projectCreated(Time.getCurrentTime());
+            Event event = projectCreated(Time.currentTime());
             CommandContext commandContext = event.getContext()
                                                  .getCommandContext();
             EventContext.Builder originContext =

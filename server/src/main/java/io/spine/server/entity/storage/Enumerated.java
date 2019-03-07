@@ -41,7 +41,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * considered enumerated, and is assumed to be of the {@linkplain EnumType#ORDINAL ordinal enum
  * type}.
  *
- * @author Dmytro Kuzmin
  * @see EnumType
  */
 @Target(METHOD)

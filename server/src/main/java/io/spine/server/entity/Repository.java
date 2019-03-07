@@ -388,7 +388,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         }
 
         @Override
-        public int getIndex() {
+        public int index() {
             return this.index;
         }
     }

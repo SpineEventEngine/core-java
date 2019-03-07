@@ -32,7 +32,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
  *           string literal for security check.
- * @author Alexander Yevsyukov
  */
 public final class ModelTests {
 

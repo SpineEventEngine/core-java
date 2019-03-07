@@ -26,8 +26,6 @@ import io.spine.system.server.PersonId;
 
 /**
  * A repository of {@link PersonProjection}.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonProjectionRepository
         extends ProjectionRepository<PersonId, PersonProjection, PersonDetails> {

@@ -49,8 +49,8 @@ import static java.util.stream.Collectors.toSet;
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
  * {@link EntityQuery}.
  *
- * @param <I> the type of the IDs of the matched records
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         the type of the IDs of the matched records
  * @see EntityQuery for the matching contract
  */
 final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWithColumns> {

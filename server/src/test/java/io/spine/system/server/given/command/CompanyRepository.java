@@ -25,8 +25,6 @@ import io.spine.system.server.CompanyId;
 
 /**
  * A repository of {@link CompanyAggregate}.
- *
- * @author Dmytro Dashenkov
  */
-public class CompanyRepository extends AggregateRepository<CompanyId, CompanyAggregate> {
+public final class CompanyRepository extends AggregateRepository<CompanyId, CompanyAggregate> {
 }

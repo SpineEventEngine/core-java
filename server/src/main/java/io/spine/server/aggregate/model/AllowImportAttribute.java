@@ -34,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * telling whether the aggregate which declares the method allows importing events accepted
  * by this method.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
 @Immutable

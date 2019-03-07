@@ -46,7 +46,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.eq;
 import static io.spine.client.Filters.gt;
@@ -135,7 +135,7 @@ class QueryParametersTest {
         Filter[] filters = {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
-                gt("thirdFilter", getCurrentTime())};
+                gt("thirdFilter", currentTime())};
         Multimap<EntityColumn, Filter> filterMap =
                 ImmutableMultimap.of(mockColumn(), filters[0],
                                      mockColumn(), filters[1],
@@ -157,7 +157,7 @@ class QueryParametersTest {
         Filter[] filters = {
                 eq("$1nd", 42.0),
                 eq("$2st", "entityColumnValue"),
-                gt("$3d", getCurrentTime())};
+                gt("$3d", currentTime())};
         EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
         Multimap<EntityColumn, Filter> filterMap =
                 ImmutableMultimap.of(columns[0], filters[0],

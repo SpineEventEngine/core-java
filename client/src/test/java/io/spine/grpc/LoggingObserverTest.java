@@ -39,9 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Logging observer should")
 class LoggingObserverTest {
 
@@ -90,7 +87,7 @@ class LoggingObserverTest {
         assertContains(loggingEvent, value);
         assertContains(loggingEvent, "onNext");
 
-        Timestamp currentTime = Time.getCurrentTime();
+        Timestamp currentTime = Time.currentTime();
         String timeStr = Timestamps.toString(currentTime);
         observer.onNext(currentTime);
         loggingEvent = queue.poll();

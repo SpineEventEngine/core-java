@@ -34,12 +34,6 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Dmytro Kuzmin
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* String literals for method names. */})
 @DisplayName("MethodExceptionChecker should")
 class MethodExceptionCheckerTest {
 

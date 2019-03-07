@@ -28,8 +28,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * A command handler which always rejects the passed command.
- *
- * @author Alexander Yevsyukov
  */
 public class RejectingHandler extends TestCommandHandler {
     @Assign

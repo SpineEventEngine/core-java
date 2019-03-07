@@ -34,8 +34,6 @@ import static io.spine.validate.Validate.checkNotDefault;
  * Attributes for accessing in-memory storage over in-process gRPC.
  *
  * @param <I> the type of entity identifiers used by the storage
- *
- * @author Alexander Yevsyukov
  */
 public final class StorageSpec<I> implements Serializable {
 

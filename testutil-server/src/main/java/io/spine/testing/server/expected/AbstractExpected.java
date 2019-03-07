@@ -30,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * The implementation base for the assertions of message handling results.
  *
- * @param <S> the state type of the tested entity
- * @param <E> the type of the tested entity
- * @author Dmytro Dashenkov
- * @author Vladyslav Lubenskyi
+ * @param <S>
+ *         the state type of the tested entity
+ * @param <E>
+ *         the type of the tested entity
  * @see MessageProducingExpected
  */
 public abstract class AbstractExpected<S extends Message, E extends AbstractExpected<S, E>> {
@@ -67,7 +67,7 @@ public abstract class AbstractExpected<S extends Message, E extends AbstractExpe
     }
 
     /**
-     * @return {@code this} with the required compile-time type
+     * Returns {@code this} with the required compile-time type.
      */
     protected abstract E self();
 }

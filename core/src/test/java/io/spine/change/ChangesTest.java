@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static com.google.protobuf.ByteString.copyFromUtf8;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -59,7 +59,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
         tester.setDefault(ByteString.class, ByteString.EMPTY)
-               .setDefault(Timestamp.class, Time.getCurrentTime());
+               .setDefault(Timestamp.class, Time.currentTime());
     }
 
     @Nested
@@ -94,7 +94,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         @DisplayName("Timestamp")
         void forTimestamps() {
             Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
-            Timestamp now = getCurrentTime();
+            Timestamp now = currentTime();
 
             TimestampChange result = Changes.of(fiveMinutesAgo, now);
 
@@ -285,7 +285,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         @Test
         @DisplayName("TimeStamp")
         void timestamps() {
-            Timestamp now = getCurrentTime();
+            Timestamp now = currentTime();
             assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
         }
 
@@ -417,13 +417,13 @@ class ChangesTest extends UtilityClassTest<Changes> {
         @Test
         @DisplayName("Timestamp previousValue")
         void timestampPrevious() {
-            assertThrows(NullPointerException.class, () -> Changes.of(null, getCurrentTime()));
+            assertThrows(NullPointerException.class, () -> Changes.of(null, currentTime()));
         }
 
         @Test
         @DisplayName("Timestamp newValue")
         void timestampNew() {
-            assertThrows(NullPointerException.class, () -> Changes.of(getCurrentTime(), null));
+            assertThrows(NullPointerException.class, () -> Changes.of(currentTime(), null));
         }
     }
 }

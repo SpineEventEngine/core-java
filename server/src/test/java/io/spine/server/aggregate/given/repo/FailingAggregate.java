@@ -114,7 +114,7 @@ class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateV
     }
 
     private static NumberPassed now() {
-        Timestamp time = Time.getCurrentTime();
+        Timestamp time = Time.currentTime();
         return NumberPassed
                 .newBuilder()
                 .setWhen(time)

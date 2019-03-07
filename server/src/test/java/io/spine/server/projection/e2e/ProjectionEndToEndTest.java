@@ -60,7 +60,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
@@ -112,8 +112,7 @@ class ProjectionEndToEndTest {
                 .singleTenant()
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
-        sender.receivesEventsProducedBy(producerId,
-                                        established);
+        sender.receivesEventsProducedBy(producerId, established);
         receiver.assertThat(exactlyOne(
                 GroupName.newBuilder()
                          .setId(GroupId.newBuilder()
@@ -149,10 +148,10 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .setId(historyId)
                 .setNewState(pack(newState))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(dispatchedMessageId())
                 .build();
-        Timestamp producedAt = Time.getCurrentTime();
+        Timestamp producedAt = Time.currentTime();
         EventContext eventContext = EventContext
                 .newBuilder()
                 .setTimestamp(producedAt)

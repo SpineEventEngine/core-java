@@ -57,11 +57,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alex Tymchenko
- */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
-// JUnit nested classes cannot be static.
 @DisplayName("StreamObservers utility should")
 class StreamObserversTest {
 

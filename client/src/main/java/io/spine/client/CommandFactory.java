@@ -31,7 +31,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.validate.ValidationException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Commands.generateId;
 import static io.spine.validate.Validate.checkValid;
 
@@ -171,7 +171,7 @@ public final class CommandFactory {
         ActorContext.Builder withCurrentTime =
                 value.getActorContext()
                      .toBuilder()
-                     .setTimestamp(getCurrentTime());
+                     .setTimestamp(currentTime());
         CommandContext.Builder result =
                 value.toBuilder()
                      .setActorContext(withCurrentTime);

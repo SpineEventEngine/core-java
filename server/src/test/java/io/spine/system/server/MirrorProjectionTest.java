@@ -28,8 +28,6 @@ import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
 
 /**
  * An implementation base for {@link MirrorProjection} event subscriber tests.
- *
- * @author Dmytro Dashenkov
  */
 abstract class MirrorProjectionTest<E extends EventMessage>
         extends ProjectionTest<MirrorId, E, Mirror, MirrorProjection> {

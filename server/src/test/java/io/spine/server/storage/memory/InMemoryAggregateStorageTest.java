@@ -29,9 +29,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("InMemoryAggregateStorage should")
 class InMemoryAggregateStorageTest extends AggregateStorageTest {
 

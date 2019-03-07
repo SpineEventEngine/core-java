@@ -44,9 +44,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("StorageFactorySwitch should")
 class StorageFactorySwitchTest {
 
@@ -152,7 +149,6 @@ class StorageFactorySwitchTest {
         assertEquals(custom, obtained);
     }
 
-    @SuppressWarnings("AccessOfSystemProperties") // OK for this test.
     @Test
     @DisplayName("throw ISE if production supplier is not present when in non-test mode")
     void throwOnNoProductionSupplier() {

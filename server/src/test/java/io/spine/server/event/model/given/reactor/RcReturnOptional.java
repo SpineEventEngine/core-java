@@ -29,8 +29,6 @@ import java.util.Optional;
 /**
  * Provides reactor method that returns {@link Optional} with an event,
  * if the incoming event has valid identifier. Otherwise, return {@code Optional.empty()}.
- *
- * @author Alexander Yevsyukov
  */
 public class RcReturnOptional extends TestEventReactor {
 

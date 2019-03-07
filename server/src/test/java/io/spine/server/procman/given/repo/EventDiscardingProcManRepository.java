@@ -34,8 +34,6 @@ import java.util.Optional;
  * <p>Note that this behaviour is not expected in production PM repositories, since
  * the "discard all" strategy breaks event PM dispatching. The same is true for
  * the {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}-s.
- *
- * @author Dmytro Dashenkov
  */
 public final class EventDiscardingProcManRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {

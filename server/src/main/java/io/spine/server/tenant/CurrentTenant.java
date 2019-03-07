@@ -32,7 +32,6 @@ import static io.spine.validate.Validate.isNotDefault;
  * This class allows to obtain a ID of the current tenant when handling
  * a command or a query in a multi-tenant application.
  *
- * @author Alexander Yevsyukov
  * @see <a href="http://ramblingsofraju.com/wp-content/uploads/2016/08/Multi-Tenant-Data-Architecture.pdf">Multi-Tenant Data Architecture</a>
  */
 final class CurrentTenant {

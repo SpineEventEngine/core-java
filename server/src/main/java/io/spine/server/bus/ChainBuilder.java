@@ -32,7 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A builder for a chain of {@linkplain BusFilter bus filters}.
  *
  * @param <E> type of the filtered envelopes
- * @author Dmytro Dashenkov
  */
 @CanIgnoreReturnValue
 final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {

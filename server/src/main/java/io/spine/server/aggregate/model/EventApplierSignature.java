@@ -44,7 +44,7 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(void.class);
     }
 
@@ -54,12 +54,12 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
         return ImmutableSet.of(AccessModifier.PRIVATE);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(EventApplierParams.values());
     }
 
