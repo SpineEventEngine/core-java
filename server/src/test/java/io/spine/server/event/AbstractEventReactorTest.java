@@ -21,17 +21,12 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import io.spine.logging.Logging;
-import io.spine.protobuf.Durations2;
 import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.FaultyCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.FaultyNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
-import io.spine.test.event.Order;
 import io.spine.testing.client.blackbox.Count;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -45,7 +40,6 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import static com.google.common.base.Predicates.not;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderPaidFor;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderReady;
@@ -61,9 +55,9 @@ import static org.slf4j.event.Level.ERROR;
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
 
-    private BlackBoxBoundedContext<SingleTenantBlackBoxContext> restaurantContext;
-    private BlackBoxBoundedContext<SingleTenantBlackBoxContext> deliveryContext;
-    private BlackBoxBoundedContext<SingleTenantBlackBoxContext> charityContext;
+    private SingleTenantBlackBoxContext restaurantContext;
+    private SingleTenantBlackBoxContext deliveryContext;
+    private SingleTenantBlackBoxContext charityContext;
 
     private AutoCharityDonor charityDonor;
     private ServicePerformanceTracker performanceTracker;
@@ -113,24 +107,12 @@ class AbstractEventReactorTest {
             ImmutableList<OrderServed> ordersServed = performanceTracker.ordersServed();
             ImmutableList<OrderServedLate> ordersServedLate = performanceTracker.ordersServedLate();
             assertThat(ordersServed).hasSize(eventsToEmit.size());
-            @SuppressWarnings("Guava") /* provides a prettier API. */
-                    long ordersInTime = ordersServed
+            long ordersInTime = ordersServed
                     .stream()
-                    .filter(not(this::isServedLate))
+                    .filter(orderServed -> !performanceTracker.servedLate(orderServed))
                     .count();
             assertThat(ordersInTime).isEqualTo(2);
             assertThat(ordersServedLate).hasSize(1);
-        }
-
-        private boolean isServedLate(OrderServed orderServed) {
-            Order order = orderServed.getOrder();
-            Timestamp placedOn = order.getTimePlaced();
-            Timestamp servedOn = orderServed.getServedOn();
-
-            Duration difference = Timestamps.between(placedOn, servedOn);
-            long differenceInMins = Durations2.toMinutes(difference);
-            return differenceInMins > 50;
-
         }
 
         @Test
@@ -143,7 +125,7 @@ class AbstractEventReactorTest {
                     (SubstituteLogger) faultyNotifier.log());
 
             restaurantContext.receivesEvent(someOrderReady());
-            assertLoggedCorrectly(loggedMessages);
+            assertSingleError(loggedMessages);
         }
 
         @Test
@@ -218,7 +200,7 @@ class AbstractEventReactorTest {
                     (SubstituteLogger) faultyDonor.log());
 
             charityContext.receivesExternalEvent(deliveryContext.name(), orderPaidFor);
-            assertLoggedCorrectly(loggedMessages);
+            assertSingleError(loggedMessages);
         }
     }
 
@@ -230,7 +212,7 @@ class AbstractEventReactorTest {
     }
 
     /**
-     * Makes sure that the error has been correctly logged.
+     * Makes sure that the error has been logged correctly.
      *
      * <p>Checks that:
      * <ul>
@@ -238,7 +220,7 @@ class AbstractEventReactorTest {
      *     <li>logged message is of the {@code ERROR} level.
      * </ul>
      */
-    private static void assertLoggedCorrectly(Queue<SubstituteLoggingEvent> messages) {
+    private static void assertSingleError(Queue<SubstituteLoggingEvent> messages) {
         assertThat(messages).hasSize(1);
         SubstituteLoggingEvent loggedWarning = messages.poll();
         assertEquals(ERROR, loggedWarning.getLevel());

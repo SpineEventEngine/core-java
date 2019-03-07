@@ -164,22 +164,30 @@ public class AbstractReactorTestEnv {
         @React
         Optional<OrderServedLate> accept(OrderServed served) {
             ordersServed.add(served);
-            Timestamp now = now();
-            Timestamp servedOn = served.getServedOn();
-            Duration timeToServe = Timestamps.between(now, servedOn);
-            boolean servedLate = isGreaterThan(timeToServe, BEFORE_SERVED_LATE);
-            if (servedLate) {
+            if (servedLate(served)) {
                 Order servedOrder = served.getOrder();
                 OrderServedLate result = OrderServedLate
                         .newBuilder()
                         .setOrder(servedOrder)
-                        .setServedOn(now)
+                        .setServedOn(now())
                         .build();
                 ordersServedLate.add(result);
                 return Optional.of(result);
             } else {
                 return Optional.empty();
             }
+        }
+
+        /**
+         * Returns {@code true} if the specified {@code orderServed} event signifies a late-served
+         * order, {@code false} otherwise.
+         */
+        public boolean servedLate(OrderServed orderServed) {
+            Timestamp now = now();
+            Timestamp servedOn = orderServed.getServedOn();
+            Duration timeToServe = Timestamps.between(now, servedOn);
+            boolean servedLate = isGreaterThan(timeToServe, BEFORE_SERVED_LATE);
+            return servedLate;
         }
 
         /** Obtains all of the served orders. */
@@ -245,7 +253,7 @@ public class AbstractReactorTestEnv {
         }
     }
 
-    /** Obtains an event that signgifes that some order is ready to be served. */
+    /** Obtains an event that signifies that some order is ready to be served. */
     public static OrderReadyToBeServed someOrderReady() {
         OrderReadyToBeServed result = OrderReadyToBeServed
                 .newBuilder()
@@ -283,4 +291,3 @@ public class AbstractReactorTestEnv {
         }
     }
 }
-

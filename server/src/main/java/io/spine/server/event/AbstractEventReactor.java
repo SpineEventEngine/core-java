@@ -125,17 +125,13 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         return Optional.of(new ExternalDispatcher());
     }
 
-    /**
-     * Obtains the name of this reactor, {@linkplain TypeConverter#toAny(Object) packed to Any}.
-     */
+    /** Obtains the name of this reactor, {@linkplain TypeConverter#toAny(Object) packed to Any}. */
     @Override
     public Any producerId() {
         return producerId.get();
     }
 
-    /**
-     * For event reactors, returns a {@linkplain Versions#zero() zero} version.
-     */
+    /** Returns a {@linkplain Versions#zero() zero version}. */
     @Override
     public Version version() {
         return Versions.zero();
