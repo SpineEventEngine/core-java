@@ -56,7 +56,7 @@ buildscript {
     }
 }
 
-println "Assembling Protobuf definitions in ${project.name}."
+logger.debug "Assembling Protobuf definitions in ${project.name}."
 
 /**
  * Collects all the directories from current project and its dependencies (including zip tree

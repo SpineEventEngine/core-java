@@ -308,7 +308,7 @@ public final class BoundedContextBuilder implements Logging {
         TransportFactory transport = transportFactory()
                 .orElseGet(InMemoryTransportFactory::newInstance);
         SystemContext system = buildSystem(transport);
-        BoundedContext result = buildDefault(system, transport);
+        BoundedContext result = buildDomain(system, transport);
         log().debug("{} created.", result.nameForLogging());
 
         registerRepositories(result);
@@ -322,7 +322,7 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
-    private BoundedContext buildDefault(SystemContext system, TransportFactory transport) {
+    private BoundedContext buildDomain(SystemContext system, TransportFactory transport) {
         SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
