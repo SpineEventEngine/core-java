@@ -58,8 +58,7 @@ final class DefaultSystemClient implements SystemClient {
 
     @Override
     public void closeSystemContext() throws Exception {
-        // TODO:2018-10-18:dmytro.dashenkov: Close system context.
-        // todo            https://github.com/SpineEventEngine/core-java/issues/872
+        context.close();
     }
 
     @VisibleForTesting

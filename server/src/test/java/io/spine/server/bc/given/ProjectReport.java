@@ -37,7 +37,7 @@ public class ProjectReport
 
     @Subscribe
     @SuppressWarnings("unused")
-    public void on(BcProjectCreated event, EventContext context) {
+    void on(BcProjectCreated event, EventContext context) {
         // Do nothing. We have the method so that there's one event class exposed
         // by the repository.
     }
