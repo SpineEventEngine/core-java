@@ -23,6 +23,9 @@ package io.spine.server;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregateRepository;
 import io.spine.server.bc.given.FinishedProjectProjectionRepo;
@@ -41,6 +44,7 @@ import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemClient;
+import io.spine.system.server.SystemContext;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
@@ -52,14 +56,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,6 +80,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.slf4j.event.Level.DEBUG;
 
 /**
  * Tests of {@link BoundedContext}.
@@ -195,7 +203,7 @@ class BoundedContextTest {
         assertTrue(stand.getExposedTypes().isEmpty());
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        assertThat(stand.getExposedTypes(), contains(repository.entityStateType()));
+        assertThat(stand.getExposedTypes()).containsExactly(repository.entityStateType());
     }
 
     @Test
@@ -416,5 +424,31 @@ class BoundedContextTest {
                     }
                 }
         );
+    }
+
+    @Test
+    @DisplayName("close System context when domain context is closed")
+    void closeSystemWhenDomainIsClosed() throws Exception {
+        BoundedContextName contextName = BoundedContextNames.newName("TestDomain");
+        BoundedContextName systemContextName = BoundedContextNames.system(contextName);
+        BoundedContext context = BoundedContext
+                .newBuilder()
+                .setName(contextName)
+                .build();
+        Queue<SubstituteLoggingEvent> log = new ArrayDeque<>();
+        Logging.redirect((SubstituteLogger) Logging.get(DomainContext.class), log);
+        Logging.redirect((SubstituteLogger) Logging.get(SystemContext.class), log);
+
+        context.close();
+
+        assertThat(log).hasSize(2);
+
+        SubstituteLoggingEvent domainLogEvent = log.poll();
+        assertThat(domainLogEvent.getMessage()).contains(contextName.getValue());
+        assertThat(domainLogEvent.getLevel()).isAtLeast(DEBUG);
+
+        SubstituteLoggingEvent systemLogEvent = log.poll();
+        assertThat(systemLogEvent.getMessage()).contains(systemContextName.getValue());
+        assertThat(systemLogEvent.getLevel()).isAtLeast(DEBUG);
     }
 }
