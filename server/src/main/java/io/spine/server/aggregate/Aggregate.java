@@ -123,8 +123,8 @@ public abstract class Aggregate<I,
         implements EventPlayer, EventReactor {
 
     /**
-     * The count of events stored to the {@linkplain AggregateStorage storage} sincee last
-     * snapshot.
+     * The count of events stored to the {@linkplain AggregateStorage storage} since
+     * the last snapshot.
      *
      * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
      *
