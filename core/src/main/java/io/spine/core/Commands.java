@@ -217,6 +217,7 @@ public final class Commands {
         checkNotNull(id);
         List<ConstraintViolation> violations = validateId(id);
         checkArgument(violations.isEmpty(), "Command ID is not valid. Violations: %s.", violations);
+        checkArgument(id.getUuid().isEmpty(), "Command ID cannot be empty.");
         return id;
     }
 
