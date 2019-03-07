@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -240,7 +241,7 @@ public class Given {
         @Assign
         List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
             AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
-            return newArrayList(message);
+            return ImmutableList.of(message);
         }
 
         @Apply

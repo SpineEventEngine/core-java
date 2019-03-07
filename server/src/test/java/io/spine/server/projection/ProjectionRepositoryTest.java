@@ -75,6 +75,7 @@ import java.util.function.Supplier;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Events.getMessage;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;

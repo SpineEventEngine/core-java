@@ -44,6 +44,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

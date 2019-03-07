@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
@@ -52,7 +53,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -102,8 +102,10 @@ class AbstractEventSubscriberTest {
                              .post(GivenEvent.withMessage(event));
         Optional<Group> receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
-        assertEquals(state, receivedState.get());
-        assertFalse(subscriber.external().isPresent());
+        Truth8.assertThat(receivedState)
+              .hasValue(state);
+        Truth8.assertThat(subscriber.external())
+              .isEmpty();
     }
 
     @Test
@@ -128,9 +130,10 @@ class AbstractEventSubscriberTest {
                              .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Organization> receivedState = subscriber.external();
-        assertTrue(receivedState.isPresent());
-        assertEquals(state, receivedState.get());
-        assertFalse(subscriber.domestic().isPresent());
+        Truth8.assertThat(receivedState)
+              .hasValue(state);
+        Truth8.assertThat(subscriber.domestic())
+              .isEmpty();
     }
 
     @Test

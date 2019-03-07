@@ -38,6 +38,7 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
+import static io.spine.protobuf.AnyPacker.pack;
 
 public final class ReadOperationTestEnv {
 

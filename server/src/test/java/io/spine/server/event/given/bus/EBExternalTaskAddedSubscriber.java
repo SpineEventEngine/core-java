@@ -27,6 +27,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
@@ -37,7 +38,7 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
     void on(EBTaskAdded message, EventContext context) {
         if (!context.getExternal()) {
             fail(format(
-                    "Domestic event %s was delivered to an external subscriber.",
+                    "Domestic event `%s` was delivered to an external subscriber.",
                     message.getClass()
             ));
         }

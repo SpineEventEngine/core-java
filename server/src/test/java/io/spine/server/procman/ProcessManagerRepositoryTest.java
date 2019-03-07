@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -282,7 +283,8 @@ class ProcessManagerRepositoryTest
 
         PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
-        assertEquals(ID, message.getProjectId());
+        Truth.assertThat(message.getProjectId())
+             .isEqualTo(ID);
     }
 
     @Nested

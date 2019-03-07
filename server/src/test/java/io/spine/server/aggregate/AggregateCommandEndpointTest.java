@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.truth.Truth;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Subscribe;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.ACommand.createProject;
 import static io.spine.server.aggregate.given.Given.ACommand.startProject;
@@ -84,10 +86,12 @@ class AggregateCommandEndpointTest {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         ProjectId id = repository.dispatch(cmd);
-        assertEquals(projectId, id);
+        assertThat(id)
+                .isEqualTo(projectId);
 
         AggProjectCreated msg = subscriber.remembered;
-        assertEquals(projectId, msg.getProjectId());
+        assertThat(msg.getProjectId())
+                .isEqualTo(projectId);
     }
 
     @Test
@@ -97,16 +101,16 @@ class AggregateCommandEndpointTest {
         AggCreateProject msg = (AggCreateProject) cmd.message();
 
         ProjectId id = repository.dispatch(cmd);
-        assertEquals(projectId, id);
+        assertThat(id).isEqualTo(projectId);
 
         Optional<ProjectAggregate> optional = repository.find(projectId);
         assertTrue(optional.isPresent());
 
         ProjectAggregate aggregate = optional.get();
-        assertEquals(projectId, aggregate.id());
+        assertThat(aggregate.id()).isEqualTo(projectId);
 
-        assertEquals(msg.getName(), aggregate.state()
-                                             .getName());
+        Truth.assertThat(aggregate.state().getName())
+             .isEqualTo(msg.getName());
     }
 
     @Test
