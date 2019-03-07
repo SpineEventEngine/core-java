@@ -1,0 +1,80 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine.test.entity;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.event";
+option java_multiple_files = true;
+
+import "spine/test/event/restaurant.proto";
+import "google/protobuf/timestamp.proto";
+
+// Events defined in this file serve the restaurant bounded context.
+
+message OrderReadyToBeServed {
+
+    event.Order order = 1;
+}
+
+message OrderPaidFor {
+
+    event.Order order = 1;
+}
+
+message OrderCannotBeServed {
+
+    event.Order order = 1;
+}
+
+message CustomerNotified {
+
+    event.Order order = 1;
+
+    NotificationMethod notification_method = 2;
+
+    enum NotificationMethod {
+        UNDEFINED = 0;
+        SMS = 1;
+        PHONE = 2;
+        MESSENGER = 3;
+    }
+}
+
+message OrderServed {
+
+    event.Order order = 1;
+    google.protobuf.Timestamp served_on = 2;
+}
+
+message OrderServedLate {
+
+    event.Order order = 1;
+    google.protobuf.Timestamp served_on = 2;
+}
+
+message DeliveryServiceNotified {
+
+    event.Order order = 1;
+    string message = 2;
+}

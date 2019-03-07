@@ -71,12 +71,12 @@ public abstract class AbstractCommander
 
     @Override
     public Set<EventClass> eventClasses() {
-        return thisClass.getEventClasses();
+        return thisClass.eventClasses();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return thisClass.getExternalEventClasses();
+        return thisClass.externalEventClasses();
     }
 
     @Override
