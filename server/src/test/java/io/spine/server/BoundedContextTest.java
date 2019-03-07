@@ -406,7 +406,6 @@ class BoundedContextTest {
     void noExternalDescendants() {
         assertThrows(
                 IllegalStateException.class,
-
                 () ->
                 new BoundedContext(BoundedContext.newBuilder()) {
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
