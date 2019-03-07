@@ -64,6 +64,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

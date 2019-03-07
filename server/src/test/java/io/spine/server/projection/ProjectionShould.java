@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -61,8 +62,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
 import static io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection.ACCEPTED_VALUE;
@@ -93,7 +96,7 @@ class ProjectionShould {
 
     @BeforeAll
     static void prepare() {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(Stringifiers.forInteger(), Integer.TYPE);
     }
 
@@ -130,7 +133,7 @@ class ProjectionShould {
         dispatch(projection, integerEvent, EventContext.getDefaultInstance());
         assertTrue(projection.state()
                              .getValue()
-                             .contains(valueOf(integerEvent.getValue())));
+                             .contains(String.valueOf(integerEvent.getValue())));
         assertTrue(projection.isChanged());
     }
 
@@ -220,7 +223,7 @@ class ProjectionShould {
         String projectionState = projection.state().getValue();
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
-        assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
+        assertTrue(projectionState.contains(String.valueOf(integerImported.getValue())));
     }
 
     @Test
@@ -273,7 +276,7 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
+        ProtoTruth.assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()
