@@ -21,6 +21,8 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.core.UserId;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.event.EventDispatcher;
 import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectVBuilder;
@@ -31,9 +33,11 @@ import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
 import io.spine.testing.server.blackbox.command.BbInitProject;
+import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
+import io.spine.testing.server.blackbox.event.EventDispatcherRegistered;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
@@ -59,15 +63,15 @@ public class Given {
 
     public static BbTaskAdded taskAdded(BbProjectId projectId) {
         return BbTaskAdded.newBuilder()
-                           .setProjectId(projectId)
-                           .setTask(newTask())
-                           .build();
+                          .setProjectId(projectId)
+                          .setTask(newTask())
+                          .build();
     }
 
     private static BbTask newTask() {
         return BbTask.newBuilder()
-                   .setTitle(newUuid())
-                   .build();
+                     .setTitle(newUuid())
+                     .build();
     }
 
     public static BbCreateReport createReport(BbProjectId projectId) {
@@ -79,8 +83,24 @@ public class Given {
 
     private static BbReportId newReportId() {
         return BbReportId.newBuilder()
-                       .setId(newUuid())
-                       .build();
+                         .setId(newUuid())
+                         .build();
+    }
+
+    public static BbRegisterCommandDispatcher
+    registerCommandDispatcher(Class<? extends CommandDispatcher> dispatcherName) {
+        return BbRegisterCommandDispatcher.newBuilder()
+                                          .setDispatcherName(dispatcherName.getName())
+                                          .build();
+    }
+
+    public static EventDispatcherRegistered
+    eventDispatcherRegistered(Class<? extends EventDispatcher> dispatcherClass) {
+        String name = dispatcherClass.getName();
+        EventDispatcherRegistered result = EventDispatcherRegistered.newBuilder()
+                                                                    .setDispatcherName(name)
+                                                                    .build();
+        return result;
     }
 
     public static BbCreateProject createProject() {
@@ -89,8 +109,8 @@ public class Given {
 
     public static BbCreateProject createProject(BbProjectId id) {
         return BbCreateProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
+                              .setProjectId(id)
+                              .build();
     }
 
     public static BbInitProject initProject(BbProjectId id) {

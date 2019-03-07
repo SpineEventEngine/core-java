@@ -30,6 +30,7 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(TempDirectory.class)
 @DisplayName("ModelVerifierPlugin should")
+@Disabled
 class ModelVerifierPluginTest {
 
     private static final String PROJECT_NAME = "model-verifier-test";
