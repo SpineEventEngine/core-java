@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
+import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.model.InsufficientVisibilityError;
@@ -39,6 +40,7 @@ import io.spine.server.organizations.Organization;
 import io.spine.server.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.SystemBoundedContexts;
@@ -94,6 +96,7 @@ class AbstractEventSubscriberTest {
                 .setId(historyId(Group.class))
                 .setWhen(Time.getCurrentTime())
                 .setNewState(pack(state))
+                .addMessageId(dispatchedMessageId())
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
                              .eventBus()
@@ -120,6 +123,7 @@ class AbstractEventSubscriberTest {
                 .setId(historyId(Organization.class))
                 .setWhen(Time.getCurrentTime())
                 .setNewState(pack(state))
+                .addMessageId(dispatchedMessageId())
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)
                              .eventBus()
@@ -154,7 +158,6 @@ class AbstractEventSubscriberTest {
         assertThrows(InsufficientVisibilityError.class, HiddenEntitySubscriber::new);
     }
 
-
     private static EntityHistoryId historyId(Class<? extends Message> type) {
         EntityId entityId = EntityId
                 .newBuilder()
@@ -166,5 +169,12 @@ class AbstractEventSubscriberTest {
                 .setTypeUrl(TypeUrl.of(type).value())
                 .build();
         return historyId;
+    }
+
+    private static DispatchedMessageId dispatchedMessageId() {
+        return DispatchedMessageId
+                .newBuilder()
+                .setEventId(EventId.getDefaultInstance())
+                .build();
     }
 }

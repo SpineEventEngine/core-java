@@ -78,6 +78,7 @@ import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
+import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.TestEventFactory.newInstance;
@@ -349,6 +350,7 @@ class ProjectionRepositoryTest
                     .setId(historyId)
                     .setWhen(getCurrentTime())
                     .setNewState(newState)
+                    .addMessageId(dispatchedMessageId())
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
