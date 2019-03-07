@@ -37,7 +37,6 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Timestamps2.isBetween;
@@ -52,7 +51,7 @@ public final class Commands {
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
 
     static {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(idStringifier(), CommandId.class);
     }
 
@@ -215,7 +214,7 @@ public final class Commands {
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
         String idStr = Identifier.toString(id);
-        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
+        checkArgument(!Identifier.isEmpty(idStr), "Command ID must not be an empty string.");
         return id;
     }
 
