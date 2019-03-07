@@ -17,49 +17,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.given;
 
-import "spine/options.proto";
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.testing.server.blackbox.event.EventDispatcherRegistered;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server.blackbox.command";
-option java_outer_classname = "TestIntCommandsProto";
-option java_multiple_files = true;
+/** Receives one type of events and keeps track of how many events it has received. */
+public class BbEventDispatcher extends AbstractEventSubscriber {
 
-import "spine/testing/server/blackbox/entities.proto";
-import "spine/testing/server/blackbox/report.proto";
-import "spine/core/user_id.proto";
+    private int eventsReceived = 0;
 
-message BbCreateProject {
-    BbProjectId project_id = 1;
-}
+    @Subscribe
+    void to(EventDispatcherRegistered dispatcherRegistered) {
+        eventsReceived++;
+    }
 
-message BbInitProject {
-    BbProjectId project_id = 1;
-}
-
-message BbAddTask {
-    BbProjectId project_id = 1;
-    BbTask task = 2;
-}
-
-message BbStartProject {
-    BbProjectId project_id = 1;
-}
-
-message BbCreateReport {
-    BbReportId report_id = 1;
-    repeated BbProjectId project_id = 2;
-}
-
-message BbAssignProject {
-    BbProjectId id = 1;
-    spine.core.UserId user_id = 2;
-}
-
-message BbRegisterCommandDispatcher {
-
-    string dispatcher_name = 1;
+    /** Obtains an amount of events dispatched by this dispatcher. */
+    public int eventsReceived() {
+        return eventsReceived;
+    }
 }
