@@ -42,7 +42,6 @@ import java.util.Optional;
 import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.ACommand.createProject;
 import static io.spine.server.aggregate.given.Given.ACommand.startProject;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("AggregateCommandEndpoint should")
@@ -141,7 +140,7 @@ class AggregateCommandEndpointTest {
         private AggProjectCreated remembered;
 
         @Subscribe
-        public void on(AggProjectCreated msg) {
+        void on(AggProjectCreated msg) {
             remembered = msg;
         }
     }

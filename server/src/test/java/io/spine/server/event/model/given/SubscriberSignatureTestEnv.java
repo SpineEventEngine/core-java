@@ -91,7 +91,7 @@ public class SubscriberSignatureTestEnv {
         return method;
     }
 
-    public static Method findThrowsUnchckedException() {
+    public static Method findThrowsUncheckedException() {
         Method method = findInvalidMethod("throwsUncheckedException");
         return method;
     }
@@ -122,7 +122,7 @@ public class SubscriberSignatureTestEnv {
         private CommandContext commandContext;
 
         @Subscribe
-        public void messageOnly(ProjectCreated event) {
+        void messageOnly(ProjectCreated event) {
             this.event = event;
         }
 
@@ -141,14 +141,14 @@ public class SubscriberSignatureTestEnv {
         }
 
         @Subscribe
-        public void messageAndCommand(ProjectAlreadyExists rejection,
+        void messageAndCommand(ProjectAlreadyExists rejection,
                                       CreateProject command) {
             this.event = rejection;
             this.command = command;
         }
 
         @Subscribe
-        public void messageAndCommandMessageAndContext(ProjectAlreadyExists rejection,
+        void messageAndCommandMessageAndContext(ProjectAlreadyExists rejection,
                                                        CreateProject command,
                                                        CommandContext commandContext) {
             this.event = rejection;

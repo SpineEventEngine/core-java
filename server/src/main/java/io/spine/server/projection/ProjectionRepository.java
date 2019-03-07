@@ -219,12 +219,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> messageClasses() {
-        return projectionClass().getEventClasses();
+        return projectionClass().eventClasses();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return projectionClass().getExternalEventClasses();
+        return projectionClass().externalEventClasses();
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -291,7 +291,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         @Override
         public Set<ExternalMessageClass> messageClasses() {
-            Set<EventClass> eventClasses = projectionClass().getExternalEventClasses();
+            Set<EventClass> eventClasses = projectionClass().externalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

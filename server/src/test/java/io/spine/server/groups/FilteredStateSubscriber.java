@@ -32,7 +32,7 @@ public class FilteredStateSubscriber extends AbstractEventSubscriber {
     @Subscribe(
             filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
     )
-    public void on(Organization organization) {
+    void on(Organization organization) {
         fail(FilteredStateSubscriber.class.getSimpleName() +
                      " should not be able to receive any updates.");
     }

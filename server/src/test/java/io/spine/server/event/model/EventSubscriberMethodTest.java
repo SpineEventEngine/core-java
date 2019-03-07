@@ -36,7 +36,6 @@ import io.spine.server.event.model.given.subscriber.InvalidTwoParamsSecondInvali
 import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
 import io.spine.server.event.model.given.subscriber.ValidButPrivate;
 import io.spine.server.event.model.given.subscriber.ValidOneParam;
-import io.spine.server.event.model.given.subscriber.ValidTwoParams;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.server.type.EventEnvelope;
@@ -49,7 +48,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;

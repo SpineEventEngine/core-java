@@ -37,6 +37,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
@@ -56,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -196,6 +198,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return result;
     }
 
+    /** Obtains the name of this bounded context. */
+    public BoundedContextName name() {
+        return boundedContext.name();
+    }
+
     /**
      * Obtains set of type names of entities known to this Bounded Context.
      */
@@ -211,8 +218,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return result.build();
     }
 
-    @VisibleForTesting
-    EventBus getEventBus() {
+    /** Obtains {@code event bus} instance used by this bounded context. */
+    public EventBus eventBus() {
         return boundedContext.eventBus();
     }
 
@@ -225,10 +232,27 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
-        checkNotNull(repositories);
-        for (Repository<?, ?> repository : repositories) {
-            checkNotNull(repository);
-            boundedContext.register(repository);
+        return registerAll(boundedContext::register, repositories);
+    }
+
+    /**
+     * Registers the specified event dispatchers with the {@code event bus} of this
+     * bounded context.
+     *
+     * @param dispatchers
+     *         dispatchers to register with the event bus of this bounded context
+     */
+    @CanIgnoreReturnValue
+    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
+        return registerAll(boundedContext::registerEventDispatcher, dispatchers);
+    }
+
+    @SafeVarargs
+    private final <S> T registerAll(Consumer<S> registerFn, S... itemsToRegister) {
+        checkNotNull(itemsToRegister);
+        for (S item : itemsToRegister) {
+            checkNotNull(item);
+            registerFn.accept(item);
         }
         return thisRef();
     }

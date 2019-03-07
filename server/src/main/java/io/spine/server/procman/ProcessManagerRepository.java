@@ -176,7 +176,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public Set<EventClass> messageClasses() {
-        return processManagerClass().getEventClasses();
+        return processManagerClass().eventClasses();
     }
 
     /**
@@ -188,7 +188,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public Set<EventClass> externalEventClasses() {
-        return processManagerClass().getExternalEventClasses();
+        return processManagerClass().externalEventClasses();
     }
 
     /**
@@ -389,7 +389,7 @@ public abstract class ProcessManagerRepository<I,
         @Override
         public Set<ExternalMessageClass> messageClasses() {
             ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
-            Set<EventClass> eventClasses = pmClass.getExternalEventClasses();
+            Set<EventClass> eventClasses = pmClass.externalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

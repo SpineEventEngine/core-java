@@ -60,7 +60,7 @@ public final class FaultyAggregate
     }
 
     @Apply
-    void event(AggProjectCreated event) {
+    private void event(AggProjectCreated event) {
         if (brokenApplier) {
             throw new IllegalStateException(BROKEN_APPLIER);
         }

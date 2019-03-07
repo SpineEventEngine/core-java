@@ -28,6 +28,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
  */
 public class InvalidTwoParamsSecondInvalid extends TestEventSubscriber {
     @Subscribe
-    public void handle(RefProjectCreated event, Exception invalid) {
+    void handle(RefProjectCreated event, Exception invalid) {
     }
 }

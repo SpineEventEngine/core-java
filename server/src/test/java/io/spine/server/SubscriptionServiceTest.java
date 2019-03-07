@@ -245,7 +245,6 @@ class SubscriptionServiceTest {
 
         Topic topic = requestFactory.topic()
                                     .forTarget(target);
-
         // Subscribe to the topic.
         MemoizingObserver<Subscription> subscriptionObserver = new MemoizingObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);

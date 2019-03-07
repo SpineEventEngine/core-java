@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class HiddenEntitySubscriber extends AbstractEventSubscriber {
 
     @Subscribe
-    public void on(HiddenParticipant organization) {
+    void on(HiddenParticipant organization) {
         fail(HiddenEntitySubscriber.class.getSimpleName() +
                      " should not be able to receive updates from hidden entities.");
     }

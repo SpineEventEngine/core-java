@@ -39,14 +39,11 @@ import static io.spine.base.Time.currentTime;
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
  */
-@SuppressWarnings({
-        "OverlyCoupledClass"  /* OK for an aggregate class. */,
-        "PMD.MissingStaticMethodInNonInstantiatableClass" /* Instantiated via reflection. */
-})
+/* Instantiated via reflection. */
 final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 
-    private CommandLifecycleAggregate(CommandId id) {
+    CommandLifecycleAggregate(CommandId id) {
         super(id);
     }
 
@@ -59,7 +56,7 @@ final class CommandLifecycleAggregate
     }
 
     @Assign
-    TargetAssignedToCommand on(AssignTargetToCommand event) {
+    TargetAssignedToCommand handle(AssignTargetToCommand event) {
         return TargetAssignedToCommand.newBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
@@ -73,13 +70,13 @@ final class CommandLifecycleAggregate
      * {@link io.spine.server.commandbus.CommandBus CommandBus}.
      */
     @Apply(allowImport = true)
-    void on(CommandReceived event) {
+    private void on(CommandReceived event) {
+        ensureId();
         CommandTimeline status = CommandTimeline
                 .newBuilder()
                 .setWhenReceived(currentTime())
                 .build();
-        builder().setId(event.getId())
-                 .setCommand(event.getPayload())
+        builder().setCommand(event.getPayload())
                  .setStatus(status);
     }
 
@@ -90,7 +87,8 @@ final class CommandLifecycleAggregate
      * {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
      */
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") CommandAcknowledged event) {
+    private void on(@SuppressWarnings("unused") CommandAcknowledged event) {
+        ensureId();
         CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(currentTime())
                 .build();
@@ -98,7 +96,8 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    void on(CommandScheduled event) {
+    private void on(CommandScheduled event) {
+        ensureId();
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
                 .setWhenScheduled(currentTime())
@@ -113,7 +112,8 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command is passed to a dispatcher after acknowledgement.
      */
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") CommandDispatched event) {
+    private void on(@SuppressWarnings("unused") CommandDispatched event) {
+        ensureId();
         CommandTimeline status = statusBuilder()
                 .setWhenDispatched(currentTime())
                 .build();
@@ -126,13 +126,14 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command target is determined.
      */
     @Apply(allowImport = true)
-    void on(TargetAssignedToCommand event) {
+    private void on(TargetAssignedToCommand event) {
+        ensureId();
         CommandTarget target = event.getTarget();
         CommandLifecycleVBuilder builder = builder();
         CommandTimeline status =
                 builder.getStatus()
                        .toBuilder()
-                       .setWhenTargetAssgined(currentTime())
+                       .setWhenTargetAssigned(currentTime())
                        .build();
         builder.setStatus(status)
                .setTarget(target);
@@ -144,7 +145,8 @@ final class CommandLifecycleAggregate
      * <p>The event is generated after a command is successfully handled.
      */
     @Apply(allowImport = true)
-    void on(@SuppressWarnings("unused") CommandHandled event) {
+    private void on(@SuppressWarnings("unused") CommandHandled event) {
+        ensureId();
         setStatus(Responses.statusOk());
     }
 
@@ -154,7 +156,8 @@ final class CommandLifecycleAggregate
      * <p>The event is generated if the command caused a runtime error during handling.
      */
     @Apply(allowImport = true)
-    void on(CommandErrored event) {
+    private void on(CommandErrored event) {
+        ensureId();
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
@@ -168,7 +171,8 @@ final class CommandLifecycleAggregate
      * <p>The event is generated if the command handler rejected the command.
      */
     @Apply(allowImport = true)
-    void on(CommandRejected event) {
+    private void on(CommandRejected event) {
+        ensureId();
         Status status = Status
                 .newBuilder()
                 .setRejection(event.getRejectionEvent())
@@ -177,19 +181,21 @@ final class CommandLifecycleAggregate
     }
 
     @Apply(allowImport = true)
-    void event(CommandTransformed event) {
+    private void on(CommandTransformed event) {
+        ensureId();
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setCommand(event.getId());
         CommandTimeline.Builder newStatus =
                 state().getStatus()
                        .toBuilder()
-                       .setSubstitued(substituted);
+                       .setSubstituted(substituted);
         builder().setStatus(newStatus.build());
     }
 
     @Apply(allowImport = true)
-    void event(CommandSplit event) {
+    private void on(CommandSplit event) {
+        ensureId();
         Substituted.Builder substituted = Substituted
                 .newBuilder()
                 .setSequence(Sequence.newBuilder()
@@ -197,7 +203,7 @@ final class CommandLifecycleAggregate
         CommandTimeline.Builder newStatus =
                 state().getStatus()
                        .toBuilder()
-                       .setSubstitued(substituted);
+                       .setSubstituted(substituted);
         builder().setStatus(newStatus.build());
     }
 
@@ -226,5 +232,9 @@ final class CommandLifecycleAggregate
                 .setHowHandled(status)
                 .build();
         builder().setStatus(commandStatus);
+    }
+
+    private void ensureId() {
+        builder().setId(id());
     }
 }

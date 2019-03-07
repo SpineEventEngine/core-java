@@ -129,7 +129,7 @@ public abstract class AggregatePart<I,
         }
 
         @Override
-        public int getIndex() {
+        public int index() {
             return this.index;
         }
     }

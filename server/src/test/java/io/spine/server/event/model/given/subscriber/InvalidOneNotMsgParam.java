@@ -27,6 +27,6 @@ import io.spine.core.Subscribe;
  */
 public class InvalidOneNotMsgParam extends TestEventSubscriber {
     @Subscribe
-    public void handle(Exception invalid) {
+    void handle(Exception invalid) {
     }
 }

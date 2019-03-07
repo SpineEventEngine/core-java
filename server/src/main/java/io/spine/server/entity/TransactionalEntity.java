@@ -268,7 +268,7 @@ public abstract class TransactionalEntity<I,
         }
 
         @Override
-        public int getIndex() {
+        public int index() {
             return this.index;
         }
 

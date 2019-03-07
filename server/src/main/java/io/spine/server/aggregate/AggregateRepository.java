@@ -244,12 +244,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Set<EventClass> eventClasses() {
-        return aggregateClass().getEventClasses();
+        return aggregateClass().eventClasses();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return aggregateClass().getExternalEventClasses();
+        return aggregateClass().externalEventClasses();
     }
 
     /**

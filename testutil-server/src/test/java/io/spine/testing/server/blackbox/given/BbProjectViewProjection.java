@@ -38,12 +38,12 @@ public class BbProjectViewProjection
     }
 
     @Subscribe
-    public void on(BbProjectCreated event) {
+    void on(BbProjectCreated event) {
         builder().setId(event.getProjectId());
     }
 
     @Subscribe
-    public void on(BbProjectStarted event) {
+    void on(BbProjectStarted event) {
         builder().setStatus(STARTED);
     }
 }

@@ -67,13 +67,13 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
-        return delegate.getEventClasses();
+    public Set<EventClass> eventClasses() {
+        return delegate.eventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
-        return delegate.getExternalEventClasses();
+    public Set<EventClass> externalEventClasses() {
+        return delegate.externalEventClasses();
     }
 
     /**

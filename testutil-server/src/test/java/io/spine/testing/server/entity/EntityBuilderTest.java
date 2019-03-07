@@ -83,7 +83,7 @@ class EntityBuilderTest {
     @Test
     @DisplayName("obtain entity ID class")
     void getEntityIdClass() {
-        assertEquals(Long.class, givenEntity().getIdClass());
+        assertEquals(Long.class, givenEntity().idClass());
     }
 
     @Test

@@ -62,9 +62,9 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     protected String toString(AggregateStateId id) {
         checkNotNull(id);
 
-        String typeUrl = id.getStateType()
+        String typeUrl = id.stateType()
                            .value();
-        Object genericId = id.getAggregateId();
+        Object genericId = id.aggregateId();
         Class genericIdType = genericId.getClass();
         String idTypeString = idTypeToString(genericIdType);
         String genericIdString = Stringifiers.toString(genericId);

@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class WronglyDomesticSubscriber extends AbstractEventSubscriber {
 
     @Subscribe // <-- Error here. Should be external.
-    public void on(Organization organization) {
+    void on(Organization organization) {
         fail(WronglyDomesticSubscriber.class.getSimpleName() +
                      " should not be able to receive external updates.");
     }

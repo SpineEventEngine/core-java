@@ -38,7 +38,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandScheduled event, EventContext context) {
+    void on(CommandScheduled event, EventContext context) {
         Command command = context.get(Command.class);
         Command commandWithSchedule = withSchedule(command, event.getSchedule());
         builder().setId(event.getId())
@@ -60,7 +60,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

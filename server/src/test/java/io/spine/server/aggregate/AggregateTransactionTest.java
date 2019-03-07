@@ -187,7 +187,7 @@ class AggregateTransactionTest
         }
 
         @Apply
-        void event(AggProjectCreated event) {
+        private void event(AggProjectCreated event) {
             receivedEvents.add(event);
             Project newState = Project
                     .newBuilder(state())
@@ -198,7 +198,7 @@ class AggregateTransactionTest
         }
 
         @Apply
-        void event(AggTaskAdded event) {
+        private void event(AggTaskAdded event) {
             throw new RuntimeException("that tests the tx behaviour");
         }
 

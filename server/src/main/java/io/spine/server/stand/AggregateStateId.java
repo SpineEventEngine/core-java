@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class AggregateStateId<I> {
 
     static {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(AggregateStateIdStringifier.getInstance(),
                                      AggregateStateId.class);
     }
@@ -56,11 +56,11 @@ public final class AggregateStateId<I> {
         return new AggregateStateId<>(aggregateId, stateType);
     }
 
-    public I getAggregateId() {
+    public I aggregateId() {
         return aggregateId;
     }
 
-    public TypeUrl getStateType() {
+    public TypeUrl stateType() {
         return stateType;
     }
 

@@ -30,6 +30,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 public class ExternalSubscriber extends TestEventSubscriber {
 
     @Subscribe(external = true)
-    public void handle(RefProjectCreated externalEvent) {
+    void handle(RefProjectCreated externalEvent) {
     }
 }

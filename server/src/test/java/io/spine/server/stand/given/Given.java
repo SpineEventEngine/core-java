@@ -78,7 +78,7 @@ public class Given {
 
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
-        public void handle(PrjProjectCreated event, EventContext context) {
+        void handle(PrjProjectCreated event, EventContext context) {
             builder().setId(event.getProjectId());
         }
     }

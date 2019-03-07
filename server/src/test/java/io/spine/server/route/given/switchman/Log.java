@@ -55,7 +55,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     }
 
     @Apply
-    void event(SwitchmanAbsenceRecorded event) {
+    private void event(SwitchmanAbsenceRecorded event) {
         builder().addMissingSwitchman(event.getSwitchmanName());
     }
 
@@ -69,7 +69,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     }
 
     @Apply
-    void event(SwitchWorkRecorded event) {
+    private void event(SwitchWorkRecorded event) {
         String switchmanName = event.getSwitchmanName();
         Integer currentCount = state().getCountersMap()
                                       .get(switchmanName);

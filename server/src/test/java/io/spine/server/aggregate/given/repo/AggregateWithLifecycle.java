@@ -55,7 +55,7 @@ public class AggregateWithLifecycle
     }
 
     @Apply
-    void on(Evaluated eventMessage) {
+    private void on(Evaluated eventMessage) {
         String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
         if (archived.name()
                     .equalsIgnoreCase(msg)) {

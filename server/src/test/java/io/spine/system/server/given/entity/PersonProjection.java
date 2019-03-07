@@ -44,18 +44,18 @@ public final class PersonProjection
     }
 
     @Subscribe
-    public void on(PersonCreated event) {
+    void on(PersonCreated event) {
         builder().setId(event.getId())
                  .setName(event.getName());
     }
 
     @Subscribe
-    public void on(PersonHidden event) {
+    void on(PersonHidden event) {
         setDeleted(true);
     }
 
     @Subscribe
-    public void on(PersonExposed event) {
+    void on(PersonExposed event) {
         setDeleted(false);
     }
 }

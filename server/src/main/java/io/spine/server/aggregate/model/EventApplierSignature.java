@@ -55,7 +55,7 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
 
     @Override
     protected ImmutableSet<AccessModifier> allowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
+        return ImmutableSet.of(AccessModifier.PRIVATE);
     }
 
     @Override

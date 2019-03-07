@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
 import static io.spine.server.model.declare.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
@@ -77,8 +78,14 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
 
     /**
      * Obtains the set of allowed access modifiers for the method.
+     *
+     * <p>By default, obtains a set of single value {@link AccessModifier#PACKAGE_PRIVATE}. Most of
+     * the implementations should be fine with this behaviour. Override this method to change
+     * the allowed access modifiers.
      */
-    protected abstract ImmutableSet<AccessModifier> allowedModifiers();
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
+        return ImmutableSet.of(PACKAGE_PRIVATE);
+    }
 
     /**
      * Obtains the set of valid return types.

@@ -59,6 +59,7 @@ import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.archived;
+import static io.spine.system.server.given.mirror.RepositoryTestEnv.cause;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.deleted;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.entityStateChanged;
 import static io.spine.system.server.given.mirror.RepositoryTestEnv.event;
@@ -262,11 +263,12 @@ class MirrorRepositoryTest {
                     .setEntityId(entityId)
                     .setTypeUrl(type.value())
                     .build();
-            EntityStateChanged event = EntityStateChanged
+            EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setWhen(currentTime())
                     .setNewState(pack(state))
+                    .addMessageId(cause())
                     .build();
             dispatchEvent(event(event));
         }

@@ -62,7 +62,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     }
 
     @Apply
-    void on(EngineStarted event) {
+    private void on(EngineStarted event) {
         setStarted();
     }
 
@@ -79,7 +79,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     }
 
     @Apply(allowImport = true)
-    void on(EngineStopped event) {
+    private void on(EngineStopped event) {
         setStopped();
     }
 
@@ -87,7 +87,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      * This is an example of import-only method.
      */
     @Apply(allowImport = true)
-    void on(SettingsAdjusted event) {
+    private void on(SettingsAdjusted event) {
         // Do nothing for now.
     }
 
