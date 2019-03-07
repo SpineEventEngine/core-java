@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -51,6 +52,7 @@ import static io.spine.validate.Validate.isNotDefault;
 public final class Commands {
 
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
+    private static final String COMMAND_ID_CANNOT_BE_EMPTY = "Command ID cannot be empty.";
 
     static {
         StringifierRegistry.instance()
@@ -189,7 +191,7 @@ public final class Commands {
      * working under the same tenant.
      */
     @VisibleForTesting
-    public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
+    static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
         ActorContext a1 = c1.getActorContext();
@@ -217,7 +219,7 @@ public final class Commands {
         checkNotNull(id);
         List<ConstraintViolation> violations = validateId(id);
         checkArgument(violations.isEmpty(), "Command ID is not valid. Violations: %s.", violations);
-        checkArgument(!id.getUuid().isEmpty(), "Command ID cannot be empty.");
+        checkArgument(!id.getUuid().isEmpty(), COMMAND_ID_CANNOT_BE_EMPTY);
         return id;
     }
 
@@ -227,7 +229,17 @@ public final class Commands {
     @Internal
     public static List<ConstraintViolation> validateId(CommandId id) {
         MessageValidator validator = MessageValidator.newInstance(id);
-        return validator.validate();
+        List<ConstraintViolation> violations = validator.validate();
+        if (id.getUuid().isEmpty()) {
+            return ImmutableList.<ConstraintViolation>builder()
+                    .addAll(violations)
+                    .add(ConstraintViolation
+                                 .newBuilder()
+                                 .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY)
+                                 .build())
+                    .build();
+        }
+        return violations;
     }
 
     /**
