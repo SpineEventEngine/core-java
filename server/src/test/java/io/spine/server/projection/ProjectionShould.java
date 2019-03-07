@@ -196,7 +196,7 @@ class ProjectionShould {
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
         Set<EventClass> classes =
-                asProjectionClass(TestProjection.class).getEventClasses();
+                asProjectionClass(TestProjection.class).eventClasses();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.from(StringImported.class)));
