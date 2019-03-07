@@ -87,7 +87,6 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     public Set<String> dispatch(EventEnvelope event) {
         TenantAwareRunner.with(event.tenantId())
                          .run(() -> reactAndPost(event));
-
         return identity();
     }
 

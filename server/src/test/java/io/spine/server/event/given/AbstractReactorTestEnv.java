@@ -38,6 +38,7 @@ import io.spine.server.event.OrderServed;
 import io.spine.server.event.OrderServedLate;
 import io.spine.server.event.React;
 import io.spine.server.tuple.Pair;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.Order;
 
 import java.time.Instant;
@@ -93,7 +94,7 @@ public class AbstractReactorTestEnv {
 
     private static double somePrice() {
         @SuppressWarnings("UnsecureRandomNumberGeneration") /* Does not matter for this test case.*/
-                Random random = new Random();
+        Random random = new Random();
         double min = 10.0d;
         double max = 100.0d;
         double result = min + (max - min) * random.nextDouble();
@@ -138,6 +139,7 @@ public class AbstractReactorTestEnv {
             return result;
         }
 
+        /** Returns a sum of all donations in USD. */
         public double totalDonated() {
             return totalDonated;
         }
@@ -253,7 +255,12 @@ public class AbstractReactorTestEnv {
         }
     }
 
-    /** Obtains an event that signifies that some order is ready to be served. */
+    /**
+     * Obtains an event that signifies that some order is ready to be served.
+     *
+     * <p>An exception thrown by this method should be picked up by
+     * {@linkplain AbstractEventReactor#onError(EventEnvelope, RuntimeException)}.
+     */
     public static OrderReadyToBeServed someOrderReady() {
         OrderReadyToBeServed result = OrderReadyToBeServed
                 .newBuilder()
@@ -269,25 +276,28 @@ public class AbstractReactorTestEnv {
             super(eventBus);
         }
 
-        @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for this test case. */
         @React
         Pair<CustomerNotified, DeliveryServiceNotified>
         notifyAboutOrder(OrderReadyToBeServed orderReady) {
-            throw new RuntimeException();
+            throw new RuntimeException("Could not send notifications.");
         }
     }
 
-    /** In an attempt to donate to charity, throws an exception every time an order is payed for. */
+    /**
+     * In an attempt to donate to charity, throws an exception every time an order is payed for.
+     *
+     * <p>An exception thrown by this method should be picked up by
+     * {@linkplain AbstractEventReactor#onError(EventEnvelope, RuntimeException)}.
+     */
     public static class FaultyCharityDonor extends AbstractEventReactor {
 
         public FaultyCharityDonor(EventBus eventBus) {
             super(eventBus);
         }
 
-        @SuppressWarnings("NewExceptionWithoutArguments") /* Does not matter for this test case. */
         @React(external = true)
         DonationMade makeDonation(OrderPaidFor orderPaidFor) {
-            throw new RuntimeException();
+            throw new RuntimeException("Could not make a donation.");
         }
     }
 }

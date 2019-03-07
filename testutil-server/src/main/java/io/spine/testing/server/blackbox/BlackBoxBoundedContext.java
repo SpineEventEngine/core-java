@@ -185,8 +185,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
         Optional<EventBus.Builder> eventBus = builder.eventBus();
         EventEnricher enricher =
-                eventBus.map(b -> b.enricher()
-                                   .orElse(emptyEnricher()))
+                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
                         .orElseGet(BlackBoxBoundedContext::emptyEnricher);
 
         BlackBoxBoundedContext<?> result = builder.isMultitenant()
@@ -638,8 +637,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return boundedContext.findRepository(stateClass)
                              .orElseThrow(
                                      () -> newIllegalStateException(
-                                             "Unable to find repository for entities with state `%s`.",
-                                             stateClass.getCanonicalName()
+                                         "Unable to find repository for entities with state `%s`.",
+                                         stateClass.getCanonicalName()
                                      )
                              );
     }

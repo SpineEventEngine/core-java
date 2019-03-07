@@ -33,5 +33,4 @@ message DonationMade {
 
     // Donation amount in The United States dollars.
     double usds_donated = 1;
-
 }
