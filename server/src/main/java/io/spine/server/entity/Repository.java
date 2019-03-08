@@ -150,13 +150,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public final Class<I> idClass() {
+    public Class<I> idClass() {
         return (Class<I>) entityModelClass().idClass();
     }
 
     /** Returns the class of entities managed by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public final Class<E> entityClass() {
+    public Class<E> entityClass() {
         return (Class<E>) entityModelClass().value();
     }
 
@@ -164,7 +164,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Obtains the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository.
      */
-    public final TypeUrl entityStateType() {
+    public TypeUrl entityStateType() {
         return entityModelClass().stateType();
     }
 
