@@ -33,7 +33,7 @@ public abstract class DefaultRecordBasedRepository<I,
                 extends RecordBasedRepository<I, E, S> {
 
     private final EntityFactory<I, E> entityFactory;
-    private final EntityStorageConverter<I, E, S> storageConverter;
+    private final StorageConverter<I, E, S> storageConverter;
 
     /**
      * Creates a new instance with the {@linkplain #entityFactory() factory} of entities of class
@@ -46,8 +46,7 @@ public abstract class DefaultRecordBasedRepository<I,
         Class<E> entityClass = entityClass();
         this.entityFactory = new DefaultEntityFactory<>(entityClass);
         TypeUrl stateType = entityModelClass().stateType();
-        this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
-                                                                           this.entityFactory);
+        this.storageConverter = DefaultConverter.forAllFields(stateType, this.entityFactory);
     }
 
     @Override
@@ -56,7 +55,7 @@ public abstract class DefaultRecordBasedRepository<I,
     }
 
     @Override
-    protected EntityStorageConverter<I, E, S> entityConverter() {
+    protected StorageConverter<I, E, S> entityConverter() {
         return this.storageConverter;
     }
 }

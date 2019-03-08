@@ -39,7 +39,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
  */
-public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
+public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Message>
         extends Converter<E, EntityRecord> implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -47,9 +47,9 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     private final EntityFactory<I, E> entityFactory;
     private final FieldMask fieldMask;
 
-    protected EntityStorageConverter(TypeUrl entityStateType,
-                                     EntityFactory<I, E> factory,
-                                     FieldMask fieldMask) {
+    protected StorageConverter(TypeUrl entityStateType,
+                               EntityFactory<I, E> factory,
+                               FieldMask fieldMask) {
         super();
         this.fieldMask = checkNotNull(fieldMask);
         this.entityFactory = factory;
@@ -81,7 +81,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     /**
      * Creates a copy of this converter modified with the passed filed mask.
      */
-    public abstract EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask);
+    public abstract StorageConverter<I, E, S> withFieldMask(FieldMask fieldMask);
 
     @Override
     protected EntityRecord doForward(E entity) {
@@ -140,10 +140,10 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof EntityStorageConverter)) {
+        if (!(obj instanceof StorageConverter)) {
             return false;
         }
-        EntityStorageConverter other = (EntityStorageConverter) obj;
+        StorageConverter other = (StorageConverter) obj;
         return Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.fieldMask, other.fieldMask);

@@ -29,13 +29,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
+import static io.spine.server.entity.DefaultConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("DefaultEntityStorageConverter should")
-class DefaultEntityStorageConverterTest {
+class DefaultConverterTest {
 
-    private EntityStorageConverter<Long, TestEntity, StringValue> converter;
+    private StorageConverter<Long, TestEntity, StringValue> converter;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +62,7 @@ class DefaultEntityStorageConverterTest {
                                        .addPaths("foo.bar")
                                        .build();
 
-        EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
+        StorageConverter<Long, TestEntity, StringValue> withMasks =
                 converter.withFieldMask(fieldMask);
 
         assertEquals(fieldMask, withMasks.fieldMask());

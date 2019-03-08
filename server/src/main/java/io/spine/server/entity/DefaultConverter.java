@@ -31,28 +31,26 @@ import io.spine.type.TypeUrl;
  * @param <E> the type of entities
  * @param <S> the type of entity states
  */
-final class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
-        extends EntityStorageConverter<I, E, S> {
+final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Message>
+        extends StorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
 
-    private DefaultEntityStorageConverter(TypeUrl stateType,
-                                          EntityFactory<I, E> factory,
-                                          FieldMask fieldMask) {
+    private DefaultConverter(TypeUrl stateType, EntityFactory<I, E> factory, FieldMask fieldMask) {
         super(stateType, factory, fieldMask);
     }
 
     static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<I, E> factory) {
+    StorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<I, E> factory) {
         FieldMask allFields = FieldMask.getDefaultInstance();
-        return new DefaultEntityStorageConverter<>(stateType, factory, allFields);
+        return new DefaultConverter<>(stateType, factory, allFields);
     }
 
     @Override
-    public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
+    public StorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
         TypeUrl stateType = entityStateType();
         EntityFactory<I, E> factory = entityFactory();
-        return new DefaultEntityStorageConverter<>(stateType, factory, fieldMask);
+        return new DefaultConverter<>(stateType, factory, fieldMask);
     }
 
     /**
