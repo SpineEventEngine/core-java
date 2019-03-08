@@ -87,12 +87,12 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Creates new entity.
      */
-    public E create(Object id) {
-        checkNotNull(id);
+    public E create(Object constructorArgument) {
+        checkNotNull(constructorArgument);
         Constructor<E> ctor = constructor();
-        checkArgumentMatches(ctor, id);
+        checkArgumentMatches(ctor, constructorArgument);
         try {
-            E result = ctor.newInstance(id);
+            E result = ctor.newInstance(constructorArgument);
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);

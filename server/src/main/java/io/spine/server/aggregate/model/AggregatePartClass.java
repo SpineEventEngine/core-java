@@ -139,7 +139,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
 
     private static ModelError noSuchConstructor(Class<?> partClass, Class<?> rootClass) {
         String errMsg =
-                format("%s class must declare a constructor with one parameter of the %s type.",
+                format("`%s` class must declare a constructor with one parameter of the `%s` type.",
                        partClass.getName(),
                        rootClass.getName());
         NoSuchMethodException cause = new NoSuchMethodException(errMsg);
