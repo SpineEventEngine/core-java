@@ -33,7 +33,8 @@ import static io.spine.server.entity.model.EntityClass.asEntityClass;
  * @param <I> the type of entity identifiers
  * @param <E> the type of entities to create
  */
-final class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityFactory<I, E> {
+final class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>>
+        implements EntityFactory<I, E> {
 
     private static final long serialVersionUID = 0L;
 

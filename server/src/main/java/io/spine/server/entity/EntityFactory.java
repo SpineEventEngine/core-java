@@ -25,10 +25,10 @@ import java.io.Serializable;
 /**
  * Base interface for objects that can create entities.
  */
-public interface EntityFactory<I, E extends Entity<I, ?>> extends Serializable {
+public interface EntityFactory<C, E extends Entity<?, ?>> extends Serializable {
 
     /**
      * Creates a new entity with the passed ID.
      */
-    E create(I id);
+    E create(C constructionArgument);
 }
