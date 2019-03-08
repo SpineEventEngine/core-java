@@ -44,11 +44,11 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Mess
 
     private static final long serialVersionUID = 0L;
     private final TypeUrl entityStateType;
-    private final EntityFactory<I, E> entityFactory;
+    private final EntityFactory<E> entityFactory;
     private final FieldMask fieldMask;
 
     protected StorageConverter(TypeUrl entityStateType,
-                               EntityFactory<I, E> factory,
+                               EntityFactory<E> factory,
                                FieldMask fieldMask) {
         super();
         this.fieldMask = checkNotNull(fieldMask);
@@ -66,7 +66,7 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Mess
     /**
      * Obtains the entity factory used by the converter.
      */
-    protected EntityFactory<I, E> entityFactory() {
+    protected EntityFactory<E> entityFactory() {
         return entityFactory;
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;
 
 /**
@@ -32,7 +33,7 @@ public abstract class DefaultRecordBasedRepository<I,
                                                    S extends Message>
                 extends RecordBasedRepository<I, E, S> {
 
-    private final EntityFactory<I, E> entityFactory;
+    private final EntityFactory<E> entityFactory;
     private final StorageConverter<I, E, S> storageConverter;
 
     /**
@@ -42,14 +43,14 @@ public abstract class DefaultRecordBasedRepository<I,
      */
     protected DefaultRecordBasedRepository() {
         super();
-        Class<E> entityClass = entityClass();
-        this.entityFactory = new DefaultEntityFactory<>(entityClass);
-        TypeUrl stateType = entityModelClass().stateType();
+        EntityClass<E> entityClass = entityModelClass();
+        this.entityFactory = entityClass.factory();
+        TypeUrl stateType = entityClass.stateType();
         this.storageConverter = DefaultConverter.forAllFields(stateType, this.entityFactory);
     }
 
     @Override
-    protected EntityFactory<I, E> entityFactory() {
+    protected EntityFactory<E> entityFactory() {
         return this.entityFactory;
     }
 

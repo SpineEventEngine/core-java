@@ -53,27 +53,27 @@ class GivenTest {
     @DisplayName("create aggregate builder")
     void createAggregateBuilder() {
         assertEquals(AnAggregate.class, Given.aggregateOfClass(AnAggregate.class)
-                                             .getResultClass());
+                                             .resultClass());
     }
 
     @Test
     @DisplayName("create aggregate part builder")
     void createAggregatePartBuilder() {
         assertEquals(AnAggregatePart.class, Given.aggregatePartOfClass(AnAggregatePart.class)
-                                                 .getResultClass());
+                                                 .resultClass());
     }
 
     @Test
     @DisplayName("create projection builder")
     void createProjectionBuilder() {
         assertEquals(AProjection.class, Given.projectionOfClass(AProjection.class)
-                                             .getResultClass());
+                                             .resultClass());
     }
 
     @Test
     @DisplayName("create builder for process managers")
     void createBuilderForProcessManagers() {
         assertEquals(AProcessManager.class, Given.processManagerOfClass(AProcessManager.class)
-                                                 .getResultClass());
+                                                 .resultClass());
     }
 }

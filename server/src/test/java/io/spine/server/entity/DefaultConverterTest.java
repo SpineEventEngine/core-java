@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.entity.DefaultConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("DefaultEntityStorageConverter should")
+@DisplayName("DefaultConverter should")
 class DefaultConverterTest {
 
     private StorageConverter<Long, TestEntity, StringValue> converter;
@@ -51,13 +51,13 @@ class DefaultConverterTest {
 
     @Test
     @DisplayName("create instance for all fields")
-    void createForAllFields() throws Exception {
+    void createForAllFields() {
         assertEquals(FieldMask.getDefaultInstance(), converter.fieldMask());
     }
 
     @Test
     @DisplayName("create instance with FieldMask")
-    void createWithFieldMask() throws Exception {
+    void createWithFieldMask() {
         FieldMask fieldMask = FieldMask.newBuilder()
                                        .addPaths("foo.bar")
                                        .build();
@@ -76,7 +76,7 @@ class DefaultConverterTest {
 
     @Test
     @DisplayName("convert forward and backward")
-    void convertForwardAndBackward() throws Exception {
+    void convertForwardAndBackward() {
         StringValue entityState = StringValue.of("back and forth");
         TestEntity entity = createEntity(100L, entityState);
 
@@ -89,7 +89,7 @@ class DefaultConverterTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        SerializableTester.reserializeAndAssert(converter);
+        SerializableTester.reserialize(converter);
     }
 
     /**

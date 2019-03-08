@@ -61,7 +61,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
     }
 
     @Override
-    protected EntityClass<A> getModelClass(Class<A> entityClass) {
+    protected EntityClass<A> modelClassOf(Class<A> entityClass) {
         return asAggregatePartClass(entityClass);
     }
 
@@ -77,7 +77,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
     }
 
     @Override
-    protected Constructor<A> getConstructor() {
+    protected Constructor<A> constructor() {
         Constructor<A> constructor = entityClass().constructor();
         return constructor;
     }

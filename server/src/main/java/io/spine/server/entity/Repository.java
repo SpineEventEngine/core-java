@@ -155,9 +155,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /** Returns the class of entities managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     public Class<E> entityClass() {
-        return (Class<E>) entityModelClass().value();
+        return entityModelClass().value();
     }
 
     /**

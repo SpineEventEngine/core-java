@@ -35,8 +35,8 @@ import org.junit.jupiter.api.Test;
 @DisplayName("DefaultEntityFactory should")
 class DefaultEntityFactoryTest {
 
-    private EntityFactory<Long, TestEntity1> entityFactory1;
-    private EntityFactory<Long, TestEntity2> entityFactory2;
+    private EntityFactory<TestEntity1> entityFactory1;
+    private EntityFactory<TestEntity2> entityFactory2;
 
     @BeforeEach
     void setUp() {
