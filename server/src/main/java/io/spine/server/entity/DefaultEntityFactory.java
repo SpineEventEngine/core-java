@@ -45,7 +45,7 @@ final class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements E
 
     @Override
     public E create(I id) {
-        return entityClass.createEntity(id);
+        return entityClass.create(id);
     }
 
     @Override

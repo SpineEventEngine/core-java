@@ -58,7 +58,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events and rejection events on which the aggregate reacts")
     void eventClasses() {
-        assertThat(aggregateClass.eventClasses())
+        assertThat(aggregateClass.incomingEvents())
                 .containsExactlyElementsIn(EventClass.setOf(
                         TankEmpty.class,
                         Rejections.EngineAlreadyStopped.class,
@@ -70,7 +70,7 @@ class AggregateClassTest {
     @DisplayName("provide classes of external events " +
             "and rejection events on which the aggregate reacts")
     void externalEventClasses() {
-        assertThat(aggregateClass.externalEventClasses())
+        assertThat(aggregateClass.externalEvents())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EmissionTestStarted.class,
                         EmissionTestStopped.class,
@@ -81,7 +81,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events that are imported by the aggregate")
     void importedEvents() {
-        assertThat(aggregateClass.importableEventClasses())
+        assertThat(aggregateClass.importableEvents())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStopped.class,
                         SettingsAdjusted.class
@@ -91,7 +91,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events produced by the aggregate")
     void producedEvents() {
-        assertThat(aggregateClass.producedEvents())
+        assertThat(aggregateClass.outgoingEvents())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStarted.class,
                         EngineStopped.class

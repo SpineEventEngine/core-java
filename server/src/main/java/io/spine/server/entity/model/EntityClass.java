@@ -69,7 +69,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** Creates new instance of the model class for the passed class of entities. */
     protected EntityClass(Class<E> cls) {
         super(cls);
-        checkNotNull((Class<? extends Entity>) cls);
         this.idClass = idClass(cls);
         this.stateClass = stateClass(cls);
         this.entityStateType = TypeUrl.of(stateClass);
@@ -88,7 +87,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Creates new entity.
      */
-    public E createEntity(Object id) {
+    public E create(Object id) {
         checkNotNull(id);
         Constructor<E> ctor = constructor();
         checkArgumentMatches(ctor, id);

@@ -228,7 +228,7 @@ public abstract class Aggregate<I,
     List<Event> reactOn(EventEnvelope event) {
         idempotencyGuard.check(event);
         EventReactorMethod method =
-                thisClass().getReactor(event.messageClass(), event.originClass());
+                thisClass().reactorOf(event.messageClass(), event.originClass());
         ReactorMethodResult result =
                 method.invoke(this, event);
         return result.produceEvents(event);
@@ -240,7 +240,7 @@ public abstract class Aggregate<I,
      * @param event the event to apply
      */
     void invokeApplier(EventEnvelope event) {
-        EventApplier method = thisClass().getApplier(event.messageClass());
+        EventApplier method = thisClass().applierOf(event.messageClass());
         method.invoke(this, event);
     }
 

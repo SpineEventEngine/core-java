@@ -39,7 +39,7 @@ public class DelegatingCommandDispatcherTestEnv {
         private boolean onErrorCalled;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> commandClasses() {
             return ImmutableSet.of();
         }
 

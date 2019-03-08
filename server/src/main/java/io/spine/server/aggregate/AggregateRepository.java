@@ -149,7 +149,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public A create(I id) {
-        A aggregate = aggregateClass().createEntity(id);
+        A aggregate = aggregateClass().create(id);
         return aggregate;
     }
 
@@ -244,19 +244,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Set<EventClass> eventClasses() {
-        return aggregateClass().eventClasses();
+        return aggregateClass().incomingEvents();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return aggregateClass().externalEventClasses();
+        return aggregateClass().externalEvents();
     }
 
     /**
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
     public Set<EventClass> importableEventClasses() {
-        return aggregateClass().importableEventClasses();
+        return aggregateClass().importableEvents();
     }
 
     /**
@@ -269,9 +269,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * aggregates.
      */
     @Override
-    public ImmutableSet<EventClass> producibleEventClasses() {
+    public ImmutableSet<EventClass> outgoingEvents() {
         SetView<EventClass> eventClasses =
-                union(aggregateClass().producedEvents(), importableEventClasses());
+                union(aggregateClass().outgoingEvents(), importableEventClasses());
         return ImmutableSet.copyOf(eventClasses);
     }
 

@@ -69,7 +69,7 @@ class EntityClassTest {
 
         // Create and init the entity.
         EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
-        AbstractEntity<Long, StringValue> entity = entityClass.createEntity(id);
+        AbstractEntity<Long, StringValue> entity = entityClass.create(id);
 
         Timestamp after = Time.currentTime();
 

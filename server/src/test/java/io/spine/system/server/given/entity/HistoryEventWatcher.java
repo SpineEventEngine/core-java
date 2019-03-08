@@ -34,6 +34,6 @@ public class HistoryEventWatcher extends AbstractEventAccumulator {
     @Override
     public Set<EventClass> eventClasses() {
         return ModelInfo.eventLifecycle()
-                        .stateEventClasses();
+                        .stateEvents();
     }
 }

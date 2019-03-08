@@ -179,7 +179,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        E result = entityClass().createEntity(id);
+        E result = entityClass().create(id);
         return result;
     }
 }

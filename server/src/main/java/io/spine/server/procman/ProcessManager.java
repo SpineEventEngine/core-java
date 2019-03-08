@@ -163,7 +163,7 @@ public abstract class ProcessManager<I,
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
-            CommandSubstituteMethod method = thisClass.getCommander(commandClass);
+            CommandSubstituteMethod method = thisClass.commanderOf(commandClass);
             CommandSubstituteMethod.Result result = method.invoke(this, command);
             result.transformOrSplitAndPost(command, commandBus);
             return noEvents();
@@ -194,14 +194,14 @@ public abstract class ProcessManager<I,
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.messageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
-            EventReactorMethod method = thisClass.getReactor(eventClass, event.originClass());
+            EventReactorMethod method = thisClass.reactorOf(eventClass, event.originClass());
             ReactorMethodResult methodResult = method.invoke(this, event);
             List<Event> result = methodResult.produceEvents(event);
             return result;
         }
 
         if (thisClass.producesCommandsOn(eventClass)) {
-            CommandReactionMethod method = thisClass.getCommander(eventClass);
+            CommandReactionMethod method = thisClass.commanderOf(eventClass);
             CommandReactionMethod.Result result = method.invoke(this, event);
             result.produceAndPost(event, commandBus);
             return noEvents();

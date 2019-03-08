@@ -72,7 +72,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
 
     @Override
     protected A createEntity(I id) {
-        A result = entityClass().createEntity(aggregateRoot);
+        A result = entityClass().create(aggregateRoot);
         return result;
     }
 
