@@ -36,8 +36,6 @@ import static java.lang.String.format;
  *
  * <p>These criteria are consumed by acks verifier
  * {@link VerifyAcknowledgements#ackedWithErrors(ErrorCriterion) ackedWithError method}.
- *
- * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 public interface ErrorCriterion extends MessageCriterion<Error> {
@@ -51,7 +49,7 @@ public interface ErrorCriterion extends MessageCriterion<Error> {
      * Verifies that the {@link Error#getType() errors type} matches the provided one.
      *
      * @param type a type that is to be matched in error
-     * @return new {@link ErrorCriterion error criterion} instance
+     * @return new {@code ErrorCriterion error criterion} instance
      */
     static ErrorCriterion withType(String type) {
         checkNotNull(type);
@@ -72,7 +70,7 @@ public interface ErrorCriterion extends MessageCriterion<Error> {
      * Verifies that the {@link Error#getCode() errors code} matches the provided one.
      *
      * @param code a code that is to be matched in error
-     * @return new {@link ErrorCriterion error criterion} instance
+     * @return new instance
      */
     static ErrorCriterion withCode(int code) {
         return new ErrorCriterion() {
@@ -92,7 +90,7 @@ public interface ErrorCriterion extends MessageCriterion<Error> {
      * Verifies that the {@link Error#getMessage() errors message} matches the provided one.
      *
      * @param message a message that is to be matched in error
-     * @return new {@link ErrorCriterion error criterion} instance
+     * @return new instance
      */
     static ErrorCriterion withMessage(String message) {
         return new ErrorCriterion() {
@@ -128,7 +126,7 @@ public interface ErrorCriterion extends MessageCriterion<Error> {
      * with a provided name.
      *
      * @param name a name of an attribute that must be absent in error
-     * @return new {@link ErrorCriterion error criterion} instance
+     * @return new instance
      */
     static ErrorCriterion withoutAttribute(String name) {
         return new ErrorCriterion() {

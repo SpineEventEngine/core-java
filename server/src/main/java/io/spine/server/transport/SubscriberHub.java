@@ -26,8 +26,6 @@ import io.spine.server.integration.ChannelId;
  *
  * <p>Creates and manages the existing subscriber channels born
  * in the given {@linkplain TransportFactory}.
- *
- * @author Alex Tymchenko
  */
 public class SubscriberHub extends ChannelHub<Subscriber> {
 

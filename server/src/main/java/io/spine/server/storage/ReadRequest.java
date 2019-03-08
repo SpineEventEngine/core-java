@@ -30,7 +30,6 @@ import io.spine.annotation.Internal;
  * a more optimal way, than just by an ID.
  *
  * @param <I> the type of the record ID
- * @author Dmytro Grankin
  */
 @Internal
 public interface ReadRequest<I> {

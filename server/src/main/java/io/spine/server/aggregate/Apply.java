@@ -46,8 +46,6 @@ import java.lang.annotation.Target;
  * <p>If the annotation comes with the attribute {@link #allowImport() allowImport} set to
  * {@code true}, the aggregate would be able receive incoming events as if they were produced
  * by the aggregate.
- *
- * @author Alexander Yevsyukov
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

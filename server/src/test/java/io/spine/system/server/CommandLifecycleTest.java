@@ -190,7 +190,7 @@ class CommandLifecycleTest {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
             CommandId commandId = Commands.generateId();
             UserId actor = GivenUserId.newUuid();
-            Timestamp now = Time.getCurrentTime();
+            Timestamp now = Time.currentTime();
             ActorContext actorContext = ActorContext
                     .newBuilder()
                     .setTimestamp(now)

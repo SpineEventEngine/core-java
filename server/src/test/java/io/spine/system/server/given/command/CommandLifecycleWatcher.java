@@ -28,8 +28,6 @@ import java.util.Set;
 
 /**
  * Accumulates {@link io.spine.system.server.CommandLifecycle} events.
- *
- * @author Dmytro Dashenkov
  */
 public class CommandLifecycleWatcher extends AbstractEventAccumulator {
 

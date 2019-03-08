@@ -37,18 +37,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Dispatches events to be imported to the associated aggregate repository.
  *
- * @param <I> the type of aggregate IDs
- * @author Alexander Yevsyukov
- * @apiNote
- * This internal class is made {@code public} for restricting types of dispatchers that can be
- * registered with an {@link io.spine.server.aggregate.ImportBus ImportBus}. Since only
- * {@linkplain io.spine.server.aggregate.AggregateRepository Aggregate Repositories} can dispatch
- * imported events to their aggregates, we limit the type of the import event dispatches to
- * this class, which neither can be extended, nor created from outside of this package.
- * Instances of this class are proxies that Aggregate Repositories create and
- * {@linkplain io.spine.server.aggregate.ImportBus#register(
- * io.spine.server.bus.MessageDispatcher) register} with an {@code ImportBus} of their parent
- * Bounded Context.
+ * @param <I>
+ *         the type of aggregate IDs
+ * @apiNote This internal class is made {@code public} for restricting types of dispatchers
+ *         that can be registered with an {@link io.spine.server.aggregate.ImportBus ImportBus}.
+ *         Since only {@linkplain io.spine.server.aggregate.AggregateRepository Aggregate Repositories}
+ *         can dispatch imported events to their aggregates, we limit the type of the import event
+ *         dispatches to this class, which neither can be extended, nor created from outside of this
+ *         package. Instances of this class are proxies that Aggregate Repositories create and
+ *         {@linkplain io.spine.server.aggregate.ImportBus#register(io.spine.server.bus.MessageDispatcher)
+ *         register} with an {@code ImportBus} of their parent Bounded Context.
  */
 @Internal
 public final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
@@ -88,7 +86,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     public void onError(EventEnvelope event, RuntimeException exception) {
         EventClass eventClass = event.messageClass();
         String id = event.idAsString();
-        _error("Unable to import event class: `{}` id: {``} repository: `{}`",
+        _error("Unable to import event class: `{}` id: `{}` repository: `{}`.",
                eventClass, id, repository);
     }
 

@@ -30,8 +30,6 @@ import static io.spine.base.Identifier.newUuid;
 
 /**
  * Factory methods for creating test values.
- *
- * @author Alexander Yevsyukov
  */
 public class QuizGiven {
 

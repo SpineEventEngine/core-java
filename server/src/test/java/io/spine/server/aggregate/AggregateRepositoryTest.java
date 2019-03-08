@@ -136,7 +136,7 @@ public class AggregateRepositoryTest {
         void aggregateCommandClasses() {
             Set<CommandClass> aggregateCommands =
                     asAggregateClass(ProjectAggregate.class)
-                            .getCommands();
+                            .commands();
             Set<CommandClass> exposedByRepository = repository().messageClasses();
 
             assertTrue(exposedByRepository.containsAll(aggregateCommands));

@@ -27,10 +27,8 @@ import io.spine.server.commandbus.CommandDispatcher;
  *
  * <p>This exception <b>must</b> have a {@linkplain #getCause() cause}, which explains why
  * the dispatching has failed.
- *
- * @author Dmytro Dashenkov
  */
-class CommandDispatchingException extends RuntimeException {
+final class CommandDispatchingException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 

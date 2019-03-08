@@ -35,8 +35,6 @@ import static java.lang.String.format;
 
 /**
  * Abstract base for a values that can be one of the possible types.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class Either implements Iterable<Message>, Serializable {
 
@@ -103,7 +101,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
 
     @Override
     public final Iterator<Message> iterator() {
-        Set<Message> singleton = Collections.singleton((Message) value);
+        Set<Message> singleton = Collections.singleton(value);
         return singleton.iterator();
     }
 }

@@ -27,7 +27,6 @@ import io.spine.core.CommandContext;
  * Obtains an ID of an entity which handles the command.
  *
  * @param <I> the type of the entity ID
- * @author Alexander Yevsyukov
  */
 @FunctionalInterface
 public interface CommandRoute<I, M extends CommandMessage> extends Unicast<I, M, CommandContext> {

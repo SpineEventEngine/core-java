@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Verifies that a command handling did not respond with any
  * {@link io.spine.base.ThrowableMessage rejections}.
- * 
- * @author Mykhailo Drachuk
  */
 final class RejectionAbsenceVerify extends VerifyAcknowledgements {
 

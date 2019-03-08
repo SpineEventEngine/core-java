@@ -85,7 +85,7 @@ class CommandValidatorViolationCheckTest {
     @DisplayName("return violations if command has invalid context")
     void notAllowInvalidContext() {
         TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
-        Command command = factory.createCommand(createProjectMessage(), Time.getCurrentTime());
+        Command command = factory.createCommand(createProjectMessage(), Time.currentTime());
         Command commandWithoutContext = command.toBuilder()
                                                .setContext(CommandContext.getDefaultInstance())
                                                .build();

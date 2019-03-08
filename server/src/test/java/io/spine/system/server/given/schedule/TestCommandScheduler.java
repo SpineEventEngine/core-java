@@ -31,9 +31,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 public final class TestCommandScheduler extends CommandScheduler {
 
     private final Set<Command> scheduledCommands = newHashSet();

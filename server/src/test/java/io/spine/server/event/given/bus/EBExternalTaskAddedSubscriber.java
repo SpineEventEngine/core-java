@@ -38,7 +38,7 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
     void on(EBTaskAdded message, EventContext context) {
         if (!context.getExternal()) {
             fail(format(
-                    "Domestic event %s was delivered to an external subscriber.",
+                    "Domestic event `%s` was delivered to an external subscriber.",
                     message.getClass()
             ));
         }

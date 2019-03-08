@@ -119,7 +119,7 @@ public final class RejectionEnvelope
         Any producerId = throwableMessage.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        RejectionMessage thrownMessage = throwableMessage.getMessageThrown();
+        RejectionMessage thrownMessage = throwableMessage.messageThrown();
         RejectionEventContext context = rejectionContext(origin.message(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;

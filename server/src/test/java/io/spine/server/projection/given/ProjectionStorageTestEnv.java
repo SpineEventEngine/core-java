@@ -24,10 +24,6 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 
-/**
- * @author Alexander Litus
- * @author Dmytro Kuzmin
- */
 public class ProjectionStorageTestEnv {
 
     /** Prevents instantiation of this utility class. */

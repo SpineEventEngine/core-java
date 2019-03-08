@@ -36,7 +36,6 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  * A root object for a larger aggregate.
  *
  * @param <I> the type for IDs of this class of aggregates
- * @author Alexander Yevsyukov
  */
 public class AggregateRoot<I> {
 

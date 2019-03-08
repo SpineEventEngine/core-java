@@ -26,8 +26,6 @@ import io.spine.client.QueryId;
 
 /**
  * A tenant-aware operation performed in response to a query.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public abstract class QueryOperation extends ActorRequestOperation {

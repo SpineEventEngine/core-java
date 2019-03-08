@@ -26,7 +26,6 @@ import io.spine.server.entity.storage.Column;
  * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
  * {@link RecordBasedRepository}.
  *
- * @author Dmytro Dashenkov
  * @see RecordBasedRepositoryTest
  */
 public interface TestEntityWithStringColumn {

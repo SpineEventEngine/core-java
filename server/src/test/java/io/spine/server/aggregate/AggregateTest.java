@@ -185,7 +185,7 @@ public class AggregateTest {
         void handledCommandClasses() {
             Set<CommandClass> commandClasses =
                     asAggregateClass(TestAggregate.class)
-                            .getCommands();
+                            .commands();
 
             assertEquals(3, commandClasses.size());
 
@@ -378,7 +378,7 @@ public class AggregateTest {
     @DisplayName("record modification time when command is handled")
     void recordModificationUponCommandHandled() {
         try {
-            Timestamp frozenTime = Time.getCurrentTime();
+            Timestamp frozenTime = Time.currentTime();
             Time.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
 
             dispatchCommand(aggregate, env(createProject));
@@ -549,7 +549,7 @@ public class AggregateTest {
             TimeTests.BackToTheFuture provider = new TimeTests.BackToTheFuture();
             Time.setProvider(provider);
 
-            Timestamp currentTime = Time.getCurrentTime();
+            Timestamp currentTime = Time.currentTime();
 
             aggregate.dispatchCommands(command(createProject));
 

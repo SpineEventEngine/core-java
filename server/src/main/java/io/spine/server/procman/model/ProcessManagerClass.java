@@ -72,9 +72,9 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<CommandClass> getCommands() {
+    public Set<CommandClass> commands() {
         SetView<CommandClass> result =
-                union(super.getCommands(), commanderDelegate.getCommands());
+                union(super.commands(), commanderDelegate.commands());
         return result;
     }
 
@@ -97,7 +97,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
      * Obtains event classes produced by this process manager class.
      */
     public Set<EventClass> getProducedEvents() {
-        SetView<EventClass> result = union(getCommandOutput(), reactionOutput());
+        SetView<EventClass> result = union(commandOutput(), reactionOutput());
         return result;
     }
 
@@ -112,12 +112,12 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<CommandClass> getProducedCommands() {
-        return commanderDelegate.getProducedCommands();
+    public Set<CommandClass> producedCommands() {
+        return commanderDelegate.producedCommands();
     }
 
     public CommandSubstituteMethod getCommander(CommandClass commandClass) {
-        return commanderDelegate.getHandler(commandClass);
+        return commanderDelegate.handlerOf(commandClass);
     }
 
     public CommandReactionMethod getCommander(EventClass eventClass) {

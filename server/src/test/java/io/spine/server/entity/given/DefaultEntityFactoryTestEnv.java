@@ -25,10 +25,6 @@ import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 
-/**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
- */
 public class DefaultEntityFactoryTestEnv {
 
     /** Prevents instantiation of this utility class. */

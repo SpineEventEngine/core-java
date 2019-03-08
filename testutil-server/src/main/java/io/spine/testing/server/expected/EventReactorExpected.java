@@ -28,8 +28,6 @@ import java.util.function.Consumer;
 
 /**
  * Assertions for an event reactor invocation results.
- *
- * @author Dmytro Dashenkov
  */
 public class EventReactorExpected<S extends Message>
         extends MessageProducingExpected<S, EventReactorExpected<S>> {

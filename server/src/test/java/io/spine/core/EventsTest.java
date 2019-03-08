@@ -320,7 +320,7 @@ public class EventsTest extends UtilityClassTest<Events> {
                 .build();
         RejectionMessage message = StandardRejections.EntityAlreadyArchived
                 .newBuilder()
-                .setEntityId(pack(Time.getCurrentTime()))
+                .setEntityId(pack(Time.currentTime()))
                 .build();
         Event event =
                 eventFactory.createRejectionEvent(message, null, rejectionContext);

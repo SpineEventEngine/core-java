@@ -72,13 +72,14 @@ import static java.lang.String.format;
  * the bus listens to a special document message called {@linkplain RequestForExternalMessages},
  * that describes the needs of other parties.
  *
- * <h3>An example.</h3>
+ * <p><b>Sample Usage.</b> The Bounded Context named Projects has an external event handler method
+ * in the projection as follows:
  *
  * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
  * <pre>
  * public class ProjectListView extends Projection ...  {
  *
- *      {@literal @}Subscribe(external = true)
+ *     {@literal @}Subscribe(external = true)
  *      public void on(UserDeleted event) {
  *          // Remove the projects that belong to this user.
  *          // ...
@@ -103,8 +104,6 @@ import static java.lang.String.format;
  * <p>The integration bus of "Projects" context will receive the {@code UserDeleted}
  * external message. The event will be dispatched to the external event handler of
  * {@code ProjectListView} projection.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus extends MulticastBus<ExternalMessage,

@@ -30,8 +30,6 @@ import io.spine.protobuf.MessageFieldException;
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
  * @param <C> the type of the message context
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 abstract class FieldAtIndex<I, M extends Message, C extends Message> implements Unicast<I, M, C> {
 
@@ -48,7 +46,10 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains the ID from the message field at the configured index.
+     *
+     * <p>Casts the value obtained from the field to the type of the generic
+     * parameter {@code <I>}.
      *
      * @throws MessageFieldException if there is no field with required index
      * @throws ClassCastException if the field type is not of the required type

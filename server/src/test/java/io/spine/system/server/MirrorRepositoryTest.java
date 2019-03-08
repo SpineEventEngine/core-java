@@ -51,7 +51,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.Filters.eq;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpackFunc;
@@ -266,7 +266,7 @@ class MirrorRepositoryTest {
             EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
-                    .setWhen(getCurrentTime())
+                    .setWhen(currentTime())
                     .setNewState(pack(state))
                     .addMessageId(cause())
                     .build();

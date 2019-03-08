@@ -50,7 +50,7 @@ class AggregateBuilderTest {
                         .setValue(Identifier.newUuid())
                         .build();
         version = 2019;
-        whenModified = Time.getCurrentTime();
+        whenModified = Time.currentTime();
         state = TuProject.newBuilder()
                          .setId(id)
                          .setTimestamp(TimeTests.Past.minutesAgo(60))

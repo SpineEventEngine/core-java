@@ -71,7 +71,7 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
      * Creates a new instance from the given {@code ThrowableMessage}.
      */
     public static RejectionClass of(ThrowableMessage rejection) {
-        RejectionMessage rejectionMessage = rejection.getMessageThrown();
+        RejectionMessage rejectionMessage = rejection.messageThrown();
         return of(rejectionMessage);
     }
 }

@@ -37,11 +37,9 @@ import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A utility for working with {@link Bus buses} and related data types.
- *
- * @author Dmytro Dashenkov
  */
 @Internal
-public class Buses {
+public final class Buses {
 
     /** Prevents instantiation of this utility class. */
     private Buses() {
@@ -54,6 +52,7 @@ public class Buses {
      * @return {@code Ack} with an {@code OK} status
      */
     public static Ack acknowledge(Message id) {
+        checkNotNull(id);
         return setStatus(id, Responses.statusOk());
     }
 

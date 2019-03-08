@@ -52,8 +52,6 @@ import static io.spine.validate.Validate.isDefault;
  * <p><b>spineDirRoot</b> is the only supported option of the processor.
  * Use {@code javac -AspineDirRoot=/path/to/project/root [...]} to set the value of the option.
  * If none is set, the option will default to current directory (denoted with "{@code ./}").
- *
- * @author Dmytro Dashenkov
  */
 public class AssignLookup extends SpineAnnotationProcessor {
 

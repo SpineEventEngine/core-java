@@ -34,8 +34,6 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
  * Subscriber for messages of a channel with the {@linkplain MessageChannel#getId() specified ID}.
  *
  * <p>There can be many subscribers per channel ID.
- *
- * @author Alex Tymchenko
  */
 @SPI
 public abstract class Subscriber extends AbstractChannel {
@@ -45,7 +43,7 @@ public abstract class Subscriber extends AbstractChannel {
      */
     private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-    public Subscriber(ChannelId channelId) {
+    protected Subscriber(ChannelId channelId) {
         super(channelId);
     }
 

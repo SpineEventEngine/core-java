@@ -31,9 +31,9 @@ import io.spine.test.model.contexts.tasks.commands.RenameTask;
 import io.spine.test.model.contexts.tasks.commands.TaskCreated;
 import io.spine.test.model.contexts.tasks.commands.TaskRenamed;
 
-class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
+final class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
 
-    protected TaskAggregate(TaskId id) {
+    TaskAggregate(TaskId id) {
         super(id);
     }
 

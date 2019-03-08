@@ -46,9 +46,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EntityLifecycle should")
 class EntityLifecycleTest {
 
@@ -102,7 +99,7 @@ class EntityLifecycleTest {
                 .build();
         EntityRecord newRecord = previousRecord
                 .toBuilder()
-                .setState(pack(Time.getCurrentTime()))
+                .setState(pack(Time.currentTime()))
                 .build();
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()

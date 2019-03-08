@@ -28,8 +28,6 @@ import java.util.Set;
 
 /**
  * Accumulates the entity history events.
- *
- * @author Dmytro Dashenkov
  */
 public class HistoryEventWatcher extends AbstractEventAccumulator {
 

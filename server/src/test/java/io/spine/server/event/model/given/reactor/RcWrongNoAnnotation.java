@@ -25,10 +25,8 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * Provides a method with correct parameters and return value, but without annotation.
- *
- * @author Alexander Yevsyukov
  */
-public class RcWrongNoAnnotation extends TestEventReactor {
+public final class RcWrongNoAnnotation extends TestEventReactor {
 
     RefProjectStarted react(RefProjectCreated event) {
         return RefProjectStarted.newBuilder()

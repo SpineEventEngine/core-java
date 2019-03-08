@@ -44,8 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link io.spine.client.TopicFactory}.
- *
- * @author Alex Tymchenko
  */
 @DisplayName("Topic factory should")
 class TopicFactoryTest {

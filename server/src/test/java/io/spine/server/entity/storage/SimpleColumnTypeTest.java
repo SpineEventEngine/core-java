@@ -26,9 +26,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("SimpleColumnType should")
 class SimpleColumnTypeTest {
 

@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.system.server.HistoryRejections.CannotDispatchCommandTwice;
 import static io.spine.system.server.HistoryRejections.CannotDispatchEventTwice;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -111,7 +111,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             watcher.on(systemEvent);
 
@@ -126,7 +126,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             watcher.on(systemEvent);
 
@@ -146,7 +146,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             watcher.on(rejection);
 
@@ -164,7 +164,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             watcher.on(rejection);
 
@@ -193,7 +193,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
@@ -206,7 +206,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
@@ -219,7 +219,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(rejection, rejection.getReceiver());
         }
@@ -232,7 +232,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(rejection, rejection.getReceiver());
         }

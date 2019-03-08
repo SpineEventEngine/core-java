@@ -28,10 +28,8 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * Provides a method which has correct parameter and return value, but wrong annotations.
- *
- * @author Alexander Yevsyukov
  */
-public class RcWrongAnnotation extends TestEventReactor {
+public final class RcWrongAnnotation extends TestEventReactor {
 
     @Apply
     @Command

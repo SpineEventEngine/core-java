@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The index of tenant IDs in a multi-tenant application.
- *
- * @author Alexander Yevsyukov
  */
 public interface TenantIndex extends AutoCloseable {
 

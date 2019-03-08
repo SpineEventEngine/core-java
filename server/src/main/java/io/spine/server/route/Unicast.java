@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
  * A route for a message to be delivered ton one entity.
  *
  * @param <I> the type of entity ID
- * @author Alexander Yevsyukov
  */
 @FunctionalInterface
 public interface Unicast<I, M extends Message, C extends Message> extends Route<M, C, I> {

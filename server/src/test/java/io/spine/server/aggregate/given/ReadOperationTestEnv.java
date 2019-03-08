@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -64,7 +64,7 @@ public final class ReadOperationTestEnv {
         version = increment(version);
         EventContext context = EventContext
                 .newBuilder()
-                .setTimestamp(getCurrentTime())
+                .setTimestamp(currentTime())
                 .setVersion(version)
                 .build();
         return Event
@@ -79,7 +79,7 @@ public final class ReadOperationTestEnv {
         version = increment(version);
         return Snapshot
                 .newBuilder()
-                .setTimestamp(getCurrentTime())
+                .setTimestamp(currentTime())
                 .setVersion(version)
                 .build();
     }

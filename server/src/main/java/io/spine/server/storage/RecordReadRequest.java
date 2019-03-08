@@ -32,7 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Two requests are considered equal if they have the same {@linkplain #getRecordId() record ID}.
  *
  * @param <I> the type of the target ID
- * @author Dmytro Grankin
  */
 @Internal
 public final class RecordReadRequest<I> implements ReadRequest<I> {

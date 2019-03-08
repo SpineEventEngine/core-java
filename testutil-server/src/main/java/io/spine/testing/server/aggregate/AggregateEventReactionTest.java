@@ -42,7 +42,6 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
  *         the aggregate state type
  * @param <A>
  *         the {@link Aggregate} type
- * @author Dmytro Dashenkov
  */
 public abstract class AggregateEventReactionTest<I,
                                                  E extends EventMessage,

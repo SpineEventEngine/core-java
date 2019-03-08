@@ -28,7 +28,6 @@ import java.util.Optional;
  *
  * @param <I> the type of entity IDs
  * @param <R> the type of stored records
- * @author Alexander Yevsyukov
  */
 interface TenantStorage<I, R> {
 

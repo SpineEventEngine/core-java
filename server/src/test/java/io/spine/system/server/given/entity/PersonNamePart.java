@@ -35,8 +35,6 @@ import io.spine.type.TypeUrl;
 
 /**
  * An aggregate part which handles a person first name.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonNamePart
         extends AggregatePart<PersonId, PersonFirstName, PersonFirstNameVBuilder, PersonRoot> {

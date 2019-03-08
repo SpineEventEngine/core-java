@@ -25,10 +25,8 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * Provides a method which accepts first parameter of wrong type.
- *
- * @author Alexander Yevsyukov
  */
-public class RcWrongFirstParam extends TestEventReactor {
+public final class RcWrongFirstParam extends TestEventReactor {
 
     @React
     RefProjectStarted react(String event) {

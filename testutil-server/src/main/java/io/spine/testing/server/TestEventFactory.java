@@ -69,7 +69,7 @@ public class TestEventFactory extends EventFactory {
 
     public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        Message producerId = requestFactory.getActor();
+        Message producerId = requestFactory.actor();
         return newInstance(pack(producerId), requestFactory);
     }
 

@@ -27,8 +27,6 @@ import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * A set of utilities for working with rejections and {@link ThrowableMessage}s.
- *
- * @author Dmytro Dashenkov
  */
 public final class Rejections {
 

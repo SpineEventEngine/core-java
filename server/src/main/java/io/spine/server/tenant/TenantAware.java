@@ -30,8 +30,6 @@ import static io.spine.validate.Validate.isDefault;
 
 /**
  * An abstract base for operations performed in a tenant context.
- *
- * @author Alexander Yevsyukov
  */
 abstract class TenantAware {
 

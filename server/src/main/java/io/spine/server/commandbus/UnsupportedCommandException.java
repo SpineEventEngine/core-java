@@ -27,9 +27,6 @@ import io.spine.server.bus.MessageUnhandled;
 /**
  * Exception that is thrown when unsupported command is obtained
  * or in case there is no class for given Protobuf command message.
- *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
  */
 public class UnsupportedCommandException extends CommandException implements MessageUnhandled {
 

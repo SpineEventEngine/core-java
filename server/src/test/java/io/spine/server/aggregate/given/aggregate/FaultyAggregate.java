@@ -35,10 +35,8 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
 /**
  * The test environment class for checking raising and catching exceptions.
- *
- * @author Alexander Yevsyukkov
  */
-public class FaultyAggregate
+public final class FaultyAggregate
         extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
     public static final String BROKEN_HANDLER = "broken_handler";

@@ -23,9 +23,6 @@ package io.spine.testing.server.entity.given;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.LifecycleFlagsVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class GivenLifecycleFlags {
 
     /** Prevent instantiation of this utility class. */

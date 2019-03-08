@@ -26,7 +26,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
  * A base class for type-specific verification classes.
  *
  * @param <E> the type of emitted messages
- * @author Alexander Yevsyukov
  */
 public abstract class DelegatingVerify<E extends EmittedMessages> implements Verify<E> {
 

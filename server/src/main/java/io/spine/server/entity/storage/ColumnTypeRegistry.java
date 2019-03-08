@@ -64,8 +64,8 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>If several {@linkplain ColumnType ColumnTypes} are written under a single {@linkplain Class}
  * object, the latest {@code put} overrides all the previous ones.
  *
- * @param <C> storage-specific implementation of the {@link ColumnType}
- * @author Dmytro Dashenkov
+ * @param <C>
+ *         storage-specific implementation of the {@link ColumnType}
  */
 public final class ColumnTypeRegistry<C extends ColumnType> {
 

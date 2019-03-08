@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -151,7 +151,7 @@ class EntityTest {
     @Test
     @DisplayName("have state")
     void haveState() {
-        Version ver = Versions.newVersion(3, getCurrentTime());
+        Version ver = Versions.newVersion(3, currentTime());
 
         entityNew.updateState(state, ver);
 

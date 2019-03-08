@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
 import static java.util.Optional.empty;
@@ -105,7 +105,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         if (isScheduledAlready(command)) {
             return;
         }
-        Command commandUpdated = setSchedulingTime(command, getCurrentTime());
+        Command commandUpdated = setSchedulingTime(command, currentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
 

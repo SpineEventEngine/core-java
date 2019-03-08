@@ -115,7 +115,7 @@ final class ClassMap {
 
     private void checkDuplicates(CommandHandlingClass<?, ?> candidate)
             throws DuplicateCommandHandlerError {
-        Set<CommandClass> candidateCommands = candidate.getCommands();
+        Set<CommandClass> candidateCommands = candidate.commands();
         ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> duplicates =
                 ImmutableMap.builder();
 
@@ -123,7 +123,7 @@ final class ClassMap {
             if (modelClass instanceof CommandHandlingClass) {
                 CommandHandlingClass<?, ?> commandHandler =
                         (CommandHandlingClass<?, ?>) modelClass;
-                Set<CommandClass> alreadyHandled = commandHandler.getCommands();
+                Set<CommandClass> alreadyHandled = commandHandler.commands();
                 Set<CommandClass> intersection = intersection(alreadyHandled, candidateCommands);
                 if (intersection.size() > 0) {
                     duplicates.put(intersection, commandHandler);

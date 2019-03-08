@@ -35,10 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- */
 @DisplayName("CurrentTenant should")
 class CurrentTenantTest {
 
@@ -61,7 +57,6 @@ class CurrentTenantTest {
                      () -> CurrentTenant.set(TenantId.getDefaultInstance()));
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We check isPresent() in assertion.
     @Test
     @DisplayName("keep set value")
     void keepSetValue() {

@@ -23,8 +23,5 @@ package io.spine.server.model.contexts.orders;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.model.contexts.orders.OrderId;
 
-/**
- * @author Alexander Yevsyuov
- */
-class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
+final class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
 }

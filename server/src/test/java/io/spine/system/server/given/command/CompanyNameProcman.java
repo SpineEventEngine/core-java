@@ -39,8 +39,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * A process manager handling company name resolution.
- *
- * @author Dmytro Dashenkov
  */
 public class CompanyNameProcman
         extends ProcessManager<CompanyId, CompanyEstablishing, CompanyEstablishingVBuilder> {

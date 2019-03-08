@@ -34,15 +34,13 @@ import io.spine.type.TypeUrl;
 
 /**
  * A process manager which handles person creation.
- *
- * @author Dmytro Dashenkov
  */
-public class PersonProcman
+public final class PersonProcman
         extends ProcessManager<PersonId, PersonCreation, PersonCreationVBuilder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(PersonCreation.class);
 
-    protected PersonProcman(PersonId id) {
+    PersonProcman(PersonId id) {
         super(id);
     }
 

@@ -27,8 +27,6 @@ import io.spine.core.TenantId;
 /**
  * Default implementation of {code TenantRepository} that stores timestamps
  * of tenant ID registration.
- *
- * @author Alexander Yevsyukov
  */
 final class DefaultTenantRepository
       extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
@@ -36,7 +34,7 @@ final class DefaultTenantRepository
     static class Entity extends TenantRepository.Entity<Timestamp> {
 
         protected Entity(TenantId id) {
-            super(id, (i) -> Time.getCurrentTime());
+            super(id, (i) -> Time.currentTime());
         }
     }
 }

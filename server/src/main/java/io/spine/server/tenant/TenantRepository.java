@@ -39,7 +39,6 @@ import java.util.function.Function;
  * Abstract base for repositories storing information about tenants.
  *
  * @param <T> the type of data associated with the tenant ID
- * @author Alexander Yevsyukov
  */
 public abstract class TenantRepository<T extends Message, E extends Entity<T>>
         extends DefaultRecordBasedRepository<TenantId, E, T>

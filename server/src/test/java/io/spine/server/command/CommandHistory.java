@@ -34,10 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Test utility for keeping the history of command messages and their contexts
  * handled by an aggregate.
- *
- * @author Alexander Yevsyukov
  */
-public class CommandHistory {
+public final class CommandHistory {
 
     private final List<Message> messages = Lists.newArrayList();
     private final List<CommandContext> contexts = Lists.newArrayList();

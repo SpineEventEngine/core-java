@@ -42,7 +42,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Map;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
@@ -109,7 +109,7 @@ public class RepositoryTestEnv {
                 .newBuilder()
                 .setId(historyId)
                 .setNewState(pack(state))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .build();
         return event(stateChanged);
@@ -132,7 +132,7 @@ public class RepositoryTestEnv {
         EntityArchived archived = EntityArchived
                 .newBuilder()
                 .setId(historyId)
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .build();
         return event(archived);
@@ -143,7 +143,7 @@ public class RepositoryTestEnv {
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
                 .setId(historyId)
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .build();
         return event(deleted);

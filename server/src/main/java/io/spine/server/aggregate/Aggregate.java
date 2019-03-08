@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
@@ -123,8 +123,8 @@ public abstract class Aggregate<I,
         implements EventPlayer, EventReactor {
 
     /**
-     * The count of events stored to the {@linkplain AggregateStorage storage} since the last
-     * snapshot.
+     * The count of events stored to the {@linkplain AggregateStorage storage} since
+     * the last snapshot.
      *
      * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
      *
@@ -192,20 +192,6 @@ public abstract class Aggregate<I,
      * <p>In {@code Aggregate}, this method must be called only from within an event applier.
      *
      * @throws IllegalStateException if the method is called from outside an event applier
-     * @deprecated use {@link #builder()}
-     */
-    @Deprecated
-    @Override
-    protected B getBuilder() {
-        return builder();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>In {@code Aggregate}, this method must be called only from within an event applier.
-     *
-     * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
     protected final B builder() {
@@ -224,7 +210,7 @@ public abstract class Aggregate<I,
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
-        CommandHandlerMethod method = thisClass().getHandler(command.messageClass());
+        CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
         EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);
     }
@@ -390,7 +376,7 @@ public abstract class Aggregate<I,
                 .newBuilder()
                 .setState(state)
                 .setVersion(version())
-                .setTimestamp(getCurrentTime());
+                .setTimestamp(currentTime());
         return builder.build();
     }
 

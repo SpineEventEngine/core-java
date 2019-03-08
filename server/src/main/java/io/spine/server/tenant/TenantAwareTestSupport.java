@@ -28,9 +28,8 @@ import io.spine.server.security.InvocationGuard;
 /**
  * Support utility for tenant-aware tests.
  *
- * @author Alexander Yevsyukov
  * @apiNote This class is only for the internal use by the Testutil Server library.
- * Calling its methods from other code would result in run-time exceptions.
+ *         Calling its methods from other code would result in run-time exceptions.
  */
 @Internal
 @VisibleForTesting

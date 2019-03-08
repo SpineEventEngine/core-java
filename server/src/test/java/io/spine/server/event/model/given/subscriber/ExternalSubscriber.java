@@ -26,8 +26,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 /**
  * A subscriber to external events for {@link io.spine.server.event.model.EventSubscriberMethodTest
  * EventSubscriberMethodTest}.
- *
- * @author Alex Tymchenko
  */
 public class ExternalSubscriber extends TestEventSubscriber {
 
