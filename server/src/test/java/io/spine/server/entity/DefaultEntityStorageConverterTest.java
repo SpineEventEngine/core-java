@@ -52,7 +52,7 @@ class DefaultEntityStorageConverterTest {
     @Test
     @DisplayName("create instance for all fields")
     void createForAllFields() throws Exception {
-        assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
+        assertEquals(FieldMask.getDefaultInstance(), converter.fieldMask());
     }
 
     @Test
@@ -65,7 +65,7 @@ class DefaultEntityStorageConverterTest {
         EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
                 converter.withFieldMask(fieldMask);
 
-        assertEquals(fieldMask, withMasks.getFieldMask());
+        assertEquals(fieldMask, withMasks.fieldMask());
     }
 
     private static TestEntity createEntity(Long id, StringValue state) {

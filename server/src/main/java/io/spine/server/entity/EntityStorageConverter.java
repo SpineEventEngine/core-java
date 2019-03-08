@@ -59,14 +59,14 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     /**
      * Obtains the type URL of the state of entities which this converter builds.
      */
-    protected TypeUrl getEntityStateType() {
+    protected TypeUrl entityStateType() {
         return entityStateType;
     }
 
     /**
      * Obtains the entity factory used by the converter.
      */
-    protected EntityFactory<I, E> getEntityFactory() {
+    protected EntityFactory<I, E> entityFactory() {
         return entityFactory;
     }
 
@@ -74,7 +74,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
      * Obtains the field mask used by this converter to trim the state of entities before the state
      * is {@linkplain #injectState(Entity, Message, EntityRecord) injected} into entities.
      */
-    protected FieldMask getFieldMask() {
+    protected FieldMask fieldMask() {
         return this.fieldMask;
     }
 
@@ -100,7 +100,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @Override
     protected E doBackward(EntityRecord entityRecord) {
         S unpacked = (S) unpack(entityRecord.getState());
-        S state = FieldMasks.applyMask(getFieldMask(), unpacked);
+        S state = FieldMasks.applyMask(fieldMask(), unpacked);
         I id = (I) Identifier.unpack(entityRecord.getEntityId());
         E entity = entityFactory.create(id);
         checkState(entity != null, "EntityFactory produced null entity.");

@@ -31,7 +31,7 @@ import io.spine.type.TypeUrl;
  * @param <E> the type of entities
  * @param <S> the type of entity states
  */
-class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
+final class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
@@ -50,8 +50,8 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
 
     @Override
     public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        TypeUrl stateType = getEntityStateType();
-        EntityFactory<I, E> factory = getEntityFactory();
+        TypeUrl stateType = entityStateType();
+        EntityFactory<I, E> factory = entityFactory();
         return new DefaultEntityStorageConverter<>(stateType, factory, fieldMask);
     }
 
@@ -72,11 +72,6 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
 
     /**
      * Injects the state into an entity.
-     *
-     * <p>if the passed entity is versionable its lifecycle flags will be set from the record.
-     *
-     * <p>If not, {@code IllegalStateException} is thrown suggesting to provide a custom
-     * {@link EntityStorageConverter} in the repository which manages entities of this class.
      *
      * @param entity
      *         the entity to inject the state
