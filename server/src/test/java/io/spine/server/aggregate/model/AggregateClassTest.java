@@ -81,7 +81,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events that are imported by the aggregate")
     void importedEvents() {
-        assertThat(aggregateClass.getImportableEventClasses())
+        assertThat(aggregateClass.importableEventClasses())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStopped.class,
                         SettingsAdjusted.class
@@ -91,7 +91,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events produced by the aggregate")
     void producedEvents() {
-        assertThat(aggregateClass.getProducedEvents())
+        assertThat(aggregateClass.producedEvents())
                 .containsExactlyElementsIn(EventClass.setOf(
                         EngineStarted.class,
                         EngineStopped.class

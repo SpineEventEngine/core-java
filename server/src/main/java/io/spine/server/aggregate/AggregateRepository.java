@@ -256,7 +256,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
     public Set<EventClass> importableEventClasses() {
-        return aggregateClass().getImportableEventClasses();
+        return aggregateClass().importableEventClasses();
     }
 
     /**
@@ -271,7 +271,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public ImmutableSet<EventClass> producibleEventClasses() {
         SetView<EventClass> eventClasses =
-                union(aggregateClass().getProducedEvents(), importableEventClasses());
+                union(aggregateClass().producedEvents(), importableEventClasses());
         return ImmutableSet.copyOf(eventClasses);
     }
 

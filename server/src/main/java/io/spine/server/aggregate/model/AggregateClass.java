@@ -69,11 +69,17 @@ public class AggregateClass<A extends Aggregate>
         return result;
     }
 
+    /**
+     * Obtains the set of event classes on which this aggregate class reacts.
+     */
     @Override
     public final Set<EventClass> eventClasses() {
         return delegate.eventClasses();
     }
 
+    /**
+     * Obtains the set of <em>external</em> event classes on which this aggregate class reacts.
+     */
     @Override
     public final Set<EventClass> externalEventClasses() {
         return delegate.externalEventClasses();
@@ -82,7 +88,7 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains event types produced by this aggregate class.
      */
-    public Set<EventClass> getProducedEvents() {
+    public Set<EventClass> producedEvents() {
         Set<EventClass> result = union(commandOutput(), reactionOutput());
         return result;
     }
@@ -90,9 +96,9 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains set of classes of events used as arguments of applier methods.
      *
-     * @see #getImportableEventClasses()
+     * @see #importableEventClasses()
      */
-    public final Set<EventClass> getStateEventClasses() {
+    public final Set<EventClass> stateEventClasses() {
         return stateEvents.getMessageClasses();
     }
 
@@ -101,9 +107,9 @@ public class AggregateClass<A extends Aggregate>
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
      * by the aggregates of this class.
      *
-     * @see #getStateEventClasses()
+     * @see #stateEventClasses()
      */
-    public final Set<EventClass> getImportableEventClasses() {
+    public final Set<EventClass> importableEventClasses() {
         return importableEvents;
     }
 
