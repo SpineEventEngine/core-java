@@ -32,6 +32,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
@@ -44,10 +45,25 @@ public class DefaultEntityFactory<E extends Entity> implements EntityFactory<E> 
     private final Class<?> idClass;
     private final Class<E> entityClass;
 
-    /** The constructor for entities of this class. */
+    /**
+     * The constructor for entities of this class.
+     *
+     * <p>If the entity class has multiple constructors, this one points to the one which
+     * accepts one parameter.
+     *
+     * @see #constructor()
+     */
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull Constructor<E> constructor;
+
+    /**
+     * The type of the first constructor parameter, if any.
+     * {@code null} if the constructor does not accept parameters.
+     */
+    @LazyInit
+    @SuppressWarnings("Immutable") // effectively
+    private transient volatile @MonotonicNonNull Class<?> firstParameterType;
 
     protected DefaultEntityFactory(Class<?> idClass, Class<E> entityClass) {
         this.idClass = checkNotNull(idClass);
@@ -57,7 +73,8 @@ public class DefaultEntityFactory<E extends Entity> implements EntityFactory<E> 
     @Override
     public E create(Object constructionArgument) {
         Constructor<E> ctor = constructor();
-        checkArgumentMatches(ctor, constructionArgument);
+        //TODO:2019-03-10:alexander.yevsyukov: Have d-tour if we have parameterless ctor.
+        checkArgumentMatches(constructionArgument);
         try {
             E result = ctor.newInstance(constructionArgument);
             return result;
@@ -80,6 +97,11 @@ public class DefaultEntityFactory<E extends Entity> implements EntityFactory<E> 
                 if (result == null) {
                     constructor = findConstructor();
                     result = constructor;
+                    Class<?>[] parameterTypes = result.getParameterTypes();
+                    firstParameterType =
+                            (parameterTypes.length > 0)
+                            ? parameterTypes[0]
+                            : null;
                 }
             }
         }
@@ -105,16 +127,18 @@ public class DefaultEntityFactory<E extends Entity> implements EntityFactory<E> 
         return result;
     }
 
-    private static void checkArgumentMatches(Constructor<?> ctor, Object argument) {
+    private void checkArgumentMatches(Object argument) {
+        checkState(firstParameterType != null,
+                   "The entity class `%s` does not have a constructor which accepts one parameter.",
+                   entityClass.getName());
         Class<?> actualArgumentType = argument.getClass();
-        Class<?> firstParameter = ctor.getParameterTypes()[0];
         String errorMessage =
-                "Constructor argument type mismatch: expected `%s`, but was `%s`. " +
-                        "Check for message routing mistakes.";
-        checkArgument(firstParameter.isAssignableFrom(actualArgumentType),
+                "Constructor argument type mismatch: expected `%s`, but was `%s`." +
+                " Check for message routing mistakes.";
+        checkArgument(firstParameterType.isAssignableFrom(actualArgumentType),
                       errorMessage,
                       actualArgumentType.getName(),
-                      firstParameter.getName());
+                      firstParameterType.getName());
     }
 
     private static ModelError noSuchConstructor(String entityClass, String idClass) {
