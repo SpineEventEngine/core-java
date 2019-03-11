@@ -34,7 +34,7 @@ import io.spine.server.projection.Projection;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Static factories for creating a default repository for an entity class.
+ * Static factory for creating a default repository for an entity class.
  */
 public class DefaultRepository {
 
