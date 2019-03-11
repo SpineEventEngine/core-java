@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -51,8 +52,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @param <I> the type of entity identifiers
  * @param <S> the type of entity state objects
  */
-@SuppressWarnings("SynchronizeOnThis") /* This class uses double-check idiom for lazy init of some
-    fields. See Effective Java 2nd Ed. Item #71. */
+@SuppressWarnings({
+        "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
+            fields. See Effective Java 2nd Ed. Item #71. */,
+        "AbstractClassWithoutAbstractMethods",
+        "ClassWithTooManyMethods"})
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
     /**
@@ -64,8 +68,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @LazyInit
     private volatile @MonotonicNonNull EntityClass<?> thisClass;
 
-    /** The ID of the entity. */
-    private final I id;
+    /**
+     * The ID of the entity.
+     *
+     * <p>Assigner either through the {@linkplain #AbstractEntity(Object)} constructor which
+     * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
+     */
+    private I id;
 
     /** Cached version of string ID. */
     @LazyInit
@@ -96,12 +105,36 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     private volatile boolean lifecycleFlagsChanged;
 
     /**
+     * Creates a new instance with the zero version and cleared lifecycle flags.
+     *
+     * <p>When this constructor is called, the entity ID must be {@linkplain #setId(Object) set}
+     * before any other interactions with the instance.
+     */
+    protected AbstractEntity() {
+        setVersion(Versions.zero());
+        clearLifecycleFlags();
+    }
+
+    /**
      * Creates new instance with the passed ID.
      */
     protected AbstractEntity(I id) {
-        this.id = checkNotNull(id);
-        setVersion(Versions.zero());
-        clearLifecycleFlags();
+        this();
+        setId(id);
+    }
+
+    /**
+     * Assigns the ID to the entity.
+     */
+    @SuppressWarnings("InstanceVariableUsedBeforeInitialized") // safety check on overriding the ID.
+    final void setId(I id) {
+        checkNotNull(id);
+        if (this.id != null) {
+            checkState(id.equals(this.id),
+                       "Entity ID already assigned to `%s`." +
+                               " Attempted to reassign to `%s`.", this.id, id);
+        }
+        this.id = id;
     }
 
     /**
@@ -119,7 +152,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
 
     @Override
     public I id() {
-        return id;
+        return checkNotNull(id);
     }
 
     /**

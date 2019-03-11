@@ -20,8 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.UInt64Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 
@@ -30,10 +28,6 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 public class DuplicateAggregate extends Aggregate<String, CallState, CallStateVBuilder> {
-
-    protected DuplicateAggregate(String id) {
-        super(id);
-    }
 
     @Assign
     public MessageSent handle(SendMessage command) {

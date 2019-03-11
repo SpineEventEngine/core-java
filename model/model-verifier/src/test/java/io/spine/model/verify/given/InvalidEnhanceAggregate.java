@@ -33,10 +33,6 @@ import io.spine.test.model.verify.given.EditStateVBuilder;
  */
 public class InvalidEnhanceAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
-    protected InvalidEnhanceAggregate(String id) {
-        super(id);
-    }
-
     @Assign
     String handle(EnhancePhoto delete) {
         return delete.getTitle();

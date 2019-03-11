@@ -29,10 +29,6 @@ import io.spine.server.enrich.given.event.EitProjectCreatedVBuilder;
 
 final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitProjectVBuilder> {
 
-    EitProjectAggregate(EitProjectId id) {
-        super(id);
-    }
-
     @Assign
     EitProjectCreated handle(EitCreateProject cmd) {
         return EitProjectCreatedVBuilder

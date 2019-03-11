@@ -44,7 +44,7 @@ final class PartFactory<A extends AggregatePart> extends AbstractEntityFactory<A
     PartFactory(Class<?> idClass,
                 Class<A> aggregatePartClass,
                 Class<? extends AggregateRoot> rootClass) {
-        super(idClass, aggregatePartClass);
+        super(aggregatePartClass);
         this.rootClass = checkNotNull(rootClass);
     }
 

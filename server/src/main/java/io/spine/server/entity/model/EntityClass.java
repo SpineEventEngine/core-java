@@ -23,6 +23,7 @@ package io.spine.server.entity.model;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.model.ModelClass;
@@ -104,7 +105,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * Creates a new instance of the factory for creating entities.
      */
     protected EntityFactory<E> createFactory() {
-        return new DefaultEntityFactory<>(idClass, value());
+        return new DefaultEntityFactory<>(value());
     }
 
     /**
@@ -200,7 +201,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      *
      * @throws ModelError if unsupported ID class passed
      */
-    private static <I> Class<I> idClass(Class<? extends Entity> cls) {
+    public static <I> Class<I> idClass(Class<? extends Entity> cls) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
                 Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
         try {

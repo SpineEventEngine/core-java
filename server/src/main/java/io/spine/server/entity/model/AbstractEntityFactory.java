@@ -30,6 +30,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Abstract base for entity factories.
  */
@@ -63,8 +65,9 @@ public abstract class AbstractEntityFactory<E extends Entity> implements EntityF
     @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull Constructor<E> constructor;
 
-    protected AbstractEntityFactory(Class<?> idClass, Class<E> entityClass) {
-        this.idClass = idClass;
+    protected AbstractEntityFactory(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        this.idClass = EntityClass.idClass(entityClass);
         this.entityClass = entityClass;
     }
 

@@ -25,9 +25,5 @@ import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.ProjectVBuilder;
 
-public class AnotherProjectAggregate
-        extends Aggregate<ProjectId, Project, ProjectVBuilder> {
-    protected AnotherProjectAggregate(ProjectId id) {
-        super(id);
-    }
+class AnotherProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 }

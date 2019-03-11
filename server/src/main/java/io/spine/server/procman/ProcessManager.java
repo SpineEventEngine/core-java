@@ -86,9 +86,15 @@ public abstract class ProcessManager<I,
 
     /**
      * Creates a new instance.
+     */
+    protected ProcessManager() {
+        super();
+    }
+
+    /**
+     * Creates a new instance.
      *
      * @param  id an ID for the new instance
-     * @throws IllegalArgumentException if the ID type is unsupported
      */
     protected ProcessManager(I id) {
         super(id);

@@ -145,6 +145,27 @@ public abstract class Aggregate<I,
     /**
      * Creates a new instance.
      *
+     * @apiNote Constructors of derived classes are likely to have package-private access
+     *         level because of the following reasons:
+     *         <ol>
+     *         <li>These constructors are not public API of an application.
+     *         Commands and aggregate IDs are.
+     *         <li>These constructors need to be accessible from tests in the same package.
+     *         </ol>
+     *
+     *         <p>If you do have tests that create aggregates via constructors, consider annotating
+     *         them with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are
+     *         invoked by {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
+     *         via Reflection) may be left {@code private}.
+     */
+    protected Aggregate() {
+        super();
+        setIdempotencyGuard();
+    }
+
+    /**
+     * Creates a new instance.
+     *
      * @param id
      *         the ID for the new aggregate
      * @apiNote Constructors of derived classes are likely to have package-private access

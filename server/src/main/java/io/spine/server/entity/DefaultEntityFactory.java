@@ -18,17 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.model;
+package io.spine.server.entity;
 
-import com.google.errorprone.annotations.concurrent.LazyInit;
-import io.spine.server.entity.Entity;
+import io.spine.server.entity.model.AbstractEntityFactory;
 import io.spine.server.model.ModelError;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -40,7 +37,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Default implementation of entity factory which creates entities by invoking constructor
  * which accepts entity ID.
  */
-final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory<E> {
+public final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory<E> {
 
     private static final long serialVersionUID = 0L;
 
@@ -55,15 +52,13 @@ final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory
      */
     private static final String ADVISE_CHECK_ROUTING = " Check for message routing mistakes.";
 
-    /**
-     * The method of setting entity identifier. Is not {@code null} if the entity class does
-     * not declare a constructor which accepts the single parameter.g
-     */
-    @LazyInit
-    private transient volatile @MonotonicNonNull Method setIdMethod;
+    private transient boolean usingDefaultConstructor;
 
-    DefaultEntityFactory(Class<?> idClass, Class<E> entityClass) {
-        super(idClass, entityClass);
+    /**
+     * Creates new instance.
+     */
+    public DefaultEntityFactory(Class<E> entityClass) {
+        super(entityClass);
     }
 
     @Override
@@ -77,16 +72,22 @@ final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory
         Constructor<E> ctor = constructor();
         try {
             E result;
-            if (!usesDefaultConstructor()) {
-                result = ctor.newInstance(id);
-            } else {
+            if (usesDefaultConstructor()) {
                 result = ctor.newInstance();
-                setIdMethod.invoke(result, id);
+                setId(result, id);
+            } else {
+                result = ctor.newInstance(id);
             }
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @SuppressWarnings("unchecked") // we check the type when obtaining default constructor
+    private void setId(E entity, Object id) {
+        AbstractEntity cast = (AbstractEntity) entity;
+        cast.setId(id);
     }
 
     @Override
@@ -136,17 +137,16 @@ final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory
             Constructor<E> result = (Constructor<E>) defaultCtor.get();
             Class<?> idClass = idClass();
             Class<E> entityClass = entityClass();
-            try {
-                setIdMethod = entityClass.getDeclaredMethod(SET_ID_METHOD_NAME, idClass);
-            } catch (NoSuchMethodException e) {
-                throw (ModelError) new ModelError(
-                        "The entity class `%s` does not have a constructor which accepts the ID" +
-                                " class `%s` as s single parameter." +
-                                " The entity class has the default constructor." +
-                                " Please provide the `%s()` method.",
-                        entityClass, idClass, SET_ID_METHOD_NAME
-                ).initCause(e);
+            if (!AbstractEntity.class.isAssignableFrom(entityClass)) {
+                throw new ModelError(
+                        "The entity class `%s` is not assignable from `%s`" +
+                        " (so that `%s()` method can be used for setting the entity ID)," +
+                        " neither it has a constructor which accepts the ID class `%s` as" +
+                        " a single parameter. Please provide the constructor.",
+                        entityClass, AbstractEntity.class.getName(), SET_ID_METHOD_NAME, idClass
+                );
             }
+            usingDefaultConstructor = true;
             return result;
         }
         return null;
@@ -184,6 +184,6 @@ final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory
     }
 
     private boolean usesDefaultConstructor() {
-        return setIdMethod != null;
+        return usingDefaultConstructor;
     }
 }

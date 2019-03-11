@@ -31,15 +31,12 @@ import io.spine.test.entity.SubscribableAggregateVBuilder;
 
 public class VisibilityGuardTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private VisibilityGuardTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
-    public static class Exposed
+    static class Exposed
             extends Aggregate<Long, FullAccessAggregate, FullAccessAggregateVBuilder> {
-        public Exposed(Long id) {
-            super(id);
-        }
     }
 
     public static class ExposedRepository extends AggregateRepository<Long, Exposed> {
@@ -48,11 +45,8 @@ public class VisibilityGuardTestEnv {
         }
     }
 
-    public static class Subscribable
+    static class Subscribable
             extends Aggregate<Long, SubscribableAggregate, SubscribableAggregateVBuilder> {
-        protected Subscribable(Long id) {
-            super(id);
-        }
     }
 
     public static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
@@ -61,11 +55,7 @@ public class VisibilityGuardTestEnv {
         }
     }
 
-    public static class Hidden
-            extends Aggregate<String, HiddenAggregate, HiddenAggregateVBuilder> {
-        public Hidden(String id) {
-            super(id);
-        }
+    static class Hidden extends Aggregate<String, HiddenAggregate, HiddenAggregateVBuilder> {
     }
 
     public static class HiddenRepository extends AggregateRepository<String, Hidden> {
