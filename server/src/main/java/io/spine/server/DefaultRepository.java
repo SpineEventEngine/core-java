@@ -45,6 +45,9 @@ public class DefaultRepository {
     /**
      * Creates default repository for the passed entity class.
      *
+     * <p>Default repositories are useful when no customization (e.g. custom routing)
+     * is required for managing entities of the passed class.
+     *
      * @param cls
      *         the class of entities
      * @param <I>
