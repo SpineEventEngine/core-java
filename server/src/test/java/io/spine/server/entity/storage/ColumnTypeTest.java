@@ -30,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * An example of using {@link ColumnType} {@code interface}.
- *
- * @author Dmytro Dashenkov
  */
 @DisplayName("ColumnType should")
 class ColumnTypeTest {

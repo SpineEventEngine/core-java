@@ -51,7 +51,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * A utility class for working with {@link EntityQuery} instances.
  *
- * @author Dmytro Dashenkov
  * @see EntityQuery
  */
 @Internal

@@ -37,21 +37,17 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-/**
- * @author Vladyslav Lubenskyi
- */
 public class CommandExpectedTestEnv {
 
-    /**
-     * Prevents direct instantiation.
-     */
+    /** Prevents instantiation of this utility class. */
     private CommandExpectedTestEnv() {
     }
 
     public static Message rejectionMessage() {
-        TuProjectId entityId = TuProjectId.newBuilder()
-                                          .setValue("entity ID")
-                                          .build();
+        TuProjectId entityId = TuProjectId
+                .newBuilder()
+                .setValue("entity ID")
+                .build();
         TuFailedToAssignProject rejectionMessage = TuFailedToAssignProject
                 .newBuilder()
                 .setId(entityId)
@@ -60,12 +56,14 @@ public class CommandExpectedTestEnv {
     }
 
     private static List<Message> interceptedCommands() {
-        StringValue firstCommand = StringValue.newBuilder()
-                                              .setValue("command 1")
-                                              .build();
-        StringValue secondCommand = StringValue.newBuilder()
-                                               .setValue("command 2")
-                                               .build();
+        StringValue firstCommand = StringValue
+                .newBuilder()
+                .setValue("command 1")
+                .build();
+        StringValue secondCommand = StringValue
+                .newBuilder()
+                .setValue("command 2")
+                .build();
         return asList(firstCommand, secondCommand);
     }
 

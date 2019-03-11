@@ -36,8 +36,6 @@ import static com.google.common.base.Preconditions.checkState;
  * Abstract base for test suites that test tenant-aware functionality.
  *
  * <p>This class must be used only from {@linkplain Environment#isTests() test execution context}.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 @VisibleForTesting

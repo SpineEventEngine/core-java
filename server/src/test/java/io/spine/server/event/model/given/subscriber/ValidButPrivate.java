@@ -25,8 +25,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * A class with subscriber method declared {@code private}.
- *
- * @author Alexander Yevsyukov
  */
 public class ValidButPrivate extends TestEventSubscriber {
 

@@ -124,29 +124,6 @@ public abstract class ProcessManager<I,
      *          defined in parents}.
      *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
      *          for reason behind the warning.
-     * @deprecated use {@link #builder()}
-     */
-    @Deprecated
-    @Override
-    @VisibleForTesting
-    protected B getBuilder() {
-        return builder();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>In {@code ProcessManager}, this method must be called from an event reactor, a rejection
-     * reactor, or a command handler.
-     *
-     * @throws IllegalStateException if the method is called from outside an event/rejection reactor
-     *         or a command handler
-     * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
-     *          It does not affect the visibility for inheritors, which stays {@code protected}
-     *          {@linkplain io.spine.server.entity.TransactionalEntity#builder() as originally
-     *          defined in parents}.
-     *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
-     *          for reason behind the warning.
      */
     @Override
     @VisibleForTesting
@@ -178,7 +155,7 @@ public abstract class ProcessManager<I,
         CommandClass commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
-            CommandHandlerMethod method = thisClass.getHandler(commandClass);
+            CommandHandlerMethod method = thisClass.handlerOf(commandClass);
             CommandHandlerMethod.Result result =
                     method.invoke(this, command);
             List<Event> events = result.produceEvents(command);

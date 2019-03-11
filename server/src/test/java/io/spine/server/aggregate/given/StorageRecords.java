@@ -34,7 +34,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -83,7 +83,7 @@ public class StorageRecords {
      * First record's timestamp is the current time.
      */
     public static List<AggregateEventRecord> sequenceFor(ProjectId id) {
-        return sequenceFor(id, getCurrentTime());
+        return sequenceFor(id, currentTime());
     }
 
     /**

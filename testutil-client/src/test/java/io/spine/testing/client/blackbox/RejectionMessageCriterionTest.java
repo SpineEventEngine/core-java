@@ -25,9 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * @author Mykhailo Drachuk
- */
 @DisplayName("Rejection Predicate should")
 class RejectionMessageCriterionTest {
 

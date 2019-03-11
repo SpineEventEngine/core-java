@@ -36,9 +36,6 @@ import static com.google.common.collect.Queues.newArrayDeque;
  * event-sourced entity}.
  *
  * <p>Any modifications to this object will not affect the real history of the entity.
- *
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
  */
 public final class RecentHistory {
 

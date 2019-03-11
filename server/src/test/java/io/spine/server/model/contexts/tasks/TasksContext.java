@@ -27,10 +27,8 @@ import io.spine.server.event.EventBus;
 
 /**
  * Creates an instance of the Tasks Bounded Context.
- *
- * @author Alexander Yevsyukov
  */
-public class TasksContext {
+public final class TasksContext {
 
     private TasksContext() {
     }

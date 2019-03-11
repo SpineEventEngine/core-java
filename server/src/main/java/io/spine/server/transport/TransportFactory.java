@@ -28,8 +28,6 @@ import io.spine.server.integration.ChannelId;
  *
  * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
  * Publish-Subscriber Channel pattern.</a>
- *
- * @author Alex Tymchenko
  */
 @SPI
 public interface TransportFactory {

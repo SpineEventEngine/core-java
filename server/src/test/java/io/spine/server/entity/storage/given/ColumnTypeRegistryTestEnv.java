@@ -25,10 +25,6 @@ import com.google.protobuf.GeneratedMessageV3;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.SimpleColumnType;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
 public class ColumnTypeRegistryTestEnv {
 
     /** Prevents instantiation of this utility class. */

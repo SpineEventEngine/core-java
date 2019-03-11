@@ -41,7 +41,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * process of reading, but resulting records should be the same.
  *
  * @param <I> the type of the record ID
- * @author Dmytro Grankin
  */
 @Internal
 public final class AggregateReadRequest<I> implements ReadRequest<I> {

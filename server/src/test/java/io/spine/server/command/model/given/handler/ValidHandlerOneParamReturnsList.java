@@ -33,7 +33,7 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 /**
  * Provides a method which accepts one parameter and returns a list of messages.
  *
- * @author Alexander Yevsyukov
+ * @apiNote Do not make this class {@code final} because it is spied on by Mockito.
  */
 public class ValidHandlerOneParamReturnsList extends TestCommandHandler {
 

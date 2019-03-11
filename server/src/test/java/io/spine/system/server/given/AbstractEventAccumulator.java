@@ -48,8 +48,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * An {@link EventDispatcher} which can {@linkplain #remember(Message) remember} received events.
- *
- * @author Dmytro Dashenkov
  */
 public abstract class AbstractEventAccumulator implements EventDispatcher<String> {
 

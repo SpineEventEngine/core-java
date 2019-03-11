@@ -25,8 +25,6 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * The class with event subscriber that returns {@code Object} instead of {@code void}.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidNotVoid extends TestEventSubscriber {
     @Subscribe

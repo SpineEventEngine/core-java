@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -63,7 +64,7 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
@@ -74,7 +75,6 @@ import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.TestValues.random;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispatch;
-import static java.lang.String.valueOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -96,7 +96,7 @@ class ProjectionShould {
 
     @BeforeAll
     static void prepare() {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(Stringifiers.forInteger(), Integer.TYPE);
     }
 
@@ -133,7 +133,7 @@ class ProjectionShould {
         dispatch(projection, integerEvent, EventContext.getDefaultInstance());
         assertTrue(projection.state()
                              .getValue()
-                             .contains(valueOf(integerEvent.getValue())));
+                             .contains(String.valueOf(integerEvent.getValue())));
         assertTrue(projection.isChanged());
     }
 
@@ -167,7 +167,7 @@ class ProjectionShould {
                 .newBuilder()
                 .setId(historyId)
                 .setNewState(pack(aggregateState))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(DispatchedMessageId
                                       .newBuilder()
                                       .setEventId(EventId.newBuilder().setValue(newUuid())))
@@ -223,7 +223,7 @@ class ProjectionShould {
         String projectionState = projection.state().getValue();
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(stringImported.getValue()));
-        assertTrue(projectionState.contains(valueOf(integerImported.getValue())));
+        assertTrue(projectionState.contains(String.valueOf(integerImported.getValue())));
     }
 
     @Test
@@ -276,7 +276,7 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
+        ProtoTruth.assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()

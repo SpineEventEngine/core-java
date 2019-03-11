@@ -34,7 +34,6 @@ import io.spine.server.event.EventReceiver;
  *     <li>Posting a command to handle a rejection using a command posted on behalf of another user.
  * </ul>
  *
- * @author Alexander Yevsyukov
  * @see Command @Command
  */
 public interface Commander extends CommandReceiver, EventReceiver {

@@ -26,9 +26,7 @@ import io.spine.system.server.CompanyId;
 
 /**
  * A repository of {@link CompanyNameProcman}.
- *
- * @author Dmytro Dashenkov
  */
-public class CompanyNameProcmanRepo
+public final class CompanyNameProcmanRepo
         extends ProcessManagerRepository<CompanyId, CompanyNameProcman, CompanyEstablishing> {
 }

@@ -26,8 +26,6 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * Provides a method which accepts first parameter of wrong type.
- *
- * @author Alexander Yevsyukov
  */
 public class RcWrongSecondParam extends TestEventReactor {
 

@@ -26,8 +26,6 @@ import io.spine.test.reflect.command.RefCreateProject;
 
 /**
  * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
- *
- * @author Alexander Yevsyukov
  */
 public class HandlerReturnsNothing extends TestCommandHandler {
 

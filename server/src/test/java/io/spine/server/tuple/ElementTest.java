@@ -39,7 +39,7 @@ class ElementTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        Timestamp time = Time.getCurrentTime();
+        Timestamp time = Time.currentTime();
         new EqualsTester().addEqualityGroup(new Element(time), new Element(time))
                           .addEqualityGroup(new Element(TestValues.newUuidValue()))
                           .addEqualityGroup(new Element(Optional.empty()))
@@ -53,13 +53,13 @@ class ElementTest {
         @Test
         @DisplayName("Message")
         void message() {
-            reserializeAndAssert(new Element(Time.getCurrentTime()));
+            reserializeAndAssert(new Element(Time.currentTime()));
         }
 
         @Test
         @DisplayName("Optional with Message")
         void optionalMessage() {
-            reserializeAndAssert(new Element(Optional.of(Time.getCurrentTime())));
+            reserializeAndAssert(new Element(Optional.of(Time.currentTime())));
         }
 
         @Test

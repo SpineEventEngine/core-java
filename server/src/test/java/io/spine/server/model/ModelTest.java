@@ -43,9 +43,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests of {@link Model}.
- *
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
 @SuppressWarnings("ErrorNotRethrown")
 @DisplayName("Model should")

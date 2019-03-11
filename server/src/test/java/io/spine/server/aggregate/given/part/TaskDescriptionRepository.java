@@ -24,8 +24,6 @@ import io.spine.server.aggregate.AggregatePartRepository;
 
 /**
  * The repository of {@link TaskDescriptionPart}s.
- *
- * @author Alexander Yevsyukov
  */
 public class TaskDescriptionRepository
         extends AggregatePartRepository<String, TaskDescriptionPart, AnAggregateRoot> {

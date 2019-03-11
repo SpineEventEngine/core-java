@@ -28,8 +28,6 @@ import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * Creates {@link EntityRecord}s for tests.
- *
- * @author Alexander Litus
  */
 public class TestEntityStorageRecordFactory {
 

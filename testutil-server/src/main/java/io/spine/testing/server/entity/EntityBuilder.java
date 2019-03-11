@@ -115,12 +115,12 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
 
     /** Returns the class of IDs used by entities. */
     @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the builder.
-    public Class<I> getIdClass() {
+    public Class<I> idClass() {
         return (Class<I>) entityClass().idClass();
     }
 
     private I createDefaultId() {
-        return Identifier.getDefaultValue(getIdClass());
+        return Identifier.defaultValue(idClass());
     }
 
     @Override

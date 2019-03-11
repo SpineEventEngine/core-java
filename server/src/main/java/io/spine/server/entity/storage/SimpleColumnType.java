@@ -25,11 +25,13 @@ import io.spine.annotation.SPI;
 /**
  * A base for implementing {@link ColumnType} interface regardless the type conversion.
  *
- * @param <T> the type of the storage field
- * @param <R> the type of the record in the database, which holds a single cortege of data and
- *            is consumed by the database upon write
- * @param <C> the type of the column identifier in the {@code R}
- * @author Dmytro Dashenkov
+ * @param <T>
+ *         the type of the storage field
+ * @param <R>
+ *         the type of the record in the database, which holds a single cortege of data and
+ *         is consumed by the database upon write
+ * @param <C>
+ *         the type of the column identifier in the {@code R}
  */
 @SPI
 public abstract class SimpleColumnType<T, R, C> implements ColumnType<T, T, R, C> {

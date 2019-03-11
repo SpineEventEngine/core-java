@@ -27,8 +27,6 @@ import io.spine.server.model.HandlerMethod;
  * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
  * its {@link HandlerMethod#rawMethod() wrapped method} does not match
  * {@linkplain MethodSignature method signature}, set for the handler.
- *
- * @author Alex Tymchenko
  */
 public class SignatureMismatchException extends RuntimeException {
 

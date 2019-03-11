@@ -35,7 +35,6 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
  * @param <C> type of the command to test
  * @param <S> the aggregate state type
  * @param <A> the {@link Aggregate} type
- * @author Vladyslav Lubenskyi
  */
 public abstract class AggregateCommandTest<I,
                                            C extends CommandMessage,

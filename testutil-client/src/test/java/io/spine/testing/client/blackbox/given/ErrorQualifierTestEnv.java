@@ -23,9 +23,6 @@ package io.spine.testing.client.blackbox.given;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class ErrorQualifierTestEnv {
 
     /** Prevents instantiation of this utility class. */

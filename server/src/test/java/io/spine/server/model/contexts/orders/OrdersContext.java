@@ -24,10 +24,8 @@ import io.spine.server.BoundedContext;
 
 /**
  * Creates Orders Bounded Context.
- *
- * @author Alexander Yevsyukov
  */
-public class OrdersContext {
+public final class OrdersContext {
 
     private OrdersContext() {
     }

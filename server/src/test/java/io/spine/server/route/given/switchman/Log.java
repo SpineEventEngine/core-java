@@ -50,7 +50,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
         return SwitchmanAbsenceRecorded
                 .newBuilder()
                 .setSwitchmanName(rejection.getSwitchmanName())
-                .setTimestamp(Time.getCurrentTime())
+                .setTimestamp(Time.currentTime())
                 .build();
     }
 

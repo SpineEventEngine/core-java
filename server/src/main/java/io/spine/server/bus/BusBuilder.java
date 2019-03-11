@@ -44,8 +44,6 @@ import static java.util.Optional.ofNullable;
  * @param <E> the type of {@link MessageEnvelope} posted by the bus
  * @param <T> the type of {@link Message} posted by the bus
  * @param <B> the own type of the builder
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
  */
 @CanIgnoreReturnValue
 public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,

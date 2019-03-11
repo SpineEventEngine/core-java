@@ -31,9 +31,8 @@ import io.spine.testing.server.procman.given.pm.CommandingPmRepo;
 /**
  * A sample class which we use for testing
  * {@link io.spine.testing.server.procman.PmCommandOnCommandTest PmCommandOnCommandTest}.
- *
- * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unused")
 public class SamplePmCommandOnCommandTest
         extends PmCommandOnCommandTest<TuProjectId, TuCreateProject, TuPmState, CommandingPm> {
 

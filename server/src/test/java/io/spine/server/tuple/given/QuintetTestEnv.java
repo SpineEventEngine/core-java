@@ -31,9 +31,6 @@ import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newVi
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolin;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolinCello;
 
-/**
- * @author Alexander Yevsyukov
- */
 public class QuintetTestEnv {
 
     /** Prevents instantiation of this utility class. */

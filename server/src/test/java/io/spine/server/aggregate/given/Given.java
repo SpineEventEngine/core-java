@@ -38,7 +38,7 @@ import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 public class Given {
 
@@ -91,11 +91,11 @@ public class Given {
         }
 
         public static Command createProject() {
-            return createProject(getCurrentTime());
+            return createProject(currentTime());
         }
 
         public static Command createProject(ProjectId id) {
-            return createProject(USER_ID, id, getCurrentTime());
+            return createProject(USER_ID, id, currentTime());
         }
 
         public static Command createProject(Timestamp when) {
@@ -111,12 +111,12 @@ public class Given {
 
         public static Command addTask(ProjectId id) {
             AggAddTask command = CommandMessage.addTask(id);
-            return create(command, USER_ID, getCurrentTime());
+            return create(command, USER_ID, currentTime());
         }
 
         public static Command startProject(ProjectId id) {
             AggStartProject command = CommandMessage.startProject(id);
-            return create(command, USER_ID, getCurrentTime());
+            return create(command, USER_ID, currentTime());
         }
 
         /**

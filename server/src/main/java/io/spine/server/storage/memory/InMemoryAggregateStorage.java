@@ -36,8 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I> the type of IDs of aggregates managed by this storage
  *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 

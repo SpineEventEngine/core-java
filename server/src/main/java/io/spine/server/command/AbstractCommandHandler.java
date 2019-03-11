@@ -58,7 +58,6 @@ import static io.spine.server.command.model.CommandHandlerClass.asCommandHandler
  * <p>This class implements {@code CommandDispatcher} dispatching messages
  * to methods declared in the derived classes.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
@@ -88,7 +87,7 @@ public abstract class AbstractCommandHandler
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        CommandHandlerMethod method = thisClass.getHandler(envelope.messageClass());
+        CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
         Result result = method.invoke(this, envelope);
         List<Event> events = result.produceEvents(envelope);
         postEvents(events);
@@ -98,7 +97,7 @@ public abstract class AbstractCommandHandler
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
     public Set<CommandClass> messageClasses() {
-        return thisClass.getCommands();
+        return thisClass.commands();
     }
 
     /**

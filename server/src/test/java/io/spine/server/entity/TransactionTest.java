@@ -40,7 +40,7 @@ import org.mockito.ArgumentMatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,7 +90,7 @@ public abstract class TransactionTest<I,
     }
 
     private static Version someVersion() {
-        return newVersion(42, getCurrentTime());
+        return newVersion(42, currentTime());
     }
 
     protected abstract Transaction<I, E, S, B> createTx(E entity);

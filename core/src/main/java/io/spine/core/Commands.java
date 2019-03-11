@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -31,13 +32,14 @@ import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageValidator;
 
 import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Timestamps2.isBetween;
@@ -50,9 +52,10 @@ import static io.spine.validate.Validate.isNotDefault;
 public final class Commands {
 
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
+    private static final String COMMAND_ID_CANNOT_BE_EMPTY = "Command ID cannot be empty.";
 
     static {
-        StringifierRegistry.getInstance()
+        StringifierRegistry.instance()
                            .register(idStringifier(), CommandId.class);
     }
 
@@ -188,7 +191,7 @@ public final class Commands {
      * working under the same tenant.
      */
     @VisibleForTesting
-    public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
+    static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
         ActorContext a1 = c1.getActorContext();
@@ -214,9 +217,29 @@ public final class Commands {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        String idStr = Identifier.toString(id);
-        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
+        List<ConstraintViolation> violations = validateId(id);
+        checkArgument(violations.isEmpty(), "Command ID is not valid. Violations: %s.", violations);
+        checkArgument(!id.getUuid().isEmpty(), COMMAND_ID_CANNOT_BE_EMPTY);
         return id;
+    }
+
+    /**
+     * Validates the passed command ID.
+     */
+    @Internal
+    public static List<ConstraintViolation> validateId(CommandId id) {
+        MessageValidator validator = MessageValidator.newInstance(id);
+        List<ConstraintViolation> violations = validator.validate();
+        if (id.getUuid().isEmpty()) {
+            return ImmutableList.<ConstraintViolation>builder()
+                    .addAll(violations)
+                    .add(ConstraintViolation
+                                 .newBuilder()
+                                 .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY)
+                                 .build())
+                    .build();
+        }
+        return violations;
     }
 
     /**

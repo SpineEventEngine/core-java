@@ -26,7 +26,6 @@ import io.spine.server.route.EventRoute;
 /**
  * Test environment aggregate repository which can switch default routing of importable events.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.aggregate.EventImportTest
  */
 public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate> {

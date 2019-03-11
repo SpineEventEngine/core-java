@@ -25,14 +25,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Verifies that a command or an event was handled responding with a rejection specified
  * amount of times.
- *
- * @author Mykhailo Drachuk
  */
 final class RejectionCountVerify extends VerifyAcknowledgements {
 
     private final Count expectedCount;
 
-    /** @param expectedCount an amount of rejection that are expected in Bounded Context */
+    /**
+     * Creates a new instance.
+     *
+     * @param expectedCount
+     *         an amount of rejection that are expected in the Bounded Context
+     */
     RejectionCountVerify(Count expectedCount) {
         super();
         this.expectedCount = expectedCount;

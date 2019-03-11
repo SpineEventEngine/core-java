@@ -30,10 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 // OK for the tests. We set right before we get().
 @DisplayName("TenantAwareOperation should")
 class TenantAwareOperationTest {

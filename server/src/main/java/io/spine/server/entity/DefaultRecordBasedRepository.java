@@ -26,8 +26,6 @@ import io.spine.type.TypeUrl;
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class DefaultRecordBasedRepository<I,
                                                    E extends AbstractEntity<I, S>,

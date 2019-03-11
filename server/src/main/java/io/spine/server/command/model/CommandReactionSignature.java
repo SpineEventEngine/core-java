@@ -50,12 +50,12 @@ public class CommandReactionSignature
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(CommandReactionParams.values());
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
     }
 

@@ -26,10 +26,8 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * A reactor with one parameter returning one event.
- *
- * @author Alexander Yevsyukov
  */
-public class RcOneParam extends TestEventReactor {
+public final class RcOneParam extends TestEventReactor {
 
     @React
     RefProjectStarted react(RefProjectCreated event) {

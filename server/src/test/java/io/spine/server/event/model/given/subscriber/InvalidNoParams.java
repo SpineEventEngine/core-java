@@ -24,8 +24,6 @@ import io.spine.core.Subscribe;
 
 /**
  * The subscriber with a method which does not have parameters.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidNoParams extends TestEventSubscriber {
     @Subscribe

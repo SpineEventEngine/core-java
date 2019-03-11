@@ -20,10 +20,6 @@
 
 package io.spine.server.storage.given;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
 public class OperatorEvaluatorTestEnv {
 
     /** Prevents instantiation of this utility class. */

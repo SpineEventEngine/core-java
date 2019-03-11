@@ -36,7 +36,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * Method object for reading {@link AggregateHistory}s.
  *
  * @param <I> the type of aggregate IDs
- * @author Alexander Yevsyukov
  */
 final class ReadOperation<I> {
 

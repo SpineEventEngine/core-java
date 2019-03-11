@@ -30,7 +30,6 @@ import java.util.function.Consumer;
  * Assertions for a commanding method results.
  *
  * @param <S> the type of the tested entity state
- * @author Alexander Yevsyukov
  */
 public class CommanderExpected<S extends Message>
     extends MessageProducingExpected<S, CommanderExpected<S>>{
@@ -66,7 +65,7 @@ public class CommanderExpected<S extends Message>
     /**
      * {@inheritDoc}
      *
-     * @apiNote Overrides to expose the method.
+     * <p>Overrides to expose the method.
      */
     @CanIgnoreReturnValue
     @Override

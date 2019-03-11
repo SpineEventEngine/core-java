@@ -25,8 +25,6 @@ import java.io.Serializable;
 /**
  * A converter which uses {@link Enum}'s {@linkplain Enum#name() name} property to convert the
  * enumerated value into the {@link String} value.
- *
- * @author Dmytro Kuzmin
  */
 final class StringEnumConverter extends EnumConverter {
 

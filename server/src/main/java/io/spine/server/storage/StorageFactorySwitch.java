@@ -37,21 +37,20 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * The {@code Supplier} of {@code StorageFactory} that takes into account if the code runs under
  * tests on in the production mode.
  *
- * <h2>Test mode</h2>
- * <p>Under tests  this class returns {@link InMemoryStorageFactory} if
+ * <p><b>Test mode.</b>
+ * Under tests  this class returns {@link InMemoryStorageFactory} if
  * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
  *
- * <h2>Production mode</h2>
- * <p>In the production mode this class obtains the instance provided by the {@code Supplier} passed
+ * <p><b>Production mode.</b>
+ * In the production mode this class obtains the instance provided by the {@code Supplier} passed
  * via {@link #init(Supplier, Supplier)}. If the production {@code Supplier} was not initialized,
  * {@code IllegalStateException} will be thrown.
  *
- * <h2>Remembering {@code StorageFactory} obtained from suppliers</h2>
+ * <p><b>Remembering {@code StorageFactory} obtained from suppliers.</b>
  * In both modes the reference to the {@code StorageFactory} obtained from a {@code Supplier}
  * will be stored. This means that a call to {@link Supplier#get()} method of
  * the suppliers passed via {@link #init(Supplier, Supplier)} will be made only once.
  *
- * @author Alexander Yevsyukov
  * @see Environment#isTests()
  */
 public final class StorageFactorySwitch implements Supplier<StorageFactory> {

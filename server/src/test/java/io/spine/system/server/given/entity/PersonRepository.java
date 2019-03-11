@@ -25,8 +25,6 @@ import io.spine.system.server.PersonId;
 
 /**
  * A repository of {@link PersonAggregate}.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonRepository
         extends AggregateRepository<PersonId, PersonAggregate> {

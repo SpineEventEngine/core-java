@@ -83,7 +83,7 @@ class EntityBuilderTest {
     @Test
     @DisplayName("obtain entity ID class")
     void getEntityIdClass() {
-        assertEquals(Long.class, givenEntity().getIdClass());
+        assertEquals(Long.class, givenEntity().idClass());
     }
 
     @Test
@@ -92,7 +92,7 @@ class EntityBuilderTest {
         long id = 1024L;
         int version = 100500;
         StringValue state = StringValue.of(getClass().getName());
-        Timestamp timestamp = Time.getCurrentTime();
+        Timestamp timestamp = Time.currentTime();
 
         Entity entity = givenEntity()
                 .withId(id)

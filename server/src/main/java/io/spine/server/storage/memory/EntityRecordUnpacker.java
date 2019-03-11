@@ -30,8 +30,6 @@ import java.util.function.Function;
  * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord}.
  *
  * <p>The {@code null} input is always converted to {@code null}.
- *
- * @author Dmytro Dashenkov
  */
 enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
 

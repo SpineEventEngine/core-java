@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <M> the type of the event message to test
  * @param <S> the type of the state message of the handling entity
  * @param <E> the type of the event subscriber being tested
- * @author Vladyslav Lubenskyi
  */
 @CheckReturnValue
 public abstract class EventSubscriptionTest<I,

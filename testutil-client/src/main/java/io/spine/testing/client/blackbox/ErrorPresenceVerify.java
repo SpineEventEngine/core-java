@@ -26,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Verifies that a command or an event was handled responding with some {@link Error error}.
- *
- * @author Mykhailo Drachuk
  */
 final class ErrorPresenceVerify extends VerifyAcknowledgements {
 

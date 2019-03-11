@@ -37,10 +37,10 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  *
  * <p>Each such part would:
  * <ul>
- *     <li>be a class derived from {@code AggregatePart}
- *     <li>have the same aggregate ID as other parts belonging to the same business object
- *     <li>have own state defined as a Protobuf message
- *     <li>managed by a separate repository class derived from {@link AggregateRepository}
+ *   <li>be a class derived from {@code AggregatePart}
+ *   <li>have the same aggregate ID as other parts belonging to the same business object
+ *   <li>have own state defined as a Protobuf message
+ *   <li>managed by a separate repository class derived from {@link AggregateRepository}
  * </ul>
  *
  * <p>In order to access parts of the aggregate {@link AggregateRoot} should be used.
@@ -48,11 +48,14 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  * <p>If your business logic cannot be split into parts that can be modified separately,
  * consider extending {@link Aggregate} instead of several {@code AggregatePart}s.
  *
- * @param <I> the type for IDs of this class of aggregates
- * @param <S> the type of the state held by the aggregate part
- * @param <B> the type of the aggregate part state builder
- * @param <R> the type of the aggregate root
- * @author Alexander Yevsyukov
+ * @param <I>
+ *         the type for IDs of this class of aggregates
+ * @param <S>
+ *         the type of the state held by the aggregate part
+ * @param <B>
+ *         the type of the aggregate part state builder
+ * @param <R>
+ *         the type of the aggregate root
  * @see Aggregate
  */
 public abstract class AggregatePart<I,
@@ -126,7 +129,7 @@ public abstract class AggregatePart<I,
         }
 
         @Override
-        public int getIndex() {
+        public int index() {
             return this.index;
         }
     }

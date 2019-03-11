@@ -45,8 +45,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>{@code CommandAckMonitor} is designed to wrap instances of {@link StreamObserver}.
  * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
  * invoke respective methods on a {@code delegate} instance.
- *
- * @author Dmytro Dashenkov
  */
 final class CommandAckMonitor implements StreamObserver<Ack> {
 

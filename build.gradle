@@ -39,7 +39,10 @@ buildscript { final scriptHandler ->
     configurations.all {
         resolutionStrategy {
             //noinspection GroovyAssignabilityCheck
-            force "io.spine:spine-base:$spineBaseVersion"
+            force(
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-time:$spineTimeVersion"
+            )
         }
     }
 }
@@ -172,7 +175,10 @@ subprojects {
         all {
             resolutionStrategy {
                 //noinspection GroovyAssignabilityCheck
-                force "io.spine:spine-base:$spineBaseVersion"
+                force(
+                        "io.spine:spine-base:$spineBaseVersion",
+                        "io.spine:spine-time:$spineTimeVersion"
+                )
             }
         }
         // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`

@@ -26,8 +26,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link ColumnValueConverter} which returns the same value as a result of the conversion.
- *
- * @author Dmytro Kuzmin
  */
 final class IdentityConverter implements ColumnValueConverter {
 

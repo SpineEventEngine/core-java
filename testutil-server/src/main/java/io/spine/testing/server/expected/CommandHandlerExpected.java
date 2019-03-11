@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Assertions for a command handler invocation results.
  *
  * @param <S> the type of the tested entity state
- * @author Dmytro Dashenkov
  */
 public class CommandHandlerExpected<S extends Message>
         extends MessageProducingExpected<S, CommandHandlerExpected<S>> {

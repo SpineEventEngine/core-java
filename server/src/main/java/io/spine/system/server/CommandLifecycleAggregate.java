@@ -31,7 +31,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.system.server.Substituted.Sequence;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 /**
  * The aggregate representing the lifecycle of a command.
@@ -39,14 +39,11 @@ import static io.spine.base.Time.getCurrentTime;
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
  */
-@SuppressWarnings({
-        "OverlyCoupledClass"  /* OK for an aggregate class. */,
-        "PMD.MissingStaticMethodInNonInstantiatableClass" /* Instantiated via reflection. */
-})
+/* Instantiated via reflection. */
 final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 
-    private CommandLifecycleAggregate(CommandId id) {
+    CommandLifecycleAggregate(CommandId id) {
         super(id);
     }
 
@@ -77,7 +74,7 @@ final class CommandLifecycleAggregate
         ensureId();
         CommandTimeline status = CommandTimeline
                 .newBuilder()
-                .setWhenReceived(getCurrentTime())
+                .setWhenReceived(currentTime())
                 .build();
         builder().setCommand(event.getPayload())
                  .setStatus(status);
@@ -93,7 +90,7 @@ final class CommandLifecycleAggregate
     private void on(@SuppressWarnings("unused") CommandAcknowledged event) {
         ensureId();
         CommandTimeline status = statusBuilder()
-                .setWhenAcknowledged(getCurrentTime())
+                .setWhenAcknowledged(currentTime())
                 .build();
         builder().setStatus(status);
     }
@@ -103,7 +100,7 @@ final class CommandLifecycleAggregate
         ensureId();
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
-                .setWhenScheduled(getCurrentTime())
+                .setWhenScheduled(currentTime())
                 .build();
         builder().setCommand(updatedCommand)
                  .setStatus(status);
@@ -118,7 +115,7 @@ final class CommandLifecycleAggregate
     private void on(@SuppressWarnings("unused") CommandDispatched event) {
         ensureId();
         CommandTimeline status = statusBuilder()
-                .setWhenDispatched(getCurrentTime())
+                .setWhenDispatched(currentTime())
                 .build();
         builder().setStatus(status);
     }
@@ -136,7 +133,7 @@ final class CommandLifecycleAggregate
         CommandTimeline status =
                 builder.getStatus()
                        .toBuilder()
-                       .setWhenTargetAssigned(getCurrentTime())
+                       .setWhenTargetAssigned(currentTime())
                        .build();
         builder.setStatus(status)
                .setTarget(target);
@@ -231,7 +228,7 @@ final class CommandLifecycleAggregate
 
     private void setStatus(Status status) {
         CommandTimeline commandStatus = statusBuilder()
-                .setWhenHandled(getCurrentTime())
+                .setWhenHandled(currentTime())
                 .setHowHandled(status)
                 .build();
         builder().setStatus(commandStatus);

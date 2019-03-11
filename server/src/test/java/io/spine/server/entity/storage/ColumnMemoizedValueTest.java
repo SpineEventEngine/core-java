@@ -36,9 +36,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Column MemoizedValue should")
 class ColumnMemoizedValueTest {

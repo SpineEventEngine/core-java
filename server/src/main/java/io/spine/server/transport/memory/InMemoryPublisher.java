@@ -34,8 +34,6 @@ import java.util.function.Function;
  * An in-memory implementation of the {@link Publisher}.
  *
  * <p>To use only in scope of the same JVM as {@linkplain InMemorySubscriber subscribers}.
- *
- * @author Alex Tymchenko
  */
 public final class InMemoryPublisher extends AbstractChannel implements Publisher {
 

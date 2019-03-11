@@ -37,9 +37,6 @@ import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.reje
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Vladyslav Lubenskyi
- */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("CommandHandlerExpected should")
 class CommandHandlerExpectedTest {

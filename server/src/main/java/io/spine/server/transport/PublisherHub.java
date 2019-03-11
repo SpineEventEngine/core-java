@@ -26,8 +26,6 @@ import io.spine.server.integration.ChannelId;
  *
  * <p>Creates and manages the existing publisher channels born
  * in the given {@linkplain TransportFactory}.
- *
- * @author Alex Tymchenko
  */
 public class PublisherHub extends ChannelHub<Publisher> {
 

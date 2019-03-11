@@ -28,9 +28,6 @@ import static io.spine.core.BoundedContextNames.newName;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("InMemoryStorageFactory should")
 class InMemoryStorageFactoryTest {
 

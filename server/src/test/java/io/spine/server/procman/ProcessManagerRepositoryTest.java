@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -86,7 +87,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -110,7 +111,6 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -201,7 +201,7 @@ class ProcessManagerRepositoryTest
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        setCurrentTenant(requestFactory.getTenantId());
+        setCurrentTenant(requestFactory.tenantId());
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
@@ -283,7 +283,8 @@ class ProcessManagerRepositoryTest
 
         PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
-        assertEquals(ID, message.getProjectId());
+        Truth.assertThat(message.getProjectId())
+             .isEqualTo(ID);
     }
 
     @Nested
@@ -522,7 +523,7 @@ class ProcessManagerRepositoryTest
         assertTrue(filter.filter(arbitraryEvent)
                          .isPresent());
 
-        Any newState = pack(getCurrentTime());
+        Any newState = pack(currentTime());
         EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState).value())

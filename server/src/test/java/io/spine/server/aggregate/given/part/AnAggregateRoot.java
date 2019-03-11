@@ -25,8 +25,6 @@ import io.spine.server.aggregate.AggregateRoot;
 
 /**
  * An aggregate root class with string ID.
- *
- * @author Alexander Yevsyukov
  */
 public class AnAggregateRoot extends AggregateRoot<String> {
 

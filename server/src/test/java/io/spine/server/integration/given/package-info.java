@@ -20,8 +20,6 @@
 
 /**
  * Test environment classes for tests of the {@code io.spine.server.integration} package.
- *
- * @author Alex Tymchenko
  */
 
 @CheckReturnValue

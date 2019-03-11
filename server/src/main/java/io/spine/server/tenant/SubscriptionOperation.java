@@ -26,8 +26,6 @@ import io.spine.client.Subscription;
  * A tenant-aware operation performed in relation to
  * a {@link Subscription} subscription processing} done in
  * {@linkplain io.spine.server.stand.Stand Stand}.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public abstract class SubscriptionOperation extends ActorRequestOperation {

@@ -40,14 +40,12 @@ import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching events to a {@code Projection} in test purposes.
- *
- * @author Alex Tymchenko
  */
 @VisibleForTesting
 public class ProjectionEventDispatcher {
 
+    /** Prevents instantiation from outside. */
     private ProjectionEventDispatcher() {
-        // Prevent from instantiation.
     }
 
     /**

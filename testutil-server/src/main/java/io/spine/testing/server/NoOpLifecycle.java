@@ -30,8 +30,6 @@ import io.spine.type.TypeUrl;
 
 /**
  * A test implementation of {@link EntityLifecycle} which performs no action on any method call.
- *
- * @author Dmytro Dashenkov
  */
 public final class NoOpLifecycle extends EntityLifecycle {
 

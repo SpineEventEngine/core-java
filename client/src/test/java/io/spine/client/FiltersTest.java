@@ -34,7 +34,7 @@ import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class FiltersTest {
 
     private static final String FIELD_PATH = "some.field.path";
-    private static final Timestamp REQUESTED_VALUE = getCurrentTime();
+    private static final Timestamp REQUESTED_VALUE = currentTime();
     private static final String ENUM_FIELD_PATH = "enum.field";
     private static final Operator ENUM_VALUE = EQUAL;
 
