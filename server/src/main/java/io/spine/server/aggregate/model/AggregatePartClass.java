@@ -78,7 +78,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      */
     @Override
     protected EntityFactory<A> createFactory() {
-        return new PartFactory<>(idClass(), value(), rootClass());
+        return new PartFactory<>(value(), rootClass());
     }
 
     /**
