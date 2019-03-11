@@ -52,7 +52,11 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
      */
     private static final String ADVISE_CHECK_ROUTING = " Check for message routing mistakes.";
 
-    private transient boolean usingDefaultConstructor;
+    /**
+     * If {@code true}, the factory uses default constructor of the entity.
+     * If {@code false}, the constructor with ID parameter is used.
+     */
+    private transient boolean usesDefaultConstructor;
 
     /**
      * Creates new instance.
@@ -72,7 +76,7 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
         Constructor<E> ctor = constructor();
         try {
             E result;
-            if (usesDefaultConstructor()) {
+            if (usesDefaultConstructor) {
                 result = ctor.newInstance();
                 setId(result, id);
             } else {
@@ -146,7 +150,7 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
                         entityClass, AbstractEntity.class.getName(), SET_ID_METHOD_NAME, idClass
                 );
             }
-            usingDefaultConstructor = true;
+            usesDefaultConstructor = true;
             return result;
         }
         return null;
@@ -160,7 +164,7 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
         Class<?> actualArgumentType = argument.getClass();
 
         Class<?> idClass = idClass();
-        if (usesDefaultConstructor()) {
+        if (usesDefaultConstructor) {
             checkArgument(
                     idClass.isAssignableFrom(actualArgumentType),
                     "`%s()` argument type mismatch: expected `%s`, but was: `%s`.",
@@ -181,9 +185,5 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
                       errorMessage,
                       actualArgumentType.getName(),
                       firstParamType.getName());
-    }
-
-    private boolean usesDefaultConstructor() {
-        return usingDefaultConstructor;
     }
 }
