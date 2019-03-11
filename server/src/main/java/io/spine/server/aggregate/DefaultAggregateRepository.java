@@ -18,12 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.server.aggregate;
 
-import io.spine.server.projection.ProjectionRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
-import io.spine.testing.server.blackbox.BbProjectView;
+import io.spine.server.aggregate.model.AggregateClass;
 
-public class BbProjectViewRepository
-        extends ProjectionRepository<BbProjectId, BbProjectViewProjection, BbProjectView> {
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+
+/**
+ * Default implementation of {@code AggregateRepository}.
+ */
+public final class DefaultAggregateRepository<I, A extends Aggregate<I, ?, ?>>
+    extends AggregateRepository<I, A> {
+
+    private final AggregateClass<A> modelClass;
+
+    /**
+     * Creates a new repository for managing aggregates of the passed class.
+     */
+    public DefaultAggregateRepository(Class<A> cls) {
+        this.modelClass = asAggregateClass(cls);
+    }
+
+    /**
+     * Obtains the class of aggregates managed by this repository.
+     */
+    @Override
+    protected AggregateClass<A> entityModelClass() {
+        return modelClass;
+    }
 }

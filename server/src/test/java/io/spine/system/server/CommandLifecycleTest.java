@@ -37,12 +37,12 @@ import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.system.server.given.command.CommandLifecycleWatcher;
 import io.spine.system.server.given.command.CompanyAggregate;
 import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
-import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
@@ -84,7 +84,7 @@ class CommandLifecycleTest {
                 .build();
         system = systemOf(context);
 
-        context.register(new CompanyRepository());
+        context.register(DefaultRepository.of(CompanyAggregate.class));
         context.register(new CompanyNameProcmanRepo());
     }
 

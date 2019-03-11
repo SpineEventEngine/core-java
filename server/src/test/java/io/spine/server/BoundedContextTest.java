@@ -33,7 +33,7 @@ import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectCreationRepository;
 import io.spine.server.bc.given.ProjectPmRepo;
 import io.spine.server.bc.given.ProjectProjectionRepo;
-import io.spine.server.bc.given.ProjectRemovalRepository;
+import io.spine.server.bc.given.ProjectRemovalProcman;
 import io.spine.server.bc.given.ProjectReportRepository;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
@@ -247,14 +247,13 @@ class BoundedContextTest {
         Set<Repository<?, ?>> sameStateRepositories =
                 ImmutableSet.of(new AnotherProjectAggregateRepository(),
                                 new FinishedProjectProjectionRepo(),
-                                new ProjectRemovalRepository());
+                                DefaultRepository.of(ProjectRemovalProcman.class));
 
         Set<List<Repository<?, ?>>> cartesianProduct = Sets.cartesianProduct(repositories,
                                                                              sameStateRepositories);
         Stream<Arguments> result = cartesianProduct.stream()
                                                    .map(repos -> Arguments.of(repos.get(0),
                                                                               repos.get(1)));
-
         return result;
     }
 

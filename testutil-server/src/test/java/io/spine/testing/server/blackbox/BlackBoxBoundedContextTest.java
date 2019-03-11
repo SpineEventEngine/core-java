@@ -26,6 +26,7 @@ import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.DefaultRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
@@ -37,9 +38,8 @@ import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbInitProcess;
-import io.spine.testing.server.blackbox.given.BbInitRepository;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
-import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
+import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
@@ -89,8 +89,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @BeforeEach
     void setUp() {
         context = newInstance().with(new BbProjectRepository(),
-                                     new BbProjectViewRepository(),
-                                     new BbInitRepository());
+                                     DefaultRepository.of(BbProjectViewProjection.class),
+                                     DefaultRepository.of(BbInitProcess.class));
     }
 
     @AfterEach
@@ -308,7 +308,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(
                 new BbProjectRepository(),
-                new BbProjectViewRepository()
+                DefaultRepository.of(BbProjectViewProjection.class)
         );
 
         private final Set<TypeName> types = toTypes(repositories);

@@ -18,11 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.server.aggregate;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.testing.server.blackbox.BbInit;
-import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.server.aggregate.model.AggregatePartClass;
 
-public class BbInitRepository extends ProcessManagerRepository<BbProjectId, BbInitProcess, BbInit> {
+import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
+
+/**
+ * Default implementation of {@code AggregatePartRepository}.
+ */
+public final class DefaultAggregatePartRepository<I,
+                                                  A extends AggregatePart<I, ?, ?, R>,
+                                                  R extends AggregateRoot<I>>
+    extends AggregatePartRepository<I, A, R> {
+
+    private final AggregatePartClass<A> modelClass;
+
+    /**
+     * Creates a new repository for managing aggregate parts of the passed class.
+     */
+    public DefaultAggregatePartRepository(Class<A> cls) {
+        this.modelClass = asAggregatePartClass(cls);
+    }
+
+    /**
+     * Obtains the class of aggregates parts managed by this repository.
+     */
+    @Override
+    protected AggregatePartClass<A> entityModelClass() {
+        return modelClass;
+    }
 }

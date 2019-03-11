@@ -132,7 +132,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains model class for the entities managed by this repository.
      */
-    protected final EntityClass<E> entityModelClass() {
+    protected EntityClass<E> entityModelClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
             Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
