@@ -35,6 +35,7 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -223,6 +224,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
         return boundedContext.eventBus();
     }
 
+    /** Obtains {@code command bus} instance used by this bounded context. */
+    public CommandBus commandBus() {
+        return boundedContext.commandBus();
+    }
+
     /**
      * Registers passed repositories with the Bounded Context under the test.
      *
@@ -245,6 +251,18 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     @CanIgnoreReturnValue
     public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
         return registerAll(boundedContext::registerEventDispatcher, dispatchers);
+    }
+
+    /**
+     * Registers the specified command dispatchers with this bounded context.
+     *
+     * @param dispatchers
+     *         command dispatchers to register with the bounded context
+     * @return current instance
+     */
+    @CanIgnoreReturnValue
+    public final T withHandlers(CommandDispatcher<?>... dispatchers) {
+        return registerAll(boundedContext::registerCommandDispatcher, dispatchers);
     }
 
     @SafeVarargs

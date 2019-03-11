@@ -217,9 +217,8 @@ public final class Commands {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        List<ConstraintViolation> violations = validateId(id);
-        checkArgument(violations.isEmpty(), "Command ID is not valid. Violations: %s.", violations);
-        checkArgument(!id.getUuid().isEmpty(), COMMAND_ID_CANNOT_BE_EMPTY);
+        String idStr = Identifier.toString(id);
+        checkArgument(!Identifier.isEmpty(idStr), "Command ID must not be an empty string.");
         return id;
     }
 
