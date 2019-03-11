@@ -35,7 +35,6 @@ import java.util.Set;
  *
  * <p>Attempting to register them with the same bounded context should result in an exception.
  */
-
 public class BbDuplicateCommandDispatcher extends AbstractCommandDispatcher {
 
     private int commandsReceived = 0;
