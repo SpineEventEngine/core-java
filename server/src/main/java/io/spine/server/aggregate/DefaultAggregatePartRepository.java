@@ -38,6 +38,7 @@ public final class DefaultAggregatePartRepository<I,
      * Creates a new repository for managing aggregate parts of the passed class.
      */
     public DefaultAggregatePartRepository(Class<A> cls) {
+        super();
         this.modelClass = asAggregatePartClass(cls);
     }
 

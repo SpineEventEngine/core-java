@@ -17,6 +17,7 @@ public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S ext
      * Creates a new repository managing projections of the passed class.
      */
     public DefaultProjectionRepository(Class<P> cls) {
+        super();
         this.modelClass = asProjectionClass(cls);
     }
 

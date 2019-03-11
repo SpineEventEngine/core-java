@@ -36,6 +36,7 @@ public final class DefaultAggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Creates a new repository for managing aggregates of the passed class.
      */
     public DefaultAggregateRepository(Class<A> cls) {
+        super();
         this.modelClass = asAggregateClass(cls);
     }
 

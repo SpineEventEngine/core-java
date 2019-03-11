@@ -19,6 +19,7 @@ public final class DefaultProcessManagerRepository<I,
      * Creates a new repository managing process managers of the passed class.
      */
     public DefaultProcessManagerRepository(Class<P> cls) {
+        super();
         this.modelClass = asProcessManagerClass(cls);
     }
 
