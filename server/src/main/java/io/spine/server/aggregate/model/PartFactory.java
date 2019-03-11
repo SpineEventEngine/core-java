@@ -22,10 +22,11 @@ package io.spine.server.aggregate.model;
 
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
-import io.spine.server.entity.model.DefaultEntityFactory;
+import io.spine.server.entity.model.AbstractEntityFactory;
 import io.spine.server.model.ModelError;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,7 +35,7 @@ import static java.lang.String.format;
 /**
  * Creates aggregate parts passing the root class to the constructor.
  */
-final class PartFactory<A extends AggregatePart> extends DefaultEntityFactory<A> {
+final class PartFactory<A extends AggregatePart> extends AbstractEntityFactory<A> {
 
     private static final long serialVersionUID = 0L;
 
@@ -45,6 +46,20 @@ final class PartFactory<A extends AggregatePart> extends DefaultEntityFactory<A>
                 Class<? extends AggregateRoot> rootClass) {
         super(idClass, aggregatePartClass);
         this.rootClass = checkNotNull(rootClass);
+    }
+
+    /**
+     * Creates an aggregate part with the passed root.
+     */
+    @Override
+    public A create(Object root) {
+        Constructor<A> ctor = constructor();
+        try {
+            A aggregatePart = ctor.newInstance(root);
+            return aggregatePart;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**

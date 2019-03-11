@@ -22,148 +22,168 @@ package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityFactory;
 import io.spine.server.model.ModelError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 
 /**
  * Default implementation of entity factory which creates entities by invoking constructor
  * which accepts entity ID.
  */
-public class DefaultEntityFactory<E extends Entity> implements EntityFactory<E> {
+final class DefaultEntityFactory<E extends Entity> extends AbstractEntityFactory<E> {
 
     private static final long serialVersionUID = 0L;
-    private final Class<?> idClass;
-    private final Class<E> entityClass;
 
     /**
-     * The constructor for entities of this class.
-     *
-     * <p>If the entity class has multiple constructors, this one points to the one which
-     * accepts one parameter.
-     *
-     * @see #constructor()
+     * The method which the factory would use for setting an entity ID, if the entity class
+     * does not have a constructor which accepts the ID.
      */
-    @LazyInit
-    @SuppressWarnings("Immutable") // effectively
-    private transient volatile @MonotonicNonNull Constructor<E> constructor;
+    private static final String SET_ID_METHOD_NAME = "setId";
 
     /**
-     * The type of the first constructor parameter, if any.
-     * {@code null} if the constructor does not accept parameters.
+     * Diagnostics message suffix for wrong type of an entity identifier.
+     */
+    private static final String ADVISE_CHECK_ROUTING = " Check for message routing mistakes.";
+
+    /**
+     * The method of setting entity identifier. Is not {@code null} if the entity class does
+     * not declare a constructor which accepts the single parameter.g
      */
     @LazyInit
-    @SuppressWarnings("Immutable") // effectively
-    private transient volatile @MonotonicNonNull Class<?> firstParameterType;
+    private transient volatile @MonotonicNonNull Method setIdMethod;
 
-    protected DefaultEntityFactory(Class<?> idClass, Class<E> entityClass) {
-        this.idClass = checkNotNull(idClass);
-        this.entityClass = checkNotNull(entityClass);
+    DefaultEntityFactory(Class<?> idClass, Class<E> entityClass) {
+        super(idClass, entityClass);
     }
 
     @Override
-    public E create(Object constructionArgument) {
+    public E create(Object id) {
+        checkArgumentMatches(id);
+        E result = doCreate(id);
+        return result;
+    }
+
+    private E doCreate(Object id) {
         Constructor<E> ctor = constructor();
-        //TODO:2019-03-10:alexander.yevsyukov: Have d-tour if we have parameterless ctor.
-        checkArgumentMatches(constructionArgument);
         try {
-            E result = ctor.newInstance(constructionArgument);
+            E result;
+            if (!usesDefaultConstructor()) {
+                result = ctor.newInstance(id);
+            } else {
+                result = ctor.newInstance();
+                setIdMethod.invoke(result, id);
+            }
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    protected Class<E> entityClass() {
-        return entityClass;
-    }
-
     @Override
-    @SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
-    public Constructor<E> constructor() {
-        Constructor<E> result = constructor;
-        if (result == null) {
-            synchronized (this) {
-                result = constructor;
-                if (result == null) {
-                    constructor = findConstructor();
-                    result = constructor;
-                    Class<?>[] parameterTypes = result.getParameterTypes();
-                    firstParameterType =
-                            (parameterTypes.length > 0)
-                            ? parameterTypes[0]
-                            : null;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Obtains the constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     *
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
     protected Constructor<E> findConstructor() {
         Constructor<E> result;
-        try {
-            result = entityClass.getDeclaredConstructor(idClass);
-            result.setAccessible(true);
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        Constructor<?>[] constructors = entityClass().getDeclaredConstructors();
+        result = idConstructorIn(constructors);
+
+        if (result == null) {
+            result = defaultConstructorIn(constructors);
         }
+
+        if (result == null) {
+            throw new ModelError(
+                "The entity class `%s` must have either a constructor which accepts `%s` as a" +
+                " single parameter or default constructor and `%s()` method.",
+                entityClass(), idClass(), SET_ID_METHOD_NAME
+            );
+        }
+
+        result.setAccessible(true);
         return result;
+    }
+
+    private @Nullable Constructor<E> idConstructorIn(Constructor<?>[] constructors) {
+        @SuppressWarnings("unchecked") // ensured by the generic parameter of this class.
+                Constructor<E> result = (Constructor<E>)
+                Arrays.stream(constructors)
+                      .filter(c -> {
+                          Class<?>[] parameterTypes = c.getParameterTypes();
+                          return parameterTypes.length == 1
+                                  && idClass().equals(parameterTypes[0]);
+                      })
+                      .findAny()
+                      .orElse(null);
+        return result;
+    }
+
+    private @Nullable Constructor<E> defaultConstructorIn(Constructor<?>[] constructors) {
+        Optional<Constructor<?>> defaultCtor =
+                Arrays.stream(constructors)
+                      .filter(c -> c.getParameterTypes().length == 0)
+                      .findAny();
+
+        if (defaultCtor.isPresent()) {
+            @SuppressWarnings("unchecked") // ensured by the generic parameter of this class.
+            Constructor<E> result = (Constructor<E>) defaultCtor.get();
+            Class<?> idClass = idClass();
+            Class<E> entityClass = entityClass();
+            try {
+                setIdMethod = entityClass.getDeclaredMethod(SET_ID_METHOD_NAME, idClass);
+            } catch (NoSuchMethodException e) {
+                throw (ModelError) new ModelError(
+                        "The entity class `%s` does not have a constructor which accepts the ID" +
+                                " class `%s` as s single parameter." +
+                                " The entity class has the default constructor." +
+                                " Please provide the `%s()` method.",
+                        entityClass, idClass, SET_ID_METHOD_NAME
+                ).initCause(e);
+            }
+            return result;
+        }
+        return null;
     }
 
     private void checkArgumentMatches(Object argument) {
-        checkState(firstParameterType != null,
-                   "The entity class `%s` does not have a constructor which accepts one parameter.",
-                   entityClass.getName());
+        // Ensure we have the constructor, and if it parameterized, it's first parameter type.
+        // If not, we must have the method for setting ID.
+        checkNotNull(constructor());
+
         Class<?> actualArgumentType = argument.getClass();
+
+        Class<?> idClass = idClass();
+        if (usesDefaultConstructor()) {
+            checkArgument(
+                    idClass.isAssignableFrom(actualArgumentType),
+                    "`%s()` argument type mismatch: expected `%s`, but was: `%s`.",
+                    SET_ID_METHOD_NAME, idClass, actualArgumentType
+            );
+            return;
+        }
+
+        Class<?> firstParamType = firstParameterType();
+        checkState(firstParamType != null,
+                   "The entity class `%s` does not have a constructor which" +
+                           " accepts ID parameter of type `%s`.",
+                   entityClass().getName(), idClass.getName());
         String errorMessage =
-                "Constructor argument type mismatch: expected `%s`, but was `%s`." +
-                " Check for message routing mistakes.";
-        checkArgument(firstParameterType.isAssignableFrom(actualArgumentType),
+                "Argument type mismatch: expected `%s`, but was `%s`." +
+                        ADVISE_CHECK_ROUTING;
+        checkArgument(firstParamType.isAssignableFrom(actualArgumentType),
                       errorMessage,
                       actualArgumentType.getName(),
-                      firstParameterType.getName());
+                      firstParamType.getName());
     }
 
-    private static ModelError noSuchConstructor(String entityClass, String idClass) {
-        String errMsg = format(
-                "%s class must declare a constructor with a single %s ID parameter.",
-                entityClass, idClass
-        );
-        return new ModelError(new NoSuchMethodException(errMsg));
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(idClass, entityClass);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof DefaultEntityFactory)) {
-            return false;
-        }
-        final DefaultEntityFactory other = (DefaultEntityFactory) obj;
-        return Objects.equals(this.idClass, other.idClass)
-                && Objects.equals(this.entityClass, other.entityClass);
+    private boolean usesDefaultConstructor() {
+        return setIdMethod != null;
     }
 }
