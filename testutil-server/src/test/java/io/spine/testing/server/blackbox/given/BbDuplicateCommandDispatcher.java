@@ -30,23 +30,25 @@ import io.spine.server.type.CommandEnvelope;
 import java.util.Set;
 
 /**
- * Increments a counter on receiving a command of the specified type.
+ * A command dispatcher that dispatches the same type of commands as
+ * {@link io.spine.testing.server.blackbox.given.BbCommandDispatcher}.
  *
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContextTest#registerCommandDispatchers
+ * <p>Attempting to register them with the same bounded context should result in an exception.
  */
-public class BbCommandDispatcher extends AbstractCommandDispatcher {
+
+public class BbDuplicateCommandDispatcher extends AbstractCommandDispatcher {
 
     private int commandsReceived = 0;
-    private final CommandClass commandToDispatch;
+    private final CommandClass commandToIntercept;
 
-    public BbCommandDispatcher(EventBus eventBus, CommandClass commandToDispatch) {
+    public BbDuplicateCommandDispatcher(EventBus eventBus, CommandClass commandToIntercept) {
         super(eventBus);
-        this.commandToDispatch = commandToDispatch;
+        this.commandToIntercept = commandToIntercept;
     }
 
     @Override
     public Set<CommandClass> messageClasses() {
-        return ImmutableSet.of(commandToDispatch);
+        return ImmutableSet.of(commandToIntercept);
     }
 
     @CanIgnoreReturnValue

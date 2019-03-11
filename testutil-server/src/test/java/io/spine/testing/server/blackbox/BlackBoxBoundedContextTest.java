@@ -41,6 +41,7 @@ import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
+import io.spine.testing.server.blackbox.given.BbDuplicateCommandDispatcher;
 import io.spine.testing.server.blackbox.given.BbEventDispatcher;
 import io.spine.testing.server.blackbox.given.BbInitProcess;
 import io.spine.testing.server.blackbox.given.BbInitRepository;
@@ -118,22 +119,27 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @Test
     @DisplayName("register command dispatchers")
     void registerCommandDispatchers() {
-        CommandClass commandTypeToIntercept = CommandClass.from(BbRegisterCommandDispatcher.class);
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
         BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
-                                                                 commandTypeToIntercept);
+                                                                 commandTypeToDispatch);
         context.withHandlers(dispatcher);
         context.receivesCommand(registerCommandDispatcher(dispatcher.getClass()));
-        assertThat(dispatcher.commandsIntercepted()).isEqualTo(1);
+        assertThat(dispatcher.commandsDispatched()).isEqualTo(1);
     }
 
     @Test
     @DisplayName("throw on an attempt to register duplicate command dispatchers")
     void throwOnDuplicateCommandDispatchers() {
-        CommandClass commandTypeToIntercept = CommandClass.from(BbRegisterCommandDispatcher.class);
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
         BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
-                                                                 commandTypeToIntercept);
+                                                                 commandTypeToDispatch);
         context.withHandlers(dispatcher);
-        assertThrows(IllegalArgumentException.class, () -> context.withHandlers(dispatcher));
+        BbDuplicateCommandDispatcher duplicateDispatcher =
+                new BbDuplicateCommandDispatcher(context.eventBus(),
+                                                 commandTypeToDispatch);
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> context.withHandlers(duplicateDispatcher));
     }
 
     @Test
@@ -146,9 +152,9 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @Test
     @DisplayName("throw on an attempt to register several command dispatchers one of which is null")
     void throwOnOneOfNull() {
-        CommandClass commandTypeToIntercept = CommandClass.from(BbRegisterCommandDispatcher.class);
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
         BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
-                                                                 commandTypeToIntercept);
+                                                                 commandTypeToDispatch);
         assertThrows(NullPointerException.class, () -> context.withHandlers(dispatcher, null));
     }
 
