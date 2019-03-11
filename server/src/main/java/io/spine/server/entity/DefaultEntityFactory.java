@@ -102,8 +102,8 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
 
         if (result == null) {
             throw new ModelError(
-                "The entity class `%s` must have either a constructor which accepts `%s` as a" +
-                " single parameter or default constructor and `%s()` method.",
+                "The entity class `%s` must have either a constructor which accepts `%s` as" +
+                " a single parameter, or a default constructor and `%s()` method.",
                 entityClass(), idClass(), SET_ID_METHOD_NAME
             );
         }
