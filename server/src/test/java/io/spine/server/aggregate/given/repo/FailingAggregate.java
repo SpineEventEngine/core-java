@@ -55,10 +55,6 @@ import static java.util.Collections.emptyList;
  */
 class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateVBuilder> {
 
-    private FailingAggregate(Long id) {
-        super(id);
-    }
-
     @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
     static long toId(FloatEncountered message) {
         float floatValue = message.getNumber();

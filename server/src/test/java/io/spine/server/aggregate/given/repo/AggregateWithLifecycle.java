@@ -40,10 +40,6 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 public class AggregateWithLifecycle
         extends Aggregate<Long, StringAggregate, StringAggregateVBuilder> {
 
-    private AggregateWithLifecycle(Long id) {
-        super(id);
-    }
-
     @Assign
     Evaluated handle(Evaluate commandMessage) {
         String command = commandMessage.getCmd();

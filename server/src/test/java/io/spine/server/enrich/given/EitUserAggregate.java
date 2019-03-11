@@ -30,10 +30,6 @@ import io.spine.server.enrich.given.event.EitUserAccountCreatedVBuilder;
 
 class EitUserAggregate extends Aggregate<UserId, EitUserAccount, EitUserAccountVBuilder> {
 
-    EitUserAggregate(UserId id) {
-        super(id);
-    }
-
     @Assign
     EitUserAccountCreated handle(EitRegisterUser cmd) {
         return EitUserAccountCreatedVBuilder

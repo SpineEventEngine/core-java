@@ -79,7 +79,7 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
 
     @Override
     public Set<EventClass> messageClasses() {
-        return thisClass.eventClasses();
+        return thisClass.incomingEvents();
     }
 
     @CanIgnoreReturnValue
@@ -92,8 +92,8 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
 
     private void reactAndPost(EventEnvelope event) {
         try {
-            EventReactorMethod method = thisClass.getReactor(event.messageClass(),
-                                                             event.originClass());
+            EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
+                                                            event.originClass());
             ReactorMethodResult result = method.invoke(this, event);
             List<Event> events = result.produceEvents(event);
             eventBus.post(events);
@@ -138,7 +138,7 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return thisClass.externalEventClasses();
+        return thisClass.externalEvents();
     }
 
     private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {

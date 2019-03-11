@@ -277,10 +277,6 @@ public class Given {
     public static class CustomerAggregate
             extends Aggregate<CustomerId, Customer, CustomerVBuilder> {
 
-        public CustomerAggregate(CustomerId id) {
-            super(id);
-        }
-
         @Assign
         CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
             CustomerCreated event = CustomerCreated

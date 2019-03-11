@@ -67,13 +67,13 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<EventClass> eventClasses() {
-        return delegate.eventClasses();
+    public Set<EventClass> incomingEvents() {
+        return delegate.incomingEvents();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
-        return delegate.externalEventClasses();
+    public Set<EventClass> externalEvents() {
+        return delegate.externalEvents();
     }
 
     /**
@@ -92,7 +92,7 @@ public final class CommanderClass<C extends Commander>
     }
 
     @Override
-    public Set<CommandClass> producedCommands() {
+    public Set<CommandClass> outgoingCommands() {
         SetView<CommandClass> result = union(commandOutput(), delegate.getProducedTypes());
         return result;
     }

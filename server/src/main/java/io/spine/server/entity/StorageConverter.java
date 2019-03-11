@@ -39,17 +39,17 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
  */
-public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
+public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Message>
         extends Converter<E, EntityRecord> implements Serializable {
 
     private static final long serialVersionUID = 0L;
     private final TypeUrl entityStateType;
-    private final EntityFactory<I, E> entityFactory;
+    private final EntityFactory<E> entityFactory;
     private final FieldMask fieldMask;
 
-    protected EntityStorageConverter(TypeUrl entityStateType,
-                                     EntityFactory<I, E> factory,
-                                     FieldMask fieldMask) {
+    protected StorageConverter(TypeUrl entityStateType,
+                               EntityFactory<E> factory,
+                               FieldMask fieldMask) {
         super();
         this.fieldMask = checkNotNull(fieldMask);
         this.entityFactory = factory;
@@ -59,14 +59,14 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     /**
      * Obtains the type URL of the state of entities which this converter builds.
      */
-    protected TypeUrl getEntityStateType() {
+    protected TypeUrl entityStateType() {
         return entityStateType;
     }
 
     /**
      * Obtains the entity factory used by the converter.
      */
-    protected EntityFactory<I, E> getEntityFactory() {
+    protected EntityFactory<E> entityFactory() {
         return entityFactory;
     }
 
@@ -74,14 +74,14 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
      * Obtains the field mask used by this converter to trim the state of entities before the state
      * is {@linkplain #injectState(Entity, Message, EntityRecord) injected} into entities.
      */
-    protected FieldMask getFieldMask() {
+    protected FieldMask fieldMask() {
         return this.fieldMask;
     }
 
     /**
      * Creates a copy of this converter modified with the passed filed mask.
      */
-    public abstract EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask);
+    public abstract StorageConverter<I, E, S> withFieldMask(FieldMask fieldMask);
 
     @Override
     protected EntityRecord doForward(E entity) {
@@ -100,7 +100,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @Override
     protected E doBackward(EntityRecord entityRecord) {
         S unpacked = (S) unpack(entityRecord.getState());
-        S state = FieldMasks.applyMask(getFieldMask(), unpacked);
+        S state = FieldMasks.applyMask(fieldMask(), unpacked);
         I id = (I) Identifier.unpack(entityRecord.getEntityId());
         E entity = entityFactory.create(id);
         checkState(entity != null, "EntityFactory produced null entity.");
@@ -140,10 +140,10 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof EntityStorageConverter)) {
+        if (!(obj instanceof StorageConverter)) {
             return false;
         }
-        EntityStorageConverter other = (EntityStorageConverter) obj;
+        StorageConverter other = (StorageConverter) obj;
         return Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.fieldMask, other.fieldMask);

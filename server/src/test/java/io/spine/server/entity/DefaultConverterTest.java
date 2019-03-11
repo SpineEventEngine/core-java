@@ -29,13 +29,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
+import static io.spine.server.entity.DefaultConverter.forAllFields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("DefaultEntityStorageConverter should")
-class DefaultEntityStorageConverterTest {
+@DisplayName("DefaultConverter should")
+class DefaultConverterTest {
 
-    private EntityStorageConverter<Long, TestEntity, StringValue> converter;
+    private StorageConverter<Long, TestEntity, StringValue> converter;
 
     @BeforeEach
     void setUp() {
@@ -51,21 +51,21 @@ class DefaultEntityStorageConverterTest {
 
     @Test
     @DisplayName("create instance for all fields")
-    void createForAllFields() throws Exception {
-        assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
+    void createForAllFields() {
+        assertEquals(FieldMask.getDefaultInstance(), converter.fieldMask());
     }
 
     @Test
     @DisplayName("create instance with FieldMask")
-    void createWithFieldMask() throws Exception {
+    void createWithFieldMask() {
         FieldMask fieldMask = FieldMask.newBuilder()
                                        .addPaths("foo.bar")
                                        .build();
 
-        EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
+        StorageConverter<Long, TestEntity, StringValue> withMasks =
                 converter.withFieldMask(fieldMask);
 
-        assertEquals(fieldMask, withMasks.getFieldMask());
+        assertEquals(fieldMask, withMasks.fieldMask());
     }
 
     private static TestEntity createEntity(Long id, StringValue state) {
@@ -76,7 +76,7 @@ class DefaultEntityStorageConverterTest {
 
     @Test
     @DisplayName("convert forward and backward")
-    void convertForwardAndBackward() throws Exception {
+    void convertForwardAndBackward() {
         StringValue entityState = StringValue.of("back and forth");
         TestEntity entity = createEntity(100L, entityState);
 
@@ -89,7 +89,7 @@ class DefaultEntityStorageConverterTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        SerializableTester.reserializeAndAssert(converter);
+        SerializableTester.reserialize(converter);
     }
 
     /**

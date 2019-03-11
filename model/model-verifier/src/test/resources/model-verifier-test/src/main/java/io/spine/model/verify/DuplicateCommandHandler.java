@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.protobuf.Any;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 
@@ -28,10 +27,6 @@ import static java.util.Collections.singletonList;
 
 public class DuplicateCommandHandler
         extends Aggregate<String, ChatState, ChatStateVBuilder> {
-
-    protected DuplicateCommandHandler(String id) {
-        super(id);
-    }
 
     @Assign
     public Iterable<LinkSent> handle(SendLink command) {

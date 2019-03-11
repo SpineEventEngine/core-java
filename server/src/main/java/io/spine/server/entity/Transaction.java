@@ -159,7 +159,7 @@ public abstract class Transaction<I,
         this.entity = entity;
         this.builder = entity.builderFromState();
         this.version = entity.version();
-        this.lifecycleFlags = entity.getLifecycleFlags();
+        this.lifecycleFlags = entity.lifecycleFlags();
         this.active = true;
 
         this.transactionListener = new SilentWitness<>();
@@ -363,7 +363,7 @@ public abstract class Transaction<I,
         Any entityId = Identifier.pack(entity.id());
         Version version = entity.version();
         Any state = pack(entity.state());
-        LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
+        LifecycleFlags lifecycleFlags = entity.lifecycleFlags();
         return EntityRecord
                 .newBuilder()
                 .setEntityId(entityId)

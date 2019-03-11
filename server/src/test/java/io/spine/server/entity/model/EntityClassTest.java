@@ -25,7 +25,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.model.ModelError;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,6 @@ import static io.spine.protobuf.Timestamps2.toInstant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EntityClass should")
@@ -69,7 +67,7 @@ class EntityClassTest {
 
         // Create and init the entity.
         EntityClass<NanoEntity> entityClass = new EntityClass<>(NanoEntity.class);
-        AbstractEntity<Long, StringValue> entity = entityClass.createEntity(id);
+        AbstractEntity<Long, StringValue> entity = entityClass.create(id);
 
         Timestamp after = Time.currentTime();
 
@@ -83,13 +81,6 @@ class EntityClassTest {
         assertEquals(StringValue.getDefaultInstance(), entity.state());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
-    }
-
-    @Test
-    @DisplayName("complain when there is no one-arg constructor for entity class")
-    void searchForOneArgCtor() {
-        assertThrows(ModelError.class,
-                     () -> new EntityClass<>(NoArgEntity.class).constructor());
     }
 
     /** A test entity which defines ID and state. */

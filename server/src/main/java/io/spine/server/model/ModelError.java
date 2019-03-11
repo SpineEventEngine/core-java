@@ -20,6 +20,8 @@
 
 package io.spine.server.model;
 
+import static java.lang.String.format;
+
 /**
  * A programming error of message processing definition.
  */
@@ -29,6 +31,10 @@ public class ModelError extends Error {
 
     protected ModelError(String message) {
         super(message);
+    }
+
+    public ModelError(String messageFormat, Object... args) {
+        super(format(messageFormat, args));
     }
 
     public ModelError(Throwable cause) {

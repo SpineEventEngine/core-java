@@ -248,10 +248,6 @@ class EventApplierTest {
     private abstract static class TestEventApplier
             extends Aggregate<Long, EmptyAggregate, EmptyAggregateVBuilder> {
 
-        TestEventApplier() {
-            super(0L);
-        }
-
         private static final String APPLIER_METHOD_NAME = "apply";
 
         public Method getMethod() {

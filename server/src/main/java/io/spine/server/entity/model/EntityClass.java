@@ -23,20 +23,19 @@ package io.spine.server.entity.model;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityFactory;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.defaultInstance;
-import static java.lang.String.format;
 
 /**
  * A class of entities.
@@ -54,22 +53,20 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** The class of the entity state. */
     private final Class<? extends Message> stateClass;
 
+    /** Type of the entity state. */
+    private final TypeUrl entityStateType;
+
     /** The default state of entities of this class. */
     @LazyInit
     private transient volatile @MonotonicNonNull Message defaultState;
 
-    /** Type of the entity state. */
-    private final TypeUrl entityStateType;
-
-    /** The constructor for entities of this class. */
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
-    private transient volatile @MonotonicNonNull Constructor<E> entityConstructor;
+    private transient volatile @MonotonicNonNull EntityFactory<E> factory;
 
     /** Creates new instance of the model class for the passed class of entities. */
     protected EntityClass(Class<E> cls) {
         super(cls);
-        checkNotNull((Class<? extends Entity>) cls);
         this.idClass = idClass(cls);
         this.stateClass = stateClass(cls);
         this.entityStateType = TypeUrl.of(stateClass);
@@ -88,76 +85,27 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Creates new entity.
      */
-    public E createEntity(Object constructorArgument) {
-        checkNotNull(constructorArgument);
-        Constructor<E> ctor = constructor();
-        checkArgumentMatches(ctor, constructorArgument);
-        try {
-            E result = ctor.newInstance(constructorArgument);
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static void checkArgumentMatches(Constructor<?> ctor, Object argument) {
-        Class<?> actualArgumentType = argument.getClass();
-        Class<?> firstParameter = ctor.getParameterTypes()[0];
-        String errorMessage =
-                "Constructor argument type mismatch: expected `%s`, but was `%s`. " +
-                        "Check for message routing mistakes.";
-        checkArgument(firstParameter.isAssignableFrom(actualArgumentType),
-                      errorMessage,
-                      actualArgumentType.getName(),
-                      firstParameter.getName());
-    }
-
-    private static ModelError noSuchConstructor(String entityClass, String idClass) {
-        String errMsg = format(
-                "%s class must declare a constructor with a single %s ID parameter.",
-                entityClass, idClass
-        );
-        return new ModelError(new NoSuchMethodException(errMsg));
-    }
-
-    /**
-     * Obtains the class of identifiers from the passed entity class.
-     *
-     * <p>Checks that this class of identifiers obtained from the passed entity class
-     * is supported by the framework.
-     *
-     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
-     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
-     * {@code Message}.
-     *
-     * <p>We perform the check to to detect possible programming error
-     * in declarations of entity and repository classes <em>until</em> we have
-     * compile-time model check.
-     *
-     * @throws ModelError if unsupported ID class passed
-     */
-    private static <I> Class<I> idClass(Class<? extends Entity> cls) {
-        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
-        try {
-            Identifier.checkSupported(idClass);
-        } catch (IllegalArgumentException e) {
-            throw new ModelError(e);
-        }
-        return idClass;
-    }
-
-    /**
-     * Retrieves the state class of the passed entity class.
-     *
-     * <p>Though this method is {@code public}, it is <em>not</em> considered a part of the
-     * public API. It is used internally by other framework routines and not designed for efficient
-     * execution by Spine users.
-     */
-    private static <S extends Message> Class<S> stateClass(Class<? extends Entity> entityClass) {
-        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
+    public E create(Object constructionArgument) {
+        checkNotNull(constructionArgument);
+        E result = factory().create(constructionArgument);
         return result;
+    }
+
+    /**
+     * Obtains the factory for creating entities.
+     */
+    public final EntityFactory<E> factory() {
+        if (factory == null) {
+            factory = createFactory();
+        }
+        return factory;
+    }
+
+    /**
+     * Creates a new instance of the factory for creating entities.
+     */
+    protected EntityFactory<E> createFactory() {
+        return new DefaultEntityFactory<>(value());
     }
 
     /**
@@ -182,39 +130,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * Obtains constructor for the entities of this class.
      */
     public Constructor<E> constructor() {
-        Constructor<E> result = entityConstructor;
-        if (result == null) {
-            synchronized (this) {
-                result = entityConstructor;
-                if (result == null) {
-                    entityConstructor = findConstructor();
-                    result = entityConstructor;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Obtains the constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     * 
-     * @throws IllegalStateException if the entity class does not have the required constructor
-    */
-    @SuppressWarnings("unchecked" /* The cast is protected by generic params of this class. */)
-    protected Constructor<E> findConstructor() {
-        Class<? extends E> entityClass = value();
-        Class<?> idClass = idClass();
-        Constructor<E> result;
-        try {
-            result = (Constructor<E>) entityClass.getDeclaredConstructor(idClass);
-            result.setAccessible(true);
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName(), idClass.getName());
-        }
-        return result;
+        return factory().constructor();
     }
 
     /**
@@ -229,6 +145,15 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public final Class<? extends Message> stateClass() {
         return stateClass;
+    }
+
+    /**
+     * Obtains the raw class of the entities.
+     */
+    @SuppressWarnings("unchecked") // The cast is protected by the generic param of this class.
+    @Override
+    public Class<E> value() {
+        return (Class<E>) super.value();
     }
 
     /**
@@ -258,5 +183,45 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), idClass, stateClass, entityStateType);
+    }
+
+    /**
+     * Obtains the class of identifiers from the passed entity class.
+     *
+     * <p>Checks that this class of identifiers obtained from the passed entity class
+     * is supported by the framework.
+     *
+     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
+     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
+     * {@code Message}.
+     *
+     * <p>We perform the check to to detect possible programming error
+     * in declarations of entity and repository classes <em>until</em> we have
+     * compile-time model check.
+     *
+     * @throws ModelError if unsupported ID class passed
+     */
+    public static <I> Class<I> idClass(Class<? extends Entity> cls) {
+        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+                Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
+        try {
+            Identifier.checkSupported(idClass);
+        } catch (IllegalArgumentException e) {
+            throw new ModelError(e);
+        }
+        return idClass;
+    }
+
+    /**
+     * Retrieves the state class of the passed entity class.
+     *
+     * <p>Though this method is {@code public}, it is <em>not</em> considered a part of the
+     * public API. It is used internally by other framework routines and not designed for efficient
+     * execution by Spine users.
+     */
+    private static <S extends Message> Class<S> stateClass(Class<? extends Entity> entityClass) {
+        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+                Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
+        return result;
     }
 }

@@ -340,7 +340,7 @@ class EntityTest {
         @Test
         @DisplayName("entity has default status after construction")
         void defaultOnCreation() {
-            assertEquals(LifecycleFlags.getDefaultInstance(), entityNew.getLifecycleFlags());
+            assertEquals(LifecycleFlags.getDefaultInstance(), entityNew.lifecycleFlags());
         }
 
         @Test
@@ -407,7 +407,7 @@ class EntityTest {
                                                   .setDeleted(false)
                                                   .build();
             entityNew.setLifecycleFlags(status);
-            assertEquals(status, entityNew.getLifecycleFlags());
+            assertEquals(status, entityNew.lifecycleFlags());
         }
 
         @Test

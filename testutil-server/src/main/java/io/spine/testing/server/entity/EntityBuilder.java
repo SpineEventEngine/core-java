@@ -80,11 +80,11 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
-        this.entityClass = getModelClass(entityClass);
+        this.entityClass = modelClassOf(entityClass);
         return this;
     }
 
-    protected EntityClass<E> getModelClass(Class<E> entityClass) {
+    protected EntityClass<E> modelClassOf(Class<E> entityClass) {
         return asEntityClass(entityClass);
     }
 
@@ -169,7 +169,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
     }
 
     @Override
-    protected Constructor<E> getConstructor() {
+    protected Constructor<E> constructor() {
         Constructor<E> constructor = entityClass().constructor();
         constructor.setAccessible(true);
         return constructor;
@@ -179,7 +179,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        E result = entityClass().createEntity(id);
+        E result = entityClass().create(id);
         return result;
     }
 }

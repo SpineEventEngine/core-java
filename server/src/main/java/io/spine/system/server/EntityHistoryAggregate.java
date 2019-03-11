@@ -55,10 +55,6 @@ import static com.google.protobuf.util.Timestamps.compare;
 final class EntityHistoryAggregate
         extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
 
-    private EntityHistoryAggregate(EntityHistoryId id) {
-        super(id);
-    }
-
     @Assign
     EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
             throws CannotDispatchEventTwice {

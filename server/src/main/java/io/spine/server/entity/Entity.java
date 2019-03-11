@@ -32,10 +32,8 @@ import io.spine.string.Stringifiers;
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *
- * <p>Implementing classes must have single constructor which accepts the ID of the entity.
- *
  * <p>Lifecycle flags determine if an entity is active.
- * An entity is considered to be active if the lifecycle flags are missing.
+ * An entity is considered to be active if the lifecycle flags are not set.
  * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted},
  * then it’s regarded to be inactive.
  *

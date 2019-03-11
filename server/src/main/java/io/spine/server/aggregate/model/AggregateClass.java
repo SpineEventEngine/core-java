@@ -69,20 +69,26 @@ public class AggregateClass<A extends Aggregate>
         return result;
     }
 
+    /**
+     * Obtains the set of event classes on which this aggregate class reacts.
+     */
     @Override
-    public final Set<EventClass> eventClasses() {
-        return delegate.eventClasses();
+    public final Set<EventClass> incomingEvents() {
+        return delegate.incomingEvents();
     }
 
+    /**
+     * Obtains the set of <em>external</em> event classes on which this aggregate class reacts.
+     */
     @Override
-    public final Set<EventClass> externalEventClasses() {
-        return delegate.externalEventClasses();
+    public final Set<EventClass> externalEvents() {
+        return delegate.externalEvents();
     }
 
     /**
      * Obtains event types produced by this aggregate class.
      */
-    public Set<EventClass> getProducedEvents() {
+    public Set<EventClass> outgoingEvents() {
         Set<EventClass> result = union(commandOutput(), reactionOutput());
         return result;
     }
@@ -90,9 +96,9 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains set of classes of events used as arguments of applier methods.
      *
-     * @see #getImportableEventClasses()
+     * @see #importableEvents()
      */
-    public final Set<EventClass> getStateEventClasses() {
+    public final Set<EventClass> stateEvents() {
         return stateEvents.getMessageClasses();
     }
 
@@ -101,9 +107,9 @@ public class AggregateClass<A extends Aggregate>
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
      * by the aggregates of this class.
      *
-     * @see #getStateEventClasses()
+     * @see #stateEvents()
      */
-    public final Set<EventClass> getImportableEventClasses() {
+    public final Set<EventClass> importableEvents() {
         return importableEvents;
     }
 
@@ -117,8 +123,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
-        return delegate.getReactor(eventClass, commandClass);
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
+        return delegate.reactorOf(eventClass, commandClass);
     }
 
     @Override
@@ -129,7 +135,7 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains event applier method for the passed class of events.
      */
-    public final EventApplier getApplier(EventClass eventClass) {
+    public final EventApplier applierOf(EventClass eventClass) {
         return stateEvents.getSingleMethod(eventClass);
     }
 }

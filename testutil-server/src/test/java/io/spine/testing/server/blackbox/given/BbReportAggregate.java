@@ -32,11 +32,7 @@ import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 
-public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
-
-    protected BbReportAggregate(BbReportId id) {
-        super(id);
-    }
+final class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
 
     @Assign
     BbReportCreated handle(BbCreateReport command) {

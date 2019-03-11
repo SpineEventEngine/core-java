@@ -57,10 +57,15 @@ public abstract class TransactionalEntity<I,
 
     /**
      * Creates a new instance.
+     */
+    protected TransactionalEntity() {
+        super();
+    }
+
+    /**
+     * Creates a new instance.
      *
      * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the
-     *                                  {@linkplain Entity supported types}
      */
     protected TransactionalEntity(I id) {
         super(id);
@@ -123,6 +128,7 @@ public abstract class TransactionalEntity<I,
      *
      * @throws IllegalStateException if the transaction is null or not active
      */
+    @SuppressWarnings("ConstantConditions") // nullity is checked by `isTransactionInProgress()`
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(missingTxMessage());

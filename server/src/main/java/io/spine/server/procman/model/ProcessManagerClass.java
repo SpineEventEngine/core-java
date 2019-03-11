@@ -79,31 +79,31 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<EventClass> eventClasses() {
+    public Set<EventClass> incomingEvents() {
         SetView<EventClass> result =
-                union(reactorDelegate.eventClasses(), commanderDelegate.eventClasses());
+                union(reactorDelegate.incomingEvents(), commanderDelegate.incomingEvents());
         return result;
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public Set<EventClass> externalEvents() {
         SetView<EventClass> result =
-                union(reactorDelegate.externalEventClasses(),
-                      commanderDelegate.externalEventClasses());
+                union(reactorDelegate.externalEvents(),
+                      commanderDelegate.externalEvents());
         return result;
     }
 
     /**
      * Obtains event classes produced by this process manager class.
      */
-    public Set<EventClass> getProducedEvents() {
+    public Set<EventClass> outgoingEvents() {
         SetView<EventClass> result = union(commandOutput(), reactionOutput());
         return result;
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
-        return reactorDelegate.getReactor(eventClass, originClass);
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+        return reactorDelegate.reactorOf(eventClass, originClass);
     }
 
     @Override
@@ -112,15 +112,15 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<CommandClass> producedCommands() {
-        return commanderDelegate.producedCommands();
+    public Set<CommandClass> outgoingCommands() {
+        return commanderDelegate.outgoingCommands();
     }
 
-    public CommandSubstituteMethod getCommander(CommandClass commandClass) {
+    public CommandSubstituteMethod commanderOf(CommandClass commandClass) {
         return commanderDelegate.handlerOf(commandClass);
     }
 
-    public CommandReactionMethod getCommander(EventClass eventClass) {
+    public CommandReactionMethod commanderOf(EventClass eventClass) {
         return commanderDelegate.getCommander(eventClass);
     }
 

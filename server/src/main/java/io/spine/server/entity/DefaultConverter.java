@@ -31,28 +31,26 @@ import io.spine.type.TypeUrl;
  * @param <E> the type of entities
  * @param <S> the type of entity states
  */
-class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
-        extends EntityStorageConverter<I, E, S> {
+final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Message>
+        extends StorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
 
-    private DefaultEntityStorageConverter(TypeUrl stateType,
-                                          EntityFactory<I, E> factory,
-                                          FieldMask fieldMask) {
+    private DefaultConverter(TypeUrl stateType, EntityFactory<E> factory, FieldMask fieldMask) {
         super(stateType, factory, fieldMask);
     }
 
     static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<I, E> factory) {
+    StorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<E> factory) {
         FieldMask allFields = FieldMask.getDefaultInstance();
-        return new DefaultEntityStorageConverter<>(stateType, factory, allFields);
+        return new DefaultConverter<>(stateType, factory, allFields);
     }
 
     @Override
-    public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        TypeUrl stateType = getEntityStateType();
-        EntityFactory<I, E> factory = getEntityFactory();
-        return new DefaultEntityStorageConverter<>(stateType, factory, fieldMask);
+    public StorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
+        TypeUrl stateType = entityStateType();
+        EntityFactory<E> factory = entityFactory();
+        return new DefaultConverter<>(stateType, factory, fieldMask);
     }
 
     /**
@@ -67,16 +65,11 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     @Override
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         builder.setVersion(entity.version())
-               .setLifecycleFlags(entity.getLifecycleFlags());
+               .setLifecycleFlags(entity.lifecycleFlags());
     }
 
     /**
      * Injects the state into an entity.
-     *
-     * <p>if the passed entity is versionable its lifecycle flags will be set from the record.
-     *
-     * <p>If not, {@code IllegalStateException} is thrown suggesting to provide a custom
-     * {@link EntityStorageConverter} in the repository which manages entities of this class.
      *
      * @param entity
      *         the entity to inject the state
@@ -88,6 +81,6 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     @Override
     protected void injectState(E entity, S state, EntityRecord entityRecord) {
         entity.updateState(state, entityRecord.getVersion());
-        entity.setLifecycleFlags(entityRecord.getLifecycleFlags());
+        entity.setLifecycleFlags(entityRecord.lifecycleFlags());
     }
 }

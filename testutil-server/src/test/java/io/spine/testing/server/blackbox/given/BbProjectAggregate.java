@@ -52,11 +52,7 @@ import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
 import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 import static java.util.Optional.empty;
 
-public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBuilder> {
-
-    protected BbProjectAggregate(BbProjectId id) {
-        super(id);
-    }
+class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBuilder> {
 
     @Assign
     BbProjectCreated handle(BbCreateProject command) {

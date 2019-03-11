@@ -527,7 +527,7 @@ public class AggregateTest {
 
         assertEquals(aggregate.state(), anotherAggregate.state());
         assertEquals(aggregate.version(), anotherAggregate.version());
-        assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
+        assertEquals(aggregate.lifecycleFlags(), anotherAggregate.lifecycleFlags());
     }
 
     @Test

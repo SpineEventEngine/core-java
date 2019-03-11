@@ -524,7 +524,7 @@ class ProcessManagerTest {
         void producedCommands() {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
-            Set<CommandClass> commands = pmClass.producedCommands();
+            Set<CommandClass> commands = pmClass.outgoingCommands();
             assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
                     PmAddTask.class,
                     PmReviewBacklog.class,
@@ -539,7 +539,7 @@ class ProcessManagerTest {
         void producedEvents() {
             ProcessManagerClass<TestProcessManager> pmClass =
                     asProcessManagerClass(TestProcessManager.class);
-            Set<EventClass> events = pmClass.getProducedEvents();
+            Set<EventClass> events = pmClass.outgoingEvents();
             assertThat(events).containsExactlyElementsIn(EventClass.setOf(
                     PmProjectCreated.class,
                     PmTaskAdded.class,

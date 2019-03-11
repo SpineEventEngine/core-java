@@ -21,14 +21,24 @@
 package io.spine.server.entity;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 
 /**
  * Base interface for objects that can create entities.
  */
-public interface EntityFactory<I, E extends Entity<I, ?>> extends Serializable {
+public interface EntityFactory<E extends Entity> extends Serializable {
 
     /**
-     * Creates a new entity with the passed ID.
+     * Creates a new entity with the passed construction argument.
+     *
+     * <p>Implementations may pass the passed object to the constructor,
+     * or use this object (or its properties) as arguments for the methods called after
+     * the resulting object is constructed.
      */
-    E create(I id);
+    E create(Object constructionArgument);
+
+    /**
+     * Obtains the constructor used by the factory.
+     */
+    Constructor<E> constructor();
 }

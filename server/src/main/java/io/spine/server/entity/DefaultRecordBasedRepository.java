@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;
 
 /**
@@ -32,8 +33,8 @@ public abstract class DefaultRecordBasedRepository<I,
                                                    S extends Message>
                 extends RecordBasedRepository<I, E, S> {
 
-    private final EntityFactory<I, E> entityFactory;
-    private final EntityStorageConverter<I, E, S> storageConverter;
+    private final EntityFactory<E> entityFactory;
+    private final StorageConverter<I, E, S> storageConverter;
 
     /**
      * Creates a new instance with the {@linkplain #entityFactory() factory} of entities of class
@@ -42,21 +43,19 @@ public abstract class DefaultRecordBasedRepository<I,
      */
     protected DefaultRecordBasedRepository() {
         super();
-        @SuppressWarnings("OverridableMethodCallDuringObjectConstruction") // get generic param
-        Class<E> entityClass = entityClass();
-        this.entityFactory = new DefaultEntityFactory<>(entityClass);
-        TypeUrl stateType = entityModelClass().stateType();
-        this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
-                                                                           this.entityFactory);
+        EntityClass<E> entityClass = entityModelClass();
+        this.entityFactory = entityClass.factory();
+        TypeUrl stateType = entityClass.stateType();
+        this.storageConverter = DefaultConverter.forAllFields(stateType, this.entityFactory);
     }
 
     @Override
-    protected EntityFactory<I, E> entityFactory() {
+    protected EntityFactory<E> entityFactory() {
         return this.entityFactory;
     }
 
     @Override
-    protected EntityStorageConverter<I, E, S> entityConverter() {
+    protected StorageConverter<I, E, S> entityConverter() {
         return this.storageConverter;
     }
 }

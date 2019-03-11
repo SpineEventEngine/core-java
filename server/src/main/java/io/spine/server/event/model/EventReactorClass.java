@@ -64,7 +64,7 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
         return reactors.getSingleMethod(eventClass, commandClass);
     }
 
@@ -74,12 +74,12 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public Set<EventClass> eventClasses() {
+    public Set<EventClass> incomingEvents() {
         return domesticEvents;
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public Set<EventClass> externalEvents() {
         return externalEvents;
     }
 }

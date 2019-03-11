@@ -133,7 +133,7 @@ public abstract class TransactionTest<I,
             E entity = createEntity();
             B expectedBuilder = entity.builderFromState();
             Version expectedVersion = entity.version();
-            LifecycleFlags expectedLifecycleFlags = entity.getLifecycleFlags();
+            LifecycleFlags expectedLifecycleFlags = entity.lifecycleFlags();
 
             Transaction<I, E, S, B> tx = createTx(entity);
             assertNotNull(tx);
