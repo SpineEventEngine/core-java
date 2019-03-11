@@ -27,16 +27,23 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.type.CommandClass;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
+import io.spine.testing.server.blackbox.given.BbDuplicateCommandDispatcher;
+import io.spine.testing.server.blackbox.given.BbEventDispatcher;
 import io.spine.testing.server.blackbox.given.BbInitProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
@@ -67,8 +74,10 @@ import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
+import static io.spine.testing.server.blackbox.given.Given.eventDispatcherRegistered;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.registerCommandDispatcher;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
@@ -106,7 +115,73 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     T boundedContext() {
         return context;
     }
-    
+
+    @Test
+    @DisplayName("register command dispatchers")
+    void registerCommandDispatchers() {
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
+        BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
+                                                                 commandTypeToDispatch);
+        context.withHandlers(dispatcher);
+        context.receivesCommand(registerCommandDispatcher(dispatcher.getClass()));
+        assertThat(dispatcher.commandsDispatched()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register duplicate command dispatchers")
+    void throwOnDuplicateCommandDispatchers() {
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
+        BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
+                                                                 commandTypeToDispatch);
+        context.withHandlers(dispatcher);
+        BbDuplicateCommandDispatcher duplicateDispatcher =
+                new BbDuplicateCommandDispatcher(context.eventBus(),
+                                                 commandTypeToDispatch);
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> context.withHandlers(duplicateDispatcher));
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register a null command dispatcher")
+    void throwOnNullCommandDispatcher() {
+        assertThrows(NullPointerException.class,
+                     () -> context.withHandlers((CommandDispatcher<?>) null));
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register several command dispatchers one of which is null")
+    void throwOnOneOfNull() {
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
+        BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
+                                                                 commandTypeToDispatch);
+        assertThrows(NullPointerException.class, () -> context.withHandlers(dispatcher, null));
+    }
+
+    @Test
+    @DisplayName("register event dispatcher")
+    void registerEventDispatcher() {
+        BbEventDispatcher dispatcher = new BbEventDispatcher();
+        context.withEventDispatchers(dispatcher);
+        context.receivesEvent(eventDispatcherRegistered(dispatcher.getClass()));
+        assertThat(dispatcher.eventsReceived()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register a null event dispatcher")
+    void throwOnNullEventDispatcher() {
+        assertThrows(NullPointerException.class,
+                     () -> context.withEventDispatchers((EventDispatcher<?>) null));
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register several event dispatchers if one of them is null")
+    void throwOnOneOfEventDispatchersIsNull() {
+        BbEventDispatcher validDispatcher = new BbEventDispatcher();
+        assertThrows(NullPointerException.class,
+                     () -> context.withEventDispatchers(validDispatcher, null));
+    }
+
     @Test
     @DisplayName("ignore sent events in emitted")
     void ignoreSentEvents() {
