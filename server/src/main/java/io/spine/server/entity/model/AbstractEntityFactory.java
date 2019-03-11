@@ -71,10 +71,16 @@ public abstract class AbstractEntityFactory<E extends Entity> implements EntityF
         this.entityClass = entityClass;
     }
 
+    /**
+     * Obtains the class of entities created by the factory.
+     */
     protected final Class<E> entityClass() {
         return entityClass;
     }
 
+    /**
+     * Obtains the class of identifiers of entities that this factory creates.
+     */
     protected final Class<?> idClass() {
         return idClass;
     }
