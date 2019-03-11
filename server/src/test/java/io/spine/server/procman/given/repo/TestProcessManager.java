@@ -136,7 +136,7 @@ public class TestProcessManager
     }
 
     private void checkNotArchived(PmStartProject command) throws PmCannotStartArchivedProject {
-        if (getLifecycleFlags().getArchived()) {
+        if (isArchived()) {
             PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
                     .newBuilder()
                     .setProjectId(command.getProjectId())

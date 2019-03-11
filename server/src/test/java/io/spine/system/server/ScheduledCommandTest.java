@@ -108,7 +108,7 @@ class ScheduledCommandTest {
         Optional<ScheduledCommand> optional = repository.find(scheduled.getId());
         assertTrue(optional.isPresent());
         ScheduledCommand deletedCommand = optional.get();
-        LifecycleFlags flags = deletedCommand.getLifecycleFlags();
+        LifecycleFlags flags = deletedCommand.lifecycleFlags();
 
         assertThat(flags.getDeleted()).isTrue();
         assertThat(flags.getArchived()).isFalse();

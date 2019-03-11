@@ -185,7 +185,7 @@ class TransactionalEntityTest {
     @DisplayName("return transaction `lifecycleFlags` if transaction is active")
     void returnActiveTxFlags() {
         TransactionalEntity entity = entityWithInactiveTx();
-        LifecycleFlags originalFlags = entity.getLifecycleFlags();
+        LifecycleFlags originalFlags = entity.lifecycleFlags();
 
         LifecycleFlags modifiedFlags = originalFlags.toBuilder()
                                                     .setDeleted(true)
@@ -198,7 +198,7 @@ class TransactionalEntityTest {
         when(txMock.isActive()).thenReturn(true);
         when(txMock.lifecycleFlags()).thenReturn(modifiedFlags);
 
-        LifecycleFlags actual = entity.getLifecycleFlags();
+        LifecycleFlags actual = entity.lifecycleFlags();
         assertEquals(modifiedFlags, actual);
     }
 

@@ -321,16 +321,16 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public final boolean isArchived() {
-        return getLifecycleFlags().getArchived();
+        return lifecycleFlags().getArchived();
     }
 
     /**
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        setLifecycleFlags(getLifecycleFlags().toBuilder()
-                                             .setArchived(archived)
-                                             .build());
+        setLifecycleFlags(lifecycleFlags().toBuilder()
+                                          .setArchived(archived)
+                                          .build());
     }
 
     /**
@@ -340,27 +340,27 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public final boolean isDeleted() {
-        return getLifecycleFlags().getDeleted();
+        return lifecycleFlags().getDeleted();
     }
 
     /**
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        setLifecycleFlags(getLifecycleFlags().toBuilder()
-                                             .setDeleted(deleted)
-                                             .build());
+        setLifecycleFlags(lifecycleFlags().toBuilder()
+                                          .setDeleted(deleted)
+                                          .build());
     }
 
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getLifecycleFlags()
+     * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getArchived()
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getLifecycleFlags().getArchived()) {
+        if (lifecycleFlags().getArchived()) {
             Any packedId = Identifier.pack(id());
             throw CannotModifyArchivedEntity
                     .newBuilder()
@@ -373,11 +373,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Ensures that the entity is not marked as {@code deleted}.
      *
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getLifecycleFlags()
+     * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getDeleted()
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getLifecycleFlags().getDeleted()) {
+        if (lifecycleFlags().getDeleted()) {
             Any packedId = Identifier.pack(id());
             throw CannotModifyDeletedEntity
                     .newBuilder()
@@ -513,11 +513,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return Objects.equals(id(), that.id()) &&
                 Objects.equals(state(), that.state()) &&
                 Objects.equals(version(), that.version()) &&
-                Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
+                Objects.equals(lifecycleFlags(), that.lifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id(), state(), version(), getLifecycleFlags());
+        return Objects.hash(id(), state(), version(), lifecycleFlags());
     }
 }

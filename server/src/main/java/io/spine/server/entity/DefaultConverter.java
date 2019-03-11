@@ -65,7 +65,7 @@ final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Messag
     @Override
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         builder.setVersion(entity.version())
-               .setLifecycleFlags(entity.getLifecycleFlags());
+               .setLifecycleFlags(entity.lifecycleFlags());
     }
 
     /**
@@ -81,6 +81,6 @@ final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Messag
     @Override
     protected void injectState(E entity, S state, EntityRecord entityRecord) {
         entity.updateState(state, entityRecord.getVersion());
-        entity.setLifecycleFlags(entityRecord.getLifecycleFlags());
+        entity.setLifecycleFlags(entityRecord.lifecycleFlags());
     }
 }
