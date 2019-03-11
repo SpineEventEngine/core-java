@@ -65,13 +65,13 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public Set<EventClass> eventClasses() {
-        return delegate.eventClasses();
+    public Set<EventClass> incomingEvents() {
+        return delegate.incomingEvents();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
-        return delegate.externalEventClasses();
+    public Set<EventClass> externalEvents() {
+        return delegate.externalEvents();
     }
 
     @Override

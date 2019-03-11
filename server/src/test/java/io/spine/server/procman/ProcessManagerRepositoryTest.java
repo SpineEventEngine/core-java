@@ -458,7 +458,7 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("commands")
         void command() {
-            Set<CommandClass> commandClasses = repository().getCommandClasses();
+            Set<CommandClass> commandClasses = repository().commandClasses();
 
             assertCommandClasses(
                     commandClasses,

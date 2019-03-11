@@ -39,13 +39,9 @@ import static io.spine.base.Time.currentTime;
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
  */
-/* Instantiated via reflection. */
+@SuppressWarnings("OverlyCoupledClass") // because of the handled commands
 final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
-
-    CommandLifecycleAggregate(CommandId id) {
-        super(id);
-    }
 
     @Assign
     CommandScheduled handle(ScheduleCommand command) {

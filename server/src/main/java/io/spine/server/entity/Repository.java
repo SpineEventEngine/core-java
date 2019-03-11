@@ -155,9 +155,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /** Returns the class of entities managed by this repository. */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     public Class<E> entityClass() {
-        return (Class<E>) entityModelClass().value();
+        return entityModelClass().value();
     }
 
     /**
@@ -174,7 +173,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>For convenience, the default version returns empty collection. This method should be
      * overridden by repositories which actually produce events.
      */
-    public ImmutableSet<EventClass> producibleEventClasses() {
+    public ImmutableSet<EventClass> outgoingEvents() {
         return ImmutableSet.of();
     }
 
@@ -194,9 +193,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Verifies whether the registry is registered with a {@code BoundedContext}.
+     * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
-    protected boolean isRegistered() {
+    protected final boolean isRegistered() {
         return boundedContext != null;
     }
 

@@ -176,7 +176,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public Set<EventClass> messageClasses() {
-        return processManagerClass().eventClasses();
+        return processManagerClass().incomingEvents();
     }
 
     /**
@@ -188,7 +188,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public Set<EventClass> externalEventClasses() {
-        return processManagerClass().externalEventClasses();
+        return processManagerClass().externalEvents();
     }
 
     /**
@@ -198,14 +198,14 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> getCommandClasses() {
+    public Set<CommandClass> commandClasses() {
         return processManagerClass().commands();
     }
 
     /**
      * Obtains command routing schema used by this repository.
      */
-    protected final CommandRouting<I> getCommandRouting() {
+    protected final CommandRouting<I> commandRouting() {
         return commandRouting;
     }
 
@@ -227,8 +227,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public ImmutableSet<EventClass> producibleEventClasses() {
-        Set<EventClass> eventClasses = processManagerClass().getProducedEvents();
+    public ImmutableSet<EventClass> outgoingEvents() {
+        Set<EventClass> eventClasses = processManagerClass().outgoingEvents();
         return ImmutableSet.copyOf(eventClasses);
     }
 
@@ -254,7 +254,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     private I route(CommandEnvelope cmd) {
-        CommandRouting<I> routing = getCommandRouting();
+        CommandRouting<I> routing = commandRouting();
         I target = routing.apply(cmd.message(), cmd.context());
         lifecycleOf(target).onTargetAssignedToCommand(cmd.id());
         return target;
@@ -389,7 +389,7 @@ public abstract class ProcessManagerRepository<I,
         @Override
         public Set<ExternalMessageClass> messageClasses() {
             ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
-            Set<EventClass> eventClasses = pmClass.externalEventClasses();
+            Set<EventClass> eventClasses = pmClass.externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

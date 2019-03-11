@@ -33,7 +33,7 @@ public interface ReactingClass extends EventReceiverClass {
     /**
      * Obtains the method that reacts on the passed projection class.
      */
-    EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass);
+    EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass);
 
     /**
      * Obtains the classes of events produced from the event reaction.

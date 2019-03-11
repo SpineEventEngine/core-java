@@ -45,10 +45,6 @@ import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
  */
 public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder> {
 
-    protected EngineAggregate(EngineId id) {
-        super(id);
-    }
-
     @Assign
     EngineStarted handle(StartEngine command) throws EngineAlreadyStarted {
         EngineId id = command.getId();

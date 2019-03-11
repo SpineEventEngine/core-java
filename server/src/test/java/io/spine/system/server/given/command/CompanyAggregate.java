@@ -39,10 +39,6 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
     public static final TypeUrl TYPE = TypeUrl.of(Company.class);
     public static final String TAKEN_NAME = "NameIsTaken!";
 
-    private CompanyAggregate(CompanyId id) {
-        super(id);
-    }
-
     @Assign
     CompanyEstablished handle(EstablishCompany command) throws CompanyNameAlreadyTaken {
         if (TAKEN_NAME.equals(command.getFinalName())) {

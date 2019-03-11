@@ -28,8 +28,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.StorageConverter;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
@@ -172,7 +172,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @SuppressWarnings("RedundantMethodOverride") // see Javadoc
     @Override
-    protected EntityStorageConverter<I, P, S> entityConverter() {
+    protected StorageConverter<I, P, S> entityConverter() {
         return super.entityConverter();
     }
 
@@ -219,12 +219,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> messageClasses() {
-        return projectionClass().eventClasses();
+        return projectionClass().incomingEvents();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return projectionClass().externalEventClasses();
+        return projectionClass().externalEvents();
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -291,7 +291,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         @Override
         public Set<ExternalMessageClass> messageClasses() {
-            Set<EventClass> eventClasses = projectionClass().externalEventClasses();
+            Set<EventClass> eventClasses = projectionClass().externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

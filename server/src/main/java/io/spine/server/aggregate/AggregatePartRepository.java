@@ -71,6 +71,6 @@ public abstract class AggregatePartRepository<I,
     }
 
     private A createAggregatePart(AggregateRoot<I> root) {
-        return aggregatePartClass().createEntity(root);
+        return aggregatePartClass().create(root);
     }
 }

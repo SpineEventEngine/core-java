@@ -32,5 +32,5 @@ public interface CommandingClass {
     /**
      * Obtains the classes of commands produced by this commanding class.
      */
-    Set<CommandClass> producedCommands();
+    Set<CommandClass> outgoingCommands();
 }

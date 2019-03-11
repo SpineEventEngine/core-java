@@ -33,10 +33,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 final class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
 
-    Dot(ObjectId id) {
-        super(id);
-    }
-
     @Assign
     Moved on(Move command) {
         return Moved.newBuilder()

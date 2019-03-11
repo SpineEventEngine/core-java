@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -51,8 +52,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @param <I> the type of entity identifiers
  * @param <S> the type of entity state objects
  */
-@SuppressWarnings("SynchronizeOnThis") /* This class uses double-check idiom for lazy init of some
-    fields. See Effective Java 2nd Ed. Item #71. */
+@SuppressWarnings({
+        "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
+            fields. See Effective Java 2nd Ed. Item #71. */,
+        "AbstractClassWithoutAbstractMethods",
+        "ClassWithTooManyMethods"})
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
     /**
@@ -64,8 +68,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     @LazyInit
     private volatile @MonotonicNonNull EntityClass<?> thisClass;
 
-    /** The ID of the entity. */
-    private final I id;
+    /**
+     * The ID of the entity.
+     *
+     * <p>Assigned either through the {@linkplain #AbstractEntity(Object)} constructor which
+     * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
+     */
+    private I id;
 
     /** Cached version of string ID. */
     @LazyInit
@@ -96,12 +105,36 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     private volatile boolean lifecycleFlagsChanged;
 
     /**
+     * Creates a new instance with the zero version and cleared lifecycle flags.
+     *
+     * <p>When this constructor is called, the entity ID must be {@linkplain #setId(Object) set}
+     * before any other interactions with the instance.
+     */
+    protected AbstractEntity() {
+        setVersion(Versions.zero());
+        clearLifecycleFlags();
+    }
+
+    /**
      * Creates new instance with the passed ID.
      */
     protected AbstractEntity(I id) {
-        this.id = checkNotNull(id);
-        setVersion(Versions.zero());
-        clearLifecycleFlags();
+        this();
+        setId(id);
+    }
+
+    /**
+     * Assigns the ID to the entity.
+     */
+    @SuppressWarnings("InstanceVariableUsedBeforeInitialized") // safety check on overriding the ID.
+    final void setId(I id) {
+        checkNotNull(id);
+        if (this.id != null) {
+            checkState(id.equals(this.id),
+                       "Entity ID already assigned to `%s`." +
+                               " Attempted to reassign to `%s`.", this.id, id);
+        }
+        this.id = id;
     }
 
     /**
@@ -119,7 +152,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
 
     @Override
     public I id() {
-        return id;
+        return checkNotNull(id);
     }
 
     /**
@@ -288,16 +321,16 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public final boolean isArchived() {
-        return getLifecycleFlags().getArchived();
+        return lifecycleFlags().getArchived();
     }
 
     /**
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        setLifecycleFlags(getLifecycleFlags().toBuilder()
-                                             .setArchived(archived)
-                                             .build());
+        setLifecycleFlags(lifecycleFlags().toBuilder()
+                                          .setArchived(archived)
+                                          .build());
     }
 
     /**
@@ -307,27 +340,27 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public final boolean isDeleted() {
-        return getLifecycleFlags().getDeleted();
+        return lifecycleFlags().getDeleted();
     }
 
     /**
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        setLifecycleFlags(getLifecycleFlags().toBuilder()
-                                             .setDeleted(deleted)
-                                             .build());
+        setLifecycleFlags(lifecycleFlags().toBuilder()
+                                          .setDeleted(deleted)
+                                          .build());
     }
 
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getLifecycleFlags()
+     * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getArchived()
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getLifecycleFlags().getArchived()) {
+        if (lifecycleFlags().getArchived()) {
             Any packedId = Identifier.pack(id());
             throw CannotModifyArchivedEntity
                     .newBuilder()
@@ -340,11 +373,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Ensures that the entity is not marked as {@code deleted}.
      *
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getLifecycleFlags()
+     * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getDeleted()
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getLifecycleFlags().getDeleted()) {
+        if (lifecycleFlags().getDeleted()) {
             Any packedId = Identifier.pack(id());
             throw CannotModifyDeletedEntity
                     .newBuilder()
@@ -480,11 +513,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return Objects.equals(id(), that.id()) &&
                 Objects.equals(state(), that.state()) &&
                 Objects.equals(version(), that.version()) &&
-                Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
+                Objects.equals(lifecycleFlags(), that.lifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id(), state(), version(), getLifecycleFlags());
+        return Objects.hash(id(), state(), version(), lifecycleFlags());
     }
 }

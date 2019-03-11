@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
-import io.spine.server.model.ModelError;
+import io.spine.server.entity.EntityFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.lang.reflect.Constructor;
@@ -32,7 +32,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.aggregate.AggregatePart.GenericParameter.AGGREGATE_ROOT;
-import static java.lang.String.format;
 
 /**
  * Provides type information on an aggregate part class.
@@ -75,43 +74,11 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     }
 
     /**
-     * Obtains the constructor for the passed aggregate part class.
-     *
-     * <p>The part class must have a constructor with ID and {@code AggregateRoot} parameters.
-     *
-     * <p>Returns the constructor if the first parameter is aggregate ID
-     * and the second constructor parameter is subtype of the {@code AggregateRoot}
-     * For example:
-     * <pre>{@code
-     *  // A user-defined AggregateRoot:
-     *  class CustomAggregateRoot extends AggregateRoot { ... }
-     *
-     *  // An AggregatePart for the CustomAggregateRoot:
-     *  class CustomAggregatePart extends AggregatePart<...> { ... }
-     *
-     *  // The expected constructor:
-     *  CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root) { ... }
-     * }</pre>
-     *
-     * <p>Throws {@code IllegalStateException} in other cases.
-     *
-     * @return the constructor
-     * @throws ModelError if the entity class does not have the required constructor
+     * Creates a new instance of the factory for creating aggregate parts of this class.
      */
     @Override
-    protected Constructor<A> findConstructor() {
-        Class<? extends A> cls = value();
-        checkNotNull(cls);
-        Constructor<? extends A> ctor;
-        try {
-            ctor = cls.getDeclaredConstructor(rootClass());
-            ctor.setAccessible(true);
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(cls, rootClass());
-        }
-        @SuppressWarnings("unchecked") // The cast is protected by generic params.
-        Constructor<A> result = (Constructor<A>) ctor;
-        return result;
+    protected EntityFactory<A> createFactory() {
+        return new PartFactory<>(value(), rootClass());
     }
 
     /**
@@ -135,14 +102,5 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
             throw new IllegalStateException(e);
         }
         return result;
-    }
-
-    private static ModelError noSuchConstructor(Class<?> partClass, Class<?> rootClass) {
-        String errMsg =
-                format("%s class must declare a constructor with one parameter of the %s type.",
-                       partClass.getName(),
-                       rootClass.getName());
-        NoSuchMethodException cause = new NoSuchMethodException(errMsg);
-        throw new ModelError(cause);
     }
 }

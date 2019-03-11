@@ -76,12 +76,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Obtains {@link EntityFactory} associated with this repository.
      */
-    protected abstract EntityFactory<I, E> entityFactory();
+    protected abstract EntityFactory<E> entityFactory();
 
     /**
-     * Obtains {@link EntityStorageConverter} associated with this repository.
+     * Obtains {@link StorageConverter} associated with this repository.
      */
-    protected abstract EntityStorageConverter<I, E, S> entityConverter();
+    protected abstract StorageConverter<I, E, S> entityConverter();
 
     /**
      * Ensures that the repository has the storage.

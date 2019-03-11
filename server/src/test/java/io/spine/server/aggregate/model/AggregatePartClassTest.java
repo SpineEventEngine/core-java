@@ -68,7 +68,7 @@ class AggregatePartClassTest {
     @Test
     @DisplayName("create aggregate part entity")
     void createAggregatePartEntity() {
-        AnAggregatePart part = partClass.createEntity(root);
+        AnAggregatePart part = partClass.create(root);
 
         assertNotNull(part);
         assertEquals(root.getId(), part.id());

@@ -35,10 +35,7 @@ import io.spine.test.model.verify.given.EditStateVBuilder;
  */
 public class InvalidRestoreAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
-    protected InvalidRestoreAggregate(String id) {
-        super(id);
-    }
-
+    @SuppressWarnings("MethodMayBeStatic")
     @Assign
     private PhotoRestored handle(RestorePhoto restore){
         return PhotoRestored.newBuilder()

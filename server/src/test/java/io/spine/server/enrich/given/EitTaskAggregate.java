@@ -32,10 +32,6 @@ import io.spine.server.enrich.given.event.EitTaskCreatedVBuilder;
 
 final class EitTaskAggregate extends Aggregate<EitTaskId, EitTask, EitTaskVBuilder> {
 
-    EitTaskAggregate(EitTaskId id) {
-        super(id);
-    }
-
     @Assign
     EitTaskCreated handle(EitCreateTask cmd) {
         return EitTaskCreatedVBuilder

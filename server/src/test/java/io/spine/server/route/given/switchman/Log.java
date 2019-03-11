@@ -41,10 +41,6 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     /** The ID of the singleton log. */
     public static final long ID = 42L;
 
-    private Log(Long id) {
-        super(id);
-    }
-
     @React
     SwitchmanAbsenceRecorded on(Rejections.SwitchmanUnavailable rejection) {
         return SwitchmanAbsenceRecorded

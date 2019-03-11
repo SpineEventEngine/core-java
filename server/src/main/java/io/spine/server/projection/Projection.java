@@ -53,9 +53,15 @@ public abstract class Projection<I,
 
     /**
      * Creates a new instance.
+     */
+    protected Projection() {
+        super();
+    }
+
+    /**
+     * Creates a new instance.
      *
      * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
     protected Projection(I id) {
         super(id);

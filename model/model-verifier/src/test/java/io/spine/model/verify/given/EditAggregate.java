@@ -31,10 +31,6 @@ import io.spine.test.model.verify.given.EditStateVBuilder;
 
 public class EditAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
 
-    protected EditAggregate(String id) {
-        super(id);
-    }
-
     @Assign
     PhotoEdited handle(EditPhoto command, CommandContext ctx) {
         return PhotoEdited

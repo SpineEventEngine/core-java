@@ -58,7 +58,7 @@ import java.util.Set;
 @Internal
 public interface CommandDispatcherDelegate<I> {
 
-    Set<CommandClass> getCommandClasses();
+    Set<CommandClass> commandClasses();
 
     I dispatchCommand(CommandEnvelope envelope);
 
@@ -74,6 +74,6 @@ public interface CommandDispatcherDelegate<I> {
      * Verifies if this instance dispatches at least one command.
      */
     default boolean dispatchesCommands() {
-        return !getCommandClasses().isEmpty();
+        return !commandClasses().isEmpty();
     }
 }

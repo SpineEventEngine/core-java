@@ -43,7 +43,7 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
         return getMethod(eventClass, originClass);
     }
 

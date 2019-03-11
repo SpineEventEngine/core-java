@@ -75,14 +75,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains domestic event classes handled by the class.
      */
-    public Set<EventClass> eventClasses() {
+    public Set<EventClass> incomingEvents() {
         return domesticEvents;
     }
 
     /**
      * Obtains external event classes handled by the class.
      */
-    public Set<EventClass> externalEventClasses() {
+    public Set<EventClass> externalEvents() {
         return externalEvents;
     }
 

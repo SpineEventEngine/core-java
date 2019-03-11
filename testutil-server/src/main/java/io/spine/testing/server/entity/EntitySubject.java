@@ -72,7 +72,7 @@ public class EntitySubject<T extends EntitySubject<T, S, E>,
     }
 
     private LifecycleFlags flags() {
-        return actual().getLifecycleFlags();
+        return actual().lifecycleFlags();
     }
 
     /**
