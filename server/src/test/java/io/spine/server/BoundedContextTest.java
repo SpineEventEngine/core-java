@@ -29,12 +29,13 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregate;
 import io.spine.server.bc.given.FinishedProjectProjection;
+import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectCreationRepository;
-import io.spine.server.bc.given.ProjectPmRepo;
-import io.spine.server.bc.given.ProjectProjectionRepo;
+import io.spine.server.bc.given.ProjectProcessManager;
+import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.bc.given.ProjectRemovalProcman;
-import io.spine.server.bc.given.ProjectReportRepository;
+import io.spine.server.bc.given.ProjectReport;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
@@ -46,6 +47,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.test.bc.Project;
+import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -120,8 +122,7 @@ class BoundedContextTest {
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        ProjectAggregateRepository repo = new ProjectAggregateRepository();
-        boundedContext.register(repo);
+        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
         boundedContext.eventBus()
                       .register(subscriber);
         handlersRegistered = true;
@@ -166,8 +167,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("AggregateRepository")
         void aggregateRepository() {
-            ProjectAggregateRepository repository = new ProjectAggregateRepository();
-            boundedContext.register(repository);
+            boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
         }
 
         @Test
@@ -175,15 +175,13 @@ class BoundedContextTest {
         void processManagerRepository() {
             ModelTests.dropAllModels();
 
-            ProjectPmRepo repository = new ProjectPmRepo();
-            boundedContext.register(repository);
+            boundedContext.register(DefaultRepository.of(ProjectProcessManager.class));
         }
 
         @Test
         @DisplayName("ProjectionRepository")
         void projectionRepository() {
-            ProjectReportRepository repository = new ProjectReportRepository();
-            boundedContext.register(repository);
+            boundedContext.register(DefaultRepository.of(ProjectReport.class));
         }
     }
 
@@ -194,9 +192,9 @@ class BoundedContextTest {
                                                       .build();
         Stand stand = boundedContext.stand();
         assertTrue(stand.getExposedTypes().isEmpty());
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
-        assertThat(stand.getExposedTypes()).containsExactly(repository.entityStateType());
+        Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
+        boundedContext.register(repo);
+        assertThat(stand.getExposedTypes()).containsExactly(repo.entityStateType());
     }
 
     @Test
@@ -208,7 +206,7 @@ class BoundedContextTest {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setEventBus(builderMock)
                                                       .build();
-        boundedContext.register(new ProjectAggregateRepository());
+        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
         verify(eventBusMock, times(1))
                 .register(eq(boundedContext.stand()));
     }
@@ -240,8 +238,8 @@ class BoundedContextTest {
      */
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
-                ImmutableSet.of(new ProjectAggregateRepository(),
-                                new ProjectProjectionRepo(),
+                ImmutableSet.of(DefaultRepository.of(ProjectAggregate.class),
+                                DefaultRepository.of(ProjectProjection.class),
                                 new ProjectCreationRepository());
 
         Set<Repository<?, ?>> sameStateRepositories =
@@ -260,7 +258,8 @@ class BoundedContextTest {
     @Test
     @DisplayName("assign storage during registration if repository does not have one")
     void setStorageOnRegister() {
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        Repository<ProjectId, ProjectAggregate> repository =
+                DefaultRepository.of(ProjectAggregate.class);
         boundedContext.register(repository);
         assertTrue(repository.isStorageAssigned());
     }
