@@ -71,7 +71,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * The ID of the entity.
      *
-     * <p>Assigner either through the {@linkplain #AbstractEntity(Object)} constructor which
+     * <p>Assigned either through the {@linkplain #AbstractEntity(Object)} constructor which
      * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
      */
     private I id;
