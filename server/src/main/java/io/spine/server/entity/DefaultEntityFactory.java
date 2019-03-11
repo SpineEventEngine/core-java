@@ -20,8 +20,10 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.server.entity.model.AbstractEntityFactory;
 import io.spine.server.model.ModelError;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Constructor;
@@ -57,6 +59,14 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
      * If {@code false}, the constructor with ID parameter is used.
      */
     private transient boolean usesDefaultConstructor;
+
+    /**
+     * The type of the first constructor parameter, if any.
+     * {@code null} if the constructor does not accept parameters.
+     */
+    @LazyInit
+    @SuppressWarnings("Immutable") // effectively
+    private transient volatile @MonotonicNonNull Class<?> firstParameterType;
 
     /**
      * Creates new instance.
@@ -127,7 +137,22 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
                       })
                       .findAny()
                       .orElse(null);
+        if (result != null) {
+            Class<?>[] parameterTypes = result.getParameterTypes();
+            firstParameterType =
+                    (parameterTypes.length > 0)
+                    ? parameterTypes[0]
+                    : null;
+        }
         return result;
+    }
+
+    /**
+     * Obtains the type of the first constructor parameter, or {@code null} if the entity
+     * does not have an ID constructor.
+     */
+    private @Nullable Class<?> firstParameterType() {
+        return firstParameterType;
     }
 
     private @Nullable Constructor<E> defaultConstructorIn(Constructor<?>[] constructors) {

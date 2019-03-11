@@ -25,7 +25,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
 import io.spine.server.model.ModelError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.util.Objects;
@@ -44,14 +43,6 @@ public abstract class AbstractEntityFactory<E extends Entity> implements EntityF
 
     /** The class of entity identifiers. */
     private final Class<?> idClass;
-
-    /**
-     * The type of the first constructor parameter, if any.
-     * {@code null} if the constructor does not accept parameters.
-     */
-    @LazyInit
-    @SuppressWarnings("Immutable") // effectively
-    private transient volatile @MonotonicNonNull Class<?> firstParameterType;
 
     /**
      * The constructor for entities of this class.
@@ -95,23 +86,10 @@ public abstract class AbstractEntityFactory<E extends Entity> implements EntityF
                 if (result == null) {
                     constructor = findConstructor();
                     result = constructor;
-                    Class<?>[] parameterTypes = result.getParameterTypes();
-                    firstParameterType =
-                            (parameterTypes.length > 0)
-                            ? parameterTypes[0]
-                            : null;
                 }
             }
         }
         return result;
-    }
-
-    /**
-     * Obtains the type of the first constructor parameter, or {@code null} if the entity
-     * has the default constructor.
-     */
-    protected final @Nullable Class<?> firstParameterType() {
-        return firstParameterType;
     }
 
     /**
