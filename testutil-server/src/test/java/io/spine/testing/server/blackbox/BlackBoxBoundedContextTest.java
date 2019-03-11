@@ -26,8 +26,10 @@ import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
@@ -137,7 +139,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @Test
     @DisplayName("throw on an attempt to register a null command dispatcher")
     void throwOnNullCommandDispatcher() {
-        assertThrows(NullPointerException.class, () -> context.withHandlers(null));
+        assertThrows(NullPointerException.class,
+                     () -> context.withHandlers((CommandDispatcher<?>) null));
     }
 
     @Test
@@ -161,7 +164,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @Test
     @DisplayName("throw on an attempt to register a null event dispatcher")
     void throwOnNullEventDispatcher() {
-        assertThrows(NullPointerException.class, () -> context.withEventDispatchers(null));
+        assertThrows(NullPointerException.class,
+                     () -> context.withEventDispatchers((EventDispatcher<?>) null));
     }
 
     @Test

@@ -66,7 +66,7 @@ message BbAssigneeRemoved {
     spine.core.UserId user_id = 2 [(required) = true];
 }
 
-message EventDispatcherRegistered {
+message BbEventDispatcherRegistered {
 
     string dispatcher_name = 1;
 }

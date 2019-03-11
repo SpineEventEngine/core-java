@@ -22,7 +22,7 @@ package io.spine.testing.server.blackbox.given;
 
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.testing.server.blackbox.event.EventDispatcherRegistered;
+import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
 
 /** Receives one type of events and keeps track of how many events it has received. */
 public class BbEventDispatcher extends AbstractEventSubscriber {
@@ -30,7 +30,7 @@ public class BbEventDispatcher extends AbstractEventSubscriber {
     private int eventsReceived = 0;
 
     @Subscribe
-    void to(EventDispatcherRegistered dispatcherRegistered) {
+    void to(BbEventDispatcherRegistered dispatcherRegistered) {
         eventsReceived++;
     }
 

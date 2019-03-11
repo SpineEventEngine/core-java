@@ -35,9 +35,9 @@ import io.spine.testing.server.blackbox.command.BbCreateReport;
 import io.spine.testing.server.blackbox.command.BbInitProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.command.BbStartProject;
+import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
-import io.spine.testing.server.blackbox.event.EventDispatcherRegistered;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
@@ -94,12 +94,12 @@ public class Given {
                                           .build();
     }
 
-    public static EventDispatcherRegistered
+    public static BbEventDispatcherRegistered
     eventDispatcherRegistered(Class<? extends EventDispatcher> dispatcherClass) {
         String name = dispatcherClass.getName();
-        EventDispatcherRegistered result = EventDispatcherRegistered.newBuilder()
-                                                                    .setDispatcherName(name)
-                                                                    .build();
+        BbEventDispatcherRegistered result = BbEventDispatcherRegistered.newBuilder()
+                                                                        .setDispatcherName(name)
+                                                                        .build();
         return result;
     }
 
