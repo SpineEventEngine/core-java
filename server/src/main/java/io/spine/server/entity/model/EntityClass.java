@@ -111,7 +111,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the default state for this class of entities.
      */
-    public Message defaultState() {
+    public final Message defaultState() {
         Message result = defaultState;
         if (result == null) {
             synchronized (this) {
@@ -129,7 +129,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains constructor for the entities of this class.
      */
-    public Constructor<E> constructor() {
+    public final Constructor<E> constructor() {
         return factory().constructor();
     }
 
