@@ -150,7 +150,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the raw class of the entities.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // The cast is protected by the generic param of this class.
     @Override
     public Class<E> value() {
         return (Class<E>) super.value();
