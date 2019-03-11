@@ -104,7 +104,7 @@ public abstract class AbstractEntityFactory<E extends Entity> implements EntityF
      * Obtains the type of the first constructor parameter, or {@code null} if the entity
      * has the default constructor.
      */
-    protected @Nullable Class<?> firstParameterType() {
+    protected final @Nullable Class<?> firstParameterType() {
         return firstParameterType;
     }
 
