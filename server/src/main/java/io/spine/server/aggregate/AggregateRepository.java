@@ -60,11 +60,10 @@ import static java.lang.Math.max;
 /**
  * The repository which manages instances of {@code Aggregate}s.
  *
- * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates managed by this repository
- * @apiNote
- * This class is made {@code abstract} for preserving type information of aggregate ID and
- * aggregate classes used by implementations.
+ * @param <I>
+ *         the type of the aggregate IDs
+ * @param <A>
+ *         the type of the aggregates managed by this repository
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
@@ -383,7 +382,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * code below:
      *
      * <pre>{@code
-     * getEventImportRouting().replaceDefault(EventRoute.fromFirstMessageField());
+     * eventImportRouting().replaceDefault(EventRoute.fromFirstMessageField());
      * }</pre>
      *
      * Consider adding this code to the constructor of your {@code AggregateRepository} class.

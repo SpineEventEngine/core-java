@@ -20,9 +20,11 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
@@ -33,8 +35,8 @@ public abstract class DefaultRecordBasedRepository<I,
                                                    S extends Message>
                 extends RecordBasedRepository<I, E, S> {
 
-    private final EntityFactory<E> entityFactory;
-    private final StorageConverter<I, E, S> storageConverter;
+    @LazyInit
+    private @MonotonicNonNull StorageConverter<I, E, S> storageConverter;
 
     /**
      * Creates a new instance with the {@linkplain #entityFactory() factory} of entities of class
@@ -43,19 +45,20 @@ public abstract class DefaultRecordBasedRepository<I,
      */
     protected DefaultRecordBasedRepository() {
         super();
-        EntityClass<E> entityClass = entityModelClass();
-        this.entityFactory = entityClass.factory();
-        TypeUrl stateType = entityClass.stateType();
-        this.storageConverter = DefaultConverter.forAllFields(stateType, this.entityFactory);
     }
 
     @Override
     protected EntityFactory<E> entityFactory() {
-        return this.entityFactory;
+        return entityModelClass().factory();
     }
 
     @Override
     protected StorageConverter<I, E, S> entityConverter() {
-        return this.storageConverter;
+        if (storageConverter == null) {
+            EntityClass<E> entityClass = entityModelClass();
+            TypeUrl stateType = entityClass.stateType();
+            storageConverter = DefaultConverter.forAllFields(stateType, entityFactory());
+        }
+        return storageConverter;
     }
 }

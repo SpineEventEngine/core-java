@@ -27,8 +27,8 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
-import io.spine.server.bc.given.AnotherProjectAggregateRepository;
-import io.spine.server.bc.given.FinishedProjectProjectionRepo;
+import io.spine.server.bc.given.AnotherProjectAggregate;
+import io.spine.server.bc.given.FinishedProjectProjection;
 import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectCreationRepository;
 import io.spine.server.bc.given.ProjectPmRepo;
@@ -245,12 +245,12 @@ class BoundedContextTest {
                                 new ProjectCreationRepository());
 
         Set<Repository<?, ?>> sameStateRepositories =
-                ImmutableSet.of(new AnotherProjectAggregateRepository(),
-                                new FinishedProjectProjectionRepo(),
+                ImmutableSet.of(DefaultRepository.of(AnotherProjectAggregate.class),
+                                DefaultRepository.of(FinishedProjectProjection.class),
                                 DefaultRepository.of(ProjectRemovalProcman.class));
 
-        Set<List<Repository<?, ?>>> cartesianProduct = Sets.cartesianProduct(repositories,
-                                                                             sameStateRepositories);
+        Set<List<Repository<?, ?>>> cartesianProduct =
+                Sets.cartesianProduct(repositories, sameStateRepositories);
         Stream<Arguments> result = cartesianProduct.stream()
                                                    .map(repos -> Arguments.of(repos.get(0),
                                                                               repos.get(1)));

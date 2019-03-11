@@ -38,6 +38,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public class DefaultRepository {
 
+    /** Prevents instantiation of this static factory class. */
     private DefaultRepository() {
     }
 
@@ -54,11 +55,11 @@ public class DefaultRepository {
      */
     @SuppressWarnings("unchecked") // Casts are ensured by class assignability checks.
     public static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
-        if (Aggregate.class.isAssignableFrom(cls)) {
-            return (Repository<I, E>) new DefaultAggregateRepository(cls);
-        }
         if (AggregatePart.class.isAssignableFrom(cls)) {
             return (Repository<I, E>) new DefaultAggregatePartRepository(cls);
+        }
+        if (Aggregate.class.isAssignableFrom(cls)) {
+            return (Repository<I, E>) new DefaultAggregateRepository(cls);
         }
         if (ProcessManager.class.isAssignableFrom(cls)) {
             return (Repository<I, E>) new DefaultProcessManagerRepository(cls);

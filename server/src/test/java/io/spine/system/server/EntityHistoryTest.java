@@ -33,15 +33,13 @@ import io.spine.core.Events;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.system.server.given.entity.HistoryEventWatcher;
 import io.spine.system.server.given.entity.PersonAggregate;
 import io.spine.system.server.given.entity.PersonNamePart;
-import io.spine.system.server.given.entity.PersonNameRepository;
 import io.spine.system.server.given.entity.PersonProcman;
 import io.spine.system.server.given.entity.PersonProcmanRepository;
 import io.spine.system.server.given.entity.PersonProjection;
-import io.spine.system.server.given.entity.PersonProjectionRepository;
-import io.spine.system.server.given.entity.PersonRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EntityHistory should")
-@SuppressWarnings("InnerClassMayBeStatic")
 class EntityHistoryTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -83,9 +80,9 @@ class EntityHistoryTest {
                 .build();
         system = systemOf(context);
 
-        context.register(new PersonRepository());
-        context.register(new PersonProjectionRepository());
-        context.register(new PersonNameRepository());
+        context.register(DefaultRepository.of(PersonAggregate.class));
+        context.register(DefaultRepository.of(PersonProjection.class));
+        context.register(DefaultRepository.of(PersonNamePart.class));
         context.register(new PersonProcmanRepository());
     }
 
