@@ -49,7 +49,7 @@ public final class GroupNameProjection
             super.onRegistered();
 
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
-            routing.route(Organization.class, (org, ctx) -> ImmutableSet.of(
+            routing.route(Organization.class, (org, ctx) -> withId(
                     GroupId.newBuilder()
                            .setUuid(org.getId()
                                        .getUuid())

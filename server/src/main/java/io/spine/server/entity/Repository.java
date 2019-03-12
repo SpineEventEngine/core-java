@@ -44,6 +44,7 @@ import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -176,6 +177,17 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     public ImmutableSet<EventClass> outgoingEvents() {
         return ImmutableSet.of();
+    }
+
+    /**
+     * Creates an immutable singleton set with the passed ID.
+     *
+     * <p>This is a convenience method for customizing routing schemas in message dispatching
+     * repositories.
+     */
+    protected final Set<I> withId(I id) {
+        checkNotNull(id);
+        return ImmutableSet.of(id);
     }
 
     /**

@@ -63,8 +63,7 @@ public final class EntitySubscriberProjection
             eventRouting().routeEntityStateUpdates(
                     StateUpdateRouting
                             .<ProjectId>newInstance()
-                            .route(Project.class,
-                                   (state, context) -> ImmutableSet.of(state.getId()))
+                            .route(Project.class, (state, context) -> withId(state.getId()))
             );
         }
     }
