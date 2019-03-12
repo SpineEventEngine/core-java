@@ -441,8 +441,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
                 throw newIllegalStateException(
-                        "Unexpected ID class encountered: `%s`. Expected: `%s`",
-                        messageClass, expectedIdClass
+                        "Unexpected ID class encountered: `%s`. Expected: `%s`.",
+                        messageClass.getCanonicalName(), expectedIdClass.getCanonicalName()
                 );
             }
         }
