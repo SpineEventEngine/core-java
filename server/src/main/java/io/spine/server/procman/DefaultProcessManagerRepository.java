@@ -8,6 +8,8 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 
 /**
  * Default implementation of {@code ProcessManagerRepository}.
+ *
+ * @see io.spine.server.DefaultRepository
  */
 @Internal
 public final class DefaultProcessManagerRepository<I,

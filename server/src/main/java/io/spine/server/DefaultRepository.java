@@ -58,6 +58,11 @@ public final class DefaultRepository {
      */
     @SuppressWarnings("unchecked") // Casts are ensured by class assignability checks.
     public static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
+        /*
+         * We deliberately "save" on OOP here and detect the class by the chain of if's below
+         * (instead of implementing this via methods in the `EntityClass` hierarchy).
+         * This is done so to provide more convenient syntax for the framework users.
+         */
         if (AggregatePart.class.isAssignableFrom(cls)) {
             return (Repository<I, E>) new DefaultAggregatePartRepository(cls);
         }

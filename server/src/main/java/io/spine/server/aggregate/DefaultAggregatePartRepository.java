@@ -27,6 +27,8 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 
 /**
  * Default implementation of {@code AggregatePartRepository}.
+ *
+ * @see io.spine.server.DefaultRepository
  */
 @Internal
 public final class DefaultAggregatePartRepository<I,

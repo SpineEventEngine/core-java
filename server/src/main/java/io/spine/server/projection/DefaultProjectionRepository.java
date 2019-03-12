@@ -8,6 +8,8 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
 
 /**
  * Default implementation of {@code ProjectionRepository}.
+ *
+ * @see io.spine.server.DefaultRepository
  */
 @Internal
 public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
