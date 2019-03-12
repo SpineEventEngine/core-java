@@ -172,8 +172,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @SuppressWarnings("RedundantMethodOverride") // see Javadoc
     @Override
-    protected StorageConverter<I, P, S> entityConverter() {
-        return super.entityConverter();
+    protected StorageConverter<I, P, S> storageConverter() {
+        return super.storageConverter();
     }
 
     /**

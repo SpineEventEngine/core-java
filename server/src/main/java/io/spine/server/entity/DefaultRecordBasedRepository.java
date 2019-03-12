@@ -41,7 +41,7 @@ public abstract class DefaultRecordBasedRepository<I,
     /**
      * Creates a new instance with the {@linkplain #entityFactory() factory} of entities of class
      * specified as the {@code <E>} generic parameter, and with the default
-     * {@linkplain #entityConverter() entity storage converter}.
+     * {@linkplain #storageConverter() entity storage converter}.
      */
     protected DefaultRecordBasedRepository() {
         super();
@@ -53,7 +53,7 @@ public abstract class DefaultRecordBasedRepository<I,
     }
 
     @Override
-    protected StorageConverter<I, E, S> entityConverter() {
+    protected StorageConverter<I, E, S> storageConverter() {
         if (storageConverter == null) {
             EntityClass<E> entityClass = entityModelClass();
             TypeUrl stateType = entityClass.stateType();
