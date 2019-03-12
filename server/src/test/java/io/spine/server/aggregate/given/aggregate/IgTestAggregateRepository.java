@@ -37,8 +37,8 @@ public class IgTestAggregateRepository
         super.onRegistered();
 
         eventRouting().route(AggTaskStarted.class,
-                             (message, context) -> ImmutableSet.of(message.getProjectId()))
+                             (message, context) -> withId(message.getProjectId()))
                       .route(AggProjectPaused.class,
-                                (message, context) -> ImmutableSet.of(message.getProjectId()));
+                                (message, context) -> withId(message.getProjectId()));
     }
 }
