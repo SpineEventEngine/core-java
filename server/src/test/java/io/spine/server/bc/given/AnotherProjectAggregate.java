@@ -25,5 +25,5 @@ import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.ProjectVBuilder;
 
-class AnotherProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+public final class AnotherProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 }

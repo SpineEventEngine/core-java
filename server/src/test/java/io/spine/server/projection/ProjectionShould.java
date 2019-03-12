@@ -261,7 +261,10 @@ class ProjectionShould {
     @Test
     @DisplayName("fail to subscribe to the same event filtering by different fields")
     void failToSubscribeByDifferentFields() {
-        assertThrows(HandlerFieldFilterClashError.class, MalformedProjection.Repository::new);
+        assertThrows(
+                HandlerFieldFilterClashError.class,
+                () -> new MalformedProjection.Repository().entityClass()
+        );
     }
 
     @Test
@@ -289,7 +292,10 @@ class ProjectionShould {
     @Test
     @DisplayName("fail on duplicate filter values")
     void failOnDuplicateFilters() {
-        assertThrows(DuplicateHandlerMethodError.class, DuplicateFilterProjection.Repository::new);
+        assertThrows(
+                DuplicateHandlerMethodError.class,
+                () -> new DuplicateFilterProjection.Repository().entityClass()
+        );
     }
 
     private static ProjectId newId() {

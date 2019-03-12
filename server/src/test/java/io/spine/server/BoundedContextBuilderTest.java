@@ -20,7 +20,7 @@
 
 package io.spine.server;
 
-import io.spine.server.bc.given.ProjectAggregateRepository;
+import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -229,7 +229,7 @@ class BoundedContextBuilderTest {
         @BeforeEach
         void setUp() {
             this.builder = BoundedContext.newBuilder();
-            repository = new ProjectAggregateRepository();
+            repository = DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test

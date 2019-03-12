@@ -104,6 +104,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @param obj an instance to store
      */
+    @SuppressWarnings("AbstractMethodWithMissingImplementations") // work-around IDEA bug.
     protected abstract void store(E obj);
 
     /**
@@ -131,7 +132,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains model class for the entities managed by this repository.
      */
-    protected final EntityClass<E> entityModelClass() {
+    protected EntityClass<E> entityModelClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
             Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
@@ -235,7 +236,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             throw newIllegalStateException("The repository %s already has storage %s.",
                                            this, this.storage);
         }
-
         this.storage = createStorage(factory);
     }
 

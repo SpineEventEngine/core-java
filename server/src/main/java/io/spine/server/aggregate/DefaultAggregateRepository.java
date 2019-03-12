@@ -18,12 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc.given;
+package io.spine.server.aggregate;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.test.shared.EmptyProcess;
-import io.spine.test.bc.ProjectId;
+import io.spine.annotation.Internal;
+import io.spine.server.aggregate.model.AggregateClass;
 
-public class ProjectPmRepo
-        extends ProcessManagerRepository<ProjectId, ProjectProcessManager, EmptyProcess> {
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+
+/**
+ * Default implementation of {@code AggregateRepository}.
+ *
+ * @see io.spine.server.DefaultRepository
+ */
+@Internal
+public final class DefaultAggregateRepository<I, A extends Aggregate<I, ?, ?>>
+    extends AggregateRepository<I, A> {
+
+    private final AggregateClass<A> modelClass;
+
+    /**
+     * Creates a new repository for managing aggregates of the passed class.
+     */
+    public DefaultAggregateRepository(Class<A> cls) {
+        super();
+        this.modelClass = asAggregateClass(cls);
+    }
+
+    /**
+     * Obtains the class of aggregates managed by this repository.
+     */
+    @Override
+    protected AggregateClass<A> entityModelClass() {
+        return modelClass;
+    }
 }
