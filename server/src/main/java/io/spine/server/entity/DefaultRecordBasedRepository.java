@@ -68,7 +68,7 @@ public abstract class DefaultRecordBasedRepository<I,
     /**
      * @inheritDoc
      *
-     * <p>Performs validation of the entity class, and initializes the storage converter.
+     * <p>Performs validation of the entity class and initializes the storage converter.
      */
     @OverridingMethodsMustInvokeSuper
     @Override
