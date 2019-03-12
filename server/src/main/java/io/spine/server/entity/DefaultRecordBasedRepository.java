@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.server.entity.model.EntityClass;
@@ -53,6 +55,7 @@ public abstract class DefaultRecordBasedRepository<I,
     }
 
     @Override
+    @CanIgnoreReturnValue
     protected StorageConverter<I, E, S> storageConverter() {
         if (storageConverter == null) {
             EntityClass<E> entityClass = entityModelClass();
@@ -60,5 +63,17 @@ public abstract class DefaultRecordBasedRepository<I,
             storageConverter = DefaultConverter.forAllFields(stateType, entityFactory());
         }
         return storageConverter;
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * <p>Performs validation of the entity class, and initializes the storage converter.
+     */
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        storageConverter();
     }
 }

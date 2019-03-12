@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.annotation.Internal;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
@@ -27,6 +28,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 /**
  * Default implementation of {@code AggregatePartRepository}.
  */
+@Internal
 public final class DefaultAggregatePartRepository<I,
                                                   A extends AggregatePart<I, ?, ?, R>,
                                                   R extends AggregateRoot<I>>

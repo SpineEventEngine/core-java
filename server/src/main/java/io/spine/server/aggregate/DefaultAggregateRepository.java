@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.annotation.Internal;
 import io.spine.server.aggregate.model.AggregateClass;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -27,6 +28,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 /**
  * Default implementation of {@code AggregateRepository}.
  */
+@Internal
 public final class DefaultAggregateRepository<I, A extends Aggregate<I, ?, ?>>
     extends AggregateRepository<I, A> {
 

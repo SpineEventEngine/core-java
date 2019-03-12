@@ -1,6 +1,7 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.server.procman.model.ProcessManagerClass;
 
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -8,6 +9,7 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 /**
  * Default implementation of {@code ProcessManagerRepository}.
  */
+@Internal
 public final class DefaultProcessManagerRepository<I,
                                                    P extends ProcessManager<I, S, ?>,
                                                    S extends Message>
