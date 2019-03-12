@@ -36,7 +36,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * Static factory for creating a default repository for an entity class.
  */
-public class DefaultRepository {
+public final class DefaultRepository {
 
     /** Prevents instantiation of this static factory class. */
     private DefaultRepository() {
