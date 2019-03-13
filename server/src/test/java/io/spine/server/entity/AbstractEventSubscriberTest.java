@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.EventId;
@@ -85,7 +84,7 @@ class AbstractEventSubscriberTest {
     void receiveEntityStateUpdates() {
         Group state = Group
                 .newBuilder()
-                .setId(Identifier.generate(GroupId.class))
+                .setId(GroupId.generate())
                 .setName("Admins")
                 .addParticipants(UserId.getDefaultInstance())
                 .addParticipants(UserId.getDefaultInstance())
@@ -113,7 +112,7 @@ class AbstractEventSubscriberTest {
     void receiveExternalEntityStateUpdates() {
         Organization state = Organization
                 .newBuilder()
-                .setId(Identifier.generate(OrganizationId.class))
+                .setId(OrganizationId.generate())
                 .setName("Developers")
                 .setHead(UserId.getDefaultInstance())
                 .addMembers(UserId.getDefaultInstance())

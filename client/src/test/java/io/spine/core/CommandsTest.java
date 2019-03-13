@@ -145,14 +145,6 @@ class CommandsTest {
     }
 
     @Test
-    @DisplayName("generate command id")
-    void generateCommandId() {
-        CommandId id = Commands.generateId();
-        assertFalse(Identifier.toString(id)
-                              .isEmpty());
-    }
-
-    @Test
     @DisplayName("extract message from given command")
     void extractMessage() {
         CommandMessage message = TestCommandMessage
@@ -225,7 +217,7 @@ class CommandsTest {
     @Test
     @DisplayName("provide stringifier for command id")
     void provideStringifierForId() {
-        CommandId id = Commands.generateId();
+        CommandId id = CommandId.generate();
 
         String str = Stringifiers.toString(id);
         CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
@@ -242,7 +234,7 @@ class CommandsTest {
     @Test
     @DisplayName("return command id value when checked")
     void returnIdWhenChecked() {
-        CommandId id = Commands.generateId();
+        CommandId id = CommandId.generate();
         assertEquals(id, Commands.checkValid(id));
     }
 }

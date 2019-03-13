@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.spine.core.Commands.generateId;
 import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
@@ -71,7 +70,7 @@ class CommandValidatorViolationCheckTest {
     void notAllowInvalidMessage() {
         Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         Command commandWithEmptyMessage = Command.newBuilder()
-                                                 .setId(generateId())
+                                                 .setId(CommandId.generate())
                                                  .setMessage(invalidMessagePacked)
                                                  .setContext(withRandomActor())
                                                  .build();

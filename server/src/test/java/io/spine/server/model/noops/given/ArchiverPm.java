@@ -20,7 +20,6 @@
 
 package io.spine.server.model.noops.given;
 
-import io.spine.base.Identifier;
 import io.spine.server.command.Assign;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
@@ -35,7 +34,7 @@ import io.spine.test.model.contexts.archiver.ArchiverVBuilder;
  */
 public final class ArchiverPm extends ProcessManager<ArchiverId, Archiver, ArchiverVBuilder> {
 
-    static final ArchiverId SINGLE_ID = Identifier.generate(ArchiverId.class);
+    static final ArchiverId SINGLE_ID = ArchiverId.generate();
 
     private ArchiverPm(ArchiverId id) {
         super(id);

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -70,7 +69,6 @@ public class RepositoryTestEnv {
     }
 
     private static Photo newPhoto(String url, String altText) {
-        PhotoId id = Identifier.generate(PhotoId.class);
         Url fullSizeUrl = Url
                 .newBuilder()
                 .setSpec(url)
@@ -81,7 +79,7 @@ public class RepositoryTestEnv {
                 .build();
         Photo photo = PhotoVBuilder
                 .newBuilder()
-                .setId(id)
+                .setId(PhotoId.generate())
                 .setFullSizeUrl(fullSizeUrl)
                 .setThumbnailUrl(thumbnail)
                 .setAltText(altText)

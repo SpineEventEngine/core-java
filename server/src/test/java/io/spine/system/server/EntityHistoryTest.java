@@ -98,7 +98,7 @@ class EntityHistoryTest {
             eventAccumulator = new HistoryEventWatcher();
             system.eventBus()
                   .register(eventAccumulator);
-            id = Identifier.generate(PersonId.class);
+            id = PersonId.generate();
         }
 
         @Test
