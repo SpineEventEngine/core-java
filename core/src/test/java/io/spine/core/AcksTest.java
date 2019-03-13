@@ -1,7 +1,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Empty;
-import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Acks.toCommandId;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Acks utility class should")
 class AcksTest extends UtilityClassTest<Acks> {
@@ -27,7 +26,7 @@ class AcksTest extends UtilityClassTest<Acks> {
         @Test
         @DisplayName("returning ID value")
         void value() {
-            CommandId commandId = Identifier.generate(CommandId.class);
+            CommandId commandId = CommandId.generate();
             Ack ack = newAck(commandId);
             assertThat(toCommandId(ack))
                     .isEqualTo(commandId);
