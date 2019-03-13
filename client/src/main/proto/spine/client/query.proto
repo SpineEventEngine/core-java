@@ -169,7 +169,6 @@ message QueryResponse {
 //
 message EntityStateWithVersion {
 
-    //TODO:2017-02-20:alexander.yevsyukov: Use EntityRecord instead of Any.
     // The state of the entity packed as `Any`.
     //
     google.protobuf.Any state = 1;
