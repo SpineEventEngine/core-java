@@ -38,7 +38,7 @@ message Order {
 }
 
 // This message has to be moved back under the Order once generation of
-// Validating Builders for nested messages is suppported.
+// Validating Builders for nested messages is supported.
 //
 // See https://github.com/SpineEventEngine/base/issues/364.
 message Item {
