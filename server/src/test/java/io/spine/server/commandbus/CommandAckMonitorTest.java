@@ -29,7 +29,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
@@ -125,7 +124,7 @@ class CommandAckMonitorTest {
                     .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .build();
-            commandId = Commands.generateId();
+            commandId = CommandId.generate();
         }
 
         @Test
@@ -186,7 +185,7 @@ class CommandAckMonitorTest {
                     .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                     .setDelegate(delegate)
                     .build();
-            commandId = Commands.generateId();
+            commandId = CommandId.generate();
         }
 
         @Test

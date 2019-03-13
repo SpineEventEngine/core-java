@@ -20,7 +20,6 @@
 
 package io.spine.server.projection.given;
 
-import io.spine.base.Identifier;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Subscribe;
@@ -180,11 +179,10 @@ public class ProjectionRepositoryTestEnv {
         }
 
         public static OrganizationEstablished organizationEstablished() {
-            OrganizationId id = Identifier.generate(OrganizationId.class);
             UserId head = GivenUserId.generated();
             return OrganizationEstablished
                     .newBuilder()
-                    .setId(id)
+                    .setId(OrganizationId.generate())
                     .setHead(head)
                     .setName("Share holders")
                     .build();
