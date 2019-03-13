@@ -22,6 +22,8 @@ package io.spine.testing.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateTestSupport;
@@ -62,6 +64,21 @@ public class AggregateMessageDispatcher {
     }
 
     /**
+     * Dispatches the command and applies the resulting events
+     * to the given {@code Aggregate}.
+     *
+     * @return the list of event messages.
+     */
+    @CanIgnoreReturnValue
+    public static List<? extends Message>
+    dispatchCommand(Aggregate<?, ?, ?> aggregate, Command command) {
+        checkNotNull(aggregate);
+        checkNotNull(command);
+        CommandEnvelope ce = CommandEnvelope.of(command);
+        return AggregateTestSupport.dispatchCommand(mockRepository(), aggregate, ce);
+    }
+
+    /**
      * Dispatches the {@linkplain EventEnvelope event envelope} and applies the resulting events
      * to the given {@code Aggregate}.
      *
@@ -76,12 +93,37 @@ public class AggregateMessageDispatcher {
     }
 
     /**
+     * Dispatches the event and applies the resulting events
+     * to the given {@code Aggregate}.
+     *
+     * @return the list of event messages.
+     */
+    @CanIgnoreReturnValue
+    public static List<? extends Message>
+    dispatchEvent(Aggregate<?, ?, ?> aggregate, Event event) {
+        checkNotNull(aggregate);
+        checkNotNull(event);
+        EventEnvelope env = EventEnvelope.of(event);
+        return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, env);
+    }
+
+    /**
      * Imports the {@linkplain EventEnvelope event envelope} to the given {@code Aggregate}.
      */
     public static void importEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
         AggregateTestSupport.importEvent(mockRepository(), aggregate, event);
+    }
+
+    /**
+     * Imports the event to the given {@code Aggregate}.
+     */
+    public static void importEvent(Aggregate<?, ?, ?> aggregate, Event event) {
+        checkNotNull(aggregate);
+        checkNotNull(event);
+        EventEnvelope env = EventEnvelope.of(event);
+        AggregateTestSupport.importEvent(mockRepository(), aggregate, env);
     }
 
     @SuppressWarnings("unchecked") // It is OK when mocking
