@@ -20,7 +20,6 @@
 
 package io.spine.server.model.contexts.tasks;
 
-import io.spine.base.Identifier;
 import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
@@ -48,7 +47,7 @@ public final class CreationRetry extends AbstractCommander {
 
     @Command
     CreateTask on(TaskRejections.TaskAlreadyExists rejection, CommandContext commandContext) {
-        TaskId id = Identifier.generate(TaskId.class);
+        TaskId id = TaskId.generate();
         rejectedTasks.add(rejection.getId());
         return CreateTask
                 .newBuilder()

@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
@@ -181,10 +180,9 @@ class ScheduledCommandTest {
     }
 
     private static CommandMessage createCommandMessage() {
-        CompanyId id = Identifier.generate(CompanyId.class);
         String name = ScheduledCommandTest.class.getSimpleName();
         EstablishCompany result = EstablishCompany.newBuilder()
-                                                  .setId(id)
+                                                  .setId(CompanyId.generate())
                                                   .setFinalName(name)
                                                   .build();
         return result;
