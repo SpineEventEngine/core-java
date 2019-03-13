@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import io.spine.base.Identifier;
 import io.spine.server.BoundedContext;
 import io.spine.server.model.contexts.tasks.TasksContext;
 import io.spine.test.model.contexts.tasks.TaskId;
@@ -42,7 +41,7 @@ class CommandOnRejectionTest {
     @DisplayName("with the command context")
     void receive() {
         BoundedContext context = TasksContext.newInstance();
-        TaskId proposedId = Identifier.generate(TaskId.class);
+        TaskId proposedId = TaskId.generate();
         context.eventBus()
                .post(eventFactory.createEvent(TaskAlreadyExists
                                                       .newBuilder()

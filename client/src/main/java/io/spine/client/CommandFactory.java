@@ -27,12 +27,12 @@ import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.validate.ValidationException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
-import static io.spine.core.Commands.generateId;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -136,7 +136,7 @@ public final class CommandFactory {
         Any packed = AnyPacker.pack(message);
         Command.Builder result = Command
                 .newBuilder()
-                .setId(generateId())
+                .setId(CommandId.generate())
                 .setMessage(packed)
                 .setContext(context);
         return result.build();

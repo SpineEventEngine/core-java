@@ -64,15 +64,6 @@ public final class Commands {
     }
 
     /**
-     * Creates a new {@link CommandId} based on random UUID.
-     *
-     * @return new command ID
-     */
-    public static CommandId generateId() {
-        return Identifier.generate(CommandId.class);
-    }
-
-    /**
      * Extracts the message from the passed {@code Command} instance.
      *
      * @param command a command to extract a message from
@@ -253,10 +244,7 @@ public final class Commands {
 
         @Override
         protected CommandId fromString(String str) {
-            CommandId result = CommandId
-                    .newBuilder()
-                    .setUuid(str)
-                    .build();
+            CommandId result = CommandId.of(str);
             return result;
         }
     }
