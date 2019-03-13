@@ -188,21 +188,30 @@ boolean isProtoFile(final File file) {
     return file.isFile() && file.name.endsWith(".proto")
 }
 
-final String artifactIdForPublishing = "spine-${project.name}"
-publishing {
-    publications {
-        mavenProto(MavenPublication) {
-            groupId = "${group}"
-            artifactId = "${artifactIdForPublishing}"
-            version = "${version}"
+def configurePublishing() {
+    project.publishing {
+        publications {
+            mavenProto(MavenPublication) {
+                final String artifactIdForPublishing = "spine-${project.name}"
+                
+                groupId = "${project.group}"
+                artifactId = "${artifactIdForPublishing}"
+                version = "${project.version}"
 
-            from components.java
+                from project.components.java
 
-            artifact assembleProto {
-                classifier = "proto"
+                artifact assembleProto {
+                    classifier = "proto"
+                }
             }
         }
     }
+}
+
+if (project.plugins.hasPlugin('maven-publish')) {
+    configurePublishing()
+} else {
+    project.pluginManager.withPlugin('maven-publish') { configurePublishing() }
 }
 
 /**

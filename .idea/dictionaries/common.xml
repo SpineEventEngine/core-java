@@ -18,7 +18,7 @@
       <w>flushables</w>
       <w>googleapis</w>
       <w>gradle</w>
-      <w>grpc</w>                                           
+      <w>grpc</w>
       <w>handshaker</w>
       <w>hohpe</w>
       <w>idempotency</w>
@@ -39,6 +39,7 @@
       <w>onmessage</w>
       <w>onopen</w>
       <w>parameterizing</w>
+      <w>plugable</w>
       <w>processmanager</w>
       <w>procman</w>
       <w>proto's</w>
