@@ -32,7 +32,7 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionUpdateVBuilder;
 import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 
 /**
  * Updates an entity subscription based on the incoming {@link EntityStateChanged} event.

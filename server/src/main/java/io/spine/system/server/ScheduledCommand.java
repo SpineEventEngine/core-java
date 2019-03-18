@@ -26,6 +26,8 @@ import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.event.CommandScheduled;
 
 /**
  * Information about a scheduled command.

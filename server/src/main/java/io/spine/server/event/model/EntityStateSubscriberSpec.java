@@ -30,7 +30,7 @@ import io.spine.core.EventContext;
 import io.spine.option.EntityOption;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeName;
 
 import java.util.Optional;

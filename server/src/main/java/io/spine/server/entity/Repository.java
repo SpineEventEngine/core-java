@@ -44,7 +44,6 @@ import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -180,17 +179,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Creates an immutable singleton set with the passed ID.
-     *
-     * <p>This is a convenience method for customizing routing schemas in message dispatching
-     * repositories.
-     */
-    protected final Set<I> withId(I id) {
-        checkNotNull(id);
-        return ImmutableSet.of(id);
-    }
-
-    /**
      * Assigns a {@code BoundedContext} to this repository.
      *
      * <p>If the repository does not have a storage assigned prior to this call, the storage
@@ -245,8 +233,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw newIllegalStateException("The repository %s already has storage %s.",
-                                           this, this.storage);
+            throw newIllegalStateException(
+                    "The repository `%s` already has storage `%s`.",
+                    this, this.storage);
         }
         this.storage = createStorage(factory);
     }

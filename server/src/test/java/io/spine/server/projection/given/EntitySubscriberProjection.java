@@ -20,7 +20,6 @@
 
 package io.spine.server.projection.given;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
@@ -33,6 +32,7 @@ import io.spine.test.projection.Task;
 
 import java.util.List;
 
+import static io.spine.server.route.EventRoute.withId;
 import static java.util.stream.Collectors.toList;
 
 public final class EntitySubscriberProjection

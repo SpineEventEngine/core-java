@@ -27,7 +27,7 @@ import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 /**

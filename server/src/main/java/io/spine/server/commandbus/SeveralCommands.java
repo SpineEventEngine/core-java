@@ -28,7 +28,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EventId;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EventCausedCommands;
+import io.spine.system.server.event.EventCausedCommands;
 import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkState;

@@ -30,6 +30,18 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.system.server.Substituted.Sequence;
+import io.spine.system.server.command.AssignTargetToCommand;
+import io.spine.system.server.command.ScheduleCommand;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandHandled;
+import io.spine.system.server.event.CommandReceived;
+import io.spine.system.server.event.CommandRejected;
+import io.spine.system.server.event.CommandScheduled;
+import io.spine.system.server.event.CommandSplit;
+import io.spine.system.server.event.CommandTransformed;
+import io.spine.system.server.event.TargetAssignedToCommand;
 
 import static io.spine.base.Time.currentTime;
 

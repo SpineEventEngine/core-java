@@ -54,7 +54,7 @@ import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -161,7 +161,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
-     * through the artificially created {@link io.spine.system.server.EntityStateChanged} event. It
+     * through the artificially created {@link EntityStateChanged} event. It
      * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" actions, applied
      * messages IDs, etc.
      *

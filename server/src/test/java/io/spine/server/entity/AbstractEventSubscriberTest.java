@@ -42,7 +42,7 @@ import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;

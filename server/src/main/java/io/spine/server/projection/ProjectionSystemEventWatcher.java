@@ -27,8 +27,8 @@ import io.spine.server.delivery.SystemEventWatcher;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EventDispatchedToSubscriber;
-import io.spine.system.server.HistoryRejections;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
+import io.spine.system.server.rejection.HistoryRejections;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events

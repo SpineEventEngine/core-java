@@ -27,7 +27,7 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
-option java_package = "io.spine.system.server";
+option java_package = "io.spine.system.server.command";
 option java_outer_classname = "CommandLifecycleCommandsProto";
 option java_multiple_files = true;
 
@@ -43,10 +43,10 @@ import "spine/system/server/command_lifecycle.proto";
 message ScheduleCommand {
 
     // The ID of the command.
-    spine.core.CommandId id = 1;
+    core.CommandId id = 1;
 
     // The schedule to execute the command.
-    spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
+    core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
 // Assigns a target to a command.
@@ -57,7 +57,7 @@ message ScheduleCommand {
 message AssignTargetToCommand {
 
     // The ID of the command.
-    spine.core.CommandId id = 1;
+    core.CommandId id = 1;
 
     // The command target.
     CommandTarget target = 2 [(valid) = true];

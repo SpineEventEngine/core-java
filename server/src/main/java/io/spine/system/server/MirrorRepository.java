@@ -32,6 +32,11 @@ import io.spine.client.TargetFilters;
 import io.spine.code.proto.EntityStateOption;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.util.Iterator;

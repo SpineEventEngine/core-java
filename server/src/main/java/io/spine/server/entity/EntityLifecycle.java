@@ -33,36 +33,36 @@ import io.spine.core.EventId;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
-import io.spine.system.server.AssignTargetToCommand;
-import io.spine.system.server.AssignTargetToCommandVBuilder;
-import io.spine.system.server.CommandHandled;
-import io.spine.system.server.CommandHandledVBuilder;
-import io.spine.system.server.CommandRejected;
-import io.spine.system.server.CommandRejectedVBuilder;
 import io.spine.system.server.CommandTarget;
-import io.spine.system.server.DispatchCommandToHandler;
-import io.spine.system.server.DispatchCommandToHandlerVBuilder;
-import io.spine.system.server.DispatchEventToReactor;
-import io.spine.system.server.DispatchEventToSubscriber;
-import io.spine.system.server.DispatchEventToSubscriberVBuilder;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.DispatchedMessageIdVBuilder;
-import io.spine.system.server.EntityArchived;
-import io.spine.system.server.EntityArchivedVBuilder;
-import io.spine.system.server.EntityCreated;
-import io.spine.system.server.EntityCreatedVBuilder;
-import io.spine.system.server.EntityDeleted;
-import io.spine.system.server.EntityDeletedVBuilder;
-import io.spine.system.server.EntityExtractedFromArchive;
-import io.spine.system.server.EntityExtractedFromArchiveVBuilder;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityRestored;
-import io.spine.system.server.EntityRestoredVBuilder;
-import io.spine.system.server.EntityStateChanged;
-import io.spine.system.server.EntityStateChangedVBuilder;
-import io.spine.system.server.EventImported;
-import io.spine.system.server.EventImportedVBuilder;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.command.AssignTargetToCommand;
+import io.spine.system.server.command.AssignTargetToCommandVBuilder;
+import io.spine.system.server.command.DispatchCommandToHandler;
+import io.spine.system.server.command.DispatchCommandToHandlerVBuilder;
+import io.spine.system.server.command.DispatchEventToReactor;
+import io.spine.system.server.command.DispatchEventToSubscriber;
+import io.spine.system.server.command.DispatchEventToSubscriberVBuilder;
+import io.spine.system.server.event.CommandHandled;
+import io.spine.system.server.event.CommandHandledVBuilder;
+import io.spine.system.server.event.CommandRejected;
+import io.spine.system.server.event.CommandRejectedVBuilder;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityArchivedVBuilder;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityCreatedVBuilder;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityDeletedVBuilder;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityExtractedFromArchiveVBuilder;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityRestoredVBuilder;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChangedVBuilder;
+import io.spine.system.server.event.EventImported;
+import io.spine.system.server.event.EventImportedVBuilder;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -147,7 +147,7 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
+     * Posts the {@link AssignTargetToCommand AssignTargetToCommand}
      * system command.
      *
      * @param commandId

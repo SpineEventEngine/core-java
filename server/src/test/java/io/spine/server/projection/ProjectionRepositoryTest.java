@@ -46,7 +46,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;

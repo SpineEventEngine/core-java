@@ -28,6 +28,21 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.system.server.command.DispatchCommandToHandler;
+import io.spine.system.server.command.DispatchEventToReactor;
+import io.spine.system.server.command.DispatchEventToSubscriber;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
+import io.spine.system.server.event.EventImported;
+import io.spine.system.server.rejection.CannotDispatchCommandTwice;
+import io.spine.system.server.rejection.CannotDispatchEventTwice;
 
 import java.util.function.UnaryOperator;
 

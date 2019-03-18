@@ -25,8 +25,8 @@ import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.CommandDispatched;
-import io.spine.system.server.ScheduleCommand;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.command.ScheduleCommand;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
 

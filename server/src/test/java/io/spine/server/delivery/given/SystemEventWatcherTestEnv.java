@@ -23,7 +23,7 @@ package io.spine.server.delivery.given;
 import com.google.protobuf.Empty;
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.SystemEventWatcher;
-import io.spine.system.server.EntityCreated;
+import io.spine.system.server.event.EntityCreated;
 import io.spine.test.delivery.SewProjectCreated;
 import io.spine.type.TypeUrl;
 

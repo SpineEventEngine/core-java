@@ -35,7 +35,7 @@ import io.spine.server.model.MessageFilter;
 import io.spine.server.model.Model;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.lang.reflect.Method;
