@@ -28,6 +28,7 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.event.CommandReceived;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
+import io.spine.system.server.event.CommandReceivedVBuilder;
 
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
     }
 
     private static CommandReceived systemEvent(Command domainCommand) {
-        CommandReceived result = CommandReceived
+        CommandReceived result = CommandReceivedVBuilder
                 .newBuilder()
                 .setId(domainCommand.getId())
                 .setPayload(domainCommand)
