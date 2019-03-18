@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.model.EntityStateClass;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
 

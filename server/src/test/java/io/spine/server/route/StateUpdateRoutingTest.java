@@ -26,7 +26,7 @@ import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.route.given.switchman.LogState;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

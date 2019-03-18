@@ -23,7 +23,7 @@ package io.spine.server.stand;
 import io.spine.base.EventMessage;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 /**

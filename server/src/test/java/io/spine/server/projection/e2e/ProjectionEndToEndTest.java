@@ -44,7 +44,7 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMe
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.event.PrjProjectCreated;

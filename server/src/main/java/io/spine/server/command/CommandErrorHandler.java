@@ -31,8 +31,8 @@ import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.CommandErrored;
-import io.spine.system.server.CommandRejected;
+import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandRejected;
 import io.spine.system.server.SystemWriteSide;
 
 import java.util.function.Consumer;

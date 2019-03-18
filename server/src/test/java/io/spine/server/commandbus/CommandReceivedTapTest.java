@@ -24,7 +24,7 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.CommandReceived;
+import io.spine.system.server.event.CommandReceived;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.WriteSideFunction;
 import io.spine.test.commands.CmdCreateProject;

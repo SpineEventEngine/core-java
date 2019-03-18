@@ -31,6 +31,8 @@ import io.spine.client.QueryFactory;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChangedVBuilder;
 import io.spine.test.system.server.IncompleteAudio;
 import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;

@@ -26,6 +26,9 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.server.entity.RecentHistory;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;

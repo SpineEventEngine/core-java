@@ -28,8 +28,8 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.system.server.CommandAcknowledged;
-import io.spine.system.server.CommandErrored;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandErrored;
 import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;

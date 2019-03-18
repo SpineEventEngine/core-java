@@ -27,6 +27,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.EventEnrichmentFn;
 import io.spine.server.event.EventEnricher;
+import io.spine.system.server.event.CommandScheduled;
 
 import java.util.Optional;
 

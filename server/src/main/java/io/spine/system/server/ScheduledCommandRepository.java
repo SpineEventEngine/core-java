@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import io.spine.core.CommandId;
 import io.spine.server.route.EventRouting;
+import io.spine.system.server.event.CommandDispatched;
 
 import java.util.Optional;
 import java.util.Set;

@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.type.EventClass;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Optional;
 import java.util.Set;
@@ -130,7 +130,7 @@ public final class EventRouting<I>
      * Sets a custom routing schema for entity state updates.
      *
      * <p>Setting a routing for state updates is equivalent to setting a route for events of type
-     * {@link EntityStateChanged io.spine.system.server.EntityStateChanged}. It is illegal to do
+     * {@link EntityStateChanged io.spine.system.server.event.EntityStateChanged}. It is illegal to do
      * both things simultaneously.
      *
      * @param routing

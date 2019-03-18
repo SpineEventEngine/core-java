@@ -27,7 +27,7 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
-option java_package = "io.spine.system.server";
+option java_package = "io.spine.system.server.command";
 option java_outer_classname = "HistoryCommandsProto";
 option java_multiple_files = true;
 

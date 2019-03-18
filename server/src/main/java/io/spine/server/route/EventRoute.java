@@ -22,7 +22,7 @@ package io.spine.server.route;
 
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptySet;
