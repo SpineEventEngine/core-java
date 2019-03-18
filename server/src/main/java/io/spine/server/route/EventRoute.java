@@ -28,7 +28,6 @@ import io.spine.system.server.event.EntityStateChanged;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptySet;
 
 /**
  * Obtains a set of entity IDs for which to deliver an event.
@@ -75,7 +74,7 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
     ignoreEntityUpdates(EventRoute<I, EventMessage> forOthers) {
         checkNotNull(forOthers);
         return (message, context) -> message instanceof EntityStateChanged
-                                     ? emptySet()
+                                     ? noTargets()
                                      : forOthers.apply(message, context);
     }
 
