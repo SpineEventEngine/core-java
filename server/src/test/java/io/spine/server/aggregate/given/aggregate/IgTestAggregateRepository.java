@@ -20,10 +20,11 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggTaskStarted;
+
+import static io.spine.server.route.EventRoute.withId;
 
 /**
  * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
