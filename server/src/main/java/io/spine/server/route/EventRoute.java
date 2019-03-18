@@ -20,9 +20,12 @@
 
 package io.spine.server.route;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.system.server.event.EntityStateChanged;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptySet;
@@ -74,5 +77,15 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
         return (message, context) -> message instanceof EntityStateChanged
                                      ? emptySet()
                                      : forOthers.apply(message, context);
+    }
+
+    /**
+     * Returns the empty immutable set.
+     *
+     * @apiNote This is a convenience method for ignoring a type of messages when building
+     *          a routing schema in a repository.
+     */
+    static <I> Set<I> noTargets() {
+        return ImmutableSet.of();
     }
 }

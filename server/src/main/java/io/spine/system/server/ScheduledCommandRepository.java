@@ -27,6 +27,8 @@ import io.spine.system.server.event.CommandDispatched;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.spine.server.route.EventRoute.noTargets;
+
 /**
  * A repository for {@link ScheduledCommand}s.
  */
@@ -45,6 +47,6 @@ final class ScheduledCommandRepository
         Optional<ScheduledCommand> existing = find(id);
         return existing.isPresent()
                ? withId(id)
-               : none();
+               : noTargets();
     }
 }
