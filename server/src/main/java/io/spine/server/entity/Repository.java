@@ -191,6 +191,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
+     * Returns the empty immutable set.
+     *
+     * @apiNote This is a convenience method for ignoring a message when building a routing schema
+     *          in a derived repository class.
+     */
+    protected final Set<I> none() {
+        return ImmutableSet.of();
+    }
+
+    /**
      * Assigns a {@code BoundedContext} to this repository.
      *
      * <p>If the repository does not have a storage assigned prior to this call, the storage

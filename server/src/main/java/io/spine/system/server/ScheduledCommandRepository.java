@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandId;
 import io.spine.server.route.EventRouting;
 
@@ -44,7 +43,7 @@ final class ScheduledCommandRepository
         CommandId id = event.getId();
         Optional<ScheduledCommand> existing = find(id);
         return existing.isPresent()
-               ? ImmutableSet.of(id)
-               : ImmutableSet.of();
+               ? withId(id)
+               : none();
     }
 }
