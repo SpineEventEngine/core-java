@@ -88,4 +88,15 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
     static <I> Set<I> noTargets() {
         return ImmutableSet.of();
     }
+
+    /**
+     * Creates an immutable singleton set with the passed ID.
+     *
+     * @apiNote This is a convenience method for customizing routing schemas when the target is
+     *          only one entity.
+     */
+    static <I> Set<I> withId(I id) {
+        checkNotNull(id);
+        return ImmutableSet.of(id);
+    }
 }

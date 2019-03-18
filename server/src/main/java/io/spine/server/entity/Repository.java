@@ -180,17 +180,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Creates an immutable singleton set with the passed ID.
-     *
-     * <p>This is a convenience method for customizing routing schemas in message dispatching
-     * repositories.
-     */
-    protected final Set<I> withId(I id) {
-        checkNotNull(id);
-        return ImmutableSet.of(id);
-    }
-
-    /**
      * Assigns a {@code BoundedContext} to this repository.
      *
      * <p>If the repository does not have a storage assigned prior to this call, the storage

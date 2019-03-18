@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.server.route.EventRoute.noTargets;
+import static io.spine.server.route.EventRoute.withId;
 
 /**
  * A repository for {@link ScheduledCommand}s.

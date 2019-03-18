@@ -20,12 +20,13 @@
 
 package io.spine.server.groups;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.Subscribe;
 import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
+
+import static io.spine.server.route.EventRoute.withId;
 
 public final class GroupNameProjection
         extends Projection<GroupId, GroupName, GroupNameVBuilder> {
