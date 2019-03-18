@@ -44,7 +44,6 @@ import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -234,8 +233,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw newIllegalStateException("The repository %s already has storage %s.",
-                                           this, this.storage);
+            throw newIllegalStateException(
+                    "The repository `%s` already has storage `%s`.",
+                    this, this.storage);
         }
         this.storage = createStorage(factory);
     }
