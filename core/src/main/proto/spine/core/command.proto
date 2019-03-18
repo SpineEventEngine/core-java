@@ -119,11 +119,7 @@ message CommandContext {
         // and its delivery to the target.
         google.protobuf.Duration delay = 1;
 
-        //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific date/time.
-        // Name the field `at`;
-
-        //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence.
-        // Name the field `every`.
+        // See: https://github.com/SpineEventEngine/core-java/issues/994
     }
 
     // The schedule to execute the command.

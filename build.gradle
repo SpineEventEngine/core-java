@@ -151,8 +151,7 @@ subprojects {
 
         implementation deps.build.guava
 
-        //TODO:2018-05-11:alexander.yevsyukov: Replace the below with Checker Framework
-        // after Guava fully migrates from it too.
+        // See: https://github.com/SpineEventEngine/base/issues/108
         implementation deps.build.jsr305Annotations
 
         implementation deps.build.checkerAnnotations
