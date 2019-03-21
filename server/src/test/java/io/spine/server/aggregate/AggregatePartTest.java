@@ -152,8 +152,8 @@ class AggregatePartTest {
                     "Final count of entities of `TaskPart` type is %d\n", count
             );
 
-            // With correct part queries work we'd expect 1 here.
-            assertThat(count).isEqualTo(0);
+            // Works incorrect, will be 0.
+            assertThat(count).isEqualTo(1);
         });
     }
 
