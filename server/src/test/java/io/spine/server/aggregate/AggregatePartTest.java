@@ -27,7 +27,6 @@ import io.spine.base.CommandMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
-import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.TaskDescriptionPart;
@@ -56,7 +55,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("AggregatePart should")
-class AggregatePartTest implements Logging {
+class AggregatePartTest {
 
     private static final ProjectId ID = ProjectId
             .newBuilder()
