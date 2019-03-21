@@ -21,42 +21,58 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
+import io.spine.client.QueryResponse;
+import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.TaskDescriptionPart;
 import io.spine.server.aggregate.given.part.TaskDescriptionRepository;
 import io.spine.server.aggregate.given.part.TaskPart;
 import io.spine.server.aggregate.given.part.TaskRepository;
+import io.spine.server.test.shared.StringAggregate;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Consumer;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("AggregatePart should")
-class AggregatePartTest {
+class AggregatePartTest implements Logging {
+
+    private static final ProjectId ID = ProjectId
+            .newBuilder()
+            .setId(newUuid())
+            .build();
 
     private static final String TASK_DESCRIPTION = "Description";
     private static final TestActorRequestFactory factory =
             new TestActorRequestFactory(AggregatePartTest.class);
+
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
     private TaskPart taskPart;
     private TaskDescriptionPart taskDescriptionPart;
     private TaskRepository taskRepository;
+    private TaskDescriptionRepository taskDescriptionRepository;
 
     private static CommandEnvelope env(CommandMessage commandMessage) {
         return CommandEnvelope.of(factory.command()
@@ -68,14 +84,14 @@ class AggregatePartTest {
         ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        root = new AnAggregateRoot(boundedContext, newUuid());
+        root = new AnAggregateRoot(boundedContext, ID);
         taskPart = new TaskPart(root);
-        prepareAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository();
-        TaskDescriptionRepository taskDescriptionRepository = new TaskDescriptionRepository();
+        taskDescriptionRepository = new TaskDescriptionRepository();
         boundedContext.register(taskRepository);
         boundedContext.register(taskDescriptionRepository);
+        prepareAggregatePart();
     }
 
     @Test
@@ -84,6 +100,85 @@ class AggregatePartTest {
         createNullPointerTester()
                 .testStaticMethods(AggregatePart.class, NullPointerTester.Visibility.PACKAGE);
         createNullPointerTester().testAllPublicInstanceMethods(taskPart);
+    }
+
+    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "HardcodedLineSeparator"}) // For clarity.
+    @Test
+    @DisplayName("not override other parts with common ID when querying")
+    void notOverrideOtherParts() {
+        System.out.println(
+                "-----------------------------------------------------------------------"
+        );
+
+        // The command to `TaskPart` was already sent in `setUp`, now there is 1 `TaskPart`
+        // and 0 `TaskDescriptionPart`-s.
+        queryEntities(StringAggregate.class, response -> {
+            int count = response.getMessagesList()
+                                .size();
+            System.out.printf(
+                    "Initial count of entities of `TaskDescriptionPart` type is %d\n", count
+            );
+            assertThat(count).isEqualTo(0);
+        });
+        queryEntities(Task.class, response -> {
+            int count = response.getMessagesList()
+                                .size();
+            System.out.printf(
+                    "Initial count of entities of `TaskPart` type is %d\n", count
+            );
+            assertThat(count).isEqualTo(1);
+        });
+
+        // Now we send the command to `TaskDescriptionPart` and it should be created in the
+        // repository.
+        AggCreateProject.Builder aggCreateProject = builderForType(AggCreateProject.class);
+        aggCreateProject.setProjectId(ID)
+                        .setName("Super Project")
+                        .build();
+        taskDescriptionRepository.dispatch(env(aggCreateProject.build()));
+
+        // Querying entities reveals that there are no `TaskPart`-s now.
+        queryEntities(StringAggregate.class, response -> {
+            int count = response.getMessagesList()
+                                .size();
+            System.out.printf(
+                    "Final count of entities of `TaskDescriptionPart` type is %d\n", count
+            );
+            assertThat(count).isEqualTo(1);
+        });
+        queryEntities(Task.class, response -> {
+            int count = response.getMessagesList()
+                                .size();
+            System.out.printf(
+                    "Final count of entities of `TaskPart` type is %d\n", count
+            );
+
+            // With correct part queries work we'd expect 1 here.
+            assertThat(count).isEqualTo(0);
+        });
+    }
+
+    private void queryEntities(Class<? extends Message> entityClass,
+                               Consumer<QueryResponse> onResponse) {
+        TestActorRequestFactory factory = new TestActorRequestFactory(AggregatePartTest.class);
+
+        QueryFactory queryFactory = new QueryFactory(factory);
+        Query query = queryFactory.select(entityClass)
+                                  .build();
+        StreamObserver<QueryResponse> obs1 = new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                onResponse.accept(value);
+            }
+            @Override
+            public void onError(Throwable t) {
+            }
+            @Override
+            public void onCompleted() {
+            }
+        };
+        boundedContext.stand()
+                      .execute(query, obs1);
     }
 
     @Test
@@ -96,7 +191,7 @@ class AggregatePartTest {
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
         Constructor constructor =
-                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, ProjectId.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
@@ -106,9 +201,8 @@ class AggregatePartTest {
 
     private void prepareAggregatePart() {
         AggAddTask.Builder addTask = builderForType(AggAddTask.class);
-        addTask.setProjectId(ProjectId.newBuilder()
-                                      .setId("agg-part-ID"))
+        addTask.setProjectId(ID)
                .build();
-        AggregateMessageDispatcher.dispatchCommand(taskPart, env(addTask.build()));
+        taskRepository.dispatch(env(addTask.build()));
     }
 }

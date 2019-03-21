@@ -23,6 +23,7 @@ package io.spine.server.aggregate.given.part;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskVBuilder;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -33,7 +34,7 @@ import io.spine.test.aggregate.event.AggTaskAdded;
  * represented by {@link AnAggregateRoot}.
  */
 public class TaskPart
-        extends AggregatePart<String, Task, TaskVBuilder, AnAggregateRoot> {
+        extends AggregatePart<ProjectId, Task, TaskVBuilder, AnAggregateRoot> {
 
     private static final String TASK_DESCRIPTION = "Description";
 
@@ -44,13 +45,14 @@ public class TaskPart
     @Assign
     AggTaskAdded handle(AggAddTask msg) {
         AggTaskAdded result = AggTaskAdded.newBuilder()
+                                          .setProjectId(msg.getProjectId())
                                           .build();
         //This command can be empty since we use apply method to setup aggregate part.
         return result;
     }
 
     @Apply
-    private void apply(AggTaskAdded event) {
+    void apply(AggTaskAdded event) {
         builder().setDescription(TASK_DESCRIPTION);
     }
 }

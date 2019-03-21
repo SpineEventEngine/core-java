@@ -23,12 +23,16 @@ package io.spine.server.aggregate.given.part;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.test.shared.StringAggregate;
 import io.spine.server.test.shared.StringAggregateVBuilder;
+import io.spine.test.aggregate.ProjectId;
 
 /**
  * An aggregate part which belongs to the aggregate represented by {@link AnAggregateRoot}.
  */
 public class AnAggregatePart
-        extends AggregatePart<String, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
+        extends AggregatePart<ProjectId,
+                              StringAggregate,
+                              StringAggregateVBuilder,
+                              AnAggregateRoot> {
 
     public AnAggregatePart(AnAggregateRoot root) {
         super(root);

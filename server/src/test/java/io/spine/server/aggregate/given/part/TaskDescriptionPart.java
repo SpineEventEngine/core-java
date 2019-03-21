@@ -26,6 +26,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.test.shared.StringAggregate;
 import io.spine.server.test.shared.StringAggregateVBuilder;
+import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -35,7 +36,7 @@ import io.spine.test.aggregate.event.AggTaskAdded;
  * represented by {@link AnAggregateRoot}.
  */
 public class TaskDescriptionPart
-        extends AggregatePart<String, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
+        extends AggregatePart<ProjectId, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
 
     public TaskDescriptionPart(AnAggregateRoot root) {
         super(root);
@@ -49,6 +50,11 @@ public class TaskDescriptionPart
                 .setName(msg.getName())
                 .build();
         return result;
+    }
+
+    @Apply
+    void apply(AggProjectCreated event) {
+        builder().setValue(event.getName());
     }
 
     @Apply

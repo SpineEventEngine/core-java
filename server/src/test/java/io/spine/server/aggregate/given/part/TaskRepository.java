@@ -21,12 +21,13 @@
 package io.spine.server.aggregate.given.part;
 
 import io.spine.server.aggregate.AggregatePartRepository;
+import io.spine.test.aggregate.ProjectId;
 
 /**
  * The repository of {@link TaskPart}s.
  */
 public class TaskRepository
-        extends AggregatePartRepository<String, TaskPart, AnAggregateRoot> {
+        extends AggregatePartRepository<ProjectId, TaskPart, AnAggregateRoot> {
 
     public TaskRepository() {
         super();
