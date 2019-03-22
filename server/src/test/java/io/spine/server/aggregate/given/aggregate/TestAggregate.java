@@ -94,7 +94,7 @@ public class TestAggregate
     AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
         isAddTaskCommandHandled = true;
         AggTaskAdded event = taskAdded(cmd.getProjectId());
-        return event.toBuilder()
+        return event.toVBuilder()
                     .setTask(cmd.getTask())
                     .build();
     }

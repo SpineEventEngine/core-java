@@ -402,7 +402,7 @@ public class EntityLifecycle {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
         checkNotNull(messageId);
-        DispatchedMessageIdVBuilder builder = DispatchedMessageIdVBuilder.newBuilder();
+        DispatchedMessageIdVBuilder builder = DispatchedMessageId.vBuilder();
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
             return builder.setEventId(eventId)

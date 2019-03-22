@@ -84,7 +84,7 @@ public class TestProcessManager
     }
 
     private void handleProjectCreated(ProjectId projectId) {
-        Project newState = state().toBuilder()
+        Project newState = state().toVBuilder()
                                   .setId(projectId)
                                   .setStatus(Project.Status.CREATED)
                                   .build();
@@ -92,14 +92,14 @@ public class TestProcessManager
     }
 
     private void handleTaskAdded(Task task) {
-        Project newState = state().toBuilder()
+        Project newState = state().toVBuilder()
                                   .addTask(task)
                                   .build();
         builder().mergeFrom(newState);
     }
 
     private void handleProjectStarted() {
-        Project newState = state().toBuilder()
+        Project newState = state().toVBuilder()
                                   .setStatus(Project.Status.STARTED)
                                   .build();
         builder().mergeFrom(newState);

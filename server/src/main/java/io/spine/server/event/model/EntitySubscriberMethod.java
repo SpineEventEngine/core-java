@@ -83,7 +83,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     @Override
     public MessageFilter filter() {
         return MessageFilter
-                .newBuilder()
+                .vBuilder()
                 .setField(TYPE_URL_PATH)
                 .setValue(typeUrlAsAny)
                 .build();

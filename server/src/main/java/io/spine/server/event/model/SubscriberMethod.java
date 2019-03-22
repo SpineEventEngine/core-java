@@ -70,7 +70,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
         FieldPath fieldPath = filter.getField();
         return fieldPath.getFieldNameList().isEmpty()
                ? typeBasedToken
-               : typeBasedToken.toBuilder()
+               : typeBasedToken.toVBuilder()
                                .setFilter(filter)
                                .build();
     }

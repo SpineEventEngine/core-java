@@ -51,11 +51,11 @@ final class ScheduledCommand
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
         CommandContext updatedContext =
                 source.getContext()
-                      .toBuilder()
+                      .toVBuilder()
                       .setSchedule(schedule)
                       .build();
         Command updatedCommand =
-                source.toBuilder()
+                source.toVBuilder()
                       .setContext(updatedContext)
                       .build();
         return updatedCommand;

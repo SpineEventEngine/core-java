@@ -71,9 +71,9 @@ import static java.lang.String.format;
 @SuppressWarnings("ClassWithTooManyMethods")
 @Internal
 public abstract class Transaction<I,
-                                  E extends TransactionalEntity<I, S, B>,
-                                  S extends Message,
-                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+        E extends TransactionalEntity<I, S, B>,
+        S extends Message,
+        B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
      * The entity, which state and attributes are modified in this transaction.
@@ -287,7 +287,7 @@ public abstract class Transaction<I,
 
             throw invalidStateException;
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") // Catch all unexpected exceptions.
-                 RuntimeException genericException) {
+                RuntimeException genericException) {
             rollback(genericException);
             throw illegalStateWithCauseOf(genericException);
         } finally {
@@ -304,7 +304,7 @@ public abstract class Transaction<I,
         S unchanged = entity().state();
         Version pendingVersion = version();
         beforeCommit(unchanged, pendingVersion);
-        if(!pendingVersion.equals(entity.version())) {
+        if (!pendingVersion.equals(entity.version())) {
             entity.updateState(unchanged, pendingVersion);
         }
         commitAttributeChanges();
@@ -380,7 +380,7 @@ public abstract class Transaction<I,
 
     private S currentBuilderState() {
         @SuppressWarnings("unchecked")  // OK, as `AbstractValidatingBuilder` is the only subclass.
-        AbstractValidatingBuilder<S, ?> abstractBuilder = (AbstractValidatingBuilder<S, ?>) builder;
+                AbstractValidatingBuilder<S, ?> abstractBuilder = (AbstractValidatingBuilder<S, ?>) builder;
         return abstractBuilder.internalBuild();
     }
 
@@ -454,8 +454,8 @@ public abstract class Transaction<I,
 
         int versionNumber = this.version.getNumber();
         if (versionNumber > 0) {
-            String errMsg =
-                    format("initVersion() called on an entity with non-zero version number (%d).",
+            String errMsg = format(
+                    "initVersion() called on an entity with non-zero version number (%d).",
                     versionNumber
             );
             throw new IllegalStateException(errMsg);
@@ -486,13 +486,13 @@ public abstract class Transaction<I,
     }
 
     public void setArchived(boolean archived) {
-        lifecycleFlags = lifecycleFlags.toBuilder()
+        lifecycleFlags = lifecycleFlags.toVBuilder()
                                        .setArchived(archived)
                                        .build();
     }
 
     public void setDeleted(boolean deleted) {
-        lifecycleFlags = lifecycleFlags.toBuilder()
+        lifecycleFlags = lifecycleFlags.toVBuilder()
                                        .setDeleted(deleted)
                                        .build();
     }

@@ -88,7 +88,8 @@ public final class Events {
     /**
      * Sorts the given event record list by the event timestamps.
      *
-     * @param events the event record list to sort
+     * @param events
+     *         the event record list to sort
      */
     public static void sort(List<Event> events) {
         checkNotNull(events);
@@ -116,7 +117,8 @@ public final class Events {
     /**
      * Extracts the event message from the passed event.
      *
-     * @param event an event to get message from
+     * @param event
+     *         an event to get message from
      */
     public static EventMessage getMessage(Event event) {
         checkNotNull(event);
@@ -129,7 +131,7 @@ public final class Events {
      * Extract event messages from the passed events.
      */
     public static List<? extends EventMessage> toMessages(List<Event> events) {
-       checkNotNull(events);
+        checkNotNull(events);
         List<EventMessage> result =
                 events.stream()
                       .map(Events::getMessage)
@@ -177,7 +179,8 @@ public final class Events {
     /**
      * Obtains event producer ID from the passed {@code EventContext}.
      *
-     * @param context the event context to to get the event producer ID
+     * @param context
+     *         the event context to to get the event producer ID
      * @return the producer ID
      */
     public static Object getProducer(EventContext context) {
@@ -187,11 +190,12 @@ public final class Events {
 
     /**
      * Obtains the ID of the root command, which lead to this event.
-     * 
-     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
+     *
+     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event},
      * the identifier of the very first command in this chain is returned.
      *
-     * @param event the event to get the root command ID for
+     * @param event
+     *         the event to get the root command ID for
      * @return the root command ID
      */
     public static CommandId getRootCommandId(Event event) {
@@ -211,8 +215,10 @@ public final class Events {
     /**
      * Ensures that the passed ID is valid.
      *
-     * @param id an ID to check
-     * @throws IllegalArgumentException if the ID string value is empty or blank
+     * @param id
+     *         an ID to check
+     * @throws IllegalArgumentException
+     *         if the ID string value is empty or blank
      */
     public static EventId checkValid(EventId id) {
         checkNotNull(id);
@@ -223,14 +229,14 @@ public final class Events {
     /**
      * Checks whether or not the given event is a rejection event.
      *
-     * @param event the event to check
+     * @param event
+     *         the event to check
      * @return {@code true} if the given event is a rejection, {@code false} otherwise
      */
     public static boolean isRejection(Event event) {
         checkNotNull(event);
         EventContext context = event.getContext();
-        boolean result = context.hasRejection()
-                      || !isDefault(context.getRejection());
+        boolean result = context.hasRejection() || !isDefault(context.getRejection());
         return result;
     }
 
@@ -238,8 +244,10 @@ public final class Events {
      * Constructs a new {@link RejectionEventContext} from the given command message and
      * {@link ThrowableMessage}.
      *
-     * @param commandMessage   rejected command
-     * @param throwableMessage thrown rejection
+     * @param commandMessage
+     *         rejected command
+     * @param throwableMessage
+     *         thrown rejection
      * @return new instance of {@code RejectionEventContext}
      */
     public static RejectionEventContext rejectionContext(CommandMessage commandMessage,
@@ -293,7 +301,8 @@ public final class Events {
      *
      * <p>This method is useful for returning empty result from reacting methods.
      *
-     * @param <M> the type of messages
+     * @param <M>
+     *         the type of messages
      * @return empty {@link Iterable}
      */
     public static <M extends EventMessage> Iterable<M> nothing() {
@@ -304,7 +313,8 @@ public final class Events {
      * Analyzes the event context and determines if the event has been produced outside
      * of the current {@code BoundedContext}.
      *
-     * @param context the context of event
+     * @param context
+     *         the context of event
      * @return {@code true} if the event is external, {@code false} otherwise
      */
     @Internal
@@ -327,23 +337,25 @@ public final class Events {
      * <p>Enrichments will not be removed from second-level and deeper origins,
      * because it's a heavy performance operation.
      *
-     * @param event the event to clear enrichments
+     * @param event
+     *         the event to clear enrichments
      * @return the event without enrichments
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Internal
     public static Event clearEnrichments(Event event) {
         EventContext context = event.getContext();
-        EventContext.Builder resultContext = context.toBuilder()
-                                                          .clearEnrichment();
-        EventContext.OriginCase originCase = resultContext.getOriginCase();
+        EventContext.OriginCase originCase = context.getOriginCase();
+        EventContextVBuilder resultContext = context.toVBuilder()
+                                                    .clearEnrichment();
         if (originCase == EVENT_CONTEXT) {
             resultContext.setEventContext(context.getEventContext()
-                                                 .toBuilder()
-                                                 .clearEnrichment());
+                                                 .toVBuilder()
+                                                 .clearEnrichment()
+                                                 .build());
         }
-        Event result = event.toBuilder()
-                            .setContext(resultContext)
+        Event result = event.toVBuilder()
+                            .setContext(resultContext.build())
                             .build();
         return result;
     }
@@ -351,17 +363,19 @@ public final class Events {
     /**
      * Replaces the event version with the given {@code newVersion}.
      *
-     * @param event      original event
-     * @param newVersion the version to set
+     * @param event
+     *         original event
+     * @param newVersion
+     *         the version to set
      * @return the copy of the original event but with the new version
      */
     @Internal
     public static Event substituteVersion(Event event, Version newVersion) {
         EventContext newContext = event.getContext()
-                                       .toBuilder()
+                                       .toVBuilder()
                                        .setVersion(newVersion)
                                        .build();
-        Event result = event.toBuilder()
+        Event result = event.toVBuilder()
                             .setContext(newContext)
                             .build();
         return result;
@@ -393,9 +407,9 @@ public final class Events {
      * <p>The context is obtained by traversing the events origin for a valid context source.
      * There can be three sources for the actor context:
      * <ol>
-     *     <li>The command context set as the event origin.
-     *     <li>The command context of an event which is an origin of this event.
-     *     <li>The import context if the event is imported to an aggregate.
+     * <li>The command context set as the event origin.
+     * <li>The command context of an event which is an origin of this event.
+     * <li>The import context if the event is imported to an aggregate.
      * </ol>
      *
      * <p>If at some point the event origin is not set, an {@link IllegalArgumentException} is

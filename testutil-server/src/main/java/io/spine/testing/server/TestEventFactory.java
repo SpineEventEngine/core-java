@@ -59,8 +59,8 @@ public class TestEventFactory extends EventFactory {
         return newInstance(id, new TestActorRequestFactory(testSuiteClass));
     }
 
-    public static
-    TestEventFactory newInstance(Message producerId, TestActorRequestFactory requestFactory) {
+    public static TestEventFactory newInstance(Message producerId,
+                                               TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
         Any id = toAny(producerId);
         CommandEnvelope cmd = CommandEnvelope.of(requestFactory.generateCommand());
@@ -93,10 +93,10 @@ public class TestEventFactory extends EventFactory {
         checkNotNull(atTime);
         Event event = createEvent(message, version);
         EventContext context = event.getContext()
-                                    .toBuilder()
+                                    .toVBuilder()
                                     .setTimestamp(atTime)
                                     .build();
-        Event result = event.toBuilder()
+        Event result = event.toVBuilder()
                             .setContext(context)
                             .build();
         return result;
