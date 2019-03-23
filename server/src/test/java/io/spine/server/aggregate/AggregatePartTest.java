@@ -101,7 +101,7 @@ class AggregatePartTest {
         createNullPointerTester().testAllPublicInstanceMethods(taskPart);
     }
 
-    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "HardcodedLineSeparator"}) // For clarity.
+    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "HardcodedLineSeparator", "CheckReturnValue"}) // For clarity.
     @Test
     @DisplayName("not override other parts with common ID when querying")
     void notOverrideOtherParts() {
@@ -198,6 +198,7 @@ class AggregatePartTest {
         return tester;
     }
 
+    @SuppressWarnings("CheckReturnValue")
     private void prepareAggregatePart() {
         AggAddTask.Builder addTask = builderForType(AggAddTask.class);
         addTask.setProjectId(ID)
