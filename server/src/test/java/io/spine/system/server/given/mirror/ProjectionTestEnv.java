@@ -25,13 +25,13 @@ import io.spine.client.EntityId;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.system.server.DispatchedMessageId;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.MirrorId;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityExtractedFromArchive;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.system.server.MirrorId;
 import io.spine.test.system.server.Video;
 import io.spine.type.TypeUrl;
 
@@ -43,9 +43,12 @@ public final class ProjectionTestEnv {
 
     public static final String RAW_ID = "42";
 
+    private static final TypeUrl AGGREGATE_TYPE_URL = TypeUrl.of(Video.class);
+
     public static final MirrorId ID = MirrorId
             .newBuilder()
             .setValue(toAny(RAW_ID))
+            .setTypeUrl(AGGREGATE_TYPE_URL.value())
             .build();
 
     public static final Version VERSION = Version
@@ -53,8 +56,6 @@ public final class ProjectionTestEnv {
             .setNumber(42)
             .setTimestamp(currentTime())
             .build();
-
-    private static final TypeUrl AGGREGATE_TYPE_URL = TypeUrl.of(Video.class);
 
     /**
      * Prevents the utility class instantiation.

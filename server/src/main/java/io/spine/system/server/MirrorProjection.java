@@ -81,7 +81,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") EntityArchived event) {
+    void on(EntityArchived event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -95,7 +95,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") EntityDeleted event) {
+    void on(EntityDeleted event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -109,7 +109,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") EntityExtractedFromArchive event) {
+    void on(EntityExtractedFromArchive event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -123,7 +123,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    void on(@SuppressWarnings("unused") EntityRestored event) {
+    void on(EntityRestored event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
@@ -166,14 +166,15 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         if (domainIds.isEmpty()) {
             return IdFilter.getDefaultInstance();
         }
-        IdFilter result = assembleSystemIdFilter(domainIds);
+        TypeUrl typeUrl = TypeUrl.parse(target.getType());
+        IdFilter result = assembleSystemIdFilter(domainIds, typeUrl);
         return result;
     }
 
-    private static IdFilter assembleSystemIdFilter(Collection<Any> domainIds) {
+    private static IdFilter assembleSystemIdFilter(Collection<Any> domainIds, TypeUrl type) {
         List<Any> mirrorIds = domainIds
                 .stream()
-                .map(MirrorProjection::domainToSystemId)
+                .map(domainId -> domainToSystemId(domainId, type))
                 .collect(toList());
         IdFilter idFilter = IdFilter
                 .newBuilder()
@@ -182,10 +183,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         return idFilter;
     }
 
-    private static Any domainToSystemId(Any domainId) {
-        MirrorId mirrorId = MirrorId
+    private static Any domainToSystemId(Any domainId, TypeUrl typeUrl) {
+        MirrorId mirrorId = MirrorIdVBuilder
                 .newBuilder()
                 .setValue(domainId)
+                .setTypeUrl(typeUrl.value())
                 .build();
         Any systemId = pack(mirrorId);
         return systemId;
