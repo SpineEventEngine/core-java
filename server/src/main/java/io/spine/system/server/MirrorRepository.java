@@ -114,6 +114,7 @@ final class MirrorRepository
         MirrorId result = MirrorId
                 .newBuilder()
                 .setValue(any)
+                .setTypeUrl(historyId.getTypeUrl())
                 .build();
         return result;
     }
