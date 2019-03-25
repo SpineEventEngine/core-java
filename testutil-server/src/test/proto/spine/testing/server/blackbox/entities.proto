@@ -57,6 +57,7 @@ message BbProject {
 }
 
 message BbProjectView {
+    option (entity).kind = PROJECTION;
 
     BbProjectId id = 1;
 
