@@ -62,8 +62,7 @@ public class TaskCommentsPart
                 .setAuthor(event.getAuthor())
                 .setText(event.getText())
                 .build();
-        builder().addComment(comment);
+        builder().setId(id())
+                 .addComment(comment);
     }
-
-
 }

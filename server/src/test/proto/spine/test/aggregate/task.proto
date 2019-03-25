@@ -36,7 +36,11 @@ message AggTaskId {
 message AggTask {
     option (entity).kind = AGGREGATE;
 
-    AggTaskId id = 1;
+    // The ID of the aggregate.
+    //
+    // In order to avoid the verbose test set up process, the ID may be not set.
+    //
+    AggTaskId id = 1 [(required) = false];
     
     spine.core.UserId assignee = 2;
 }
