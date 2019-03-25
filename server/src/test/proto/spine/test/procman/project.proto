@@ -32,6 +32,8 @@ message ProjectId {
 }
 
 message Project {
+    option (entity).kind = PROCESS_MANAGER;
+
     ProjectId id = 1;
     string name = 2;
     repeated Task task = 3;
@@ -51,6 +53,8 @@ message TaskId {
 }
 
 message Task {
+    option (entity).kind = PROCESS_MANAGER;
+
     TaskId task_id = 1;
     string title = 2;
     string description = 3;

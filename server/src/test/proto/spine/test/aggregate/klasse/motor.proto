@@ -35,6 +35,7 @@ message EngineId {
 }
 
 message Engine {
+    option (entity).kind = AGGREGATE;
 
     enum Status {
         ENGINE_STATE_UNDEFINED = 0;

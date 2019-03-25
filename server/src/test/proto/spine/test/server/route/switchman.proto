@@ -42,12 +42,16 @@ enum SwitchPosition {
 
 // A log with counters of operations per switchman, and list of missing switchman.
 message LogState {
+    option (entity).kind = AGGREGATE;
+
     map<string, int32> counters = 1;
+
     repeated string missing_switchman = 2;
 }
 
 // A simple counter of turned switches.
 message SwitchmanLog {
+    option (entity).kind = AGGREGATE;
 
     // The name of the switchman, which serves as the ID.
     string name = 1 [(required) = true];

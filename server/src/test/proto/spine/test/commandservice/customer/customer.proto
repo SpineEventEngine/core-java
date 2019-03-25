@@ -41,6 +41,8 @@ message CustomerId {
 
 // A Customer is a person who is interested in our products or services.
 message Customer {
+    option (entity).kind = AGGREGATE;
+
     // The ID of the customer.
     CustomerId id = 1;
 
