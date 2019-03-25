@@ -137,8 +137,13 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected TestProcessManager createEntity(ProjectId id) {
+        Project state = ProjectVBuilder
+                .newBuilder()
+                .setId(id)
+                .build();
         TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                          .withId(id)
+                                         .withState(state)
                                          .build();
         return result;
     }

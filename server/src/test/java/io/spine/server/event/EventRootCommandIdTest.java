@@ -159,9 +159,9 @@ public class EventRootCommandIdTest {
          * different aggregates:
          * <ol>
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} —
-         *     {@link ProjectCreated}</li>
+         *     {@link ProjectCreated}
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} —
-         *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
+         *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}
          * </ol>
          */
         @Test
@@ -186,10 +186,9 @@ public class EventRootCommandIdTest {
          * different process managers:
          * <ol>
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager}
-         *     — {@link EvInvitationAccepted}</li>
+         *     — {@link EvInvitationAccepted}
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager}
          *     — {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}
-         *     </li>
          * </ol>
          */
         @Test

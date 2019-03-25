@@ -45,7 +45,11 @@ message EvMemberInvitation {
 message EvTeam {
     option (entity).kind = AGGREGATE;
 
-    EvTeamId id = 1;
+    // ID of the aggregate.
+    //
+    // Allow empty ID to avoid verbose test set up.
+    //
+    EvTeamId id = 1 [(required) = false];
 
     repeated ProjectId project_id = 2;
 
