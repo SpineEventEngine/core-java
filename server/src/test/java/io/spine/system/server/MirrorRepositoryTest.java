@@ -40,6 +40,7 @@ import io.spine.test.system.server.PhotoId;
 import io.spine.test.system.server.Video;
 import io.spine.test.system.server.VideoId;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -247,6 +248,7 @@ class MirrorRepositoryTest {
 
         @Test
         @DisplayName("to nowhere if the target type is not marked as an `(entity)`")
+        @MuteLogging
         void incompleteAggregate() {
             String id = newUuid();
             TypeUrl type = TypeUrl.of(IncompleteAudio.class);
