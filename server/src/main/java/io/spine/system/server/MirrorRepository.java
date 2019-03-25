@@ -116,7 +116,8 @@ final class MirrorRepository
                           .orElse(KIND_UNKNOWN);
         if (kind == KIND_UNKNOWN) {
             log.warn("Received a state update of entity `{}`. The entity kind is unknown. " +
-                             "Please use (entity) option to define entity states.");
+                             "Please use (entity) option to define entity states.",
+                     type);
         }
         return kind;
     }
