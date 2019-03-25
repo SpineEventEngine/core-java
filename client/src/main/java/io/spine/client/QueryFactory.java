@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -55,8 +54,7 @@ public final class QueryFactory {
 
     private final ActorContext actorContext;
 
-    @VisibleForTesting
-    public QueryFactory(ActorRequestFactory actorRequestFactory) {
+    QueryFactory(ActorRequestFactory actorRequestFactory) {
         checkNotNull(actorRequestFactory);
         this.actorContext = actorRequestFactory.newActorContext();
     }

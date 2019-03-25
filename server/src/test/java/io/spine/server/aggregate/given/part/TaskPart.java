@@ -47,12 +47,11 @@ public class TaskPart
         AggTaskAdded result = AggTaskAdded.newBuilder()
                                           .setProjectId(msg.getProjectId())
                                           .build();
-        //This command can be empty since we use apply method to setup aggregate part.
         return result;
     }
 
     @Apply
-    void apply(AggTaskAdded event) {
+    private void apply(AggTaskAdded event) {
         builder().setDescription(TASK_DESCRIPTION);
     }
 }
