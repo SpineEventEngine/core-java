@@ -22,11 +22,10 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
 import io.spine.client.Query;
-import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.TaskDescriptionPart;
@@ -46,10 +45,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
-import java.util.function.Consumer;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,83 +103,38 @@ class AggregatePartTest {
         createNullPointerTester().testAllPublicInstanceMethods(taskPart);
     }
 
-    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "HardcodedLineSeparator", "CheckReturnValue"}) // For clarity.
     @Test
     @DisplayName("not override other parts with common ID when querying")
+    @SuppressWarnings("CheckReturnValue") // Message dispatching called for the side effect.
     void notOverrideOtherParts() {
-        System.out.println(
-                "-----------------------------------------------------------------------"
-        );
-
-        // The command to `TaskPart` was already sent in `setUp`, now there is 1 `TaskPart`
-        // and 0 `TaskDescriptionPart`-s.
-        queryEntities(StringAggregate.class, response -> {
-            int count = response.getMessagesList()
-                                .size();
-            System.out.printf(
-                    "Initial count of entities of `TaskDescriptionPart` type is %d\n", count
-            );
-            assertThat(count).isEqualTo(0);
-        });
-        queryEntities(Task.class, response -> {
-            int count = response.getMessagesList()
-                                .size();
-            System.out.printf(
-                    "Initial count of entities of `TaskPart` type is %d\n", count
-            );
-            assertThat(count).isEqualTo(1);
-        });
-
-        // Now we send the command to `TaskDescriptionPart` and it should be created in the
-        // repository.
+        assertEntityCount(StringAggregate.class, 0);
+        assertEntityCount(Task.class, 1);
         AggCreateProject.Builder aggCreateProject = builderForType(AggCreateProject.class);
         aggCreateProject.setProjectId(ID)
                         .setName("Super Project")
                         .build();
         taskDescriptionRepository.dispatch(env(aggCreateProject.build()));
 
-        // Querying entities reveals that there are no `TaskPart`-s now.
-        queryEntities(StringAggregate.class, response -> {
-            int count = response.getMessagesList()
-                                .size();
-            System.out.printf(
-                    "Final count of entities of `TaskDescriptionPart` type is %d\n", count
-            );
-            assertThat(count).isEqualTo(1);
-        });
-        queryEntities(Task.class, response -> {
-            int count = response.getMessagesList()
-                                .size();
-            System.out.printf(
-                    "Final count of entities of `TaskPart` type is %d\n", count
-            );
-
-            // Works incorrect, will be 0.
-            assertThat(count).isEqualTo(1);
-        });
+        assertEntityCount(StringAggregate.class, 1);
+        assertEntityCount(Task.class, 1);
     }
 
-    private void queryEntities(Class<? extends Message> entityClass,
-                               Consumer<QueryResponse> onResponse) {
-        TestActorRequestFactory factory = new TestActorRequestFactory(AggregatePartTest.class);
+    private void assertEntityCount(Class<? extends Message> stateType, int expectedCount) {
+        Collection<? extends Message> messages = queryEntities(stateType);
+        assertThat(messages).hasSize(expectedCount);
+    }
 
-        QueryFactory queryFactory = new QueryFactory(factory);
-        Query query = queryFactory.select(entityClass)
-                                  .build();
-        StreamObserver<QueryResponse> obs1 = new StreamObserver<QueryResponse>() {
-            @Override
-            public void onNext(QueryResponse value) {
-                onResponse.accept(value);
-            }
-            @Override
-            public void onError(Throwable t) {
-            }
-            @Override
-            public void onCompleted() {
-            }
-        };
+    private Collection<? extends Message> queryEntities(Class<? extends Message> entityClass) {
+        Query query = factory.query()
+                             .all(entityClass);
+        MemoizingObserver<QueryResponse> observer = memoizingObserver();
         boundedContext.stand()
-                      .execute(query, obs1);
+                      .execute(query, observer);
+        return observer.firstResponse()
+                       .getMessagesList()
+                       .stream()
+                       .map(state -> unpack(state.getState()))
+                       .collect(Collectors.toList());
     }
 
     @Test
