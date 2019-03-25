@@ -23,35 +23,47 @@ package io.spine.server.aggregate.given.part;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.test.aggregate.ProjectId;
+import io.spine.server.tuple.Pair;
 import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.TaskVBuilder;
-import io.spine.test.aggregate.command.AggAddTask;
-import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.command.AggCreateTask;
+import io.spine.test.aggregate.event.AggTaskAssigned;
+import io.spine.test.aggregate.event.AggTaskCreated;
+import io.spine.test.aggregate.task.AggTask;
+import io.spine.test.aggregate.task.AggTaskId;
+import io.spine.test.aggregate.task.AggTaskVBuilder;
 
 /**
  * An aggregate part with {@link Task} state, which belongs to the aggregate
  * represented by {@link AnAggregateRoot}.
  */
 public class TaskPart
-        extends AggregatePart<ProjectId, Task, TaskVBuilder, AnAggregateRoot> {
+        extends AggregatePart<AggTaskId, AggTask, AggTaskVBuilder, TaskRoot> {
 
-    private static final String TASK_DESCRIPTION = "Description";
-
-    public TaskPart(AnAggregateRoot root) {
+    public TaskPart(TaskRoot root) {
         super(root);
     }
 
     @Assign
-    AggTaskAdded handle(AggAddTask msg) {
-        AggTaskAdded result = AggTaskAdded.newBuilder()
-                                          .setProjectId(msg.getProjectId())
-                                          .build();
-        return result;
+    Pair<AggTaskCreated, AggTaskAssigned> handle(AggCreateTask command) {
+        AggTaskCreated created = AggTaskCreated
+                .newBuilder()
+                .setTaskId(command.getTaskId())
+                .build();
+        AggTaskAssigned assigned = AggTaskAssigned
+                .newBuilder()
+                .setTaskId(command.getTaskId())
+                .setNewAssignee(command.getAssignee())
+                .build();
+        return Pair.of(created, assigned);
     }
 
     @Apply
-    private void apply(AggTaskAdded event) {
-        builder().setDescription(TASK_DESCRIPTION);
+    private void apply(AggTaskCreated event) {
+        builder().setId(event.getTaskId());
+    }
+
+    @Apply
+    private void apply(AggTaskAssigned event) {
+        builder().setAssignee(event.getNewAssignee());
     }
 }

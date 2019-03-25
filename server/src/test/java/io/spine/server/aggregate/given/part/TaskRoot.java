@@ -20,16 +20,13 @@
 
 package io.spine.server.aggregate.given.part;
 
-import io.spine.server.aggregate.AggregatePartRepository;
+import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.AggregateRoot;
 import io.spine.test.aggregate.task.AggTaskId;
 
-/**
- * The repository of {@link TaskPart}s.
- */
-public class TaskRepository
-        extends AggregatePartRepository<AggTaskId, TaskPart, TaskRoot> {
+public final class TaskRoot extends AggregateRoot<AggTaskId> {
 
-    public TaskRepository() {
-        super();
+    public TaskRoot(BoundedContext boundedContext, AggTaskId id) {
+        super(boundedContext, id);
     }
 }
