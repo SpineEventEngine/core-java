@@ -30,6 +30,7 @@ import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.code.proto.EntityStateOption;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.system.server.event.EntityArchived;
@@ -38,6 +39,7 @@ import io.spine.system.server.event.EntityExtractedFromArchive;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
+import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -70,6 +72,8 @@ final class MirrorRepository
             fromFieldNumbers(Mirror.class,
                              ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER);
 
+    private static final Logger log = Logging.get(MirrorRepository.class);
+
     @Override
     public void onRegistered() {
         super.onRegistered();
@@ -99,13 +103,22 @@ final class MirrorRepository
     }
 
     private static boolean shouldMirror(TypeUrl type) {
+        Kind kind = entityKind(type);
+        boolean aggregate = kind == AGGREGATE;
+        return aggregate;
+    }
+
+    private static EntityOption.Kind entityKind(TypeUrl type) {
         Descriptor descriptor = type.toTypeName()
                                     .messageDescriptor();
         Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
         Kind kind = option.map(EntityOption::getKind)
                           .orElse(KIND_UNKNOWN);
-        boolean aggregate = kind == AGGREGATE;
-        return aggregate;
+        if (kind == KIND_UNKNOWN) {
+            log.warn("Received a state update of entity `{}`. The entity kind is unknown. " +
+                             "Please use (entity) option to define entity states.");
+        }
+        return kind;
     }
 
     private static MirrorId idFrom(EntityHistoryId historyId) {

@@ -34,6 +34,7 @@ message AggTaskId {
 }
 
 message AggTask {
+    option (entity).kind = AGGREGATE;
 
     AggTaskId id = 1;
     
@@ -41,6 +42,7 @@ message AggTask {
 }
 
 message AggTaskComments {
+    option (entity).kind = AGGREGATE;
 
     AggTaskId id = 1;
 
