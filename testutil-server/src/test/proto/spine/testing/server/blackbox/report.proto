@@ -35,6 +35,8 @@ message BbReportId {
 }
 
 message BbReport {
+    option (entity).kind = AGGREGATE;
+
     BbReportId id = 1;
     repeated BbProjectId project_ids = 2;
     repeated BbTask tasks = 3;

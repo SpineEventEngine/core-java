@@ -18,14 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environment for {@link io.spine.server.enrich.LinkerTest}.
- */
+package io.spine.server.aggregate.given.part;
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.event.given.linker;
+import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.AggregateRoot;
+import io.spine.test.aggregate.task.AggTaskId;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+public final class TaskRoot extends AggregateRoot<AggTaskId> {
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public TaskRoot(BoundedContext boundedContext, AggTaskId id) {
+        super(boundedContext, id);
+    }
+}

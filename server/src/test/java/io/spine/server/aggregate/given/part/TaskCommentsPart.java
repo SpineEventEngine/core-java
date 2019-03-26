@@ -24,35 +24,45 @@ import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.aggregate.command.AggAddComment;
+import io.spine.test.aggregate.event.AggCommentAdded;
+import io.spine.test.aggregate.event.AggCommentAddedVBuilder;
+import io.spine.test.aggregate.task.AggTaskComments;
+import io.spine.test.aggregate.task.AggTaskCommentsVBuilder;
+import io.spine.test.aggregate.task.AggTaskId;
+import io.spine.test.aggregate.task.Comment;
+import io.spine.test.aggregate.task.CommentVBuilder;
 
 /**
  * An aggregate part with {@link StringValue} state, which belongs to an aggregate
  * represented by {@link AnAggregateRoot}.
  */
-public class TaskDescriptionPart
-        extends AggregatePart<String, StringAggregate, StringAggregateVBuilder, AnAggregateRoot> {
+public class TaskCommentsPart
+        extends AggregatePart<AggTaskId, AggTaskComments, AggTaskCommentsVBuilder, TaskRoot> {
 
-    public TaskDescriptionPart(AnAggregateRoot root) {
+    public TaskCommentsPart(TaskRoot root) {
         super(root);
     }
 
     @Assign
-    AggProjectCreated handle(AggCreateProject msg) {
-        AggProjectCreated result = AggProjectCreated
+    AggCommentAdded handle(AggAddComment command) {
+        AggCommentAdded event = AggCommentAddedVBuilder
                 .newBuilder()
-                .setProjectId(msg.getProjectId())
-                .setName(msg.getName())
+                .setTaskId(command.getTaskId())
+                .setAuthor(command.getAuthor())
+                .setText(command.getText())
                 .build();
-        return result;
+        return event;
     }
 
     @Apply
-    private void apply(AggTaskAdded event) {
-        builder().setValue("Description value");
+    private void apply(AggCommentAdded event) {
+        Comment comment = CommentVBuilder
+                .newBuilder()
+                .setAuthor(event.getAuthor())
+                .setText(event.getText())
+                .build();
+        builder().setId(id())
+                 .addComment(comment);
     }
 }

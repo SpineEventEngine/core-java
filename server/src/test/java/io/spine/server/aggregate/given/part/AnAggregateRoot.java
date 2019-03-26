@@ -22,13 +22,14 @@ package io.spine.server.aggregate.given.part;
 
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRoot;
+import io.spine.test.aggregate.ProjectId;
 
 /**
  * An aggregate root class with string ID.
  */
-public class AnAggregateRoot extends AggregateRoot<String> {
+public class AnAggregateRoot extends AggregateRoot<ProjectId> {
 
-    public AnAggregateRoot(BoundedContext boundedContext, String id) {
+    public AnAggregateRoot(BoundedContext boundedContext, ProjectId id) {
         super(boundedContext, id);
     }
 }

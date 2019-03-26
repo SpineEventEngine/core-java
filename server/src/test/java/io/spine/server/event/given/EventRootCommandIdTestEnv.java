@@ -318,14 +318,15 @@ public class EventRootCommandIdTestEnv {
 
         @Assign
         EvTeamMemberAdded on(EvAddTeamMember command, CommandContext ctx) {
-            builder().addMember(command.getMember());
-
+            builder().setId(id())
+                     .addMember(command.getMember());
             EvTeamMemberAdded event = memberAdded(command.getMember());
             return event;
         }
 
         @Assign
         List<EvTeamMemberInvited> on(EvInviteTeamMembers command, CommandContext ctx) {
+            builder().setId(id());
             ImmutableList.Builder<EvTeamMemberInvited> events = ImmutableList.builder();
 
             for (EmailAddress email : command.getEmailList()) {
@@ -342,6 +343,7 @@ public class EventRootCommandIdTestEnv {
 
         @React
         EvTeamMemberAdded on(EvInvitationAccepted event) {
+            builder().setId(id());
             EvMember member = member(event.getUserId());
             EvTeamMemberAdded newEvent = memberAdded(member);
             return newEvent;
@@ -387,7 +389,9 @@ public class EventRootCommandIdTestEnv {
 
         @Assign
         EvInvitationAccepted on(EvAcceptInvitation command, CommandContext ctx) {
-            builder().setInvitation(command.getInvitation());
+            builder()
+                    .setUserId(id())
+                    .setInvitation(command.getInvitation());
             EvInvitationAccepted event = invitationAccepted(command.getInvitation());
             return event;
         }

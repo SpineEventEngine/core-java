@@ -37,6 +37,8 @@ option java_multiple_files = true;
 // Fields are not marked as `required` since [0,0] is a valid point value.
 //
 message Point {
+    option (entity).kind = AGGREGATE;
+
     int32 x = 1;
     int32 y = 2;
 }

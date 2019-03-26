@@ -32,6 +32,8 @@ message TaskId {
 }
 
 message Task {
+    option (entity).kind = AGGREGATE;
+
     TaskId id = 1;
     string name = 2 [(required) = true];
     string description = 3;

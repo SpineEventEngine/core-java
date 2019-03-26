@@ -43,8 +43,13 @@ message EvMemberInvitation {
 }
 
 message EvTeam {
+    option (entity).kind = AGGREGATE;
 
-    EvTeamId id = 1;
+    // ID of the aggregate.
+    //
+    // Allow empty ID to avoid verbose test set up.
+    //
+    EvTeamId id = 1 [(required) = false];
 
     repeated ProjectId project_id = 2;
 
@@ -61,6 +66,7 @@ message EvMember {
 }
 
 message EvTeamCreation {
+    option (entity).kind = PROCESS_MANAGER;
 
     EvTeamId id = 1;
 
@@ -70,6 +76,7 @@ message EvTeamCreation {
 }
 
 message EvUserSignUp {
+    option (entity).kind = PROCESS_MANAGER;
 
     spine.core.UserId user_id = 1;
 

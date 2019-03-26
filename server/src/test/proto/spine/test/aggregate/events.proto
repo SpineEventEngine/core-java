@@ -85,3 +85,10 @@ message AggUserNotified {
     AggTaskId task_id = 1;
     spine.core.UserId user_id = 2;
 }
+
+message AggCommentAdded {
+    AggTaskId task_id = 1;
+    spine.core.UserId author = 2;
+    string text = 3;
+}
+

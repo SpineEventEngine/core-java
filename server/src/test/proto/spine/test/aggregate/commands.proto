@@ -80,3 +80,9 @@ message AggReassignTask {
     AggTaskId task_id = 1;
     spine.core.UserId assignee = 2;
 }
+
+message AggAddComment {
+    AggTaskId task_id = 1;
+    spine.core.UserId author = 2;
+    string text = 3;
+}
