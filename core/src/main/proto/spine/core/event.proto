@@ -87,19 +87,20 @@ message Event {
 // Meta-information for an event.
 message EventContext {
     option (is).java_type = "io.spine.core.EnrichableMessageContext";
+    option (required_field) = "command_context | event_context | import_context";
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
     oneof origin {
         // The context of the command which generated this event.
-        CommandContext command_context = 2 [(required) = true];
+        CommandContext command_context = 2 [(valid) = true];
 
         // The context of the event which generated this event.
-        EventContext event_context = 6 [(required) = true];
+        EventContext event_context = 6 [(valid) = true];
 
         // The event was imported using this `ActorContext`.
-        ActorContext import_context = 11 [(required) = true];
+        ActorContext import_context = 11 [(valid) = true];
     }
 
     // An ID of the root command, which lead to this event.
@@ -119,7 +120,7 @@ message EventContext {
     google.protobuf.Any producer_id = 3 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 4 [(required) = true];
+    Version version = 4 [(valid) = true];
 
     // Optional enrichment of the event.
     Enrichment enrichment = 5;
@@ -134,7 +135,7 @@ message EventContext {
     //
     RejectionEventContext rejection = 10;
 
-    // An ID of the origin messsage.
+    // An ID of the origin message.
     //
     // The case of this `oneof` is always the same as the case of `origin` (except for
     // the `import_context`, which does not have a corresponding field in `origin_id`).

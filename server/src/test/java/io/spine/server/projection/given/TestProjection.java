@@ -87,7 +87,7 @@ public class TestProjection
         // Keep the event message for further inspection in tests.
         keep(event);
 
-        Project newState = state().toBuilder()
+        Project newState = state().toVBuilder()
                                   .setId(event.getProjectId())
                                   .setStatus(Project.Status.CREATED)
                                   .setName(event.getName())
@@ -114,7 +114,7 @@ public class TestProjection
     void on(PrjProjectStarted event,
                    @SuppressWarnings("UnusedParameters") EventContext ignored) {
         keep(event);
-        Project newState = state().toBuilder()
+        Project newState = state().toVBuilder()
                                   .setStatus(Project.Status.STARTED)
                                   .build();
         builder().mergeFrom(newState);

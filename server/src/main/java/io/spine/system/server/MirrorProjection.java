@@ -59,10 +59,9 @@ import static java.util.stream.Collectors.toList;
  * <p>The projection defines an {@link io.spine.server.entity.storage.EntityColumn EntityColumn}
  * which stored the {@linkplain #getAggregateType() type URL} of the state, which is mirrored.
  *
- * @implNote
- * Many subscriber methods of this class ignore their arguments. The argument of a subscriber method
- * is an event used by the framework to bind the method to the event type. The content of the event,
- * in those cases, is irrelevant.
+ * @implNote Many subscriber methods of this class ignore their arguments. The argument of a
+ *         subscriber method is an event used by the framework to bind the method to the event type.
+ *         The content of the event, in those cases, is irrelevant.
  */
 public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
@@ -85,7 +84,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setArchived(true)
                 .build();
         builder.setId(id())
@@ -99,7 +98,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setDeleted(true)
                 .build();
         builder.setId(id())
@@ -113,7 +112,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setArchived(false)
                 .build();
         builder.setId(id())
@@ -127,7 +126,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setDeleted(false)
                 .build();
         builder.setId(id())
@@ -149,7 +148,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         TargetFilters filters = target.getFilters();
         CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
         TargetFilters appendedFilters = filters
-                .toBuilder()
+                .toVBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(typeFilter)
                 .build();
@@ -204,7 +203,8 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
      */
     final Any aggregateState(FieldMask fields) {
         Any completeState = aggregateState();
-        if (isDefault(fields) || fields.getPathsList().isEmpty()) {
+        if (isDefault(fields) || fields.getPathsList()
+                                       .isEmpty()) {
             return completeState;
         }
         Message unpacked = unpack(completeState);

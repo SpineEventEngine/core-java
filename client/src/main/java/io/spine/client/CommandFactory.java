@@ -168,13 +168,15 @@ public final class CommandFactory {
      * Creates a copy of the passed {@code CommandContext} updated with the current time.
      */
     private static CommandContext withCurrentTime(CommandContext value) {
-        ActorContext.Builder withCurrentTime =
+        ActorContext withCurrentTime =
                 value.getActorContext()
-                     .toBuilder()
-                     .setTimestamp(currentTime());
-        CommandContext.Builder result =
-                value.toBuilder()
-                     .setActorContext(withCurrentTime);
-        return result.build();
+                     .toVBuilder()
+                     .setTimestamp(currentTime())
+                     .build();
+        CommandContext result =
+                value.toVBuilder()
+                     .setActorContext(withCurrentTime)
+                     .build();
+        return result;
     }
 }

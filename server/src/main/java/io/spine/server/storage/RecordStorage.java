@@ -54,7 +54,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A storage keeping messages with identity.
  *
- * @param <I> the type of entity IDs
+ * @param <I>
+ *         the type of entity IDs
  */
 public abstract class RecordStorage<I>
         extends AbstractStorage<I, EntityRecord, RecordReadRequest<I>>
@@ -65,6 +66,7 @@ public abstract class RecordStorage<I>
      * The cache for entity columns.
      *
      * <p>Is {@code null} for instances that do not support entity columns.
+     *
      * @see RecordStorage(boolean)
      */
     private final @MonotonicNonNull EntityColumnCache entityColumnCache;
@@ -96,7 +98,8 @@ public abstract class RecordStorage<I>
     /**
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
      *
-     * @param  request the request to read the record
+     * @param request
+     *         the request to read the record
      * @return a record instance or {@code Optional.empty()} if there is no record with this ID
      */
     @Override
@@ -112,11 +115,13 @@ public abstract class RecordStorage<I>
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}
      * and applies a {@link FieldMask} to it.
      *
-     * @param  request   the request to read the record
-     * @param  fieldMask fields to read.
+     * @param request
+     *         the request to read the record
+     * @param fieldMask
+     *         fields to read.
      * @return the item with the given ID and with the {@code FieldMask} applied
      *         or {@code Optional.empty()} if there is no record matching this request
-     * @see    #read(RecordReadRequest)
+     * @see #read(RecordReadRequest)
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
@@ -142,10 +147,13 @@ public abstract class RecordStorage<I>
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param  id     the ID for the record
-     * @param  record a record to store
-     * @throws IllegalStateException if the storage is closed
-     * @see   #write(Object, EntityRecord)
+     * @param id
+     *         the ID for the record
+     * @param record
+     *         a record to store
+     * @throws IllegalStateException
+     *         if the storage is closed
+     * @see #write(Object, EntityRecord)
      */
     public void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
@@ -167,8 +175,10 @@ public abstract class RecordStorage<I>
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param  records an ID to record map with the entries to store
-     * @throws IllegalStateException if the storage is closed
+     * @param records
+     *         an ID to record map with the entries to store
+     * @throws IllegalStateException
+     *         if the storage is closed
      */
     public void write(Map<I, EntityRecordWithColumns> records) {
         checkNotNull(records);
@@ -190,15 +200,15 @@ public abstract class RecordStorage<I>
         Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             EntityRecord record = optional.get();
-            EntityRecord updated = record.toBuilder()
+            EntityRecord updated = record.toVBuilder()
                                          .setLifecycleFlags(flags)
                                          .build();
             write(id, updated);
         } else {
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
             String idStr = id instanceof AggregateStateId
-                              ? id.toString()
-                              : Identifier.toString(id);
+                           ? id.toString()
+                           : Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
         }
     }
@@ -206,7 +216,8 @@ public abstract class RecordStorage<I>
     /**
      * Deletes the record with the passed ID.
      *
-     * @param id the record to delete
+     * @param id
+     *         the record to delete
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
     public abstract boolean delete(I id);
@@ -248,7 +259,8 @@ public abstract class RecordStorage<I>
     /**
      * Reads all active items from the storage and apply {@link FieldMask} to each of the results.
      *
-     * @param fieldMask the {@code FieldMask} to apply
+     * @param fieldMask
+     *         the {@code FieldMask} to apply
      * @return all items from this repository with the given {@code FieldMask} applied
      */
     public Iterator<EntityRecord> readAll(FieldMask fieldMask) {
@@ -261,12 +273,14 @@ public abstract class RecordStorage<I>
      * Reads all the records matching the given {@link EntityQuery} and applies the given
      * {@link FieldMask} to the resulting record states.
      *
-     * <p>By default, the entities supporting lifecycle will be returned only if they are active. 
-     * To get inactive entities, the lifecycle attribute must be set to the 
+     * <p>By default, the entities supporting lifecycle will be returned only if they are active.
+     * To get inactive entities, the lifecycle attribute must be set to the
      * {@linkplain EntityQuery provided query}.
      *
-     * @param  query     the query to execute
-     * @param  fieldMask the fields to retrieve
+     * @param query
+     *         the query to execute
+     * @param fieldMask
+     *         the fields to retrieve
      * @return the matching records mapped upon their IDs
      */
     public Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
@@ -285,7 +299,8 @@ public abstract class RecordStorage<I>
      * supports them, all the resulting records are active. Otherwise the records obey
      * the constraints provided by the query.
      *
-     * @param  query     the query to execute
+     * @param query
+     *         the query to execute
      * @return the matching records mapped upon their IDs
      */
     public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
@@ -311,7 +326,8 @@ public abstract class RecordStorage<I>
      * by this storage.
      *
      * @return a {@code Map} of managed {@link Entity} lifecycle columns
-     * @throws IllegalArgumentException if a lifecycle field is not present
+     * @throws IllegalArgumentException
+     *         if a lifecycle field is not present
      *         in the managed {@link Entity} class
      * @see EntityColumn
      * @see Columns
@@ -331,8 +347,9 @@ public abstract class RecordStorage<I>
     /**
      * Obtains the entity column cache.
      *
-     * @throws IllegalStateException if the storage {@linkplain RecordStorage#RecordStorage(boolean)
-     * does not support} the cache
+     * @throws IllegalStateException
+     *         if the storage {@linkplain RecordStorage#RecordStorage(boolean) does not support}
+     *         the cache
      */
     @Internal
     public EntityColumnCache entityColumnCache() {
@@ -352,15 +369,16 @@ public abstract class RecordStorage<I>
     /**
      * Reads a record from the storage by the passed ID.
      *
-     * @param id the ID of the record to load
+     * @param id
+     *         the ID of the record to load
      * @return a record instance or {@code null} if there is no record with this ID
      */
     protected abstract Optional<EntityRecord> readRecord(I id);
 
     /**
      * Obtains an iterator for reading multiple records by IDs.
-     * 
-     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids}, 
+     *
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
      * with nulls in place of missing or inactive entities.
      *
      * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
@@ -371,7 +389,7 @@ public abstract class RecordStorage<I>
      * Obtains an iterator for reading multiple records by IDs, and
      * applying the passed field mask to the results.
      *
-     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids}, 
+     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
      * with nulls in place of missing or inactive entities.
      *
      * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
@@ -381,7 +399,7 @@ public abstract class RecordStorage<I>
 
     /**
      * Obtains an iterator for reading all records.
-     * 
+     *
      * <p>Only active entities are returned.
      *
      * @see BulkStorageOperationsMixin#readAll()
@@ -391,7 +409,7 @@ public abstract class RecordStorage<I>
     /**
      * Obtains an iterator for reading all records, and applying the passed field mask to
      * the results.
-     * 
+     *
      * <p>Only active entities are returned.
      *
      * @see BulkStorageOperationsMixin#readAll()
@@ -401,23 +419,25 @@ public abstract class RecordStorage<I>
     /**
      * Obtains an iterator for reading records matching the query,
      * and applying the passed field mask to the results.
-     * 
+     *
      * <p>Returns only active entities if the query does not specify the {@linkplain LifecycleFlags
      * lifecycle flags}. In order to read inactive entities, the corresponding filters must be set
      * to the provided {@link EntityQuery query}.
      *
      * @see #readAll(EntityQuery, FieldMask)
      */
-    protected abstract
-    Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask);
+    protected abstract Iterator<EntityRecord> readAllRecords(EntityQuery<I> query,
+                                                             FieldMask fieldMask);
 
     /**
      * Writes a record and the associated {@link EntityColumn} values into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param id     an ID of the record
-     * @param record a record to store
+     * @param id
+     *         an ID of the record
+     * @param record
+     *         a record to store
      */
     protected abstract void writeRecord(I id, EntityRecordWithColumns record);
 
@@ -426,7 +446,8 @@ public abstract class RecordStorage<I>
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param records an ID to record map with the entries to store
+     * @param records
+     *         an ID to record map with the entries to store
      */
     protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
 }

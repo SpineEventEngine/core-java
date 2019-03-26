@@ -139,9 +139,9 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         if (limit == 0) {
             return Optional.empty();
         }
-        Pagination result = PaginationVBuilder.newBuilder()
-                                              .setPageSize(limit)
-                                              .build();
+        Pagination result = Pagination.vBuilder()
+                                      .setPageSize(limit)
+                                      .build();
         return Optional.of(result);
     }
 
@@ -149,10 +149,10 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         if (orderingColumn == null) {
             return Optional.empty();
         }
-        OrderBy result = OrderByVBuilder.newBuilder()
-                                        .setColumn(orderingColumn)
-                                        .setDirection(direction)
-                                        .build();
+        OrderBy result = OrderBy.vBuilder()
+                                .setColumn(orderingColumn)
+                                .setDirection(direction)
+                                .build();
         return Optional.of(result);
     }
 

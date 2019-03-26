@@ -181,7 +181,7 @@ public final class RejectionEnvelope
         Any commandMessage = rejectionContext.getCommandMessage();
         CommandContext commandContext = context.getCommandContext();
         DispatchedCommand result = DispatchedCommand
-                .newBuilder()
+                .vBuilder()
                 .setMessage(commandMessage)
                 .setContext(commandContext)
                 .build();

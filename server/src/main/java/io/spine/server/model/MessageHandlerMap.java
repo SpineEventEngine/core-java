@@ -53,8 +53,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,
-                                     P extends MessageClass<?>,
-                                     H extends HandlerMethod<?, M, ?, P, ?>>
+        P extends MessageClass<?>,
+        H extends HandlerMethod<?, M, ?, P, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -79,8 +79,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      *         signature
      */
     public static <M extends MessageClass<?>,
-                   P extends MessageClass<?>,
-                   H extends HandlerMethod<?, M, ?, P, ?>>
+            P extends MessageClass<?>,
+            H extends HandlerMethod<?, M, ?, P, ?>>
     MessageHandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
@@ -167,10 +167,10 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
                 .setOriginType(typeUrl(originClass).value())
                 .build();
         HandlerTypeInfo presentKey = map.containsKey(keyWithOrigin)
-                                 ? keyWithOrigin
-                                 : keyWithOrigin.toBuilder()
-                                                .clearOriginType()
-                                                .build();
+                                     ? keyWithOrigin
+                                     : keyWithOrigin.toVBuilder()
+                                                    .clearOriginType()
+                                                    .build();
         return getMethods(presentKey);
     }
 
@@ -213,7 +213,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
      * thrown.
      *
-     * @param messageClass the message class of the handled message
+     * @param messageClass
+     *         the message class of the handled message
      * @return a handler method
      * @throws IllegalStateException
      *         if there is no such method or several such methods found in the map

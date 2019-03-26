@@ -25,6 +25,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventVBuilder;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
@@ -61,9 +62,9 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
         Any packedEvent = externalMsg.getOriginalMessage();
         Event event = unpack(packedEvent, Event.class);
-        Event.Builder eventBuilder = event.toBuilder();
+        EventVBuilder eventBuilder = event.toVBuilder();
         EventContext modifiedContext = eventBuilder.getContext()
-                                                   .toBuilder()
+                                                   .toVBuilder()
                                                    .setExternal(true)
                                                    .build();
 

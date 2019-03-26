@@ -44,8 +44,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EventEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements
-            ActorMessageEnvelope<EventId, Event, EventContext>,
-            EnrichableMessageEnvelope<EventId, Event, EventMessage, EventContext, EventEnvelope> {
+        ActorMessageEnvelope<EventId, Event, EventContext>,
+        EnrichableMessageEnvelope<EventId, Event, EventMessage, EventContext, EventEnvelope> {
 
     private final EventMessage eventMessage;
     private final EventClass eventClass;
@@ -116,7 +116,8 @@ public final class EventEnvelope
      *     <li>the context of the enclosed event is set as the origin.
      * </ul>
      *
-     * @param builder event context builder into which the origin related fields are set
+     * @param builder
+     *         event context builder into which the origin related fields are set
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
@@ -150,7 +151,7 @@ public final class EventEnvelope
      * the type of rejected command.
      *
      * @return the class of origin message or {@link EmptyClass} if the origin message type is
-     * unknown
+     *         unknown
      */
     public MessageClass originClass() {
         if (isRejection()) {
@@ -201,11 +202,13 @@ public final class EventEnvelope
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {
-        EventContext context = this.context().toBuilder()
+        EventContext context = this.context()
+                                   .toVBuilder()
                                    .setEnrichment(enrichment)
                                    .build();
-        Event.Builder enrichedCopy = outerObject().toBuilder()
-                                                  .setContext(context);
-        return of(enrichedCopy.build());
+        Event enrichedCopy = outerObject().toVBuilder()
+                                          .setContext(context)
+                                          .build();
+        return of(enrichedCopy);
     }
 }

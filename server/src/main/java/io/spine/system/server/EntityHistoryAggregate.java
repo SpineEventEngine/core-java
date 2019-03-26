@@ -28,6 +28,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.LifecycleFlagsVBuilder;
 import io.spine.system.server.command.DispatchCommandToHandler;
 import io.spine.system.server.command.DispatchEventToReactor;
 import io.spine.system.server.command.DispatchEventToSubscriber;
@@ -194,25 +195,25 @@ final class EntityHistoryAggregate
         }
     }
 
-    private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
+    private void updateLifecycleFlags(UnaryOperator<LifecycleFlagsVBuilder> mutation) {
         LifecycleHistory oldLifecycleHistory = builder().getLifecycle();
-        LifecycleFlags.Builder flagsBuilder =
+        LifecycleFlagsVBuilder flagsBuilder =
                 oldLifecycleHistory.getLifecycleFlags()
-                                   .toBuilder();
+                                   .toVBuilder();
         LifecycleFlags newFlags = mutation.apply(flagsBuilder)
                                           .build();
         LifecycleHistory newLifecycleHistory =
-                oldLifecycleHistory.toBuilder()
+                oldLifecycleHistory.toVBuilder()
                                    .setLifecycleFlags(newFlags)
                                    .build();
         builder().setLifecycle(newLifecycleHistory);
     }
 
-    private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistory.Builder> mutation) {
+    private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistoryVBuilder> mutation) {
         EntityHistoryVBuilder builder = builder();
-        LifecycleHistory.Builder history =
+        LifecycleHistoryVBuilder history =
                 builder.getLifecycle()
-                       .toBuilder();
+                       .toVBuilder();
         LifecycleHistory newHistory =
                 mutation.apply(history)
                         .build();
@@ -235,11 +236,11 @@ final class EntityHistoryAggregate
         }
     }
 
-    private void updateDispatchingHistory(UnaryOperator<DispatchingHistory.Builder> mutation) {
+    private void updateDispatchingHistory(UnaryOperator<DispatchingHistoryVBuilder> mutation) {
         EntityHistoryVBuilder builder = builder();
-        DispatchingHistory.Builder history =
+        DispatchingHistoryVBuilder history =
                 builder.getDispatching()
-                       .toBuilder();
+                       .toVBuilder();
         DispatchingHistory newHistory =
                 mutation.apply(history)
                         .build();

@@ -31,10 +31,12 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
+import io.spine.testing.TestValues;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -266,10 +268,14 @@ public class EventStoreTest {
             Event event = projectCreated(Time.currentTime());
             CommandContext commandContext = event.getContext()
                                                  .getCommandContext();
-            EventContext.Builder originContext =
-                    EventContext.newBuilder()
+            EventContext originContext =
+                    EventContext.vBuilder()
                                 .setEnrichment(withOneAttribute())
-                                .setCommandContext(commandContext);
+                                .setCommandContext(commandContext)
+                                .setTimestamp(event.getContext()
+                                                   .getTimestamp())
+                                .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
+                                .build();
             Event enriched = event.toBuilder()
                                   .setContext(event.getContext()
                                                    .toBuilder()

@@ -104,8 +104,8 @@ public final class Targets {
         boolean includeAll = (ids == null && filters == null);
 
         TypeUrl typeUrl = TypeUrl.of(targetClass);
-        TargetVBuilder builder = TargetVBuilder.newBuilder()
-                                               .setType(typeUrl.value());
+        TargetVBuilder builder = Target.vBuilder()
+                                       .setType(typeUrl.value());
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
@@ -132,9 +132,9 @@ public final class Targets {
     }
 
     private static IdFilter idFilter(List<Any> ids) {
-        return IdFilterVBuilder.newBuilder()
-                               .addAllIds(ids)
-                               .build();
+        return IdFilter.vBuilder()
+                       .addAllIds(ids)
+                       .build();
     }
 
     /**
@@ -154,10 +154,10 @@ public final class Targets {
     }
 
     private static TargetFilters targetFilters(List<CompositeFilter> filters, IdFilter idFilter) {
-        return TargetFiltersVBuilder.newBuilder()
-                                    .setIdFilter(idFilter)
-                                    .addAllFilter(filters)
-                                    .build();
+        return TargetFilters.vBuilder()
+                            .setIdFilter(idFilter)
+                            .addAllFilter(filters)
+                            .build();
     }
 
     /**
