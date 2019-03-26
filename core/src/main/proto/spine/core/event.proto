@@ -119,7 +119,7 @@ message EventContext {
     google.protobuf.Any producer_id = 3 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 4 [(required) = true];
+    Version version = 4 [(valid) = true];
 
     // Optional enrichment of the event.
     Enrichment enrichment = 5;
@@ -134,7 +134,7 @@ message EventContext {
     //
     RejectionEventContext rejection = 10;
 
-    // An ID of the origin messsage.
+    // An ID of the origin message.
     //
     // The case of this `oneof` is always the same as the case of `origin` (except for
     // the `import_context`, which does not have a corresponding field in `origin_id`).
