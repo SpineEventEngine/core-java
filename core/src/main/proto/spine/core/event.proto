@@ -87,19 +87,20 @@ message Event {
 // Meta-information for an event.
 message EventContext {
     option (is).java_type = "io.spine.core.EnrichableMessageContext";
+    option (required_field) = "command_context | event_context | import_context";
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
     oneof origin {
         // The context of the command which generated this event.
-        CommandContext command_context = 2 [(required) = true];
+        CommandContext command_context = 2 [(valid) = true];
 
         // The context of the event which generated this event.
-        EventContext event_context = 6 [(required) = true];
+        EventContext event_context = 6 [(valid) = true];
 
         // The event was imported using this `ActorContext`.
-        ActorContext import_context = 11 [(required) = true];
+        ActorContext import_context = 11 [(valid) = true];
     }
 
     // An ID of the root command, which lead to this event.
