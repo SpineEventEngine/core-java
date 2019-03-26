@@ -78,9 +78,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
-        AggregateHistory,
-        AggregateReadRequest<ProjectId>,
-        AggregateStorage<ProjectId>> {
+                                    AggregateHistory,
+                                    AggregateReadRequest<ProjectId>,
+                                    AggregateStorage<ProjectId>> {
 
     private static final Function<AggregateEventRecord, Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;

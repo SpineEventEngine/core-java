@@ -97,8 +97,7 @@ public final class Events {
     }
 
     /**
-     * Returns comparator which compares events by their timestamp
-     * in chronological order.
+     * Returns comparator which compares events by their timestamp in chronological order.
      */
     public static Comparator<Event> eventComparator() {
         return eventComparator;
@@ -407,9 +406,9 @@ public final class Events {
      * <p>The context is obtained by traversing the events origin for a valid context source.
      * There can be three sources for the actor context:
      * <ol>
-     * <li>The command context set as the event origin.
-     * <li>The command context of an event which is an origin of this event.
-     * <li>The import context if the event is imported to an aggregate.
+     *     <li>The command context set as the event origin.
+     *     <li>The command context of an event which is an origin of this event.
+     *     <li>The import context if the event is imported to an aggregate.
      * </ol>
      *
      * <p>If at some point the event origin is not set, an {@link IllegalArgumentException} is

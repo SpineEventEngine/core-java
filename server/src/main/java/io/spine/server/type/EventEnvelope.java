@@ -112,8 +112,8 @@ public final class EventEnvelope
      *
      * <p>In particular:
      * <ul>
-     * <li>the root command identifier replicates the one defined in the enclosed event;
-     * <li>the context of the enclosed event is set as the origin.
+     *     <li>the root command identifier replicates the one defined in the enclosed event;
+     *     <li>the context of the enclosed event is set as the origin.
      * </ul>
      *
      * @param builder
