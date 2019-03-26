@@ -22,6 +22,7 @@ package io.spine.testing.core.given;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
@@ -49,8 +50,8 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        tester.setDefault(UserId.class, UserId.getDefaultInstance())
-              .setDefault(Timestamp.class, Timestamp.getDefaultInstance());
+        tester.setDefault(UserId.class, GivenUserId.generated())
+              .setDefault(Timestamp.class, Time.currentTime());
     }
 
     @Test
