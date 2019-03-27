@@ -20,23 +20,23 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.core.Command;
-import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
-import io.spine.server.type.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 
 /**
- * Remembers commands posted to a Command Bus.
+ * Remembers events posted to an Event Bus.
  */
-public final class CommandMemoizingTap
-        extends MemoizingTap<CommandId, Command, CommandContext, CommandEnvelope> {
+public final class EventMemoizingTap
+        extends MemoizingTap<EventId, Event, EventContext, EventEnvelope> {
 
     /**
-     * Obtains immutable list with commands collected by the tap so far.
+     * Obtains immutable list with events collected by the tap so far.
      */
-    public List<Command> commands() {
+    public List<Event> events() {
         return outerObjects();
     }
 }

@@ -31,6 +31,7 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -94,20 +95,22 @@ import static java.util.stream.Collectors.toList;
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
+public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
+        implements Logging {
 
     /**
-     * Use the same {@code TransportFactory} instance across all instances of black box bounded
-     * context in order to allow them to communicate via external events.
+     * Use the same {@code TransportFactory} instance across all instances of
+     * {@code BlackBoxBoundedContext} in order to allow them to communicate via external events.
      */
     private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
     private final BoundedContext boundedContext;
     private final CommandMemoizingTap commandTap;
+    private final EventMemoizingTap eventTap;
     private final MemoizingObserver<Ack> observer;
 
     /**
-     * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
+     * Events received by this instance and posted to the Event Bus.
      *
      * <p>These events are filtered out from those which are stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
@@ -118,12 +121,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
 
     protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
         this.commandTap = new CommandMemoizingTap();
-        EventBus.Builder eventBus = EventBus
-                .newBuilder()
-                .setEnricher(enricher);
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()
                 .appendFilter(commandTap);
+        this.eventTap = new EventMemoizingTap();
+        EventBus.Builder eventBus = EventBus
+                .newBuilder()
+                .appendFilter(eventTap)
+                .setEnricher(enricher);
         this.boundedContext = BoundedContext
                 .newBuilder()
                 .setMultitenant(multitenant)
@@ -605,24 +610,35 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * calls.
      */
     protected EmittedEvents emittedEvents() {
+        List<Event> allWithoutPosted = generatedEvents();
+        if (eventTap.events().isEmpty()) {
+            //TODO:2019-03-27:alexander.yevsyukov: Why don't we have it?
+            _warn("No events are gathered by the tap...");
+        }
+        return new EmittedEvents(allWithoutPosted);
+    }
+
+//    private List<Event> postedEvents() {
+//        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
+//        return eventTap.events()
+//                       .stream()
+//                       .filter(wasNotReceived)
+//                       .collect(toList());
+//    }
+
+    private List<Event> generatedEvents() {
         MemoizingObserver<Event> queryObserver = memoizingObserver();
+        EventStreamQuery allEvents = EventStreamQuery.newBuilder()
+                                                     .build();
         boundedContext.eventBus()
                       .eventStore()
-                      .read(allEventsQuery(), queryObserver);
+                      .read(allEvents, queryObserver);
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         List<Event> responses = queryObserver.responses()
                                              .stream()
                                              .filter(wasNotReceived)
                                              .collect(toList());
-        return new EmittedEvents(responses);
-    }
-
-    /**
-     * Creates a new {@link io.spine.server.event.EventStreamQuery} without any filters.
-     */
-    private static EventStreamQuery allEventsQuery() {
-        return EventStreamQuery.newBuilder()
-                               .build();
+        return responses;
     }
 
     private static EventEnricher emptyEnricher() {
