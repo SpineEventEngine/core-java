@@ -40,7 +40,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies the states of entities currently present in a bounded context.
+ * Verifies the states of entities currently present in a Bounded Context.
  */
 @VisibleForTesting
 public abstract class VerifyState {
@@ -50,7 +50,7 @@ public abstract class VerifyState {
      * {@linkplain #verify(Collection)} verifies} the results according to the pre-set expectations.
      *
      * @param boundedContext
-     *         the bounded context to query
+     *         the Bounded Context to query
      * @param queryFactory
      *         the factory to create queries
      */
@@ -102,8 +102,8 @@ public abstract class VerifyState {
      *         the expected entity states
      * @return new instance of {@code VerifyState}
      */
-    public static <T extends Message> VerifyState exactly(Class<T> entityType,
-                                                          Iterable<T> expected) {
+    public static <T extends Message>
+    VerifyState exactly(Class<T> entityType, Iterable<T> expected) {
         return new AllOfTypeMatch<>(expected, entityType);
     }
 }
