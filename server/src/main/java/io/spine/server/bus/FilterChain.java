@@ -47,7 +47,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     private volatile boolean closed;
 
     FilterChain(ChainBuilder<E> builder) {
-        this.chain = builder.getFilters();
+        this.chain = builder.filters();
     }
 
     static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {

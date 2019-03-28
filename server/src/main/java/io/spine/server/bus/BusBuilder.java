@@ -81,8 +81,8 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
      *
      * @see #appendFilter(BusFilter)
      */
-    public final Deque<BusFilter<E>> getFilters() {
-        return chainBuilder.getFilters();
+    public final Deque<BusFilter<E>> filters() {
+        return chainBuilder.filters();
     }
 
     /**
