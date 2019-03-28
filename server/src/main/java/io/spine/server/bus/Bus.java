@@ -62,11 +62,15 @@ public abstract class Bus<T extends Message,
     @LazyInit
     private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
 
+    /** Listeners of the messages posted to the bus. */
+    private final Listeners<E> listeners;
+
     /** The supplier of filter chain for this bus. */
     private final FilterChainSupplier filterChain;
 
     protected Bus(BusBuilder<E, T, ?> builder) {
         super();
+        this.listeners = new Listeners<>(builder);
         this.filterChain = new FilterChainSupplier(builder);
     }
 
@@ -136,7 +140,7 @@ public abstract class Bus<T extends Message,
     public final void post(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-
+        messages.forEach(m -> listeners.accept(toEnvelope(m)));
         StreamObserver<Ack> wrappedObserver = prepareObserver(messages, observer);
         filterAndPost(messages, wrappedObserver);
     }
@@ -175,8 +179,8 @@ public abstract class Bus<T extends Message,
      * @param source   the source {@link StreamObserver} to be transformed
      * @return a transformed observer of {@link Ack} streams
      */
-    protected StreamObserver<Ack> prepareObserver(Iterable<T> messages,
-                                                  StreamObserver<Ack> source) {
+    protected 
+    StreamObserver<Ack> prepareObserver(Iterable<T> messages, StreamObserver<Ack> source) {
         return source;
     }
 
