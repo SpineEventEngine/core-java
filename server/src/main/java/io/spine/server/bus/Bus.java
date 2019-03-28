@@ -63,11 +63,11 @@ public abstract class Bus<T extends Message,
     private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
 
     /** The supplier of filter chain for this bus. */
-    private final FilterChainSupplier chainSupplier;
+    private final FilterChainSupplier filterChain;
 
     protected Bus(BusBuilder<E, T, ?> builder) {
         super();
-        this.chainSupplier = new FilterChainSupplier(builder);
+        this.filterChain = new FilterChainSupplier(builder);
     }
 
     /**
@@ -216,7 +216,7 @@ public abstract class Bus<T extends Message,
      * Returns the filter chain for this bus.
      */
     private BusFilter<E> filterChain() {
-        return chainSupplier.get();
+        return filterChain.get();
     }
 
     /**
