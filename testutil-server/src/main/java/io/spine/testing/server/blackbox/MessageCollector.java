@@ -22,7 +22,6 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.MessageContext;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.server.type.MessageEnvelope;
@@ -47,18 +46,16 @@ import static org.hamcrest.Matchers.instanceOf;
  *         the type of the message identifiers
  * @param <T>
  *         the type of the outer objects of messages
- * @param <C>
- *         the type of message contexts
  * @param <E>
  *         the type of the message envelopes
  */
 abstract class MessageCollector<I extends MessageId,
                                 T extends Message,
-                                C extends MessageContext,
-                                E extends MessageEnvelope<I, T, C>> implements Consumer<E> {
+                                E extends MessageEnvelope<I, T, ?>>
+        implements Consumer<E> {
 
-    private final Map<I, Message> messages = new HashMap<>();
     private final List<T> outerObjects = new ArrayList<>();
+    private final Map<I, Message> messages = new HashMap<>();
 
     /**
      * Looks up the command message by the command ID.

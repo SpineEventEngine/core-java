@@ -21,7 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.TenantId;
@@ -30,8 +29,7 @@ import io.spine.server.type.EventEnvelope;
 /**
  * Remembers events posted to an Event Bus.
  */
-public final class EventCollector
-        extends MessageCollector<EventId, Event, EventContext, EventEnvelope> {
+public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
 
     @Override
     protected TenantId tenantOf(Event event) {

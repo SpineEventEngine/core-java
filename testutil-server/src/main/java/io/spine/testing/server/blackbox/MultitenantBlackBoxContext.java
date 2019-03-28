@@ -68,13 +68,12 @@ public final class MultitenantBlackBoxContext
     }
 
     @Override
-    protected EmittedCommands emittedCommands(CommandCollector collector) {
-        List<Command> tenantCommands = collector.ofTenant(tenantId);
-        return new EmittedCommands(tenantCommands);
+    protected List<Command> select(CommandCollector collector) {
+        return collector.ofTenant(tenantId);
     }
 
     @Override
-    protected List<Event> collectedEvents(EventCollector collector) {
+    protected List<Event> select(EventCollector collector) {
         return collector.ofTenant(tenantId);
     }
 
@@ -102,5 +101,4 @@ public final class MultitenantBlackBoxContext
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId);
     }
-
 }

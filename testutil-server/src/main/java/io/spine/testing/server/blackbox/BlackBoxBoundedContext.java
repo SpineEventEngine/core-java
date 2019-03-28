@@ -29,6 +29,7 @@ import io.spine.base.RejectionMessage;
 import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
@@ -114,7 +115,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>These events are filtered out from those which are stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
      *
-     * @see #emittedEvents(EventCollector)
+     * @see #emittedEvents()
      */
     private final Set<Message> postedEvents;
 
@@ -481,7 +482,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents(this.events);
+        EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();
     }
@@ -496,7 +497,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public T assertEmitted(Class<? extends EventMessage> eventClass) {
         VerifyEvents verifier = VerifyEvents.emittedEvent(eventClass, once());
-        EmittedEvents events = emittedEvents(this.events);
+        EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();
     }
@@ -511,7 +512,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
         VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
-        EmittedEvents events = emittedEvents(this.events);
+        EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();
     }
@@ -540,7 +541,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = emittedCommands(this.commands);
+        EmittedCommands commands = emittedCommands();
         verifier.verify(commands);
         return thisRef();
     }
@@ -591,13 +592,21 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Obtains commands emitted in the bounded context.
      */
-    protected abstract EmittedCommands emittedCommands(CommandCollector collector);
+    private EmittedCommands emittedCommands() {
+        List<Command> collected = select(this.commands);
+        return new EmittedCommands(collected);
+    }
 
     /**
-     * Obtains acknowledgements of {@linkplain #emittedCommands(CommandCollector)
+     * Selects commands that belong to the current tenant.
+     */
+    protected abstract List<Command> select(CommandCollector collector);
+
+    /**
+     * Obtains acknowledgements of {@linkplain #emittedCommands()
      * emitted commands}.
      */
-    protected Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
+    private static Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
         List<Ack> acknowledgements = observer.responses();
         return new Acknowledgements(acknowledgements);
     }
@@ -608,23 +617,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
      * calls.
      */
-    protected EmittedEvents emittedEvents(EventCollector collector) {
-        List<Event> allWithoutPosted = generatedEvents(collector);
+    private EmittedEvents emittedEvents() {
+        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
+        List<Event> allWithoutPosted =
+                select(this.events)
+                        .stream()
+                        .filter(wasNotReceived)
+                        .collect(toList());
         return new EmittedEvents(allWithoutPosted);
     }
 
-    protected List<Event> collectedEvents(EventCollector collector) {
-        return collector.all();
-    }
-
-    private List<Event> generatedEvents(EventCollector collector) {
-        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
-        List<Event> result = collectedEvents(collector)
-                                   .stream()
-                                   .filter(wasNotReceived)
-                                   .collect(toList());
-        return result;
-    }
+    /**
+     * Selects events that belong to the current tenant.
+     */
+    protected abstract List<Event> select(EventCollector collector);
 
     private static EventEnricher emptyEnricher() {
         return EventEnricher.newBuilder()
