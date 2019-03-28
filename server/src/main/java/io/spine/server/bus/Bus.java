@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,7 +49,6 @@ import static java.util.Collections.singleton;
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
  */
-@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
@@ -62,15 +62,12 @@ public abstract class Bus<T extends Message,
     @LazyInit
     private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
 
-    /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
-    @LazyInit
-    private @MonotonicNonNull FilterChain<E> filterChain;
-
-    private final ChainBuilder<E> chainBuilder;
+    /** The supplier of filter chain for this bus. */
+    private final FilterChainSupplier chainSupplier;
 
     protected Bus(BusBuilder<E, T, ?> builder) {
         super();
-        this.chainBuilder = builder.chainBuilderCopy();
+        this.chainSupplier = new FilterChainSupplier(builder);
     }
 
     /**
@@ -216,42 +213,10 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Initializes the {@code Bus.filterChain} field upon the first invocation and obtains
-     * the value of the field.
-     *
-     * <p>Adds the {@link DeadMessageFilter} and the {@link ValidatingFilter} to the chain, so that
-     * a chain always has the following format:
-     *
-     * <pre>
-     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain BusBuilder Builder} -> chain tail.
-     * </pre>
-     *
-     * <p>The head and the tail of the chain are created by the {@code Bus} itself. Those are
-     * typically empty. Override {@link #filterChainHead()} and {@link #filterChainHead()} to add
-     * some filters to the respective chain side.
-     *
-     * @return the value of the bus filter chain
+     * Returns the filter chain for this bus.
      */
     private BusFilter<E> filterChain() {
-        if (filterChain == null) {
-            initChain();
-        }
-        return filterChain;
-    }
-
-    private void initChain() {
-        Collection<BusFilter<E>> tail = filterChainTail();
-        tail.forEach(chainBuilder::append);
-
-        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(deadMessageHandler(), registry());
-        BusFilter<E> validatingFilter = new ValidatingFilter<>(validator());
-
-        chainBuilder.prepend(deadMsgFilter);
-        chainBuilder.prepend(validatingFilter);
-        Collection<BusFilter<E>> head = filterChainHead();
-        head.forEach(chainBuilder::prepend);
-
-        filterChain = chainBuilder.build();
+        return chainSupplier.get();
     }
 
     /**
@@ -387,4 +352,52 @@ public abstract class Bus<T extends Message,
      * @param messages the messages to store
      */
     protected abstract void store(Iterable<T> messages);
+
+    /**
+     * Initializes the filter chain upon the first invocation and returns the initialized instance
+     * for all next calls.
+     *
+     * <p>Adds the {@link DeadMessageFilter} and the {@link ValidatingFilter} to the chain, so that
+     * a chain always has the following format:
+     *
+     * <pre>
+     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain BusBuilder Builder} -> chain tail.
+     * </pre>
+     *
+     * <p>The head and the tail of the chain are created by the {@code Bus} itself. Those are
+     * typically empty. Override {@link #filterChainHead()} and {@link #filterChainHead()} to add
+     * some filters to the respective chain side.
+     */
+    private class FilterChainSupplier implements Supplier<FilterChain<E>> {
+
+        private final ChainBuilder<E> chainBuilder;
+
+        @LazyInit
+        private @MonotonicNonNull FilterChain<E> chain;
+
+        private FilterChainSupplier(BusBuilder<E, T, ?> builder) {
+            this.chainBuilder = builder.chainBuilderCopy();
+        }
+
+        @Override
+        public FilterChain<E> get() {
+            if(chain == null) {
+                chain = buildChain();
+            }
+            return chain;
+        }
+        private FilterChain<E> buildChain() {
+            Collection<BusFilter<E>> tail = filterChainTail();
+            tail.forEach(chainBuilder::append);
+            BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(deadMessageHandler(), registry());
+            BusFilter<E> validatingFilter = new ValidatingFilter<>(validator());
+
+            chainBuilder.prepend(deadMsgFilter);
+            chainBuilder.prepend(validatingFilter);
+            Collection<BusFilter<E>> head = filterChainHead();
+            head.forEach(chainBuilder::prepend);
+
+            return chainBuilder.build();
+        }
+    }
 }
