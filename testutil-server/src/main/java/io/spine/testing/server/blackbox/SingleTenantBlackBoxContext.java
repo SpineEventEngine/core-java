@@ -42,8 +42,8 @@ public final class SingleTenantBlackBoxContext
     }
 
     @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
+    protected EmittedCommands emittedCommands(CommandCollector collector) {
+        List<Command> commands = collector.all();
         return new EmittedCommands(commands);
     }
 

@@ -70,7 +70,7 @@ public final class EventStore implements AutoCloseable {
     private static void ensureSameTenant(Iterable<Event> events) {
         checkNotNull(events);
         Set<TenantId> tenants = Streams.stream(events)
-                                       .map(Events::getTenantId)
+                                       .map(Events::tenantOf)
                                        .collect(toSet());
         checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }

@@ -23,9 +23,8 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.MessageContext;
-import io.spine.core.Ack;
 import io.spine.core.MessageId;
-import io.spine.server.bus.BusFilter;
+import io.spine.core.TenantId;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.ArrayList;
@@ -33,15 +32,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
 /**
- * Abstract base for bus filters that remember passing messages.
- *
- * <p>Always accepts the posted messages.
+ * Abstract base for message listeners that collect messages posted to a bus.
  *
  * @param <I>
  *         the type of the message identifiers
@@ -52,10 +52,10 @@ import static org.hamcrest.Matchers.instanceOf;
  * @param <E>
  *         the type of the message envelopes
  */
-abstract class MemoizingTap<I extends MessageId,
-                            T extends Message,
-                            C extends MessageContext,
-                            E extends MessageEnvelope<I, T, C>> implements BusFilter<E> {
+abstract class MessageCollector<I extends MessageId,
+                                T extends Message,
+                                C extends MessageContext,
+                                E extends MessageEnvelope<I, T, C>> implements Consumer<E> {
 
     private final Map<I, Message> messages = new HashMap<>();
     private final List<T> outerObjects = new ArrayList<>();
@@ -75,16 +75,32 @@ abstract class MemoizingTap<I extends MessageId,
      * Remembers the passed message and accepts its, returning empty {@code Optional}.
      */
     @Override
-    public final Optional<Ack> accept(E envelope) {
+    public final void accept(E envelope) {
         messages.put(envelope.id(), envelope.message());
         outerObjects.add(envelope.outerObject());
-        return Optional.empty();
     }
 
     /**
-     * Obtains immutable list with outer objects by the tap so far.
+     * Obtains immutable list with outer objects of messages collected so far.
      */
-    final List<T> outerObjects() {
+    public final List<T> all() {
         return ImmutableList.copyOf(outerObjects);
+    }
+
+    /**
+     * Obtains ID of the tenant to which the passed message belongs.
+     */
+    protected abstract TenantId tenantOf(T message);
+
+    /**
+     * Obtains immutable list with outer objects of messages belonging to the passed tenant.
+     */
+    public final List<T> ofTenant(TenantId tenantId) {
+        checkNotNull(tenantId);
+        ImmutableList<T> result =
+                outerObjects.stream()
+                            .filter(m -> tenantId.equals(tenantOf(m)))
+                            .collect(toImmutableList());
+        return result;
     }
 }

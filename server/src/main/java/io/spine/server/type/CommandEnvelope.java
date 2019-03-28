@@ -77,7 +77,7 @@ public final class CommandEnvelope
      */
     @Override
     public TenantId tenantId() {
-        return Commands.getTenantId(command());
+        return Commands.tenantOf(command());
     }
 
     /**

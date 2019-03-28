@@ -254,7 +254,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         void forEventWithoutOrigin() {
             EventContext context = contextWithoutOrigin().build();
             Event event = EventsTestEnv.event(context);
-            assertThrows(IllegalArgumentException.class, () -> Events.getTenantId(event));
+            assertThrows(IllegalArgumentException.class, () -> Events.tenantOf(event));
         }
 
         @Test
@@ -264,7 +264,7 @@ public class EventsTest extends UtilityClassTest<Events> {
                     .setEventContext(contextWithoutOrigin())
                     .build();
             Event event = EventsTestEnv.event(context);
-            assertThrows(IllegalArgumentException.class, () -> Events.getTenantId(event));
+            assertThrows(IllegalArgumentException.class, () -> Events.tenantOf(event));
         }
     }
 
@@ -281,7 +281,7 @@ public class EventsTest extends UtilityClassTest<Events> {
                                                          .build();
             Event event = EventsTestEnv.event(context);
 
-            TenantId tenantId = Events.getTenantId(event);
+            TenantId tenantId = Events.tenantOf(event);
 
             assertEquals(targetTenantId, tenantId);
 
@@ -299,7 +299,7 @@ public class EventsTest extends UtilityClassTest<Events> {
                                                          .build();
             Event event = EventsTestEnv.event(context);
 
-            TenantId tenantId = Events.getTenantId(event);
+            TenantId tenantId = Events.tenantOf(event);
 
             assertEquals(targetTenantId, tenantId);
         }
@@ -308,7 +308,7 @@ public class EventsTest extends UtilityClassTest<Events> {
     @Test
     @DisplayName("throw NullPointerException when getting tenant ID of null event")
     void notAcceptNullEvent() {
-        assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
+        assertThrows(NullPointerException.class, () -> Events.tenantOf(Tests.nullRef()));
     }
 
     @Test

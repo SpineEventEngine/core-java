@@ -41,7 +41,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.transport.TransportFactory;
@@ -105,8 +104,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
     private final BoundedContext boundedContext;
-    private final CommandMemoizingTap commandTap;
-    private final EventMemoizingTap eventTap;
+    private final CommandCollector commands;
+    private final EventCollector events;
     private final MemoizingObserver<Ack> observer;
 
     /**
@@ -115,19 +114,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>These events are filtered out from those which are stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
      *
-     * @see #emittedEvents()
+     * @see #emittedEvents(EventCollector)
      */
     private final Set<Message> postedEvents;
 
     protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
-        this.commandTap = new CommandMemoizingTap();
+        this.commands = new CommandCollector();
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()
-                .appendFilter(commandTap);
-        this.eventTap = new EventMemoizingTap();
+                .addListener(commands);
+        this.events = new EventCollector();
         EventBus.Builder eventBus = EventBus
                 .newBuilder()
-                .appendFilter(eventTap)
+                .addListener(events)
                 .setEnricher(enricher);
         this.boundedContext = BoundedContext
                 .newBuilder()
@@ -482,7 +481,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents();
+        EmittedEvents events = emittedEvents(this.events);
         verifier.verify(events);
         return thisRef();
     }
@@ -497,7 +496,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public T assertEmitted(Class<? extends EventMessage> eventClass) {
         VerifyEvents verifier = VerifyEvents.emittedEvent(eventClass, once());
-        EmittedEvents events = emittedEvents();
+        EmittedEvents events = emittedEvents(this.events);
         verifier.verify(events);
         return thisRef();
     }
@@ -512,7 +511,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
         VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
-        EmittedEvents events = emittedEvents();
+        EmittedEvents events = emittedEvents(this.events);
         verifier.verify(events);
         return thisRef();
     }
@@ -541,7 +540,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = emittedCommands(commandTap);
+        EmittedCommands commands = emittedCommands(this.commands);
         verifier.verify(commands);
         return thisRef();
     }
@@ -592,10 +591,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Obtains commands emitted in the bounded context.
      */
-    protected abstract EmittedCommands emittedCommands(CommandMemoizingTap commandTap);
+    protected abstract EmittedCommands emittedCommands(CommandCollector collector);
 
     /**
-     * Obtains acknowledgements of {@linkplain #emittedCommands(CommandMemoizingTap)
+     * Obtains acknowledgements of {@linkplain #emittedCommands(CommandCollector)
      * emitted commands}.
      */
     protected Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
@@ -609,36 +608,22 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
      * calls.
      */
-    protected EmittedEvents emittedEvents() {
-        List<Event> allWithoutPosted = generatedEvents();
-        if (eventTap.events().isEmpty()) {
-            //TODO:2019-03-27:alexander.yevsyukov: Why don't we have it?
-            _warn("No events are gathered by the tap...");
-        }
+    protected EmittedEvents emittedEvents(EventCollector collector) {
+        List<Event> allWithoutPosted = generatedEvents(collector);
         return new EmittedEvents(allWithoutPosted);
     }
 
-//    private List<Event> postedEvents() {
-//        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
-//        return eventTap.events()
-//                       .stream()
-//                       .filter(wasNotReceived)
-//                       .collect(toList());
-//    }
+    protected List<Event> collectedEvents(EventCollector collector) {
+        return collector.all();
+    }
 
-    private List<Event> generatedEvents() {
-        MemoizingObserver<Event> queryObserver = memoizingObserver();
-        EventStreamQuery allEvents = EventStreamQuery.newBuilder()
-                                                     .build();
-        boundedContext.eventBus()
-                      .eventStore()
-                      .read(allEvents, queryObserver);
+    private List<Event> generatedEvents(EventCollector collector) {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
-        List<Event> responses = queryObserver.responses()
-                                             .stream()
-                                             .filter(wasNotReceived)
-                                             .collect(toList());
-        return responses;
+        List<Event> result = collectedEvents(collector)
+                                   .stream()
+                                   .filter(wasNotReceived)
+                                   .collect(toList());
+        return result;
     }
 
     private static EventEnricher emptyEnricher() {
