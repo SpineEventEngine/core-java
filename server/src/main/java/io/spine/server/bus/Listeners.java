@@ -18,38 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.tenant;
+package io.spine.server.bus;
 
-import io.spine.annotation.Internal;
-import io.spine.core.Event;
+import com.google.common.collect.ImmutableSet;
+import io.spine.server.type.MessageEnvelope;
 
-import static io.spine.core.Events.tenantOf;
+import java.util.function.Consumer;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A tenant-aware operation performed in relation to an event.
+ * Manages consumption of a message posted to the bus by its listeners.
+ *
+ * @param <E> the type of the {@link MessageEnvelope} posted by the bus
  */
-@Internal
-public abstract class EventOperation extends TenantAwareOperation {
+final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E> {
 
-    /**
-     * The event because of which the operation is performed.
-     */
-    private final Event event;
+    private final ImmutableSet<Consumer<E>> listeners;
 
-    /**
-     * Creates an instance of the operation on the tenant related to the event.
-     *
-     * @param event the event from which to obtain the tenant ID
-     */
-    protected EventOperation(Event event) {
-        super(tenantOf(event));
-        this.event = event;
+    Listeners(BusBuilder<E, ?, ?> builder) {
+        checkNotNull(builder);
+        this.listeners = ImmutableSet.copyOf(builder.listeners());
     }
 
-    /**
-     * Obtains the ID of the event.
-     */
-    protected Event getEvent() {
-        return event;
+    @Override
+    public void accept(E envelope) {
+        listeners.forEach(l -> {
+            try {
+                l.accept(envelope);
+            } catch (RuntimeException ignored) {
+                // Do nothing.
+            }
+        });
     }
 }

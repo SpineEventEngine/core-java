@@ -182,7 +182,7 @@ public class CommandBus extends UnicastBus<Command,
 
     private static TenantId tenantOf(Iterable<Command> commands) {
         return Streams.stream(commands)
-                      .map(Commands::getTenantId)
+                      .map(Commands::tenantOf)
                       .findAny()
                       .orElse(TenantId.getDefaultInstance());
     }

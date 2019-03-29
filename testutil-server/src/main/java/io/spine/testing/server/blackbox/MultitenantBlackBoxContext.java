@@ -22,7 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Command;
-import io.spine.core.Commands;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -30,9 +30,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -70,19 +68,13 @@ public final class MultitenantBlackBoxContext
     }
 
     @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> allCommands = commandTap.commands();
-        List<Command> tenantCommands = allCommands.stream()
-                                                  .filter(new MatchesTenant(tenantId))
-                                                  .collect(Collectors.toList());
-        return new EmittedCommands(tenantCommands);
+    protected List<Command> select(CommandCollector collector) {
+        return collector.ofTenant(tenantId);
     }
 
     @Override
-    protected EmittedEvents emittedEvents() {
-        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
-        EmittedEvents events = tenantAwareRunner.evaluate(super::emittedEvents);
-        return events;
+    protected List<Event> select(EventCollector collector) {
+        return collector.ofTenant(tenantId);
     }
 
     @Override
@@ -108,23 +100,5 @@ public final class MultitenantBlackBoxContext
      */
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId);
-    }
-
-    /**
-     * A predicate to match commands with a {@linkplain #tenantToMatch tenant ID}.
-     */
-    private static class MatchesTenant implements Predicate<Command> {
-
-        private final TenantId tenantToMatch;
-
-        private MatchesTenant(TenantId tenantToMatch) {
-            this.tenantToMatch = tenantToMatch;
-        }
-
-        @Override
-        public boolean test(Command command) {
-            TenantId commandTenant = Commands.getTenantId(command);
-            return commandTenant.equals(tenantToMatch);
-        }
     }
 }

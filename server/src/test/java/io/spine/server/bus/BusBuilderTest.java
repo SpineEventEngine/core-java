@@ -50,7 +50,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<E, T, ?>,
         @SuppressWarnings("unchecked") BusFilter<E> filter = mock(BusFilter.class);
 
         assertTrue(builder().appendFilter(filter)
-                            .getFilters()
+                            .filters()
                             .contains(filter));
     }
 
@@ -64,7 +64,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<E, T, ?>,
         B builder = builder();
         builder.appendFilter(first)
                .appendFilter(second);
-        Deque<BusFilter<E>> filters = builder.getFilters();
+        Deque<BusFilter<E>> filters = builder.filters();
         assertEquals(first, filters.pop());
         assertEquals(second, filters.pop());
     }

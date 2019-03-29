@@ -61,7 +61,7 @@ final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
      *
      * @return new {@link Deque} containing all the filters
      */
-    Deque<BusFilter<E>> getFilters() {
+    Deque<BusFilter<E>> filters() {
         return new ConcurrentLinkedDeque<>(filters);
     }
 

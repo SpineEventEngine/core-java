@@ -18,38 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.tenant;
+package io.spine.testing.server.blackbox;
 
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
-
-import static io.spine.core.Events.tenantOf;
+import io.spine.core.EventId;
+import io.spine.core.Events;
+import io.spine.core.TenantId;
+import io.spine.server.type.EventEnvelope;
 
 /**
- * A tenant-aware operation performed in relation to an event.
+ * Remembers events posted to an Event Bus.
  */
-@Internal
-public abstract class EventOperation extends TenantAwareOperation {
+public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
 
-    /**
-     * The event because of which the operation is performed.
-     */
-    private final Event event;
-
-    /**
-     * Creates an instance of the operation on the tenant related to the event.
-     *
-     * @param event the event from which to obtain the tenant ID
-     */
-    protected EventOperation(Event event) {
-        super(tenantOf(event));
-        this.event = event;
-    }
-
-    /**
-     * Obtains the ID of the event.
-     */
-    protected Event getEvent() {
-        return event;
+    @Override
+    protected TenantId tenantOf(Event event) {
+        return Events.tenantOf(event);
     }
 }

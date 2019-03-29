@@ -22,6 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.server.event.EventEnricher;
 import io.spine.testing.client.TestActorRequestFactory;
 
@@ -42,9 +43,13 @@ public final class SingleTenantBlackBoxContext
     }
 
     @Override
-    protected EmittedCommands emittedCommands(CommandMemoizingTap commandTap) {
-        List<Command> commands = commandTap.commands();
-        return new EmittedCommands(commands);
+    protected List<Command> select(CommandCollector collector) {
+        return collector.all();
+    }
+
+    @Override
+    protected List<Event> select(EventCollector collector) {
+        return collector.all();
     }
 
     @Override

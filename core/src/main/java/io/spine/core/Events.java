@@ -262,15 +262,15 @@ public final class Events {
     }
 
     /**
-     * Obtains a {@link TenantId} from the {@linkplain #getActorContext(Event) actor context}
+     * Obtains a {@link TenantId} from the {@linkplain #actorContextOf(Event) actor context}
      * of the given {@link Event}.
      *
      * @return a tenant ID from the actor context of the event
      */
     @Internal
-    public static TenantId getTenantId(Event event) {
+    public static TenantId tenantOf(Event event) {
         checkNotNull(event);
-        ActorContext actorContext = getActorContext(event);
+        ActorContext actorContext = actorContextOf(event);
         return actorContext.getTenantId();
     }
 
@@ -288,7 +288,7 @@ public final class Events {
      * @return the actor context of the wrapped event
      */
     @Internal
-    public static ActorContext getActorContext(Event event) {
+    public static ActorContext actorContextOf(Event event) {
         checkNotNull(event);
         EventContext eventContext = event.getContext();
         ActorContext result = retrieveActorContext(eventContext);

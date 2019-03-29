@@ -103,7 +103,7 @@ public final class EventEnvelope
 
     @Override
     public ActorContext actorContext() {
-        return Events.getActorContext(outerObject());
+        return Events.actorContextOf(outerObject());
     }
 
     /**

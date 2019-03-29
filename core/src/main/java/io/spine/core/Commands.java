@@ -91,9 +91,9 @@ public final class Commands {
     /**
      * Obtains a tenant ID from the command.
      */
-    public static TenantId getTenantId(Command command) {
+    public static TenantId tenantOf(Command command) {
         checkNotNull(command);
-        TenantId result = getTenantId(command.getContext());
+        TenantId result = tenantOf(command.getContext());
         return result;
     }
 
@@ -105,7 +105,7 @@ public final class Commands {
      * a valid {@code TenantId} source inside of the {@code Event}.
      */
     @Internal
-    public static TenantId getTenantId(CommandContext context) {
+    public static TenantId tenantOf(CommandContext context) {
         return context.getActorContext()
                       .getTenantId();
     }

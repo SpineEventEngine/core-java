@@ -29,8 +29,10 @@ import io.spine.base.RejectionMessage;
 import io.spine.client.QueryFactory;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -40,7 +42,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.transport.TransportFactory;
@@ -94,20 +95,22 @@ import static java.util.stream.Collectors.toList;
         "ClassWithTooManyMethods",
         "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
+public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
+        implements Logging {
 
     /**
-     * Use the same {@code TransportFactory} instance across all instances of black box bounded
-     * context in order to allow them to communicate via external events.
+     * Use the same {@code TransportFactory} instance across all instances of
+     * {@code BlackBoxBoundedContext} in order to allow them to communicate via external events.
      */
     private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
     private final BoundedContext boundedContext;
-    private final CommandMemoizingTap commandTap;
+    private final CommandCollector commands;
+    private final EventCollector events;
     private final MemoizingObserver<Ack> observer;
 
     /**
-     * Events received by {@code BlackBoxBoundedContext} and posted to the event bus.
+     * Events received by this instance and posted to the Event Bus.
      *
      * <p>These events are filtered out from those which are stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
@@ -117,13 +120,15 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     private final Set<Message> postedEvents;
 
     protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
-        this.commandTap = new CommandMemoizingTap();
-        EventBus.Builder eventBus = EventBus
-                .newBuilder()
-                .setEnricher(enricher);
+        this.commands = new CommandCollector();
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()
-                .appendFilter(commandTap);
+                .addListener(commands);
+        this.events = new EventCollector();
+        EventBus.Builder eventBus = EventBus
+                .newBuilder()
+                .addListener(events)
+                .setEnricher(enricher);
         this.boundedContext = BoundedContext
                 .newBuilder()
                 .setMultitenant(multitenant)
@@ -536,7 +541,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      */
     @CanIgnoreReturnValue
     public T assertThat(VerifyCommands verifier) {
-        EmittedCommands commands = emittedCommands(commandTap);
+        EmittedCommands commands = emittedCommands();
         verifier.verify(commands);
         return thisRef();
     }
@@ -587,13 +592,21 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
     /**
      * Obtains commands emitted in the bounded context.
      */
-    protected abstract EmittedCommands emittedCommands(CommandMemoizingTap commandTap);
+    private EmittedCommands emittedCommands() {
+        List<Command> collected = select(this.commands);
+        return new EmittedCommands(collected);
+    }
 
     /**
-     * Obtains acknowledgements of {@linkplain #emittedCommands(CommandMemoizingTap)
+     * Selects commands that belong to the current tenant.
+     */
+    protected abstract List<Command> select(CommandCollector collector);
+
+    /**
+     * Obtains acknowledgements of {@linkplain #emittedCommands()
      * emitted commands}.
      */
-    protected Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
+    private static Acknowledgements commandAcknowledgements(MemoizingObserver<Ack> observer) {
         List<Ack> acknowledgements = observer.responses();
         return new Acknowledgements(acknowledgements);
     }
@@ -604,26 +617,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext> {
      * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
      * calls.
      */
-    protected EmittedEvents emittedEvents() {
-        MemoizingObserver<Event> queryObserver = memoizingObserver();
-        boundedContext.eventBus()
-                      .eventStore()
-                      .read(allEventsQuery(), queryObserver);
+    private EmittedEvents emittedEvents() {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
-        List<Event> responses = queryObserver.responses()
-                                             .stream()
-                                             .filter(wasNotReceived)
-                                             .collect(toList());
-        return new EmittedEvents(responses);
+        List<Event> allWithoutPosted =
+                select(this.events)
+                        .stream()
+                        .filter(wasNotReceived)
+                        .collect(toList());
+        return new EmittedEvents(allWithoutPosted);
     }
 
     /**
-     * Creates a new {@link io.spine.server.event.EventStreamQuery} without any filters.
+     * Selects events that belong to the current tenant.
      */
-    private static EventStreamQuery allEventsQuery() {
-        return EventStreamQuery.newBuilder()
-                               .build();
-    }
+    protected abstract List<Event> select(EventCollector collector);
 
     private static EventEnricher emptyEnricher() {
         return EventEnricher.newBuilder()
