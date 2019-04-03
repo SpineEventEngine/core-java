@@ -66,13 +66,11 @@ class MultitenantBlackBoxContextTest
 
                 // Verify project was created for John.
                 .withTenant(john)
-                .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
                 .assertThat(exactlyOne(createdProjectState(createJohnProject)))
 
                 // Verify project was created for Carl.
                 .withTenant(carl)
-                .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
                 .assertThat(exactlyOne(createdProjectState(createCarlProject)))
 

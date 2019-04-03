@@ -21,7 +21,6 @@
 package io.spine.server.model.noops;
 
 import io.spine.server.model.noops.given.ArchiverPm;
-import io.spine.test.model.contexts.archiver.ArchiveFile;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.server.model.noops.given.NoOpMessageTestEnv.archiveSingleFile;
 import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
 @DisplayName("When Nothing event is emitted")
@@ -42,9 +40,7 @@ class NothingTest {
                 .singleTenant()
                 .with(new ArchiverPm.Repository())
                 .receivesCommand(archiveSingleFile());
-        boundedContext.assertThat(emittedCommand(count(1)))
-                      .assertThat(emittedCommand(ArchiveFile.class))
-                      .assertThat(emittedEvent(count(0)))
+        boundedContext.assertThat(emittedEvent(count(0)))
                       .close();
     }
 }

@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -84,27 +85,28 @@ final class BlackBoxSetup {
     /**
      * Posts commands to the bounded context.
      *
-     * @param domainCommands
+     * @param commandMessages
      *         a list of {@linkplain CommandMessage command messages}
      *         or {@linkplain Command commands}
      */
-    void postCommands(Collection<Message> domainCommands) {
-        List<Command> commands = domainCommands.stream()
-                                               .map(commandOrMessage -> command(commandOrMessage,
-                                                                                requestFactory))
-                                               .collect(toList());
+    List<Command> postCommands(Collection<CommandMessage> commandMessages) {
+        List<Command> commands =
+                commandMessages.stream()
+                               .map(commandOrMessage -> command(commandOrMessage, requestFactory))
+                               .collect(toList());
         commandBus.post(commands, observer);
+        return commands;
     }
 
     /**
      * Posts events to the bounded context.
      *
-     * @param domainEvents
+     * @param eventMessages
      *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
      * @return list of events posted to {@link EventBus}
      */
-    List<Event> postEvents(Collection<Message> domainEvents) {
-        List<Event> events = toEvents(domainEvents, eventFactory);
+    List<Event> postEvents(Collection<EventMessage> eventMessages) {
+        List<Event> events = toEvents(eventMessages, eventFactory);
         eventBus.post(events, observer);
         return events;
     }
@@ -114,15 +116,14 @@ final class BlackBoxSetup {
      *
      * @param producerId
      *         the {@linkplain io.spine.core.EventContext#getProducerId() producer} for events
-     * @param firstEvent
+     * @param first
      *         the first event to be posted
-     * @param otherEvents
+     * @param rest
      *         other events to be posted, if any
      * @return list of events posted to {@link EventBus}
      */
-    List<Event> postEvents(Object producerId, EventMessage firstEvent,
-                           EventMessage... otherEvents) {
-        List<Message> eventMessages = asList(firstEvent, otherEvents);
+    List<Event> postEvents(Object producerId, EventMessage first, EventMessage... rest) {
+        List<EventMessage> eventMessages = asList(first, rest);
         TestEventFactory customFactory = newEventFactory(producerId);
         List<Event> events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);
@@ -137,8 +138,18 @@ final class BlackBoxSetup {
      * @param domainEvents
      *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
      */
-    void postExternalEvents(BoundedContextName sourceContext, Collection<Message> domainEvents) {
+    void postExternalEvents(BoundedContextName sourceContext,
+                            Collection<EventMessage> domainEvents) {
         List<Event> events = toEvents(domainEvents, eventFactory);
+        postExternal(sourceContext, events);
+    }
+
+    void postExternalEvent(BoundedContextName sourceContext, Message eventOrMessage) {
+        List<Event> event = ImmutableList.of(event(eventOrMessage, eventFactory));
+        postExternal(sourceContext, event);
+    }
+
+    void postExternal(BoundedContextName sourceContext, List<Event> events) {
         List<ExternalMessage> externalEvents = events
                 .stream()
                 .map(event -> ExternalMessages.of(event, sourceContext))
@@ -152,17 +163,30 @@ final class BlackBoxSetup {
      * @param domainEvents
      *         a list of events to import
      */
-    void importEvents(Collection<Message> domainEvents) {
-        List<Event> events = toEvents(domainEvents, eventFactory);
+    void importEvents(Collection<EventMessage> domainEvents) {
+        List<Event> events = toEvents(domainEvents);
+        postImport(events);
+    }
+
+    private void postImport(List<Event> events) {
         importBus.post(events, observer);
     }
 
-    private static List<Event> toEvents(Collection<Message> domainEvents,
-                                        TestEventFactory eventFactory) {
+    void importEvent(Message eventOrMessage) {
+        List<Event> event = ImmutableList.of(event(eventOrMessage));
+        postImport(event);
+    }
+
+    private static
+    List<Event> toEvents(Collection<EventMessage> domainEvents, TestEventFactory factory) {
         return domainEvents
                 .stream()
-                .map(domainEvent -> event(domainEvent, eventFactory))
+                .map(domainEvent -> event(domainEvent, factory))
                 .collect(toList());
+    }
+
+    private List<Event> toEvents(Collection<EventMessage> domainEvents) {
+        return toEvents(domainEvents, eventFactory);
     }
 
     /**
@@ -171,8 +195,6 @@ final class BlackBoxSetup {
      *
      * @param eventOrMessage
      *         a domain event message or {@code Event}
-     * @param eventFactory
-     *         the event factory to produce events with
      * @return a newly created {@code Event} instance or passed {@code Event}
      */
     private static Event event(Message eventOrMessage, TestEventFactory eventFactory) {
@@ -181,6 +203,10 @@ final class BlackBoxSetup {
         }
         EventMessage message = (EventMessage) eventOrMessage;
         return eventFactory.createEvent(message);
+    }
+
+    private Event event(Message eventOrMessage) {
+        return event(eventOrMessage, eventFactory);
     }
 
     /**
