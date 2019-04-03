@@ -72,6 +72,10 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         assertActual().isNotEmpty();
     }
 
+    private IterableSubject assertActual() {
+        return assertThat(actual());
+    }
+
     /**
      * Obtains the subject for the message at the given index.
      *
@@ -81,16 +85,12 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         int size = Iterables.size(actual());
         if (index >= size) {
             failWithActual(
-                fact("the size of the generated messages is", size),
-                fact("but the requested index was", index)
+                    fact("the size of the generated messages is", size),
+                    fact("but the requested index was", index)
             );
         }
         T outerObject = Iterables.get(actual(), index);
         Message unpacked = AnyPacker.unpack(outerObject.getMessage());
         return ProtoTruth.assertThat(unpacked);
-    }
-
-    private IterableSubject assertActual() {
-        return assertThat(actual());
     }
 }
