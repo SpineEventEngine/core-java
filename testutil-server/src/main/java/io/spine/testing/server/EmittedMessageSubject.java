@@ -79,7 +79,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      */
     public final ProtoSubject<?, ?> message(int index) {
         int size = Iterables.size(actual());
-        if (size <= index) {
+        if (index >= size) {
             failWithActual(
                 fact("the size of the generated messages is", size),
                 fact("but the requested index was", index)
