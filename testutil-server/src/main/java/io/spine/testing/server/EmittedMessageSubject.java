@@ -64,7 +64,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
 
     /** Fails if the subject is not empty. */
     public final void isEmpty() {
-        assertActual().isNotEmpty();
+        assertActual().isEmpty();
     }
 
     /** Fails if the subject is empty. */
