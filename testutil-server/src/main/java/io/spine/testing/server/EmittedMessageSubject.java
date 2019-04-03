@@ -20,13 +20,19 @@
 
 package io.spine.testing.server;
 
+import com.google.common.collect.Iterables;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.common.truth.extensions.proto.ProtoSubject;
+import com.google.common.truth.extensions.proto.ProtoTruth;
+import com.google.protobuf.Message;
 import io.spine.base.SerializableMessage;
 import io.spine.core.MessageWithContext;
+import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import static com.google.common.truth.Fact.fact;
 import static com.google.common.truth.Truth.assertThat;
 
 /**
@@ -64,6 +70,24 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
     /** Fails if the subject is empty. */
     public final void isNotEmpty() {
         assertActual().isNotEmpty();
+    }
+
+    /**
+     * Obtains the subject for the message at the given index.
+     *
+     * <p>Fails if the index is out of the range of the generated message sequence.
+     */
+    public final ProtoSubject<?, ?> message(int index) {
+        int size = Iterables.size(actual());
+        if (size <= index) {
+            failWithActual(
+                fact("the size of the generated messages is", size),
+                fact("but the requested index was", index)
+            );
+        }
+        T outerObject = Iterables.get(actual(), index);
+        Message unpacked = AnyPacker.unpack(outerObject.getMessage());
+        return ProtoTruth.assertThat(unpacked);
     }
 
     private IterableSubject assertActual() {
