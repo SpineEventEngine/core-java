@@ -104,6 +104,7 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
         int messageCount = 5;
         Iterable<M> messages = messages(messageCount);
         int index = 13;
+        @SuppressWarnings("CheckReturnValue")
         AssertionError error = expectFailure(whenTesting -> whenTesting.that(messages)
                                                                        .message(index));
         TruthFailureSubject assertError = assertThat(error);
@@ -118,7 +119,7 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
         return expectFailureAbout(subjectFactory(), assertionCallback);
     }
 
-    @SuppressWarnings("ThrowableNotThrown") // Ignore the AssertionError.
+    @SuppressWarnings({"ThrowableNotThrown", "CheckReturnValue"}) // Ignore the AssertionError.
     private void
     expectSomeFailure(SimpleSubjectBuilderCallback<S, Iterable<M>> assertionCallback) {
         expectFailureAbout(subjectFactory(), assertionCallback);
