@@ -32,6 +32,7 @@ import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
+import io.spine.time.TimestampTemporal;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
@@ -42,8 +43,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Timestamps2.isBetween;
-import static io.spine.protobuf.Timestamps2.isLaterThan;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -113,12 +112,11 @@ public final class Commands {
     /**
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
-    public static Predicate<Command> wereAfter(Timestamp from) {
-        checkNotNull(from);
-        return request -> {
-            checkNotNull(request);
-            Timestamp timestamp = getTimestamp(request);
-            return isLaterThan(timestamp, from);
+    public static Predicate<Command> wereAfter(Timestamp time) {
+        checkNotNull(time);
+        return command -> {
+            checkNotNull(command);
+            return timeOf(command).isLaterThan(Utils.toTemporal(time));
         };
     }
 
@@ -128,18 +126,26 @@ public final class Commands {
     public static Predicate<Command> wereWithinPeriod(Timestamp from, Timestamp to) {
         checkNotNull(from);
         checkNotNull(to);
-        return request -> {
-            checkNotNull(request);
-            Timestamp timestamp = getTimestamp(request);
-            return isBetween(timestamp, from, to);
+        return command -> {
+            checkNotNull(command);
+            return timeOf(command).isBetween(Utils.toTemporal(from), Utils.toTemporal(to));
         };
     }
 
-    private static Timestamp getTimestamp(Command request) {
+    private static Timestamp timestampOf(Command request) {
         checkNotNull(request);
         Timestamp result = request.getContext()
                                   .getActorContext()
                                   .getTimestamp();
+        return result;
+    }
+
+    /**
+     * Obtains the creation time of the passed command.
+     */
+    @VisibleForTesting
+    public static TimestampTemporal timeOf(Command command) {
+        TimestampTemporal result = Utils.toTemporal(timestampOf(command));
         return result;
     }
 
@@ -151,8 +157,8 @@ public final class Commands {
     public static void sort(List<Command> commands) {
         checkNotNull(commands);
         commands.sort((o1, o2) -> {
-            Timestamp timestamp1 = getTimestamp(o1);
-            Timestamp timestamp2 = getTimestamp(o2);
+            Timestamp timestamp1 = timestampOf(o1);
+            Timestamp timestamp2 = timestampOf(o2);
             return Timestamps.compare(timestamp1, timestamp2);
         });
     }

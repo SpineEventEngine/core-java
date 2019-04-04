@@ -21,7 +21,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.Timestamps2;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Predicate;
@@ -30,6 +29,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static com.google.protobuf.util.Timestamps.compare;
+import static io.spine.core.Utils.toTemporal;
+import static io.spine.core.Events.timeOf;
+import static io.spine.core.Events.timestampOf;
 
 /**
  * Predicates for working with {@code Event}s.
@@ -81,7 +83,7 @@ public final class EventPredicates {
             if (record == null) {
                 return false;
             }
-            Timestamp ts = Events.getTimestamp(record);
+            Timestamp ts = timestampOf(record);
             boolean result = compare(ts, this.timestamp) > 0;
             return result;
         }
@@ -102,7 +104,7 @@ public final class EventPredicates {
                 return false;
             }
 
-            Timestamp ts = Events.getTimestamp(record);
+            Timestamp ts = timestampOf(record);
             boolean result = compare(ts, this.timestamp) < 0;
             return result;
         }
@@ -133,9 +135,7 @@ public final class EventPredicates {
             if (event == null) {
                 return false;
             }
-
-            Timestamp ts = Events.getTimestamp(event);
-            boolean result = Timestamps2.isBetween(ts, start, finish);
+            boolean result = timeOf(event).isBetween(toTemporal(start), toTemporal(finish));
             return result;
         }
     }

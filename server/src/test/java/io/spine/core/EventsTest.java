@@ -53,7 +53,7 @@ import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getProducer;
-import static io.spine.core.Events.getTimestamp;
+import static io.spine.core.Events.timestampOf;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -153,7 +153,7 @@ public class EventsTest extends UtilityClassTest<Events> {
             Event event = GivenEvent.occurredMinutesAgo(1);
 
             assertEquals(event.getContext()
-                              .getTimestamp(), getTimestamp(event));
+                              .getTimestamp(), timestampOf(event));
         }
 
         @Test

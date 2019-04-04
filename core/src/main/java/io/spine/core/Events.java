@@ -32,6 +32,8 @@ import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
+import io.spine.time.Temporals;
+import io.spine.time.TimestampTemporal;
 
 import java.util.Comparator;
 import java.util.List;
@@ -55,8 +57,8 @@ public final class Events {
 
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = (o1, o2) -> {
-        Timestamp timestamp1 = getTimestamp(o1);
-        Timestamp timestamp2 = getTimestamp(o2);
+        Timestamp timestamp1 = timestampOf(o1);
+        Timestamp timestamp2 = timestampOf(o2);
         return Timestamps.compare(timestamp1, timestamp2);
     };
 
@@ -106,11 +108,18 @@ public final class Events {
     /**
      * Obtains the timestamp of the event.
      */
-    public static Timestamp getTimestamp(Event event) {
+    static Timestamp timestampOf(Event event) {
         checkNotNull(event);
         Timestamp result = event.getContext()
                                 .getTimestamp();
         return result;
+    }
+
+    /**
+     * Obtains the time of the passed event.
+     */
+    static TimestampTemporal timeOf(Event event) {
+        return (TimestampTemporal) Temporals.from(timestampOf(event));
     }
 
     /**

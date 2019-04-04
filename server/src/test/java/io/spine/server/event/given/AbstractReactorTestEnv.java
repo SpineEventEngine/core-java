@@ -25,21 +25,23 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.protobuf.Durations2;
-import io.spine.protobuf.Timestamps2;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.CustomerNotified;
 import io.spine.server.event.CustomerNotified.NotificationMethod;
+import io.spine.server.event.CustomerNotifiedVBuilder;
 import io.spine.server.event.DeliveryServiceNotified;
 import io.spine.server.event.DonationMade;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.OrderPaidFor;
 import io.spine.server.event.OrderReadyToBeServed;
+import io.spine.server.event.OrderReadyToBeServedVBuilder;
 import io.spine.server.event.OrderServed;
 import io.spine.server.event.OrderServedLate;
 import io.spine.server.event.React;
 import io.spine.server.tuple.Pair;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.Order;
+import io.spine.time.InstantConverter;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,14 +63,12 @@ public class AbstractReactorTestEnv {
 
     /** Obtains an event that signifies that some order was served in time. */
     public static OrderServed someOrderServedInTime() {
-        Timestamp now = Timestamps2.fromInstant(Instant.now());
-        return someOrderServedOn(now);
+        return someOrderServedOn(now());
     }
 
     /** Obtains an event that signifies that some order was sered late. */
     public static OrderServed someOrderServedLate() {
-        Timestamp now = Timestamps2.fromInstant(Instant.now());
-        Timestamp twoHoursAfter = Timestamps.add(now, Durations2.fromHours(2));
+        Timestamp twoHoursAfter = Timestamps.add(now(), Durations2.fromHours(2));
         return someOrderServedOn(twoHoursAfter);
     }
 
@@ -82,12 +82,11 @@ public class AbstractReactorTestEnv {
     }
 
     private static Order someOrder() {
-        Timestamp now = Timestamps2.fromInstant(Instant.now());
         Order result = Order
                 .newBuilder()
                 .setOrderId(newUuid())
                 .setPriceInUsd(somePrice())
-                .setTimePlaced(now)
+                .setTimePlaced(now())
                 .build();
         return result;
     }
@@ -202,11 +201,13 @@ public class AbstractReactorTestEnv {
             return ImmutableList.copyOf(ordersServedLate);
         }
 
-        private static Timestamp now() {
-            Instant currentInstant = Instant.now();
-            Timestamp result = Timestamps2.fromInstant(currentInstant);
-            return result;
-        }
+    }
+
+    private static Timestamp now() {
+        Instant currentInstant = Instant.now();
+        Timestamp result = InstantConverter.instance()
+                                           .convert(currentInstant);
+        return result;
     }
 
     /**
@@ -230,13 +231,13 @@ public class AbstractReactorTestEnv {
             Order order = orderReady.getOrder();
             CustomerNotified customerNotified = notifyCustomer(order);
             DeliveryServiceNotified deliveryNotified = notifyDelivery(order);
-            Pair<CustomerNotified, DeliveryServiceNotified> result = Pair.of(customerNotified,
-                                                                             deliveryNotified);
+            Pair<CustomerNotified, DeliveryServiceNotified> result =
+                    Pair.of(customerNotified, deliveryNotified);
             return result;
         }
 
         private CustomerNotified notifyCustomer(Order order) {
-            CustomerNotified result = CustomerNotified
+            CustomerNotified result = CustomerNotifiedVBuilder
                     .newBuilder()
                     .setOrder(order)
                     .setNotificationMethod(notificationMethod)
@@ -262,7 +263,7 @@ public class AbstractReactorTestEnv {
      * {@linkplain AbstractEventReactor#onError(EventEnvelope, RuntimeException)}.
      */
     public static OrderReadyToBeServed someOrderReady() {
-        OrderReadyToBeServed result = OrderReadyToBeServed
+        OrderReadyToBeServed result = OrderReadyToBeServedVBuilder
                 .newBuilder()
                 .setOrder(someOrder())
                 .build();

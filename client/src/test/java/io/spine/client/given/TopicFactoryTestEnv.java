@@ -25,8 +25,8 @@ import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 
-import static io.spine.protobuf.Timestamps2.isLaterThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static io.spine.core.Utils.toTemporal;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TopicFactoryTestEnv {
@@ -46,18 +46,14 @@ public class TopicFactoryTestEnv {
     }
 
     public static void verifyContext(ActorContext expected, ActorContext actual) {
-        assertEquals(expected.getTenantId(), actual.getTenantId());
-        assertEquals(expected.getActor(), actual.getActor());
-        assertEquals(expected.getLanguage(), actual.getLanguage());
-        assertEquals(expected.getZoneOffset(), actual.getZoneOffset());
-        assertEquals(expected.getZoneId(), actual.getZoneId());
+        assertThat(actual).ignoringFields(3 /* timestamp */)
+                          .isEqualTo(expected);
 
         // It's impossible to get the same creation time for the `expected` value,
         //    so checking that the `actual` value is not later than `expected`.
-        assertTrue(actual.getTimestamp()
-                         .equals(expected.getTimestamp())
-                           ||
-                           isLaterThan(expected.getTimestamp(),
-                                       actual.getTimestamp()));
+        assertTrue(
+                toTemporal(actual.getTimestamp())
+                        .isEarlierOrSameAs(toTemporal(expected.getTimestamp()))
+        );
     }
 }

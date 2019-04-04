@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.entity.AbstractEntity;
+import io.spine.time.InstantConverter;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 import java.time.Instant;
 
-import static io.spine.protobuf.Timestamps2.toInstant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -90,10 +90,9 @@ class EntityClassTest {
         }
     }
 
-    /** An entity class without ID constructor. */
-    private static class NoArgEntity extends AbstractEntity<Long, StringValue> {
-        private NoArgEntity() {
-            super(0L);
-        }
+    static Instant toInstant(Timestamp timestamp) {
+        return InstantConverter.instance()
+                               .reverse()
+                               .convert(timestamp);
     }
 }
