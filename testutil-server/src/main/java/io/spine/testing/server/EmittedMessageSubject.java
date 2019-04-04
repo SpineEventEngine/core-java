@@ -20,6 +20,7 @@
 
 package io.spine.testing.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
@@ -53,6 +54,11 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
                                             M extends SerializableMessage>
         extends Subject<S, Iterable<T>> {
 
+    @VisibleForTesting
+    static final String MESSAGE_COUNT_FACT_KEY = "the count of the generated messages is";
+    @VisibleForTesting
+    static final String REQUESTED_INDEX_FACT_KEY = "but the requested index was";
+
     protected EmittedMessageSubject(FailureMetadata metadata, @NullableDecl Iterable<T> actual) {
         super(metadata, actual);
     }
@@ -85,8 +91,8 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         int size = Iterables.size(actual());
         if (index >= size) {
             failWithActual(
-                    fact("the size of the generated messages is", size),
-                    fact("but the requested index was", index)
+                    fact(MESSAGE_COUNT_FACT_KEY, size),
+                    fact(REQUESTED_INDEX_FACT_KEY, index)
             );
         }
         T outerObject = Iterables.get(actual(), index);
