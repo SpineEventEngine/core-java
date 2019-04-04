@@ -55,15 +55,18 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
     @Test
     @DisplayName("check message count")
     void checkSize() {
-        int expectedMessageCount = 42;
-        Iterable<M> messages = messages(expectedMessageCount);
-        assertWithSubjectThat(messages).hasSize(expectedMessageCount);
+        int messageCount = 42;
+        Iterable<M> messages = messages(messageCount);
+        assertWithSubjectThat(messages).hasSize(messageCount);
         AssertionError error = expectFailure(
                 whenTesting -> whenTesting.that(messages)
                                           .hasSize(0)
         );
-        assertThat(error).factValue("size()")
-                         .isEqualTo(expectedMessageCount);
+        TruthFailureSubject assertError = assertThat(error);
+        assertError.factValue("expected")
+                   .isEqualTo(String.valueOf(0));
+        assertError.factValue("but was")
+                   .isEqualTo(String.valueOf(messageCount));
     }
 
     @Test
@@ -109,9 +112,9 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
                                                                        .message(index));
         TruthFailureSubject assertError = assertThat(error);
         assertError.factValue(MESSAGE_COUNT_FACT_KEY)
-                   .isEqualTo(messageCount);
+                   .isEqualTo(String.valueOf(messageCount));
         assertError.factValue(REQUESTED_INDEX_FACT_KEY)
-                   .isEqualTo(index);
+                   .isEqualTo(String.valueOf(index));
     }
 
     private AssertionError
