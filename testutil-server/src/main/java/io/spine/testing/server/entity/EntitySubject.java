@@ -29,23 +29,30 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 
 /**
  * Assertions for entities.
  *
- * @param <T> the type of entity subject for parameter covariance in {@code Subject.Factory}
  * @param <S> the type of the entity state message
  * @param <E> the type of the entity
  */
-public class EntitySubject<T extends EntitySubject<T, S, E>,
-                           S extends Message,
-                           E extends Entity<?, S>>
-        extends Subject<T, E> {
+public final class EntitySubject<S extends Message, E extends Entity<?, S>>
+        extends Subject<EntitySubject<S, E>, E> {
 
-    protected EntitySubject(FailureMetadata metadata, @NullableDecl E actual) {
+    private EntitySubject(FailureMetadata metadata, @NullableDecl E actual) {
         super(metadata, actual);
+    }
+
+    /**
+     * Creates a subject for asserting the passed Projection instance.
+     */
+    public static <I, E extends Entity<I, S>, S extends Message>
+    EntitySubject<S, E> assertEntity(@Nullable E entity) {
+        return assertAbout(EntitySubject.<S, E>entities()).that(entity);
     }
 
     /**
@@ -81,5 +88,10 @@ public class EntitySubject<T extends EntitySubject<T, S, E>,
     public ProtoSubject<?, Message> hasStateThat() {
         exists();
         return ProtoTruth.assertThat(actual().state());
+    }
+
+    private static <S extends Message, E extends Entity<?, S>>
+    Subject.Factory<EntitySubject<S, E>, E> entities() {
+        return EntitySubject::new;
     }
 }

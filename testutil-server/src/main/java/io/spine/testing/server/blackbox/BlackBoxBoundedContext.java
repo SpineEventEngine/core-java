@@ -37,7 +37,6 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
@@ -45,8 +44,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.projection.Projection;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -54,10 +51,8 @@ import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.aggregate.AggregateSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
-import io.spine.testing.server.procman.PmSubject;
-import io.spine.testing.server.projection.ProjectionSubject;
+import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -685,31 +680,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Obtains a Subject for the Aggregate of the passed class with the given ID.
      */
-    public <I, S extends Message, A extends Aggregate<I, S, ?>>
-    AggregateSubject<S, A> assertAggregate(Class<A> aggregateClass, I id) {
+    public <I, S extends Message, E extends Entity<I, S>>
+    EntitySubject<S, E> assertEntity(Class<E> entityClass, I id) {
         @SuppressWarnings("unchecked") // safe as bound by Aggregate class declaration.
-        @Nullable A found = (A) findEntity(aggregateClass, id);
-        return AggregateSubject.assertAggregate(found);
-    }
-
-    /**
-     * Obtains a Subject for the Process Manager of the passed class with the given ID.
-     */
-    public <I, S extends Message, P extends ProcessManager<I, S, ?>>
-    PmSubject<S, P> assertProcessManager(Class<P> pmClass, I id) {
-        @SuppressWarnings("unchecked") // safe as bound by PM class declaration.
-        @Nullable P found = (P) findEntity(pmClass, id);
-        return PmSubject.assertProcessManager(found);
-    }
-
-    /**
-     * Obtains a Subject for the Projection of the passed class with the given ID.
-     */
-    public <I, S extends Message, P extends Projection<I, S, ?>>
-    ProjectionSubject<S, P> assertProjection(Class<P> projectionClass, I id) {
-        @SuppressWarnings("unchecked") // safe as bound by Projection class declaration.
-        @Nullable P found = (P) findEntity(projectionClass, id);
-        return ProjectionSubject.assertProjection(found);
+        @Nullable E found = (E) findEntity(entityClass, id);
+        return EntitySubject.assertEntity(found);
     }
 
     private <I, S extends Message, E extends Entity<I, S>>

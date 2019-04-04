@@ -50,7 +50,7 @@ import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
-import io.spine.testing.server.procman.PmSubject;
+import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -437,16 +437,16 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
     @Nested
     @DisplayName("obtain PmSubject with")
-    class ObtainPmSubject {
+    class ObtainEntitySubject {
 
         private BbProjectId id;
-        private PmSubject<BbInit, BbInitProcess> assertProcessManager;
+        private EntitySubject<BbInit, BbInitProcess> assertProcessManager;
 
         @BeforeEach
         void getSubject() {
             id = newProjectId();
             assertProcessManager = context.receivesCommand(initProject(id))
-                                          .assertProcessManager(BbInitProcess.class, id);
+                                          .assertEntity(BbInitProcess.class, id);
         }
 
         @Test
