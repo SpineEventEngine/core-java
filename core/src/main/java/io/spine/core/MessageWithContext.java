@@ -24,6 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.TypeUrl;
 
+import javax.xml.ws.handler.MessageContext;
+
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
  *
@@ -44,7 +46,7 @@ public interface MessageWithContext extends Message {
     /**
      * Obtains the context of the enclosed message.
      */
-    Message getContext();
+    MessageContext getContext();
 
     /**
      * Obtains the type URL of the enclosed message.
