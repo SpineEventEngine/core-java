@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 import io.spine.type.TypeUrl;
 
 /**
@@ -44,7 +45,7 @@ public interface MessageWithContext extends Message {
     /**
      * Obtains the context of the enclosed message.
      */
-    Message getContext();
+    MessageContext getContext();
 
     /**
      * Obtains the type URL of the enclosed message.
