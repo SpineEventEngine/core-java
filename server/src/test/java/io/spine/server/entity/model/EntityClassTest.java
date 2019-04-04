@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 import java.time.Instant;
 
-import static io.spine.protobuf.Timestamps2.toInstant;
+import static io.spine.time.Timestamps2.toInstant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

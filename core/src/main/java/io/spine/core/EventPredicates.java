@@ -21,7 +21,7 @@
 package io.spine.core;
 
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.Timestamps2;
+import io.spine.time.Timestamps2;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Predicate;

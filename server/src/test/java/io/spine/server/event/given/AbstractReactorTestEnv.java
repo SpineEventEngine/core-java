@@ -25,7 +25,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.protobuf.Durations2;
-import io.spine.protobuf.Timestamps2;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.CustomerNotified;
 import io.spine.server.event.CustomerNotified.NotificationMethod;
@@ -40,6 +39,7 @@ import io.spine.server.event.React;
 import io.spine.server.tuple.Pair;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.Order;
+import io.spine.time.Timestamps2;
 
 import java.time.Instant;
 import java.util.ArrayList;

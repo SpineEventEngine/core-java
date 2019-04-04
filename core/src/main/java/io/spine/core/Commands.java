@@ -42,8 +42,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandContext.Schedule;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Timestamps2.isBetween;
-import static io.spine.protobuf.Timestamps2.isLaterThan;
+import static io.spine.time.Timestamps2.isBetween;
+import static io.spine.time.Timestamps2.isLaterThan;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**

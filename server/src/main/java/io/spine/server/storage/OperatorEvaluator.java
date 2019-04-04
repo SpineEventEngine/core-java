@@ -30,7 +30,7 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator;
-import static io.spine.protobuf.Timestamps2.isLaterThan;
+import static io.spine.time.Timestamps2.isLaterThan;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
