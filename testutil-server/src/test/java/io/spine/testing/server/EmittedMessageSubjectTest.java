@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
 
 abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?>,
-        M extends MessageWithContext> {
+                                         M extends MessageWithContext> {
 
     abstract Subject.Factory<S, Iterable<M>> subjectFactory();
 
@@ -69,28 +69,28 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
     @Test
     @DisplayName("check if there is no messages")
     void checkIfAbsent() {
-        int expectedMessageCount = 0;
-        Iterable<M> messages = messages(expectedMessageCount);
+        int messageCount = 0;
+        Iterable<M> messages = messages(messageCount);
         assertWithSubjectThat(messages).isEmpty();
         expectSomeFailure(whenTesting -> whenTesting.that(messages)
-                                                .isNotEmpty());
+                                                    .isNotEmpty());
     }
 
     @Test
     @DisplayName("check if there are some messages")
     void checkIfPresent() {
-        int expectedMessageCount = 1;
-        Iterable<M> messages = messages(expectedMessageCount);
+        int messageCount = 1;
+        Iterable<M> messages = messages(messageCount);
         assertWithSubjectThat(messages).isNotEmpty();
         expectSomeFailure(whenTesting -> whenTesting.that(messages)
-                                                .isEmpty());
+                                                    .isEmpty());
     }
 
     @Test
     @DisplayName("retrieve a subject of an emitted message by its index")
     void retrieveMessage() {
-        int expectedMessageCount = 3;
-        Iterable<M> messages = messages(expectedMessageCount);
+        int messageCount = 3;
+        Iterable<M> messages = messages(messageCount);
         ProtoSubject<?, ?> protoSubject = assertWithSubjectThat(messages).message(2);
         assertThat(protoSubject).isNotNull();
         protoSubject.isNotEqualToDefaultInstance();
