@@ -37,14 +37,16 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.projection.Projection;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -52,8 +54,10 @@ import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.aggregate.AggregateSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.procman.PmSubject;
+import io.spine.testing.server.projection.ProjectionSubject;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -68,9 +72,8 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -680,17 +683,42 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Obtains the Subject for the Process Manager of the passed class with the given ID.
+     * Obtains a Subject for the Aggregate of the passed class with the given ID.
+     */
+    public <I, S extends Message, A extends Aggregate<I, S, ?>>
+    AggregateSubject<S, A> assertAggregate(Class<A> aggregateClass, I id) {
+        @SuppressWarnings("unchecked") // safe as bound by Aggregate class declaration.
+        @Nullable A found = (A) findEntity(aggregateClass, id);
+        return AggregateSubject.assertAggregate(found);
+    }
+
+    /**
+     * Obtains a Subject for the Process Manager of the passed class with the given ID.
      */
     public <I, S extends Message, P extends ProcessManager<I, S, ?>>
-    PmSubject<S, P> assertThat(Class<? extends P> pmClass, I id) {
-        Class<? extends Message> stateClass = asProcessManagerClass(pmClass).stateClass();
-        Repository repo = repositoryOf(stateClass);
+    PmSubject<S, P> assertProcessManager(Class<P> pmClass, I id) {
+        @SuppressWarnings("unchecked") // safe as bound by PM class declaration.
+        @Nullable P found = (P) findEntity(pmClass, id);
+        return PmSubject.assertProcessManager(found);
+    }
+
+    /**
+     * Obtains a Subject for the Projection of the passed class with the given ID.
+     */
+    public <I, S extends Message, P extends Projection<I, S, ?>>
+    ProjectionSubject<S, P> assertProjection(Class<P> projectionClass, I id) {
+        @SuppressWarnings("unchecked") // safe as bound by Projection class declaration.
+        @Nullable P found = (P) findEntity(projectionClass, id);
+        return ProjectionSubject.assertProjection(found);
+    }
+
+    private <I, S extends Message, E extends Entity<I, S>>
+    @Nullable Entity<I, S> findEntity(Class<? extends E> entityClass, I id) {
+        Class<? extends Message> stateClass = stateClassOf(entityClass);
         @SuppressWarnings("unchecked")
-        ProcessManagerRepository<I, P, ?> pmRepo = (ProcessManagerRepository<I, P, ?>) repo;
-        P found = readOperation(() -> pmRepo.find(id)
-                                            .orElse(null));
-        return assertAbout(PmSubject.<S, P>processManagers()).that(found);
+        Repository<I, Entity<I, S>> repo = repositoryOf(stateClass);
+        return readOperation(() -> repo.find(id)
+                                       .orElse(null));
     }
 
     private Repository repositoryOf(Class<? extends Message> stateClass) {

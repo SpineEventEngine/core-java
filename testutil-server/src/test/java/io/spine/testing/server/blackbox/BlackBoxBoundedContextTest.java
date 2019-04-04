@@ -446,7 +446,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void getSubject() {
             id = newProjectId();
             assertProcessManager = context.receivesCommand(initProject(id))
-                                          .assertThat(BbInitProcess.class, id);
+                                          .assertProcessManager(BbInitProcess.class, id);
         }
 
         @Test

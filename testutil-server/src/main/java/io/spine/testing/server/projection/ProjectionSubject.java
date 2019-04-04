@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman;
+package io.spine.testing.server.projection;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.protobuf.Message;
-import io.spine.server.procman.ProcessManager;
+import io.spine.server.projection.Projection;
 import io.spine.testing.server.entity.EntitySubject;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,28 +31,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.truth.Truth.assertAbout;
 
 /**
- * Assertions for Process Managers.
- *
- * @param <S> the type of the process manager state
- * @param <P> the type of the process manager
+ * Assertions for Projections.
  */
-public final class PmSubject<S extends Message, P extends ProcessManager<?, S, ?>>
-        extends EntitySubject<PmSubject<S, P>, S, P> {
+public final class ProjectionSubject<S extends Message, P extends Projection<?, S, ?>>
+        extends EntitySubject<ProjectionSubject<S, P>, S, P> {
 
-    private PmSubject(FailureMetadata metadata, @NullableDecl P actual) {
+    private ProjectionSubject(FailureMetadata metadata, @NullableDecl P actual) {
         super(metadata, actual);
     }
 
     /**
-     * Creates a subject for asserting the passed Process Manager instance.
+     * Creates a subject for asserting the passed Projection instance.
      */
-    public static <I, S extends Message, P extends ProcessManager<I, S, ?>>
-    PmSubject<S, P> assertProcessManager(@Nullable P instance) {
-        return assertAbout(PmSubject.<S, P>processManagers()).that(instance);
+    public static <I, P extends Projection<I, S, ?>, S extends Message>
+    ProjectionSubject<S, P> assertProjection(@Nullable P instance) {
+        return assertAbout(ProjectionSubject.<S, P>projections()).that(instance);
     }
 
-    private static <S extends Message, P extends ProcessManager<?, S, ?>>
-    Subject.Factory<PmSubject<S, P>, P> processManagers() {
-        return PmSubject::new;
+    private static <S extends Message, P extends Projection<?, S, ?>>
+    Subject.Factory<ProjectionSubject<S, P>, P> projections() {
+        return ProjectionSubject::new;
     }
 }

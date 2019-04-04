@@ -37,7 +37,7 @@ import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Multi tenant Black Box Bounded Context should")
+@DisplayName("Multi-tenant Black Box Bounded Context should")
 class MultitenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
 
