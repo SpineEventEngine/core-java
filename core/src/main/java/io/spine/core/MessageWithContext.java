@@ -22,9 +22,8 @@ package io.spine.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 import io.spine.type.TypeUrl;
-
-import javax.xml.ws.handler.MessageContext;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
