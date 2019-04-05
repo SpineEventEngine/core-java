@@ -121,7 +121,7 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
             @SuppressWarnings("CheckReturnValue")
             AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
                                                                            .archivedFlag());
-            assertThat(error).factValue(ENTITY_SHOULD_EXIST).isNull();
+            assertThat(error).factKeys().contains(ENTITY_SHOULD_EXIST);
         }
 
         @Test
@@ -130,7 +130,7 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
             @SuppressWarnings("CheckReturnValue")
             AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
                                                                            .deletedFlag());
-            assertThat(error).factValue(ENTITY_SHOULD_EXIST).isNull();
+            assertThat(error).factKeys().contains(ENTITY_SHOULD_EXIST);
         }
 
         @Test
@@ -139,7 +139,7 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
             @SuppressWarnings("CheckReturnValue")
             AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
                                                                            .hasStateThat());
-            assertThat(error).factValue(ENTITY_SHOULD_EXIST).isNull();
+            assertThat(error).factKeys().contains(ENTITY_SHOULD_EXIST);
         }
     }
 }
