@@ -128,7 +128,6 @@ public abstract class TransactionalEntity<I,
      *
      * @throws IllegalStateException if the transaction is null or not active
      */
-    @SuppressWarnings("ConstantConditions") // nullity is checked by `isTransactionInProgress()`
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(missingTxMessage());

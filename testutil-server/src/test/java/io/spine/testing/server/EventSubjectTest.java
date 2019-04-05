@@ -34,7 +34,7 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event> {
             TestEventFactory.newInstance(EventSubjectTest.class);
 
     @Override
-    Subject.Factory<EventSubject, Iterable<Event>> subjectFactory() {
+    protected Subject.Factory<EventSubject, Iterable<Event>> subjectFactory() {
         return events();
     }
 

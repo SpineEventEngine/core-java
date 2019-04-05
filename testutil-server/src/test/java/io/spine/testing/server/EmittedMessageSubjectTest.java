@@ -20,8 +20,6 @@
 
 package io.spine.testing.server;
 
-import com.google.common.truth.ExpectFailure.SimpleSubjectBuilderCallback;
-import com.google.common.truth.Subject;
 import com.google.common.truth.TruthFailureSubject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
@@ -30,7 +28,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.ExpectFailure.assertThat;
-import static com.google.common.truth.ExpectFailure.expectFailureAbout;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.server.EmittedMessageSubject.MESSAGE_COUNT_FACT_KEY;
 import static io.spine.testing.server.EmittedMessageSubject.REQUESTED_INDEX_FACT_KEY;
@@ -38,9 +35,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
 
 abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?>,
-                                         M extends MessageWithContext> {
-
-    abstract Subject.Factory<S, Iterable<M>> subjectFactory();
+                                         M extends MessageWithContext>
+        extends SubjectTest<S, Iterable<M>> {
 
     abstract S assertWithSubjectThat(Iterable<M> messages);
 
@@ -63,9 +59,9 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
                                           .hasSize(0)
         );
         TruthFailureSubject assertError = assertThat(error);
-        assertError.factValue("expected")
+        assertError.factValue(EXPECTED)
                    .isEqualTo(String.valueOf(0));
-        assertError.factValue("but was")
+        assertError.factValue(BUT_WAS)
                    .isEqualTo(String.valueOf(messageCount));
     }
 
@@ -115,16 +111,5 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
                    .isEqualTo(String.valueOf(messageCount));
         assertError.factValue(REQUESTED_INDEX_FACT_KEY)
                    .isEqualTo(String.valueOf(index));
-    }
-
-    private AssertionError
-    expectFailure(SimpleSubjectBuilderCallback<S, Iterable<M>> assertionCallback) {
-        return expectFailureAbout(subjectFactory(), assertionCallback);
-    }
-
-    @SuppressWarnings({"ThrowableNotThrown", "CheckReturnValue"}) // Ignore the AssertionError.
-    private void
-    expectSomeFailure(SimpleSubjectBuilderCallback<S, Iterable<M>> assertionCallback) {
-        expectFailureAbout(subjectFactory(), assertionCallback);
     }
 }
