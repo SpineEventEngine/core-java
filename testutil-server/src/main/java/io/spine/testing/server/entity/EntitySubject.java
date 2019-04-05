@@ -24,15 +24,13 @@ import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
-import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 
 /**
  * Assertions for entities.
@@ -43,7 +41,7 @@ import static com.google.common.truth.Truth.assertThat;
 public final class EntitySubject<S extends Message, E extends Entity<?, S>>
         extends Subject<EntitySubject<S, E>, E> {
 
-    private EntitySubject(FailureMetadata metadata, @NullableDecl E actual) {
+    private EntitySubject(FailureMetadata metadata, @Nullable E actual) {
         super(metadata, actual);
     }
 
@@ -67,7 +65,7 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
      */
     public BooleanSubject archivedFlag() {
         exists();
-        return assertThat(flags().getArchived());
+        return check().that(flags().getArchived());
     }
 
     /**
@@ -75,7 +73,7 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
      */
     public BooleanSubject deletedFlag() {
         exists();
-        return assertThat(flags().getDeleted());
+        return check().that(flags().getDeleted());
     }
 
     private LifecycleFlags flags() {
@@ -87,7 +85,8 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
      */
     public ProtoSubject<?, Message> hasStateThat() {
         exists();
-        return ProtoTruth.assertThat(actual().state());
+        return check().about(protos())
+                      .that(actual().state());
     }
 
     private static <S extends Message, E extends Entity<?, S>>
