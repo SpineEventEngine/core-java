@@ -29,10 +29,12 @@ import io.spine.testing.server.entity.EntitySubjectTestEnv.ProjectView;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.ExpectFailure.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.testing.server.entity.EntitySubject.ENTITY_SHOULD_EXIST;
 import static io.spine.testing.server.entity.EntitySubject.assertEntity;
 import static io.spine.testing.server.entity.EntitySubject.entities;
 
@@ -107,5 +109,34 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
         AssertionError failure = expectFailure(whenTesting -> whenTesting.that(null)
                                                                          .exists());
         assertThat(failure).factValue(EXPECTED_NOT_TO_BE).isEqualTo(NULL);
+    }
+
+    @Nested
+    @DisplayName("if entity does not exist, fail to check")
+    class OnNonExisting {
+
+        @Test
+        @DisplayName("if archived")
+        void archived() {
+            AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                           .archivedFlag());
+            assertThat(error).factValue(ENTITY_SHOULD_EXIST).isNull();
+        }
+
+        @Test
+        @DisplayName("if deleted")
+        void deleted() {
+            AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                           .deletedFlag());
+            assertThat(error).factValue(ENTITY_SHOULD_EXIST).isNull();
+        }
+
+        @Test
+        @DisplayName("entity state")
+        void state() {
+            AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                           .hasStateThat());
+            assertThat(error).factValue(ENTITY_SHOULD_EXIST).isNull();
+        }
     }
 }

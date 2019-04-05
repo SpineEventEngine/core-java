@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
@@ -39,6 +40,9 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
  */
 public final class EntitySubject
         extends Subject<EntitySubject, Entity<?, ?>> {
+
+    @VisibleForTesting
+    static final String ENTITY_SHOULD_EXIST = "entity should exist";
 
     private EntitySubject(FailureMetadata metadata, @Nullable Entity<?, ?> actual) {
         super(metadata, actual);
@@ -110,7 +114,7 @@ public final class EntitySubject
     }
 
     private void shouldExistButDoesNot() {
-        failWithoutActual(simpleFact("entity should exist"));
+        failWithoutActual(simpleFact(ENTITY_SHOULD_EXIST));
     }
 
     static
