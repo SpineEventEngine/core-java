@@ -681,7 +681,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains a Subject for the Aggregate of the passed class with the given ID.
      */
     public <I, S extends Message, E extends Entity<I, S>>
-    EntitySubject<S, E> assertEntity(Class<E> entityClass, I id) {
+    EntitySubject assertEntity(Class<E> entityClass, I id) {
         @SuppressWarnings("unchecked") // safe as bound by Aggregate class declaration.
         @Nullable E found = (E) findEntity(entityClass, id);
         return EntitySubject.assertEntity(found);

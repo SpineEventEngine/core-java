@@ -36,23 +36,20 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 
 /**
  * Assertions for entities.
- *
- * @param <S> the type of the entity state message
- * @param <E> the type of the entity
  */
-public final class EntitySubject<S extends Message, E extends Entity<?, S>>
-        extends Subject<EntitySubject<S, E>, E> {
+public final class EntitySubject
+        extends Subject<EntitySubject, Entity<?, ?>> {
 
-    private EntitySubject(FailureMetadata metadata, @Nullable E actual) {
+    private EntitySubject(FailureMetadata metadata, @Nullable Entity<?, ?> actual) {
         super(metadata, actual);
     }
 
     /**
      * Creates a subject for asserting the passed Projection instance.
      */
-    public static <I, E extends Entity<I, S>, S extends Message>
-    EntitySubject<S, E> assertEntity(@Nullable E entity) {
-        return assertAbout(EntitySubject.<S, E>entities()).that(entity);
+    public static <E extends Entity<?, ?>>
+    EntitySubject assertEntity(@Nullable E entity) {
+        return assertAbout(entities()).that(entity);
     }
 
     /**
@@ -101,7 +98,7 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
      * Obtains the subject for the state of the entity.
      */
     public ProtoSubject<?, Message> hasStateThat() {
-        E entity = actual();
+        Entity<?, ?> entity = actual();
         if (entity == null) {
             shouldExistButDoesNot();
             return ignoreCheck().about(protos())
@@ -116,8 +113,8 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
         failWithoutActual(simpleFact("entity should exist"));
     }
 
-    private static <S extends Message, E extends Entity<?, S>>
-    Subject.Factory<EntitySubject<S, E>, E> entities() {
+    static
+    Subject.Factory<EntitySubject, Entity<?, ?>> entities() {
         return EntitySubject::new;
     }
 }
