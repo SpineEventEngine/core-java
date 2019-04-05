@@ -25,12 +25,15 @@ import io.spine.server.entity.Entity;
 import io.spine.testing.server.SubjectTest;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectView;
+import io.spine.testing.server.entity.EntitySubjectTestEnv.ProjectView;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.ExpectFailure.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.testing.server.entity.EntitySubject.assertEntity;
 import static io.spine.testing.server.entity.EntitySubject.entities;
 
 @DisplayName("EntitySubject")
@@ -53,7 +56,7 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
                 .vBuilder()
                 .setId(id)
                 .build();
-        entity = Given.projectionOfClass(EntitySubjectTestEnv.ProjectView.class)
+        entity = Given.projectionOfClass(ProjectView.class)
                       .withId(id)
                       .withState(state)
                       .build();
@@ -62,9 +65,47 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
     @Test
     @DisplayName("check if the entity is archived")
     void checkArchived() {
-        EntitySubject assertEntity = EntitySubject.assertEntity(entity);
+        EntitySubject assertEntity = assertEntity(entity);
         assertEntity.archivedFlag()
                     .isFalse();
-        expectSomeFailure(whenTesting -> whenTesting.that(entity).archivedFlag().isTrue());
+        expectSomeFailure(whenTesting -> whenTesting.that(entity)
+                                                    .archivedFlag()
+                                                    .isTrue());
+    }
+
+    @Test
+    @DisplayName("check if the entity is deleted")
+    void checkDeleted() {
+        EntitySubject assertEntity = assertEntity(entity);
+        assertEntity.deletedFlag()
+                    .isFalse();
+        expectSomeFailure(whenTesting -> whenTesting.that(entity)
+                                                    .deletedFlag()
+                                                    .isTrue());
+    }
+
+    @Test
+    @DisplayName("produce a subject for the entity state")
+    void verifyState() {
+        assertEntity(entity).hasStateThat()
+                            .isEqualTo(entity.state());
+    }
+
+    @Test
+    @DisplayName("check that the entity exists")
+    void checkExists() {
+        assertEntity(entity).exists();
+        AssertionError failure = expectFailure(whenTesting -> whenTesting.that(entity)
+                                                                         .doesNotExist());
+        assertThat(failure).factValue(EXPECTED).isEqualTo(NULL);
+    }
+
+    @Test
+    @DisplayName("check that the entity does not exist")
+    void checkDoesNotExist() {
+        assertEntity(null).doesNotExist();
+        AssertionError failure = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                         .exists());
+        assertThat(failure).factValue(EXPECTED_NOT_TO_BE).isEqualTo(NULL);
     }
 }

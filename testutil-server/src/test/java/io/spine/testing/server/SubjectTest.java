@@ -35,6 +35,11 @@ import static com.google.common.truth.ExpectFailure.expectFailureAbout;
  */
 public abstract class SubjectTest<S extends Subject<S, T>, T> {
 
+    protected static final String EXPECTED = "expected";
+    protected static final String BUT_WAS = "but was";
+    protected static final String EXPECTED_NOT_TO_BE = "expected not to be";
+    protected static final String NULL = "null";
+
     protected abstract Subject.Factory<S, T> subjectFactory();
 
     protected AssertionError

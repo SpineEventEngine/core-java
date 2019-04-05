@@ -440,7 +440,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     class ObtainEntitySubject {
 
         private BbProjectId id;
-        private EntitySubject<BbInit, BbInitProcess> assertProcessManager;
+        private EntitySubject assertProcessManager;
 
         @BeforeEach
         void getSubject() {

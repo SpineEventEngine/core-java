@@ -59,9 +59,9 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, M, ?
                                           .hasSize(0)
         );
         TruthFailureSubject assertError = assertThat(error);
-        assertError.factValue("expected")
+        assertError.factValue(EXPECTED)
                    .isEqualTo(String.valueOf(0));
-        assertError.factValue("but was")
+        assertError.factValue(BUT_WAS)
                    .isEqualTo(String.valueOf(messageCount));
     }
 

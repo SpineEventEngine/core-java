@@ -36,7 +36,7 @@ class CommandSubjectTest extends EmittedMessageSubjectTest<CommandSubject, Comma
             new TestActorRequestFactory(CommandSubjectTest.class).command();
 
     @Override
-    Subject.Factory<CommandSubject, Iterable<Command>> subjectFactory() {
+    protected Subject.Factory<CommandSubject, Iterable<Command>> subjectFactory() {
         return commands();
     }
 
