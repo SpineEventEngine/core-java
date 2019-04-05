@@ -18,32 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity;
+package io.spine.testing.server.entity.testenv.ebuilder;
 
-import io.spine.core.Subscribe;
-import io.spine.server.projection.Projection;
-import io.spine.testing.server.blackbox.BbProjectId;
-import io.spine.testing.server.blackbox.BbProjectView;
-import io.spine.testing.server.blackbox.BbProjectViewVBuilder;
-import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.testing.server.User;
+import io.spine.testing.server.UserVBuilder;
 
-import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
-
-final class EntitySubjectTestEnv {
-
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private EntitySubjectTestEnv() {
-    }
-
-    static final class ProjectView
-            extends Projection<BbProjectId, BbProjectView, BbProjectViewVBuilder> {
-
-        @Subscribe
-        void on(BbProjectCreated event) {
-            builder().setId(event.getProjectId())
-                     .setStatus(CREATED);
-        }
+/**
+ * The test environment aggregate for testing validation during aggregate state transition.
+ */
+public class UserAggregate extends Aggregate<String, User, UserVBuilder> {
+    private UserAggregate(String id) {
+        super(id);
     }
 }
