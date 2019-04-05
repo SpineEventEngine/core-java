@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity;
+package io.spine.testing.server.entity.given;
 
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
@@ -26,28 +26,29 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.testing.server.User;
 import io.spine.testing.server.UserVBuilder;
+import io.spine.testing.server.entity.EntityBuilder;
 
 /**
  * Test environment for {@link io.spine.testing.server.entity.EntityBuilder}.
  */
-class EntityBuilderTestEnv {
+public class EntityBuilderTestEnv {
 
     /**
      * The test environment aggregate for testing validation during aggregate state transition.
      */
-    static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
+    public static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
         private UserAggregate(String id) {
             super(id);
         }
     }
 
-    static class TestEntity extends AbstractEntity<Long, StringValue> {
+    public static class TestEntity extends AbstractEntity<Long, StringValue> {
         protected TestEntity(Long id) {
             super(id);
         }
     }
 
-    static class TestEntityBuilder extends EntityBuilder<TestEntity, Long, StringValue> {
+    public static class TestEntityBuilder extends EntityBuilder<TestEntity, Long, StringValue> {
 
         @Override
         protected void setState(TestEntity result, StringValue state, Version version) {
