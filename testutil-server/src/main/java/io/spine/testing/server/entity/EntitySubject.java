@@ -24,11 +24,13 @@ import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 
@@ -61,19 +63,34 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
     }
 
     /**
+     * Verifies if the entity does not exist.
+     */
+    public void doesNotExist() {
+        isNull();
+    }
+
+    /**
      * Obtains the subject for the {@code archived} flag.
      */
     public BooleanSubject archivedFlag() {
-        exists();
-        return check().that(flags().getArchived());
+        if (actual() == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().that(false);
+        } else {
+            return check().that(flags().getArchived());
+        }
     }
 
     /**
      * Obtains the subject for the {@code deleted} flag.
      */
     public BooleanSubject deletedFlag() {
-        exists();
-        return check().that(flags().getDeleted());
+        if (actual() == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().that(false);
+        } else {
+            return check().that(flags().getDeleted());
+        }
     }
 
     private LifecycleFlags flags() {
@@ -84,9 +101,19 @@ public final class EntitySubject<S extends Message, E extends Entity<?, S>>
      * Obtains the subject for the state of the entity.
      */
     public ProtoSubject<?, Message> hasStateThat() {
-        exists();
-        return check().about(protos())
-                      .that(actual().state());
+        E entity = actual();
+        if (entity == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().about(protos())
+                                .that(Empty.getDefaultInstance());
+        } else {
+            return check().about(protos())
+                          .that(entity.state());
+        }
+    }
+
+    private void shouldExistButDoesNot() {
+        failWithoutActual(simpleFact("entity should exist"));
     }
 
     private static <S extends Message, E extends Entity<?, S>>
