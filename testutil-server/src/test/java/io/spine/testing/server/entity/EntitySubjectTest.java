@@ -50,10 +50,7 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
 
     @BeforeEach
     void setUp() {
-        BbProjectId id = BbProjectId
-                .vBuilder()
-                .setId(newUuid())
-                .build();
+        BbProjectId id = BbProjectId.generate();
         BbProjectView state = BbProjectView
                 .vBuilder()
                 .setId(id)
