@@ -475,4 +475,29 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                                 .isEqualTo(expectedState);
         }
     }
+
+    @Nested
+    @DisplayName("Provide `Subject` for generated messages")
+    class MessageSubjects {
+
+        @BeforeEach
+        void sendCommand() {
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id));
+        }
+
+        @Test
+        @DisplayName("`CommandSubject`")
+        void commandSubject() {
+            assertThat(context.assertCommands())
+                    .isNotNull();
+        }
+
+        @Test
+        @DisplayName("`EventSubject`")
+        void eventSubject() {
+            assertThat(context.assertEvents())
+                    .isNotNull();
+        }
+    }
 }
