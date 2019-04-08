@@ -33,12 +33,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.ExpectFailure.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.entity.EntitySubject.ENTITY_SHOULD_EXIST;
 import static io.spine.testing.server.entity.EntitySubject.assertEntity;
 import static io.spine.testing.server.entity.EntitySubject.entities;
 
-@DisplayName("EntitySubject")
+@DisplayName("EntitySubject should")
 class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
 
     private Entity<?, ?> entity;

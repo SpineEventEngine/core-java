@@ -26,10 +26,12 @@ import io.spine.core.Command;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.CommandSubject.commands;
 
+@DisplayName("CommandSubject should")
 class CommandSubjectTest extends EmittedMessageSubjectTest<CommandSubject, Command> {
 
     private static final CommandFactory commands =

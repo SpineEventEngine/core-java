@@ -24,10 +24,12 @@ import com.google.common.truth.Subject;
 import io.spine.core.Event;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.EventSubject.events;
 
+@DisplayName("EventSubject should")
 class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event> {
 
     private static final TestEventFactory events =
