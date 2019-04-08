@@ -116,7 +116,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Commands received by this instance and posted to Command Bus during the test setup.
      *
-     * <p>These commands are filtered out from those which are generated in the Bounded Context
+     * <p>These commands are filtered out from those generated in the Bounded Context
      * (in response to posted or generated events or commands), which are used for assertions.
      */
     private final Set<Command> postedCommands;
@@ -130,7 +130,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Events received by this instance and posted to the Event Bus during the test setup.
      *
-     * <p>These events are filtered out from those which are stored in the Bounded Context to
+     * <p>These events are filtered out from those stored in the Bounded Context to
      * collect only the emitted events, which are used for assertions.
      *
      * @see #emittedEvents()
