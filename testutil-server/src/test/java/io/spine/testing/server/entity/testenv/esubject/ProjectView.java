@@ -18,29 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.noops;
+package io.spine.testing.server.entity.testenv.esubject;
 
-import io.spine.server.model.noops.given.ArchiverPm;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbProjectView;
+import io.spine.testing.server.blackbox.BbProjectViewVBuilder;
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
 
-import static io.spine.server.model.noops.given.NoOpMessageTestEnv.archiveSingleFile;
-import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
 
-@DisplayName("When Nothing event is emitted")
-class NothingTest {
+public final class ProjectView
+        extends Projection<BbProjectId, BbProjectView, BbProjectViewVBuilder> {
 
-    @Test
-    @DisplayName("the bus should not know")
-    void notPost() {
-        SingleTenantBlackBoxContext boundedContext = BlackBoxBoundedContext
-                .singleTenant()
-                .with(new ArchiverPm.Repository())
-                .receivesCommand(archiveSingleFile());
-        boundedContext.assertThat(emittedEvent(count(0)))
-                      .close();
+    @Subscribe
+    void on(BbProjectCreated event) {
+        builder().setId(event.getProjectId())
+                 .setStatus(CREATED);
     }
 }

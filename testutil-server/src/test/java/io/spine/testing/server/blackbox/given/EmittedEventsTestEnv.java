@@ -71,9 +71,7 @@ public class EmittedEventsTestEnv {
     }
 
     private static BbProjectId newProjectId() {
-        return BbProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+        return BbProjectId.generate();
     }
 
     public static BbProjectCreated projectCreated() {

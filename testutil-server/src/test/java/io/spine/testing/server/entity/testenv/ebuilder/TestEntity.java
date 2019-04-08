@@ -18,30 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman;
+package io.spine.testing.server.entity.testenv.ebuilder;
 
-import com.google.common.truth.FailureMetadata;
-import com.google.common.truth.Subject;
-import com.google.protobuf.Message;
-import io.spine.server.procman.ProcessManager;
-import io.spine.testing.server.entity.EntitySubject;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import com.google.protobuf.StringValue;
+import io.spine.server.entity.AbstractEntity;
 
-/**
- * Assertions for process managers.
- *
- * @param <S> the type of the process manager state
- * @param <P> the type of the process manager
- */
-public final class PmSubject<S extends Message, P extends ProcessManager<?, S, ?>>
-        extends EntitySubject<PmSubject<S, P>, S, P> {
-
-    private PmSubject(FailureMetadata metadata, @NullableDecl P actual) {
-        super(metadata, actual);
-    }
-
-    public static <S extends Message, P extends ProcessManager<?, S, ?>>
-    Subject.Factory<PmSubject<S, P>, P> processManagers() {
-        return PmSubject::new;
+public class TestEntity extends AbstractEntity<Long, StringValue> {
+    private TestEntity(Long id) {
+        super(id);
     }
 }

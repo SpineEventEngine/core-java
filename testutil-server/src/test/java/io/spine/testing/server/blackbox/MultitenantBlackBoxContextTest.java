@@ -37,7 +37,7 @@ import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Multi tenant Black Box Bounded Context should")
+@DisplayName("Multi-tenant Black Box Bounded Context should")
 class MultitenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
 
@@ -66,13 +66,11 @@ class MultitenantBlackBoxContextTest
 
                 // Verify project was created for John.
                 .withTenant(john)
-                .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
                 .assertThat(exactlyOne(createdProjectState(createJohnProject)))
 
                 // Verify project was created for Carl.
                 .withTenant(carl)
-                .assertThat(emittedCommand(BbCreateProject.class, count(1)))
                 .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
                 .assertThat(exactlyOne(createdProjectState(createCarlProject)))
 

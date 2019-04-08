@@ -49,9 +49,7 @@ public class Given {
     }
 
     public static BbProjectId newProjectId() {
-        return BbProjectId.newBuilder()
-                          .setId(newUuid())
-                          .build();
+        return BbProjectId.generate();
     }
 
     public static BbAddTask addTask(BbProjectId projectId) {

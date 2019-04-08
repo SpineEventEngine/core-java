@@ -50,7 +50,7 @@ import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
-import io.spine.testing.server.procman.PmSubject;
+import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -437,16 +437,16 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
     @Nested
     @DisplayName("obtain PmSubject with")
-    class ObtainPmSubject {
+    class ObtainEntitySubject {
 
         private BbProjectId id;
-        private PmSubject<BbInit, BbInitProcess> assertProcessManager;
+        private EntitySubject assertProcessManager;
 
         @BeforeEach
         void getSubject() {
             id = newProjectId();
             assertProcessManager = context.receivesCommand(initProject(id))
-                                          .assertThat(BbInitProcess.class, id);
+                                          .assertEntity(BbInitProcess.class, id);
         }
 
         @Test
@@ -473,6 +473,31 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .build();
             assertProcessManager.hasStateThat()
                                 .isEqualTo(expectedState);
+        }
+    }
+
+    @Nested
+    @DisplayName("Provide `Subject` for generated messages")
+    class MessageSubjects {
+
+        @BeforeEach
+        void sendCommand() {
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id));
+        }
+
+        @Test
+        @DisplayName("`CommandSubject`")
+        void commandSubject() {
+            assertThat(context.assertCommands())
+                    .isNotNull();
+        }
+
+        @Test
+        @DisplayName("`EventSubject`")
+        void eventSubject() {
+            assertThat(context.assertEvents())
+                    .isNotNull();
         }
     }
 }

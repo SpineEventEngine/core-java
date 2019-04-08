@@ -68,7 +68,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     protected EntityClass(Class<E> cls) {
         super(cls);
         this.idClass = idClass(cls);
-        this.stateClass = stateClass(cls);
+        this.stateClass = stateClassOf(cls);
         this.entityStateType = TypeUrl.of(stateClass);
     }
 
@@ -219,9 +219,9 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * public API. It is used internally by other framework routines and not designed for efficient
      * execution by Spine users.
      */
-    private static <S extends Message> Class<S> stateClass(Class<? extends Entity> entityClass) {
+    public static <S extends Message> Class<S> stateClassOf(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-                Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
+        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
         return result;
     }
 }
