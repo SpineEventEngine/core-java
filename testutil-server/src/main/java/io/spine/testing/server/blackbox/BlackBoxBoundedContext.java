@@ -66,6 +66,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
@@ -73,7 +74,6 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class provides means for integration testing of Bounded Contexts.
@@ -618,13 +618,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         return new EmittedCommands(allWithoutPosted);
     }
 
-    private List<Command> generatedCommands() {
+    /**
+     * Obtains immutable list of commands generated in this Bounded Context in response to posted
+     * messages.
+     *
+     * <p>The returned list does <em>NOT</em> contain commands posted to this Bounded Context
+     * during test setup.
+     */
+    public List<Command> generatedCommands() {
         Predicate<Command> wasNotReceived =
                 ((Predicate<Command>) postedCommands::contains).negate();
         return select(this.commands)
                 .stream()
                 .filter(wasNotReceived)
-                .collect(toList());
+                .collect(toImmutableList());
     }
 
     /**
@@ -642,7 +649,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Obtains events emitted in the bounded context.
+     * Obtains events emitted in the Bounded Context.
      *
      * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
      * calls.
@@ -652,12 +659,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         return new EmittedEvents(allWithoutPosted);
     }
 
-    private List<Event> generatedEvents() {
+    /**
+     * Obtains immutable list of events generated in this Bounded Context in response to posted
+     * messages.
+     *
+     * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
+     * during test setup.
+     */
+    public List<Event> generatedEvents() {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         return select(this.events)
                 .stream()
                 .filter(wasNotReceived)
-                .collect(toList());
+                .collect(toImmutableList());
     }
 
     /**
