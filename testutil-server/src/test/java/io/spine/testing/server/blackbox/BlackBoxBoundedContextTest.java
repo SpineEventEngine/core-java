@@ -22,6 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
@@ -498,6 +499,27 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void eventSubject() {
             assertThat(context.assertEvents())
                     .isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Provide generated")
+    class Generated {
+
+        @BeforeEach
+        void postCommands() {
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id))
+                   .receivesCommand(initProject(id)) ;
+        }
+
+        @Test
+        @DisplayName("event messages")
+        void eventMessages() {
+            IterableSubject assertEventMessages = assertThat(context.eventMessages());
+            assertEventMessages.isNotEmpty();
+            assertEventMessages.hasSize(context.events()
+                                               .size());
         }
     }
 }

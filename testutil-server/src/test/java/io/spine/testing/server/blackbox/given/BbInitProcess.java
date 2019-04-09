@@ -32,9 +32,9 @@ import io.spine.testing.server.blackbox.command.BbInitProject;
  * Test environment process manager for testing
  * {@link io.spine.testing.server.entity.EntitySubject}.
  */
-public class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbInitVBuilder> {
+public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbInitVBuilder> {
 
-    protected BbInitProcess(BbProjectId id) {
+    BbInitProcess(BbProjectId id) {
         super(id);
     }
 

@@ -25,7 +25,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
 
 /** Receives one type of events and keeps track of how many events it has received. */
-public class BbEventDispatcher extends AbstractEventSubscriber {
+public final class BbEventDispatcher extends AbstractEventSubscriber {
 
     private int eventsReceived = 0;
 

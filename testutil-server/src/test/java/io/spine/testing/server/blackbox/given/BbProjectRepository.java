@@ -26,7 +26,8 @@ import io.spine.testing.server.blackbox.event.BbUserDeleted;
 
 import java.util.HashSet;
 
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+public final class BbProjectRepository
+        extends AggregateRepository<BbProjectId, BbProjectAggregate> {
 
     public BbProjectRepository() {
         eventRouting().route(BbUserDeleted.class,
