@@ -35,6 +35,7 @@ import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
@@ -66,6 +67,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
@@ -73,7 +75,6 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class provides means for integration testing of Bounded Contexts.
@@ -614,17 +615,43 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains commands emitted in the bounded context.
      */
     private EmittedCommands emittedCommands() {
-        List<Command> allWithoutPosted = generatedCommands();
+        List<Command> allWithoutPosted = commands();
         return new EmittedCommands(allWithoutPosted);
     }
 
-    private List<Command> generatedCommands() {
+    /**
+     * Obtains immutable list of commands generated in this Bounded Context in response to posted
+     * messages.
+     *
+     * <p>The returned list does <em>NOT</em> contain commands posted to this Bounded Context
+     * during test setup.
+     *
+     * @see #commandMessages()
+     */
+    public List<Command> commands() {
         Predicate<Command> wasNotReceived =
                 ((Predicate<Command>) postedCommands::contains).negate();
         return select(this.commands)
                 .stream()
                 .filter(wasNotReceived)
-                .collect(toList());
+                .collect(toImmutableList());
+    }
+
+    /**
+     * Obtains immutable list of command messages generated in this Bounded Context in response
+     * to posted messages.
+     *
+     * <p>The returned list does <em>NOT</em> contain commands posted to this Bounded Context
+     * during test setup.
+     *
+     * @see #commands()
+     */
+    public List<CommandMessage> commandMessages() {
+        return commands().stream()
+                         .map(Command::getMessage)
+                         .map(AnyPacker::unpack)
+                         .map(m -> (CommandMessage) m)
+                         .collect(toImmutableList());
     }
 
     /**
@@ -642,22 +669,46 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Obtains events emitted in the bounded context.
+     * Obtains events emitted in the Bounded Context.
      *
      * <p>They do not include the events posted to the bounded context via {@code receivesEvent...}
      * calls.
      */
     private EmittedEvents emittedEvents() {
-        List<Event> allWithoutPosted = generatedEvents();
+        List<Event> allWithoutPosted = events();
         return new EmittedEvents(allWithoutPosted);
     }
 
-    private List<Event> generatedEvents() {
+    /**
+     * Obtains immutable list of events generated in this Bounded Context in response to posted
+     * messages.
+     *
+     * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
+     * during test setup.
+     */
+    public List<Event> events() {
         Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
         return select(this.events)
                 .stream()
                 .filter(wasNotReceived)
-                .collect(toList());
+                .collect(toImmutableList());
+    }
+
+    /**
+     * Obtains immutable list of event messages generated in this Bounded Context in response
+     * to posted messages.
+     *
+     * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
+     * during test setup.
+     *
+     * @see #events()
+     */
+    public List<EventMessage> eventMessages() {
+        return events().stream()
+                       .map(Event::getMessage)
+                       .map(AnyPacker::unpack)
+                       .map(m -> (EventMessage) m)
+                       .collect(toImmutableList());
     }
 
     /**
@@ -678,22 +729,41 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Obtains a Subject for the Aggregate of the passed class with the given ID.
+     * Obtains a Subject for an entity of the passed class with the given ID.
      */
     public <I, S extends Message, E extends Entity<I, S>>
     EntitySubject assertEntity(Class<E> entityClass, I id) {
-        @SuppressWarnings("unchecked") // safe as bound by Aggregate class declaration.
+        @SuppressWarnings("unchecked") // safe as bound by entity class declaration.
         @Nullable E found = (E) findEntity(entityClass, id);
         return EntitySubject.assertEntity(found);
     }
 
+    /**
+     * Obtains a Subject for an entity which has the state of the passed class with the given ID.
+     */
+    public <I, S extends Message, E extends Entity<I, S>>
+    EntitySubject assertEntityWithState(Class<S> stateClass, I id) {
+        @Nullable E found = findByState(stateClass, id);
+        return EntitySubject.assertEntity(found);
+    }
+
     private <I, S extends Message, E extends Entity<I, S>>
-    @Nullable Entity<I, S> findEntity(Class<? extends E> entityClass, I id) {
-        Class<? extends Message> stateClass = stateClassOf(entityClass);
+    @Nullable Entity<I, S> findEntity(Class<E> entityClass, I id) {
+        Class<S> stateClass = stateClassOf(entityClass);
+        return findByState(stateClass, id);
+    }
+
+    @SuppressWarnings("TypeParameterUnusedInFormals") // is safe as calling sites are bound.
+    private @Nullable <I, S extends Message, E extends Entity<I, S>>
+    E findByState(Class<S> stateClass, I id) {
         @SuppressWarnings("unchecked")
         Repository<I, Entity<I, S>> repo = repositoryOf(stateClass);
-        return readOperation(() -> repo.find(id)
-                                       .orElse(null));
+        return readOperation(() -> {
+            @SuppressWarnings("unchecked") // safe as bound by entity class declaration.
+                    E result = (E) repo.find(id)
+                                       .orElse(null);
+            return result;
+        });
     }
 
     private Repository repositoryOf(Class<? extends Message> stateClass) {
@@ -710,13 +780,13 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains the subject for checking commands generated by the entities of this Bounded Context.
      */
     public CommandSubject assertCommands() {
-        return CommandSubject.assertThat(generatedCommands());
+        return CommandSubject.assertThat(commands());
     }
 
     /**
      * Obtains the subject for checking events emitted by the entities of this Bounded Context.
      */
     public EventSubject assertEvents() {
-        return EventSubject.assertThat(generatedEvents());
+        return EventSubject.assertThat(events());
     }
 }

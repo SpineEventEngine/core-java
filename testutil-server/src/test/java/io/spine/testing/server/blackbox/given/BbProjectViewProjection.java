@@ -30,10 +30,10 @@ import io.spine.testing.server.blackbox.event.BbProjectStarted;
 
 import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 
-public class BbProjectViewProjection
+public final class BbProjectViewProjection
         extends Projection<BbProjectId, BbProjectView, BbProjectViewVBuilder> {
 
-    protected BbProjectViewProjection(BbProjectId id) {
+    BbProjectViewProjection(BbProjectId id) {
         super(id);
     }
 

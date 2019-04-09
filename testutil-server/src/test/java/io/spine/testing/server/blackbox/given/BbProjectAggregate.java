@@ -34,9 +34,7 @@ import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
-import io.spine.testing.server.blackbox.event.BbAssigneeAddedVBuilder;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
-import io.spine.testing.server.blackbox.event.BbAssigneeRemovedVBuilder;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbProjectStarted;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
@@ -52,12 +50,12 @@ import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
 import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 import static java.util.Optional.empty;
 
-class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBuilder> {
+final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBuilder> {
 
     @Assign
     BbProjectCreated handle(BbCreateProject command) {
         return BbProjectCreated
-                .newBuilder()
+                .vBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -72,7 +70,7 @@ class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBui
                     .build();
         }
         return BbProjectStarted
-                .newBuilder()
+                .vBuilder()
                 .setProjectId(projectId)
                 .build();
     }
@@ -89,7 +87,7 @@ class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBui
                     .build();
         }
         return BbTaskAdded
-                .newBuilder()
+                .vBuilder()
                 .setProjectId(projectId)
                 .setTask(task)
                 .build();
@@ -97,8 +95,8 @@ class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBui
 
     @Assign
     BbAssigneeAdded handle(BbAssignProject command) {
-        return BbAssigneeAddedVBuilder
-                .newBuilder()
+        return BbAssigneeAdded
+                .vBuilder()
                 .setId(id())
                 .setUserId(command.getUserId())
                 .build();
@@ -115,8 +113,8 @@ class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBui
     }
 
     private BbAssigneeRemoved userUnassigned(UserId user) {
-        return BbAssigneeRemovedVBuilder
-                .newBuilder()
+        return BbAssigneeRemoved
+                .vBuilder()
                 .setId(id())
                 .setUserId(user)
                 .build();

@@ -34,7 +34,7 @@ import java.util.Set;
  *
  * @see io.spine.testing.server.blackbox.BlackBoxBoundedContextTest#registerCommandDispatchers
  */
-public class BbCommandDispatcher extends AbstractCommandDispatcher {
+public final class BbCommandDispatcher extends AbstractCommandDispatcher {
 
     private int commandsReceived = 0;
     private final CommandClass commandToDispatch;

@@ -22,6 +22,7 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
@@ -436,43 +437,72 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Nested
-    @DisplayName("obtain PmSubject with")
+    @DisplayName("obtain `EntitySubject`")
     class ObtainEntitySubject {
 
         private BbProjectId id;
-        private EntitySubject assertProcessManager;
 
         @BeforeEach
         void getSubject() {
             id = newProjectId();
-            assertProcessManager = context.receivesCommand(initProject(id))
-                                          .assertEntity(BbInitProcess.class, id);
+            context.receivesCommand(initProject(id, false));
         }
 
         @Test
-        @DisplayName("archived flag subject")
-        void archivedFlag() {
-            assertProcessManager.archivedFlag()
-                                .isFalse();
+        @DisplayName("via entity class")
+        void entityClass() {
+            EntitySubject subject = context.assertEntity(BbInitProcess.class, id);
+            assertThat(subject)
+                    .isNotNull();
+            subject.isInstanceOf(BbInitProcess.class);
         }
 
         @Test
-        @DisplayName("deleted flag subject")
-        void deletedFlag() {
-            assertProcessManager.deletedFlag()
-                                .isTrue();
+        @DisplayName("via entity state class")
+        void entityStateClass() {
+            EntitySubject subject = context.assertEntityWithState(BbInit.class, id);
+            assertThat(subject)
+                    .isNotNull();
+            subject.hasStateThat()
+                   .isInstanceOf(BbInit.class);
         }
 
-        @Test
-        @DisplayName("state subject")
-        void stateSubject() {
-            BbInit expectedState = BbInit
-                    .newBuilder()
-                    .setId(id)
-                    .setInitialized(true)
-                    .build();
-            assertProcessManager.hasStateThat()
-                                .isEqualTo(expectedState);
+        @Nested
+        @DisplayName("with")
+        class NestedSubjects {
+
+            private EntitySubject assertProcessManager;
+
+            @BeforeEach
+            void getSubj() {
+                assertProcessManager = context.assertEntity(BbInitProcess.class, id);
+            }
+
+            @Test
+            @DisplayName("archived flag subject")
+            void archivedFlag() {
+                assertProcessManager.archivedFlag()
+                                    .isFalse();
+            }
+
+            @Test
+            @DisplayName("deleted flag subject")
+            void deletedFlag() {
+                assertProcessManager.deletedFlag()
+                                    .isTrue();
+            }
+
+            @Test
+            @DisplayName("state subject")
+            void stateSubject() {
+                BbInit expectedState = BbInit
+                        .vBuilder()
+                        .setId(id)
+                        .setInitialized(true)
+                        .build();
+                assertProcessManager.hasStateThat()
+                                    .isEqualTo(expectedState);
+            }
         }
     }
 
@@ -498,6 +528,36 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void eventSubject() {
             assertThat(context.assertEvents())
                     .isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Provide generated")
+    class Generated {
+
+        @BeforeEach
+        void postCommands() {
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id))
+                   .receivesCommand(initProject(id, true)) ;
+        }
+
+        @Test
+        @DisplayName("event messages")
+        void eventMessages() {
+            IterableSubject assertEventMessages = assertThat(context.eventMessages());
+            assertEventMessages.isNotEmpty();
+            assertEventMessages.hasSize(context.events()
+                                               .size());
+        }
+
+        @Test
+        @DisplayName("command messages")
+        void commandMessages() {
+            IterableSubject assertCommandMessages = assertThat(context.commandMessages());
+            assertCommandMessages.isNotEmpty();
+            assertCommandMessages.hasSize(context.commands()
+                                                 .size());
         }
     }
 }
