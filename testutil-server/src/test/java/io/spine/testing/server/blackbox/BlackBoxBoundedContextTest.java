@@ -437,43 +437,72 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Nested
-    @DisplayName("obtain PmSubject with")
+    @DisplayName("obtain `EntitySubject`")
     class ObtainEntitySubject {
 
         private BbProjectId id;
-        private EntitySubject assertProcessManager;
 
         @BeforeEach
         void getSubject() {
             id = newProjectId();
-            assertProcessManager = context.receivesCommand(initProject(id, false))
-                                          .assertEntity(BbInitProcess.class, id);
+            context.receivesCommand(initProject(id, false));
         }
 
         @Test
-        @DisplayName("archived flag subject")
-        void archivedFlag() {
-            assertProcessManager.archivedFlag()
-                                .isFalse();
+        @DisplayName("via entity class")
+        void entityClass() {
+            EntitySubject subject = context.assertEntity(BbInitProcess.class, id);
+            assertThat(subject)
+                    .isNotNull();
+            subject.isInstanceOf(BbInitProcess.class);
         }
 
         @Test
-        @DisplayName("deleted flag subject")
-        void deletedFlag() {
-            assertProcessManager.deletedFlag()
-                                .isTrue();
+        @DisplayName("via entity state class")
+        void entityStateClass() {
+            EntitySubject subject = context.assertEntityWithState(BbInit.class, id);
+            assertThat(subject)
+                    .isNotNull();
+            subject.hasStateThat()
+                   .isInstanceOf(BbInit.class);
         }
 
-        @Test
-        @DisplayName("state subject")
-        void stateSubject() {
-            BbInit expectedState = BbInit
-                    .vBuilder()
-                    .setId(id)
-                    .setInitialized(true)
-                    .build();
-            assertProcessManager.hasStateThat()
-                                .isEqualTo(expectedState);
+        @Nested
+        @DisplayName("with")
+        class NestedSubjects {
+
+            private EntitySubject assertProcessManager;
+
+            @BeforeEach
+            void getSubj() {
+                assertProcessManager = context.assertEntity(BbInitProcess.class, id);
+            }
+
+            @Test
+            @DisplayName("archived flag subject")
+            void archivedFlag() {
+                assertProcessManager.archivedFlag()
+                                    .isFalse();
+            }
+
+            @Test
+            @DisplayName("deleted flag subject")
+            void deletedFlag() {
+                assertProcessManager.deletedFlag()
+                                    .isTrue();
+            }
+
+            @Test
+            @DisplayName("state subject")
+            void stateSubject() {
+                BbInit expectedState = BbInit
+                        .vBuilder()
+                        .setId(id)
+                        .setInitialized(true)
+                        .build();
+                assertProcessManager.hasStateThat()
+                                    .isEqualTo(expectedState);
+            }
         }
     }
 

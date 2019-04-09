@@ -729,22 +729,41 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Obtains a Subject for the Aggregate of the passed class with the given ID.
+     * Obtains a Subject for an entity of the passed class with the given ID.
      */
     public <I, S extends Message, E extends Entity<I, S>>
     EntitySubject assertEntity(Class<E> entityClass, I id) {
-        @SuppressWarnings("unchecked") // safe as bound by Aggregate class declaration.
+        @SuppressWarnings("unchecked") // safe as bound by entity class declaration.
         @Nullable E found = (E) findEntity(entityClass, id);
         return EntitySubject.assertEntity(found);
     }
 
+    /**
+     * Obtains a Subject for an entity which has the state of the passed class with the given ID.
+     */
+    public <I, S extends Message, E extends Entity<I, S>>
+    EntitySubject assertEntityWithState(Class<S> stateClass, I id) {
+        @Nullable E found = findByState(stateClass, id);
+        return EntitySubject.assertEntity(found);
+    }
+
     private <I, S extends Message, E extends Entity<I, S>>
-    @Nullable Entity<I, S> findEntity(Class<? extends E> entityClass, I id) {
-        Class<? extends Message> stateClass = stateClassOf(entityClass);
+    @Nullable Entity<I, S> findEntity(Class<E> entityClass, I id) {
+        Class<S> stateClass = stateClassOf(entityClass);
+        return findByState(stateClass, id);
+    }
+
+    @SuppressWarnings("TypeParameterUnusedInFormals") // is safe as calling sites are bound.
+    private @Nullable <I, S extends Message, E extends Entity<I, S>>
+    E findByState(Class<S> stateClass, I id) {
         @SuppressWarnings("unchecked")
         Repository<I, Entity<I, S>> repo = repositoryOf(stateClass);
-        return readOperation(() -> repo.find(id)
-                                       .orElse(null));
+        return readOperation(() -> {
+            @SuppressWarnings("unchecked") // safe as bound by entity class declaration.
+                    E result = (E) repo.find(id)
+                                       .orElse(null);
+            return result;
+        });
     }
 
     private Repository repositoryOf(Class<? extends Message> stateClass) {
