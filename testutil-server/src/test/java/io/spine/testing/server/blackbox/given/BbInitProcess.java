@@ -21,12 +21,20 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.command.Assign;
-import io.spine.server.model.Nothing;
+import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.tuple.Pair;
 import io.spine.testing.server.blackbox.BbInit;
 import io.spine.testing.server.blackbox.BbInitVBuilder;
 import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.command.BbAssignScrumMaster;
+import io.spine.testing.server.blackbox.command.BbAssignTeam;
 import io.spine.testing.server.blackbox.command.BbInitProject;
+import io.spine.testing.server.blackbox.event.BbProjectInitialized;
+import io.spine.testing.server.blackbox.event.BbTeamAssigned;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 /**
  * Test environment process manager for testing
@@ -38,11 +46,41 @@ public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbI
         super(id);
     }
 
+    @Command
+    Pair<BbAssignTeam, Optional<BbAssignScrumMaster>> on(BbInitProject cmd) {
+        builder().setId(cmd.getProjectId());
+        BbAssignTeam assignTeam = BbAssignTeam
+                .vBuilder()
+                .setProjectId(cmd.getProjectId())
+                .addAllMember(cmd.getMemberList())
+                .build();
+        @Nullable BbAssignScrumMaster assignScrumMaster =
+                cmd.hasScrumMaster()
+                ? BbAssignScrumMaster
+                        .vBuilder()
+                        .setProjectId(cmd.getProjectId())
+                        .setScrumMaster(cmd.getScrumMaster())
+                        .build()
+                : null;
+        return Pair.withNullable(assignTeam, assignScrumMaster);
+    }
+
     @Assign
-    Nothing on(BbInitProject cmd) {
-        builder().setId(cmd.getProjectId())
-                 .setInitialized(true);
+    Pair<BbTeamAssigned, BbProjectInitialized> on(BbAssignTeam cmd) {
+        builder()
+                .setId(cmd.getProjectId())
+                .setInitialized(true);
         setDeleted(true);
-        return nothing();
+        return Pair.of(
+                BbTeamAssigned
+                        .vBuilder()
+                        .setProjectId(cmd.getProjectId())
+                        .addAllMember(cmd.getMemberList())
+                        .build(),
+                BbProjectInitialized
+                        .vBuilder()
+                        .setProjectId(cmd.getProjectId())
+                        .build()
+        );
     }
 }

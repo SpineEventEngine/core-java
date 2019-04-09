@@ -23,6 +23,7 @@ package io.spine.testing.server.blackbox.given;
 import io.spine.core.UserId;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventDispatcher;
+import io.spine.testing.TestValues;
 import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbReportId;
@@ -32,11 +33,14 @@ import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
 import io.spine.testing.server.blackbox.command.BbInitProject;
+import io.spine.testing.server.blackbox.command.BbInitProjectVBuilder;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
+
+import java.util.stream.IntStream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
@@ -111,6 +115,12 @@ public class Given {
         return createProject(newProjectId());
     }
 
+    private static UserId generateUserId() {
+        return UserId.vBuilder()
+                     .setValue(TestValues.randomString())
+                     .build();
+    }
+
     public static BbCreateProject createProject(BbProjectId id) {
         return BbCreateProject
                 .vBuilder()
@@ -118,11 +128,17 @@ public class Given {
                 .build();
     }
 
-    public static BbInitProject initProject(BbProjectId id) {
-        return BbInitProject
+    public static BbInitProject initProject(BbProjectId id, boolean scrum) {
+        BbInitProjectVBuilder builder = BbInitProject
                 .vBuilder()
-                .setProjectId(id)
-                .build();
+                .setProjectId(id);
+        // Generate a random team.
+        IntStream.range(0, TestValues.random(1, 10))
+                 .forEach(i -> builder.addMember(generateUserId()));
+        if (scrum) {
+            builder.setScrumMaster(generateUserId());
+        }
+        return builder.build();
     }
 
     public static BbStartProject startProject(BbProjectId id) {

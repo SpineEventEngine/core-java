@@ -36,6 +36,16 @@ message BbProjectCreated {
     BbProjectId project_id = 1 [(required) = true];
 }
 
+message BbTeamAssigned {
+    BbProjectId project_id = 1;
+    repeated spine.core.UserId member = 2;
+}
+
+message BbScrumMasterAssigned {
+    BbProjectId project_id = 1;
+    spine.core.UserId scrum_master = 2;
+}
+
 message BbProjectInitialized {
     BbProjectId project_id = 1 [(required) = true];
 }

@@ -446,7 +446,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         @BeforeEach
         void getSubject() {
             id = newProjectId();
-            assertProcessManager = context.receivesCommand(initProject(id))
+            assertProcessManager = context.receivesCommand(initProject(id, false))
                                           .assertEntity(BbInitProcess.class, id);
         }
 
@@ -510,7 +510,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void postCommands() {
             BbProjectId id = newProjectId();
             context.receivesCommand(createProject(id))
-                   .receivesCommand(initProject(id)) ;
+                   .receivesCommand(initProject(id, true)) ;
         }
 
         @Test
@@ -520,6 +520,15 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             assertEventMessages.isNotEmpty();
             assertEventMessages.hasSize(context.events()
                                                .size());
+        }
+
+        @Test
+        @DisplayName("command messages")
+        void commandMessages() {
+            IterableSubject assertCommandMessages = assertThat(context.commandMessages());
+            assertCommandMessages.isNotEmpty();
+            assertCommandMessages.hasSize(context.commands()
+                                                 .size());
         }
     }
 }
