@@ -151,6 +151,8 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @DisplayName("fail when trying to obtain filtered sub-subject over null actual")
     void failWithNull() {
         Class<M> cls1 = typeOf(createMessage());
+        @SuppressWarnings("CheckReturnValue") /* The call to `withType()` should fail,
+            we don't need its result. */
         AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
                                                                        .withType(cls1));
         TruthFailureSubject assertError = assertThat(error);
