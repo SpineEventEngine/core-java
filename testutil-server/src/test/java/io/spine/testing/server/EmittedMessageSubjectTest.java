@@ -145,7 +145,6 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
 
         S subSubject2 = subject.withType(cls2);
         subSubject2.hasSize(otherMessageCount);
-
     }
 
     @Test
