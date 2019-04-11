@@ -43,6 +43,11 @@ public final class CommandSubject
         return CommandSubject::new;
     }
 
+    @Override
+    protected Factory<CommandSubject, Iterable<Command>> factory() {
+        return commands();
+    }
+
     /** Creates the subject for asserting passed commands. */
     public static CommandSubject assertThat(@NullableDecl Iterable<Command> actual) {
         return assertAbout(commands()).that(actual);

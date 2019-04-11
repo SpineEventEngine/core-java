@@ -42,6 +42,11 @@ public final class EventSubject extends EmittedMessageSubject<EventSubject, Even
         return EventSubject::new;
     }
 
+    @Override
+    protected Factory<EventSubject, Iterable<Event>> factory() {
+        return events();
+    }
+
     /** Creates the subject for asserting passed events. */
     public static EventSubject assertThat(@NullableDecl Iterable<Event> actual) {
         return assertAbout(events()).that(actual);
