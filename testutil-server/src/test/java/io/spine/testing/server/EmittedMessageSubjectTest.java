@@ -135,16 +135,16 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
                 .addAll(messages(otherMessageCount, this::createAnotherMessage))
                 .build();
 
-        Class<M> cls1 = typeOf(createMessage());
-        Class<M> cls2 = typeOf(createAnotherMessage());
+        Class<M> type = typeOf(createMessage());
+        Class<M> anotherType = typeOf(createAnotherMessage());
 
         S subject = assertWithSubjectThat(outerObjects);
 
-        S subSubject1 = subject.withType(cls1);
-        subSubject1.hasSize(messageCount);
+        S subSubject = subject.withType(type);
+        subSubject.hasSize(messageCount);
 
-        S subSubject2 = subject.withType(cls2);
-        subSubject2.hasSize(otherMessageCount);
+        S anotherSubSubject = subject.withType(anotherType);
+        anotherSubSubject.hasSize(otherMessageCount);
     }
 
     @Test
