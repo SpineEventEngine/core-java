@@ -38,11 +38,11 @@ class MessageWithContextTest {
     void checkType() {
         Event event = stubEvent();
 
-        assertThat(event.hasType(ProjectCreated.class))
+        assertThat(event.is(ProjectCreated.class))
                 .isTrue();
-        assertThat(event.hasType(EventMessage.class))
+        assertThat(event.is(EventMessage.class))
                 .isTrue();
-        assertThat(event.hasType(TaskAssigned.class))
+        assertThat(event.is(TaskAssigned.class))
                 .isFalse();
     }
 

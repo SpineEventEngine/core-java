@@ -143,7 +143,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         } else {
             List<T> filtered =
                     Streams.stream(actual)
-                           .filter(m -> m.hasType(messageClass))
+                           .filter(m -> m.is(messageClass))
                            .collect(toImmutableList());
             return check().about(factory())
                           .that(filtered);
