@@ -50,14 +50,17 @@ class MessageWithContextTest {
      * Creates a stub instance of {@code Event} with the type {@link ProjectCreated}.
      */
     private Event stubEvent() {
+        ProjectId project = ProjectId
+                .newBuilder()
+                .setId(getClass().getName())
+                .build();
+        ProjectCreated message = ProjectCreated
+                .newBuilder()
+                .setProjectId(project)
+                .build();
         Event event = Event
                 .newBuilder()
-                .setMessage(AnyPacker.pack(
-                        ProjectCreated
-                                .newBuilder()
-                                .setProjectId(ProjectId.newBuilder()
-                                                       .setId(getClass().getName()))
-                                .build()))
+                .setMessage(AnyPacker.pack(message))
                 .build();
         return event;
     }
