@@ -47,16 +47,12 @@ public final class EventEnvelope
         ActorMessageEnvelope<EventId, Event, EventContext>,
         EnrichableMessageEnvelope<EventId, Event, EventMessage, EventContext, EventEnvelope> {
 
-    private final EventMessage eventMessage;
     private final EventClass eventClass;
-    private final EventContext eventContext;
     private final boolean rejection;
 
     private EventEnvelope(Event event) {
         super(event);
-        this.eventMessage = Events.getMessage(event);
-        this.eventClass = EventClass.of(this.eventMessage);
-        this.eventContext = event.context();
+        this.eventClass = EventClass.of(event.enclosedMessage());
         this.rejection = Events.isRejection(event);
     }
 
@@ -90,7 +86,7 @@ public final class EventEnvelope
      */
     @Override
     public EventMessage message() {
-        return this.eventMessage;
+        return outerObject().enclosedMessage();
     }
 
     /**
@@ -133,14 +129,14 @@ public final class EventEnvelope
      */
     @Override
     public EventContext context() {
-        return this.eventContext;
+        return outerObject().context();
     }
 
     /**
      * Obtains the type of the event message.
      */
     public TypeName messageTypeName() {
-        TypeName result = TypeName.of(eventMessage);
+        TypeName result = TypeName.of(message());
         return result;
     }
 
@@ -155,7 +151,7 @@ public final class EventEnvelope
      */
     public MessageClass originClass() {
         if (isRejection()) {
-            RejectionEventContext rejection = eventContext.getRejection();
+            RejectionEventContext rejection = context().getRejection();
             Any commandMessage = rejection.getCommandMessage();
             return CommandClass.of(commandMessage);
         } else {

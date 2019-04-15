@@ -26,7 +26,6 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
-import io.spine.core.Events;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.given.CommandHandlerTestEnv.EventCatcher;
@@ -49,6 +48,7 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.List;
 import java.util.Queue;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -129,8 +129,11 @@ class CommandHandlerTest {
         List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
             Message expected = expectedMessages.get(i);
-            Message actual = Events.getMessage(actualEvents.get(i).outerObject());
-            assertEquals(expected, actual);
+            Message actual = actualEvents.get(i)
+                                         .outerObject()
+                                         .enclosedMessage();
+            assertThat(actual)
+                    .isEqualTo(expected);
         }
     }
 
@@ -149,7 +152,8 @@ class CommandHandlerTest {
             handler.handle(cmd);
 
             List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
-            assertEquals(2, dispatchedEvents.size());
+            assertThat(dispatchedEvents)
+                    .hasSize(2);
         }
 
         @Test
@@ -163,7 +167,8 @@ class CommandHandlerTest {
             handler.handle(cmd);
 
             List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
-            assertEquals(1, dispatchedEvents.size());
+            assertThat(dispatchedEvents)
+                    .hasSize(1);
         }
     }
 
@@ -202,9 +207,12 @@ class CommandHandlerTest {
 
         loggingEvent = queue.poll();
 
-        assertEquals(Level.ERROR, loggingEvent.getLevel());
-        assertEquals(commandEnvelope, handler.getLastErrorEnvelope());
-        assertEquals(exception, handler.getLastException());
+        assertThat(loggingEvent.getLevel())
+                .isEqualTo(Level.ERROR);
+        assertThat(handler.getLastErrorEnvelope())
+                .isEqualTo(commandEnvelope);
+        assertThat(handler.getLastException())
+                .isEqualTo(exception);
     }
 
     private static CommandEnvelope generate() {

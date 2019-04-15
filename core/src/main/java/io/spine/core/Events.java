@@ -122,18 +122,6 @@ public final class Events {
     }
 
     /**
-     * Extracts the event message from the passed event.
-     *
-     * @param event
-     *         an event to get message from
-     */
-    public static EventMessage getMessage(Event event) {
-        checkNotNull(event);
-        EventMessage result = event.enclosedMessage();
-        return result;
-    }
-
-    /**
      * Extract event messages from the passed events.
      */
     public static List<? extends EventMessage> toMessages(List<Event> events) {
@@ -152,7 +140,7 @@ public final class Events {
     public static EventMessage ensureMessage(Message eventOrMessage) {
         checkNotNull(eventOrMessage);
         if (eventOrMessage instanceof Event) {
-            return getMessage((Event) eventOrMessage);
+            return ((Event) eventOrMessage).enclosedMessage();
         }
         Message unpacked = Messages.ensureMessage(eventOrMessage);
         return (EventMessage) unpacked;

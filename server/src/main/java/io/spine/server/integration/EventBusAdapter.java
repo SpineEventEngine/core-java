@@ -32,7 +32,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -54,7 +53,8 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
         Message unpacked = unpack(message.getOriginalMessage());
         Event event = (Event) unpacked;
-        ExternalMessageEnvelope result = ExternalMessageEnvelope.of(message, getMessage(event));
+        ExternalMessageEnvelope result =
+                ExternalMessageEnvelope.of(message, event.enclosedMessage());
         return result;
     }
 
@@ -71,7 +71,7 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
         Event marked = eventBuilder.setContext(modifiedContext)
                                    .build();
         ExternalMessage result = ExternalMessages.of(marked, externalMsg.getBoundedContextName());
-        return ExternalMessageEnvelope.of(result, getMessage(event));
+        return ExternalMessageEnvelope.of(result, event.enclosedMessage());
     }
 
     @Override

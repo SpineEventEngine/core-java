@@ -79,7 +79,7 @@ public final class RejectionEnvelope
      */
     public static RejectionEnvelope from(EventEnvelope event) {
         checkNotNull(event);
-        checkArgument(event.isRejection(), "%s is not a rejection", event.messageClass());
+        checkArgument(event.isRejection(), "`%s` is not a rejection", event.messageClass());
         return new RejectionEnvelope(event);
     }
 

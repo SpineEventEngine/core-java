@@ -65,6 +65,13 @@ public interface MessageWithContext<I extends MessageId,
     C getContext();
 
     /**
+     * Obtains the identifier of the message.
+     */
+    default I id() {
+        return getId();
+    }
+
+    /**
      * Obtains the unpacked form of the enclosed message.
      *
      * @see #getMessage()

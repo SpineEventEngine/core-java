@@ -88,7 +88,6 @@ import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
@@ -302,7 +301,7 @@ class ProcessManagerRepositoryTest
             Event event = GivenMessage.projectStarted();
 
             dispatchEvent(event);
-            assertTrue(TestProcessManager.processed(getMessage(event)));
+            assertTrue(TestProcessManager.processed(event.enclosedMessage()));
 
             dispatchEvent(event);
             RuntimeException exception = repository().getLatestException();
