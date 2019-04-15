@@ -45,10 +45,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.currentTime;
-import static io.spine.core.Commands.wereWithinPeriod;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -145,8 +144,8 @@ class CommandsTest {
         void wereAfter() {
             Command command = requestFactory.command()
                                             .create(stopProject);
-            assertTrue(Commands.wereAfter(secondsAgo(5))
-                               .test(command));
+            assertThat(command.isAfter(secondsAgo(5)))
+                 .isTrue();
         }
 
         @Test
@@ -163,7 +162,7 @@ class CommandsTest {
                                               thirtySecondsAgo,
                                               twentySecondsAgo,
                                               fiveSecondsAgo)
-                                          .filter(wereWithinPeriod(minutesAgo(3), secondsAgo(10)))
+                                          .filter(c -> c.isBetween(minutesAgo(3), secondsAgo(10)))
                                           .count();
             assertEquals(3, filteredCommands);
         }

@@ -20,20 +20,16 @@
 
 package io.spine.core;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.time.TimestampTemporal;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -109,38 +105,6 @@ public final class Commands {
     public static TenantId tenantOf(CommandContext context) {
         return context.getActorContext()
                       .getTenantId();
-    }
-
-    /**
-     * Creates a predicate for filtering commands created after the passed timestamp.
-     */
-    public static Predicate<Command> wereAfter(Timestamp time) {
-        checkNotNull(time);
-        return command -> {
-            checkNotNull(command);
-            return timeOf(command).isLaterThan(Utils.toTemporal(time));
-        };
-    }
-
-    /**
-     * Creates a predicate for filtering commands created withing given time range.
-     */
-    public static Predicate<Command> wereWithinPeriod(Timestamp from, Timestamp to) {
-        checkNotNull(from);
-        checkNotNull(to);
-        return command -> {
-            checkNotNull(command);
-            return timeOf(command).isBetween(Utils.toTemporal(from), Utils.toTemporal(to));
-        };
-    }
-
-    /**
-     * Obtains the creation time of the passed command.
-     */
-    @VisibleForTesting
-    public static TimestampTemporal timeOf(Command command) {
-        TimestampTemporal result = Utils.toTemporal(command.time());
-        return result;
     }
 
     /**

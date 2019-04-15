@@ -24,6 +24,8 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 
+import static io.spine.core.Utils.toTemporal;
+
 /**
  * Mixin interface for command objects.
  */
@@ -44,5 +46,25 @@ public interface CommandMixin
     default Timestamp time() {
         return context().getActorContext()
                         .getTimestamp();
+    }
+
+    /**
+     * Verifies if the command was created after the passed time.
+     */
+    default boolean isAfter(Timestamp time) {
+        return toTemporal(time()).isLaterThan(toTemporal(time));
+    }
+
+    /**
+     * Verifies if the command was created within the passed period of time.
+     *
+     * @param periodStart
+     *         lower bound, exclusive
+     * @param periodEnd
+     *         higher bound, inclusive
+     * @return {@code true} if the time point of the command creation lies in between the given two
+     */
+    default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
+        return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
     }
 }
