@@ -30,7 +30,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
@@ -182,7 +181,7 @@ public class CommandBus extends UnicastBus<Command,
 
     private static TenantId tenantOf(Iterable<Command> commands) {
         return Streams.stream(commands)
-                      .map(Commands::tenantOf)
+                      .map(Command::tenant)
                       .findAny()
                       .orElse(TenantId.getDefaultInstance());
     }

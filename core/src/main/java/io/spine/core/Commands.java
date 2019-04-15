@@ -90,10 +90,13 @@ public final class Commands {
 
     /**
      * Obtains a tenant ID from the command.
+     *
+     * @deprecated Please use {@link Command#tenant()}.
      */
+    @Deprecated
     public static TenantId tenantOf(Command command) {
         checkNotNull(command);
-        TenantId result = tenantOf(command.getContext());
+        TenantId result = command.tenant();
         return result;
     }
 
@@ -103,7 +106,10 @@ public final class Commands {
      * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
      * created as a result of some command or its rejection. This makes the {@code CommandContext}
      * a valid {@code TenantId} source inside of the {@code Event}.
+     *
+     * @deprecated Please use {@link Command#tenant()}
      */
+    @Deprecated
     @Internal
     public static TenantId tenantOf(CommandContext context) {
         return context.getActorContext()

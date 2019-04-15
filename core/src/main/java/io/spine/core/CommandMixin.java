@@ -30,4 +30,12 @@ import io.spine.base.CommandMessage;
 public interface CommandMixin
         extends MessageWithContext<CommandId, CommandMessage, CommandContext> {
 
+    /**
+     * Obtains the ID of the tenant of the command.
+     */
+    @Override
+    default TenantId tenant() {
+        return getContext().getActorContext()
+                           .getTenantId();
+    }
 }

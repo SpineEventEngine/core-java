@@ -28,4 +28,12 @@ import io.spine.base.EventMessage;
  */
 @Immutable
 public interface EventMixin extends MessageWithContext<EventId, EventMessage, EventContext> {
+
+    /**
+     * Obtains the ID of the tenant of the event.
+     */
+    @Override
+    default TenantId tenant() {
+        return Events.retrieveActorContext(getContext()).getTenantId();
+    }
 }

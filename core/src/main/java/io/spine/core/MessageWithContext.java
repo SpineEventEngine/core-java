@@ -75,6 +75,11 @@ public interface MessageWithContext<I extends MessageId,
     }
 
     /**
+     * Obtains the ID of the tenant under which the message was created.
+     */
+    TenantId tenant();
+
+    /**
      * Obtains the type URL of the enclosed message.
      */
     default TypeUrl typeUrl() {

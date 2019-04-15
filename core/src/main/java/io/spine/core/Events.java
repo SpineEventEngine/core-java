@@ -129,7 +129,7 @@ public final class Events {
      */
     public static EventMessage getMessage(Event event) {
         checkNotNull(event);
-        EventMessage result = (EventMessage) event.enclosedMessage();
+        EventMessage result = event.enclosedMessage();
         return result;
     }
 
@@ -422,7 +422,7 @@ public final class Events {
      * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
      * declaration.
      */
-    private static ActorContext retrieveActorContext(EventContext eventContext) {
+    static ActorContext retrieveActorContext(EventContext eventContext) {
         ActorContext actorContext = null;
         EventContext ctx = eventContext;
 
