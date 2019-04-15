@@ -24,41 +24,30 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.protobuf.Durations2;
 import io.spine.string.Stringifiers;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.test.commands.CmdStartProject;
 import io.spine.test.commands.CmdStopProject;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.client.command.TestCommandMessage;
-import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.currentTime;
-import static io.spine.protobuf.Durations2.seconds;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@linkplain Commands Commands utility class}.
@@ -67,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
  */
 @DisplayName("Commands utility should")
-class CommandsTest {
+class CommandsTest extends UtilityClassTest<Commands> {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
@@ -88,24 +77,20 @@ class CommandsTest {
     private final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(CommandsTest.class);
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(Commands.class);
+    CommandsTest() {
+        super(Commands.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
-                .setDefault(Timestamp.class, currentTime())
-                .setDefault(Duration.class, Durations2.ZERO)
-                .setDefault(Command.class, requestFactory.createCommand(createProject, minutesAgo(1)))
-                .setDefault(CommandContext.class, requestFactory.createCommandContext())
-                .setDefault(ZoneOffset.class, ZoneOffsets.utc())
-                .setDefault(UserId.class, GivenUserId.newUuid())
-                .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
+              .setDefault(Timestamp.class, currentTime())
+              .setDefault(Duration.class, Durations2.ZERO)
+              .setDefault(Command.class, requestFactory.createCommand(createProject, minutesAgo(1)))
+              .setDefault(CommandContext.class, requestFactory.createCommandContext())
+              .setDefault(ZoneOffset.class, ZoneOffsets.utc())
+              .setDefault(UserId.class, GivenUserId.newUuid());
     }
 
     @Test
@@ -124,83 +109,13 @@ class CommandsTest {
     }
 
     @Test
-    @DisplayName("extract message from given command")
-    void extractMessage() {
-        CommandMessage message = TestCommandMessage
-                .newBuilder()
-                .setId(Identifier.newUuid())
-                .build();
-        Command command = requestFactory.createCommand(message);
-        assertThat(command.enclosedMessage())
-                .isEqualTo(message);
-    }
-
-    @Nested
-    @DisplayName("create command predicate of type")
-    class CreatePredicate {
-
-        @Test
-        @DisplayName("`wereAfter`")
-        void wereAfter() {
-            Command command = requestFactory.command()
-                                            .create(stopProject);
-            assertThat(command.isAfter(secondsAgo(5)))
-                 .isTrue();
-        }
-
-        @Test
-        @DisplayName("`wereBetween`")
-        void wereBetween() {
-            Command fiveMinsAgo = requestFactory.createCommand(createProject, minutesAgo(5));
-            Command twoMinsAgo = requestFactory.createCommand(startProject, minutesAgo(2));
-            Command thirtySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(30));
-            Command twentySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(20));
-            Command fiveSecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(5));
-
-            long filteredCommands = Stream.of(fiveMinsAgo,
-                                              twoMinsAgo,
-                                              thirtySecondsAgo,
-                                              twentySecondsAgo,
-                                              fiveSecondsAgo)
-                                          .filter(c -> c.isBetween(minutesAgo(3), secondsAgo(10)))
-                                          .count();
-            assertEquals(3, filteredCommands);
-        }
-    }
-
-    @Test
-    @DisplayName("consider command scheduled when command delay is set")
-    void recognizeScheduled() {
-        CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
-        Command cmd = requestFactory.command()
-                                    .createBasedOnContext(createProject, context);
-        assertTrue(Commands.isScheduled(cmd));
-    }
-
-    @Test
-    @DisplayName("consider command not scheduled when no scheduling options are present")
-    void recognizeNotScheduled() {
-        Command cmd = requestFactory.createCommand(createProject);
-        assertFalse(Commands.isScheduled(cmd));
-    }
-
-    @Test
-    @DisplayName("throw exception when command delay set to negative")
-    void throwOnNegativeDelay() {
-        CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
-        Command cmd =
-                requestFactory.command()
-                              .createBasedOnContext(createProject, context);
-        assertThrows(IllegalArgumentException.class, () -> Commands.isScheduled(cmd));
-    }
-
-    @Test
     @DisplayName("provide stringifier for command id")
     void provideStringifierForId() {
         CommandId id = CommandId.generate();
 
         String str = Stringifiers.toString(id);
         CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
-        assertEquals(id, convertedBack);
+        assertThat(convertedBack)
+                .isEqualTo(id);
     }
 }

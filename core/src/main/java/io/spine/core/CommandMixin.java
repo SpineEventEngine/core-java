@@ -21,10 +21,13 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.Utils.toTemporal;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Mixin interface for command objects.
@@ -66,5 +69,22 @@ public interface CommandMixin
      */
     default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
         return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
+    }
+
+    /**
+     * Checks if the command is scheduled to be delivered later.
+     *
+     * @return {@code true} if the command context has a scheduling option set,
+     * {@code false} otherwise
+     */
+    default boolean isScheduled() {
+        CommandContext.Schedule schedule = context().getSchedule();
+        Duration delay = schedule.getDelay();
+        if (isNotDefault(delay)) {
+            checkState(delay.getSeconds() > 0,
+                          "Command delay seconds must be a positive value.");
+            return true;
+        }
+        return false;
     }
 }
