@@ -56,7 +56,7 @@ public final class EventEnvelope
         super(event);
         this.eventMessage = Events.getMessage(event);
         this.eventClass = EventClass.of(this.eventMessage);
-        this.eventContext = event.getContext();
+        this.eventContext = event.context();
         this.rejection = Events.isRejection(event);
     }
 

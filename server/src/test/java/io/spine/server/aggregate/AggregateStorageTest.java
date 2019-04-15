@@ -561,7 +561,7 @@ public abstract class AggregateStorageTest
 
             AggregateHistory record = readRecord(id);
             EventContext loadedContext = record.getEvent(0)
-                                               .getContext();
+                                               .context();
             assertTrue(isDefault(loadedContext.getEnrichment()));
         }
 
@@ -590,7 +590,7 @@ public abstract class AggregateStorageTest
             storage.writeEvent(id, event);
             AggregateHistory record = readRecord(id);
             EventContext loadedOrigin = record.getEvent(0)
-                                              .getContext()
+                                              .context()
                                               .getEventContext();
             assertTrue(isDefault(loadedOrigin.getEnrichment()));
         }

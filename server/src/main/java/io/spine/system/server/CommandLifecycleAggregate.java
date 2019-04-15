@@ -225,7 +225,7 @@ final class CommandLifecycleAggregate
     private Command updateSchedule(Schedule schedule) {
         Command command = builder().getCommand();
         CommandContext updatedContext =
-                command.getContext()
+                command.context()
                        .toVBuilder()
                        .setSchedule(schedule)
                        .build();

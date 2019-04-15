@@ -140,7 +140,7 @@ public abstract class AggregateStorage<I>
 
     private static AggregateEventRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");
-        EventContext context = event.getContext();
+        EventContext context = event.context();
 
         String eventIdStr = Identifier.toString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID");

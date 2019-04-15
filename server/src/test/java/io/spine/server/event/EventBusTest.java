@@ -243,7 +243,7 @@ public class EventBusTest {
 
             // Exclude event ID from comparison.
             assertEquals(Events.getMessage(event), subscriber.getEventMessage());
-            assertEquals(event.getContext(), subscriber.getEventContext());
+            assertEquals(event.context(), subscriber.getEventContext());
         }
 
         @Test

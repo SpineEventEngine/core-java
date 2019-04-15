@@ -291,7 +291,7 @@ public class AggregateTest {
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.version(), event.getContext()
+        assertEquals(this.aggregate.version(), event.context()
                                                     .getVersion());
     }
 

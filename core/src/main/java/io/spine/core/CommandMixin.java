@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 
 /**
@@ -35,7 +36,13 @@ public interface CommandMixin
      */
     @Override
     default TenantId tenant() {
-        return getContext().getActorContext()
-                           .getTenantId();
+        return context().getActorContext()
+                        .getTenantId();
+    }
+
+    @Override
+    default Timestamp time() {
+        return context().getActorContext()
+                        .getTimestamp();
     }
 }

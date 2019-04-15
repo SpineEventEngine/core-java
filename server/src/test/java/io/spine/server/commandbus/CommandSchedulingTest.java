@@ -119,7 +119,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             Duration delay = minutes(5);
 
             Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
-            CommandContext.Schedule schedule = cmdUpdated.getContext()
+            CommandContext.Schedule schedule = cmdUpdated.context()
                                                          .getSchedule();
 
             assertEquals(delay, schedule.getDelay());

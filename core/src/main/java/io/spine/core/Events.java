@@ -109,7 +109,7 @@ public final class Events {
      */
     static Timestamp timestampOf(Event event) {
         checkNotNull(event);
-        Timestamp result = event.getContext()
+        Timestamp result = event.context()
                                 .getTimestamp();
         return result;
     }
@@ -140,7 +140,7 @@ public final class Events {
         checkNotNull(events);
         List<EventMessage> result =
                 events.stream()
-                      .map(Events::getMessage)
+                      .map(Event::enclosedMessage)
                       .collect(toList());
         return result;
     }
@@ -206,7 +206,7 @@ public final class Events {
      */
     public static CommandId getRootCommandId(Event event) {
         checkNotNull(event);
-        EventContext context = event.getContext();
+        EventContext context = event.context();
         CommandId id = context.getRootCommandId();
         return id;
     }
@@ -241,7 +241,7 @@ public final class Events {
      */
     public static boolean isRejection(Event event) {
         checkNotNull(event);
-        EventContext context = event.getContext();
+        EventContext context = event.context();
         boolean result = context.hasRejection() || !isDefault(context.getRejection());
         return result;
     }
@@ -297,7 +297,7 @@ public final class Events {
     @Internal
     public static ActorContext actorContextOf(Event event) {
         checkNotNull(event);
-        EventContext eventContext = event.getContext();
+        EventContext eventContext = event.context();
         ActorContext result = retrieveActorContext(eventContext);
         return result;
     }
@@ -350,7 +350,7 @@ public final class Events {
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Internal
     public static Event clearEnrichments(Event event) {
-        EventContext context = event.getContext();
+        EventContext context = event.context();
         EventContext.OriginCase originCase = context.getOriginCase();
         EventContextVBuilder resultContext = context.toVBuilder()
                                                     .clearEnrichment();
@@ -377,7 +377,7 @@ public final class Events {
      */
     @Internal
     public static Event substituteVersion(Event event, Version newVersion) {
-        EventContext newContext = event.getContext()
+        EventContext newContext = event.context()
                                        .toVBuilder()
                                        .setVersion(newVersion)
                                        .build();

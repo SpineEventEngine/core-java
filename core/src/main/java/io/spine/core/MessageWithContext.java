@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.base.MessageContext;
 import io.spine.base.SerializableMessage;
@@ -75,9 +76,22 @@ public interface MessageWithContext<I extends MessageId,
     }
 
     /**
+     * Obtains the context of the enclosed message.
+     */
+    default C context() {
+        return getContext();
+    }
+
+    /**
+     *
      * Obtains the ID of the tenant under which the message was created.
      */
     TenantId tenant();
+
+    /**
+     * Obtains the time when the message was created.
+     */
+    Timestamp time();
 
     /**
      * Obtains the type URL of the enclosed message.

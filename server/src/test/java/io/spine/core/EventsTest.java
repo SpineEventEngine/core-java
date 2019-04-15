@@ -53,9 +53,9 @@ import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Events.getProducer;
-import static io.spine.core.Events.timestampOf;
 import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
+import static io.spine.core.Events.timestampOf;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.type.given.EventsTestEnv.tenantId;
@@ -93,7 +93,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         StringValue producerId = StringValue.of(getClass().getSimpleName());
         eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(GivenEvent.message(), null);
-        context = event.getContext();
+        context = event.context();
     }
 
     private static CommandEnvelope generate() {
@@ -152,7 +152,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         void timestamp() {
             Event event = GivenEvent.occurredMinutesAgo(1);
 
-            assertEquals(event.getContext()
+            assertEquals(event.context()
                               .getTimestamp(), timestampOf(event));
         }
 

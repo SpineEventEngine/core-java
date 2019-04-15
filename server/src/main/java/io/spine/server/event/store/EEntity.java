@@ -72,7 +72,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
      */
     @Column
     public Timestamp getCreated() {
-        return state().getContext()
+        return state().context()
                       .getTimestamp();
     }
 

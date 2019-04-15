@@ -21,6 +21,7 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 
 /**
@@ -34,6 +35,11 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      */
     @Override
     default TenantId tenant() {
-        return Events.retrieveActorContext(getContext()).getTenantId();
+        return Events.retrieveActorContext(context()).getTenantId();
+    }
+
+    @Override
+    default Timestamp time() {
+        return context().getTimestamp();
     }
 }

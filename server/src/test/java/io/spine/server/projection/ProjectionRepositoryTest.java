@@ -117,10 +117,7 @@ class ProjectionRepositoryTest
      * in multi-tenant context.
      */
     private static void keepTenantIdFromEvent(BoundedContext boundedContext, Event event) {
-        TenantId tenantId = event.getContext()
-                                 .getCommandContext()
-                                 .getActorContext()
-                                 .getTenantId();
+        TenantId tenantId = event.tenant();
         if (boundedContext.isMultitenant()) {
             boundedContext.tenantIndex()
                           .keep(tenantId);

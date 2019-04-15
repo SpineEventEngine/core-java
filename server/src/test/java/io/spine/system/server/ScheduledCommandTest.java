@@ -157,7 +157,7 @@ class ScheduledCommandTest {
     }
 
     private static Command schedule(Command command, Schedule schedule) {
-        CommandContext sourceContext = command.getContext();
+        CommandContext sourceContext = command.context();
         CommandContext newContext = sourceContext.toBuilder()
                                                  .setSchedule(schedule)
                                                  .build();

@@ -88,7 +88,7 @@ class CommandFactoryTest {
         void withEntityVersion() {
             Command command = factory.create(command(), 2);
 
-            CommandContext context = command.getContext();
+            CommandContext context = command.context();
             assertEquals(2, context.getTargetVersion());
         }
 
@@ -105,7 +105,7 @@ class CommandFactoryTest {
                     .setZoneOffset(ZONE_OFFSET)
                     .build();
             Command command = mtFactory.command().create(command());
-            assertEquals(tenantId, command.getContext()
+            assertEquals(tenantId, command.context()
                                           .getActorContext()
                                           .getTenantId());
         }

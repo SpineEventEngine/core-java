@@ -126,7 +126,7 @@ public final class CommandEnvelope
      */
     @Override
     public CommandContext context() {
-        return outerObject().getContext();
+        return outerObject().context();
     }
 
     /**

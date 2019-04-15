@@ -232,7 +232,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
                                       .getVersion()
                                       .getNumber();
             } else {
-                versionNumber = event.getContext()
+                versionNumber = event.context()
                                      .getVersion()
                                      .getNumber();
             }

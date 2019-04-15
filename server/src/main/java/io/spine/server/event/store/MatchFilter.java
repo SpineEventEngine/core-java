@@ -94,7 +94,7 @@ final class MatchFilter implements Predicate<Event> {
         }
 
         EventMessage eventMessage = Events.getMessage(event);
-        EventContext context = event.getContext();
+        EventContext context = event.context();
 
         if (!checkEventType(eventMessage)) {
             return false;

@@ -136,7 +136,7 @@ public final class Commands {
 
     private static Timestamp timestampOf(Command request) {
         checkNotNull(request);
-        Timestamp result = request.getContext()
+        Timestamp result = request.context()
                                   .getActorContext()
                                   .getTimestamp();
         return result;
@@ -174,7 +174,7 @@ public final class Commands {
      */
     public static boolean isScheduled(Command command) {
         checkNotNull(command);
-        Schedule schedule = command.getContext()
+        Schedule schedule = command.context()
                                    .getSchedule();
         Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {

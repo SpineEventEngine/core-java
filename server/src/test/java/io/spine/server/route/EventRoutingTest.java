@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.spine.core.Events.getMessage;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -166,7 +165,7 @@ class EventRoutingTest {
         // It should go through the default route, because only `StringValue` has a custom route.
         Event event = GivenEvent.arbitrary();
 
-        Set<Long> ids = eventRouting.apply(getMessage(event), event.getContext());
+        Set<Long> ids = eventRouting.apply(event.enclosedMessage(), event.context());
         assertEquals(DEFAULT_ROUTE, ids);
     }
 

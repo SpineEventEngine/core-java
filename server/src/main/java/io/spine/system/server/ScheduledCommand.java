@@ -50,7 +50,7 @@ final class ScheduledCommand
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
         CommandContext updatedContext =
-                source.getContext()
+                source.context()
                       .toVBuilder()
                       .setSchedule(schedule)
                       .build();
