@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.base.MessageContext;
+import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
@@ -32,36 +33,46 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
  *
- * @apiNote Some methods use the {@code 'get'} prefix to mix-in with the generated code.
+ * @param <I>
+ *         the type of the message identifier
+ * @param <M>
+ *         the type of the enclosed messages
+ * @param <C>
+ *         the type of the message context
  */
 @GeneratedMixin
-public interface MessageWithContext extends Message {
+public interface MessageWithContext<I extends MessageId,
+                                    M extends SerializableMessage,
+                                    C extends MessageContext>
+        extends Message {
 
     /**
      * Obtains the identifier of the message.
      */
-    Message getId();
+    I getId();
 
     /**
      * Obtains the packed version of the enclosed message.
      *
      * @see #enclosedMessage()
      */
+    @SuppressWarnings("override") // in generated code
     Any getMessage();
 
     /**
      * Obtains the context of the enclosed message.
      */
-    MessageContext getContext();
+    C getContext();
 
     /**
      * Obtains the unpacked form of the enclosed message.
      *
      * @see #getMessage()
      */
-    default Message enclosedMessage() {
+    @SuppressWarnings("unchecked") // protected by generic params of extending interfaces
+    default M enclosedMessage() {
         Message enclosed = AnyPacker.unpack(getMessage());
-        return enclosed;
+        return (M) enclosed;
     }
 
     /**

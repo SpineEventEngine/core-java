@@ -72,7 +72,7 @@ message EventId {
 // See `EventContext.rejection` to determine the event kind.
 //
 message Event {
-    option (is).java_type = "io.spine.core.MessageWithContext";
+    option (is).java_type = "io.spine.core.EventMixin";
 
     // The ID of the event.
     EventId id = 1 [(required) = true];
