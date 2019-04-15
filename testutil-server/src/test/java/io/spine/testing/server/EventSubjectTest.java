@@ -21,16 +21,18 @@
 package io.spine.testing.server;
 
 import com.google.common.truth.Subject;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
+import io.spine.testing.server.given.entity.event.TuTaskCreated;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.EventSubject.events;
 
 @DisplayName("EventSubject should")
-class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event> {
+class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, EventMessage> {
 
     private static final TestEventFactory events =
             TestEventFactory.newInstance(EventSubjectTest.class);
@@ -47,14 +49,32 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event> {
 
     @Override
     Event createMessage() {
-        TuTaskId taskId = TuTaskId
-                .vBuilder()
-                .setValue(newUuid())
-                .build();
+        TuTaskId taskId = generateTaskId();
         TuCommentAdded event = TuCommentAdded
                 .vBuilder()
                 .setId(taskId)
                 .build();
-        return events.createEvent(event);
+        return newEvent(event);
+    }
+
+    @Override
+    Event createAnotherMessage() {
+        TuTaskId taskId = generateTaskId();
+        TuTaskCreated event = TuTaskCreated
+                .vBuilder()
+                .setId(taskId)
+                .build();
+        return newEvent(event);
+    }
+
+    private static Event newEvent(EventMessage msg) {
+        return events.createEvent(msg);
+    }
+
+    private static TuTaskId generateTaskId() {
+        return TuTaskId
+                .vBuilder()
+                .setValue(newUuid())
+                .build();
     }
 }

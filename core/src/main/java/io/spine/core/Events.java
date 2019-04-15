@@ -43,7 +43,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
@@ -130,8 +129,7 @@ public final class Events {
      */
     public static EventMessage getMessage(Event event) {
         checkNotNull(event);
-        Any any = event.getMessage();
-        EventMessage result = (EventMessage) unpack(any);
+        EventMessage result = (EventMessage) event.enclosedMessage();
         return result;
     }
 

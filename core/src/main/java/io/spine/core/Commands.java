@@ -42,7 +42,6 @@ import java.util.function.Predicate;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandContext.Schedule;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -70,7 +69,7 @@ public final class Commands {
      */
     public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        CommandMessage result = (CommandMessage) unpack(command.getMessage());
+        CommandMessage result = (CommandMessage) command.enclosedMessage();
         return result;
     }
 

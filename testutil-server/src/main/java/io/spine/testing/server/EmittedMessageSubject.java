@@ -21,7 +21,9 @@
 package io.spine.testing.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
@@ -34,6 +36,9 @@ import io.spine.core.MessageWithContext;
 import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import java.util.List;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Fact.fact;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 
@@ -42,23 +47,40 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
  * a Bounded Context under the test.
  *
  * @param <S>
- *          the self-type for return type covariance
+ *         the self-type for return type covariance
  * @param <T>
- *          the type of the outer objects of the checked messages,
- *          such as {@link io.spine.core.Command Command} or {@link io.spine.core.Event Event}
+ *         the type of the outer objects of the checked messages,
+ *         such as {@link io.spine.core.Command Command} or {@link io.spine.core.Event Event}
  * @param <M>
- *          the type of emitted messages, such as {@link io.spine.base.CommandMessage CommandMessage}
- *          or {@link io.spine.base.EventMessage EventMessage}.
+ *         the type of emitted messages, such as {@link io.spine.base.CommandMessage CommandMessage}
+ *         or {@link io.spine.base.EventMessage EventMessage}.
  */
 public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T, M>,
                                             T extends MessageWithContext,
                                             M extends SerializableMessage>
         extends Subject<S, Iterable<T>> {
 
+    /**
+     * Key strings for Truth facts.
+     */
     @VisibleForTesting
-    static final String MESSAGE_COUNT_FACT_KEY = "the count of the generated messages is";
-    @VisibleForTesting
-    static final String REQUESTED_INDEX_FACT_KEY = "but the requested index was";
+    enum FactKey {
+
+        MESSAGE_COUNT("the count of the generated messages is"),
+        REQUESTED_INDEX("but the requested index was"),
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        ACTUAL("actual");
+
+        private final String value;
+
+        FactKey(String value) {
+            this.value = value;
+        }
+
+        String value() {
+            return value;
+        }
+    }
 
     protected EmittedMessageSubject(FailureMetadata metadata, @NullableDecl Iterable<T> actual) {
         super(metadata, actual);
@@ -92,8 +114,8 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         int size = Iterables.size(actual());
         if (index >= size) {
             failWithActual(
-                    fact(MESSAGE_COUNT_FACT_KEY, size),
-                    fact(REQUESTED_INDEX_FACT_KEY, index)
+                    fact(FactKey.MESSAGE_COUNT.value, size),
+                    fact(FactKey.REQUESTED_INDEX.value, index)
             );
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
@@ -101,6 +123,30 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             T outerObject = Iterables.get(actual(), index);
             Message unpacked = AnyPacker.unpack(outerObject.getMessage());
             return ProtoTruth.assertThat(unpacked);
+        }
+    }
+
+    /**
+     * Provides factory for creating the same type of subject on a subset of messages.
+     */
+    protected abstract Subject.Factory<S, Iterable<T>> factory();
+
+    /**
+     * Obtains the subject over outer objects that contain messages of the passed class.
+     */
+    public final S withType(Class<? extends M> messageClass) {
+        Iterable<T> actual = actual();
+        if (actual == null) {
+            failWithActual(fact(FactKey.ACTUAL.value, null));
+            return ignoreCheck().about(factory())
+                                .that(ImmutableList.of());
+        } else {
+            List<T> filtered =
+                    Streams.stream(actual)
+                           .filter(m -> m.is(messageClass))
+                           .collect(toImmutableList());
+            return check().about(factory())
+                          .that(filtered);
         }
     }
 }

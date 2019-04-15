@@ -22,14 +22,19 @@ package io.spine.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.base.MessageContext;
+import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
  *
  * @apiNote Some methods use the {@code 'get'} prefix to mix-in with the generated code.
  */
+@GeneratedMixin
 public interface MessageWithContext extends Message {
 
     /**
@@ -38,7 +43,9 @@ public interface MessageWithContext extends Message {
     Message getId();
 
     /**
-     * Obtains the enclosed message.
+     * Obtains the packed version of the enclosed message.
+     *
+     * @see #enclosedMessage()
      */
     Any getMessage();
 
@@ -48,9 +55,30 @@ public interface MessageWithContext extends Message {
     MessageContext getContext();
 
     /**
+     * Obtains the unpacked form of the enclosed message.
+     *
+     * @see #getMessage()
+     */
+    default Message enclosedMessage() {
+        Message enclosed = AnyPacker.unpack(getMessage());
+        return enclosed;
+    }
+
+    /**
      * Obtains the type URL of the enclosed message.
      */
     default TypeUrl typeUrl() {
         return TypeUrl.ofEnclosed(getMessage());
+    }
+
+    /**
+     * Verifies if the enclosed message has the same type as the passed, or the passed type
+     * is the super-type of the message.
+     */
+    default boolean is(Class<? extends Message> enclosedMessageClass) {
+        checkNotNull(enclosedMessageClass);
+        Message enclosed = enclosedMessage();
+        boolean result = enclosedMessageClass.isAssignableFrom(enclosed.getClass());
+        return result;
     }
 }

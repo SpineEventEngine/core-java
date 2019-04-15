@@ -21,18 +21,21 @@
 package io.spine.testing.server;
 
 import com.google.common.truth.Subject;
+import io.spine.base.CommandMessage;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
+import io.spine.testing.server.given.entity.command.TuCreateTask;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.CommandSubject.commands;
 
 @DisplayName("CommandSubject should")
-class CommandSubjectTest extends EmittedMessageSubjectTest<CommandSubject, Command> {
+class CommandSubjectTest
+        extends EmittedMessageSubjectTest<CommandSubject, Command, CommandMessage> {
 
     private static final CommandFactory commands =
             new TestActorRequestFactory(CommandSubjectTest.class).command();
@@ -49,14 +52,32 @@ class CommandSubjectTest extends EmittedMessageSubjectTest<CommandSubject, Comma
 
     @Override
     Command createMessage() {
-        TuTaskId taskId = TuTaskId
+        return newCommand(
+                TuAddComment
+                        .vBuilder()
+                        .setId(generateTaskId())
+                        .build()
+        );
+    }
+
+    @Override
+    Command createAnotherMessage() {
+        return newCommand(
+                TuCreateTask
+                        .vBuilder()
+                        .setId(generateTaskId())
+                        .build()
+        );
+    }
+
+    private static Command newCommand(CommandMessage msg) {
+        return commands.create(msg);
+    }
+
+    private static TuTaskId generateTaskId() {
+        return TuTaskId
                 .vBuilder()
                 .setValue(newUuid())
                 .build();
-        TuAddComment event = TuAddComment
-                .vBuilder()
-                .setId(taskId)
-                .build();
-        return commands.create(event);
     }
 }

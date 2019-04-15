@@ -20,7 +20,9 @@
 
 package io.spine.core;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.base.MessageContext;
 import io.spine.core.Enrichment.Container;
 
@@ -31,6 +33,8 @@ import static io.spine.core.Enrichments.containerIn;
 /**
  * A common interface for message contexts that hold enrichments.
  */
+@GeneratedMixin
+@Immutable
 public interface EnrichableMessageContext extends MessageContext {
 
     /**
