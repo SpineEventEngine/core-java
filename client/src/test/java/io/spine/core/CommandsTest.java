@@ -48,13 +48,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.currentTime;
-import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.Commands.wereWithinPeriod;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,25 +122,6 @@ class CommandsTest {
         Commands.sort(commandsToSort);
 
         assertEquals(sortedCommands, commandsToSort);
-    }
-
-    @Test
-    @DisplayName("check if command contexts have same actor and tenant id")
-    void checkSameActorAndTenantId() {
-        ActorContext.Builder actorContext = ActorContext
-                .newBuilder()
-                .setActor(GivenUserId.newUuid())
-                .setTenantId(newUuid());
-        CommandContext c1 = CommandContext
-                .newBuilder()
-                .setActorContext(actorContext)
-                .build();
-        CommandContext c2 = CommandContext
-                .newBuilder()
-                .setActorContext(actorContext)
-                .build();
-
-        assertTrue(sameActorAndTenant(c1, c2));
     }
 
     @Test

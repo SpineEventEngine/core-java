@@ -134,20 +134,12 @@ public final class Commands {
         };
     }
 
-    private static Timestamp timestampOf(Command request) {
-        checkNotNull(request);
-        Timestamp result = request.context()
-                                  .getActorContext()
-                                  .getTimestamp();
-        return result;
-    }
-
     /**
      * Obtains the creation time of the passed command.
      */
     @VisibleForTesting
     public static TimestampTemporal timeOf(Command command) {
-        TimestampTemporal result = Utils.toTemporal(timestampOf(command));
+        TimestampTemporal result = Utils.toTemporal(command.time());
         return result;
     }
 
@@ -158,11 +150,7 @@ public final class Commands {
      */
     public static void sort(List<Command> commands) {
         checkNotNull(commands);
-        commands.sort((o1, o2) -> {
-            Timestamp timestamp1 = timestampOf(o1);
-            Timestamp timestamp2 = timestampOf(o2);
-            return Timestamps.compare(timestamp1, timestamp2);
-        });
+        commands.sort((c1, c2) -> Timestamps.compare(c1.time(), c2.time()));
     }
 
     /**
@@ -183,22 +171,6 @@ public final class Commands {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Tests whether both command contexts are from the same actor
-     * working under the same tenant.
-     */
-    @VisibleForTesting
-    static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
-        checkNotNull(c1);
-        checkNotNull(c2);
-        ActorContext a1 = c1.getActorContext();
-        ActorContext a2 = c2.getActorContext();
-        return a1.getActor()
-                 .equals(a2.getActor()) &&
-               a1.getTenantId()
-                 .equals(a2.getTenantId());
     }
 
     /**

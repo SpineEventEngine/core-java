@@ -24,6 +24,8 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 
+import static io.spine.core.Events.retrieveActorContext;
+
 /**
  * Mixin interface for event objects.
  */
@@ -35,7 +37,7 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      */
     @Override
     default TenantId tenant() {
-        return Events.retrieveActorContext(context()).getTenantId();
+        return retrieveActorContext(context()).getTenantId();
     }
 
     @Override
