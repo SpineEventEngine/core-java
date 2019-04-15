@@ -30,6 +30,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Utils.toTemporal;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
@@ -116,5 +117,25 @@ public interface MessageWithContext<I extends MessageId,
         Message enclosed = enclosedMessage();
         boolean result = enclosedMessageClass.isAssignableFrom(enclosed.getClass());
         return result;
+    }
+
+    /**
+     * Verifies if the message was created after the passed time.
+     */
+    default boolean isAfter(Timestamp time) {
+        return toTemporal(time()).isLaterThan(toTemporal(time));
+    }
+
+    /**
+     * Verifies if the message was created within the passed period of time.
+     *
+     * @param periodStart
+     *         lower bound, exclusive
+     * @param periodEnd
+     *         higher bound, inclusive
+     * @return {@code true} if the time point of the command creation lies in between the given two
+     */
+    default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
+        return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
     }
 }

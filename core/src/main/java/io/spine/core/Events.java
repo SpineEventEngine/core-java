@@ -22,7 +22,6 @@ package io.spine.core;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
@@ -52,13 +51,6 @@ import static java.util.stream.Collectors.toList;
  * Utility class for working with {@link Event} objects.
  */
 public final class Events {
-
-    /** Compares two events by their timestamps. */
-    private static final Comparator<Event> eventComparator = (o1, o2) -> {
-        Timestamp timestamp1 = timestampOf(o1);
-        Timestamp timestamp2 = timestampOf(o2);
-        return Timestamps.compare(timestamp1, timestamp2);
-    };
 
     /** The stringifier for event IDs. */
     private static final Stringifier<EventId> idStringifier = new EventIdStringifier();
@@ -100,24 +92,14 @@ public final class Events {
      * Returns comparator which compares events by their timestamp in chronological order.
      */
     public static Comparator<Event> eventComparator() {
-        return eventComparator;
-    }
-
-    /**
-     * Obtains the timestamp of the event.
-     */
-    static Timestamp timestampOf(Event event) {
-        checkNotNull(event);
-        Timestamp result = event.context()
-                                .getTimestamp();
-        return result;
+        return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
     }
 
     /**
      * Obtains the time of the passed event.
      */
     static TimestampTemporal timeOf(Event event) {
-        return (TimestampTemporal) Temporals.from(timestampOf(event));
+        return (TimestampTemporal) Temporals.from(event.time());
     }
 
     /**

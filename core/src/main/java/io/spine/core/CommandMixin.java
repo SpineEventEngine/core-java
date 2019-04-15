@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Utils.toTemporal;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -49,26 +48,6 @@ public interface CommandMixin
     default Timestamp time() {
         return context().getActorContext()
                         .getTimestamp();
-    }
-
-    /**
-     * Verifies if the command was created after the passed time.
-     */
-    default boolean isAfter(Timestamp time) {
-        return toTemporal(time()).isLaterThan(toTemporal(time));
-    }
-
-    /**
-     * Verifies if the command was created within the passed period of time.
-     *
-     * @param periodStart
-     *         lower bound, exclusive
-     * @param periodEnd
-     *         higher bound, inclusive
-     * @return {@code true} if the time point of the command creation lies in between the given two
-     */
-    default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
-        return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
     }
 
     /**

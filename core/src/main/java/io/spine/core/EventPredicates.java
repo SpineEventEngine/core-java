@@ -29,9 +29,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static com.google.protobuf.util.Timestamps.compare;
-import static io.spine.core.Utils.toTemporal;
 import static io.spine.core.Events.timeOf;
-import static io.spine.core.Events.timestampOf;
+import static io.spine.core.Utils.toTemporal;
 
 /**
  * Predicates for working with {@code Event}s.
@@ -79,11 +78,11 @@ public final class EventPredicates {
         }
 
         @Override
-        public boolean test(@Nullable Event record) {
-            if (record == null) {
+        public boolean test(@Nullable Event event) {
+            if (event == null) {
                 return false;
             }
-            Timestamp ts = timestampOf(record);
+            Timestamp ts = event.time();
             boolean result = compare(ts, this.timestamp) > 0;
             return result;
         }
@@ -99,12 +98,12 @@ public final class EventPredicates {
         }
 
         @Override
-        public boolean test(@Nullable Event record) {
-            if (record == null) {
+        public boolean test(@Nullable Event event) {
+            if (event == null) {
                 return false;
             }
 
-            Timestamp ts = timestampOf(record);
+            Timestamp ts = event.time();
             boolean result = compare(ts, this.timestamp) < 0;
             return result;
         }
