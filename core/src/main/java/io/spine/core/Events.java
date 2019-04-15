@@ -51,7 +51,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * Utility class for working with {@link Event} objects.
  */
-@SuppressWarnings("ClassWithTooManyMethods") // Lots of event-related utility methods.
 public final class Events {
 
     /** Compares two events by their timestamps. */
@@ -180,23 +179,6 @@ public final class Events {
     public static Object getProducer(EventContext context) {
         checkNotNull(context);
         return Identifier.unpack(context.getProducerId());
-    }
-
-    /**
-     * Obtains the ID of the root command, which lead to this event.
-     *
-     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event},
-     * the identifier of the very first command in this chain is returned.
-     *
-     * @param event
-     *         the event to get the root command ID for
-     * @return the root command ID
-     */
-    public static CommandId getRootCommandId(Event event) {
-        checkNotNull(event);
-        EventContext context = event.context();
-        CommandId id = context.getRootCommandId();
-        return id;
     }
 
     /**

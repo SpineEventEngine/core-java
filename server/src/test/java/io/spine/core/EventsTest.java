@@ -20,7 +20,6 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.EventMessage;
@@ -50,6 +49,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Events.checkValid;
 import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getProducer;
@@ -144,7 +144,7 @@ public class EventsTest extends UtilityClassTest<Events> {
         void message() {
             EventMessage message = GivenEvent.message();
             Event event = GivenEvent.withMessage(message);
-            Truth.assertThat(event.enclosedMessage())
+            assertThat(event.enclosedMessage())
                  .isEqualTo(message);
         }
 
@@ -163,7 +163,8 @@ public class EventsTest extends UtilityClassTest<Events> {
             CommandEnvelope command = generate();
             Event event = newEvent(command);
 
-            assertEquals(command.id(), Events.getRootCommandId(event));
+            assertThat(event.rootCommandId())
+                    .isEqualTo(command.id());
         }
 
         @Test

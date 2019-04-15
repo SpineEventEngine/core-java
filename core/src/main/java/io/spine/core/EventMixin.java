@@ -44,4 +44,16 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     default Timestamp time() {
         return context().getTimestamp();
     }
+
+    /**
+     * Obtains the ID of the root command, which lead to this event.
+     *
+     * <p> In case the {@code Event} is a reaction to another {@code Event},
+     * the identifier of the very first command in this chain is returned.
+     *
+     * @return the root command ID
+     */
+    default CommandId rootCommandId() {
+        return context().getRootCommandId();
+    }
 }
