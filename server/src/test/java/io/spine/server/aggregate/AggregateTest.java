@@ -77,7 +77,6 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.Commands.getMessage;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -579,7 +578,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(getMessage(command)));
+                dispatchCommand(faultyAggregate, env(command));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);
@@ -597,7 +596,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(getMessage(command)));
+                dispatchCommand(faultyAggregate, env(command));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);

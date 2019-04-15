@@ -56,7 +56,6 @@ public interface MessageWithContext<I extends MessageId,
      *
      * @see #enclosedMessage()
      */
-    @SuppressWarnings("override") // in generated code
     Any getMessage();
 
     /**

@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Commands.sameActorAndTenant;
@@ -152,7 +153,8 @@ class CommandsTest {
                 .setId(Identifier.newUuid())
                 .build();
         Command command = requestFactory.createCommand(message);
-        assertEquals(message, Commands.getMessage(command));
+        assertThat(command.enclosedMessage())
+                .isEqualTo(message);
     }
 
     @Nested

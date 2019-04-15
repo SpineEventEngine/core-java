@@ -66,10 +66,12 @@ public final class Commands {
      *
      * @param command a command to extract a message from
      * @return an unpacked message
+     * @deprecated use {@link Command#enclosedMessage()}
      */
+    @Deprecated
     public static CommandMessage getMessage(Command command) {
         checkNotNull(command);
-        CommandMessage result = (CommandMessage) command.enclosedMessage();
+        CommandMessage result = command.enclosedMessage();
         return result;
     }
 
@@ -80,7 +82,7 @@ public final class Commands {
     public static CommandMessage ensureMessage(Message commandOrMessage) {
         checkNotNull(commandOrMessage);
         if (commandOrMessage instanceof Command) {
-            return getMessage((Command) commandOrMessage);
+            return ((Command) commandOrMessage).enclosedMessage();
         }
         CommandMessage unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
         return unpacked;
