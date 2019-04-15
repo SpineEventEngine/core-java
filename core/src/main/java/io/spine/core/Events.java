@@ -129,7 +129,6 @@ public final class Events {
      */
     public static EventMessage getMessage(Event event) {
         checkNotNull(event);
-        Any any = event.getMessage();
         EventMessage result = (EventMessage) event.enclosedMessage();
         return result;
     }
