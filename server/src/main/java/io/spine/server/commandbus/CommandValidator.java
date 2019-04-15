@@ -22,10 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.Commands;
+import io.spine.core.CommandId;
 import io.spine.core.MessageInvalid;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
@@ -119,11 +120,32 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
      */
     private static final class ViolationCheck {
 
+        private static final String COMMAND_ID_CANNOT_BE_EMPTY = "Command ID cannot be empty.";
+
         private final CommandEnvelope command;
         private final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
 
         private ViolationCheck(CommandEnvelope commandEnvelope) {
             this.command = commandEnvelope;
+        }
+
+        /**
+         * Validates the passed command ID.
+         */
+        @Internal
+        private static List<ConstraintViolation> validateId(CommandId id) {
+            MessageValidator validator = MessageValidator.newInstance(id);
+            List<ConstraintViolation> violations = validator.validate();
+            if (id.getUuid().isEmpty()) {
+                return ImmutableList.<ConstraintViolation>builder()
+                        .addAll(violations)
+                        .add(ConstraintViolation
+                                     .newBuilder()
+                                     .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY)
+                                     .build())
+                        .build();
+            }
+            return violations;
         }
 
         private List<ConstraintViolation> build() {
@@ -135,7 +157,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateId() {
-            List<ConstraintViolation> violations = Commands.validateId(command.id());
+            List<ConstraintViolation> violations = validateId(command.id());
             if (!violations.isEmpty()) {
                 result.addAll(violations);
             }

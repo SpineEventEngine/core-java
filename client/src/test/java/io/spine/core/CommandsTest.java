@@ -225,18 +225,4 @@ class CommandsTest {
         CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
         assertEquals(id, convertedBack);
     }
-
-    @Test
-    @DisplayName("throw exception if checked command id is empty")
-    void throwOnEmptyId() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> Commands.checkValid(CommandId.getDefaultInstance()));
-    }
-
-    @Test
-    @DisplayName("return command id value when checked")
-    void returnIdWhenChecked() {
-        CommandId id = CommandId.generate();
-        assertEquals(id, Commands.checkValid(id));
-    }
 }
