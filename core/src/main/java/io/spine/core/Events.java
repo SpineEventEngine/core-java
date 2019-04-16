@@ -22,7 +22,6 @@ package io.spine.core;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -32,7 +31,6 @@ import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +40,6 @@ import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -76,24 +73,6 @@ public final class Events {
     }
 
     /**
-     * Sorts the given event record list by the event timestamps.
-     *
-     * @param events
-     *         the event record list to sort
-     */
-    public static void sort(List<Event> events) {
-        checkNotNull(events);
-        events.sort(eventComparator());
-    }
-
-    /**
-     * Returns comparator which compares events by their timestamp in chronological order.
-     */
-    public static Comparator<Event> eventComparator() {
-        return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
-    }
-
-    /**
      * Extract event messages from the passed events.
      */
     public static List<? extends EventMessage> toMessages(List<Event> events) {
@@ -118,6 +97,7 @@ public final class Events {
         return (EventMessage) unpacked;
     }
 
+    //TODO:2019-04-16:alexander.yevsyukov: Move to EventContextMixin
     /**
      * Obtains the actor user ID from the passed {@code EventContext}.
      *
@@ -142,6 +122,7 @@ public final class Events {
         return result;
     }
 
+    //TODO:2019-04-16:alexander.yevsyukov: Move to EventContextMixin
     /**
      * Obtains event producer ID from the passed {@code EventContext}.
      *
@@ -175,20 +156,7 @@ public final class Events {
         return id;
     }
 
-    /**
-     * Checks whether or not the given event is a rejection event.
-     *
-     * @param event
-     *         the event to check
-     * @return {@code true} if the given event is a rejection, {@code false} otherwise
-     */
-    public static boolean isRejection(Event event) {
-        checkNotNull(event);
-        EventContext context = event.context();
-        boolean result = context.hasRejection() || !isDefault(context.getRejection());
-        return result;
-    }
-
+    //TODO:2019-04-16:alexander.yevsyukov: Move to ThrowableMessage
     /**
      * Constructs a new {@link RejectionEventContext} from the given command message and
      * {@link ThrowableMessage}.
@@ -259,6 +227,7 @@ public final class Events {
         return context.getExternal();
     }
 
+    //TODO:2019-04-16:alexander.yevsyukov: Move to EventMixin
     /**
      * Clears enrichments of the specified event.
      *
@@ -296,6 +265,7 @@ public final class Events {
         return result;
     }
 
+    //TODO:2019-04-16:alexander.yevsyukov: Move to EventMixin
     /**
      * Replaces the event version with the given {@code newVersion}.
      *

@@ -53,7 +53,7 @@ public final class EventEnvelope
     private EventEnvelope(Event event) {
         super(event);
         this.eventClass = EventClass.of(event.enclosedMessage());
-        this.rejection = Events.isRejection(event);
+        this.rejection = event.isRejection();
     }
 
     /**
@@ -143,7 +143,7 @@ public final class EventEnvelope
     /**
      * Obtains the class of the origin message if available.
      *
-     * <p>If this envelope represents a {@linkplain Events#isRejection(Event) rejection}, returns
+     * <p>If this envelope represents a {@linkplain Event#isRejection() rejection}, returns
      * the type of rejected command.
      *
      * @return the class of origin message or {@link EmptyClass} if the origin message type is
@@ -198,13 +198,15 @@ public final class EventEnvelope
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {
-        EventContext context = this.context()
-                                   .toVBuilder()
-                                   .setEnrichment(enrichment)
-                                   .build();
-        Event enrichedCopy = outerObject().toVBuilder()
-                                          .setContext(context)
-                                          .build();
+        EventContext context =
+                this.context()
+                    .toVBuilder()
+                    .setEnrichment(enrichment)
+                    .build();
+        Event enrichedCopy =
+                outerObject().toVBuilder()
+                             .setContext(context)
+                             .build();
         return of(enrichedCopy);
     }
 }

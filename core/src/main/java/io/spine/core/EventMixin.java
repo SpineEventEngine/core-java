@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 
 import static io.spine.core.Events.retrieveActorContext;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * Mixin interface for event objects.
@@ -55,5 +56,16 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      */
     default CommandId rootCommandId() {
         return context().getRootCommandId();
+    }
+
+    /**
+     * Checks if this event is a rejection.
+     *
+     * @return {@code true} if the given event is a rejection, {@code false} otherwise
+     */
+    default boolean isRejection() {
+        EventContext context = context();
+        boolean result = context.hasRejection() || !isDefault(context.getRejection());
+        return result;
     }
 }

@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.isRejection;
 
 /**
  * A command dispatch operation.
@@ -109,7 +108,7 @@ public final class DispatchCommand<I> {
             return Optional.empty();
         }
         Event singleEvent = produced.get(0);
-        Optional<Event> result = isRejection(singleEvent)
+        Optional<Event> result = singleEvent.isRejection()
                                  ? Optional.of(singleEvent)
                                  : Optional.empty();
         return result;
