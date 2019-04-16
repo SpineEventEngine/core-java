@@ -22,8 +22,10 @@ package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 
+import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.core.Events.retrieveActorContext;
 import static io.spine.validate.Validate.isDefault;
 
@@ -66,6 +68,45 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     default boolean isRejection() {
         EventContext context = context();
         boolean result = context.hasRejection() || !isDefault(context.getRejection());
+        return result;
+    }
+
+    /**
+     * Creates a copy of this instance without enrichments.
+     *
+     * <p>Use this method to decrease a size of an event, if enrichments aren't important.
+     *
+     * <p>A result won't contain:
+     * <ul>
+     *     <li>the enrichment from the event context;</li>
+     *     <li>the enrichment from the first-level origin.</li>
+     * </ul>
+     *
+     * <p>Enrichments will not be removed from second-level and deeper origins,
+     * because it's a heavy performance operation.
+     *
+     * @return the event without enrichments
+     */
+    @SuppressWarnings({
+            "ClassReferencesSubclass" /* `Event` is the only case of this mixin. */,
+            "CheckReturnValue" /* calling builder */
+    })
+    @Internal
+    default Event clearEnrichments() {
+        EventContext context = context();
+        EventContext.OriginCase originCase = context.getOriginCase();
+        EventContextVBuilder resultContext = context.toVBuilder()
+                                                    .clearEnrichment();
+        if (originCase == EVENT_CONTEXT) {
+            resultContext.setEventContext(context.getEventContext()
+                                                 .toVBuilder()
+                                                 .clearEnrichment()
+                                                 .build());
+        }
+        Event thisEvent = (Event) this;
+        Event result = thisEvent.toVBuilder()
+                                .setContext(resultContext.build())
+                                .build();
         return result;
     }
 }

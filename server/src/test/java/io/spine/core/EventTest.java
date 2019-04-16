@@ -43,16 +43,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.Events.getActor;
-import static io.spine.core.Events.getProducer;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.type.given.EventsTestEnv.commandContext;
 import static io.spine.server.type.given.EventsTestEnv.event;
 import static io.spine.server.type.given.EventsTestEnv.tenantId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Test functionality of {@link Events} utility class.
@@ -60,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
  */
-@DisplayName("Events utility should")
+@DisplayName("Event should")
 public class EventTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
@@ -100,27 +96,6 @@ public class EventTest extends UtilityClassTest<Events> {
               .setDefault(Version.class, Version.getDefaultInstance())
               .setDefault(Event.class, Event.getDefaultInstance())
               .setDefault(ThrowableMessage.class, defaultThrowableMessage);
-    }
-
-    @Nested
-    @DisplayName("given event context, obtain")
-    class GetFromEventContext {
-
-        @Test
-        @DisplayName("actor")
-        void actor() {
-            assertEquals(context.getCommandContext()
-                                .getActorContext()
-                                .getActor(), getActor(context));
-        }
-
-        @Test
-        @DisplayName("producer")
-        void producer() {
-            StringValue msg = unpack(context.getProducerId(), StringValue.class);
-            String id = (String) getProducer(context);
-            assertEquals(msg.getValue(), id);
-        }
     }
 
     @Nested
@@ -175,30 +150,6 @@ public class EventTest extends UtilityClassTest<Events> {
         }
     }
 
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Method called to throw exception.
-    @Nested
-    @DisplayName("throw IAE when reading tenant ID")
-    class ThrowIaeOnRead {
-
-        @Test
-        @DisplayName("of the event without origin")
-        void forEventWithoutOrigin() {
-            EventContext context = contextWithoutOrigin().build();
-            Event event = event(context);
-            assertThrows(IllegalArgumentException.class, event::tenant);
-        }
-
-        @Test
-        @DisplayName("of the event whose event context has no origin")
-        void forEventContextWithoutOrigin() {
-            EventContext context = contextWithoutOrigin()
-                    .setEventContext(contextWithoutOrigin())
-                    .build();
-            Event event = event(context);
-            assertThrows(IllegalArgumentException.class, event::tenant);
-        }
-    }
 
     @Nested
     @DisplayName("retrieve tenant ID")
@@ -235,10 +186,15 @@ public class EventTest extends UtilityClassTest<Events> {
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
         }
+
+        private EventContext.Builder contextWithoutOrigin() {
+            return context.toBuilder()
+                          .clearOrigin();
+        }
     }
 
     @Test
-    @DisplayName("tell if an Event is a rejection event")
+    @DisplayName("tell if it is a rejection")
     void tellWhenRejection() {
         RejectionEventContext rejectionContext = RejectionEventContext
                 .newBuilder()
@@ -255,14 +211,9 @@ public class EventTest extends UtilityClassTest<Events> {
     }
 
     @Test
-    @DisplayName("tell if an Event is NOT a rejection event")
+    @DisplayName("tell if it is NOT a rejection")
     void tellWhenNotRejection() {
         assertThat(event.isRejection())
                 .isFalse();
-    }
-
-    private EventContext.Builder contextWithoutOrigin() {
-        return context.toBuilder()
-                      .clearOrigin();
     }
 }

@@ -36,7 +36,6 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getStackTraceAsString;
-import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
@@ -225,44 +224,6 @@ public final class Events {
     public static boolean isExternal(EventContext context) {
         checkNotNull(context);
         return context.getExternal();
-    }
-
-    //TODO:2019-04-16:alexander.yevsyukov: Move to EventMixin
-    /**
-     * Clears enrichments of the specified event.
-     *
-     * <p>Use this method to decrease a size of an event, if enrichments aren't important.
-     *
-     * <p>A result won't contain:
-     * <ul>
-     *     <li>the enrichment from the event context;</li>
-     *     <li>the enrichment from the first-level origin.</li>
-     * </ul>
-     *
-     * <p>Enrichments will not be removed from second-level and deeper origins,
-     * because it's a heavy performance operation.
-     *
-     * @param event
-     *         the event to clear enrichments
-     * @return the event without enrichments
-     */
-    @SuppressWarnings("CheckReturnValue") // calling builder
-    @Internal
-    public static Event clearEnrichments(Event event) {
-        EventContext context = event.context();
-        EventContext.OriginCase originCase = context.getOriginCase();
-        EventContextVBuilder resultContext = context.toVBuilder()
-                                                    .clearEnrichment();
-        if (originCase == EVENT_CONTEXT) {
-            resultContext.setEventContext(context.getEventContext()
-                                                 .toVBuilder()
-                                                 .clearEnrichment()
-                                                 .build());
-        }
-        Event result = event.toVBuilder()
-                            .setContext(resultContext.build())
-                            .build();
-        return result;
     }
 
     //TODO:2019-04-16:alexander.yevsyukov: Move to EventMixin

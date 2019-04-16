@@ -41,6 +41,7 @@ import static io.spine.core.Events.getActor;
 import static io.spine.core.Events.getProducer;
 import static io.spine.core.Events.nothing;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.type.given.EventsTestEnv.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -143,5 +144,37 @@ public class EventsTest extends UtilityClassTest<Events> {
     void acceptGeneratedEventId() {
         EventId eventId = event.getId();
         assertEquals(eventId, checkValid(eventId));
+    }
+
+    //TODO:2019-04-16:alexander.yevsyukov: Move to EventContextTest.
+    // Throw IllegalStateException instead of IllegalArgumentException since it should be from an instance method.
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Method called to throw exception.
+    @Nested
+    @DisplayName("throw IAE when reading tenant ID")
+    class ThrowIaeOnRead {
+
+        @Test
+        @DisplayName("of the event without origin")
+        void forEventWithoutOrigin() {
+            EventContext context = contextWithoutOrigin().build();
+            Event event = event(context);
+            assertThrows(IllegalArgumentException.class, event::tenant);
+        }
+
+        @Test
+        @DisplayName("of the event whose event context has no origin")
+        void forEventContextWithoutOrigin() {
+            EventContext context = contextWithoutOrigin()
+                    .setEventContext(contextWithoutOrigin())
+                    .build();
+            Event event = event(context);
+            assertThrows(IllegalArgumentException.class, event::tenant);
+        }
+
+        private EventContext.Builder contextWithoutOrigin() {
+            return context.toBuilder()
+                          .clearOrigin();
+        }
     }
 }
