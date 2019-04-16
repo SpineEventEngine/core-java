@@ -31,9 +31,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.type.given.EventsTestEnv.event;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("EventContext should")
@@ -57,8 +57,6 @@ class EventContextTest {
         return CommandEnvelope.of(requestFactory.generateCommand());
     }
 
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Method called to throw exception.
     @Nested
     @DisplayName("throw `IllegalStateException` when reading tenant ID")
     class ReportIllegalState {
@@ -81,6 +79,8 @@ class EventContextTest {
             assertThrowsFor(event);
         }
 
+        @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+        /* Method called to throw the exception. */
         private void assertThrowsFor(Event event) {
             assertThrows(IllegalStateException.class, event::tenant);
         }
@@ -93,14 +93,15 @@ class EventContextTest {
 
     @Nested
     @DisplayName("obtain")
-    class GetFromEventContext {
+    class ContextProperties {
 
         @Test
         @DisplayName("actor")
         void actor() {
-            assertEquals(context.getCommandContext()
-                                .getActorContext()
-                                .getActor(), context.actor());
+            assertThat(context.actor())
+                    .isEqualTo(context.getCommandContext()
+                                      .getActorContext()
+                                      .getActor());
         }
 
         @Test
@@ -108,7 +109,8 @@ class EventContextTest {
         void producer() {
             StringValue msg = unpack(context.getProducerId(), StringValue.class);
             String id = (String) context.producer();
-            assertEquals(msg.getValue(), id);
+            assertThat(id)
+                 .isEqualTo(msg.getValue());
         }
     }
 }
