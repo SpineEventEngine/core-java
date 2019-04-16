@@ -32,11 +32,9 @@ import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.given.EventsTestEnv;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.string.Stringifiers;
 import io.spine.test.core.given.EtProjectCreated;
-import io.spine.testing.Tests;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
@@ -57,6 +55,8 @@ import static io.spine.core.Events.nothing;
 import static io.spine.core.Events.sort;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.type.given.EventsTestEnv.commandContext;
+import static io.spine.server.type.given.EventsTestEnv.event;
 import static io.spine.server.type.given.EventsTestEnv.tenantId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -255,8 +255,8 @@ public class EventsTest extends UtilityClassTest<Events> {
         @DisplayName("of the event without origin")
         void forEventWithoutOrigin() {
             EventContext context = contextWithoutOrigin().build();
-            Event event = EventsTestEnv.event(context);
-            assertThrows(IllegalArgumentException.class, () -> Events.tenantOf(event));
+            Event event = event(context);
+            assertThrows(IllegalArgumentException.class, event::tenant);
         }
 
         @Test
@@ -265,8 +265,8 @@ public class EventsTest extends UtilityClassTest<Events> {
             EventContext context = contextWithoutOrigin()
                     .setEventContext(contextWithoutOrigin())
                     .build();
-            Event event = EventsTestEnv.event(context);
-            assertThrows(IllegalArgumentException.class, () -> Events.tenantOf(event));
+            Event event = event(context);
+            assertThrows(IllegalArgumentException.class, event::tenant);
         }
     }
 
@@ -278,39 +278,33 @@ public class EventsTest extends UtilityClassTest<Events> {
         @DisplayName("from event with command context")
         void fromCommandContext() {
             TenantId targetTenantId = tenantId();
-            CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
+            CommandContext commandContext = commandContext(targetTenantId);
             EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
                                                          .build();
-            Event event = EventsTestEnv.event(context);
+            Event event = event(context);
 
-            TenantId tenantId = Events.tenantOf(event);
-
-            assertEquals(targetTenantId, tenantId);
-
+            assertThat(event.tenant())
+                    .isEqualTo(targetTenantId);
         }
 
         @Test
         @DisplayName("from event with event context originated from command context")
         void fromEventContextWithCommandContext() {
             TenantId targetTenantId = tenantId();
-            CommandContext commandContext = EventsTestEnv.commandContext(targetTenantId);
-            EventContext outerContext = contextWithoutOrigin().setCommandContext(
-                    commandContext)
-                                                              .build();
-            EventContext context = contextWithoutOrigin().setEventContext(outerContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
+            CommandContext commandContext = commandContext(targetTenantId);
+            EventContext outerContext =
+                    contextWithoutOrigin()
+                            .setCommandContext(commandContext)
+                            .build();
+            EventContext context =
+                    contextWithoutOrigin()
+                            .setEventContext(outerContext)
+                            .build();
+            Event event = event(context);
 
-            TenantId tenantId = Events.tenantOf(event);
-
-            assertEquals(targetTenantId, tenantId);
+            assertThat(event.tenant())
+                    .isEqualTo(targetTenantId);
         }
-    }
-
-    @Test
-    @DisplayName("throw NullPointerException when getting tenant ID of null event")
-    void notAcceptNullEvent() {
-        assertThrows(NullPointerException.class, () -> Events.tenantOf(Tests.nullRef()));
     }
 
     @Test

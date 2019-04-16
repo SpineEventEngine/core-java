@@ -31,8 +31,6 @@ import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.time.Temporals;
-import io.spine.time.TimestampTemporal;
 
 import java.util.Comparator;
 import java.util.List;
@@ -93,13 +91,6 @@ public final class Events {
      */
     public static Comparator<Event> eventComparator() {
         return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
-    }
-
-    /**
-     * Obtains the time of the passed event.
-     */
-    static TimestampTemporal timeOf(Event event) {
-        return (TimestampTemporal) Temporals.from(event.time());
     }
 
     /**
@@ -218,19 +209,6 @@ public final class Events {
                                     .setCommandMessage(pack(commandMessage))
                                     .setStacktrace(stacktrace)
                                     .build();
-    }
-
-    /**
-     * Obtains a {@link TenantId} from the {@linkplain #actorContextOf(Event) actor context}
-     * of the given {@link Event}.
-     *
-     * @return a tenant ID from the actor context of the event
-     */
-    @Internal
-    public static TenantId tenantOf(Event event) {
-        checkNotNull(event);
-        ActorContext actorContext = actorContextOf(event);
-        return actorContext.getTenantId();
     }
 
     /**
