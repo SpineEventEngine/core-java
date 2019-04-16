@@ -109,4 +109,24 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
                                 .build();
         return result;
     }
+
+    /**
+     * Obtains the actor context of the event.
+     *
+     * <p>The {@code ActorContext} is retrieved by traversing {@code Event}s context
+     * and can be retrieved from the following places:
+     * <ul>
+     *     <li>the import context of the event;
+     *     <li>the actor context of the command context of this event;
+     *     <li>the actor context of the command context of the origin event of any depth.
+     * </ul>
+     *
+     * @return the actor context of the wrapped event
+     */
+    @Internal
+    default ActorContext actorContext() {
+        EventContext eventContext = context();
+        ActorContext result = retrieveActorContext(eventContext);
+        return result;
+    }
 }
