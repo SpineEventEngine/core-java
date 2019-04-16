@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.util.stream.Collectors.toList;
 
@@ -90,44 +88,6 @@ public final class Events {
         }
         Message unpacked = Messages.ensureMessage(eventOrMessage);
         return (EventMessage) unpacked;
-    }
-
-    //TODO:2019-04-16:alexander.yevsyukov: Move to EventContextMixin
-    /**
-     * Obtains the actor user ID from the passed {@code EventContext}.
-     *
-     * <p>The 'actor' is the user responsible for producing the given event.
-     *
-     * <p>It is obtained as follows:
-     * <ul>
-     *     <li>For the events generated from commands, the actor context is taken from the
-     *         enclosing command context.
-     *     <li>For the event react chain, the command context of the topmost event is used.
-     *     <li>For the imported events, the separate import context contains information about an
-     *         actor.
-     * </ul>
-     *
-     * <p>If the given event context contains no origin, an {@link IllegalArgumentException} is
-     * thrown as it contradicts the Spine validation rules.
-     */
-    public static UserId getActor(EventContext context) {
-        checkNotNull(context);
-        ActorContext actorContext = retrieveActorContext(context);
-        UserId result = actorContext.getActor();
-        return result;
-    }
-
-    //TODO:2019-04-16:alexander.yevsyukov: Move to EventContextMixin
-    /**
-     * Obtains event producer ID from the passed {@code EventContext}.
-     *
-     * @param context
-     *         the event context to to get the event producer ID
-     * @return the producer ID
-     */
-    public static Object getProducer(EventContext context) {
-        checkNotNull(context);
-        return Identifier.unpack(context.getProducerId());
     }
 
     /**
@@ -196,48 +156,5 @@ public final class Events {
                                     .build();
             return result;
         }
-    }
-
-    /**
-     * Obtains an actor context for the given event.
-     *
-     * <p>The context is obtained by traversing the events origin for a valid context source.
-     * There can be three sources for the actor context:
-     * <ol>
-     *     <li>The command context set as the event origin.
-     *     <li>The command context of an event which is an origin of this event.
-     *     <li>The import context if the event is imported to an aggregate.
-     * </ol>
-     *
-     * <p>If at some point the event origin is not set, an {@link IllegalArgumentException} is
-     * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
-     * declaration.
-     */
-    static ActorContext retrieveActorContext(EventContext eventContext) {
-        ActorContext actorContext = null;
-        EventContext ctx = eventContext;
-
-        while (actorContext == null) {
-            switch (ctx.getOriginCase()) {
-                case COMMAND_CONTEXT:
-                    actorContext = ctx.getCommandContext()
-                                      .getActorContext();
-                    break;
-                case EVENT_CONTEXT:
-                    ctx = ctx.getEventContext();
-                    break;
-                case IMPORT_CONTEXT:
-                    actorContext = ctx.getImportContext();
-                    break;
-                case ORIGIN_NOT_SET:
-                default:
-                    throw newIllegalArgumentException(
-                            "The provided event context (id: %s) has no origin defined.",
-                            eventContext.getEventId()
-                                        .getValue()
-                    );
-            }
-        }
-        return actorContext;
     }
 }

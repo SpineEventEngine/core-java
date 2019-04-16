@@ -86,7 +86,7 @@ message Event {
 
 // Meta-information for an event.
 message EventContext {
-    option (is).java_type = "io.spine.core.EnrichableMessageContext";
+    option (is).java_type = "io.spine.core.EventContextMixin";
     option (required_field) = "command_context | event_context | import_context";
 
     // When the event occurred.

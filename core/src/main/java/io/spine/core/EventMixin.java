@@ -26,7 +26,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
-import static io.spine.core.Events.retrieveActorContext;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -40,7 +39,8 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      */
     @Override
     default TenantId tenant() {
-        return retrieveActorContext(context()).getTenantId();
+        return context().actorContext()
+                        .getTenantId();
     }
 
     @Override
@@ -126,7 +126,7 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     @Internal
     default ActorContext actorContext() {
         EventContext eventContext = context();
-        ActorContext result = retrieveActorContext(eventContext);
+        ActorContext result = eventContext.actorContext();
         return result;
     }
 }
