@@ -123,6 +123,7 @@ public interface MessageWithContext<I extends MessageId,
      * Verifies if the message was created after the point in time.
      */
     default boolean isAfter(Timestamp time) {
+        checkNotNull(time);
         return toTemporal(time()).isLaterThan(toTemporal(time));
     }
 
@@ -130,6 +131,7 @@ public interface MessageWithContext<I extends MessageId,
      * Verifies if the message was created before the point in time.
      */
     default boolean isBefore(Timestamp time) {
+        checkNotNull(time);
         return toTemporal(time()).isEarlierThan(toTemporal(time));
     }
 
@@ -143,6 +145,8 @@ public interface MessageWithContext<I extends MessageId,
      * @return {@code true} if the time point of the command creation lies in between the given two
      */
     default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
+        checkNotNull(periodStart);
+        checkNotNull(periodEnd);
         return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
     }
 }
