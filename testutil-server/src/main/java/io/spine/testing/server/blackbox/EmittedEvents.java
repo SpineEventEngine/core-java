@@ -61,7 +61,7 @@ public final class EmittedEvents extends EmittedMessages<EventClass, Event, Even
         Iterator<Event> events = this.messages().iterator();
         for (int version : versionNumbers) {
             Version actualVersion = events.next()
-                                          .getContext()
+                                          .context()
                                           .getVersion();
             if (version != actualVersion.getNumber()) {
                 return false;

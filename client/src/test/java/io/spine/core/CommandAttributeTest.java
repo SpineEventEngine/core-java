@@ -54,7 +54,8 @@ class CommandAttributeTest {
                 .setId(Identifier.newUuid())
                 .build();
         Command command = factory.createCommand(commandMessage, Time.currentTime());
-        contextBuilder = command.getContext().toBuilder();
+        contextBuilder = command.context()
+                                .toBuilder();
     }
 
     private <T> void assertSetGet(CommandAttribute<T> attr, T value) {

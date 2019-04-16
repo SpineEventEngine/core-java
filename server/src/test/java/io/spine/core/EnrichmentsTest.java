@@ -104,7 +104,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
                 .build();
         eventFactory = TestEventFactory.newInstance(Identifier.pack(producerId), getClass());
         context = eventFactory.createEvent(projectCreated)
-                              .getContext();
+                              .context();
     }
 
     @Test

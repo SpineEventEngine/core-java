@@ -24,7 +24,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.Events;
 import io.spine.server.entity.RecentHistory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EventDispatchedToReactor;
@@ -78,25 +77,27 @@ final class DuplicateLookup {
 
     private boolean isDuplicateOfReact(Event candidate) {
         EventId candidateId = candidate.getId();
-        boolean duplicate = history.stream()
-                                   .filter(DuplicateLookup::isEventDispatchedToReactor)
-                                   .map(Events::getMessage)
-                                   .map(EventDispatchedToReactor.class::cast)
-                                   .map(EventDispatchedToReactor::getPayload)
-                                   .map(Event::getId)
-                                   .anyMatch(candidateId::equals);
+        boolean duplicate =
+                history.stream()
+                       .filter(DuplicateLookup::isEventDispatchedToReactor)
+                       .map(Event::enclosedMessage)
+                       .map(EventDispatchedToReactor.class::cast)
+                       .map(EventDispatchedToReactor::getPayload)
+                       .map(Event::id)
+                       .anyMatch(candidateId::equals);
         return duplicate;
     }
 
     private boolean isDuplicateOfSubscribe(Event candidate) {
         EventId candidateId = candidate.getId();
-        boolean duplicate = history.stream()
-                                   .filter(DuplicateLookup::isEventDispatchedToSubscriber)
-                                   .map(Events::getMessage)
-                                   .map(EventDispatchedToSubscriber.class::cast)
-                                   .map(EventDispatchedToSubscriber::getPayload)
-                                   .map(Event::getId)
-                                   .anyMatch(candidateId::equals);
+        boolean duplicate =
+                history.stream()
+                       .filter(DuplicateLookup::isEventDispatchedToSubscriber)
+                       .map(Event::enclosedMessage)
+                       .map(EventDispatchedToSubscriber.class::cast)
+                       .map(EventDispatchedToSubscriber::getPayload)
+                       .map(Event::id)
+                       .anyMatch(candidateId::equals);
         return duplicate;
     }
 
@@ -109,13 +110,14 @@ final class DuplicateLookup {
      */
     boolean isDuplicate(Command candidate) {
         CommandId candidateId = candidate.getId();
-        boolean duplicate = history.stream()
-                                   .filter(DuplicateLookup::isCommandDispatchedToHandler)
-                                   .map(Events::getMessage)
-                                   .map(CommandDispatchedToHandler.class::cast)
-                                   .map(CommandDispatchedToHandler::getPayload)
-                                   .map(Command::getId)
-                                   .anyMatch(candidateId::equals);
+        boolean duplicate =
+                history.stream()
+                       .filter(DuplicateLookup::isCommandDispatchedToHandler)
+                       .map(Event::enclosedMessage)
+                       .map(CommandDispatchedToHandler.class::cast)
+                       .map(CommandDispatchedToHandler::getPayload)
+                       .map(Command::id)
+                       .anyMatch(candidateId::equals);
         return duplicate;
     }
 

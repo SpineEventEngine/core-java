@@ -24,7 +24,6 @@ import com.google.protobuf.Int32Value;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.Events;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
@@ -242,8 +241,10 @@ public class EventBusTest {
             eventBus.post(event);
 
             // Exclude event ID from comparison.
-            assertEquals(Events.getMessage(event), subscriber.getEventMessage());
-            assertEquals(event.getContext(), subscriber.getEventContext());
+            assertThat(subscriber.getEventMessage())
+                    .isEqualTo(event.enclosedMessage());
+            assertThat(subscriber.getEventContext())
+                    .isEqualTo(event.context());
         }
 
         @Test
@@ -255,7 +256,8 @@ public class EventBusTest {
 
             eventBus.post(GivenEvent.projectCreated());
 
-            assertTrue(dispatcher.isDispatchCalled());
+            assertThat(dispatcher.isDispatchCalled())
+                    .isTrue();
         }
     }
 

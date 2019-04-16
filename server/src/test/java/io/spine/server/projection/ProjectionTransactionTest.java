@@ -42,9 +42,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -173,9 +172,11 @@ class ProjectionTransactionTest
         Event event = GivenEvent.withMessage(createEventMessage());
         Projection.playOn(entity, Collections.singleton(event));
         Version expected = Versions.increment(oldVersion);
-        assertEquals(expected.getNumber(), entity.version()
-                                                 .getNumber());
-        assertNotEquals(event.getContext()
-                             .getVersion(), entity.version());
+
+        assertThat(entity.version().getNumber())
+                .isEqualTo(expected.getNumber());
+        assertThat(entity.version())
+                .isNotEqualTo(event.context()
+                                   .getVersion());
     }
 }

@@ -47,17 +47,13 @@ public final class EventEnvelope
         ActorMessageEnvelope<EventId, Event, EventContext>,
         EnrichableMessageEnvelope<EventId, Event, EventMessage, EventContext, EventEnvelope> {
 
-    private final EventMessage eventMessage;
     private final EventClass eventClass;
-    private final EventContext eventContext;
     private final boolean rejection;
 
     private EventEnvelope(Event event) {
         super(event);
-        this.eventMessage = Events.getMessage(event);
-        this.eventClass = EventClass.of(this.eventMessage);
-        this.eventContext = event.getContext();
-        this.rejection = Events.isRejection(event);
+        this.eventClass = EventClass.of(event.enclosedMessage());
+        this.rejection = event.isRejection();
     }
 
     /**
@@ -90,7 +86,7 @@ public final class EventEnvelope
      */
     @Override
     public EventMessage message() {
-        return this.eventMessage;
+        return outerObject().enclosedMessage();
     }
 
     /**
@@ -103,7 +99,7 @@ public final class EventEnvelope
 
     @Override
     public ActorContext actorContext() {
-        return Events.actorContextOf(outerObject());
+        return outerObject().actorContext();
     }
 
     /**
@@ -133,21 +129,21 @@ public final class EventEnvelope
      */
     @Override
     public EventContext context() {
-        return this.eventContext;
+        return outerObject().context();
     }
 
     /**
      * Obtains the type of the event message.
      */
     public TypeName messageTypeName() {
-        TypeName result = TypeName.of(eventMessage);
+        TypeName result = TypeName.of(message());
         return result;
     }
 
     /**
      * Obtains the class of the origin message if available.
      *
-     * <p>If this envelope represents a {@linkplain Events#isRejection(Event) rejection}, returns
+     * <p>If this envelope represents a {@linkplain Event#isRejection() rejection}, returns
      * the type of rejected command.
      *
      * @return the class of origin message or {@link EmptyClass} if the origin message type is
@@ -155,7 +151,7 @@ public final class EventEnvelope
      */
     public MessageClass originClass() {
         if (isRejection()) {
-            RejectionEventContext rejection = eventContext.getRejection();
+            RejectionEventContext rejection = context().getRejection();
             Any commandMessage = rejection.getCommandMessage();
             return CommandClass.of(commandMessage);
         } else {
@@ -202,13 +198,15 @@ public final class EventEnvelope
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {
-        EventContext context = this.context()
-                                   .toVBuilder()
-                                   .setEnrichment(enrichment)
-                                   .build();
-        Event enrichedCopy = outerObject().toVBuilder()
-                                          .setContext(context)
-                                          .build();
+        EventContext context =
+                this.context()
+                    .toVBuilder()
+                    .setEnrichment(enrichment)
+                    .build();
+        Event enrichedCopy =
+                outerObject().toVBuilder()
+                             .setContext(context)
+                             .build();
         return of(enrichedCopy);
     }
 }

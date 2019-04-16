@@ -28,8 +28,6 @@ import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
-import io.spine.core.Commands;
-import io.spine.core.Events;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
@@ -307,7 +305,8 @@ class EntityHistoryTest {
             CommandDispatchedToHandler event =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             assertId(event.getReceiver());
-            Message commandMessage = Commands.getMessage(event.getPayload());
+            Message commandMessage = event.getPayload()
+                                          .enclosedMessage();
             assertEquals(command, commandMessage);
         }
 
@@ -324,7 +323,8 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = event.getReceiver();
-            PersonCreated payload = (PersonCreated) Events.getMessage(event.getPayload());
+            PersonCreated payload = (PersonCreated) event.getPayload()
+                                                         .enclosedMessage();
             assertId(receiver);
             assertEquals(PersonProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -343,7 +343,8 @@ class EntityHistoryTest {
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
             CreatePerson payload = (CreatePerson)
-                    Commands.getMessage(commandDispatchedEvent.getPayload());
+                    commandDispatchedEvent.getPayload()
+                                          .enclosedMessage();
             assertId(receiver);
             assertEquals(PersonAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());

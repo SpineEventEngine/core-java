@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.server.type.EventClass;
 
 import java.util.Collection;
@@ -71,7 +70,7 @@ public final class EventFieldFilter implements EventFilter {
     }
 
     private Event maskEvent(Event event) {
-        EventMessage message = Events.getMessage(event);
+        EventMessage message = event.enclosedMessage();
         EventMessage masked = mask(message);
         return event.toVBuilder()
                     .setMessage(pack(masked))

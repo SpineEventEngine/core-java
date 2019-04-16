@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
@@ -87,7 +86,7 @@ public interface EventFilter {
         ImmutableCollection<Event> filteredEvents = events
                 .stream()
                 .map(event -> {
-                    EventMessage eventMessage = getMessage(event);
+                    EventMessage eventMessage = event.enclosedMessage();
                     Optional<? extends EventMessage> filtered = filter(eventMessage);
                     Optional<Event> result = filtered.map(message -> event.toVBuilder()
                                                                           .setMessage(pack(message))

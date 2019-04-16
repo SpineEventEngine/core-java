@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Commands;
 import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
@@ -50,11 +49,11 @@ public final class CommandHistory {
     }
 
     public boolean contains(Command command) {
-        Message message = Commands.getMessage(command);
+        Message message = command.enclosedMessage();
 
         if (messages.contains(message)) {
             int messageIndex = messages.indexOf(message);
-            CommandContext actualContext = command.getContext();
+            CommandContext actualContext = command.context();
             CommandContext storedContext = contexts.get(messageIndex);
             return actualContext.equals(storedContext);
         }
@@ -73,7 +72,7 @@ public final class CommandHistory {
     }
 
     public void assertHandled(Command expected) {
-        String cmdName = Commands.getMessage(expected)
+        String cmdName = expected.enclosedMessage()
                                  .getClass()
                                  .getName();
         assertTrue(contains(expected), "Expected but wasn't handled, command: " + cmdName);

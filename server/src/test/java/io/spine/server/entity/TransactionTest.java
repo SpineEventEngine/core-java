@@ -250,7 +250,7 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
         Event event = withMessage(createEventMessage());
 
-        Version ctxVersion = event.getContext()
+        Version ctxVersion = event.context()
                                   .getVersion();
         assertNotEquals(tx.version(), ctxVersion);
 
@@ -397,7 +397,7 @@ public abstract class TransactionTest<I,
 
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
-        Version versionFromEvent = event.getContext()
+        Version versionFromEvent = event.context()
                                         .getVersion();
         assertEquals(versionFromEvent, tx.version());
         tx.commit();

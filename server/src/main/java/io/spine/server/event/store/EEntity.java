@@ -25,7 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.EventVBuilder;
-import io.spine.core.Events;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
@@ -33,12 +32,10 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static io.spine.core.Events.clearEnrichments;
-
 /**
  * An entity for storing an event.
  *
- * <p>An underlying event doesn't contain {@linkplain Events#clearEnrichments(Event) enrichments}.
+ * <p>An underlying event doesn't contain {@linkplain Event#clearEnrichments() enrichments}.
  *
  * @apiNote This class is public so that {@link io.spine.server.entity.storage.EntityColumn
  * EntityColumn} can access its column declarations.
@@ -72,7 +69,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
      */
     @Column
     public Timestamp getCreated() {
-        return state().getContext()
+        return state().context()
                       .getTimestamp();
     }
 
@@ -106,7 +103,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
         }
 
         private EEntity create() {
-            Event eventWithoutEnrichments = clearEnrichments(event);
+            Event eventWithoutEnrichments = event.clearEnrichments();
             EEntity entity = entity();
             entity.builder()
                   .mergeFrom(eventWithoutEnrichments);

@@ -78,7 +78,7 @@ public abstract class EventReactionTest<I,
      */
     protected final Event createEvent(M message) {
         Event event = eventFactory.createEvent(message);
-        EventContext context = event.getContext()
+        EventContext context = event.context()
                                     .toVBuilder()
                                     .setExternal(externalMessage())
                                     .build();

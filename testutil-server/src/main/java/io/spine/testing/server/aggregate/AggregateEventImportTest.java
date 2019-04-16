@@ -86,7 +86,7 @@ public abstract class AggregateEventImportTest<I,
      */
     protected final Event createEvent(E message) {
         Event event = eventFactory.createEvent(message);
-        EventContext context = event.getContext()
+        EventContext context = event.context()
                                     .toBuilder()
                                     .setExternal(externalMessage())
                                     .build();

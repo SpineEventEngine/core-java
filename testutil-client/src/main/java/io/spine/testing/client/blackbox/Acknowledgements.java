@@ -29,7 +29,6 @@ import io.spine.base.Error;
 import io.spine.base.RejectionMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.core.Status;
 import io.spine.type.RejectionType;
 import io.spine.type.TypeUrl;
@@ -93,7 +92,7 @@ public class Acknowledgements {
     ImmutableMap<RejectionType, Integer> countRejectionTypes(List<Event> rejectionEvents) {
         Map<RejectionType, Integer> countForType = new HashMap<>();
         for (Event rejection : rejectionEvents) {
-            Message msg = Events.getMessage(rejection);
+            Message msg = rejection.enclosedMessage();
             RejectionType type = new RejectionType(msg.getDescriptorForType());
             int currentCount = countForType.getOrDefault(type, 0);
             countForType.put(type, currentCount + 1);

@@ -249,7 +249,7 @@ public class EventStoreTest {
         void eventContext() {
             Event event = projectCreated(Time.currentTime());
             Event enriched = event.toBuilder()
-                                  .setContext(event.getContext()
+                                  .setContext(event.context()
                                                    .toBuilder()
                                                    .setEnrichment(withOneAttribute()))
                                   .build();
@@ -258,7 +258,7 @@ public class EventStoreTest {
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             EventContext context = observer.responses()
                                            .get(0)
-                                           .getContext();
+                                           .context();
             assertTrue(isDefault(context.getEnrichment()));
         }
 
@@ -266,13 +266,13 @@ public class EventStoreTest {
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
             Event event = projectCreated(Time.currentTime());
-            CommandContext commandContext = event.getContext()
+            CommandContext commandContext = event.context()
                                                  .getCommandContext();
             EventContext originContext =
                     EventContext.vBuilder()
                                 .setEnrichment(withOneAttribute())
                                 .setCommandContext(commandContext)
-                                .setTimestamp(event.getContext()
+                                .setTimestamp(event.context()
                                                    .getTimestamp())
                                 .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                                 .build();
@@ -286,7 +286,7 @@ public class EventStoreTest {
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             EventContext loadedOriginContext = observer.responses()
                                                        .get(0)
-                                                       .getContext()
+                                                       .context()
                                                        .getEventContext();
             assertTrue(isDefault(loadedOriginContext.getEnrichment()));
         }

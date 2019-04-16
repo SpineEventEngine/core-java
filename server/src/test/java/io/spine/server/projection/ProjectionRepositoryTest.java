@@ -74,7 +74,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
@@ -117,10 +116,7 @@ class ProjectionRepositoryTest
      * in multi-tenant context.
      */
     private static void keepTenantIdFromEvent(BoundedContext boundedContext, Event event) {
-        TenantId tenantId = event.getContext()
-                                 .getCommandContext()
-                                 .getActorContext()
-                                 .getTenantId();
+        TenantId tenantId = event.tenant();
         if (boundedContext.isMultitenant()) {
             boundedContext.tenantIndex()
                           .keep(tenantId);
@@ -418,7 +414,7 @@ class ProjectionRepositoryTest
 
         private void dispatchSuccessfully(Event event) {
             dispatchEvent(event);
-            assertTrue(TestProjection.processed(getMessage(event)));
+            assertTrue(TestProjection.processed(event.enclosedMessage()));
             assertNull(repository().getLastException());
         }
 
@@ -449,7 +445,7 @@ class ProjectionRepositoryTest
         assertThat(lastMessage)
                 .isInstanceOf(EventEnvelope.class);
         assertThat(lastMessage.message())
-                .isEqualTo(getMessage(event));
+                .isEqualTo(event.enclosedMessage());
         assertThat(lastMessage.outerObject())
                 .isEqualTo(event);
 
