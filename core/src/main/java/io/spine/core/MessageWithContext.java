@@ -122,17 +122,17 @@ public interface MessageWithContext<I extends MessageId,
     /**
      * Verifies if the message was created after the point in time.
      */
-    default boolean isAfter(Timestamp time) {
-        checkNotNull(time);
-        return toTemporal(time()).isLaterThan(toTemporal(time));
+    default boolean isAfter(Timestamp bound) {
+        checkNotNull(bound);
+        return toTemporal(time()).isLaterThan(toTemporal(bound));
     }
 
     /**
      * Verifies if the message was created before the point in time.
      */
-    default boolean isBefore(Timestamp time) {
-        checkNotNull(time);
-        return toTemporal(time()).isEarlierThan(toTemporal(time));
+    default boolean isBefore(Timestamp bound) {
+        checkNotNull(bound);
+        return toTemporal(time()).isEarlierThan(toTemporal(bound));
     }
 
     /**
