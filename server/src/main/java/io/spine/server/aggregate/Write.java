@@ -82,7 +82,7 @@ final class Write<I> {
     }
 
     private void writeEvents(List<Event> events) {
-        int eventCount = aggregate.getEventCountAfterLastSnapshot();
+        int eventCount = aggregate.eventCountAfterLastSnapshot();
         Collection<Event> eventBatch = newArrayListWithCapacity(snapshotTrigger);
         for (Event event : events) {
             eventBatch.add(event);

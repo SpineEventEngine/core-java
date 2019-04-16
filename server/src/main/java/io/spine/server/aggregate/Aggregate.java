@@ -424,7 +424,7 @@ public abstract class Aggregate<I,
     /**
      * Obtains the number of events stored in the associated storage since last snapshot.
      */
-    int getEventCountAfterLastSnapshot() {
+    int eventCountAfterLastSnapshot() {
         return eventCountAfterLastSnapshot;
     }
 
