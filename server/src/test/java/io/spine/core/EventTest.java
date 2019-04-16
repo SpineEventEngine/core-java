@@ -99,7 +99,7 @@ public class EventTest extends UtilityClassTest<Events> {
     }
 
     @Nested
-    @DisplayName("obtain")
+    @DisplayName("provide")
     class GetFromEvent {
 
         @Test
@@ -152,11 +152,11 @@ public class EventTest extends UtilityClassTest<Events> {
 
 
     @Nested
-    @DisplayName("retrieve tenant ID")
+    @DisplayName("expose tenant ID")
     class GetTenantId {
 
         @Test
-        @DisplayName("from event with command context")
+        @DisplayName("from enclosed command context")
         void fromCommandContext() {
             TenantId targetTenantId = tenantId();
             CommandContext commandContext = commandContext(targetTenantId);
@@ -169,7 +169,7 @@ public class EventTest extends UtilityClassTest<Events> {
         }
 
         @Test
-        @DisplayName("from event with event context originated from command context")
+        @DisplayName("from enclosed context of origin event, which had command as origin")
         void fromEventContextWithCommandContext() {
             TenantId targetTenantId = tenantId();
             CommandContext commandContext = commandContext(targetTenantId);
