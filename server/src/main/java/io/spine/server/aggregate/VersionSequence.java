@@ -53,14 +53,15 @@ final class VersionSequence {
      * @see Aggregate#apply(List)
      */
     ImmutableList<Event> update(Collection<Event> originalEvents) {
-
-        Stream<Version> versions = Stream.iterate(start, Versions::increment)
-                                         .skip(1) // Skip current version
-                                         .limit(originalEvents.size());
+        Stream<Version> versions =
+                Stream.iterate(start, Versions::increment)
+                      .skip(1) // Skip current version
+                      .limit(originalEvents.size());
         Stream<Event> events = originalEvents.stream();
-        ImmutableList<Event> eventsToApply = Streams.zip(events, versions,
-                                                         VersionSequence::substituteVersion)
-                                                    .collect(toImmutableList());
+        ImmutableList<Event> eventsToApply =
+                Streams.zip(events, versions,
+                            VersionSequence::substituteVersion)
+                       .collect(toImmutableList());
         return eventsToApply;
     }
 
@@ -74,13 +75,15 @@ final class VersionSequence {
      * @return the copy of the original event but with the new version
      */
     private static Event substituteVersion(Event event, Version newVersion) {
-        EventContext newContext = event.context()
-                                       .toVBuilder()
-                                       .setVersion(newVersion)
-                                       .build();
-        Event result = event.toVBuilder()
-                            .setContext(newContext)
-                            .build();
+        EventContext newContext =
+                event.context()
+                     .toVBuilder()
+                     .setVersion(newVersion)
+                     .build();
+        Event result =
+                event.toVBuilder()
+                     .setContext(newContext)
+                     .build();
         return result;
     }
 }
