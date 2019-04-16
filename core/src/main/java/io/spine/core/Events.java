@@ -23,10 +23,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -35,8 +33,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getStackTraceAsString;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.util.stream.Collectors.toList;
@@ -153,29 +149,6 @@ public final class Events {
         checkNotNull(id);
         checkNotEmptyOrBlank(id.getValue(), "event ID");
         return id;
-    }
-
-    //TODO:2019-04-16:alexander.yevsyukov: Move to ThrowableMessage
-    /**
-     * Constructs a new {@link RejectionEventContext} from the given command message and
-     * {@link ThrowableMessage}.
-     *
-     * @param commandMessage
-     *         rejected command
-     * @param throwableMessage
-     *         thrown rejection
-     * @return new instance of {@code RejectionEventContext}
-     */
-    public static RejectionEventContext rejectionContext(CommandMessage commandMessage,
-                                                         ThrowableMessage throwableMessage) {
-        checkNotNull(commandMessage);
-        checkNotNull(throwableMessage);
-
-        String stacktrace = getStackTraceAsString(throwableMessage);
-        return RejectionEventContext.newBuilder()
-                                    .setCommandMessage(pack(commandMessage))
-                                    .setStacktrace(stacktrace)
-                                    .build();
     }
 
     /**

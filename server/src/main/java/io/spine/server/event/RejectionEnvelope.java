@@ -23,6 +23,7 @@ package io.spine.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
@@ -44,7 +45,8 @@ import io.spine.server.type.RejectionClass;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Events.rejectionContext;
+import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -123,6 +125,29 @@ public final class RejectionEnvelope
         RejectionEventContext context = rejectionContext(origin.message(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
+    }
+
+    /**
+     * Constructs a new {@link RejectionEventContext} from the given command message and
+     * {@link ThrowableMessage}.
+     *
+     * @param commandMessage
+     *         rejected command
+     * @param throwableMessage
+     *         thrown rejection
+     * @return new instance of {@code RejectionEventContext}
+     */
+    private static RejectionEventContext rejectionContext(CommandMessage commandMessage,
+                                                          ThrowableMessage throwableMessage) {
+        checkNotNull(commandMessage);
+        checkNotNull(throwableMessage);
+
+        String stacktrace = getStackTraceAsString(throwableMessage);
+        return RejectionEventContext
+                .newBuilder()
+                .setCommandMessage(pack(commandMessage))
+                .setStacktrace(stacktrace)
+                .build();
     }
 
     @Override
