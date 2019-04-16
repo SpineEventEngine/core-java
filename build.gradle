@@ -119,6 +119,7 @@ subprojects {
 
     apply from: deps.scripts.javacArgs
     apply from: modelCompilerConfiguration
+    apply from: deps.scripts.projectLicenseReport
 
     // Specific setup for a Travis build,
     // which prevents appearing of warning messages in build logs.
@@ -280,3 +281,6 @@ idea {
 
 // Aggregated coverage report across all subprojects.
 apply from: spineJacocoScript
+
+// Generate a repository-wide report of 3rd-party dependencies and their licenses.
+apply from: deps.scripts.repoLicenseReport
