@@ -27,9 +27,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.core.Version;
-import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.EventApplier;
@@ -44,14 +42,11 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -116,6 +111,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
  */
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
@@ -312,31 +308,11 @@ public abstract class Aggregate<I,
      * @return the exact list of {@code events} but with adjusted versions
      */
     List<Event> apply(List<Event> events) {
-        ImmutableList<Event> versionedEvents = prepareEvents(events);
+        VersionSequence versionSequence = new VersionSequence(version());
+        ImmutableList<Event> versionedEvents = versionSequence.update(events);
         play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
         return versionedEvents;
-    }
-
-    /**
-     * Prepares the given events to be applied to this aggregate.
-     *
-     * @param originalEvents
-     *         the events to be applied
-     * @return events ready to be applied to this aggregate
-     * @see #apply(List)
-     */
-    private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents) {
-        Version currentVersion = version();
-
-        Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
-                                         .skip(1) // Skip current version
-                                         .limit(originalEvents.size());
-        Stream<Event> events = originalEvents.stream();
-        ImmutableList<Event> eventsToApply = Streams.zip(events, versions,
-                                                         Events::substituteVersion)
-                                                    .collect(toImmutableList());
-        return eventsToApply;
     }
 
     /**

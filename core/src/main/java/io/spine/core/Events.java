@@ -226,28 +226,6 @@ public final class Events {
         return context.getExternal();
     }
 
-    //TODO:2019-04-16:alexander.yevsyukov: Move to EventMixin
-    /**
-     * Replaces the event version with the given {@code newVersion}.
-     *
-     * @param event
-     *         original event
-     * @param newVersion
-     *         the version to set
-     * @return the copy of the original event but with the new version
-     */
-    @Internal
-    public static Event substituteVersion(Event event, Version newVersion) {
-        EventContext newContext = event.context()
-                                       .toVBuilder()
-                                       .setVersion(newVersion)
-                                       .build();
-        Event result = event.toVBuilder()
-                            .setContext(newContext)
-                            .build();
-        return result;
-    }
-
     /**
      * The stringifier of event IDs.
      */
