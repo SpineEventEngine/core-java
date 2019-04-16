@@ -120,10 +120,17 @@ public interface MessageWithContext<I extends MessageId,
     }
 
     /**
-     * Verifies if the message was created after the passed time.
+     * Verifies if the message was created after the point in time.
      */
     default boolean isAfter(Timestamp time) {
         return toTemporal(time()).isLaterThan(toTemporal(time));
+    }
+
+    /**
+     * Verifies if the message was created before the point in time.
+     */
+    default boolean isBefore(Timestamp time) {
+        return toTemporal(time()).isEarlierThan(toTemporal(time));
     }
 
     /**

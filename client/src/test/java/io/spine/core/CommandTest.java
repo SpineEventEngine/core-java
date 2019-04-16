@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.Durations2.seconds;
+import static io.spine.time.testing.TimeTests.Future.secondsFromNow;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,8 +84,8 @@ class CommandTest {
     class TimeCheck {
 
         @Test
-        @DisplayName("created after given time")
-        void wereAfter() {
+        @DisplayName("after given time")
+        void after() {
             Command command = requestFactory.command()
                                             .create(stopProject);
             assertThat(command.isAfter(secondsAgo(5)))
@@ -92,8 +93,17 @@ class CommandTest {
         }
 
         @Test
-        @DisplayName("created withing time range")
-        void wereBetween() {
+        @DisplayName("before given time")
+        void before() {
+            Command command = requestFactory.command()
+                                            .create(startProject);
+            assertThat(command.isBefore(secondsFromNow(10)))
+                    .isTrue();
+        }
+
+        @Test
+        @DisplayName("withing time range")
+        void between() {
             Command fiveMinsAgo = requestFactory.createCommand(createProject, minutesAgo(5));
             Command twoMinsAgo = requestFactory.createCommand(startProject, minutesAgo(2));
             Command thirtySecondsAgo = requestFactory.createCommand(stopProject, secondsAgo(30));
