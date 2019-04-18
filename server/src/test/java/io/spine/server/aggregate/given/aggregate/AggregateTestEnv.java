@@ -90,6 +90,10 @@ public class AggregateTestEnv {
         return CommandEnvelope.of(command(commandMessage));
     }
 
+    public static CommandEnvelope env(Command command) {
+        return CommandEnvelope.of(command);
+    }
+
     public static Event event(EventMessage eventMessage, int versionNumber) {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
     }

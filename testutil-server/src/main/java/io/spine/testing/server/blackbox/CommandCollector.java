@@ -22,17 +22,10 @@ package io.spine.testing.server.blackbox;
 
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Commands;
-import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
 
 /**
  * Remembers commands posted to a Command Bus.
  */
 public final class CommandCollector extends MessageCollector<CommandId, Command, CommandEnvelope> {
-
-    @Override
-    protected TenantId tenantOf(Command command) {
-        return Commands.tenantOf(command);
-    }
 }

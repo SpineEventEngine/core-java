@@ -91,7 +91,8 @@ final class IdempotencyGuard {
     private boolean didHandleRecently(EventEnvelope event) {
         EventId eventId = event.id();
         boolean found = aggregate.historyContains(
-                e -> eventId.equals(e.getContext().getEventId())
+                e -> eventId.equals(e.context()
+                                     .getEventId())
         );
         return found;
     }
@@ -112,7 +113,8 @@ final class IdempotencyGuard {
     private boolean didHandleRecently(CommandEnvelope command) {
         CommandId commandId = command.id();
         boolean found = aggregate.historyContains(
-                e -> commandId.equals(e.getContext().getCommandId())
+                e -> commandId.equals(e.context()
+                                       .getCommandId())
         );
         return found;
     }

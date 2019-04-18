@@ -21,6 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.DefaultSubject;
+import com.google.common.truth.Subject;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -77,8 +79,7 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Events.getRootCommandId;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
@@ -101,8 +102,6 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -164,9 +163,10 @@ public class AggregateTest {
         ModelTests.dropAllModels();
         aggregate = newAggregate(ID);
         amishAggregate = newAmishAggregate(ID);
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
+        boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
         repository = new TestAggregateRepository();
         boundedContext.register(repository);
     }
@@ -292,7 +292,7 @@ public class AggregateTest {
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.version(), event.getContext()
+        assertEquals(this.aggregate.version(), event.context()
                                                     .getVersion());
     }
 
@@ -579,7 +579,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(getMessage(command)));
+                dispatchCommand(faultyAggregate, env(command));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);
@@ -597,7 +597,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(getMessage(command)));
+                dispatchCommand(faultyAggregate, env(command));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);
@@ -643,6 +643,8 @@ public class AggregateTest {
     @DisplayName("traverse history")
     class TraverseHistory {
 
+        private Iterator<Event> history;
+
         @Test
         @DisplayName("iterating through newest events first")
         void throughNewestEventsFirst() {
@@ -659,14 +661,20 @@ public class AggregateTest {
             commandBus.post(newArrayList(addTaskCommand2, startCommand), noOpObserver);
 
             TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
+            history = aggregate.historyBackward();
 
-            Iterator<Event> history = aggregate.historyBackward();
+            assertNextCommandId().isEqualTo(startCommand.id());
+            assertNextCommandId().isEqualTo(addTaskCommand2.id());
+            assertNextCommandId().isEqualTo(addTaskCommand.id());
+            assertNextCommandId().isEqualTo(createCommand.id());
 
-            assertEquals(startCommand.getId(), getRootCommandId(history.next()));
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
-            assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
-            assertEquals(createCommand.getId(), getRootCommandId(history.next()));
-            assertFalse(history.hasNext());
+            assertThat(history.hasNext())
+                    .isFalse();
+        }
+
+        private Subject<DefaultSubject, Object> assertNextCommandId() {
+            return assertThat(history.next()
+                                     .rootCommandId());
         }
 
         @Test
@@ -688,11 +696,12 @@ public class AggregateTest {
 
             TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
 
-            Iterator<Event> history = aggregate.historyBackward();
+            history = aggregate.historyBackward();
 
-            Event singleEvent = history.next();
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(singleEvent));
-            assertFalse(history.hasNext());
+            assertNextCommandId()
+                    .isEqualTo(addTaskCommand2.id());
+            assertThat(history.hasNext())
+                    .isFalse();
         }
     }
 
@@ -710,7 +719,8 @@ public class AggregateTest {
         RuntimeException exception = assertThrows(RuntimeException.class,
                                                   () -> repository.dispatch(envelope));
         Throwable cause = getRootCause(exception);
-        assertThat(cause, instanceOf(DuplicateCommandException.class));
+        assertThat(cause)
+             .isInstanceOf(DuplicateCommandException.class);
     }
 
     @Nested

@@ -25,7 +25,6 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Commands;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
@@ -39,22 +38,12 @@ public final class CommandEnvelope
         extends AbstractMessageEnvelope<CommandId, Command, CommandContext>
         implements ActorMessageEnvelope<CommandId, Command, CommandContext> {
 
-    // The below fields are calculated from the command.
-
-    /** The ID of the command. */
-    private final CommandId commandId;
-
-    /** The command message. */
-    private final CommandMessage commandMessage;
-
     /** The command class. */
     private final CommandClass commandClass;
 
     private CommandEnvelope(Command command) {
         super(command);
-        this.commandId = command.getId();
-        this.commandMessage = Commands.getMessage(command);
-        this.commandClass = CommandClass.of(commandMessage);
+        this.commandClass = CommandClass.of(command.enclosedMessage());
     }
 
     /**
@@ -77,7 +66,7 @@ public final class CommandEnvelope
      */
     @Override
     public TenantId tenantId() {
-        return Commands.tenantOf(command());
+        return command().tenant();
     }
 
     /**
@@ -85,7 +74,7 @@ public final class CommandEnvelope
      */
     @Override
     public CommandId id() {
-        return commandId;
+        return command().getId();
     }
 
     /**
@@ -93,7 +82,7 @@ public final class CommandEnvelope
      */
     @Override
     public CommandMessage message() {
-        return commandMessage;
+        return command().enclosedMessage();
     }
 
     /**
@@ -137,13 +126,13 @@ public final class CommandEnvelope
      */
     @Override
     public CommandContext context() {
-        return outerObject().getContext();
+        return outerObject().context();
     }
 
     /**
      * Obtains {@link TypeName} of the command message.
      */
     public TypeName messageTypeName() {
-        return TypeName.of(commandMessage);
+        return TypeName.of(message());
     }
 }

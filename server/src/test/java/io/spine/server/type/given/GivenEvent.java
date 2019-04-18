@@ -47,7 +47,7 @@ public final class GivenEvent {
 
     public static EventContext context() {
         Event event = eventFactory.createEvent(message(), someVersion());
-        return event.getContext();
+        return event.context();
     }
 
     public static Event occurredMinutesAgo(int minutesAgo) {
@@ -72,7 +72,7 @@ public final class GivenEvent {
         Event event = withMessage(message);
         Event.Builder builder =
                 event.toBuilder()
-                     .setContext(event.getContext()
+                     .setContext(event.context()
                                       .toBuilder()
                                       .setEnrichment(Enrichment.newBuilder()
                                                                .setDoNotEnrich(true)));

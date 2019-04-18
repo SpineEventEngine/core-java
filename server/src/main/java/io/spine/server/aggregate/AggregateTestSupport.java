@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Events;
+import io.spine.core.Event;
 import io.spine.server.security.InvocationGuard;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -107,7 +107,7 @@ public final class AggregateTestSupport {
         List<Message> result =
                 endpoint.runTransactionWith(aggregate)
                         .stream()
-                        .map(Events::getMessage)
+                        .map(Event::enclosedMessage)
                         .collect(toList());
         return result;
     }

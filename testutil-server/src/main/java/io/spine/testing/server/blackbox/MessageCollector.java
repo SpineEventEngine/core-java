@@ -21,8 +21,10 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
 import io.spine.core.MessageId;
+import io.spine.core.MessageWithContext;
 import io.spine.core.TenantId;
 import io.spine.server.type.MessageEnvelope;
 
@@ -36,8 +38,6 @@ import java.util.function.Consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Optional.ofNullable;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 
 /**
  * Abstract base for message listeners that collect messages posted to a bus.
@@ -50,7 +50,7 @@ import static org.hamcrest.Matchers.instanceOf;
  *         the type of the message envelopes
  */
 abstract class MessageCollector<I extends MessageId,
-                                T extends Message,
+                                T extends MessageWithContext<I, ?, ?>,
                                 E extends MessageEnvelope<I, T, ?>>
         implements Consumer<E> {
 
@@ -62,7 +62,8 @@ abstract class MessageCollector<I extends MessageId,
      */
     public final <M extends Message> Optional<M> find(I messageId, Class<M> messageClass) {
         Message commandMessage = messages.get(messageId);
-        assertThat(commandMessage, instanceOf(messageClass));
+        ProtoTruth.assertThat(commandMessage)
+                  .isInstanceOf(messageClass);
         @SuppressWarnings("unchecked") // Checked with an assertion.
                 M result = (M) commandMessage;
         return ofNullable(result);
@@ -85,18 +86,13 @@ abstract class MessageCollector<I extends MessageId,
     }
 
     /**
-     * Obtains ID of the tenant to which the passed message belongs.
-     */
-    protected abstract TenantId tenantOf(T message);
-
-    /**
      * Obtains immutable list with outer objects of messages belonging to the passed tenant.
      */
     public final List<T> ofTenant(TenantId tenantId) {
         checkNotNull(tenantId);
         ImmutableList<T> result =
                 outerObjects.stream()
-                            .filter(m -> tenantId.equals(tenantOf(m)))
+                            .filter(m -> tenantId.equals(m.tenant()))
                             .collect(toImmutableList());
         return result;
     }

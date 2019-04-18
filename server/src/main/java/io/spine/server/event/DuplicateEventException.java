@@ -23,7 +23,6 @@ package io.spine.server.event;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.Events;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;
@@ -47,7 +46,7 @@ public final class DuplicateEventException extends RuntimeException {
 
     private static String messageFrom(Event event) {
         EventId eventId = event.getId();
-        Message eventMessage = Events.getMessage(event);
+        Message eventMessage = event.enclosedMessage();
         TypeName eventType = TypeName.of(eventMessage);
         String result = format(MESSAGE, eventType, eventId.getValue());
         return result;

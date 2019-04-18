@@ -59,7 +59,7 @@ public abstract class ProjectionTest<I,
     protected List<? extends Message> dispatchTo(P entity) {
         Event sourceEvent = createEvent();
         EventContext context =
-                sourceEvent.getContext()
+                sourceEvent.context()
                            .toVBuilder()
                            .setEnrichment(enrichment())
                            .build();

@@ -31,9 +31,8 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 @DisplayName("CommandEnvelope should")
 class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
@@ -61,8 +60,10 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     void getCommandContext() {
         Command command = outerObject();
         CommandEnvelope envelope = toEnvelope(command);
-        assertEquals(command.getContext(), envelope.context());
-        assertSame(envelope.context(), envelope.context());
+        assertThat(envelope.context())
+                .isEqualTo(command.context());
+        assertThat(envelope.context())
+                .isSameAs(envelope.context());
     }
 
     @Test
@@ -71,8 +72,9 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
         Command command = outerObject();
         CommandEnvelope envelope = toEnvelope(command);
 
-        assertEquals(command.getContext()
-                            .getActorContext(), envelope.actorContext());
+        assertThat(envelope.actorContext())
+                .isEqualTo(command.context()
+                                  .getActorContext());
     }
 
     @Test
@@ -82,8 +84,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
 
         TypeName typeName = CommandEnvelope.of(command)
                                            .messageTypeName();
-        assertNotNull(typeName);
-        assertEquals(TypeName.of(TestCommandMessage.class), typeName);
+        assertThat(typeName)
+                .isEqualTo(TypeName.of(TestCommandMessage.class));
     }
 
     @Test

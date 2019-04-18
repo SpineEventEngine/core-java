@@ -164,7 +164,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     private static Command withTimestamp(Command command, Timestamp timestamp) {
-        CommandContext origin = command.getContext();
+        CommandContext origin = command.context();
         ActorContext withTime = origin.getActorContext()
                                       .toVBuilder()
                                       .setTimestamp(timestamp)

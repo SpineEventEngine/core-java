@@ -67,7 +67,7 @@ public abstract class PmEventReactionTest<I,
         Event sourceEvent = createEvent(message);
 
         EventContext context = sourceEvent
-                .getContext()
+                .context()
                 .toBuilder()
                 .setEnrichment(enrichment())
                 .build();

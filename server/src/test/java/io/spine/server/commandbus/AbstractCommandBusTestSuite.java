@@ -146,7 +146,7 @@ abstract class AbstractCommandBusTestSuite {
                 .setTenantId(TenantId.getDefaultInstance());
         Command invalidCmd =
                 cmd.toBuilder()
-                   .setContext(cmd.getContext()
+                   .setContext(cmd.context()
                                   .toBuilder()
                                   .setActorContext(withNoTenant))
                    .build();
@@ -158,7 +158,7 @@ abstract class AbstractCommandBusTestSuite {
                 .newBuilder()
                 .setTenantId(TenantId.getDefaultInstance());
         Command result = cmd.toBuilder()
-                            .setContext(cmd.getContext()
+                            .setContext(cmd.context()
                                            .toBuilder()
                                            .setActorContext(withNoTenant))
                             .build();

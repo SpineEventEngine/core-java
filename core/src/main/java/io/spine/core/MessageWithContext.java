@@ -22,25 +22,36 @@ package io.spine.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.base.MessageContext;
+import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Utils.toTemporal;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
  *
- * @apiNote Some methods use the {@code 'get'} prefix to mix-in with the generated code.
+ * @param <I>
+ *         the type of the message identifier
+ * @param <M>
+ *         the type of the enclosed messages
+ * @param <C>
+ *         the type of the message context
  */
 @GeneratedMixin
-public interface MessageWithContext extends Message {
+public interface MessageWithContext<I extends MessageId,
+                                    M extends SerializableMessage,
+                                    C extends MessageContext>
+        extends Message {
 
     /**
      * Obtains the identifier of the message.
      */
-    Message getId();
+    I getId();
 
     /**
      * Obtains the packed version of the enclosed message.
@@ -52,17 +63,43 @@ public interface MessageWithContext extends Message {
     /**
      * Obtains the context of the enclosed message.
      */
-    MessageContext getContext();
+    C getContext();
+
+    /**
+     * Obtains the identifier of the message.
+     */
+    default I id() {
+        return getId();
+    }
 
     /**
      * Obtains the unpacked form of the enclosed message.
      *
      * @see #getMessage()
      */
-    default Message enclosedMessage() {
+    @SuppressWarnings("unchecked") // protected by generic params of extending interfaces
+    default M enclosedMessage() {
         Message enclosed = AnyPacker.unpack(getMessage());
-        return enclosed;
+        return (M) enclosed;
     }
+
+    /**
+     * Obtains the context of the enclosed message.
+     */
+    default C context() {
+        return getContext();
+    }
+
+    /**
+     *
+     * Obtains the ID of the tenant under which the message was created.
+     */
+    TenantId tenant();
+
+    /**
+     * Obtains the time when the message was created.
+     */
+    Timestamp time();
 
     /**
      * Obtains the type URL of the enclosed message.
@@ -80,5 +117,36 @@ public interface MessageWithContext extends Message {
         Message enclosed = enclosedMessage();
         boolean result = enclosedMessageClass.isAssignableFrom(enclosed.getClass());
         return result;
+    }
+
+    /**
+     * Verifies if the message was created after the point in time.
+     */
+    default boolean isAfter(Timestamp bound) {
+        checkNotNull(bound);
+        return toTemporal(time()).isLaterThan(toTemporal(bound));
+    }
+
+    /**
+     * Verifies if the message was created before the point in time.
+     */
+    default boolean isBefore(Timestamp bound) {
+        checkNotNull(bound);
+        return toTemporal(time()).isEarlierThan(toTemporal(bound));
+    }
+
+    /**
+     * Verifies if the message was created within the passed period of time.
+     *
+     * @param periodStart
+     *         lower bound, exclusive
+     * @param periodEnd
+     *         higher bound, inclusive
+     * @return {@code true} if the time point of the command creation lies in between the given two
+     */
+    default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
+        checkNotNull(periodStart);
+        checkNotNull(periodEnd);
+        return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
     }
 }
