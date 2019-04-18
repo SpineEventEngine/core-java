@@ -32,7 +32,7 @@ dependencies {
     testImplementation project(path: ":testutil-server")
 }
 
-apply from: testArtifactsScript
+apply from: deps.scripts.testArtifacts
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673

@@ -24,4 +24,4 @@ dependencies {
     testImplementation project(path: ':testutil-client', configuration: 'testArtifacts')
 }
 
-apply from: testArtifactsScript
+apply from: deps.scripts.testArtifacts
