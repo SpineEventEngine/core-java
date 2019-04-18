@@ -40,7 +40,7 @@ import com.google.common.collect.Lists
  * <p>To enable the artifact publishing for a project, apply this plugin to it:
  * <pre>
  *     {@code
- *     apply from: "../scripts/assemble-proto.gradle"
+ *     apply from: "../gradle/assemble-proto.gradle"
  *     }
  * </pre>
  */

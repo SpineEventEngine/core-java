@@ -26,4 +26,4 @@ dependencies {
     testImplementation "io.spine:spine-testutil-time:$spineTimeVersion"
 }
 
-apply from: testArtifactsScript
+apply from: deps.scripts.testArtifacts

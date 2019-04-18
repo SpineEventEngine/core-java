@@ -34,7 +34,7 @@ buildscript {
     }
 }
 
-apply from: "$rootDir/scripts/no-internal-javadoc.gradle"
+apply from: deps.scripts.filterInternalJavadocs
 
 ext {
     javaDocFolder = Files.createTempDir()
