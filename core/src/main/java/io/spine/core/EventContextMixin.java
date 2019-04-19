@@ -67,9 +67,9 @@ public interface EventContextMixin extends EnrichableMessageContext {
                 case ORIGIN_NOT_SET:
                 default:
                     throw newIllegalStateException(
-                            "The provided event context (id: %s) has no origin defined.",
+                            "The provided event context (id: `%s`) has no origin defined.",
                             thisContext.getEventId()
-                                        .getValue()
+                                       .getValue()
                     );
             }
         }
