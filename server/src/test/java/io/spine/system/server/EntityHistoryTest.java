@@ -77,7 +77,7 @@ class EntityHistoryTest {
     @BeforeEach
     void setUp() {
         BoundedContextName contextName = BoundedContextName
-                .newBuilder()
+                .vBuilder()
                 .setValue(EntityHistoryTest.class.getSimpleName())
                 .build();
         context = BoundedContext
@@ -116,13 +116,13 @@ class EntityHistoryTest {
 
             checkCommandDispatchedToAggregateHandler();
             checkEntityCreated(AGGREGATE, PersonAggregate.TYPE);
-            checkEntityStateChanged(Person.newBuilder()
+            checkEntityStateChanged(Person.vBuilder()
                                           .setId(id)
                                           .setName(PersonName.getDefaultInstance())
                                           .build());
             checkEventDispatchedToSubscriber();
             checkEntityCreated(PROJECTION, PersonProjection.TYPE);
-            checkEntityStateChanged(PersonDetails.newBuilder()
+            checkEntityStateChanged(PersonDetails.vBuilder()
                                                  .setId(id)
                                                  .setName(PersonName.getDefaultInstance())
                                                  .build());
@@ -152,7 +152,7 @@ class EntityHistoryTest {
             eventAccumulator.forgetEvents();
 
             ExposePerson command = ExposePerson
-                    .newBuilder()
+                    .vBuilder()
                     .setId(id)
                     .build();
             postCommand(command);
@@ -190,7 +190,7 @@ class EntityHistoryTest {
         @DisplayName("command is dispatched to handler in procman")
         void commandToPm() {
             CommandMessage startCommand = StartPersonCreation
-                    .newBuilder()
+                    .vBuilder()
                     .setId(id)
                     .build();
             postCommand(startCommand);
@@ -206,7 +206,7 @@ class EntityHistoryTest {
             eventAccumulator.forgetEvents();
 
             CommandMessage domainCommand = CompletePersonCreation
-                    .newBuilder()
+                    .vBuilder()
                     .setId(id)
                     .build();
             postCommand(domainCommand);
@@ -256,7 +256,7 @@ class EntityHistoryTest {
             eventAccumulator.forgetEvents();
 
             RenamePerson domainCommand = RenamePerson
-                    .newBuilder()
+                    .vBuilder()
                     .setId(id)
                     .setNewFirstName("Paul")
                     .build();
@@ -275,17 +275,19 @@ class EntityHistoryTest {
         }
 
         private void createPerson() {
-            CreatePerson command = CreatePerson.newBuilder()
-                                               .setId(id)
-                                               .build();
+            CreatePerson command = CreatePerson
+                    .vBuilder()
+                    .setId(id)
+                    .build();
             postCommand(command);
         }
 
         @CanIgnoreReturnValue
         private HidePerson hidePerson() {
-            HidePerson command = HidePerson.newBuilder()
-                                           .setId(id)
-                                           .build();
+            HidePerson command = HidePerson
+                    .vBuilder()
+                    .setId(id)
+                    .build();
             postCommand(command);
             return command;
         }
@@ -293,7 +295,7 @@ class EntityHistoryTest {
         @CanIgnoreReturnValue
         private CreatePersonName createPersonName() {
             CreatePersonName domainCommand = CreatePersonName
-                    .newBuilder()
+                    .vBuilder()
                     .setId(id)
                     .setFirstName("Ringo")
                     .build();

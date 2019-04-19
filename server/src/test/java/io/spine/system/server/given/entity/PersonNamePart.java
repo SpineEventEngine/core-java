@@ -52,10 +52,11 @@ public class PersonNamePart
 
     @Assign
     PersonNameCreated handle(CreatePersonName command) {
-        return PersonNameCreated.newBuilder()
-                                .setId(command.getId())
-                                .setFirstName(command.getFirstName())
-                                .build();
+        return PersonNameCreated
+                .vBuilder()
+                .setId(command.getId())
+                .setFirstName(command.getFirstName())
+                .build();
     }
 
     @Apply

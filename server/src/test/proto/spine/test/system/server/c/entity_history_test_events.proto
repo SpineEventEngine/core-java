@@ -62,3 +62,13 @@ message PersonExposed {
 
     PersonId id = 1 [(required) = true];
 }
+
+message PersonCreationStarted {
+
+    PersonId id = 1 [(required) = true];
+}
+
+message PersonCreationCompleted {
+
+    PersonId id = 1 [(required) = true];
+}

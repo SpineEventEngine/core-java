@@ -28,7 +28,6 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
@@ -40,7 +39,6 @@ import io.spine.server.command.model.given.handler.InvalidHandlerReturnsVoid;
 import io.spine.server.command.model.given.handler.InvalidHandlerTooManyParams;
 import io.spine.server.command.model.given.handler.InvalidHandlerTwoParamsFirstInvalid;
 import io.spine.server.command.model.given.handler.InvalidHandlerTwoParamsSecondInvalid;
-import io.spine.server.command.model.given.handler.ProcessManagerDoingNothing;
 import io.spine.server.command.model.given.handler.RejectingAggregate;
 import io.spine.server.command.model.given.handler.RejectingHandler;
 import io.spine.server.command.model.given.handler.ValidHandlerButPrivate;
@@ -50,7 +48,6 @@ import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.declare.SignatureMismatchException;
-import io.spine.server.procman.ProcessManager;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
@@ -59,7 +56,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.procman.PmDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -70,7 +66,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.testing.Helpers.assertEmpty;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -196,18 +191,6 @@ class CommandHandlerMethodTest {
             assertThrows(IllegalStateException.class,
                          () -> handler.invoke(handlerObject, envelope));
         }
-    }
-
-    @Test
-    @DisplayName("allow `ProcessManager` methods producing `Empty`")
-    void allowEmptyInProcman() {
-        RefCreateProject commandMessage = createProject();
-        ProcessManager<String, ?, ?> entity =
-                new ProcessManagerDoingNothing(commandMessage.getProjectId()
-                                                             .getId());
-        CommandEnvelope cmd = newCommand(commandMessage);
-        List<Event> events = PmDispatcher.dispatch(entity, cmd);
-        assertEmpty(events);
     }
 
     @Nested
