@@ -307,7 +307,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <ol>
      *     <li>The name of the message class.
      *     <li>The message ID.
-     *     <li>The entity type URL.
+     *     <li>The URL of the entity state type.
      * </ol>
      *
      * @param msgFormat the format of the message

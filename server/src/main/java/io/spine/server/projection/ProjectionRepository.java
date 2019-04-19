@@ -170,7 +170,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *
      * <p>Overrides to open the method to the package.
      */
-    @SuppressWarnings("RedundantMethodOverride") // see Javadoc
     @Override
     protected StorageConverter<I, P, S> storageConverter() {
         return super.storageConverter();
@@ -299,8 +298,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
             checkNotNull(envelope);
             checkNotNull(exception);
-            logError("Error dispatching external event (class: %s, id: %s)" +
-                             " to projection of type %s.",
+            logError("Error dispatching external event (class: `%s`, id: `%s`)" +
+                             " to projection with state `%s`.",
                      envelope, exception);
         }
     }
