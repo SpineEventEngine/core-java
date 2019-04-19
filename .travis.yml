@@ -42,5 +42,5 @@ after_success:
     fi
 
 after_script:
-  - chmod +x ./scripts/upload-artifacts.sh
-  - ./scripts/upload-artifacts.sh
+  - chmod +x ./config/scripts/upload-artifacts.sh
+  - ./config/scripts/upload-artifacts.sh

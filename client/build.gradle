@@ -30,6 +30,6 @@ dependencies {
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
 }
 
-apply from: testArtifactsScript
+apply from: deps.scripts.testArtifacts
 
-apply from: "$rootDir/scripts/assemble-proto.gradle"
+apply from: "$rootDir/gradle/assemble-proto.gradle"
