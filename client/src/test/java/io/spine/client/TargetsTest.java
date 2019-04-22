@@ -19,6 +19,7 @@
  */
 package io.spine.client;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
@@ -36,7 +37,6 @@ import static io.spine.client.given.TargetsTestEnv.newTaskId;
 import static io.spine.type.TypeUrl.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.internal.util.collections.Sets.newSet;
 
 @DisplayName("Targets utility should")
 class TargetsTest extends UtilityClassTest<Targets> {
@@ -61,7 +61,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
     @DisplayName("compose Target with Message IDs")
     void composeWithMessageIds() {
         TaskId taskId = newTaskId();
-        Target target = someOf(TestEntity.class, newSet(taskId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(taskId));
 
         assertUrl(target);
 
@@ -76,7 +76,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
         String secondId = "b";
         String thirdId = "c";
 
-        Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
@@ -93,7 +93,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
         int secondId = 2;
         int thirdId = 3;
 
-        Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
@@ -110,7 +110,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
         long secondId = 2L;
         long thirdId = 3L;
 
-        Target target = someOf(TestEntity.class, newSet(firstId, secondId, thirdId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
@@ -124,6 +124,6 @@ class TargetsTest extends UtilityClassTest<Targets> {
     @DisplayName("throw IAE for unsupported IDs")
     void throwIaeForUnsupportedIds() {
         assertThrows(IllegalArgumentException.class,
-                     () -> someOf(TaskId.class, newSet(new Object())));
+                     () -> someOf(TaskId.class, ImmutableSet.of(new Object())));
     }
 }
