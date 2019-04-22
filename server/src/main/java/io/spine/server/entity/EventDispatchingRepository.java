@@ -112,7 +112,7 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Determines the targets of the given event.
      *
-     * @param envelope the event to find targets for
+     * @param event the event to find targets for
      * @return a set of IDs of projections to dispatch the given event to
      */
     private Set<I> route(EventEnvelope event) {
@@ -131,7 +131,7 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void onError(EventEnvelope event, RuntimeException exception) {
-        logError("Error dispatching event (class: `%s`, id: `%s`) to entity of type `%s`.",
+        logError("Error dispatching event (class: `%s`, id: `%s`) to entity with state `%s`.",
                  event, exception);
     }
 
