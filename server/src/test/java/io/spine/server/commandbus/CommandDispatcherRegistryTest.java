@@ -34,9 +34,9 @@ import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoComma
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandClass;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.CmdStartProject;
+import io.spine.test.commandbus.command.CmdBusAddTask;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
+import io.spine.test.commandbus.command.CmdBusStartProject;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -102,7 +102,9 @@ class CommandDispatcherRegistryTest {
         void commandDispatcher() {
             registry.register(new AllCommandDispatcher());
 
-            assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+            assertSupported(CmdBusCreateProject.class,
+                            CmdBusAddTask.class,
+                            CmdBusStartProject.class);
         }
 
         @Test
@@ -110,7 +112,9 @@ class CommandDispatcherRegistryTest {
         void commandHandler() {
             registry.register(new AllCommandHandler(eventBus));
 
-            assertSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+            assertSupported(CmdBusCreateProject.class,
+                            CmdBusAddTask.class,
+                            CmdBusStartProject.class);
         }
     }
 
@@ -126,7 +130,9 @@ class CommandDispatcherRegistryTest {
             registry.register(dispatcher);
             registry.unregister(dispatcher);
 
-            assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+            assertNotSupported(CmdBusCreateProject.class,
+                               CmdBusAddTask.class,
+                               CmdBusStartProject.class);
         }
 
         @Test
@@ -137,7 +143,9 @@ class CommandDispatcherRegistryTest {
             registry.register(handler);
             registry.unregister(handler);
 
-            assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+            assertNotSupported(CmdBusCreateProject.class,
+                               CmdBusAddTask.class,
+                               CmdBusStartProject.class);
         }
 
         @Test
@@ -148,7 +156,8 @@ class CommandDispatcherRegistryTest {
 
             registry.unregisterAll();
 
-            assertTrue(registry.getRegisteredMessageClasses().isEmpty());
+            assertTrue(registry.getRegisteredMessageClasses()
+                               .isEmpty());
         }
     }
 
@@ -189,13 +198,15 @@ class CommandDispatcherRegistryTest {
         registry.register(new CreateProjectHandler(eventBus));
         registry.register(new AddTaskDispatcher());
 
-        assertSupported(CmdCreateProject.class, CmdAddTask.class);
+        assertSupported(CmdBusCreateProject.class, CmdBusAddTask.class);
     }
 
     @Test
     @DisplayName("state that no commands are supported when nothing is registered")
     void supportNothingWhenEmpty() {
-        assertNotSupported(CmdCreateProject.class, CmdAddTask.class, CmdStartProject.class);
+        assertNotSupported(CmdBusCreateProject.class,
+                           CmdBusAddTask.class,
+                           CmdBusStartProject.class);
     }
 
     @Nested

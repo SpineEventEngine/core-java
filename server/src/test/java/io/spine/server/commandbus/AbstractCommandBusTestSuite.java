@@ -42,8 +42,8 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
+import io.spine.test.commandbus.event.CmdBusProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
@@ -254,9 +254,9 @@ abstract class AbstractCommandBusTestSuite {
         }
 
         @Assign
-        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
+        CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
-            return CmdProjectCreated.getDefaultInstance();
+            return CmdBusProjectCreated.getDefaultInstance();
         }
 
         boolean wasHandlerInvoked() {

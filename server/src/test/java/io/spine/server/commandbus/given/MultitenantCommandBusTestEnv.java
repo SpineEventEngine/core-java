@@ -26,7 +26,7 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
-import io.spine.test.command.CmdAddTask;
+import io.spine.test.commandbus.command.CmdBusAddTask;
 
 import java.util.Set;
 
@@ -47,7 +47,7 @@ public class MultitenantCommandBusTestEnv {
 
         @Override
         public Set<CommandClass> messageClasses() {
-            return CommandClass.setOf(CmdAddTask.class);
+            return CommandClass.setOf(CmdBusAddTask.class);
         }
 
         @Override

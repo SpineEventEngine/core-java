@@ -30,8 +30,8 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.command.FirstCmdCreateProject;
-import io.spine.test.command.SecondCmdStartProject;
+import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
+import io.spine.test.commandbus.command.SecondCmdBusStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,7 +93,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
             checkCommandError(observer.firstResponse(),
                               INVALID_COMMAND,
-                              CommandValidationError.getDescriptor().getFullName(),
+                              CommandValidationError.getDescriptor()
+                                                    .getFullName(),
                               cmd);
         }
 
@@ -116,8 +117,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @DisplayName("post commands in FIFO order")
     void doPostCommandsInFIFO() {
         Command secondCommand = clearTenantId(secondStartProject());
-        CommandPostingHandler handler = new CommandPostingHandler(eventBus, commandBus,
-                                                                  secondCommand);
+        CommandPostingHandler handler =
+                new CommandPostingHandler(eventBus, commandBus, secondCommand);
         commandBus.register(handler);
 
         Command firstCommand = clearTenantId(firstCreateProject());
@@ -126,8 +127,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         List<Message> handledCommands = handler.handledCommands();
         assertEquals(2, handledCommands.size());
-        assertTrue(handledCommands.get(0) instanceof FirstCmdCreateProject);
-        assertTrue(handledCommands.get(1) instanceof SecondCmdStartProject);
+        assertTrue(handledCommands.get(0) instanceof FirstCmdBusCreateProject);
+        assertTrue(handledCommands.get(1) instanceof SecondCmdBusStartProject);
     }
 
     @MuteLogging
