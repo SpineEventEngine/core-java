@@ -20,14 +20,14 @@
 
 package io.spine.server.inbox;
 
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.DuplicateEventException;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 
 /**
- * The part of {@link Inbox} responsible for processing incoming {@link io.spine.core.EventEnvelope
- * events}.
+ * The part of {@link Inbox} responsible for processing incoming
+ * {@link io.spine.server.type.EventEnvelope events}.
  *
  * @param <I>
  *         the type of identifier or inbox target entities
@@ -40,7 +40,7 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     @Override
     protected void setRecordPayload(EventEnvelope envelope, InboxMessageVBuilder builder) {
-        builder.setEvent(envelope.getOuterObject());
+        builder.setEvent(envelope.outerObject());
     }
 
     @Override
@@ -49,12 +49,12 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
         boolean hasDuplicate = contents.getMessageList()
                                        .stream()
                                        .filter(InboxMessage::hasEvent)
-                                       .anyMatch(m -> envelope.getId()
+                                       .anyMatch(m -> envelope.id()
                                                               .equals(m.getEvent()
                                                                        .getId()));
         if (hasDuplicate) {
             DuplicateEventException exception =
-                    new DuplicateEventException(envelope.getOuterObject());
+                    new DuplicateEventException(envelope.outerObject());
             return Optional.of(exception);
         }
         return Optional.empty();

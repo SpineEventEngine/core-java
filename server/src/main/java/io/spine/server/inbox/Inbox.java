@@ -20,8 +20,8 @@
 
 package io.spine.server.inbox;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;

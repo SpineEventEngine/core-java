@@ -20,13 +20,13 @@
 
 package io.spine.server.procman;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.SystemEventWatcher;
-import io.spine.system.server.CommandDispatchedToHandler;
-import io.spine.system.server.EventDispatchedToReactor;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.EventDispatchedToReactor;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events

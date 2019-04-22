@@ -36,6 +36,7 @@ public class LabelNotFoundException extends RuntimeException {
     private final InboxId inboxId;
 
     public LabelNotFoundException(InboxId id, InboxLabel label) {
+        super();
         this.label = label;
         inboxId = id;
     }

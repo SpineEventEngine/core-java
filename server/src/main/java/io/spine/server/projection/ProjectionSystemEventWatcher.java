@@ -20,16 +20,12 @@
 
 package io.spine.server.projection;
 
-import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.SystemEventWatcher;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
-import io.spine.system.server.rejection.HistoryRejections;
-import io.spine.system.server.EventDispatchedToSubscriber;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
@@ -59,11 +55,11 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
 //        onError(event.getPayload());
 //    }
 
-    private void onError(Event event) {
-        RuntimeException exception = new DuplicateEventException(event);
-        EventEnvelope envelope = EventEnvelope.of(event);
-        repository.onError(envelope, exception);
-    }
+//    private void onError(Event event) {
+//        RuntimeException exception = new DuplicateEventException(event);
+//        EventEnvelope envelope = EventEnvelope.of(event);
+//        repository.onError(envelope, exception);
+//    }
 
     @Override // Exposes the method to this package.
     protected void registerIn(BoundedContext context) {

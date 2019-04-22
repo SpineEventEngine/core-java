@@ -20,14 +20,14 @@
 
 package io.spine.server.inbox;
 
-import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Optional;
 
 /**
  * The part of {@link Inbox} responsible for processing incoming
- * {@link io.spine.core.CommandEnvelope commands}.
+ * {@link io.spine.server.type.CommandEnvelope commands}.
  *
  * @param <I>
  *         the type of identifier or inbox target entities
@@ -40,7 +40,7 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
     @Override
     protected void setRecordPayload(CommandEnvelope envelope, InboxMessageVBuilder builder) {
-        builder.setCommand(envelope.getOuterObject());
+        builder.setCommand(envelope.outerObject());
     }
 
     //TODO:2019-01-25:alex.tymchenko: should we post rejections?
@@ -50,12 +50,12 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
         boolean hasDuplicate = contents.getMessageList()
                                        .stream()
                                        .filter(InboxMessage::hasCommand)
-                                       .anyMatch(m -> envelope.getId()
+                                       .anyMatch(m -> envelope.id()
                                                               .equals(m.getCommand()
                                                                        .getId()));
         if (hasDuplicate) {
             DuplicateCommandException exception =
-                    DuplicateCommandException.of(envelope.getOuterObject());
+                    DuplicateCommandException.of(envelope.outerObject());
             return Optional.of(exception);
         }
         return Optional.empty();

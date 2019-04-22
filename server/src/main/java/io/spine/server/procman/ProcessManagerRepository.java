@@ -38,7 +38,6 @@ import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxLabel;
 import io.spine.server.inbox.InboxStorage;
@@ -49,7 +48,6 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.EntityStateChanged;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -327,7 +325,7 @@ public abstract class ProcessManagerRepository<I,
     private Inbox<I> getInbox(I id) {
         checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
         Inbox<I> inbox = Inbox
-                .<I>newBuilder(id, getEntityStateType())
+                .<I>newBuilder(id, entityStateType())
                 .setStorage(inboxStorage)
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> PmEventEndpoint.of(this, e))

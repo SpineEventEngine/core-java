@@ -20,8 +20,8 @@
 
 package io.spine.server.inbox;
 
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.EnumMap;
 import java.util.Map;

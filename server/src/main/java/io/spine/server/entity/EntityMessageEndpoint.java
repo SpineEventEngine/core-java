@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.List;
@@ -43,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
                                             M extends ActorMessageEnvelope<?, ?, ?>>
-                                implements MessageEndpoint<I, M> {
+        implements MessageEndpoint<I, M> {
 
     /** The repository which created this endpoint. */
     private final Repository<I, E> repository;

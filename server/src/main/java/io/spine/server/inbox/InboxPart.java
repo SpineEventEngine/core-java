@@ -21,9 +21,9 @@
 package io.spine.server.inbox;
 
 import io.spine.base.Time;
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.Optional;
 
@@ -100,7 +100,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         InboxMessageVBuilder builder = InboxMessageVBuilder
                 .newBuilder()
                 .setLabel(label)
-                .setWhenReceived(Time.getCurrentTime());
+                .setWhenReceived(Time.currentTime());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder
                 .build();

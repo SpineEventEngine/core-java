@@ -45,7 +45,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected void onError(EventEnvelope event, RuntimeException exception) {
+    public void onError(EventEnvelope event, RuntimeException exception) {
         repository().onError(event, exception);
     }
 

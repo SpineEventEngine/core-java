@@ -21,8 +21,8 @@
 package io.spine.server.inbox;
 
 import io.spine.annotation.Internal;
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.function.Function;
 

@@ -42,8 +42,6 @@ import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
-import io.spine.system.server.rejection.CannotDispatchCommandTwice;
-import io.spine.system.server.rejection.CannotDispatchEventTwice;
 
 import java.util.function.UnaryOperator;
 

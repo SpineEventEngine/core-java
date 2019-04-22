@@ -21,7 +21,7 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
-import io.spine.core.ActorMessageEnvelope;
+import io.spine.server.type.ActorMessageEnvelope;
 
 /**
  * An endpoint for messages delivered to an abstract target.
