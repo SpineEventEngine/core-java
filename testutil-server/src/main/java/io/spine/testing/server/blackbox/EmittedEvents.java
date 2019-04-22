@@ -23,8 +23,8 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.Version;
+import io.spine.server.type.EventClass;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -44,9 +44,7 @@ public final class EmittedEvents extends EmittedMessages<EventClass, Event, Even
 
     private static MessageTypeCounter<EventClass, Event, EventMessage>
     counterFor(List<Event> events) {
-        return new MessageTypeCounter<EventClass, Event, EventMessage>(events,
-                                                                       EventClass::of,
-                                                                       EventClass::from);
+        return new MessageTypeCounter<>(events, EventClass::of, EventClass::from);
     }
 
     /**
@@ -63,7 +61,7 @@ public final class EmittedEvents extends EmittedMessages<EventClass, Event, Even
         Iterator<Event> events = this.messages().iterator();
         for (int version : versionNumbers) {
             Version actualVersion = events.next()
-                                          .getContext()
+                                          .context()
                                           .getVersion();
             if (version != actualVersion.getNumber()) {
                 return false;

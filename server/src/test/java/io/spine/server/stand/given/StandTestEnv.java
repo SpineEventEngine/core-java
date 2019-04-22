@@ -27,6 +27,7 @@ import io.spine.client.EntityStateUpdate;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
@@ -65,7 +66,7 @@ public class StandTestEnv {
                 .setMultitenant(multitenant)
                 .setStand(standBuilder)
                 .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
         for (Repository repository : repositories) {
             boundedContext.register(repository);
         }
@@ -111,7 +112,8 @@ public class StandTestEnv {
 
     public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
-        private Any newEntityState = null;
+        private @Nullable Any newEntityState = null;
+        private @Nullable Event newEvent = null;
 
         /**
          * {@inheritDoc}
@@ -121,13 +123,29 @@ public class StandTestEnv {
          */
         @Override
         public void accept(SubscriptionUpdate update) {
-            EntityStateUpdate entityStateUpdate = update.getEntityStateUpdatesList()
-                                                        .get(0);
-            newEntityState = entityStateUpdate.getState();
+            switch (update.getUpdateCase()) {
+                case ENTITY_UPDATES:
+                    EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
+                                                                .getUpdatesList()
+                                                                .get(0);
+                    newEntityState = entityStateUpdate.getState();
+                    break;
+                case EVENT_UPDATES:
+                    newEvent = update.getEventUpdates()
+                                     .getEventsList()
+                                     .get(0);
+                    break;
+                default:
+                    // Do nothing.
+            }
         }
 
         public @Nullable Any newEntityState() {
             return newEntityState;
+        }
+
+        public @Nullable Event newEvent() {
+            return newEvent;
         }
     }
 }

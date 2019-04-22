@@ -42,19 +42,13 @@ import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
 
 /**
  * A engine which handles commands and reacts on domestic and external events.
- *
- * @author Alexander Yevsyukov
  */
 public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder> {
-
-    protected EngineAggregate(EngineId id) {
-        super(id);
-    }
 
     @Assign
     EngineStarted handle(StartEngine command) throws EngineAlreadyStarted {
         EngineId id = command.getId();
-        if (getState().getStatus() == STARTED) {
+        if (state().getStatus() == STARTED) {
             throw EngineAlreadyStarted
                     .newBuilder()
                     .setId(id)
@@ -64,14 +58,14 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     }
 
     @Apply
-    void on(EngineStarted event) {
+    private void on(EngineStarted event) {
         setStarted();
     }
 
     @Assign
     EngineStopped handle(StopEngine command) throws EngineAlreadyStopped {
         EngineId id = command.getId();
-        if (getState().getStatus() == STOPPED) {
+        if (state().getStatus() == STOPPED) {
             throw EngineAlreadyStopped
                     .newBuilder()
                     .setId(id)
@@ -81,7 +75,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     }
 
     @Apply(allowImport = true)
-    void on(EngineStopped event) {
+    private void on(EngineStopped event) {
         setStopped();
     }
 
@@ -89,7 +83,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      * This is an example of import-only method.
      */
     @Apply(allowImport = true)
-    void on(SettingsAdjusted event) {
+    private void on(SettingsAdjusted event) {
         // Do nothing for now.
     }
 
@@ -161,10 +155,10 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     }
 
     private void setStarted() {
-        getBuilder().setStatus(STARTED);
+        builder().setStatus(STARTED);
     }
 
     private void setStopped() {
-        getBuilder().setStatus(STOPPED);
+        builder().setStatus(STOPPED);
     }
 }

@@ -32,11 +32,7 @@ import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 
-public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
-
-    protected BbReportAggregate(BbReportId id) {
-        super(id);
-    }
+final class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
 
     @Assign
     BbReportCreated handle(BbCreateReport command) {
@@ -51,7 +47,7 @@ public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportV
     BbTaskAddedToReport on(BbTaskAdded event) {
         return BbTaskAddedToReport
                 .newBuilder()
-                .setReportId(getId())
+                .setReportId(id())
                 .setProjectId(event.getProjectId())
                 .setTask(event.getTask())
                 .build();
@@ -59,13 +55,13 @@ public class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportV
     }
 
     @Apply
-    void on(BbReportCreated event) {
-        getBuilder().setId(event.getReportId())
-                    .addAllProjectIds(event.getProjectIdList());
+    private void on(BbReportCreated event) {
+        builder().setId(event.getReportId())
+                 .addAllProjectIds(event.getProjectIdList());
     }
 
     @Apply
-    void on(BbTaskAddedToReport event) {
-        getBuilder().addTasks(event.getTask());
+    private void on(BbTaskAddedToReport event) {
+        builder().addTasks(event.getTask());
     }
 }

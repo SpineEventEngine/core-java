@@ -27,8 +27,6 @@ import io.spine.system.server.PersonId;
 
 /**
  * A repository of {@link PersonProcman}.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonProcmanRepository
         extends ProcessManagerRepository<PersonId, PersonProcman, PersonCreation> {

@@ -20,24 +20,34 @@
 
 package io.spine.server.command.model;
 
-import io.spine.core.CommandClass;
+import io.spine.server.type.CommandClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
 /**
  * A common interface for classes that handle commands.
  *
- * @author Alexander Yevsyukov
+ * @param <P>
+ *         the type of message classes produced from the command handling
+ * @param <H>
+ *         the type of methods which perform command handling
  */
-public interface CommandHandlingClass<H extends CommandAcceptingMethod> {
+public interface CommandHandlingClass<P extends MessageClass<?>,
+                                      H extends CommandAcceptingMethod<?, P, ?>> {
 
     /**
      * Obtains classes of commands handled by the class.
      */
-    Set<CommandClass> getCommands();
+    Set<CommandClass> commands();
+
+    /**
+     * Obtains classes of all messages produced as a result of command handling.
+     */
+    Set<P> commandOutput();
 
     /**
      * Obtains the handler method for the passed command class.
      */
-    H getHandler(CommandClass commandClass);
+    H handlerOf(CommandClass commandClass);
 }

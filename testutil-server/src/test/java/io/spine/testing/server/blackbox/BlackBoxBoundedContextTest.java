@@ -22,28 +22,36 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.DefaultRepository;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
+import io.spine.server.type.CommandClass;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
+import io.spine.testing.server.blackbox.given.BbCommandDispatcher;
+import io.spine.testing.server.blackbox.given.BbDuplicateCommandDispatcher;
+import io.spine.testing.server.blackbox.given.BbEventDispatcher;
 import io.spine.testing.server.blackbox.given.BbInitProcess;
-import io.spine.testing.server.blackbox.given.BbInitRepository;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
-import io.spine.testing.server.blackbox.given.BbProjectViewRepository;
+import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
-import io.spine.testing.server.procman.PmSubject;
+import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,8 +75,10 @@ import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
+import static io.spine.testing.server.blackbox.given.Given.eventDispatcherRegistered;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.registerCommandDispatcher;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
@@ -89,8 +99,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @BeforeEach
     void setUp() {
         context = newInstance().with(new BbProjectRepository(),
-                                     new BbProjectViewRepository(),
-                                     new BbInitRepository());
+                                     DefaultRepository.of(BbProjectViewProjection.class),
+                                     DefaultRepository.of(BbInitProcess.class));
     }
 
     @AfterEach
@@ -106,7 +116,73 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     T boundedContext() {
         return context;
     }
-    
+
+    @Test
+    @DisplayName("register command dispatchers")
+    void registerCommandDispatchers() {
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
+        BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
+                                                                 commandTypeToDispatch);
+        context.withHandlers(dispatcher);
+        context.receivesCommand(registerCommandDispatcher(dispatcher.getClass()));
+        assertThat(dispatcher.commandsDispatched()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register duplicate command dispatchers")
+    void throwOnDuplicateCommandDispatchers() {
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
+        BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
+                                                                 commandTypeToDispatch);
+        context.withHandlers(dispatcher);
+        BbDuplicateCommandDispatcher duplicateDispatcher =
+                new BbDuplicateCommandDispatcher(context.eventBus(),
+                                                 commandTypeToDispatch);
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> context.withHandlers(duplicateDispatcher));
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register a null command dispatcher")
+    void throwOnNullCommandDispatcher() {
+        assertThrows(NullPointerException.class,
+                     () -> context.withHandlers((CommandDispatcher<?>) null));
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register several command dispatchers one of which is null")
+    void throwOnOneOfNull() {
+        CommandClass commandTypeToDispatch = CommandClass.from(BbRegisterCommandDispatcher.class);
+        BbCommandDispatcher dispatcher = new BbCommandDispatcher(context.eventBus(),
+                                                                 commandTypeToDispatch);
+        assertThrows(NullPointerException.class, () -> context.withHandlers(dispatcher, null));
+    }
+
+    @Test
+    @DisplayName("register event dispatcher")
+    void registerEventDispatcher() {
+        BbEventDispatcher dispatcher = new BbEventDispatcher();
+        context.withEventDispatchers(dispatcher);
+        context.receivesEvent(eventDispatcherRegistered(dispatcher.getClass()));
+        assertThat(dispatcher.eventsReceived()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register a null event dispatcher")
+    void throwOnNullEventDispatcher() {
+        assertThrows(NullPointerException.class,
+                     () -> context.withEventDispatchers((EventDispatcher<?>) null));
+    }
+
+    @Test
+    @DisplayName("throw on an attempt to register several event dispatchers if one of them is null")
+    void throwOnOneOfEventDispatchersIsNull() {
+        BbEventDispatcher validDispatcher = new BbEventDispatcher();
+        assertThrows(NullPointerException.class,
+                     () -> context.withEventDispatchers(validDispatcher, null));
+    }
+
     @Test
     @DisplayName("ignore sent events in emitted")
     void ignoreSentEvents() {
@@ -297,8 +373,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
      */
     private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
         ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
-        repos.forEach(repository -> builder.add(repository.getEntityStateType()
-                                                          .toName()));
+        repos.forEach(repository -> builder.add(repository.entityStateType()
+                                                          .toTypeName()));
         return builder.build();
     }
 
@@ -308,22 +384,24 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(
                 new BbProjectRepository(),
-                new BbProjectViewRepository()
+                DefaultRepository.of(BbProjectViewProjection.class)
         );
 
         private final Set<TypeName> types = toTypes(repositories);
 
         private BlackBoxBoundedContext<?> blackBox;
         private BoundedContextBuilder builder;
-        private Enricher enricher;
+        private EventEnricher enricher;
 
         @BeforeEach
         void setUp() {
-            enricher = Enricher.newBuilder()
-                               .build();
-            builder = BoundedContext.newBuilder()
-                                    .setEventBus(EventBus.newBuilder()
-                                                         .setEnricher(enricher));
+            enricher = EventEnricher
+                    .newBuilder()
+                    .build();
+            builder = BoundedContext
+                    .newBuilder()
+                    .setEventBus(EventBus.newBuilder()
+                                         .setEnricher(enricher));
             repositories.forEach(builder::add);
         }
 
@@ -342,7 +420,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         private void assertEnricher() {
-            Truth8.assertThat(blackBox.getEventBus()
+            Truth8.assertThat(blackBox.eventBus()
                                       .enricher())
                   .hasValue(enricher);
         }
@@ -359,43 +437,127 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Nested
-    @DisplayName("obtain PmSubject with")
-    class ObtainPmSubject {
+    @DisplayName("obtain `EntitySubject`")
+    class ObtainEntitySubject {
 
         private BbProjectId id;
-        private PmSubject<BbInit, BbInitProcess> assertProcessManager;
 
         @BeforeEach
         void getSubject() {
             id = newProjectId();
-            assertProcessManager = context.receivesCommand(initProject(id))
-                                          .assertThat(BbInitProcess.class, id);
+            context.receivesCommand(initProject(id, false));
         }
 
         @Test
-        @DisplayName("archived flag subject")
-        void archivedFlag() {
-            assertProcessManager.archivedFlag()
-                                .isFalse();
+        @DisplayName("via entity class")
+        void entityClass() {
+            EntitySubject subject = context.assertEntity(BbInitProcess.class, id);
+            assertThat(subject)
+                    .isNotNull();
+            subject.isInstanceOf(BbInitProcess.class);
         }
 
         @Test
-        @DisplayName("deleted flag subject")
-        void deletedFlag() {
-            assertProcessManager.deletedFlag()
-                                .isTrue();
+        @DisplayName("via entity state class")
+        void entityStateClass() {
+            EntitySubject subject = context.assertEntityWithState(BbInit.class, id);
+            assertThat(subject)
+                    .isNotNull();
+            subject.hasStateThat()
+                   .isInstanceOf(BbInit.class);
+        }
+
+        @Nested
+        @DisplayName("with")
+        class NestedSubjects {
+
+            private EntitySubject assertProcessManager;
+
+            @BeforeEach
+            void getSubj() {
+                assertProcessManager = context.assertEntity(BbInitProcess.class, id);
+            }
+
+            @Test
+            @DisplayName("archived flag subject")
+            void archivedFlag() {
+                assertProcessManager.archivedFlag()
+                                    .isFalse();
+            }
+
+            @Test
+            @DisplayName("deleted flag subject")
+            void deletedFlag() {
+                assertProcessManager.deletedFlag()
+                                    .isTrue();
+            }
+
+            @Test
+            @DisplayName("state subject")
+            void stateSubject() {
+                BbInit expectedState = BbInit
+                        .vBuilder()
+                        .setId(id)
+                        .setInitialized(true)
+                        .build();
+                assertProcessManager.hasStateThat()
+                                    .isEqualTo(expectedState);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Provide `Subject` for generated messages")
+    class MessageSubjects {
+
+        @BeforeEach
+        void sendCommand() {
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id));
         }
 
         @Test
-        @DisplayName("state subject")
-        void stateSubject() {
-            BbInit expectedState = BbInit
-                    .newBuilder()
-                    .setId(id)
-                    .setInitialized(true)
-                    .build();
-            assertProcessManager.hasStateThat()
-                                .isEqualTo(expectedState);
+        @DisplayName("`CommandSubject`")
+        void commandSubject() {
+            assertThat(context.assertCommands())
+                    .isNotNull();
+        }
+
+        @Test
+        @DisplayName("`EventSubject`")
+        void eventSubject() {
+            assertThat(context.assertEvents())
+                    .isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Provide generated")
+    class Generated {
+
+        @BeforeEach
+        void postCommands() {
+            BbProjectId id = newProjectId();
+            context.receivesCommand(createProject(id))
+                   .receivesCommand(initProject(id, true)) ;
+        }
+
+        @Test
+        @DisplayName("event messages")
+        void eventMessages() {
+            IterableSubject assertEventMessages = assertThat(context.eventMessages());
+            assertEventMessages.isNotEmpty();
+            assertEventMessages.hasSize(context.events()
+                                               .size());
+        }
+
+        @Test
+        @DisplayName("command messages")
+        void commandMessages() {
+            IterableSubject assertCommandMessages = assertThat(context.commandMessages());
+            assertCommandMessages.isNotEmpty();
+            assertCommandMessages.hasSize(context.commands()
+                                                 .size());
         }
     }
 }

@@ -23,11 +23,11 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
 import java.util.Set;
@@ -37,18 +37,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Dispatches events to be imported to the associated aggregate repository.
  *
- * @param <I> the type of aggregate IDs
- * @author Alexander Yevsyukov
- * @apiNote
- * This internal class is made {@code public} for restricting types of dispatchers that can be
- * registered with an {@link io.spine.server.aggregate.ImportBus ImportBus}. Since only
- * {@linkplain io.spine.server.aggregate.AggregateRepository Aggregate Repositories} can dispatch
- * imported events to their aggregates, we limit the type of the import event dispatches to
- * this class, which neither can be extended, nor created from outside of this package.
- * Instances of this class are proxies that Aggregate Repositories create and
- * {@linkplain io.spine.server.aggregate.ImportBus#register(
- * io.spine.server.bus.MessageDispatcher) register} with an {@code ImportBus} of their parent
- * Bounded Context.
+ * @param <I>
+ *         the type of aggregate IDs
+ * @apiNote This internal class is made {@code public} for restricting types of dispatchers
+ *         that can be registered with an {@link io.spine.server.aggregate.ImportBus ImportBus}.
+ *         Since only {@linkplain io.spine.server.aggregate.AggregateRepository Aggregate Repositories}
+ *         can dispatch imported events to their aggregates, we limit the type of the import event
+ *         dispatches to this class, which neither can be extended, nor created from outside of this
+ *         package. Instances of this class are proxies that Aggregate Repositories create and
+ *         {@linkplain io.spine.server.aggregate.ImportBus#register(io.spine.server.bus.MessageDispatcher)
+ *         register} with an {@code ImportBus} of their parent Bounded Context.
  */
 @Internal
 public final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
@@ -65,30 +63,30 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     }
 
     @Override
-    public Set<EventClass> getMessageClasses() {
-        return repository.getImportableEventClasses();
+    public Set<EventClass> messageClasses() {
+        return repository.importableEventClasses();
     }
 
     /**
      * Always returns empty set because external events cannot be imported.
      */
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }
 
     @CanIgnoreReturnValue
     @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        I result = repository.importEvent(envelope);
+    public Set<I> dispatch(EventEnvelope event) {
+        I result = repository.importEvent(event);
         return ImmutableSet.of(result);
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        EventClass eventClass = envelope.getMessageClass();
-        String id = envelope.idAsString();
-        _error("Unable to import event class: `{}` id: {``} repository: `{}`",
+    public void onError(EventEnvelope event, RuntimeException exception) {
+        EventClass eventClass = event.messageClass();
+        String id = event.idAsString();
+        _error("Unable to import event class: `{}` id: `{}` repository: `{}`.",
                eventClass, id, repository);
     }
 

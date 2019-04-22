@@ -27,9 +27,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("TenantAwareFunction0 should")
 class TenantAwareFunction0Test {
 
@@ -40,7 +37,7 @@ class TenantAwareFunction0Test {
                      () -> new TenantAwareFunction0<Timestamp>() {
                          @Override
                          public Timestamp apply() {
-                             return Time.getCurrentTime();
+                             return Time.currentTime();
                          }
                      });
     }

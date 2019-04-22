@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -63,9 +64,8 @@ import io.spine.time.LocalDates;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 public class Given {
 
@@ -129,13 +129,13 @@ public class Given {
                                                  .setValue(newUuid())
                                                  .build();
             TestActorRequestFactory factory =
-                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+                    new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
             return result;
         }
 
         static Command createProject() {
-            return createProject(getCurrentTime());
+            return createProject(currentTime());
         }
 
         private static Command createProject(Timestamp when) {
@@ -172,7 +172,7 @@ public class Given {
                     .setCustomer(customer)
                     .build();
             UserId userId = GivenUserId.of(Identifier.newUuid());
-            Command result = create(msg, userId, getCurrentTime());
+            Command result = create(msg, userId, currentTime());
             return result;
         }
 
@@ -187,7 +187,7 @@ public class Given {
     static class AQuery {
 
         private static final ActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(AQuery.class);
+                new TestActorRequestFactory(AQuery.class);
 
         private AQuery() {
         }
@@ -241,25 +241,23 @@ public class Given {
         @Assign
         List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
             AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
-            return newArrayList(message);
+            return ImmutableList.of(message);
         }
 
         @Apply
-        void event(AggProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Status.CREATED);
+        private void event(AggProjectCreated event) {
+            builder().setId(event.getProjectId())
+                     .setStatus(Status.CREATED);
         }
 
         @Apply
-        void event(AggTaskAdded event) {
+        private void event(AggTaskAdded event) {
         }
 
         @Apply
-        void event(AggProjectStarted event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Status.STARTED);
+        private void event(AggProjectStarted event) {
+            builder().setId(event.getProjectId())
+                     .setStatus(Status.STARTED);
         }
     }
 
@@ -279,10 +277,6 @@ public class Given {
     public static class CustomerAggregate
             extends Aggregate<CustomerId, Customer, CustomerVBuilder> {
 
-        public CustomerAggregate(CustomerId id) {
-            super(id);
-        }
-
         @Assign
         CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
             CustomerCreated event = CustomerCreated
@@ -294,8 +288,8 @@ public class Given {
         }
 
         @Apply
-        void event(CustomerCreated event) {
-            getBuilder().mergeFrom(event.getCustomer());
+        private void event(CustomerCreated event) {
+            builder().mergeFrom(event.getCustomer());
         }
     }
 
@@ -322,7 +316,7 @@ public class Given {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        public void on(BcProjectCreated event, EventContext context) {
+        void on(BcProjectCreated event, EventContext context) {
             // Do nothing.
         }
     }

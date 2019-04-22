@@ -26,9 +26,9 @@ import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
-import io.spine.system.server.EventCausedCommand;
+import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.EventCausedCommand;
 import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -37,8 +37,6 @@ import static com.google.common.base.Preconditions.checkState;
  * A sequence with one command was generated in response to an incoming event.
  *
  * <p>The result of the sequence is the system command for event lifecycle aggregate.
- *
- * @author Alexander Yevsyukov
  */
 @Internal
 public class SingleCommand
@@ -52,7 +50,7 @@ public class SingleCommand
      * Creates an empty sequence for creating a command in response to the passed event.
      */
     public static SingleCommand inResponseTo(EventEnvelope event) {
-        return new SingleCommand(event.getId(), event.getActorContext());
+        return new SingleCommand(event.id(), event.actorContext());
     }
 
     public SingleCommand produce(CommandMessage commandMessage) {

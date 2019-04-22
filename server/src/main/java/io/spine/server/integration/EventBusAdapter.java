@@ -24,24 +24,22 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
+import io.spine.core.EventVBuilder;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
- *
- * @author Alex Tymchenko
  */
 final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
 
-    EventBusAdapter(Builder builder) {
+    private EventBusAdapter(Builder builder) {
         super(builder);
     }
 
@@ -55,7 +53,8 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
         Message unpacked = unpack(message.getOriginalMessage());
         Event event = (Event) unpacked;
-        ExternalMessageEnvelope result = ExternalMessageEnvelope.of(message, getMessage(event));
+        ExternalMessageEnvelope result =
+                ExternalMessageEnvelope.of(message, event.enclosedMessage());
         return result;
     }
 
@@ -63,16 +62,16 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
         Any packedEvent = externalMsg.getOriginalMessage();
         Event event = unpack(packedEvent, Event.class);
-        Event.Builder eventBuilder = event.toBuilder();
+        EventVBuilder eventBuilder = event.toVBuilder();
         EventContext modifiedContext = eventBuilder.getContext()
-                                                   .toBuilder()
+                                                   .toVBuilder()
                                                    .setExternal(true)
                                                    .build();
 
         Event marked = eventBuilder.setContext(modifiedContext)
                                    .build();
         ExternalMessage result = ExternalMessages.of(marked, externalMsg.getBoundedContextName());
-        return ExternalMessageEnvelope.of(result, getMessage(event));
+        return ExternalMessageEnvelope.of(result, event.enclosedMessage());
     }
 
     @Override

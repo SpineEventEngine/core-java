@@ -30,9 +30,6 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.TestValues.randomString;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("SingleTenantIndex should")
 class SingleTenantIndexTest {
 

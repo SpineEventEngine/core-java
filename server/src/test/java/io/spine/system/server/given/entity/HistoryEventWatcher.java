@@ -20,7 +20,7 @@
 
 package io.spine.system.server.given.entity;
 
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.system.server.ModelInfo;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
@@ -28,14 +28,12 @@ import java.util.Set;
 
 /**
  * Accumulates the entity history events.
- *
- * @author Dmytro Dashenkov
  */
 public class HistoryEventWatcher extends AbstractEventAccumulator {
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return ModelInfo.eventLifecycle()
-                        .getStateEventClasses();
+                        .stateEvents();
     }
 }

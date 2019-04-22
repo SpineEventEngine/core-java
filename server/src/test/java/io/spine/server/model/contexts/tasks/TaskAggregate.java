@@ -31,12 +31,9 @@ import io.spine.test.model.contexts.tasks.commands.RenameTask;
 import io.spine.test.model.contexts.tasks.commands.TaskCreated;
 import io.spine.test.model.contexts.tasks.commands.TaskRenamed;
 
-/**
- * @author Alexander Yevsyukov
- */
-class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
+final class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
 
-    protected TaskAggregate(TaskId id) {
+    TaskAggregate(TaskId id) {
         super(id);
     }
 
@@ -53,9 +50,9 @@ class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
     }
 
     @Apply
-    void event(TaskCreated event) {
+    private void event(TaskCreated event) {
         Task task = event.getTask();
-        getBuilder()
+        builder()
                 .setId(event.getId())
                 .setName(task.getName())
                 .setDescription(task.getDescription());
@@ -71,7 +68,7 @@ class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
     }
 
     @Apply
-    void event(TaskRenamed event) {
-        getBuilder().setName(event.getNewName());
+    private void event(TaskRenamed event) {
+        builder().setName(event.getNewName());
     }
 }

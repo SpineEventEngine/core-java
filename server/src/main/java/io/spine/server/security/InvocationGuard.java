@@ -27,8 +27,6 @@ import static java.lang.String.format;
 
 /**
  * Controls which class can call a method.
-
- * @author Alexander Yevsyukov
  */
 public final class InvocationGuard {
 

@@ -41,12 +41,14 @@ import static java.util.Optional.ofNullable;
  * <p>Other three can be {@code Message}, {@link java.util.Optional Optional} or
  * {@link Either}.
  *
- * @param <A> the type of the first element
- * @param <B> the type of the second element
- * @param <C> the type of the third element
- * @param <D> the type of the fourth element
- *
- * @author Alexander Yevsyukov
+ * @param <A>
+ *         the type of the first element
+ * @param <B>
+ *         the type of the second element
+ * @param <C>
+ *         the type of the third element
+ * @param <D>
+ *         the type of the fourth element
  */
 public final class Quartet<A extends Message, B, C, D>
         extends Tuple

@@ -20,32 +20,40 @@
 
 package io.spine.testing.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
-import com.google.common.truth.extensions.proto.ProtoTruth;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Fact.simpleFact;
+import static com.google.common.truth.Truth.assertAbout;
+import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 
 /**
  * Assertions for entities.
- *
- * @param <T> the type of entity subject for parameter covariance in {@code Subject.Factory}
- * @param <S> the type of the entity state message
- * @param <E> the type of the entity
  */
-public class EntitySubject<T extends EntitySubject<T, S, E>,
-                           S extends Message,
-                           E extends Entity<?, S>>
-        extends Subject<T, E> {
+public final class EntitySubject
+        extends Subject<EntitySubject, Entity<?, ?>> {
 
-    protected EntitySubject(FailureMetadata metadata, @NullableDecl E actual) {
+    @VisibleForTesting
+    static final String ENTITY_SHOULD_EXIST = "entity should exist";
+
+    private EntitySubject(FailureMetadata metadata, @Nullable Entity<?, ?> actual) {
         super(metadata, actual);
+    }
+
+    /**
+     * Creates a subject for asserting the passed Projection instance.
+     */
+    public static <E extends Entity<?, ?>>
+    EntitySubject assertEntity(@Nullable E entity) {
+        return assertAbout(entities()).that(entity);
     }
 
     /**
@@ -56,30 +64,61 @@ public class EntitySubject<T extends EntitySubject<T, S, E>,
     }
 
     /**
+     * Verifies if the entity does not exist.
+     */
+    public void doesNotExist() {
+        isNull();
+    }
+
+    /**
      * Obtains the subject for the {@code archived} flag.
      */
     public BooleanSubject archivedFlag() {
-        exists();
-        return assertThat(flags().getArchived());
+        if (actual() == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().that(false);
+        } else {
+            return check().that(flags().getArchived());
+        }
     }
 
     /**
      * Obtains the subject for the {@code deleted} flag.
      */
     public BooleanSubject deletedFlag() {
-        exists();
-        return assertThat(flags().getDeleted());
+        if (actual() == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().that(false);
+        } else {
+            return check().that(flags().getDeleted());
+        }
     }
 
     private LifecycleFlags flags() {
-        return actual().getLifecycleFlags();
+        return actual().lifecycleFlags();
     }
 
     /**
      * Obtains the subject for the state of the entity.
      */
     public ProtoSubject<?, Message> hasStateThat() {
-        exists();
-        return ProtoTruth.assertThat(actual().getState());
+        Entity<?, ?> entity = actual();
+        if (entity == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().about(protos())
+                                .that(Empty.getDefaultInstance());
+        } else {
+            return check().about(protos())
+                          .that(entity.state());
+        }
+    }
+
+    private void shouldExistButDoesNot() {
+        failWithoutActual(simpleFact(ENTITY_SHOULD_EXIST));
+    }
+
+    static
+    Subject.Factory<EntitySubject, Entity<?, ?>> entities() {
+        return EntitySubject::new;
     }
 }

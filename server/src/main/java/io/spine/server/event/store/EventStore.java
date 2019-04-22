@@ -24,7 +24,6 @@ import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventStreamQuery;
@@ -70,7 +69,7 @@ public final class EventStore implements AutoCloseable {
     private static void ensureSameTenant(Iterable<Event> events) {
         checkNotNull(events);
         Set<TenantId> tenants = Streams.stream(events)
-                                       .map(Events::getTenantId)
+                                       .map(Event::tenant)
                                        .collect(toSet());
         checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }

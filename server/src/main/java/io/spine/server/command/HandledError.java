@@ -25,8 +25,6 @@ package io.spine.server.command;
  *
  * <p>Performs no action on {@link #rethrowOnce()} and always returns
  * {@link java.util.Optional#empty() Optional.empty()} on {@link #asRejection()}.
- *
- * @author Dmytro Dashenkov
  */
 enum HandledError implements CaughtError {
 

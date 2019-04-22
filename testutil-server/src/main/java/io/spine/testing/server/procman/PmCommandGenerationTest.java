@@ -23,8 +23,8 @@ package io.spine.testing.server.procman;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.MessageHandlerTest;
 import io.spine.testing.server.expected.CommanderExpected;
 
@@ -37,8 +37,6 @@ import java.util.List;
  * @param <M> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- *
- * @author Alexander Yevsyukov
  */
 public abstract
 class PmCommandGenerationTest<I,
@@ -65,10 +63,10 @@ class PmCommandGenerationTest<I,
     protected CommanderExpected<S> expectThat(P processManager) {
         InjectCommandBus.of(boundedContext())
                         .to(processManager);
-        S initialState = processManager.getState();
+        S initialState = processManager.state();
         List<? extends Message> messages = dispatchTo(processManager);
         ImmutableList<Message> commands = interceptedCommands();
-        S updatedState = processManager.getState();
+        S updatedState = processManager.state();
         CommanderExpected<S> result =
                 new CommanderExpected<>(messages, initialState, updatedState, commands);
         return result;

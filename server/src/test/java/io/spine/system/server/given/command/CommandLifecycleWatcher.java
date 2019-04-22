@@ -20,7 +20,7 @@
 
 package io.spine.system.server.given.command;
 
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.system.server.ModelInfo;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
@@ -28,14 +28,12 @@ import java.util.Set;
 
 /**
  * Accumulates {@link io.spine.system.server.CommandLifecycle} events.
- *
- * @author Dmytro Dashenkov
  */
 public class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> eventClasses() {
         return ModelInfo.commandLifecycle()
-                        .getStateEventClasses();
+                        .stateEvents();
     }
 }

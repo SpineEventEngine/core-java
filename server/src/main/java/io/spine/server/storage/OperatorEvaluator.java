@@ -30,7 +30,7 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator;
-import static io.spine.protobuf.Timestamps2.isLaterThan;
+import static io.spine.core.Utils.toTemporal;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
@@ -65,7 +65,7 @@ public enum OperatorEvaluator {
             if (left instanceof Timestamp) {
                 Timestamp tsLeft = (Timestamp) left;
                 Timestamp tsRight = (Timestamp) right;
-                return isLaterThan(tsLeft, tsRight);
+                return toTemporal(tsLeft).isLaterThan(toTemporal(tsRight));
             }
             if (left instanceof Comparable<?>) {
                 Comparable cmpLeft = (Comparable<?>) left;
@@ -117,14 +117,18 @@ public enum OperatorEvaluator {
      * expressed as {@code 42 > 9}. The function returns the {@code boolean} result of
      * the evaluation.
      *
-     * @param left     the left operand
-     * @param operator the comparison operator
-     * @param right    the right operand
-     * @param <T>      the type of the compared values
+     * @param left
+     *         the left operand
+     * @param operator
+     *         the comparison operator
+     * @param right
+     *         the right operand
+     * @param <T>
+     *         the type of the compared values
      * @return {@code true} if the operands match the operator, {@code false} otherwise
-     * @throws UnsupportedOperationException if the operation is
-     *                                       <a href="supported_types">not supported</a> for
-     *                                       the given data types
+     * @throws UnsupportedOperationException
+     *         if the operation is <a href="supported_types">not supported</a> for the given
+     *         data types
      */
     public static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {

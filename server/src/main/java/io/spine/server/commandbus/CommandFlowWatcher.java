@@ -23,10 +23,10 @@ package io.spine.server.commandbus;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
-import io.spine.system.server.CommandDispatched;
-import io.spine.system.server.ScheduleCommand;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.command.ScheduleCommand;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
 
@@ -34,8 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A set of callbacks invoked when a command processing reaches a given point.
- *
- * @author Dmytro Dashenkov
  */
 final class CommandFlowWatcher {
 
@@ -53,9 +51,9 @@ final class CommandFlowWatcher {
     void onDispatchCommand(CommandEnvelope command) {
         CommandDispatched systemEvent = CommandDispatched
                 .newBuilder()
-                .setId(command.getId())
+                .setId(command.id())
                 .build();
-        postSystemEvent(systemEvent, command.getTenantId());
+        postSystemEvent(systemEvent, command.tenantId());
     }
 
     /**
@@ -64,14 +62,14 @@ final class CommandFlowWatcher {
      * @param command the scheduled command
      */
     void onScheduled(CommandEnvelope command) {
-        CommandContext context = command.getCommandContext();
+        CommandContext context = command.context();
         CommandContext.Schedule schedule = context.getSchedule();
         ScheduleCommand systemCommand = ScheduleCommand
                 .newBuilder()
-                .setId(command.getId())
+                .setId(command.id())
                 .setSchedule(schedule)
                 .build();
-        postSystemCommand(systemCommand, command.getTenantId());
+        postSystemCommand(systemCommand, command.tenantId());
     }
 
     private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {

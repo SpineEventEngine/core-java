@@ -25,9 +25,9 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.type.CommandEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -37,16 +37,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Commands.isScheduled;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.bus.Buses.acknowledge;
 import static java.util.Optional.empty;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
@@ -82,10 +78,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        Command command = envelope.getCommand();
-        if (isScheduled(command)) {
-            schedule(envelope.getCommand());
-            return Optional.of(acknowledge(envelope.getId()));
+        Command command = envelope.command();
+        if (command.isScheduled()) {
+            schedule(envelope.command());
+            return Optional.of(acknowledge(envelope.id()));
         }
         return empty();
     }
@@ -100,15 +96,17 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      *
      * <p>A command with the same ID cannot be scheduled again.
      *
-     * @param command a command to deliver later
-     * @throws IllegalStateException if the scheduler is shut down
+     * @param command
+     *         a command to deliver later
+     * @throws IllegalStateException
+     *         if the scheduler is shut down
      */
     public void schedule(Command command) {
         checkState(isActive, "Scheduler is shut down.");
         if (isScheduledAlready(command)) {
             return;
         }
-        Command commandUpdated = setSchedulingTime(command, getCurrentTime());
+        Command commandUpdated = setSchedulingTime(command, currentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
 
@@ -119,8 +117,9 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     /**
      * Obtains {@code CommandBus} associated with this scheduler.
      *
-     * @throws IllegalStateException if {@code CommandBus} was not
-     * {@linkplain #setCommandBus(CommandBus) set} prior to calling this method
+     * @throws IllegalStateException
+     *         if {@code CommandBus} was not {@linkplain #setCommandBus(CommandBus) set} prior
+     *         to calling this method
      */
     protected CommandBus commandBus() {
         checkState(commandBus != null, "CommandBus is not set.");
@@ -136,7 +135,8 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * Schedules a command and delivers it to the target according to
      * the scheduling options set to a context.
      *
-     * @param command a command to deliver later
+     * @param command
+     *         a command to deliver later
      * @see #post(Command)
      */
     protected abstract void doSchedule(Command command);
@@ -144,7 +144,8 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     /**
      * Delivers a scheduled command to a target.
      *
-     * @param command a command to deliver
+     * @param command
+     *         a command to deliver
      */
     protected void post(Command command) {
         commandBus().postPreviouslyScheduled(command);
@@ -175,8 +176,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * Sets a new scheduling time in the {@linkplain CommandContext.Schedule context}
      * of the passed command.
      *
-     * @param command        a command to update
-     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
+     * @param command
+     *         a command to update
+     * @param schedulingTime
+     *         the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
     static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
@@ -193,9 +196,12 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     /**
      * Updates {@linkplain CommandContext.Schedule command schedule}.
      *
-     * @param command        a command to update
-     * @param delay          a {@linkplain CommandContext.Schedule#getDelay() delay} to set
-     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
+     * @param command
+     *         a command to update
+     * @param delay
+     *         a {@linkplain CommandContext.Schedule#getDelay() delay} to set
+     * @param schedulingTime
+     *         the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
     static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
@@ -206,18 +212,18 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
         CommandContext context = command.getContext();
         CommandContext.Schedule scheduleUpdated = context.getSchedule()
-                                                         .toBuilder()
+                                                         .toVBuilder()
                                                          .setDelay(delay)
                                                          .build();
-        CommandContext contextUpdated = context.toBuilder()
+        CommandContext contextUpdated = context.toVBuilder()
                                                .setSchedule(scheduleUpdated)
                                                .build();
 
         Command.SystemProperties sysProps = command.getSystemProperties()
-                                                   .toBuilder()
+                                                   .toVBuilder()
                                                    .setSchedulingTime(schedulingTime)
                                                    .build();
-        Command result = command.toBuilder()
+        Command result = command.toVBuilder()
                                 .setContext(contextUpdated)
                                 .setSystemProperties(sysProps)
                                 .build();

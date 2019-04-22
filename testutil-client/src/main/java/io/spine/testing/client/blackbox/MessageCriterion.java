@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
  * <p>Optionally can contain a criterion description, useful for display by test assertions.
  *
  * @param <T> a protobuf message type, that is checked to match criterion
- * @author Mykhailo Drachuk
  */
 @FunctionalInterface
 interface MessageCriterion<T extends Message> {
@@ -42,7 +41,7 @@ interface MessageCriterion<T extends Message> {
     boolean matches(T target);
 
     /**
-     * @return a message describing the criterion
+     * Returns a message describing the criterion.
      */
     default String description() {
         return "The message must match the criterion.";

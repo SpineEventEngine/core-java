@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -75,12 +76,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Obtains {@link EntityFactory} associated with this repository.
      */
-    protected abstract EntityFactory<I, E> entityFactory();
+    protected abstract EntityFactory<E> entityFactory();
 
     /**
-     * Obtains {@link EntityStorageConverter} associated with this repository.
+     * Obtains {@link StorageConverter} associated with this repository.
      */
-    protected abstract EntityStorageConverter<I, E, S> entityConverter();
+    protected abstract StorageConverter<I, E, S> storageConverter();
 
     /**
      * Ensures that the repository has the storage.
@@ -91,7 +92,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        RecordStorage<I> storage = (RecordStorage<I>) getStorage();
+        RecordStorage<I> storage = (RecordStorage<I>) storage();
         return storage;
     }
 
@@ -118,7 +119,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public void store(E entity) {
         EntityRecordWithColumns record = toRecord(entity);
         RecordStorage<I> storage = recordStorage();
-        storage.write(entity.getId(), record);
+        storage.write(entity.id(), record);
     }
 
     @Override
@@ -130,7 +131,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
+        RecordStorage<I> result = factory.createRecordStorage(entityClass());
         return result;
     }
 
@@ -145,7 +146,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Map<I, EntityRecordWithColumns> records = newHashMapWithExpectedSize(entities.size());
         for (E entity : entities) {
             EntityRecordWithColumns recordWithColumns = toRecord(entity);
-            records.put(entity.getId(), recordWithColumns);
+            records.put(entity.id(), recordWithColumns);
         }
         recordStorage().write(records);
     }
@@ -259,7 +260,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         RecordStorage<I> storage = recordStorage();
         Iterator<@Nullable EntityRecord> records = storage.readMultiple(ids, fieldMask);
         Iterator<EntityRecord> presentRecords = filter(records, Objects::nonNull);
-        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(presentRecords, toEntity::apply);
         return result;
     }
@@ -273,11 +274,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     public Iterator<E> loadAll() {
-        RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll();
-        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Iterator<EntityRecord> records = loadAllRecords();
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
+    }
+
+    /**
+     * Obtains iterator over all present {@linkplain EntityRecord entity records}.
+     *
+     * @return an iterator over all records
+     */
+    @Internal
+    public Iterator<EntityRecord> loadAllRecords() {
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll();
+        return records;
     }
 
     /**
@@ -312,19 +324,45 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(pagination);
         checkNotNull(fieldMask);
 
-        RecordStorage<I> storage = recordStorage();
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
-        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
-        Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        Iterator<EntityRecord> records = findRecords(filters, orderBy, pagination, fieldMask);
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
     }
 
     /**
+     * Obtains iterator over {@linkplain EntityRecord entity records} matching the passed filters.
+     *
+     * @param filters
+     *         entity filters
+     * @param orderBy
+     *         an orderBy to sort the filtered results before pagination
+     * @param pagination
+     *         a pagination to apply to the sorted result set
+     * @param fieldMask
+     *         a mask to apply to the entities
+     * @return an iterator over the matching records
+     */
+    @Internal
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, OrderBy orderBy,
+                                              Pagination pagination, FieldMask fieldMask) {
+        checkNotNull(filters);
+        checkNotNull(orderBy);
+        checkNotNull(pagination);
+        checkNotNull(fieldMask);
+
+        RecordStorage<I> storage = recordStorage();
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
+        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
+        return records;
+    }
+
+    /**
      * Converts the passed entity into the record.
      */
-    private EntityRecordWithColumns toRecord(E entity) {
-        EntityRecord entityRecord = entityConverter().convert(entity);
+    @VisibleForTesting
+    EntityRecordWithColumns toRecord(E entity) {
+        EntityRecord entityRecord = storageConverter().convert(entity);
         checkNotNull(entityRecord);
         EntityRecordWithColumns result =
                 EntityRecordWithColumns.create(entityRecord, entity, recordStorage());
@@ -332,8 +370,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     private E toEntity(EntityRecord record) {
-        E result = entityConverter().reverse()
-                                    .convert(record);
+        E result = storageConverter().reverse()
+                                     .convert(record);
         checkNotNull(result);
         return result;
     }
@@ -388,7 +426,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             Any idAsAny = input.getId();
 
             TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            Class messageClass = typeUrl.getJavaClass();
+            Class messageClass = typeUrl.toJavaClass();
             checkIdClass(messageClass);
 
             Message idAsMessage = unpack(idAsAny);
@@ -403,8 +441,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
                 throw newIllegalStateException(
-                        "Unexpected ID class encountered: `%s`. Expected: `%s`",
-                        messageClass, expectedIdClass
+                        "Unexpected ID class encountered: `%s`. Expected: `%s`.",
+                        messageClass.getCanonicalName(), expectedIdClass.getCanonicalName()
                 );
             }
         }

@@ -23,6 +23,7 @@ package io.spine.server.stand;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.FieldPath;
+import io.spine.base.FieldPaths;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
@@ -30,16 +31,16 @@ import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
-import io.spine.core.EventEnvelope;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-import static io.spine.protobuf.FieldPaths.fieldAt;
+import static io.spine.base.FieldPaths.getValue;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.lang.String.join;
 
 /**
  * Matches the incoming event against a subscription criteria.
@@ -109,31 +110,30 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         boolean result = filters
                 .getFilterList()
                 .stream()
-                .allMatch(filter -> checkPasses(message, filter));
+                .allMatch(f -> checkPasses(message, f));
         return result;
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.
     private static boolean checkPasses(Message message, CompositeFilter filter) {
+        Stream<Filter> filters = filter.getFilterList()
+                                       .stream();
         CompositeOperator operator = filter.getOperator();
+        Predicate<Filter> passesFilter = f -> checkPasses(message, f);
         switch (operator) {
             case ALL:
-                return filter.getFilterList()
-                             .stream()
-                             .allMatch(f -> checkPasses(message, f));
+                return filters.allMatch(passesFilter);
             case EITHER:
-                return filter.getFilterList()
-                             .stream()
-                             .anyMatch(f -> checkPasses(message, f));
+                return filters.anyMatch(passesFilter);
             default:
-                throw newIllegalArgumentException("Unknown composite filter operator %s.",
+                throw newIllegalArgumentException("Unknown composite filter operator `%s`.",
                                                   operator);
         }
     }
 
     private static boolean checkPasses(Message state, Filter filter) {
         FieldPath fieldPath = filter.getFieldPath();
-        Object actual = fieldAt(state, fieldPath);
+        Object actual = getValue(fieldPath, state);
         Any requiredAsAny = filter.getValue();
         Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
         try {
@@ -141,9 +141,9 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         } catch (IllegalArgumentException e) {
             throw newIllegalArgumentException(
                     e,
-                    "Filter value %s cannot be properly compared to the message field %s of " +
-                            "type %s",
-                    required, join(".", fieldPath.getFieldNameList()), actual.getClass()
+                    "Filter value `%s` cannot be properly compared to" +
+                            " the message field `%s` of the class `%s`.",
+                    required, FieldPaths.toString(fieldPath), actual.getClass().getName()
             );
         }
     }

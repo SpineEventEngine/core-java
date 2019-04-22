@@ -21,13 +21,13 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
 import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -70,9 +70,9 @@ class EventImportTest {
     @Test
     @DisplayName("Obtain importable event classes")
     void importableEventClasses() {
-        Set<EventClass> importableEventClasses = repository.getImportableEventClasses();
+        Set<EventClass> importableEventClasses = repository.importableEventClasses();
         Set<EventClass> exposedByAggregateClass = repository.aggregateClass()
-                                                            .getImportableEventClasses();
+                                                            .importableEvents();
         assertThat(importableEventClasses).isEqualTo(exposedByAggregateClass);
     }
 
@@ -112,8 +112,8 @@ class EventImportTest {
          */
         private void assertRouted(EventEnvelope event) {
             Set<EngineId> targets =
-                    repository.getEventImportRouting()
-                              .apply(event.getMessage(), event.getEventContext());
+                    repository.eventImportRouting()
+                              .apply(event.message(), event.context());
 
             assertThat(targets).hasSize(1);
             assertThat(targets).containsExactly(engineId);
@@ -152,7 +152,7 @@ class EventImportTest {
         }
 
         private void assertImports(EventEnvelope event) {
-            boundedContext.importsEvent(event.getOuterObject())
+            boundedContext.importsEvent(event.outerObject())
                           .assertThat(emittedEvent(EngineStopped.class, once()));
         }
     }
@@ -167,7 +167,7 @@ class EventImportTest {
                 .build();
         EventEnvelope unsupported = createEvent(eventMessage, id);
 
-        boundedContext.importsEvent(unsupported.getOuterObject())
+        boundedContext.importsEvent(unsupported.outerObject())
                       .assertThat(ackedWithErrors());
     }
 

@@ -32,7 +32,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
  *           string literal for security check.
- * @author Alexander Yevsyukov
  */
 public final class ModelTests {
 
@@ -45,7 +44,7 @@ public final class ModelTests {
      *
      * @implNote This method is the only way to drop models because {@link Model#dropAllModels()}
      * verifies the name of the class which calls the method.
-     * It must be {@linkplain ModelTests this class}.
+     * It must be {@code ModelTests this class}.
      */
     public static void dropAllModels() {
         Model.dropAllModels();
@@ -64,7 +63,7 @@ public final class ModelTests {
                       .findFirst()
                       .orElseThrow(
                               () -> newIllegalStateException(
-                                      "No method named `%s` found in class `%s`",
+                                      "No method named `%s` found in class `%s`.",
                                       methodName,
                                       cls.getName()
                               )

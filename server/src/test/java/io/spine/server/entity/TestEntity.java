@@ -50,9 +50,9 @@ public class TestEntity extends AbstractEntity<String, Project> {
     static TestEntity withStateOf(TestEntity entity) {
         TestEntity result = new TestEntityBuilder()
                 .setResultClass(TestEntity.class)
-                .withId(entity.getId())
-                .withState(entity.getState())
-                .withVersion(entity.getVersion()
+                .withId(entity.id())
+                .withState(entity.state())
+                .withVersion(entity.version()
                                    .getNumber())
                 .build();
         return result;

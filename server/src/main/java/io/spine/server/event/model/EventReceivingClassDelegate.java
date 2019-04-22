@@ -22,12 +22,12 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.declare.MethodSignature;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -37,18 +37,22 @@ import java.util.Set;
  * Helper object for storing information about methods and events of an
  * {@linkplain EventReceiverClass event receiving class}.
  *
- * @param <T> the type of target objects that handle messages
- * @param <M> the type of handler method objects
- * @author Alexander Yevsyukov
+ * @param <T>
+ *         the type of target objects that handle messages
+ * @param <P>
+ *         the type of message classes produced by handler methods
+ * @param <M>
+ *         the type of handler method objects
  */
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
-                                         M extends HandlerMethod<?, EventClass, ?, ?>>
+                                         P extends MessageClass<?>,
+                                         M extends HandlerMethod<?, EventClass, ?, P, ?>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
     
-    private final MessageHandlerMap<EventClass, M> events;
+    private final MessageHandlerMap<EventClass, P, M> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
@@ -71,15 +75,22 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains domestic event classes handled by the class.
      */
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> incomingEvents() {
         return domesticEvents;
     }
 
     /**
      * Obtains external event classes handled by the class.
      */
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEvents() {
         return externalEvents;
+    }
+
+    /**
+     * Obtains the classes of messages produced by handler methods of this class.
+     */
+    public Set<P> getProducedTypes() {
+        return events.getProducedTypes();
     }
 
     /**
@@ -99,5 +110,4 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     public M getMethod(EventClass eventClass, MessageClass originClass) {
         return events.getSingleMethod(eventClass, originClass);
     }
-
 }

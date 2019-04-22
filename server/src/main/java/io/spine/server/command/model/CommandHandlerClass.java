@@ -21,17 +21,18 @@
 package io.spine.server.command.model;
 
 import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.type.EventClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Provides message handling information on a command handler class.
  *
- * @param <C> the type of command handlers
- * @author Alexander Yevsyukov
+ * @param <C>
+ *         the type of command handlers
  */
 public final class CommandHandlerClass<C extends AbstractCommandHandler>
-        extends AbstractCommandHandlingClass<C, CommandHandlerMethod> {
+        extends AbstractCommandHandlingClass<C, EventClass, CommandHandlerMethod> {
 
     private static final long serialVersionUID = 0L;
 

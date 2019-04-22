@@ -27,12 +27,11 @@ import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
-import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -51,17 +50,12 @@ public class CommandReactionSignature
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(CommandReactionParams.values());
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
     }
 
@@ -103,8 +97,8 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.getMessage()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message()};
             }
         },
 
@@ -115,8 +109,8 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.getMessage(), envelope.getEventContext()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message(), event.context()};
             }
         },
 
@@ -127,10 +121,10 @@ public class CommandReactionSignature
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                CommandContext originContext = envelope.getEventContext()
-                                                       .getCommandContext();
-                return new Object[]{envelope.getMessage(), originContext};
+            public Object[] extractArguments(EventEnvelope event) {
+                CommandContext originContext = event.context()
+                                                    .getCommandContext();
+                return new Object[]{event.message(), originContext};
             }
         }
     }

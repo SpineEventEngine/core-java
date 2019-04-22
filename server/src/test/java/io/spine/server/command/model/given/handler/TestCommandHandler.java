@@ -31,8 +31,6 @@ import java.lang.reflect.Method;
  *
  * <p>Derived classes must declare a method named {@linkplain #HANDLER_METHOD_NAME handleTest}
  * so that the method can be {@linkplain #getHandler() obtained} by the code of tests.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class TestCommandHandler extends AbstractCommandHandler {
 
@@ -42,7 +40,7 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
         super(BoundedContext.newBuilder()
                             .setMultitenant(true)
                             .build()
-                            .getEventBus());
+                            .eventBus());
     }
 
     public Method getHandler() {

@@ -28,9 +28,15 @@ import io.spine.client.IdFilter;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.core.Subscribe;
+import io.spine.core.Version;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -53,10 +59,9 @@ import static java.util.stream.Collectors.toList;
  * <p>The projection defines an {@link io.spine.server.entity.storage.EntityColumn EntityColumn}
  * which stored the {@linkplain #getAggregateType() type URL} of the state, which is mirrored.
  *
- * @implNote
- * Many subscriber methods of this class ignore their arguments. The argument of a subscriber method
- * is an event used by the framework to bind the method to the event type. The content of the event,
- * in those cases, is irrelevant.
+ * @implNote Many subscriber methods of this class ignore their arguments. The argument of a
+ *         subscriber method is an event used by the framework to bind the method to the event type.
+ *         The content of the event, in those cases, is irrelevant.
  */
 public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
@@ -68,56 +73,65 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    public void on(EntityStateChanged event) {
-        getBuilder().setId(getId())
-                    .setState(event.getNewState());
+    void on(EntityStateChanged event) {
+        builder().setId(id())
+                 .setState(event.getNewState())
+                 .setVersion(event.getNewVersion());
     }
 
     @Subscribe
-    public void on(EntityArchived event) {
-        LifecycleFlags flags = getBuilder()
+    void on(EntityArchived event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setArchived(true)
                 .build();
-        getBuilder().setId(getId())
-                    .setLifecycle(flags);
+        builder.setId(id())
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setArchived(true);
     }
 
     @Subscribe
-    public void on(EntityDeleted event) {
-        LifecycleFlags flags = getBuilder()
+    void on(EntityDeleted event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setDeleted(true)
                 .build();
-        getBuilder().setId(getId())
-                    .setLifecycle(flags);
+        builder.setId(id())
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setDeleted(true);
     }
 
     @Subscribe
-    public void on(EntityExtractedFromArchive event) {
-        LifecycleFlags flags = getBuilder()
+    void on(EntityExtractedFromArchive event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setArchived(false)
                 .build();
-        getBuilder().setId(getId())
-                    .setLifecycle(flags);
+        builder.setId(id())
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setArchived(false);
     }
 
     @Subscribe
-    public void on(EntityRestored event) {
-        LifecycleFlags flags = getBuilder()
+    void on(EntityRestored event) {
+        MirrorVBuilder builder = builder();
+        LifecycleFlags flags = builder
                 .getLifecycle()
-                .toBuilder()
+                .toVBuilder()
                 .setDeleted(false)
                 .build();
-        getBuilder().setId(getId())
-                    .setLifecycle(flags);
+        builder.setId(id())
+               .setLifecycle(flags)
+               .setVersion(event.getVersion());
         setDeleted(false);
     }
 
@@ -134,7 +148,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         TargetFilters filters = target.getFilters();
         CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
         TargetFilters appendedFilters = filters
-                .toBuilder()
+                .toVBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(typeFilter)
                 .build();
@@ -151,14 +165,15 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         if (domainIds.isEmpty()) {
             return IdFilter.getDefaultInstance();
         }
-        IdFilter result = assembleSystemIdFilter(domainIds);
+        TypeUrl typeUrl = TypeUrl.parse(target.getType());
+        IdFilter result = assembleSystemIdFilter(domainIds, typeUrl);
         return result;
     }
 
-    private static IdFilter assembleSystemIdFilter(Collection<Any> domainIds) {
+    private static IdFilter assembleSystemIdFilter(Collection<Any> domainIds, TypeUrl type) {
         List<Any> mirrorIds = domainIds
                 .stream()
-                .map(MirrorProjection::domainToSystemId)
+                .map(domainId -> domainToSystemId(domainId, type))
                 .collect(toList());
         IdFilter idFilter = IdFilter
                 .newBuilder()
@@ -167,10 +182,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         return idFilter;
     }
 
-    private static Any domainToSystemId(Any domainId) {
-        MirrorId mirrorId = MirrorId
+    private static Any domainToSystemId(Any domainId, TypeUrl typeUrl) {
+        MirrorId mirrorId = MirrorIdVBuilder
                 .newBuilder()
                 .setValue(domainId)
+                .setTypeUrl(typeUrl.value())
                 .build();
         Any systemId = pack(mirrorId);
         return systemId;
@@ -187,13 +203,23 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
      */
     final Any aggregateState(FieldMask fields) {
         Any completeState = aggregateState();
-        if (isDefault(fields) || fields.getPathsList().isEmpty()) {
+        if (isDefault(fields) || fields.getPathsList()
+                                       .isEmpty()) {
             return completeState;
         }
         Message unpacked = unpack(completeState);
         Message trimmedState = applyMask(fields, unpacked);
         Any result = pack(trimmedState);
         return result;
+    }
+
+    /**
+     * Obtains an aggregate version.
+     *
+     * @return the version of the mirrored aggregate
+     */
+    final Version aggregateVersion() {
+        return state().getVersion();
     }
 
     /**
@@ -214,6 +240,6 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     private Any aggregateState() {
-        return getState().getState();
+        return state().getState();
     }
 }

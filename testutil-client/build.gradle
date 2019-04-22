@@ -20,8 +20,10 @@
 
 dependencies {
     compile project(path: ':client')
+    
+    implementation deps.grpc.grpcProtobuf
     api project(path: ':testutil-core')
     api "io.spine:spine-testutil-time:$spineTimeVersion"
 }
 
-apply from: testArtifactsScript
+apply from: deps.scripts.testArtifacts

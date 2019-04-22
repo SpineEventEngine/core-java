@@ -23,9 +23,9 @@ package io.spine.server.route;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.server.type.EventClass;
+import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Optional;
 import java.util.Set;
@@ -130,7 +130,7 @@ public final class EventRouting<I>
      * Sets a custom routing schema for entity state updates.
      *
      * <p>Setting a routing for state updates is equivalent to setting a route for events of type
-     * {@link EntityStateChanged io.spine.system.server.EntityStateChanged}. It is illegal to do
+     * {@link EntityStateChanged io.spine.system.server.event.EntityStateChanged}. It is illegal to do
      * both things simultaneously.
      *
      * @param routing
@@ -154,12 +154,9 @@ public final class EventRouting<I>
      */
     public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
         Optional<? extends Route<EventMessage, EventContext, Set<I>>> optional = doGet(eventClass);
-        if (optional.isPresent()) {
-            @SuppressWarnings("unchecked") // Cast to external API.
-            EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
-            return Optional.of(route);
-        }
-        return Optional.empty();
+        @SuppressWarnings({"unchecked", "RedundantSuppression"})
+        Optional<EventRoute<I, M>> result = optional.map(r -> (EventRoute<I, M>) r);
+        return result;
     }
 
     /**

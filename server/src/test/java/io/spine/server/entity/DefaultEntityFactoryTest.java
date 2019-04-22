@@ -32,15 +32,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("DefaultEntityFactory should")
 class DefaultEntityFactoryTest {
 
-    private EntityFactory<Long, TestEntity1> entityFactory1;
-    private EntityFactory<Long, TestEntity2> entityFactory2;
+    private EntityFactory<TestEntity1> entityFactory1;
+    private EntityFactory<TestEntity2> entityFactory2;
 
     @BeforeEach
     void setUp() {

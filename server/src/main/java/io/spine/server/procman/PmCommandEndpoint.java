@@ -21,10 +21,10 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> invokeDispatcher(P processManager, CommandEnvelope envelope) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
+        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.perform(dispatch);

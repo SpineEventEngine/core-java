@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import io.spine.core.Command;
+import io.spine.logging.Logging;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,13 +33,12 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 /**
  * The command scheduler implementation which uses basic Java task scheduling features.
  *
- * <p><b>NOTE:</b> please use <a href="https://github.com/SpineEventEngine/gae-java">another implementation</a>
- * in applications running under the Google App Engine.
+ * <p><b>NOTE:</b> please use <a href="https://github.com/SpineEventEngine/gcloud-java">
+ * another implementation</a> in applications running under the Google App Engine.
  *
  * @see ScheduledExecutorService
- * @author Alexander Litus
  */
-public class ExecutorCommandScheduler extends CommandScheduler {
+public class ExecutorCommandScheduler extends CommandScheduler implements Logging {
 
     private static final int MIN_THREAD_POOL_SIZE = 5;
     private static final int NANOS_IN_MILLISECOND = 1_000_000;
@@ -51,11 +51,33 @@ public class ExecutorCommandScheduler extends CommandScheduler {
         super();
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.
     @Override
     protected void doSchedule(Command command) {
         final long delayMillis = getDelayMilliseconds(command);
-        executorService.schedule(() -> post(command),
+        executorService.schedule(() -> safePost(command),
                                  delayMillis, MILLISECONDS);
+    }
+
+    /**
+     * Posts a command catching all errors along the way.
+     *
+     * @apiNote
+     * Such post operation is required for the {@link ScheduledExecutorService} as any uncaught
+     * throwable in its action will lead to the worker thread silently halting. This method logs an
+     * error and keeps the thread "alive".
+     */
+    private void safePost(Command command) {
+        try {
+            post(command);
+        } catch (Throwable t) {
+            _error(t,
+                   "Error scheduling command `{}` with ID `{}`: {}",
+                   command.typeUrl(),
+                   command.getId()
+                          .getUuid(),
+                   t.getLocalizedMessage());
+        }
     }
 
     private static long getDelayMilliseconds(Command command) {

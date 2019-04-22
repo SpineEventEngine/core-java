@@ -20,7 +20,6 @@
 
 package io.spine.server.projection.model;
 
-import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
@@ -28,6 +27,8 @@ import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.projection.Projection;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -38,15 +39,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Provides type information on a projection class.
  *
- * @param <P> the type of projections
- * @author Alexander Yevsyukov
+ * @param <P>
+ *         the type of projections
  */
 public final class ProjectionClass<P extends Projection>
         extends EntityClass<P>
         implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<P, SubscriberMethod> delegate;
+    private final EventReceivingClassDelegate<P, EmptyClass, SubscriberMethod> delegate;
 
     private ProjectionClass(Class<P> cls) {
         super(cls);
@@ -64,13 +65,13 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
-        return delegate.getEventClasses();
+    public Set<EventClass> incomingEvents() {
+        return delegate.incomingEvents();
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
-        return delegate.getExternalEventClasses();
+    public Set<EventClass> externalEvents() {
+        return delegate.externalEvents();
     }
 
     @Override

@@ -37,7 +37,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>An event subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is {@code public};
+ *     <li>is package-private;
  *     <li>returns {@code void};
  *     <li>accepts an event derived from {@link io.spine.base.EventMessage EventMessage}
  *          as the first parameter;
@@ -50,7 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>A rejection subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is {@code public};
+ *     <li>is package-private;
  *     <li>returns {@code void};
  *     <li>accepts a rejection message derived from {@link io.spine.base.RejectionMessage
  *         RejectionMessage} as the first parameter;
@@ -80,7 +80,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>An entity state subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};
- *     <li>is {@code public};
+ *     <li>is package-private;
  *     <li>returns {@code void};
  *     <li>accepts an entity state message marked with the {@code (entity)} option as the only
  *         parameter.
@@ -100,17 +100,17 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <pre>
  *     {@code
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
- *     public void onExpired(UserLoggedIn event) {
+ *     void onExpired(UserLoggedIn event) {
  *         // Handle expired subscription.
  *     }
  *
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "INACTIVE"))
- *     public void onInactive(UserLoggedIn event) {
+ *     void onInactive(UserLoggedIn event) {
  *         // Handle inactive subscription.
  *     }
  *
  *     \@Subscribe
- *     public void on(UserLoggedIn event) {
+ *     void on(UserLoggedIn event) {
  *         // Handle other cases.
  *     }
  *     }
@@ -119,11 +119,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <pre>
  *     {@code
  *     \@Subscribe(filter = @ByField(path = "subscription.status", value = "EXPIRED"))
- *     public void onExpired(UserLoggedIn event) {
+ *     void onExpired(UserLoggedIn event) {
  *     }
  *
  *     \@Subscribe(filter = @ByField(path = "payment_method.status", value = "UNSET"))
- *     public void onUnknownBilling(UserLoggedIn event) {
+ *     void onUnknownBilling(UserLoggedIn event) {
  *         // Error, different field paths used in the same class for the same event type.
  *     }
  *     }

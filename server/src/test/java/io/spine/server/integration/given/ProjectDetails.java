@@ -41,12 +41,12 @@ public class ProjectDetails
     }
 
     @Subscribe(external = true)
-    public void on(ItgProjectCreated event) {
+    void on(ItgProjectCreated event) {
         externalEvent = event;
     }
 
     @Subscribe
-    public void on(ItgProjectStarted event) {
+    void on(ItgProjectStarted event) {
         domesticEvent = event;
     }
 

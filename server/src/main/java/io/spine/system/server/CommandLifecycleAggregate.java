@@ -30,36 +30,42 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.system.server.Substituted.Sequence;
+import io.spine.system.server.command.AssignTargetToCommand;
+import io.spine.system.server.command.ScheduleCommand;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandHandled;
+import io.spine.system.server.event.CommandReceived;
+import io.spine.system.server.event.CommandRejected;
+import io.spine.system.server.event.CommandScheduled;
+import io.spine.system.server.event.CommandSplit;
+import io.spine.system.server.event.CommandTransformed;
+import io.spine.system.server.event.TargetAssignedToCommand;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 /**
  * The aggregate representing the lifecycle of a command.
  *
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
- *
- * @author Dmytro Dashenkov
  */
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an aggregate class.
+@SuppressWarnings("OverlyCoupledClass") // because of the handled commands
 final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 
-    private CommandLifecycleAggregate(CommandId id) {
-        super(id);
-    }
-
     @Assign
     CommandScheduled handle(ScheduleCommand command) {
-        return CommandScheduled.newBuilder()
+        return CommandScheduled.vBuilder()
                                .setId(command.getId())
                                .setSchedule(command.getSchedule())
                                .build();
     }
 
     @Assign
-    TargetAssignedToCommand on(AssignTargetToCommand event) {
-        return TargetAssignedToCommand.newBuilder()
+    TargetAssignedToCommand handle(AssignTargetToCommand event) {
+        return TargetAssignedToCommand.vBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
                                       .build();
@@ -72,14 +78,14 @@ final class CommandLifecycleAggregate
      * {@link io.spine.server.commandbus.CommandBus CommandBus}.
      */
     @Apply(allowImport = true)
-    void on(CommandReceived event) {
+    private void on(CommandReceived event) {
+        ensureId();
         CommandTimeline status = CommandTimeline
-                .newBuilder()
-                .setWhenReceived(getCurrentTime())
+                .vBuilder()
+                .setWhenReceived(currentTime())
                 .build();
-        getBuilder().setId(event.getId())
-                    .setCommand(event.getPayload())
-                    .setStatus(status);
+        builder().setCommand(event.getPayload())
+                 .setStatus(status);
     }
 
     /**
@@ -89,21 +95,23 @@ final class CommandLifecycleAggregate
      * {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
      */
     @Apply(allowImport = true)
-    void on(CommandAcknowledged event) {
+    private void on(@SuppressWarnings("unused") CommandAcknowledged event) {
+        ensureId();
         CommandTimeline status = statusBuilder()
-                .setWhenAcknowledged(getCurrentTime())
+                .setWhenAcknowledged(currentTime())
                 .build();
-        getBuilder().setStatus(status);
+        builder().setStatus(status);
     }
 
     @Apply(allowImport = true)
-    void on(CommandScheduled event) {
+    private void on(CommandScheduled event) {
+        ensureId();
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
-                .setWhenScheduled(getCurrentTime())
+                .setWhenScheduled(currentTime())
                 .build();
-        getBuilder().setCommand(updatedCommand)
-                    .setStatus(status);
+        builder().setCommand(updatedCommand)
+                 .setStatus(status);
     }
 
     /**
@@ -112,11 +120,12 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command is passed to a dispatcher after acknowledgement.
      */
     @Apply(allowImport = true)
-    void on(CommandDispatched event) {
+    private void on(@SuppressWarnings("unused") CommandDispatched event) {
+        ensureId();
         CommandTimeline status = statusBuilder()
-                .setWhenDispatched(getCurrentTime())
+                .setWhenDispatched(currentTime())
                 .build();
-        getBuilder().setStatus(status);
+        builder().setStatus(status);
     }
 
     /**
@@ -125,16 +134,17 @@ final class CommandLifecycleAggregate
      * <p>The event is generated when the command target is determined.
      */
     @Apply(allowImport = true)
-    void on(TargetAssignedToCommand event) {
+    private void on(TargetAssignedToCommand event) {
+        ensureId();
         CommandTarget target = event.getTarget();
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
-                .setWhenTargetAssgined(getCurrentTime())
-                .build();
-        getBuilder()
-                .setStatus(status)
-                .setTarget(target);
+        CommandLifecycleVBuilder builder = builder();
+        CommandTimeline status =
+                builder.getStatus()
+                       .toVBuilder()
+                       .setWhenTargetAssigned(currentTime())
+                       .build();
+        builder.setStatus(status)
+               .setTarget(target);
     }
 
     /**
@@ -143,7 +153,8 @@ final class CommandLifecycleAggregate
      * <p>The event is generated after a command is successfully handled.
      */
     @Apply(allowImport = true)
-    void on(CommandHandled event) {
+    private void on(@SuppressWarnings("unused") CommandHandled event) {
+        ensureId();
         setStatus(Responses.statusOk());
     }
 
@@ -153,9 +164,10 @@ final class CommandLifecycleAggregate
      * <p>The event is generated if the command caused a runtime error during handling.
      */
     @Apply(allowImport = true)
-    void on(CommandErrored event) {
+    private void on(CommandErrored event) {
+        ensureId();
         Status status = Status
-                .newBuilder()
+                .vBuilder()
                 .setError(event.getError())
                 .build();
         setStatus(status);
@@ -167,63 +179,77 @@ final class CommandLifecycleAggregate
      * <p>The event is generated if the command handler rejected the command.
      */
     @Apply(allowImport = true)
-    void on(CommandRejected event) {
+    private void on(CommandRejected event) {
+        ensureId();
         Status status = Status
-                .newBuilder()
+                .vBuilder()
                 .setRejection(event.getRejectionEvent())
                 .build();
         setStatus(status);
     }
 
     @Apply(allowImport = true)
-    void event(CommandTransformed event) {
-        Substituted.Builder substituted = Substituted
-                .newBuilder()
-                .setCommand(event.getId());
-        CommandTimeline.Builder newStatus =
-                getState().getStatus()
-                          .toBuilder()
-                          .setSubstitued(substituted);
-        getBuilder().setStatus(newStatus.build());
+    private void on(CommandTransformed event) {
+        ensureId();
+        Substituted substituted = Substituted
+                .vBuilder()
+                .setCommand(event.getId())
+                .build();
+        CommandTimeline newStatus =
+                state().getStatus()
+                       .toVBuilder()
+                       .setSubstituted(substituted)
+                       .build();
+        builder().setStatus(newStatus);
     }
 
     @Apply(allowImport = true)
-    void event(CommandSplit event) {
-        Substituted.Builder substituted = Substituted
-                .newBuilder()
-                .setSequence(Sequence.newBuilder()
-                                     .addAllItem(event.getProducedList()));
-        CommandTimeline.Builder newStatus =
-                getState().getStatus()
-                          .toBuilder()
-                          .setSubstitued(substituted);
-        getBuilder().setStatus(newStatus.build());
+    private void on(CommandSplit event) {
+        ensureId();
+        Sequence sequence = Sequence
+                .vBuilder()
+                .addAllItem(event.getProducedList())
+                .build();
+        Substituted substituted = Substituted
+                .vBuilder()
+                .setSequence(sequence)
+                .build();
+        CommandTimeline newStatus =
+                state().getStatus()
+                       .toVBuilder()
+                       .setSubstituted(substituted)
+                       .build();
+        builder().setStatus(newStatus);
     }
 
     private Command updateSchedule(Schedule schedule) {
-        Command command = getBuilder().getCommand();
+        Command command = builder().getCommand();
         CommandContext updatedContext =
-                command.getContext()
-                       .toBuilder()
+                command.context()
+                       .toVBuilder()
                        .setSchedule(schedule)
                        .build();
         Command updatedCommand =
-                command.toBuilder()
+                command.toVBuilder()
                        .setContext(updatedContext)
                        .build();
         return updatedCommand;
     }
 
-    private CommandTimeline.Builder statusBuilder() {
-        return getBuilder().getStatus()
-                           .toBuilder();
+    private CommandTimelineVBuilder statusBuilder() {
+        return builder().getStatus()
+                        .toVBuilder();
     }
 
     private void setStatus(Status status) {
         CommandTimeline commandStatus = statusBuilder()
-                .setWhenHandled(getCurrentTime())
+                .setWhenHandled(currentTime())
                 .setHowHandled(status)
                 .build();
-        getBuilder().setStatus(commandStatus);
+        builder().setStatus(commandStatus);
+    }
+
+    private void ensureId() {
+        builder().setId(id());
     }
 }

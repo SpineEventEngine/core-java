@@ -23,8 +23,8 @@ package io.spine.testing.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.EventReactionTest;
 
 import java.util.List;
@@ -42,7 +42,6 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
  *         the aggregate state type
  * @param <A>
  *         the {@link Aggregate} type
- * @author Dmytro Dashenkov
  */
 public abstract class AggregateEventReactionTest<I,
                                                  E extends EventMessage,

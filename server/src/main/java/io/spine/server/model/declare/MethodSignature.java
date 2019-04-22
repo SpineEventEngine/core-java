@@ -21,9 +21,9 @@
 package io.spine.server.model.declare;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.type.MessageEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
 import static io.spine.server.model.declare.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
@@ -45,19 +46,19 @@ import static java.util.stream.Collectors.toList;
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},
- *     <li>{@linkplain #getParamSpecs() the specification of method parameters},
- *     <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},
- *     <li>{@linkplain #getValidReturnTypes() the set of valid return types},
- *     <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
+ *     <li>{@linkplain #paramSpecs() the specification of method parameters},
+ *     <li>{@linkplain #allowedModifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #validReturnTypes() the set of valid return types},
+ *     <li>{@linkplain #allowedExceptions() the set of allowed exceptions}, that the method
  * declares to throw (empty by default),
  * </ul>
  *
- * @param <H> the type of the handler method
- * @param <E> the type of envelope, which is used to invoke the handler method
- *
- * @author Alex Tymchenko
+ * @param <H>
+ *         the type of the handler method
+ * @param <E>
+ *         the type of envelope, which is used to invoke the handler method
  */
-public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
+public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
@@ -73,22 +74,28 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the specification of handler parameters to meet.
      */
-    public abstract ImmutableSet<? extends ParameterSpec<E>> getParamSpecs();
+    public abstract ImmutableSet<? extends ParameterSpec<E>> paramSpecs();
 
     /**
      * Obtains the set of allowed access modifiers for the method.
+     *
+     * <p>By default, obtains a set of single value {@link AccessModifier#PACKAGE_PRIVATE}. Most of
+     * the implementations should be fine with this behaviour. Override this method to change
+     * the allowed access modifiers.
      */
-    protected abstract ImmutableSet<AccessModifier> getAllowedModifiers();
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
+        return ImmutableSet.of(PACKAGE_PRIVATE);
+    }
 
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
+    protected abstract ImmutableSet<Class<?>> validReturnTypes();
 
     /**
      * Obtains the set of allowed exceptions that method may declare to throw.
      */
-    protected ImmutableSet<Class<? extends Throwable>> getAllowedExceptions() {
+    protected ImmutableSet<Class<? extends Throwable>> allowedExceptions() {
         return ImmutableSet.of();
     }
 
@@ -135,7 +142,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *
      * <p>Such an approach allows to improve performance by skipping the methods, that a priori
      * cannot be qualified as message handler methods, such as methods with no
-     * {@linkplain #getAnnotation() required annotation}.
+     * {@linkplain #annotation() required annotation}.
      *
      * @param method
      *         the method to determine if it should be inspected at all
@@ -165,7 +172,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
      */
-    public Class<? extends Annotation> getAnnotation() {
+    public Class<? extends Annotation> annotation() {
         return annotation;
     }
 
@@ -187,7 +194,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecs());
+        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, paramSpecs());
         return matchingSpec.map(spec -> {
             H handler = doCreate(method, spec);
             handler.discoverAttributes();

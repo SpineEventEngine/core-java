@@ -23,6 +23,11 @@ package io.spine.system.server;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.VERSION;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityArchived;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityDeleted;
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityExtracted;
@@ -67,6 +73,7 @@ class MirrorEventsTest {
                         assertFalse(mirror.getLifecycle().getArchived());
                         assertFalse(mirror.getLifecycle().getDeleted());
                         assertTrue(mirror.getColumns().getColumnsMap().isEmpty());
+                        assertEquals(VERSION, mirror.getVersion());
                     });
         }
     }

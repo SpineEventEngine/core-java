@@ -24,9 +24,9 @@ import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
@@ -35,15 +35,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.spine.core.Commands.generateId;
 import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author Alexander Litus
- */
 @DisplayName("CommandValidator violation check should")
 class CommandValidatorViolationCheckTest {
 
@@ -74,7 +70,7 @@ class CommandValidatorViolationCheckTest {
     void notAllowInvalidMessage() {
         Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         Command commandWithEmptyMessage = Command.newBuilder()
-                                                 .setId(generateId())
+                                                 .setId(CommandId.generate())
                                                  .setMessage(invalidMessagePacked)
                                                  .setContext(withRandomActor())
                                                  .build();
@@ -87,9 +83,8 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("return violations if command has invalid context")
     void notAllowInvalidContext() {
-        Command command = TestActorRequestFactory.newInstance(getClass())
-                                                 .createCommand(createProjectMessage(),
-                                                                Time.getCurrentTime());
+        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
+        Command command = factory.createCommand(createProjectMessage(), Time.currentTime());
         Command commandWithoutContext = command.toBuilder()
                                                .setContext(CommandContext.getDefaultInstance())
                                                .build();

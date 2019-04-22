@@ -23,8 +23,8 @@ package io.spine.testing.server.procman;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <M> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- * @author Alexander Yevsyukov
  */
 public abstract
 class PmCommandOnEventTest<I,

@@ -24,7 +24,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -59,7 +59,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
 
     public void register(D dispatcher) {
         checkDispatcher(dispatcher);
-        Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.messageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.put(messageClass, dispatcher);
         }
@@ -69,7 +69,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
 
-        Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.messageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.remove(messageClass, dispatcher);
         }
@@ -163,14 +163,14 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
 
     private C classOf(E envelope) {
         @SuppressWarnings("unchecked") // Logically valid.
-                C messageClass = (C) envelope.getMessageClass();
+                C messageClass = (C) envelope.messageClass();
         return messageClass;
     }
 
     /**
      * Ensures that the passed dispatcher is valid.
      *
-     * <p>The passed dispatcher must {@linkplain MessageDispatcher#getMessageClasses() expose}
+     * <p>The passed dispatcher must {@linkplain MessageDispatcher#messageClasses() expose}
      * at least one message class.
      *
      * @param dispatcher
@@ -184,7 +184,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     }
 
     private static <D extends MessageDispatcher> void checkNotEmpty(D dispatcher) {
-        Set<?> messageClasses = dispatcher.getMessageClasses();
+        Set<?> messageClasses = dispatcher.messageClasses();
         checkArgument(!messageClasses.isEmpty(),
                       "The dispatcher (%s) has empty message class set.",
                       dispatcher);

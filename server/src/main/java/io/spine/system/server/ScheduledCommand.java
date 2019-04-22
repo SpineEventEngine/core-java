@@ -26,14 +26,11 @@ import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-
-import static io.spine.core.Enrichments.getEnrichment;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.event.CommandScheduled;
 
 /**
  * Information about a scheduled command.
- *
- * @author Dmytro Dashenkov
  */
 final class ScheduledCommand
         extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecordVBuilder> {
@@ -43,32 +40,29 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandScheduled event, EventContext context) {
-        CommandEnrichment enrichment =
-                getEnrichment(CommandEnrichment.class, context)
-                .orElseThrow(() -> newIllegalStateException("Command enrichment must be present."));
-
-        Command commandWithSchedule = withSchedule(enrichment.getCommand(), event.getSchedule());
-        getBuilder().setId(event.getId())
-                    .setCommand(commandWithSchedule)
-                    .setSchedulingTime(context.getTimestamp());
+    void on(CommandScheduled event, EventContext context) {
+        Command command = context.get(Command.class);
+        Command commandWithSchedule = withSchedule(command, event.getSchedule());
+        builder().setId(event.getId())
+                 .setCommand(commandWithSchedule)
+                 .setSchedulingTime(context.getTimestamp());
     }
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
         CommandContext updatedContext =
-                source.getContext()
-                      .toBuilder()
+                source.context()
+                      .toVBuilder()
                       .setSchedule(schedule)
                       .build();
         Command updatedCommand =
-                source.toBuilder()
+                source.toVBuilder()
                       .setContext(updatedContext)
                       .build();
         return updatedCommand;
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
+    void on(@SuppressWarnings("unused") /* Defines the event type. */ CommandDispatched ignored) {
         setDeleted(true);
     }
 }

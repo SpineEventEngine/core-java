@@ -29,10 +29,8 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
  * Provides a method which accepts an extra parameter after two valid.
- *
- * @author Alexander Yevsyukov
  */
-public class InvalidHandlerTooManyParams extends TestCommandHandler {
+public final class InvalidHandlerTooManyParams extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context, Object redundant) {
         return projectCreated(cmd.getProjectId());

@@ -37,6 +37,11 @@ sourceSets {
     }
 }
 
+configurations {
+    // Avoid clashes with SLF4J binding from Gradle API dependency.
+    testRuntime.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+}
+
 dependencies {
     implementation gradleApi()
     implementation "io.spine.tools:spine-plugin-base:$spineBaseVersion"

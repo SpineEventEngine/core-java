@@ -36,6 +36,8 @@ import "spine/core/actor_context.proto";
 
 // Command identifier.
 message CommandId {
+    option (is).java_type = "io.spine.core.MessageId";
+
     string uuid = 1;
 }
 
@@ -55,6 +57,7 @@ message CommandId {
 // There should be one and only one command handler associated with the type of the command.
 //
 message Command {
+    option (is).java_type = "io.spine.core.CommandMixin";
 
     // The ID of the command.
     CommandId id = 1 [(required) = true];
@@ -91,7 +94,7 @@ message Command {
 
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
-    option (is) = {java_type: "io.spine.core.MessageContext" generate: true};
+    option (is).java_type = "io.spine.base.MessageContext";
 
     // Information about the environment of the user who created the command.
     ActorContext actor_context = 1 [(required) = true];
@@ -116,11 +119,7 @@ message CommandContext {
         // and its delivery to the target.
         google.protobuf.Duration delay = 1;
 
-        //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific date/time.
-        // Name the field `at`;
-
-        //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence.
-        // Name the field `every`.
+        // See: https://github.com/SpineEventEngine/core-java/issues/994
     }
 
     // The schedule to execute the command.

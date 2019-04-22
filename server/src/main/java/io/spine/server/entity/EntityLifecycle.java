@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -31,37 +30,39 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
+import io.spine.core.Version;
 import io.spine.option.EntityOption;
-import io.spine.system.server.AssignTargetToCommand;
-import io.spine.system.server.AssignTargetToCommandVBuilder;
-import io.spine.system.server.CommandHandled;
-import io.spine.system.server.CommandHandledVBuilder;
-import io.spine.system.server.CommandRejected;
-import io.spine.system.server.CommandRejectedVBuilder;
 import io.spine.system.server.CommandTarget;
-import io.spine.system.server.DispatchCommandToHandler;
-import io.spine.system.server.DispatchCommandToHandlerVBuilder;
-import io.spine.system.server.DispatchEventToReactor;
-import io.spine.system.server.DispatchEventToSubscriber;
-import io.spine.system.server.DispatchEventToSubscriberVBuilder;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.DispatchedMessageIdVBuilder;
-import io.spine.system.server.EntityArchived;
-import io.spine.system.server.EntityArchivedVBuilder;
-import io.spine.system.server.EntityCreated;
-import io.spine.system.server.EntityCreatedVBuilder;
-import io.spine.system.server.EntityDeleted;
-import io.spine.system.server.EntityDeletedVBuilder;
-import io.spine.system.server.EntityExtractedFromArchive;
-import io.spine.system.server.EntityExtractedFromArchiveVBuilder;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityRestored;
-import io.spine.system.server.EntityRestoredVBuilder;
-import io.spine.system.server.EntityStateChanged;
-import io.spine.system.server.EntityStateChangedVBuilder;
-import io.spine.system.server.EventImported;
-import io.spine.system.server.EventImportedVBuilder;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.command.AssignTargetToCommand;
+import io.spine.system.server.command.AssignTargetToCommandVBuilder;
+import io.spine.system.server.command.DispatchCommandToHandler;
+import io.spine.system.server.command.DispatchCommandToHandlerVBuilder;
+import io.spine.system.server.command.DispatchEventToReactor;
+import io.spine.system.server.command.DispatchEventToSubscriber;
+import io.spine.system.server.command.DispatchEventToSubscriberVBuilder;
+import io.spine.system.server.event.CommandHandled;
+import io.spine.system.server.event.CommandHandledVBuilder;
+import io.spine.system.server.event.CommandRejected;
+import io.spine.system.server.event.CommandRejectedVBuilder;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityArchivedVBuilder;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityCreatedVBuilder;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityDeletedVBuilder;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityExtractedFromArchiveVBuilder;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityRestoredVBuilder;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChangedVBuilder;
+import io.spine.system.server.event.EventImported;
+import io.spine.system.server.event.EventImportedVBuilder;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -70,7 +71,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.entity.EventFilter.allowAll;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
@@ -114,7 +115,7 @@ public class EntityLifecycle {
      *
      * <p>Use this constructor for test purposes <b>only</b>.
      *
-     * @see io.spine.server.entity.EntityLifecycle.Builder
+     * @see EntityLifecycle.Builder
      */
     @VisibleForTesting
     protected EntityLifecycle(Object entityId,
@@ -146,7 +147,7 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
+     * Posts the {@link AssignTargetToCommand AssignTargetToCommand}
      * system command.
      *
      * @param commandId
@@ -232,7 +233,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEventId(event.getId())
-                .setWhenImported(getCurrentTime())
+                .setWhenImported(currentTime())
                 .build();
         postEvent(systemEvent);
     }
@@ -266,7 +267,7 @@ public class EntityLifecycle {
      *         {@link EventId EventId}s or {@link CommandId}s
      */
     public final void onStateChanged(EntityRecordChange change,
-                                     Set<? extends Message> messageIds) {
+                                     Set<? extends MessageId> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -283,11 +284,14 @@ public class EntityLifecycle {
         Any newState = change.getNewValue()
                              .getState();
         if (!oldState.equals(newState)) {
+            Version newVersion = change.getNewValue()
+                                       .getVersion();
             EntityStateChanged event = EntityStateChangedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setNewVersion(newVersion)
                     .build();
             postEvent(event);
         }
@@ -302,10 +306,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (newValue && !oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityArchived event = EntityArchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -320,10 +327,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (newValue && !oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityDeleted event = EntityDeletedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -338,10 +348,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -356,10 +369,13 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
+            Version version = change.getNewValue()
+                                    .getVersion();
             EntityRestored event = EntityRestoredVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setVersion(version)
                     .build();
             postEvent(event);
         }
@@ -375,7 +391,7 @@ public class EntityLifecycle {
     }
 
     private static Collection<DispatchedMessageId>
-    toDispatched(Collection<? extends Message> messageIds) {
+    toDispatched(Collection<? extends MessageId> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds =
                 messageIds.stream()
                           .map(EntityLifecycle::dispatchedMessageId)
@@ -384,9 +400,9 @@ public class EntityLifecycle {
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")
-    private static DispatchedMessageId dispatchedMessageId(Message messageId) {
+    private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
         checkNotNull(messageId);
-        DispatchedMessageIdVBuilder builder = DispatchedMessageIdVBuilder.newBuilder();
+        DispatchedMessageIdVBuilder builder = DispatchedMessageId.vBuilder();
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
             return builder.setEventId(eventId)

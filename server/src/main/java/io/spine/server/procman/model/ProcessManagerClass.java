@@ -21,8 +21,6 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.Sets.SetView;
-import io.spine.core.CommandClass;
-import io.spine.core.EventClass;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -32,6 +30,8 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -42,7 +42,8 @@ import static com.google.common.collect.Sets.union;
 /**
  * Provides message handling information on a process manager class.
  *
- * @param <P> the type of process managers
+ * @param <P>
+ *         the type of process managers
  */
 public final class ProcessManagerClass<P extends ProcessManager>
         extends CommandHandlingEntityClass<P>
@@ -71,37 +72,55 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<CommandClass> getCommands() {
+    public Set<CommandClass> commands() {
         SetView<CommandClass> result =
-                union(super.getCommands(), commanderDelegate.getCommands());
+                union(super.commands(), commanderDelegate.commands());
         return result;
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> incomingEvents() {
         SetView<EventClass> result =
-                union(reactorDelegate.getEventClasses(), commanderDelegate.getEventClasses());
+                union(reactorDelegate.incomingEvents(), commanderDelegate.incomingEvents());
         return result;
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEvents() {
         SetView<EventClass> result =
-                union(reactorDelegate.getExternalEventClasses(),
-                      commanderDelegate.getExternalEventClasses());
+                union(reactorDelegate.externalEvents(),
+                      commanderDelegate.externalEvents());
+        return result;
+    }
+
+    /**
+     * Obtains event classes produced by this process manager class.
+     */
+    public Set<EventClass> outgoingEvents() {
+        SetView<EventClass> result = union(commandOutput(), reactionOutput());
         return result;
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
-        return reactorDelegate.getReactor(eventClass, originClass);
+    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
+        return reactorDelegate.reactorOf(eventClass, originClass);
     }
 
-    public CommandSubstituteMethod getCommander(CommandClass commandClass) {
-        return commanderDelegate.getHandler(commandClass);
+    @Override
+    public Set<EventClass> reactionOutput() {
+        return reactorDelegate.reactionOutput();
     }
 
-    public CommandReactionMethod getCommander(EventClass eventClass) {
+    @Override
+    public Set<CommandClass> outgoingCommands() {
+        return commanderDelegate.outgoingCommands();
+    }
+
+    public CommandSubstituteMethod commanderOf(CommandClass commandClass) {
+        return commanderDelegate.handlerOf(commandClass);
+    }
+
+    public CommandReactionMethod commanderOf(EventClass eventClass) {
         return commanderDelegate.getCommander(eventClass);
     }
 

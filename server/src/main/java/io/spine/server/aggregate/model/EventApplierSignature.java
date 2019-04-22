@@ -24,11 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
@@ -44,7 +44,7 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+    protected ImmutableSet<Class<?>> validReturnTypes() {
         return ImmutableSet.of(void.class);
     }
 
@@ -54,12 +54,12 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PACKAGE_PRIVATE);
+    protected ImmutableSet<AccessModifier> allowedModifiers() {
+        return ImmutableSet.of(AccessModifier.PRIVATE);
     }
 
     @Override
-    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> getParamSpecs() {
+    public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
         return ImmutableSet.copyOf(EventApplierParams.values());
     }
 
@@ -77,8 +77,8 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope.getMessage()};
+            public Object[] extractArguments(EventEnvelope event) {
+                return new Object[]{event.message()};
             }
         }
     }

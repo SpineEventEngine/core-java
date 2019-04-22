@@ -37,12 +37,12 @@ import static java.util.stream.Collectors.toSet;
  * A Report repository routing the {@link BbTaskAdded Task Added} events to all reports containing
  * corresponding project.
  */
-public class BbReportRepository extends AggregateRepository<BbReportId, BbReportAggregate> {
+public final class BbReportRepository extends AggregateRepository<BbReportId, BbReportAggregate> {
 
     private final List<BbReportAggregate> aggregates = newArrayList();
 
     public BbReportRepository() {
-        getEventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
+        eventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
                 (event, context) -> getReportsContainingProject(event.getProjectId()));
     }
 
@@ -57,12 +57,12 @@ public class BbReportRepository extends AggregateRepository<BbReportId, BbReport
         return aggregates
                 .stream()
                 .filter(report -> reportContainsProject(report, projectId))
-                .map(AbstractEntity::getId)
+                .map(AbstractEntity::id)
                 .collect(toSet());
     }
 
     private static boolean reportContainsProject(BbReportAggregate report, BbProjectId projectId) {
-        return report.getState()
+        return report.state()
                      .getProjectIdsList()
                      .contains(projectId);
     }

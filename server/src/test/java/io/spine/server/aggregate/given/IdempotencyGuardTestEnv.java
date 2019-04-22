@@ -39,15 +39,12 @@ import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class IdempotencyGuardTestEnv {
 
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(IdempotencyGuardTestEnv.class);
     private static final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(AggregateTest.class).command();
+            new TestActorRequestFactory(AggregateTest.class).command();
 
 
     /** Prevents instantiation of this test environment. */

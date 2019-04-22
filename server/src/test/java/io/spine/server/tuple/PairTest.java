@@ -51,7 +51,7 @@ class PairTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Message.class, TestValues.newUuidValue())
-                               .setDefault(Either.class, EitherOf2.withB(Time.getCurrentTime()))
+                               .setDefault(Either.class, EitherOf2.withB(Time.currentTime()))
                                .testAllPublicStaticMethods(Pair.class);
     }
 
@@ -172,7 +172,7 @@ class PairTest {
         reserializeAndAssert(Pair.withNullable(a, b));
         reserializeAndAssert(Pair.withNullable(a, null));
 
-        reserializeAndAssert(Pair.withEither(a, EitherOf2.withA(Time.getCurrentTime())));
+        reserializeAndAssert(Pair.withEither(a, EitherOf2.withA(Time.currentTime())));
         reserializeAndAssert(Pair.withEither(a, EitherOf2.withB(TestValues.newUuidValue())));
     }
 }

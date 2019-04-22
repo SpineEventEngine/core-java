@@ -20,17 +20,21 @@
 
 package io.spine.server.bus;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -44,8 +48,6 @@ import static java.util.Optional.ofNullable;
  * @param <E> the type of {@link MessageEnvelope} posted by the bus
  * @param <T> the type of {@link Message} posted by the bus
  * @param <B> the own type of the builder
- * @author Dmytro Dashenkov
- * @author Alexander Yevsyukov
  */
 @CanIgnoreReturnValue
 public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
@@ -53,6 +55,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
                                  B extends BusBuilder<E, T, B>> {
 
     private final ChainBuilder<E> chainBuilder;
+    private final Set<Consumer<E>> listeners = new HashSet<>();
 
     private @Nullable SystemWriteSide systemWriteSide;
     private @Nullable TenantIndex tenantIndex;
@@ -79,12 +82,42 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Obtains the {@linkplain BusFilter bus filters} of this builder.
+     * Obtains the filters added to this this builder by the time of the call.
      *
      * @see #appendFilter(BusFilter)
      */
-    public final Deque<BusFilter<E>> getFilters() {
-        return chainBuilder.getFilters();
+    public final Deque<BusFilter<E>> filters() {
+        return chainBuilder.filters();
+    }
+
+    /**
+     * Adds a listener of the message posted to the bus being build.
+     *
+     * <p>When a message is posted to the bus, the listeners are notified before invoking filters.
+     *
+     * <p>If an exception is thrown by a {@linkplain Consumer#accept(Object) listener code}, it
+     * will be ignored by the bus.
+     */
+    public final B addListener(Consumer<E> listener) {
+        checkNotNull(listener);
+        listeners.add(listener);
+        return self();
+    }
+
+    /**
+     * Removes the listener. If the listener was not added before, the method has no effect.
+     */
+    public final B removeListener(Consumer<E> listener) {
+        checkNotNull(listener);
+        listeners.remove(listener);
+        return self();
+    }
+
+    /**
+     * Obtains immutable set of listeners added to the builder by the time of the call.
+     */
+    public final Set<Consumer<E>> listeners() {
+        return ImmutableSet.copyOf(listeners);
     }
 
     /**

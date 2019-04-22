@@ -46,7 +46,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
@@ -58,7 +57,6 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProjec
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
@@ -142,7 +140,7 @@ public class EventRootCommandIdTest {
          * Asserts that the ID of the passed command is the root command ID of the passed event.
          */
         private void assertIsRootCommand(Command command, Event event) {
-            assertThat(getRootCommandId(event))
+            assertThat(event.rootCommandId())
                     .isEqualTo(command.getId());
         }
     }
@@ -159,9 +157,9 @@ public class EventRootCommandIdTest {
          * different aggregates:
          * <ol>
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} —
-         *     {@link ProjectCreated}</li>
+         *     {@link ProjectCreated}
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} —
-         *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
+         *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}
          * </ol>
          */
         @Test
@@ -175,7 +173,8 @@ public class EventRootCommandIdTest {
             assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
-            assertEquals(command.getId(), getRootCommandId(reaction));
+            assertThat(reaction.rootCommandId())
+                    .isEqualTo(command.id());
         }
 
         /**
@@ -186,10 +185,9 @@ public class EventRootCommandIdTest {
          * different process managers:
          * <ol>
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager}
-         *     — {@link EvInvitationAccepted}</li>
+         *     — {@link EvInvitationAccepted}
          *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager}
          *     — {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}
-         *     </li>
          * </ol>
          */
         @Test
@@ -203,13 +201,15 @@ public class EventRootCommandIdTest {
             assertThat(events).hasSize(2);
 
             Event reaction = events.get(1);
-            assertEquals(command.getId(), getRootCommandId(reaction));
+            assertThat(reaction.rootCommandId())
+                    .isEqualTo(command.id());
+
         }
     }
 
     private void postCommand(Command command) {
         StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.getCommandBus()
+        boundedContext.commandBus()
                       .post(command, observer);
     }
 
@@ -222,8 +222,8 @@ public class EventRootCommandIdTest {
         TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
-                boundedContext.getEventBus()
-                              .getEventStore()
+                boundedContext.eventBus()
+                              .eventStore()
                               .read(allEventsQuery(), observer);
             }
         };

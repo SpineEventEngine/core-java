@@ -22,12 +22,13 @@ package io.spine.server.commandbus;
 
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.BusFilter;
-import io.spine.system.server.CommandReceived;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.system.server.event.CommandReceived;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
+import io.spine.system.server.event.CommandReceivedVBuilder;
 
 import java.util.Optional;
 
@@ -41,8 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>The filter never terminates the command processing, i.e. {@link #accept(CommandEnvelope)}
  * always returns an empty value.
- *
- * @author Dmytro Dashenkov
  */
 final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
@@ -54,15 +53,15 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        CommandReceived systemEvent = systemEvent(envelope.getCommand());
-        TenantId tenantId = envelope.getTenantId();
+        CommandReceived systemEvent = systemEvent(envelope.command());
+        TenantId tenantId = envelope.tenantId();
         SystemWriteSide writeSide = writeSideFunction.get(tenantId);
         writeSide.postEvent(systemEvent);
         return Optional.empty();
     }
 
     private static CommandReceived systemEvent(Command domainCommand) {
-        CommandReceived result = CommandReceived
+        CommandReceived result = CommandReceivedVBuilder
                 .newBuilder()
                 .setId(domainCommand.getId())
                 .setPayload(domainCommand)

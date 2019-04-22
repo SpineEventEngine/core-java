@@ -56,8 +56,8 @@ public class ModelTestEnv {
         }
 
         @Apply
-        void event(RefProjectCreated evt) {
-            getBuilder().setId(evt.getProjectId());
+        private void event(RefProjectCreated evt) {
+            builder().setId(evt.getProjectId());
         }
 
         @Assign
@@ -66,8 +66,8 @@ public class ModelTestEnv {
         }
 
         @Apply
-        void event(RefProjectStarted evt) {
-            getBuilder().setId(evt.getProjectId());
+        private void event(RefProjectStarted evt) {
+            builder().setId(evt.getProjectId());
         }
     }
 

@@ -25,11 +25,9 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * The subscriber with a method which is not annotated.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidNoAnnotation extends TestEventSubscriber {
     @SuppressWarnings("unused")
-    public void handle(RefProjectCreated event, EventContext context) {
+    void handle(RefProjectCreated event, EventContext context) {
     }
 }

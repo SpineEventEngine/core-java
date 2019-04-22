@@ -21,9 +21,9 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.EventMessage;
-import io.spine.core.EventEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
@@ -39,9 +39,9 @@ import static io.spine.server.event.InvalidEventException.onConstraintViolations
 final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
 
     @Override
-    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        EventMessage eventMessage = envelope.getMessage();
+    public Optional<MessageInvalid> validate(EventEnvelope event) {
+        checkNotNull(event);
+        EventMessage eventMessage = event.message();
         MessageValidator validator = MessageValidator.newInstance(eventMessage);
         List<ConstraintViolation> violations = validator.validate();
         if (violations.isEmpty()) {

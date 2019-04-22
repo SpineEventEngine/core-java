@@ -20,23 +20,24 @@
 
 package io.spine.server.command;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.validate.ValidatingBuilder;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
 /**
  * An entity that {@linkplain Assign handles} commands.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.command.Assign @Assign
  */
 public abstract
@@ -47,7 +48,12 @@ class CommandHandlingEntity<I,
         implements CommandHandler {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
-    private final Any idAsAny;
+    @LazyInit
+    private @MonotonicNonNull Any idAsAny;
+
+    protected CommandHandlingEntity() {
+        super();
+    }
 
     /**
      * Creates a new entity with the passed ID.
@@ -58,7 +64,10 @@ class CommandHandlingEntity<I,
     }
 
     @Override
-    public Any getProducerId() {
+    public Any producerId() {
+        if (idAsAny == null) {
+            idAsAny = Identifier.pack(id());
+        }
         return idAsAny;
     }
 

@@ -31,15 +31,22 @@ import io.spine.core.Command;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.given.entity.HistoryEventWatcher;
 import io.spine.system.server.given.entity.PersonAggregate;
 import io.spine.system.server.given.entity.PersonNamePart;
-import io.spine.system.server.given.entity.PersonNameRepository;
 import io.spine.system.server.given.entity.PersonProcman;
 import io.spine.system.server.given.entity.PersonProcmanRepository;
 import io.spine.system.server.given.entity.PersonProjection;
-import io.spine.system.server.given.entity.PersonProjectionRepository;
-import io.spine.system.server.given.entity.PersonRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +54,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Events.getMessage;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
@@ -61,11 +66,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EntityHistory should")
-@SuppressWarnings("InnerClassMayBeStatic")
 class EntityHistoryTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EntityHistoryTest.class);
+            new TestActorRequestFactory(EntityHistoryTest.class);
 
     private BoundedContext context;
     private BoundedContext system;
@@ -83,9 +87,9 @@ class EntityHistoryTest {
                 .build();
         system = systemOf(context);
 
-        context.register(new PersonRepository());
-        context.register(new PersonProjectionRepository());
-        context.register(new PersonNameRepository());
+        context.register(DefaultRepository.of(PersonAggregate.class));
+        context.register(DefaultRepository.of(PersonProjection.class));
+        context.register(DefaultRepository.of(PersonNamePart.class));
         context.register(new PersonProcmanRepository());
     }
 
@@ -99,9 +103,9 @@ class EntityHistoryTest {
         @BeforeEach
         void setUp() {
             eventAccumulator = new HistoryEventWatcher();
-            system.getEventBus()
+            system.eventBus()
                   .register(eventAccumulator);
-            id = Identifier.generate(PersonId.class);
+            id = PersonId.generate();
         }
 
         @Test
@@ -301,7 +305,8 @@ class EntityHistoryTest {
             CommandDispatchedToHandler event =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             assertId(event.getReceiver());
-            Message commandMessage = getMessage(event.getPayload());
+            Message commandMessage = event.getPayload()
+                                          .enclosedMessage();
             assertEquals(command, commandMessage);
         }
 
@@ -318,7 +323,8 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = event.getReceiver();
-            PersonCreated payload = (PersonCreated) getMessage(event.getPayload());
+            PersonCreated payload = (PersonCreated) event.getPayload()
+                                                         .enclosedMessage();
             assertId(receiver);
             assertEquals(PersonProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -336,7 +342,9 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
-            CreatePerson payload = (CreatePerson) getMessage(commandDispatchedEvent.getPayload());
+            CreatePerson payload = (CreatePerson)
+                    commandDispatchedEvent.getPayload()
+                                          .enclosedMessage();
             assertId(receiver);
             assertEquals(PersonAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
@@ -387,7 +395,7 @@ class EntityHistoryTest {
 
         private void postCommand(CommandMessage commandMessage) {
             Command command = requestFactory.createCommand(commandMessage);
-            context.getCommandBus()
+            context.commandBus()
                    .post(command, noOpObserver());
         }
     }

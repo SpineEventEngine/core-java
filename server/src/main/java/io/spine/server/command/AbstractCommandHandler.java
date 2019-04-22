@@ -20,8 +20,6 @@
 
 package io.spine.server.command;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
@@ -29,6 +27,8 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerMethod.Result;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Set;
@@ -58,7 +58,6 @@ import static io.spine.server.command.model.CommandHandlerClass.asCommandHandler
  * <p>This class implements {@code CommandDispatcher} dispatching messages
  * to methods declared in the derived classes.
  *
- * @author Alexander Yevsyukov
  * @see io.spine.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
@@ -88,7 +87,7 @@ public abstract class AbstractCommandHandler
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
+        CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
         Result result = method.invoke(this, envelope);
         List<Event> events = result.produceEvents(envelope);
         postEvents(events);
@@ -97,15 +96,15 @@ public abstract class AbstractCommandHandler
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
     @Override
-    public Set<CommandClass> getMessageClasses() {
-        return thisClass.getCommands();
+    public Set<CommandClass> messageClasses() {
+        return thisClass.commands();
     }
 
     /**
      * Always returns {@linkplain Version#getDefaultInstance() empty} version.
      */
     @Override
-    public Version getVersion() {
+    public Version version() {
         return Version.getDefaultInstance();
     }
 }

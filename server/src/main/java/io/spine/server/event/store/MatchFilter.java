@@ -26,7 +26,6 @@ import io.spine.base.EventMessage;
 import io.spine.base.FieldFilter;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.Events;
 import io.spine.server.event.EventFilter;
 import io.spine.server.reflect.Field;
 import io.spine.type.TypeName;
@@ -93,8 +92,8 @@ final class MatchFilter implements Predicate<Event> {
             return false;
         }
 
-        EventMessage eventMessage = Events.getMessage(event);
-        EventContext context = event.getContext();
+        EventMessage eventMessage = event.enclosedMessage();
+        EventContext context = event.context();
 
         if (!checkEventType(eventMessage)) {
             return false;

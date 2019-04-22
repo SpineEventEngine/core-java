@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
@@ -32,8 +31,10 @@ import io.spine.server.model.declare.MatchCriterion;
 import io.spine.server.model.declare.SignatureMismatch;
 import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.server.test.shared.EmptyAggregateVBuilder;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -73,7 +74,8 @@ class EventApplierTest {
         Optional<EventApplier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE), actual.get());
+        EventApplier expected = new EventApplier(method, EventApplierParams.MESSAGE);
+        assertEquals(expected, actual.get());
     }
 
     @Test
@@ -120,6 +122,7 @@ class EventApplierTest {
         }
 
         @Test
+        @MuteLogging // Mute the warning about signature mismatch as it's expected.
         @DisplayName("it's not package-private")
         void isNotPrivate() {
             Method method = new ValidApplierButNotPackagePrivate().getMethod();
@@ -190,7 +193,7 @@ class EventApplierTest {
         private RefProjectCreated eventApplied;
 
         @Apply
-        void apply(RefProjectCreated event) {
+        private void apply(RefProjectCreated event) {
             this.eventApplied = event;
         }
     }
@@ -244,10 +247,6 @@ class EventApplierTest {
 
     private abstract static class TestEventApplier
             extends Aggregate<Long, EmptyAggregate, EmptyAggregateVBuilder> {
-
-        TestEventApplier() {
-            super(0L);
-        }
 
         private static final String APPLIER_METHOD_NAME = "apply";
 

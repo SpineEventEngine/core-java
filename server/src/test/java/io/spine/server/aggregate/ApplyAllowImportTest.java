@@ -43,8 +43,6 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 /**
  * This class contains test for importing events into aggregate via {@link Apply}
  * methods that {@linkplain Apply#allowImport() allow import} of events.
- *
- * @author Alexander Yevsyukov
  */
 @DisplayName("Aggregate which supports event import should")
 class ApplyAllowImportTest {

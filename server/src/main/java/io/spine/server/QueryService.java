@@ -72,7 +72,7 @@ public class QueryService
     private void handleQuery(BoundedContext boundedContext,
                              Query query,
                              StreamObserver<QueryResponse> responseObserver) {
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
         try {
             stand.execute(query, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -133,7 +133,7 @@ public class QueryService
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
 
-            Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.stand();
             ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
 
             for (TypeUrl availableType : exposedTypes) {

@@ -23,18 +23,16 @@ package io.spine.core;
 import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static java.lang.String.format;
 
 /**
  * Utilities for working with {@link Version}.
- *
- * @author Alexander Yevsyukov
  */
 public final class Versions {
 
+    /** Prevent instantiation of this utility class. */
     private Versions() {
-        // Prevent instantiation of this utility class.
     }
 
     private static Version create(int number, Timestamp timestamp) {
@@ -48,7 +46,7 @@ public final class Versions {
      * Creates a new instance with the zero number and current system time.
      */
     public static Version zero() {
-        return create(0, getCurrentTime());
+        return create(0, currentTime());
     }
 
     /**
@@ -65,7 +63,7 @@ public final class Versions {
      */
     public static Version increment(Version version) {
         checkNotNull(version);
-        Version result = create(version.getNumber() + 1, getCurrentTime());
+        Version result = create(version.getNumber() + 1, currentTime());
         return result;
     }
 

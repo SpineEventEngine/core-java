@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.Events;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.test.entity.ProjectId;
@@ -45,9 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("NoOpEventFilter should")
 class NoOpEventFilterTest {
 
@@ -65,7 +61,7 @@ class NoOpEventFilterTest {
     @Test
     @DisplayName("allow any event")
     void allowAny() {
-        events().map(Events::getMessage)
+        events().map(Event::enclosedMessage)
                 .forEach(event -> {
             Optional<? extends Message> filtered = this.filter.filter(event);
             assertTrue(filtered.isPresent());

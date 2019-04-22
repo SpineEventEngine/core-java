@@ -29,9 +29,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("MulticastDispatcher.Identity utility should")
 class MulticastDispatcherIdentityTest {
 

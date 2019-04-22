@@ -28,15 +28,10 @@ import io.spine.test.storage.event.StgProjectCreated;
 
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Alexander Yevsyukov
- * @author Andrey Lavrov
- * @author Alexander Aleksandrov
- */
 public class Given {
 
+    /** Prevent instantiation of this utility class. */
     private Given() {
-        // Prevent instantiation of this utility class from outside.
     }
 
     static ProjectId newProjectId() {

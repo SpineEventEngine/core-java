@@ -31,9 +31,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 public final class TestCommandScheduler extends CommandScheduler {
 
     private final Set<Command> scheduledCommands = newHashSet();
@@ -46,7 +43,7 @@ public final class TestCommandScheduler extends CommandScheduler {
     public void assertScheduled(Command command) {
         // System properties are modified by the framework.
         boolean found = scheduledCommands.stream()
-                                         .map(cmd -> cmd.toBuilder()
+                                         .map(cmd -> cmd.toVBuilder()
                                                         .clearSystemProperties()
                                                         .build())
                                          .anyMatch(command::equals);

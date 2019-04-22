@@ -25,14 +25,14 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.Ack;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.server.expected.AbstractExpected;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
@@ -159,7 +159,7 @@ public abstract class MessageHandlerTest<I,
         repository = createRepository();
         assertNotNull(repository);
 
-        Set<CommandClass> commandClasses = getAllCommandClasses();
+        Set<CommandClass> commandClasses = allCommandClasses();
         boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
     }
 
@@ -180,17 +180,17 @@ public abstract class MessageHandlerTest<I,
         }
     }
 
-    private static Set<CommandClass> getAllCommandClasses() {
+    private static Set<CommandClass> allCommandClasses() {
         return KnownTypes
                 .instance()
-                .getAllUrls()
+                .allUrls()
                 .stream()
                 .flatMap(MessageHandlerTest::commandOfType)
                 .collect(toSet());
     }
 
     private static Stream<CommandClass> commandOfType(TypeUrl type) {
-        Class<?> cls = type.getJavaClass();
+        Class<?> cls = type.toJavaClass();
         if (CommandMessage.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
             Class<? extends CommandMessage> messageType = (Class<? extends CommandMessage>) cls;
@@ -228,7 +228,7 @@ public abstract class MessageHandlerTest<I,
         }
 
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> messageClasses() {
             return newHashSet(expectedCommands);
         }
 
@@ -255,7 +255,7 @@ public abstract class MessageHandlerTest<I,
 
         @Override
         public Optional<Ack> accept(CommandEnvelope envelope) {
-            interceptedCommands.add(unpack(envelope.getCommand()
+            interceptedCommands.add(unpack(envelope.command()
                                                    .getMessage()));
             return empty();
         }

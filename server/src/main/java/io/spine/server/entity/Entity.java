@@ -32,10 +32,8 @@ import io.spine.string.Stringifiers;
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *
- * <p>Implementing classes must have single constructor which accepts the ID of the entity.
- *
  * <p>Lifecycle flags determine if an entity is active.
- * An entity is considered to be active if the lifecycle flags are missing.
+ * An entity is considered to be active if the lifecycle flags are not set.
  * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted},
  * then it’s regarded to be inactive.
  *
@@ -47,7 +45,7 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
     /**
      * Obtains the identifier of the entity.
      */
-    I getId();
+    I id();
 
     /**
      * Obtains string representation of the entity identifier.
@@ -56,13 +54,13 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
      *          form in debug and error messages.
      */
     default String idAsString() {
-        return Stringifiers.toString(getId());
+        return Stringifiers.toString(id());
     }
 
     /**
      * Obtains the state of the entity.
      */
-    S getState();
+    S state();
 
     /**
      * {@inheritDoc}
@@ -89,9 +87,20 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
 
     /**
      * Obtains the version of the entity.
+     *
+     * @apiNote This method has the {@code get} prefix for conforming to Java Beans convention which
+     *          is used for the column methods.
+     * @see #version()
      */
     @Column
     Version getVersion();
+
+    /**
+     * Obtains the version of the entity.
+     */
+    default Version version() {
+        return getVersion();
+    }
 
     /**
      * Enumeration of generic type parameters of this interface.
@@ -117,7 +126,7 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
         }
 
         @Override
-        public int getIndex() {
+        public int index() {
             return index;
         }
     }

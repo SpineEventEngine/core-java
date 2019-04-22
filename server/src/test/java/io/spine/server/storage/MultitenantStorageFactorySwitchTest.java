@@ -22,9 +22,6 @@ package io.spine.server.storage;
 
 import org.junit.jupiter.api.DisplayName;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("Multitenant StorageFactorySwitch should")
 class MultitenantStorageFactorySwitchTest extends StorageFactorySwitchTest {
     MultitenantStorageFactorySwitchTest() {

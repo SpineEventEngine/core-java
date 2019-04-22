@@ -1,0 +1,77 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+
+option java_package = "io.spine.system.server.command";
+option java_outer_classname = "HistoryCommandsProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/core/event.proto";
+import "spine/core/command.proto";
+import "spine/system/server/entity_history.proto";
+
+// A command to dispatch an event to a subscriber.
+//
+// This command is relevant only to histories of Projections.
+//
+message DispatchEventToSubscriber {
+
+    // The ID of the entity, which the event is dispatched to.
+    EntityHistoryId receiver = 1;
+
+    // The event to dispatch.
+    core.Event event = 2 [(valid) = true];
+}
+
+// A command to dispatch an event to a reactor.
+//
+// This command is relevant to histories of Aggregates and ProcessManagers.
+//
+message DispatchEventToReactor {
+
+    // The ID of the entity, which the event is dispatched to.
+    EntityHistoryId receiver = 1;
+
+    // The event to dispatch.
+    core.Event event = 2 [(valid) = true];
+}
+
+// A command to dispatch a command to a command handler.
+//
+// This command is relevant to histories of Aggregates and ProcessManagers.
+//
+message DispatchCommandToHandler {
+
+    // The ID of the entity, which the command is dispatched to.
+    EntityHistoryId receiver = 1;
+
+    // The command to dispatch.
+    core.Command command = 2 [(valid) = true];
+}

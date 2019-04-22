@@ -28,6 +28,22 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.LifecycleFlagsVBuilder;
+import io.spine.system.server.command.DispatchCommandToHandler;
+import io.spine.system.server.command.DispatchEventToReactor;
+import io.spine.system.server.command.DispatchEventToSubscriber;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
+import io.spine.system.server.event.EventImported;
+import io.spine.system.server.rejection.CannotDispatchCommandTwice;
+import io.spine.system.server.rejection.CannotDispatchEventTwice;
 
 import java.util.function.UnaryOperator;
 
@@ -50,16 +66,10 @@ import static com.google.protobuf.util.Timestamps.compare;
  *
  * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
  * an entity history of its own.
- *
- * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
 final class EntityHistoryAggregate
         extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
-
-    private EntityHistoryAggregate(EntityHistoryId id) {
-        super(id);
-    }
 
     @Assign
     EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
@@ -92,113 +102,121 @@ final class EntityHistoryAggregate
     }
 
     @Apply(allowImport = true)
-    void on(EntityCreated event) {
-        getBuilder().setId(event.getId());
+    private void on(EntityCreated event) {
+        builder().setId(event.getId());
     }
 
     @Apply
-    void on(EventDispatchedToSubscriber event) {
-        getBuilder().setId(event.getReceiver());
+    private void on(EventDispatchedToSubscriber event) {
+        builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
-    void on(EventDispatchedToReactor event) {
-        getBuilder().setId(event.getReceiver());
+    private void on(EventDispatchedToReactor event) {
+        builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
     @Apply
-    void on(CommandDispatchedToHandler event) {
-        getBuilder().setId(event.getReceiver());
+    private void on(CommandDispatchedToHandler event) {
+        builder().setId(event.getReceiver());
         updateLastCommandTime(event.getWhenDispatched());
     }
 
     @Apply(allowImport = true)
-    void on(EntityStateChanged event) {
-        getBuilder().setId(event.getId())
-                    .setLastStateChange(event.getWhen());
+    private void on(EntityStateChanged event) {
+        builder().setId(event.getId())
+                 .setLastStateChange(event.getWhen());
     }
 
     @Apply(allowImport = true)
-    void on(EntityArchived event) {
+    private void on(EntityArchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityDeleted event) {
+    private void on(EntityDeleted event) {
         updateLifecycleFlags(builder -> builder.setDeleted(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityExtractedFromArchive event) {
+    private void on(EntityExtractedFromArchive event) {
         updateLifecycleFlags(builder -> builder.setArchived(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EntityRestored event) {
+    private void on(EntityRestored event) {
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
     }
 
     @Apply(allowImport = true)
-    void on(EventImported event) {
+    private void on(EventImported event) {
         updateLastEventTime(event.getWhenImported());
     }
 
 
-    private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
-        LifecycleHistory oldLifecycleHistory = getBuilder().getLifecycle();
-        LifecycleFlags.Builder flagsBuilder = oldLifecycleHistory.getLifecycleFlags()
-                                                                 .toBuilder();
+    private void updateLifecycleFlags(UnaryOperator<LifecycleFlagsVBuilder> mutation) {
+        LifecycleHistory oldLifecycleHistory = builder().getLifecycle();
+        LifecycleFlagsVBuilder flagsBuilder =
+                oldLifecycleHistory.getLifecycleFlags()
+                                   .toVBuilder();
         LifecycleFlags newFlags = mutation.apply(flagsBuilder)
                                           .build();
-        LifecycleHistory newLifecycleHistory = oldLifecycleHistory.toBuilder()
-                                                                  .setLifecycleFlags(newFlags)
-                                                                  .build();
-        getBuilder().setLifecycle(newLifecycleHistory);
+        LifecycleHistory newLifecycleHistory =
+                oldLifecycleHistory.toVBuilder()
+                                   .setLifecycleFlags(newFlags)
+                                   .build();
+        builder().setLifecycle(newLifecycleHistory);
     }
 
-    private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistory.Builder> mutation) {
-        LifecycleHistory.Builder builder = getBuilder().getLifecycle()
-                                                       .toBuilder();
-        LifecycleHistory newHistory = mutation.apply(builder)
-                                              .build();
-        getBuilder().setLifecycle(newHistory);
+    private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistoryVBuilder> mutation) {
+        EntityHistoryVBuilder builder = builder();
+        LifecycleHistoryVBuilder history =
+                builder.getLifecycle()
+                       .toVBuilder();
+        LifecycleHistory newHistory =
+                mutation.apply(history)
+                        .build();
+        builder.setLifecycle(newHistory);
     }
 
     private void updateLastEventTime(Timestamp newEvent) {
-        Timestamp lastEvent = getBuilder().getDispatching()
-                                          .getWhenEvent();
+        Timestamp lastEvent = builder().getDispatching()
+                                       .getWhenEvent();
         if (compare(newEvent, lastEvent) > 0) {
             updateDispatchingHistory(builder -> builder.setWhenEvent(newEvent));
         }
     }
 
     private void updateLastCommandTime(Timestamp newCommand) {
-        Timestamp lastCommand = getBuilder().getDispatching()
-                                            .getWhenCommand();
+        Timestamp lastCommand = builder().getDispatching()
+                                         .getWhenCommand();
         if (compare(newCommand, lastCommand) > 0) {
             updateDispatchingHistory(builder -> builder.setWhenCommand(newCommand));
         }
     }
 
-    private void updateDispatchingHistory(UnaryOperator<DispatchingHistory.Builder> mutation) {
-        DispatchingHistory.Builder builder = getBuilder().getDispatching()
-                                                         .toBuilder();
-        DispatchingHistory newHistory = mutation.apply(builder)
-                                                .build();
-        getBuilder().setDispatching(newHistory);
+    private void updateDispatchingHistory(UnaryOperator<DispatchingHistoryVBuilder> mutation) {
+        EntityHistoryVBuilder builder = builder();
+        DispatchingHistoryVBuilder history =
+                builder.getDispatching()
+                       .toVBuilder();
+        DispatchingHistory newHistory =
+                mutation.apply(history)
+                        .build();
+        builder.setDispatching(newHistory);
     }
 
     private static Timestamp now() {
-        return Time.getCurrentTime();
+        return Time.currentTime();
     }
 }

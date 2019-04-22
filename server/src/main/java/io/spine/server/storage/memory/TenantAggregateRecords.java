@@ -32,12 +32,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.unsupported;
 import static io.spine.validate.Validate.isDefault;
 
@@ -45,17 +45,16 @@ import static io.spine.validate.Validate.isDefault;
  * The events for for a tenant.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
- * @author Alexander Yevsyukov
  */
-class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
+final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
 
     private final Multimap<I, AggregateEventRecord> records = TreeMultimap.create(
             new AggregateStorageKeyComparator<>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private final Map<I, LifecycleFlags> statuses = newHashMap();
-    private final Map<I, Integer> eventCounts = newHashMap();
+    private final Map<I, LifecycleFlags> statuses = new HashMap<>();
+    private final Map<I, Integer> eventCounts = new HashMap<>();
 
     @Override
     public Iterator<I> index() {
@@ -233,7 +232,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
                                       .getVersion()
                                       .getNumber();
             } else {
-                versionNumber = event.getContext()
+                versionNumber = event.context()
                                      .getVersion()
                                      .getNumber();
             }

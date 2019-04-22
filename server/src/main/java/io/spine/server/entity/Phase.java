@@ -20,8 +20,8 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.MessageId;
 
 /**
  * An atomic entity state change which advances the entity version.
@@ -87,5 +87,5 @@ public abstract class Phase<I, R> {
     /**
      * Returns the dispatched {@code Message} ID.
      */
-    protected abstract Message getMessageId();
+    protected abstract MessageId getMessageId();
 }

@@ -55,15 +55,16 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
 
     /** Prevents direct instantiation. */
     private AggregateStateIdStringifier() {
+        super();
     }
 
     @Override
     protected String toString(AggregateStateId id) {
         checkNotNull(id);
 
-        String typeUrl = id.getStateType()
+        String typeUrl = id.stateType()
                            .value();
-        Object genericId = id.getAggregateId();
+        Object genericId = id.aggregateId();
         Class genericIdType = genericId.getClass();
         String idTypeString = idTypeToString(genericIdType);
         String genericIdString = Stringifiers.toString(genericId);
@@ -121,7 +122,7 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         Class result;
         if (idTypeString.contains(TYPE_NAME_DIVIDER)) {
             TypeName typeName = TypeName.of(idTypeString);
-            result = typeName.getJavaClass();
+            result = typeName.toJavaClass();
         } else {
             try {
                 result = Class.forName(JAVA_LANG_PACKAGE_NAME + idTypeString);

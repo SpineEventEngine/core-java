@@ -21,8 +21,8 @@ package io.spine.server.commandbus;
 
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Set;
 
@@ -30,7 +30,6 @@ import java.util.Set;
  * A {@link CommandDispatcher}, that delegates the responsibilities to an aggregated
  * {@linkplain CommandDispatcherDelegate delegate instance}.
  *
- * @author Alex Tymchenko
  * @see CommandDispatcherDelegate
  */
 @Internal
@@ -56,8 +55,8 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
     }
 
     @Override
-    public final Set<CommandClass> getMessageClasses() {
-        return delegate.getCommandClasses();
+    public final Set<CommandClass> messageClasses() {
+        return delegate.commandClasses();
     }
 
     @Override

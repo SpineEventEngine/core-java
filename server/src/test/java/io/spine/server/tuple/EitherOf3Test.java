@@ -52,7 +52,7 @@ class EitherOf3Test {
     private final UInt32Value b = UInt32Value.newBuilder()
                                              .setValue(42)
                                              .build();
-    private final Timestamp c = Time.getCurrentTime();
+    private final Timestamp c = Time.currentTime();
 
     private EitherOf3<StringValue, UInt32Value, Timestamp> eitherWithA;
     private EitherOf3<StringValue, UInt32Value, Timestamp> eitherWithB;

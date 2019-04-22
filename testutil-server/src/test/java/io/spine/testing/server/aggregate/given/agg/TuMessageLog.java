@@ -51,13 +51,13 @@ public class TuMessageLog extends Aggregate<Long, TuString, TuStringVBuilder> {
     }
 
     @Apply
-    void newLine(ValueLogged line) {
-        String current = getState().getValue();
-        getBuilder().setValue(current + System.lineSeparator() + line.getValue());
+    private void newLine(ValueLogged line) {
+        String current = state().getValue();
+        builder().setValue(current + System.lineSeparator() + line.getValue());
     }
 
     private static ValueLogged logItem(String digitalPart) {
-        String str = Timestamps.toString(Time.getCurrentTime())
+        String str = Timestamps.toString(Time.currentTime())
                 + " - "
                 + digitalPart;
         return ValueLogged.newBuilder()

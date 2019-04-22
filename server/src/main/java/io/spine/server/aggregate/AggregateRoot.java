@@ -36,7 +36,6 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  * A root object for a larger aggregate.
  *
  * @param <I> the type for IDs of this class of aggregates
- * @author Alexander Yevsyukov
  */
 public class AggregateRoot<I> {
 
@@ -85,7 +84,7 @@ public class AggregateRoot<I> {
     S getPartState(Class<S> partStateClass) {
         AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
-        S partState = aggregatePart.getState();
+        S partState = aggregatePart.state();
         return partState;
     }
 

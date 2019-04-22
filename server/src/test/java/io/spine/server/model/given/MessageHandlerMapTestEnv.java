@@ -24,10 +24,6 @@ import io.spine.server.command.Assign;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.command.CreateProject;
 
-/**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
- */
 public class MessageHandlerMapTestEnv {
 
     /** Prevents instantiation of this utility class. */

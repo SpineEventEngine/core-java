@@ -23,15 +23,19 @@ package io.spine.server;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
-import io.spine.server.bc.given.AnotherProjectAggregateRepository;
-import io.spine.server.bc.given.FinishedProjectProjectionRepo;
+import io.spine.server.bc.given.AnotherProjectAggregate;
+import io.spine.server.bc.given.FinishedProjectProjection;
+import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectCreationRepository;
-import io.spine.server.bc.given.ProjectPmRepo;
-import io.spine.server.bc.given.ProjectProjectionRepo;
-import io.spine.server.bc.given.ProjectRemovalRepository;
-import io.spine.server.bc.given.ProjectReportRepository;
+import io.spine.server.bc.given.ProjectProcessManager;
+import io.spine.server.bc.given.ProjectProjection;
+import io.spine.server.bc.given.ProjectRemovalProcman;
+import io.spine.server.bc.given.ProjectReport;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
@@ -41,7 +45,9 @@ import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemClient;
+import io.spine.system.server.SystemContext;
 import io.spine.test.bc.Project;
+import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -52,23 +58,31 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.event.SubstituteLoggingEvent;
+import org.slf4j.helpers.SubstituteLogger;
 
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.slf4j.event.Level.DEBUG;
 
 /**
  * Tests of {@link BoundedContext}.
@@ -79,14 +93,7 @@ import static org.mockito.Mockito.verify;
  *     <li>spine/test/bc/command_factory_test.proto — commands
  *     <li>spine/test/bc/events.proto — events.
  * </ul>
- *
- * @author Alexander Litus
- * @author Alexander Yevsyukov
- * @author Dmitry Ganzha
  */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext should")
 class BoundedContextTest {
 
@@ -107,7 +114,7 @@ class BoundedContextTest {
     @AfterEach
     void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus()
+            boundedContext.eventBus()
                           .unregister(subscriber);
         }
         boundedContext.close();
@@ -115,9 +122,8 @@ class BoundedContextTest {
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        ProjectAggregateRepository repo = new ProjectAggregateRepository();
-        boundedContext.register(repo);
-        boundedContext.getEventBus()
+        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
+        boundedContext.eventBus()
                       .register(subscriber);
         handlersRegistered = true;
     }
@@ -129,19 +135,19 @@ class BoundedContextTest {
         @Test
         @DisplayName("EventBus")
         void eventBus() {
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.eventBus());
         }
 
         @Test
         @DisplayName("IntegrationBus")
         void integrationBus() {
-            assertNotNull(boundedContext.getIntegrationBus());
+            assertNotNull(boundedContext.integrationBus());
         }
 
         @Test
         @DisplayName("CommandDispatcher")
         void commandDispatcher() {
-            assertNotNull(boundedContext.getCommandBus());
+            assertNotNull(boundedContext.commandBus());
         }
 
         @Test
@@ -161,8 +167,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("AggregateRepository")
         void aggregateRepository() {
-            ProjectAggregateRepository repository = new ProjectAggregateRepository();
-            boundedContext.register(repository);
+            boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
         }
 
         @Test
@@ -170,15 +175,13 @@ class BoundedContextTest {
         void processManagerRepository() {
             ModelTests.dropAllModels();
 
-            ProjectPmRepo repository = new ProjectPmRepo();
-            boundedContext.register(repository);
+            boundedContext.register(DefaultRepository.of(ProjectProcessManager.class));
         }
 
         @Test
         @DisplayName("ProjectionRepository")
         void projectionRepository() {
-            ProjectReportRepository repository = new ProjectReportRepository();
-            boundedContext.register(repository);
+            boundedContext.register(DefaultRepository.of(ProjectReport.class));
         }
     }
 
@@ -187,11 +190,25 @@ class BoundedContextTest {
     void propagateRepositoriesToStand() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
-        Stand stand = boundedContext.getStand();
+        Stand stand = boundedContext.stand();
         assertTrue(stand.getExposedTypes().isEmpty());
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        boundedContext.register(repository);
-        assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
+        Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
+        boundedContext.register(repo);
+        assertThat(stand.getExposedTypes()).containsExactly(repo.entityStateType());
+    }
+
+    @Test
+    @DisplayName("re-register Stand as event dispatcher when registering repository")
+    void registerStandAsEventDispatcher() {
+        EventBus eventBusMock = mock(EventBus.class);
+        EventBus.Builder builderMock = mock(EventBus.Builder.class);
+        when(builderMock.build()).thenReturn(eventBusMock);
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setEventBus(builderMock)
+                                                      .build();
+        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
+        verify(eventBusMock, times(1))
+                .register(eq(boundedContext.stand()));
     }
 
     @ParameterizedTest
@@ -221,28 +238,28 @@ class BoundedContextTest {
      */
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
-                ImmutableSet.of(new ProjectAggregateRepository(),
-                                new ProjectProjectionRepo(),
+                ImmutableSet.of(DefaultRepository.of(ProjectAggregate.class),
+                                DefaultRepository.of(ProjectProjection.class),
                                 new ProjectCreationRepository());
 
         Set<Repository<?, ?>> sameStateRepositories =
-                ImmutableSet.of(new AnotherProjectAggregateRepository(),
-                                new FinishedProjectProjectionRepo(),
-                                new ProjectRemovalRepository());
+                ImmutableSet.of(DefaultRepository.of(AnotherProjectAggregate.class),
+                                DefaultRepository.of(FinishedProjectProjection.class),
+                                DefaultRepository.of(ProjectRemovalProcman.class));
 
-        Set<List<Repository<?, ?>>> cartesianProduct = Sets.cartesianProduct(repositories,
-                                                                             sameStateRepositories);
+        Set<List<Repository<?, ?>>> cartesianProduct =
+                Sets.cartesianProduct(repositories, sameStateRepositories);
         Stream<Arguments> result = cartesianProduct.stream()
                                                    .map(repos -> Arguments.of(repos.get(0),
                                                                               repos.get(1)));
-
         return result;
     }
 
     @Test
     @DisplayName("assign storage during registration if repository does not have one")
     void setStorageOnRegister() {
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
+        Repository<ProjectId, ProjectAggregate> repository =
+                DefaultRepository.of(ProjectAggregate.class);
         boundedContext.register(repository);
         assertTrue(repository.isStorageAssigned());
     }
@@ -262,7 +279,7 @@ class BoundedContextTest {
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setEventBus(EventBus.newBuilder())
                                           .build();
-        assertNotNull(bc.getEventBus());
+        assertNotNull(bc.eventBus());
     }
 
     @Test
@@ -273,8 +290,8 @@ class BoundedContextTest {
                                           .setEventBus(EventBus.newBuilder()
                                                                .setEventStore(eventStore))
                                           .build();
-        assertEquals(eventStore, bc.getEventBus()
-                                   .getEventStore());
+        assertEquals(eventStore, bc.eventBus()
+                                   .eventStore());
     }
 
     @Nested
@@ -315,14 +332,14 @@ class BoundedContextTest {
                                               .setMultitenant(true)
                                               .build();
 
-            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+            assertEquals(bc.isMultitenant(), bc.commandBus()
                                                .isMultitenant());
 
             bc = BoundedContext.newBuilder()
                                .setMultitenant(false)
                                .build();
 
-            assertEquals(bc.isMultitenant(), bc.getCommandBus()
+            assertEquals(bc.isMultitenant(), bc.commandBus()
                                                .isMultitenant());
         }
 
@@ -333,14 +350,14 @@ class BoundedContextTest {
                                               .setMultitenant(true)
                                               .build();
 
-            assertEquals(bc.isMultitenant(), bc.getStand()
+            assertEquals(bc.isMultitenant(), bc.stand()
                                                .isMultitenant());
 
             bc = BoundedContext.newBuilder()
                                .setMultitenant(false)
                                .build();
 
-            assertEquals(bc.isMultitenant(), bc.getStand()
+            assertEquals(bc.isMultitenant(), bc.stand()
                                                .isMultitenant());
         }
     }
@@ -355,12 +372,12 @@ class BoundedContextTest {
     @Test
     @DisplayName("obtain entity types by visibility")
     void getEntityTypesByVisibility() {
-        assertTrue(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
+        assertTrue(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
                                  .isEmpty());
 
         registerAll();
 
-        assertFalse(boundedContext.getEntityStateTypes(EntityOption.Visibility.FULL)
+        assertFalse(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
                                   .isEmpty());
     }
 
@@ -388,16 +405,41 @@ class BoundedContextTest {
     void noExternalDescendants() {
         assertThrows(
                 IllegalStateException.class,
-
                 () ->
                 new BoundedContext(BoundedContext.newBuilder()) {
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
                     @Internal
                     @Override
-                    public SystemClient getSystemClient() {
+                    public SystemClient systemClient() {
                         return null;
                     }
                 }
         );
+    }
+
+    @Test
+    @DisplayName("close System context when domain context is closed")
+    void closeSystemWhenDomainIsClosed() throws Exception {
+        BoundedContextName contextName = BoundedContextNames.newName("TestDomain");
+        BoundedContextName systemContextName = BoundedContextNames.system(contextName);
+        BoundedContext context = BoundedContext
+                .newBuilder()
+                .setName(contextName)
+                .build();
+        Queue<SubstituteLoggingEvent> log = new ArrayDeque<>();
+        Logging.redirect((SubstituteLogger) Logging.get(DomainContext.class), log);
+        Logging.redirect((SubstituteLogger) Logging.get(SystemContext.class), log);
+
+        context.close();
+
+        assertThat(log).hasSize(2);
+
+        SubstituteLoggingEvent domainLogEvent = log.poll();
+        assertThat(domainLogEvent.getMessage()).contains(contextName.getValue());
+        assertThat(domainLogEvent.getLevel()).isAtLeast(DEBUG);
+
+        SubstituteLoggingEvent systemLogEvent = log.poll();
+        assertThat(systemLogEvent.getMessage()).contains(systemContextName.getValue());
+        assertThat(systemLogEvent.getLevel()).isAtLeast(DEBUG);
     }
 }

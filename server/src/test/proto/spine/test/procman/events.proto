@@ -52,6 +52,14 @@ message PmOwnerChanged {
     ProjectId project_id = 1;
 }
 
+message PmProjectArchived {
+    ProjectId project_id = 1;
+}
+
+message PmProjectDeleted {
+    ProjectId project_id = 1;
+}
+
 message PmIterationStarted {
     ProjectId project_id = 1;
 }

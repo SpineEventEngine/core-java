@@ -25,17 +25,17 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
-import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
-import io.spine.system.server.given.command.CompanyRepository;
+import io.spine.system.server.given.command.CompanyAggregate;
 import io.spine.system.server.given.schedule.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ScheduledCommandTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(ScheduledCommandTest.class);
+            new TestActorRequestFactory(ScheduledCommandTest.class);
 
     private RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository;
     private BoundedContext context;
@@ -71,7 +71,7 @@ class ScheduledCommandTest {
         context = BoundedContext.newBuilder()
                                 .setCommandBus(commandBus)
                                 .build();
-        context.register(new CompanyRepository());
+        context.register(DefaultRepository.of(CompanyAggregate.class));
         BoundedContext system = systemOf(this.context);
         Optional<Repository> found = system.findRepository(ScheduledCommandRecord.class);
         assertTrue(found.isPresent());
@@ -108,7 +108,7 @@ class ScheduledCommandTest {
         Optional<ScheduledCommand> optional = repository.find(scheduled.getId());
         assertTrue(optional.isPresent());
         ScheduledCommand deletedCommand = optional.get();
-        LifecycleFlags flags = deletedCommand.getLifecycleFlags();
+        LifecycleFlags flags = deletedCommand.lifecycleFlags();
 
         assertThat(flags.getDeleted()).isTrue();
         assertThat(flags.getArchived()).isFalse();
@@ -130,7 +130,7 @@ class ScheduledCommandTest {
     private void checkScheduled(Command scheduled) {
         Optional<ScheduledCommand> found = repository.find(scheduled.getId());
         assertTrue(found.isPresent());
-        ScheduledCommandRecord scheduledCommand = found.get().getState();
+        ScheduledCommandRecord scheduledCommand = found.get().state();
 
         assertFalse(isDefault(scheduledCommand.getSchedulingTime()));
         Command savedCommand = scheduledCommand.getCommand();
@@ -157,7 +157,7 @@ class ScheduledCommandTest {
     }
 
     private static Command schedule(Command command, Schedule schedule) {
-        CommandContext sourceContext = command.getContext();
+        CommandContext sourceContext = command.context();
         CommandContext newContext = sourceContext.toBuilder()
                                                  .setSchedule(schedule)
                                                  .build();
@@ -168,7 +168,7 @@ class ScheduledCommandTest {
     }
 
     private void post(Command command) {
-        context.getCommandBus()
+        context.commandBus()
                .post(command, noOpObserver());
     }
 
@@ -180,10 +180,9 @@ class ScheduledCommandTest {
     }
 
     private static CommandMessage createCommandMessage() {
-        CompanyId id = Identifier.generate(CompanyId.class);
         String name = ScheduledCommandTest.class.getSimpleName();
         EstablishCompany result = EstablishCompany.newBuilder()
-                                                  .setId(id)
+                                                  .setId(CompanyId.generate())
                                                   .setFinalName(name)
                                                   .build();
         return result;

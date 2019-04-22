@@ -52,7 +52,7 @@ public class ProjectAggregateRepository
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public ProjectAggregateRepository() {
         super();
-        getEventRouting()
+        eventRouting()
                 .route(AggProjectArchived.class,
                        new EventRoute<ProjectId, AggProjectArchived>() {
                            private static final long serialVersionUID = 0L;
@@ -82,12 +82,11 @@ public class ProjectAggregateRepository
     }
 
     @Override
-    public void store(ProjectAggregate aggregate) {
-        super.store(aggregate);
-    }
-
-    @Override
     public AggregateStorage<ProjectId> aggregateStorage() {
         return super.aggregateStorage();
+    }
+
+    void storeAggregate(ProjectAggregate aggregate) {
+        store(aggregate);
     }
 }

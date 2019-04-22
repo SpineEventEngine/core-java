@@ -28,17 +28,16 @@ import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Buses;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.system.server.CommandAcknowledged;
-import io.spine.system.server.CommandErrored;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandErrored;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.commandbus.CmdBusStartProject;
@@ -125,7 +124,7 @@ class CommandAckMonitorTest {
                     .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .build();
-            commandId = Commands.generateId();
+            commandId = CommandId.generate();
         }
 
         @Test
@@ -186,7 +185,7 @@ class CommandAckMonitorTest {
                     .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                     .setDelegate(delegate)
                     .build();
-            commandId = Commands.generateId();
+            commandId = CommandId.generate();
         }
 
         @Test

@@ -21,24 +21,25 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
 
 /**
  * Provides message handling information on an aggregate class.
  *
  * @param <A> the type of aggregates
- * @author Alexander Yevsyukov
  */
 public class AggregateClass<A extends Aggregate>
         extends CommandHandlingEntityClass<A>
@@ -46,7 +47,7 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
+    private final MessageHandlerMap<EventClass, EmptyClass, EventApplier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
@@ -68,22 +69,36 @@ public class AggregateClass<A extends Aggregate>
         return result;
     }
 
+    /**
+     * Obtains the set of event classes on which this aggregate class reacts.
+     */
     @Override
-    public final Set<EventClass> getEventClasses() {
-        return delegate.getEventClasses();
+    public final Set<EventClass> incomingEvents() {
+        return delegate.incomingEvents();
     }
 
+    /**
+     * Obtains the set of <em>external</em> event classes on which this aggregate class reacts.
+     */
     @Override
-    public final Set<EventClass> getExternalEventClasses() {
-        return delegate.getExternalEventClasses();
+    public final Set<EventClass> externalEvents() {
+        return delegate.externalEvents();
+    }
+
+    /**
+     * Obtains event types produced by this aggregate class.
+     */
+    public Set<EventClass> outgoingEvents() {
+        Set<EventClass> result = union(commandOutput(), reactionOutput());
+        return result;
     }
 
     /**
      * Obtains set of classes of events used as arguments of applier methods.
      *
-     * @see #getImportableEventClasses()
+     * @see #importableEvents()
      */
-    public final Set<EventClass> getStateEventClasses() {
+    public final Set<EventClass> stateEvents() {
         return stateEvents.getMessageClasses();
     }
 
@@ -92,9 +107,9 @@ public class AggregateClass<A extends Aggregate>
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
      * by the aggregates of this class.
      *
-     * @see #getStateEventClasses()
+     * @see #stateEvents()
      */
-    public final Set<EventClass> getImportableEventClasses() {
+    public final Set<EventClass> importableEvents() {
         return importableEvents;
     }
 
@@ -108,14 +123,19 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public final EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
-        return delegate.getReactor(eventClass, commandClass);
+    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
+        return delegate.reactorOf(eventClass, commandClass);
+    }
+
+    @Override
+    public Set<EventClass> reactionOutput() {
+        return delegate.reactionOutput();
     }
 
     /**
      * Obtains event applier method for the passed class of events.
      */
-    public final EventApplier getApplier(EventClass eventClass) {
+    public final EventApplier applierOf(EventClass eventClass) {
         return stateEvents.getSingleMethod(eventClass);
     }
 }

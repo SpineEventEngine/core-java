@@ -48,8 +48,6 @@ import java.lang.annotation.Target;
  *
  * <p>Packages that do not have a common “parent”, but annotated with the same name of a
  * Bounded Context, belong to the same Bounded Context.
- *
- * @author Alexander Yevsyukov
  */
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -21,7 +21,6 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
@@ -35,10 +34,14 @@ import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.Subscriptions.toShortString;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -67,8 +70,12 @@ public class SubscriptionService
 
         try {
             Target target = topic.getTarget();
-            BoundedContext boundedContext = selectBoundedContext(target);
-            Stand stand = boundedContext.getStand();
+            Optional<BoundedContext> selected = selectBoundedContext(target);
+            BoundedContext context = selected.orElseThrow(
+                    () -> newIllegalArgumentException(
+                            "Trying to subscribe to an unknown type: `%s`.", target.getType())
+            );
+            Stand stand = context.stand();
 
             stand.subscribe(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -82,12 +89,17 @@ public class SubscriptionService
         _debug("Activating the subscription: {}", subscription);
 
         try {
-            BoundedContext boundedContext = selectBoundedContext(subscription);
+            Optional<BoundedContext> selected = selectBoundedContext(subscription);
+            BoundedContext context = selected.orElseThrow(
+                    () -> newIllegalArgumentException(
+                            "Target subscription `%s` could not be found for activation.",
+                            toShortString(subscription))
+            );
             Stand.NotifySubscriptionAction notifyAction = update -> {
                 checkNotNull(update);
                 observer.onNext(update);
             };
-            Stand targetStand = boundedContext.getStand();
+            Stand targetStand = context.stand();
 
             targetStand.activate(subscription, notifyAction, forwardErrorsOnly(observer));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -100,9 +112,16 @@ public class SubscriptionService
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
         _debug("Incoming cancel request for the subscription topic: {}", subscription);
 
-        BoundedContext boundedContext = selectBoundedContext(subscription);
+        Optional<BoundedContext> selected = selectBoundedContext(subscription);
+        if (!selected.isPresent()) {
+            _warn("Trying to cancel a subscription {} which could not be found",
+                  toShortString(subscription));
+            responseObserver.onCompleted();
+            return;
+        }
         try {
-            Stand stand = boundedContext.getStand();
+            BoundedContext context = selected.get();
+            Stand stand = context.stand();
             stand.cancel(subscription, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error(e, "Error processing cancel subscription request");
@@ -110,16 +129,17 @@ public class SubscriptionService
         }
     }
 
-    private BoundedContext selectBoundedContext(Subscription subscription) {
+    private Optional<BoundedContext> selectBoundedContext(Subscription subscription) {
         Target target = subscription.getTopic()
                                     .getTarget();
-        BoundedContext context = selectBoundedContext(target);
-        return context;
+        Optional<BoundedContext> result = selectBoundedContext(target);
+        return result;
     }
 
-    private BoundedContext selectBoundedContext(Target target) {
+    private Optional<BoundedContext> selectBoundedContext(Target target) {
         TypeUrl type = TypeUrl.parse(target.getType());
-        BoundedContext result = typeToContextMap.get(type);
+        BoundedContext selected = typeToContextMap.get(type);
+        Optional<BoundedContext> result = Optional.ofNullable(selected);
         return result;
     }
 
@@ -137,7 +157,6 @@ public class SubscriptionService
             return this;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableList<BoundedContext> getBoundedContexts() {
             return ImmutableList.copyOf(boundedContexts);
         }
@@ -167,11 +186,12 @@ public class SubscriptionService
 
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-            Stand stand = boundedContext.getStand();
-            ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
-            for (TypeUrl availableType : exposedTypes) {
-                mapBuilder.put(availableType, boundedContext);
-            }
+            Stand stand = boundedContext.stand();
+            Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, boundedContext);
+            stand.getExposedTypes()
+                 .forEach(putIntoMap);
+            stand.getExposedEventTypes()
+                 .forEach(putIntoMap);
         }
     }
 }

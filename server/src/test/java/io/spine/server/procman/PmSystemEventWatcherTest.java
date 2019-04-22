@@ -31,11 +31,13 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.procman.given.delivery.GivenMessage;
-import io.spine.system.server.CommandDispatchedToHandler;
-import io.spine.system.server.CommandDispatchedToHandlerVBuilder;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EventDispatchedToReactor;
-import io.spine.system.server.EventDispatchedToReactorVBuilder;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.CommandDispatchedToHandlerVBuilder;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToReactorVBuilder;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +70,7 @@ class PmSystemEventWatcherTest {
     @BeforeEach
     void setUp() {
         repository = mock(ProcessManagerRepository.class);
-        when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+        when(repository.entityStateType()).thenReturn(REPOSITORY_TYPE);
 
         watcher = new PmSystemEventWatcher<>(repository);
     }
@@ -107,7 +109,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             watcher.on(systemEvent);
 
@@ -122,7 +124,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             watcher.on(systemEvent);
 
@@ -189,7 +191,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }
@@ -202,7 +204,7 @@ class PmSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }

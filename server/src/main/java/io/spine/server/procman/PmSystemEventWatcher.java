@@ -37,12 +37,12 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
     private final ProcessManagerRepository<I, ?, ?> repository;
 
     PmSystemEventWatcher(ProcessManagerRepository<I, ?, ?> repository) {
-        super(repository.getEntityStateType());
+        super(repository.entityStateType());
         this.repository = repository;
     }
 
     @Subscribe
-    public void on(CommandDispatchedToHandler event) {
+    void on(CommandDispatchedToHandler event) {
         I id = extract(event.getReceiver());
         CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);
@@ -57,7 +57,7 @@ final class PmSystemEventWatcher<I> extends SystemEventWatcher<I> {
 //    }
 
     @Subscribe
-    public void on(EventDispatchedToReactor event) {
+    void on(EventDispatchedToReactor event) {
         I id = extract(event.getReceiver());
         EventEnvelope envelope = EventEnvelope.of(event.getPayload());
         repository.dispatchNowTo(id, envelope);

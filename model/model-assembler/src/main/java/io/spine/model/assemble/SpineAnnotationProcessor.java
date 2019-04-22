@@ -53,8 +53,6 @@ import static javax.tools.Diagnostic.Kind.WARNING;
  * class to intentionally break the compilation. It may cause unreadable error messages. Use
  * {@link #error(String) error()} method instead with the error message. Use throwables only
  * to state the programming mistakes in the processor itself.
- *
- * @author Dmytro Dashenkov
  */
 @SPI
 public abstract class SpineAnnotationProcessor extends AbstractProcessor {

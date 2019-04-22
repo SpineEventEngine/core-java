@@ -22,9 +22,11 @@
 
 buildscript {
 
-    // Apply the script created by `GradleProject.createTestEnvExt()` which defines
-    // `enclosingRootDir` variable that we use below.
-    apply from: "$rootDir/testEnv.gradle"
+    // Apply the script created by `io.spine.tools.gradle.testing.TestEnvGradle`.
+    //
+    // The script defines `enclosingRootDir` variable that we use below.
+    //
+    apply from: "$rootDir/test-env.gradle"
 
     // Apply shared dependencies.
     apply from: "$enclosingRootDir/config/gradle/dependencies.gradle"
@@ -80,6 +82,7 @@ apply plugin: 'io.spine.tools.spine-model-verifier'
 
 // NOTE: this file is copied from the root project in the test setup.
 apply from: "$enclosingRootDir/version.gradle"
+apply from: "$enclosingRootDir/config/gradle/model-compiler.gradle"
 
 repositories {
     mavenLocal()
@@ -121,7 +124,7 @@ sourceSets {
     main {
         proto.srcDirs += ["$projectDir/src/main/proto"]
         java.srcDirs += ["$projectDir/generated/main/java",
-                        "$projectDir/generated/main/spine"]
+                         "$projectDir/generated/main/spine"]
         resources.srcDirs += ["$projectDir/generated/main/resources"]
     }
 }

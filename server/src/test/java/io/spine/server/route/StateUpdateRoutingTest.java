@@ -26,14 +26,14 @@ import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.route.given.switchman.LogState;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 @DisplayName("StateUpdateRouting should")
 class StateUpdateRoutingTest {
@@ -92,7 +92,7 @@ class StateUpdateRoutingTest {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setNewState(AnyPacker.pack(log))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .build();
         EventRoute<Integer, EntityStateChanged> eventRoute = routing.eventRoute();
         Set<Integer> targets = eventRoute.apply(event, EventContext.getDefaultInstance());

@@ -31,10 +31,12 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
+import io.spine.testing.TestValues;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
@@ -86,7 +88,7 @@ public class EventStoreTest {
         @DisplayName("time bounds")
         void timeBounds() {
             Duration delta = seconds(111);
-            Timestamp present = getCurrentTime();
+            Timestamp present = currentTime();
             Timestamp past = subtract(present, delta);
             Timestamp future = add(present, delta);
 
@@ -118,7 +120,7 @@ public class EventStoreTest {
         @Test
         @DisplayName("type")
         void type() {
-            Timestamp now = getCurrentTime();
+            Timestamp now = currentTime();
 
             Event taskAdded1 = taskAdded(now);
             Event projectCreated = projectCreated(now);
@@ -151,7 +153,7 @@ public class EventStoreTest {
         @DisplayName("time bounds and type")
         void timeBoundsAndType() {
             Duration delta = seconds(111);
-            Timestamp present = getCurrentTime();
+            Timestamp present = currentTime();
             Timestamp past = subtract(present, delta);
             Timestamp future = add(present, delta);
 
@@ -245,9 +247,9 @@ public class EventStoreTest {
         @Test
         @DisplayName("EventContext")
         void eventContext() {
-            Event event = projectCreated(Time.getCurrentTime());
+            Event event = projectCreated(Time.currentTime());
             Event enriched = event.toBuilder()
-                                  .setContext(event.getContext()
+                                  .setContext(event.context()
                                                    .toBuilder()
                                                    .setEnrichment(withOneAttribute()))
                                   .build();
@@ -256,20 +258,24 @@ public class EventStoreTest {
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             EventContext context = observer.responses()
                                            .get(0)
-                                           .getContext();
+                                           .context();
             assertTrue(isDefault(context.getEnrichment()));
         }
 
         @Test
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
-            Event event = projectCreated(Time.getCurrentTime());
-            CommandContext commandContext = event.getContext()
+            Event event = projectCreated(Time.currentTime());
+            CommandContext commandContext = event.context()
                                                  .getCommandContext();
-            EventContext.Builder originContext =
-                    EventContext.newBuilder()
+            EventContext originContext =
+                    EventContext.vBuilder()
                                 .setEnrichment(withOneAttribute())
-                                .setCommandContext(commandContext);
+                                .setCommandContext(commandContext)
+                                .setTimestamp(event.context()
+                                                   .getTimestamp())
+                                .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
+                                .build();
             Event enriched = event.toBuilder()
                                   .setContext(event.getContext()
                                                    .toBuilder()
@@ -280,7 +286,7 @@ public class EventStoreTest {
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             EventContext loadedOriginContext = observer.responses()
                                                        .get(0)
-                                                       .getContext()
+                                                       .context()
                                                        .getEventContext();
             assertTrue(isDefault(loadedOriginContext.getEnrichment()));
         }

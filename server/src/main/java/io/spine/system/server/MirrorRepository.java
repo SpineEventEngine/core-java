@@ -24,12 +24,22 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
+import io.spine.client.EntityStateWithVersion;
+import io.spine.client.EntityStateWithVersionVBuilder;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
+import io.spine.code.proto.EntityStateOption;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityExtractedFromArchive;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
+import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -39,10 +49,9 @@ import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
-import static io.spine.option.Options.option;
-import static io.spine.option.OptionsProto.entity;
 import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
+import static io.spine.system.server.Mirror.VERSION_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
 
 /**
@@ -59,8 +68,11 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    private static final FieldMask AGGREGATE_STATE_FIELD =
-            fromFieldNumbers(Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER);
+    private static final FieldMask AGGREGATE_STATE_WITH_VERSION =
+            fromFieldNumbers(Mirror.class,
+                             ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER);
+
+    private static final Logger log = Logging.get(MirrorRepository.class);
 
     @Override
     public void onRegistered() {
@@ -69,7 +81,7 @@ final class MirrorRepository
     }
 
     private void prepareRouting() {
-        getEventRouting()
+        eventRouting()
                 .route(EntityStateChanged.class,
                        (message, context) -> targetsFrom(message.getId()))
                 .route(EntityArchived.class,
@@ -91,13 +103,23 @@ final class MirrorRepository
     }
 
     private static boolean shouldMirror(TypeUrl type) {
-        Descriptor descriptor = type.toName()
-                                    .getMessageDescriptor();
-        Optional<EntityOption> option = option(descriptor, entity);
-        Kind kind = option.map(EntityOption::getKind)
-                          .orElse(KIND_UNKNOWN);
+        Kind kind = entityKind(type);
         boolean aggregate = kind == AGGREGATE;
         return aggregate;
+    }
+
+    private static EntityOption.Kind entityKind(TypeUrl type) {
+        Descriptor descriptor = type.toTypeName()
+                                    .messageDescriptor();
+        Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
+        Kind kind = option.map(EntityOption::getKind)
+                          .orElse(KIND_UNKNOWN);
+        if (kind == KIND_UNKNOWN) {
+            log.warn("Received a state update of entity `{}`. The entity kind is unknown. " +
+                             "Please use (entity) option to define entity states.",
+                     type);
+        }
+        return kind;
     }
 
     private static MirrorId idFrom(EntityHistoryId historyId) {
@@ -106,6 +128,7 @@ final class MirrorRepository
         MirrorId result = MirrorId
                 .newBuilder()
                 .setValue(any)
+                .setTypeUrl(historyId.getTypeUrl())
                 .build();
         return result;
     }
@@ -120,23 +143,33 @@ final class MirrorRepository
      * @return an {@code Iterator} over the result aggregate states
      * @see SystemReadSide#readDomainAggregate(Query)
      */
-    Iterator<Any> execute(Query query) {
+    Iterator<EntityStateWithVersion> execute(Query query) {
         FieldMask aggregateFields = query.getFieldMask();
         Target target = query.getTarget();
         TargetFilters filters = buildFilters(target);
         Iterator<MirrorProjection> mirrors = find(filters, 
                                                   query.getOrderBy(), 
-                                                  query.getPagination(), 
-                                                  AGGREGATE_STATE_FIELD);
-        Iterator<Any> result = aggregateStates(mirrors, aggregateFields);
+                                                  query.getPagination(),
+                                                  AGGREGATE_STATE_WITH_VERSION);
+        Iterator<EntityStateWithVersion> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }
 
-    private static Iterator<Any> aggregateStates(Iterator<MirrorProjection> projections,
-                                                 FieldMask requiredFields) {
-        Iterator<Any> result = stream(projections)
-                .map(mirror -> mirror.aggregateState(requiredFields))
+    private static Iterator<EntityStateWithVersion>
+    aggregateStates(Iterator<MirrorProjection> projections, FieldMask requiredFields) {
+        Iterator<EntityStateWithVersion> result = stream(projections)
+                .map(mirror -> toAggregateState(mirror, requiredFields))
                 .iterator();
+        return result;
+    }
+
+    private static EntityStateWithVersion
+    toAggregateState(MirrorProjection mirror, FieldMask requiredFields) {
+        EntityStateWithVersion result = EntityStateWithVersionVBuilder
+                .newBuilder()
+                .setState(mirror.aggregateState(requiredFields))
+                .setVersion(mirror.aggregateVersion())
+                .build();
         return result;
     }
 }

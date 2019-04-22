@@ -21,7 +21,6 @@
 package io.spine.model.verify.given;
 
 import io.spine.core.EventContext;
-import io.spine.core.Events;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
@@ -46,7 +45,7 @@ public class RenameProcMan extends ProcessManager<String, RenameState, RenameSta
 
     @Apply
     private void on(TitleChanged event, EventContext context) {
-        getBuilder().setEditor(Events.getActor(context)
-                                     .getValue());
+        builder().setEditor(context.actor()
+                                   .getValue());
     }
 }

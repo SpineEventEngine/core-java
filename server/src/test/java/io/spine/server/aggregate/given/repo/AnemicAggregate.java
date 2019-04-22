@@ -28,7 +28,4 @@ import io.spine.server.test.shared.EmptyAggregateVBuilder;
  * An aggregate class which neither handles commands nor reacts on events or rejections.
  */
 class AnemicAggregate extends Aggregate<Integer, EmptyAggregate, EmptyAggregateVBuilder> {
-    private AnemicAggregate(Integer id) {
-        super(id);
-    }
 }

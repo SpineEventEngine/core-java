@@ -36,9 +36,6 @@ import java.util.function.Supplier;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 
-/**
- * @author Mykhailo Drachuk
- */
 public class EmittedEventsTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -70,13 +67,11 @@ public class EmittedEventsTestEnv {
     }
 
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
+        return new TestActorRequestFactory(BlackBoxBoundedContext.class, tenantId);
     }
 
     private static BbProjectId newProjectId() {
-        return BbProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+        return BbProjectId.generate();
     }
 
     public static BbProjectCreated projectCreated() {

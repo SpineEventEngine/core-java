@@ -21,9 +21,9 @@
 package io.spine.server.commandbus.given;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Set;
 
@@ -39,7 +39,7 @@ public class DelegatingCommandDispatcherTestEnv {
         private boolean onErrorCalled;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> commandClasses() {
             return ImmutableSet.of();
         }
 

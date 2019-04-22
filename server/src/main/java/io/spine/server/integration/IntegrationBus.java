@@ -72,13 +72,14 @@ import static java.lang.String.format;
  * the bus listens to a special document message called {@linkplain RequestForExternalMessages},
  * that describes the needs of other parties.
  *
- * <h3>An example.</h3>
+ * <p><b>Sample Usage.</b> The Bounded Context named Projects has an external event handler method
+ * in the projection as follows:
  *
  * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
  * <pre>
  * public class ProjectListView extends Projection ...  {
  *
- *      {@literal @}Subscribe(external = true)
+ *     {@literal @}Subscribe(external = true)
  *      public void on(UserDeleted event) {
  *          // Remove the projects that belong to this user.
  *          // ...
@@ -103,8 +104,6 @@ import static java.lang.String.format;
  * <p>The integration bus of "Projects" context will receive the {@code UserDeleted}
  * external message. The event will be dispatched to the external event handler of
  * {@code ProjectListView} projection.
- *
- * @author Alex Tymchenko
  */
 @SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus extends MulticastBus<ExternalMessage,
@@ -174,12 +173,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected DeadMessageHandler<ExternalMessageEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<ExternalMessageEnvelope> deadMessageHandler() {
         return DeadExternalMessageHandler.INSTANCE;
     }
 
     @Override
-    protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
+    protected EnvelopeValidator<ExternalMessageEnvelope> validator() {
         return ExternalMessageValidator.INSTANCE;
     }
 
@@ -201,11 +200,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         checkState(dispatchersCalled != 0,
                    format("External message %s has no local dispatchers.",
-                          markedEnvelope.getMessage()));
+                          markedEnvelope.message()));
     }
 
     private ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
-        ExternalMessage externalMessage = envelope.getOuterObject();
+        ExternalMessage externalMessage = envelope.outerObject();
         BusAdapter<?, ?> adapter = adapterFor(externalMessage);
         return adapter.markExternal(externalMessage);
     }
@@ -313,7 +312,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
         IntegrationBus integrationBus = this;
-        Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
+        Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass imClass : transformed) {
             ChannelId channelId = toId(imClass);
             Subscriber subscriber = subscriberHub.get(channelId);
@@ -325,7 +324,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
         IntegrationBus integrationBus = this;
-        Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
+        Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass imClass : transformed) {
             ChannelId channelId = toId(imClass);
             Subscriber subscriber = subscriberHub.get(channelId);

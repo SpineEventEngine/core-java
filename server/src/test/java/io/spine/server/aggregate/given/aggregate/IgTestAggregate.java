@@ -67,8 +67,8 @@ public class IgTestAggregate
 
     @React
     Optional<AggProjectStarted> reactOn(AggTaskStarted event) {
-        if (getState().getStatus() == Status.CREATED) {
-            return Optional.of(projectStarted(getId()));
+        if (state().getStatus() == Status.CREATED) {
+            return Optional.of(projectStarted(id()));
         } else {
             return Optional.empty();
         }
@@ -84,14 +84,14 @@ public class IgTestAggregate
 
     @Apply
     private void event(AggProjectCreated event) {
-        getBuilder()
+        builder()
                 .setId(event.getProjectId())
                 .setStatus(Status.CREATED);
     }
 
     @Apply
     private void event(AggProjectStarted event) {
-        getBuilder()
+        builder()
                 .setId(event.getProjectId())
                 .setStatus(Status.STARTED);
     }

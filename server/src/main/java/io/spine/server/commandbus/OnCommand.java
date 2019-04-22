@@ -30,7 +30,6 @@ import io.spine.core.CommandId;
  * @param <R> the type of the system event generated when the command sequence is posted
  * @param <B> the type of the result builder
  * @param <S> the type of the sequence for the return type covariance
- * @author Alexander Yevsyukov
  */
 abstract class OnCommand<R extends EventMessage,
                          B extends EventMessage.Builder,

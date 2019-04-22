@@ -35,8 +35,6 @@ script:
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
-  - chmod +x ./scripts/report-coverage.sh
-  - ./scripts/report-coverage.sh
   - |
     if [[ $TRAVIS_BRANCH == master ]] && [[ $TRAVIS_PULL_REQUEST == false ]]; then
       chmod +x ./scripts/dependent-repositories/update-dependent-repositories.sh
@@ -44,5 +42,5 @@ after_success:
     fi
 
 after_script:
-  - chmod +x ./scripts/upload-artifacts.sh
-  - ./scripts/upload-artifacts.sh
+  - chmod +x ./config/scripts/upload-artifacts.sh
+  - ./config/scripts/upload-artifacts.sh

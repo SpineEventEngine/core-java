@@ -20,8 +20,9 @@
 
 package io.spine.server.route;
 
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.HashMap;
@@ -37,8 +38,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <M> the type of the message to route
  * @param <C> the type of message context objects
- * @param <K> the type of message class objects such as {@link io.spine.core.EventClass EventClass}
- *            or {@link io.spine.core.CommandClass CommandClass}
+ * @param <K> the type of message class objects such as {@link EventClass EventClass}
+ *            or {@link CommandClass CommandClass}
  * @param <R> the type returned by the {@linkplain Route#apply(Message, Message) routing function}
  */
 abstract class MessageRouting<M extends Message, C extends Message, K extends MessageClass, R>
@@ -46,7 +47,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
 
     private static final long serialVersionUID = 0L;
 
-    private final HashMap<K, Route<M, C, R>> routes = Maps.newHashMap();
+    private final HashMap<K, Route<M, C, R>> routes = new HashMap<>();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
     private Route<M, C, R> defaultRoute;

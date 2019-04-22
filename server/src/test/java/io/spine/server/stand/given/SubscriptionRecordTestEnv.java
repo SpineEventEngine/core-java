@@ -28,13 +28,16 @@ import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
+import io.spine.test.event.ProjectCreated;
 import io.spine.type.TypeUrl;
 
 import java.util.Collections;
@@ -82,6 +85,22 @@ public final class SubscriptionRecordTestEnv {
                 .setId(entityHistoryId)
                 .setNewState(packedMatchingState)
                 .build();
+        return result;
+    }
+
+    public static EventEnvelope projectCreatedEnvelope(EventId eventId) {
+        return projectCreatedEnvelope(eventId, ProjectCreated.getDefaultInstance());
+    }
+
+    public static EventEnvelope
+    projectCreatedEnvelope(EventId eventId, ProjectCreated eventMessage) {
+        Any packedMessage = AnyPacker.pack(eventMessage);
+        Event event = Event
+                .newBuilder()
+                .setId(eventId)
+                .setMessage(packedMessage)
+                .build();
+        EventEnvelope result = EventEnvelope.of(event);
         return result;
     }
 

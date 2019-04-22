@@ -36,12 +36,14 @@ import static java.util.Collections.emptyList;
 /**
  * The implementation base for testing projection event subscriptions.
  *
- * @param <I> ID message of the projection
- * @param <M> type of the event to test
- * @param <S> the projection state type
- * @param <P> the {@link Projection} type
- * @author Dmytro Dashenkov
- * @author Vladyslav Lubenskyi
+ * @param <I>
+ *         ID message of the projection
+ * @param <M>
+ *         type of the event to test
+ * @param <S>
+ *         the projection state type
+ * @param <P>
+ *         the {@link Projection} type
  */
 public abstract class ProjectionTest<I,
                                      M extends EventMessage,
@@ -57,12 +59,12 @@ public abstract class ProjectionTest<I,
     protected List<? extends Message> dispatchTo(P entity) {
         Event sourceEvent = createEvent();
         EventContext context =
-                sourceEvent.getContext()
-                           .toBuilder()
+                sourceEvent.context()
+                           .toVBuilder()
                            .setEnrichment(enrichment())
                            .build();
         Event enrichedEvent =
-                sourceEvent.toBuilder()
+                sourceEvent.toVBuilder()
                            .setContext(context)
                            .build();
         dispatch(entity, enrichedEvent);

@@ -61,7 +61,7 @@ class AggregateStateIdStringifierTest {
 
             String stringAggregateId = stringifier.convert(id);
             assertNotNull(stringAggregateId);
-            assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
+            assertThat(stringAggregateId, CoreMatchers.containsString(id.aggregateId()
                                                                         .toString()));
         }
 
@@ -73,7 +73,7 @@ class AggregateStateIdStringifierTest {
 
             String stringAggregateId = stringifier.convert(id);
             assertNotNull(stringAggregateId);
-            assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
+            assertThat(stringAggregateId, CoreMatchers.containsString(id.aggregateId()
                                                                         .toString()));
         }
 
@@ -85,7 +85,7 @@ class AggregateStateIdStringifierTest {
 
             String stringAggregateId = stringifier.convert(id);
             assertNotNull(stringAggregateId);
-            assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
+            assertThat(stringAggregateId, CoreMatchers.containsString(id.aggregateId()
                                                                         .toString()));
         }
 
@@ -98,7 +98,7 @@ class AggregateStateIdStringifierTest {
             String stringAggregateId = stringifier.convert(id);
             assertNotNull(stringAggregateId);
             assertThat(stringAggregateId,
-                       CoreMatchers.containsString(Stringifiers.toString(id.getAggregateId())));
+                       CoreMatchers.containsString(Stringifiers.toString(id.aggregateId())));
         }
     }
 
@@ -117,8 +117,8 @@ class AggregateStateIdStringifierTest {
                                              .convert(stringId);
 
             assertNotNull(id);
-            assertEquals(ANY_TYPE_URL, id.getStateType());
-            assertEquals(stringIdValue, id.getAggregateId());
+            assertEquals(ANY_TYPE_URL, id.stateType());
+            assertEquals(stringIdValue, id.aggregateId());
         }
 
         @Test
@@ -132,8 +132,8 @@ class AggregateStateIdStringifierTest {
                                              .convert(stringId);
 
             assertNotNull(id);
-            assertEquals(ANY_TYPE_URL, id.getStateType());
-            assertEquals(intId, id.getAggregateId());
+            assertEquals(ANY_TYPE_URL, id.stateType());
+            assertEquals(intId, id.aggregateId());
         }
 
         @Test
@@ -147,8 +147,8 @@ class AggregateStateIdStringifierTest {
                                              .convert(stringId);
 
             assertNotNull(id);
-            assertEquals(ANY_TYPE_URL, id.getStateType());
-            assertEquals(longId, id.getAggregateId());
+            assertEquals(ANY_TYPE_URL, id.stateType());
+            assertEquals(longId, id.aggregateId());
         }
 
         @Test
@@ -164,8 +164,8 @@ class AggregateStateIdStringifierTest {
                                              .convert(stringId);
 
             assertNotNull(id);
-            assertEquals(ANY_TYPE_URL, id.getStateType());
-            assertEquals(messageId, id.getAggregateId());
+            assertEquals(ANY_TYPE_URL, id.stateType());
+            assertEquals(messageId, id.aggregateId());
         }
     }
 

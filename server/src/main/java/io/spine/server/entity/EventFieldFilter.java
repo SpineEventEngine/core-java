@@ -25,16 +25,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.Events;
+import io.spine.server.type.EventClass;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.FieldMasks.applyMask;
 import static io.spine.validate.Validate.isDefault;
@@ -71,9 +70,9 @@ public final class EventFieldFilter implements EventFilter {
     }
 
     private Event maskEvent(Event event) {
-        EventMessage message = Events.getMessage(event);
+        EventMessage message = event.enclosedMessage();
         EventMessage masked = mask(message);
-        return event.toBuilder()
+        return event.toVBuilder()
                     .setMessage(pack(masked))
                     .build();
     }
@@ -103,7 +102,7 @@ public final class EventFieldFilter implements EventFilter {
      */
     public static final class Builder {
 
-        private final Map<EventClass, FieldMask> masks = newHashMap();
+        private final Map<EventClass, FieldMask> masks = new HashMap<>();
 
         /**
          * Prevents direct instantiation.

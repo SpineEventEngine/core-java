@@ -20,14 +20,12 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * A utility class providing various test-only methods, which in production mode are allowed
  * with the transactions only.
- *
- * @author Alex Tymchenko
  */
 public class TestTransaction {
 
@@ -106,7 +104,7 @@ public class TestTransaction {
         }
 
         private void dispatchForTest() {
-            doDispatch(getEntity(), null);
+            doDispatch(entity(), null);
         }
     }
 
@@ -118,7 +116,7 @@ public class TestTransaction {
 
         @Override
         protected Version nextVersion() {
-            return transaction().getVersion();
+            return transaction().version();
         }
     }
 }

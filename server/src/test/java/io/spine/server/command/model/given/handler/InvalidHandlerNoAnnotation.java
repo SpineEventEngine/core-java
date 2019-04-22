@@ -34,7 +34,6 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
  * and IDEA is configured to ignore unused methods with those annotations.
  * Since the method does not have the annotation (which is the purpose of this test dummy class),
  * it is deemed unused. We suppress the annotation to avoid accidental removal of the method.
- * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unused") // See Javadoc
 public class InvalidHandlerNoAnnotation extends TestCommandHandler {

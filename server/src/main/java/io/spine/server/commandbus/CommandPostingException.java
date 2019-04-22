@@ -28,10 +28,8 @@ import static java.lang.String.format;
 
 /**
  * Exception that is thrown when a command could not be posted to a {@code CommandBus}.
- *
- * @author Alexander Yevsyukov
  */
-public class CommandPostingException extends RuntimeException {
+public final class CommandPostingException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
     private final GeneratedMessageV3 commandMessage;

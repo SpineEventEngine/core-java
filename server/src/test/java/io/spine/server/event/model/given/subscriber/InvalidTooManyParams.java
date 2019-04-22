@@ -26,11 +26,9 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * The subscriber which has too many parameters.
- *
- * @author Alexander Yevsyukov
  */
 public class InvalidTooManyParams extends TestEventSubscriber {
     @Subscribe
-    public void handle(RefProjectCreated event, EventContext context, Object redundant) {
+    void handle(RefProjectCreated event, EventContext context, Object redundant) {
     }
 }

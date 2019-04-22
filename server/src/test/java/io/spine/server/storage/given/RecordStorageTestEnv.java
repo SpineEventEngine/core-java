@@ -188,7 +188,7 @@ public class RecordStorageTestEnv {
 
         @Column
         public String getCounterName() {
-            return getId().toString();
+            return id().toString();
         }
 
         @Column(name = "COUNTER_VERSION" /* Custom name for storing
@@ -201,35 +201,35 @@ public class RecordStorageTestEnv {
 
         @Column
         public Timestamp getNow() {
-            return Time.getCurrentTime();
+            return Time.currentTime();
         }
 
         @Column
         public Project getCounterState() {
-            return getState();
+            return state();
         }
 
         @Column
         public int getProjectStatusValue() {
-            return getState().getStatusValue();
+            return state().getStatusValue();
         }
 
         @Column
         public Project.Status getProjectStatusOrdinal() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus()
-                                                                .name());
+            return Enum.valueOf(Project.Status.class, state().getStatus()
+                                                             .name());
         }
 
         @Column
         @Enumerated(STRING)
         public Project.Status getProjectStatusString() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus()
-                                                                .name());
+            return Enum.valueOf(Project.Status.class, state().getStatus()
+                                                             .name());
         }
 
         public void assignStatus(Project.Status status) {
             Project newState = Project
-                    .newBuilder(getState())
+                    .newBuilder(state())
                     .setStatus(status)
                     .build();
             injectState(this, newState, getCounterVersion());

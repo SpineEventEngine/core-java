@@ -40,6 +40,7 @@ import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+@SuppressWarnings("deprecation") // Need to test deprecated API of `ServerEnvironment`.
 @DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 

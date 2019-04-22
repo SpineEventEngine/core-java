@@ -23,6 +23,7 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.util.Timestamps;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
@@ -31,12 +32,12 @@ import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.event.EventStreamQuery;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.core.Events.eventComparator;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -57,11 +58,18 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
         Predicate<Event> predicate = new MatchesStreamQuery(query);
         Iterator<Event> result =
                 Streams.stream(entities)
-                       .map(EEntity::getState)
+                       .map(EEntity::state)
                        .filter(predicate)
-                       .sorted(eventComparator())
+                       .sorted(chronologically())
                        .iterator();
         return result;
+    }
+
+    /**
+     * Returns comparator which compares events by their timestamp in chronological order.
+     */
+    private static Comparator<Event> chronologically() {
+        return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
     }
 
     /**

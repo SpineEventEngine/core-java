@@ -20,14 +20,15 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.truth.Truth;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -39,10 +40,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.ACommand.createProject;
 import static io.spine.server.aggregate.given.Given.ACommand.startProject;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("AggregateCommandEndpoint should")
@@ -66,7 +67,7 @@ class AggregateCommandEndpointTest {
 
         // Create a subscriber of ProjectCreated event.
         subscriber = new Subscriber();
-        boundedContext.getEventBus()
+        boundedContext.eventBus()
                       .register(subscriber);
 
         repository = new ProjectAggregateRepository();
@@ -85,29 +86,31 @@ class AggregateCommandEndpointTest {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         ProjectId id = repository.dispatch(cmd);
-        assertEquals(projectId, id);
+        assertThat(id)
+                .isEqualTo(projectId);
 
         AggProjectCreated msg = subscriber.remembered;
-        assertEquals(projectId, msg.getProjectId());
+        assertThat(msg.getProjectId())
+                .isEqualTo(projectId);
     }
 
     @Test
     @DisplayName("store aggregate on command dispatching")
     void storeAggregateOnCommandDispatching() {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        AggCreateProject msg = (AggCreateProject) cmd.getMessage();
+        AggCreateProject msg = (AggCreateProject) cmd.message();
 
         ProjectId id = repository.dispatch(cmd);
-        assertEquals(projectId, id);
+        assertThat(id).isEqualTo(projectId);
 
         Optional<ProjectAggregate> optional = repository.find(projectId);
         assertTrue(optional.isPresent());
 
         ProjectAggregate aggregate = optional.get();
-        assertEquals(projectId, aggregate.getId());
+        assertThat(aggregate.id()).isEqualTo(projectId);
 
-        assertEquals(msg.getName(), aggregate.getState()
-                                             .getName());
+        Truth.assertThat(aggregate.state().getName())
+             .isEqualTo(msg.getName());
     }
 
     @Test
@@ -141,7 +144,7 @@ class AggregateCommandEndpointTest {
         private AggProjectCreated remembered;
 
         @Subscribe
-        public void on(AggProjectCreated msg) {
+        void on(AggProjectCreated msg) {
             remembered = msg;
         }
     }

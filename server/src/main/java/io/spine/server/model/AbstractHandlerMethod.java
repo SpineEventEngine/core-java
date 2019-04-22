@@ -24,8 +24,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
-import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,19 +46,27 @@ import static java.lang.String.format;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
- * @param <T> the type of the target object
- * @param <M> the type of the message handled by this method
- * @param <C> the type of the message class
- * @param <E> the type of message envelopes, in which the messages to handle are wrapped
- * @param <R> the type of the method invocation result
+ * @param <T>
+ *         the type of the target object
+ * @param <M>
+ *         the type of the message handled by this method
+ * @param <C>
+ *         the type of the message class
+ * @param <E>
+ *         the type of message envelopes, in which the messages to handle are wrapped
+ * @param <P>
+ *         the type of the produced message classes
+ * @param <R>
+ *         the type of the method invocation result
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
                                             C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ?, ?>,
-                                            R extends MethodResult>
-        implements HandlerMethod<T, C, E, R> {
+                                            P extends MessageClass<?>,
+                                            R extends MethodResult<?>>
+        implements HandlerMethod<T, C, E, P, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -88,6 +96,8 @@ public abstract class AbstractHandlerMethod<T,
      */
     private final ParameterSpec<E> parameterSpec;
 
+    private final ProducedTypeSet<P> producedTypes;
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -96,12 +106,12 @@ public abstract class AbstractHandlerMethod<T,
      * @param parameterSpec
      *         the specification of method parameters
      */
-    protected AbstractHandlerMethod(Method method,
-                                    ParameterSpec<E> parameterSpec) {
+    protected AbstractHandlerMethod(Method method, ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
+        this.producedTypes = ProducedTypeSet.collect(method);
 
         method.setAccessible(true);
     }
@@ -162,7 +172,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Method getRawMethod() {
+    public Method rawMethod() {
         return method;
     }
 
@@ -172,6 +182,11 @@ public abstract class AbstractHandlerMethod<T,
 
     protected ParameterSpec<E> getParameterSpec() {
         return parameterSpec;
+    }
+
+    @Override
+    public Set<P> producedMessages() {
+        return producedTypes.typeSet();
     }
 
     /**
@@ -193,7 +208,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<MethodAttribute<?>> getAttributes() {
+    public Set<MethodAttribute<?>> attributes() {
         return attributes;
     }
 
@@ -215,8 +230,8 @@ public abstract class AbstractHandlerMethod<T,
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            Message message = envelope.getMessage();
-            Message context = envelope.getMessageContext();
+            Message message = envelope.message();
+            Message context = envelope.context();
             throw new HandlerMethodFailedException(target, message, context, e);
         }
     }

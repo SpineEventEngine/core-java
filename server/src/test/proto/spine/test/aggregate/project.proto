@@ -24,7 +24,7 @@ package spine.test.aggregate;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.aggregate";
+option java_package = "io.spine.test.aggregate";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
@@ -42,7 +42,14 @@ enum Status {
 }
 
 message Project {
-    ProjectId id = 1;
+    option (entity).kind = AGGREGATE;
+
+    // The aggregate ID.
+    //
+    // In order to skip verbose test set up, this ID may be not set.
+    //
+    ProjectId id = 1 [(required) = false];
+
     string name = 2;
     repeated Task task = 3;
     Status status = 4;
@@ -63,11 +70,16 @@ message TaskId {
 }
 
 message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
+    option (entity).kind = AGGREGATE;
+
+    ProjectId id = 1 [(required) = false, (valid) = false];
+    TaskId task_id = 2;
+    string title = 3;
+    string description = 4;
 }
 
 message SubProjectList {
+    option (entity).kind = AGGREGATE;
+
     repeated ProjectId item = 1;
 }

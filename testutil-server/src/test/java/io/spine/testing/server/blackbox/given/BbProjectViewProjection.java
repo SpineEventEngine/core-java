@@ -30,20 +30,20 @@ import io.spine.testing.server.blackbox.event.BbProjectStarted;
 
 import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 
-public class BbProjectViewProjection
+public final class BbProjectViewProjection
         extends Projection<BbProjectId, BbProjectView, BbProjectViewVBuilder> {
 
-    protected BbProjectViewProjection(BbProjectId id) {
+    BbProjectViewProjection(BbProjectId id) {
         super(id);
     }
 
     @Subscribe
-    public void on(BbProjectCreated event) {
-        getBuilder().setId(event.getProjectId());
+    void on(BbProjectCreated event) {
+        builder().setId(event.getProjectId());
     }
 
     @Subscribe
-    public void on(BbProjectStarted event) {
-        getBuilder().setStatus(STARTED);
+    void on(BbProjectStarted event) {
+        builder().setStatus(STARTED);
     }
 }

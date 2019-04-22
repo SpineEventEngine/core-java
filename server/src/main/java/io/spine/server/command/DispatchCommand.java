@@ -22,15 +22,14 @@ package io.spine.server.command;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.isRejection;
 
 /**
  * A command dispatch operation.
@@ -83,7 +82,7 @@ public final class DispatchCommand<I> {
      */
     public List<Event> perform() {
         List<Event> result = entity.dispatchCommand(command);
-        onCommandResult(command.getCommand(), result);
+        onCommandResult(command.command(), result);
         return result;
     }
 
@@ -109,7 +108,7 @@ public final class DispatchCommand<I> {
             return Optional.empty();
         }
         Event singleEvent = produced.get(0);
-        Optional<Event> result = isRejection(singleEvent)
+        Optional<Event> result = singleEvent.isRejection()
                                  ? Optional.of(singleEvent)
                                  : Optional.empty();
         return result;

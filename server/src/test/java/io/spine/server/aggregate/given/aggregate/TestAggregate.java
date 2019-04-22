@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.CommandMessage;
+import com.google.common.collect.ImmutableList;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
@@ -44,8 +44,6 @@ import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.Commands.getMessage;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -94,7 +92,7 @@ public class TestAggregate
     AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
         isAddTaskCommandHandled = true;
         AggTaskAdded event = taskAdded(cmd.getProjectId());
-        return event.toBuilder()
+        return event.toVBuilder()
                     .setTask(cmd.getTask())
                     .build();
     }
@@ -103,27 +101,27 @@ public class TestAggregate
     List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
         isStartProjectCommandHandled = true;
         AggProjectStarted message = projectStarted(cmd.getProjectId());
-        return newArrayList(message);
+        return ImmutableList.of(message);
     }
 
     @Apply
-    void event(AggProjectCreated event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Status.CREATED);
+    private void event(AggProjectCreated event) {
+        builder().setId(event.getProjectId())
+                 .setStatus(Status.CREATED);
 
         isProjectCreatedEventApplied = true;
     }
 
     @Apply
-    void event(AggTaskAdded event) {
+    private void event(AggTaskAdded event) {
         isTaskAddedEventApplied = true;
-        getBuilder().addTask(event.getTask());
+        builder().addTask(event.getTask());
     }
 
     @Apply
-    void event(AggProjectStarted event) {
-        getBuilder().setId(event.getProjectId())
-                    .setStatus(Status.STARTED);
+    private void event(AggProjectStarted event) {
+        builder().setId(event.getProjectId())
+                 .setStatus(Status.STARTED);
 
         isProjectStartedEventApplied = true;
     }
@@ -143,8 +141,7 @@ public class TestAggregate
     @VisibleForTesting
     public void dispatchCommands(Command... commands) {
         for (Command cmd : commands) {
-            CommandMessage commandMessage = getMessage(cmd);
-            AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
+            AggregateMessageDispatcher.dispatchCommand(this, env(cmd));
         }
     }
 }

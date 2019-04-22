@@ -32,14 +32,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
 
+    private boolean receivedMessage;
+
     @Subscribe(external = true)
     void on(EBTaskAdded message, EventContext context) {
         if (!context.getExternal()) {
             fail(format(
-                    "Domestic event %s was delivered to an external subscriber.",
+                    "Domestic event `%s` was delivered to an external subscriber.",
                     message.getClass()
             ));
         }
+        receivedMessage = true;
     }
 
     /**
@@ -50,7 +53,11 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
      * @param event ignored
      */
     @Subscribe
-    public void on(ProjectCreated event) {
+    void on(ProjectCreated event) {
         fail("Unexpected event " + Json.toJson(event));
+    }
+
+    public boolean receivedExternalMessage() {
+        return receivedMessage;
     }
 }

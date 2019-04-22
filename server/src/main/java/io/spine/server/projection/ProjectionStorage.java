@@ -43,7 +43,6 @@ import java.util.Optional;
  * <p>This timestamp is used for 'catch-up' operation of the projection repositories.
  *
  * @param <I> the type of stream projection IDs
- * @author Alexander Litus
  */
 @SPI
 public abstract class ProjectionStorage<I> extends RecordStorage<I> {

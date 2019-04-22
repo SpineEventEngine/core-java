@@ -23,13 +23,14 @@ package io.spine.testing.client.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.RejectionMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.RejectionClass;
 import io.spine.core.Status;
+import io.spine.type.RejectionType;
 import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
@@ -38,25 +39,28 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Contains the data on provided acknowledgements, allowing it to be queried about acks, errors, 
  * and rejections.
  */
+@Immutable
 @VisibleForTesting
 public class Acknowledgements {
 
     private static final Event EMPTY_EVENT = Event.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
 
-    private final List<Ack> acks = newArrayList();
-    private final List<Error> errors = newArrayList();
-    private final List<Event> rejectionEvents = newArrayList();
-    private final Map<RejectionClass, Integer> rejectionTypes;
+    private final ImmutableList<Ack> acks;
+    private final ImmutableList<Error> errors;
+    private final ImmutableList<Event> rejectionEvents;
+    private final ImmutableMap<RejectionType, Integer> rejectionTypes;
 
     public Acknowledgements(Iterable<Ack> responses) {
+        ImmutableList.Builder<Ack> acks = ImmutableList.builder();
+        ImmutableList.Builder<Error> errors = ImmutableList.builder();
+        ImmutableList.Builder<Event> rejectionEvents = ImmutableList.builder();
         for (Ack response : responses) {
             acks.add(response);
 
@@ -72,7 +76,10 @@ public class Acknowledgements {
                 rejectionEvents.add(rejection);
             }
         }
-        rejectionTypes = countRejectionTypes(rejectionEvents);
+        this.acks = acks.build();
+        this.errors = errors.build();
+        this.rejectionEvents = rejectionEvents.build();
+        this.rejectionTypes = countRejectionTypes(this.rejectionEvents);
     }
 
     /**
@@ -81,10 +88,12 @@ public class Acknowledgements {
      * @param rejectionEvents a list of rejection events
      * @return a mapping of Rejection classes to their count
      */
-    private static Map<RejectionClass, Integer> countRejectionTypes(List<Event> rejectionEvents) {
-        Map<RejectionClass, Integer> countForType = new HashMap<>();
+    private static
+    ImmutableMap<RejectionType, Integer> countRejectionTypes(List<Event> rejectionEvents) {
+        Map<RejectionType, Integer> countForType = new HashMap<>();
         for (Event rejection : rejectionEvents) {
-            RejectionClass type = RejectionClass.of(rejection);
+            Message msg = rejection.enclosedMessage();
+            RejectionType type = new RejectionType(msg.getDescriptorForType());
             int currentCount = countForType.getOrDefault(type, 0);
             countForType.put(type, currentCount + 1);
         }
@@ -166,17 +175,16 @@ public class Acknowledgements {
     /**
      * Verifies if there was a rejection of the passed class.
      */
-    public boolean containRejections(RejectionClass type) {
+    public boolean containRejections(RejectionType type) {
         return rejectionTypes.containsKey(type);
     }
 
     /**
-     * Obtains an amount of rejections of the provided type observed in Bounded Context.
-     *
-     * @param type rejection type in a form of {@link RejectionClass RejectionClass}
+     * Obtains an amount of rejections of the provided type observed in the Bounded Context.
      */
-    public int countRejections(RejectionClass type) {
-        return rejectionTypes.getOrDefault(type, 0);
+    public int countRejections(RejectionType type) {
+        Integer result = rejectionTypes.getOrDefault(type, 0);
+        return result;
     }
 
     /**

@@ -20,11 +20,10 @@
 
 package io.spine.server;
 
-import io.spine.server.bc.given.ProjectAggregateRepository;
+import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventDispatcher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
@@ -35,20 +34,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.function.Supplier;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
@@ -98,7 +91,7 @@ class BoundedContextBuilderTest {
             CommandBus.Builder expected = CommandBus.newBuilder();
             builder = BoundedContext.newBuilder()
                                     .setCommandBus(expected);
-            assertEquals(expected, builder.getCommandBus()
+            assertEquals(expected, builder.commandBus()
                                           .get());
         }
 
@@ -107,7 +100,7 @@ class BoundedContextBuilderTest {
         void eventBusBuilder() {
             EventBus.Builder expected = EventBus.newBuilder();
             builder.setEventBus(expected);
-            assertEquals(expected, builder.getEventBus()
+            assertEquals(expected, builder.eventBus()
                                           .get());
         }
 
@@ -117,7 +110,7 @@ class BoundedContextBuilderTest {
             String nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.newBuilder()
                                                    .setName(nameString)
-                                                   .getName()
+                                                   .name()
                                                    .getValue());
         }
 
@@ -128,7 +121,7 @@ class BoundedContextBuilderTest {
                     Supplier<StorageFactory> mock = mock(Supplier.class);
 
             assertEquals(mock, builder.setStorageFactorySupplier(mock)
-                                      .getStorageFactorySupplier()
+                                      .storageFactorySupplier()
                                       .get());
         }
 
@@ -138,7 +131,7 @@ class BoundedContextBuilderTest {
             TransportFactory factory = InMemoryTransportFactory.newInstance();
 
             assertEquals(factory, builder.setTransportFactory(factory)
-                                         .getTransportFactory()
+                                         .transportFactory()
                                          .get());
         }
     }
@@ -147,7 +140,7 @@ class BoundedContextBuilderTest {
     @DisplayName("allow clearing storage factory supplier")
     void clearStorageFactorySupplier() {
         assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
-                           .getStorageFactorySupplier()
+                           .storageFactorySupplier()
                            .isPresent());
     }
 
@@ -161,7 +154,7 @@ class BoundedContextBuilderTest {
             assertNotNull(BoundedContext.newBuilder()
                                         .setMultitenant(true)
                                         .build()
-                                        .getTenantIndex());
+                                        .tenantIndex());
         }
 
         @Test
@@ -170,7 +163,7 @@ class BoundedContextBuilderTest {
             // Pass EventBus to builder initialization, and do NOT pass CommandBus.
             BoundedContext boundedContext = builder.setEventBus(EventBus.newBuilder())
                                                    .build();
-            assertNotNull(boundedContext.getCommandBus());
+            assertNotNull(boundedContext.commandBus());
         }
 
         @Test
@@ -180,31 +173,16 @@ class BoundedContextBuilderTest {
             BoundedContext boundedContext = builder.setMultitenant(true)
                                                    .setCommandBus(CommandBus.newBuilder())
                                                    .build();
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.eventBus());
         }
 
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {
             BoundedContext boundedContext = builder.build();
-            assertNotNull(boundedContext.getCommandBus());
-            assertNotNull(boundedContext.getEventBus());
+            assertNotNull(boundedContext.commandBus());
+            assertNotNull(boundedContext.eventBus());
         }
-    }
-
-    @Test
-    @DisplayName("automatically register Stand as event dispatcher")
-    void addStandAsEventDispatcher() {
-        List<EventDispatcher<?>> dispatchers = newArrayList();
-
-        EventBus.Builder busBuilderMock = mock(EventBus.Builder.class);
-        EventBus busMock = mock(EventBus.class);
-        doAnswer(invocation -> dispatchers.add(invocation.getArgument(0))).when(busMock)
-                                                                          .register(any());
-        when(busBuilderMock.build()).thenReturn(busMock);
-        BoundedContext boundedContext = builder.setEventBus(busBuilderMock)
-                                               .build();
-        assertThat(dispatchers).contains(boundedContext.getStand());
     }
 
     @Test
@@ -227,7 +205,7 @@ class BoundedContextBuilderTest {
         TenantIndex tenantIndex = mock(TenantIndex.class);
         assertEquals(tenantIndex, BoundedContext.newBuilder()
                                                 .setTenantIndex(tenantIndex)
-                                                .getTenantIndex()
+                                                .tenantIndex()
                                                 .get());
     }
 
@@ -251,7 +229,7 @@ class BoundedContextBuilderTest {
         @BeforeEach
         void setUp() {
             this.builder = BoundedContext.newBuilder();
-            repository = new ProjectAggregateRepository();
+            repository = DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test

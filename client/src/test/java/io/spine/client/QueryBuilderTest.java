@@ -39,7 +39,7 @@ import java.util.List;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -63,9 +63,9 @@ import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
-import static io.spine.client.given.QueryBuilderTestEnv.newMessageId;
 import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
 import static io.spine.client.given.QueryBuilderTestEnv.pagination;
+import static io.spine.client.given.TestEntities.randomId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
@@ -281,7 +281,7 @@ class QueryBuilderTest {
             String columnName1 = "myColumn";
             Object columnValue1 = 42;
             String columnName2 = "oneMore";
-            Object columnValue2 = newMessageId();
+            Object columnValue2 = randomId();
 
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .where(eq(columnName1, columnValue1),
@@ -318,7 +318,7 @@ class QueryBuilderTest {
             String countryColumn = "country";
             String countryName = "Ukraine";
 
-            Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
+            Timestamp twoDaysAgo = subtract(currentTime(), fromHours(-48));
 
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .where(all(ge(companySizeColumn, 50),
@@ -396,7 +396,7 @@ class QueryBuilderTest {
             String columnName1 = "column1";
             Object columnValue1 = 42;
             String columnName2 = "column2";
-            Object columnValue2 = newMessageId();
+            Object columnValue2 = randomId();
             String fieldName = "TestEntity.secondField";
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .withMask(fieldName)
@@ -482,9 +482,9 @@ class QueryBuilderTest {
         @Test
         @DisplayName("IDs clause")
         void lastIds() {
-            Iterable<?> genericIds = asList(newUuid(), -1, newMessageId());
+            Iterable<?> genericIds = asList(newUuid(), -1, randomId());
             Long[] longIds = {1L, 2L, 3L};
-            Message[] messageIds = {newMessageId(), newMessageId(), newMessageId()};
+            Message[] messageIds = {randomId(), randomId(), randomId()};
             String[] stringIds = {newUuid(), newUuid(), newUuid()};
             Integer[] intIds = {4, 5, 6};
 
@@ -566,7 +566,7 @@ class QueryBuilderTest {
         String columnName1 = "column1";
         Object columnValue1 = 42;
         String columnName2 = "column2";
-        Message columnValue2 = newMessageId();
+        Message columnValue2 = randomId();
         String fieldName = "TestEntity.secondField";
         QueryBuilder builder = factory.select(TEST_ENTITY_TYPE)
                                       .withMask(fieldName)

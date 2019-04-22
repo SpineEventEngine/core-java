@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,6 @@ import static org.mockito.Mockito.mock;
 /**
  * The abstract test suite for the tests of the builders of buses.
  *
- * @author Dmytro Dashenkov
  * @see io.spine.server.commandbus.CommandBusBuilderTest
  * @see io.spine.server.event.EventBusBuilderTest
  * @see io.spine.server.rejection.RejectionBusBuilderTest
@@ -51,7 +50,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<E, T, ?>,
         @SuppressWarnings("unchecked") BusFilter<E> filter = mock(BusFilter.class);
 
         assertTrue(builder().appendFilter(filter)
-                            .getFilters()
+                            .filters()
                             .contains(filter));
     }
 
@@ -65,7 +64,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<E, T, ?>,
         B builder = builder();
         builder.appendFilter(first)
                .appendFilter(second);
-        Deque<BusFilter<E>> filters = builder.getFilters();
+        Deque<BusFilter<E>> filters = builder.filters();
         assertEquals(first, filters.pop());
         assertEquals(second, filters.pop());
     }

@@ -31,6 +31,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Version;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
@@ -39,7 +40,9 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
+import io.spine.testing.TestValues;
 import io.spine.testing.Tests;
+import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +60,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.protobuf.Durations2.seconds;
@@ -143,9 +146,12 @@ public abstract class AggregateStorageTest
      *
      * <p>The created storage should be closed manually.
      *
-     * @param idClass        the class of aggregate ID
-     * @param aggregateClass the aggregate class
-     * @param <I>            the type of aggregate IDs
+     * @param idClass
+     *         the class of aggregate ID
+     * @param aggregateClass
+     *         the aggregate class
+     * @param <I>
+     *         the type of aggregate IDs
      * @return a new storage instance
      */
     protected abstract <I> AggregateStorage<I>
@@ -255,7 +261,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read one record")
     void writeAndReadRecord() {
-        AggregateEventRecord expected = StorageRecords.create(getCurrentTime());
+        AggregateEventRecord expected = StorageRecords.create(currentTime());
 
         storage.writeRecord(id, expected);
 
@@ -312,7 +318,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                .setArchived(true)
                                                                .build();
-            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(currentTime()));
             storage.writeLifecycleFlags(id, archivedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -324,7 +330,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                               .setDeleted(true)
                                                               .build();
-            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(currentTime()));
             storage.writeLifecycleFlags(id, deletedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -391,7 +397,7 @@ public abstract class AggregateStorageTest
         void sortedByVersion() {
             int eventsNumber = 5;
             List<AggregateEventRecord> records = newLinkedList();
-            Timestamp timestamp = getCurrentTime();
+            Timestamp timestamp = currentTime();
             Version currentVersion = zero();
             for (int i = 0; i < eventsNumber; i++) {
                 Project state = Project.getDefaultInstance();
@@ -433,7 +439,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read snapshot")
     void writeAndReadSnapshot() {
-        Snapshot expected = newSnapshot(getCurrentTime());
+        Snapshot expected = newSnapshot(currentTime());
 
         storage.writeSnapshot(id, expected);
 
@@ -451,14 +457,14 @@ public abstract class AggregateStorageTest
         @Test
         @DisplayName("if there are no snapshots available")
         void withNoSnapshots() {
-            testWriteRecordsAndLoadHistory(getCurrentTime());
+            testWriteRecordsAndLoadHistory(currentTime());
         }
 
         @Test
         @DisplayName("till last snapshot available")
         void tillLastSnapshot() {
             Duration delta = seconds(10);
-            Timestamp time1 = getCurrentTime();
+            Timestamp time1 = currentTime();
             Timestamp time2 = add(time1, delta);
             Timestamp time3 = add(time2, delta);
 
@@ -539,20 +545,23 @@ public abstract class AggregateStorageTest
         @DisplayName("for EventContext")
         void forEventContext() {
             EventContext enrichedContext = EventContext
-                    .newBuilder()
+                    .vBuilder()
                     .setEnrichment(withOneAttribute())
+                    .setTimestamp(Time.currentTime())
+                    .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
+                    .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             Event event = Event
-                    .newBuilder()
+                    .vBuilder()
                     .setId(newEventId())
                     .setContext(enrichedContext)
-                    .setMessage(Any.getDefaultInstance())
+                    .setMessage(AnyPacker.pack(TestValues.newUuidValue()))
                     .build();
             storage.writeEvent(id, event);
 
             AggregateHistory record = readRecord(id);
             EventContext loadedContext = record.getEvent(0)
-                                               .getContext();
+                                               .context();
             assertTrue(isDefault(loadedContext.getEnrichment()));
         }
 
@@ -560,23 +569,28 @@ public abstract class AggregateStorageTest
         @DisplayName("for origin of EventContext type")
         void forEventContextOrigin() {
             EventContext origin = EventContext
-                    .newBuilder()
+                    .vBuilder()
                     .setEnrichment(withOneAttribute())
+                    .setTimestamp(Time.currentTime())
+                    .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
+                    .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             EventContext context = EventContext
-                    .newBuilder()
+                    .vBuilder()
                     .setEventContext(origin)
+                    .setTimestamp(Time.currentTime())
+                    .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .build();
             Event event = Event
-                    .newBuilder()
+                    .vBuilder()
                     .setId(newEventId())
                     .setContext(context)
-                    .setMessage(Any.getDefaultInstance())
+                    .setMessage(AnyPacker.pack(TestValues.newUuidValue()))
                     .build();
             storage.writeEvent(id, event);
             AggregateHistory record = readRecord(id);
             EventContext loadedOrigin = record.getEvent(0)
-                                              .getContext()
+                                              .context()
                                               .getEventContext();
             assertTrue(isDefault(loadedOrigin.getEnrichment()));
         }
@@ -612,7 +626,7 @@ public abstract class AggregateStorageTest
     }
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
-        Event expectedEvent = eventFactory.createEvent(event(Time.getCurrentTime()));
+        Event expectedEvent = eventFactory.createEvent(event(Time.currentTime()));
 
         storage.writeEvent(id, expectedEvent);
 
@@ -652,6 +666,7 @@ public abstract class AggregateStorageTest
     }
 
     public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+
         protected TestAggregate(ProjectId id) {
             super(id);
         }
@@ -659,6 +674,7 @@ public abstract class AggregateStorageTest
 
     private static class TestAggregateWithIdString
             extends Aggregate<String, Project, ProjectVBuilder> {
+
         private TestAggregateWithIdString(String id) {
             super(id);
         }
@@ -666,6 +682,7 @@ public abstract class AggregateStorageTest
 
     private static class TestAggregateWithIdInteger
             extends Aggregate<Integer, Project, ProjectVBuilder> {
+
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
@@ -673,6 +690,7 @@ public abstract class AggregateStorageTest
 
     private static class TestAggregateWithIdLong
             extends Aggregate<Long, Project, ProjectVBuilder> {
+
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

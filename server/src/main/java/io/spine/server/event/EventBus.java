@@ -31,18 +31,18 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.event.enrich.Enricher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -109,13 +109,13 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     private final StreamObserver<Ack> streamObserver;
 
     /**
-     * The validator for events posted to the bus, lazily {@linkplain #getValidator() initialized}.
+     * The validator for events posted to the bus, lazily {@linkplain #validator() initialized}.
      */
     @LazyInit
     private @MonotonicNonNull EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
-    private final @MonotonicNonNull Enricher enricher;
+    private final @MonotonicNonNull EventEnricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -144,12 +144,12 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<EventEnvelope> deadMessageHandler() {
         return deadMessageHandler;
     }
 
     @Override
-    protected EnvelopeValidator<EventEnvelope> getValidator() {
+    protected EnvelopeValidator<EventEnvelope> validator() {
         if (eventValidator == null) {
             eventValidator = new EventValidator();
         }
@@ -167,7 +167,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     /** Returns {@link EventStore} associated with the bus. */
-    public EventStore getEventStore() {
+    public EventStore eventStore() {
         return eventStore;
     }
 
@@ -218,11 +218,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected void dispatch(EventEnvelope envelope) {
-        EventEnvelope enrichedEnvelope = enrich(envelope);
+    protected void dispatch(EventEnvelope event) {
+        EventEnvelope enrichedEnvelope = enrich(event);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.getMessage()));
+                   format("Message %s has no dispatchers.", event.message()));
     }
 
     @Override
@@ -291,7 +291,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code EventBus} instance built.
          */
-        private @Nullable Enricher enricher;
+        private @Nullable EventEnricher enricher;
 
         /** Logging level for posted events.  */
         private LoggingObserver.Level logLevelForPost = Level.TRACE;
@@ -381,12 +381,12 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * @param enricher
          *         the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
-        public Builder setEnricher(Enricher enricher) {
+        public Builder setEnricher(EventEnricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
-        public Optional<Enricher> getEnricher() {
+        public Optional<EventEnricher> enricher() {
             return Optional.ofNullable(enricher);
         }
 
@@ -452,12 +452,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
-        public UnsupportedEventException handle(EventEnvelope envelope) {
+        public UnsupportedEventException handle(EventEnvelope event) {
+            store(ImmutableSet.of(event.outerObject()));
 
-            Event event = envelope.getOuterObject();
-            store(ImmutableSet.of(event));
-
-            EventMessage message = envelope.getMessage();
+            EventMessage message = event.message();
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }

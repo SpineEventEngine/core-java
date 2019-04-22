@@ -39,8 +39,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * A process manager handling company name resolution.
- *
- * @author Dmytro Dashenkov
  */
 public class CompanyNameProcman
         extends ProcessManager<CompanyId, CompanyEstablishing, CompanyEstablishingVBuilder> {
@@ -54,7 +52,7 @@ public class CompanyNameProcman
 
     @Assign
     CompanyEstablishingStarted handle(StartCompanyEstablishing command) {
-        getBuilder().setId(command.getId());
+        builder().setId(command.getId());
 
         return CompanyEstablishingStarted.newBuilder()
                                          .setId(command.getId())
@@ -65,7 +63,7 @@ public class CompanyNameProcman
     CompanyNameRethought handle(ProposeCompanyName command) {
         String name = command.getName();
         checkArgument(!name.equals(FAULTY_NAME));
-        getBuilder().setProposedName(name);
+        builder().setProposedName(name);
 
         return CompanyNameRethought.newBuilder()
                                    .setId(command.getId())
@@ -75,10 +73,10 @@ public class CompanyNameProcman
 
     @Command
     EstablishCompany transform(FinalizeCompanyName command, CommandContext context) {
-        String name = getBuilder().getProposedName();
+        String name = builder().getProposedName();
         EstablishCompany establishCommand = EstablishCompany
                 .newBuilder()
-                .setId(getBuilder().getId())
+                .setId(builder().getId())
                 .setFinalName(name)
                 .build();
         return establishCommand;

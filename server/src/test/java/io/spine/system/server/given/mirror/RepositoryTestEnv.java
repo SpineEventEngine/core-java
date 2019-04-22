@@ -24,16 +24,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.net.Url;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityArchived;
-import io.spine.system.server.EntityDeleted;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.system.server.Photo;
 import io.spine.test.system.server.PhotoId;
 import io.spine.test.system.server.PhotoVBuilder;
@@ -42,7 +41,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Map;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
@@ -70,7 +69,6 @@ public class RepositoryTestEnv {
     }
 
     private static Photo newPhoto(String url, String altText) {
-        PhotoId id = Identifier.generate(PhotoId.class);
         Url fullSizeUrl = Url
                 .newBuilder()
                 .setSpec(url)
@@ -81,7 +79,7 @@ public class RepositoryTestEnv {
                 .build();
         Photo photo = PhotoVBuilder
                 .newBuilder()
-                .setId(id)
+                .setId(PhotoId.generate())
                 .setFullSizeUrl(fullSizeUrl)
                 .setThumbnailUrl(thumbnail)
                 .setAltText(altText)
@@ -109,7 +107,7 @@ public class RepositoryTestEnv {
                 .newBuilder()
                 .setId(historyId)
                 .setNewState(pack(state))
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .build();
         return event(stateChanged);
@@ -132,7 +130,7 @@ public class RepositoryTestEnv {
         EntityArchived archived = EntityArchived
                 .newBuilder()
                 .setId(historyId)
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .build();
         return event(archived);
@@ -143,7 +141,7 @@ public class RepositoryTestEnv {
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
                 .setId(historyId)
-                .setWhen(getCurrentTime())
+                .setWhen(currentTime())
                 .addMessageId(cause())
                 .build();
         return event(deleted);

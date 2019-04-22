@@ -28,10 +28,12 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
- * @param <I> the type of part identifiers
- * @param <A> the type of aggregate parts
- * @param <R> the type of the aggregate root associated with the type of parts
- * @author Alexander Yevsyukov
+ * @param <I>
+ *         the type of part identifiers
+ * @param <A>
+ *         the type of aggregate parts
+ * @param <R>
+ *         the type of the aggregate root associated with the type of parts
  */
 public abstract class AggregatePartRepository<I,
                                               A extends AggregatePart<I, ?, ?, R>,
@@ -54,21 +56,21 @@ public abstract class AggregatePartRepository<I,
 
     @Internal
     @Override
-    protected final AggregatePartClass<A> getModelClass(Class<A> cls) {
+    protected final AggregatePartClass<A> toModelClass(Class<A> cls) {
         return asAggregatePartClass(cls);
     }
 
     private AggregatePartClass<A> aggregatePartClass() {
-        return (AggregatePartClass<A>) entityClass();
+        return (AggregatePartClass<A>) entityModelClass();
     }
 
     //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
-        AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
+        AggregateRoot<I> result = aggregatePartClass().createRoot(boundedContext(), id);
         return result;
     }
 
     private A createAggregatePart(AggregateRoot<I> root) {
-        return aggregatePartClass().createEntity(root);
+        return aggregatePartClass().create(root);
     }
 }

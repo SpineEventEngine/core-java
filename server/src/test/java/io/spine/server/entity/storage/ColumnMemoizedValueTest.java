@@ -36,9 +36,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Dmytro Dashenkov
- */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Column MemoizedValue should")
 class ColumnMemoizedValueTest {
@@ -85,7 +82,7 @@ class ColumnMemoizedValueTest {
 
         MemoizedValue valueB = columnB.memoizeFor(entity);
 
-        MemoizedValue valueC = new MemoizedValue(columnC, entity.getState());
+        MemoizedValue valueC = new MemoizedValue(columnC, entity.state());
 
         new EqualsTester().addEqualityGroup(valueA1, valueA2, valueA3)
                           .addEqualityGroup(valueAMutated)

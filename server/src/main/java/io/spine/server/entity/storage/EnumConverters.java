@@ -26,14 +26,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * A utility for the creation of {@linkplain EnumConverter enum converters} for the given
  * {@link EnumType}.
- *
- * @author Dmytro Kuzmin
  */
 final class EnumConverters {
 
-    /**
-     * Prevents instantiation of this class.
-     */
+    /** Prevents instantiation of this class. */
     private EnumConverters() {
     }
 

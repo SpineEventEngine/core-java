@@ -27,7 +27,7 @@ import com.google.protobuf.Int32Value;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
 import io.spine.server.model.declare.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
-import io.spine.system.server.ScheduleCommand;
+import io.spine.system.server.command.ScheduleCommand;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

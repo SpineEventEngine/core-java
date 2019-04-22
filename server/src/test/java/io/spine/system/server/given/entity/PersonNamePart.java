@@ -35,8 +35,6 @@ import io.spine.type.TypeUrl;
 
 /**
  * An aggregate part which handles a person first name.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonNamePart
         extends AggregatePart<PersonId, PersonFirstName, PersonFirstNameVBuilder, PersonRoot> {
@@ -61,8 +59,8 @@ public class PersonNamePart
     }
 
     @Apply
-    void on(PersonNameCreated event) {
-        getBuilder().setId(event.getId())
-                    .setFirstName(event.getFirstName());
+    private void on(PersonNameCreated event) {
+        builder().setId(event.getId())
+                 .setFirstName(event.getFirstName());
     }
 }

@@ -20,17 +20,16 @@
 
 package io.spine.server.model.declare;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.model.MethodExceptionChecker;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-import static com.google.common.base.Joiner.on;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
@@ -46,15 +45,13 @@ import static java.lang.String.format;
  *
  * <p>Additionally, upon testing the criteria provide a number of {@linkplain SignatureMismatch
  * signature mismatches}, that may later be used for diagnostic purposes.
- *
- * @author Alex Tymchenko
  */
 @Internal
 public enum MatchCriterion {
 
     /**
      * The criterion, which checks that the method return type is among the
-     * {@linkplain MethodSignature#getValidReturnTypes() expected}.
+     * {@linkplain MethodSignature#validReturnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints " +
@@ -62,14 +59,15 @@ public enum MatchCriterion {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Class<?> returnType = method.getReturnType();
-            boolean conforms = signature.getValidReturnTypes()
-                                        .stream()
-                                        .anyMatch(type -> type.isAssignableFrom(returnType));
+            boolean conforms = signature
+                    .validReturnTypes()
+                    .stream()
+                    .anyMatch(type -> type.isAssignableFrom(returnType));
             if (!conforms) {
                 SignatureMismatch mismatch =
                         create(this,
                                methodAsString(method),
-                               signature.getAnnotation()
+                               signature.annotation()
                                         .getSimpleName());
                 return Optional.of(mismatch);
             }
@@ -79,13 +77,13 @@ public enum MatchCriterion {
 
     /**
      * The criterion, which ensures that the method access modifier is among the
-     * {@linkplain MethodSignature#getAllowedModifiers() expected}.
+     * {@linkplain MethodSignature#allowedModifiers() expected}.
      */
     ACCESS_MODIFIER(WARN,
                     "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            ImmutableSet<AccessModifier> allowedModifiers = signature.getAllowedModifiers();
+            ImmutableSet<AccessModifier> allowedModifiers = signature.allowedModifiers();
             boolean hasMatch = allowedModifiers
                     .stream()
                     .anyMatch(m -> m.test(method));
@@ -94,7 +92,7 @@ public enum MatchCriterion {
                         create(this,
                                methodAsString(method),
                                AccessModifier.asString(allowedModifiers),
-                               Modifier.toString(method.getModifiers()));
+                               AccessModifier.fromMethod(method));
                 return Optional.of(mismatch);
 
             }
@@ -104,7 +102,7 @@ public enum MatchCriterion {
 
     /**
      * The criterion checking that the tested method throws only
-     * {@linkplain MethodSignature#getAllowedExceptions() allowed exceptions}.
+     * {@linkplain MethodSignature#allowedExceptions() allowed exceptions}.
      */
     PROHIBITED_EXCEPTION(ERROR, "%s") {
         @Override
@@ -112,7 +110,7 @@ public enum MatchCriterion {
             //TODO:2018-08-15:alex.tymchenko: add non-throwing behavior to `MethodExceptionChecker`.
             try {
                 MethodExceptionChecker checker = forMethod(method);
-                Collection<Class<? extends Throwable>> allowed = signature.getAllowedExceptions();
+                Collection<Class<? extends Throwable>> allowed = signature.allowedExceptions();
                 checker.checkThrowsNoExceptionsBut(allowed);
                 return Optional.empty();
             } catch (IllegalStateException e) {
@@ -125,7 +123,7 @@ public enum MatchCriterion {
 
     /**
      * The criterion for the method parameter list to conform the
-     * {@linkplain MethodSignature#getParamSpecs() requirements}.
+     * {@linkplain MethodSignature#paramSpecs() requirements}.
      *
      * @see MethodParams#findMatching(Method, Collection)
      */
@@ -135,18 +133,20 @@ public enum MatchCriterion {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
-                    MethodParams.findMatching(method, signature.getParamSpecs());
+                    MethodParams.findMatching(method, signature.paramSpecs());
             if (!matching.isPresent()) {
                 SignatureMismatch mismatch =
                         create(this,
                                methodAsString(method),
-                               signature.getAnnotation()
+                               signature.annotation()
                                         .getSimpleName());
                 return Optional.of(mismatch);
             }
             return Optional.empty();
         }
     };
+
+    private static final Joiner PARAMETER_TYPE_JOINER = Joiner.on(", ");
 
     private final SignatureMismatch.Severity severity;
     private final String format;
@@ -182,13 +182,10 @@ public enum MatchCriterion {
     abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
 
     private static String methodAsString(Method method) {
-        String result =
-                on(".").join(method.getDeclaringClass()
-                                   .getCanonicalName(),
-                             method.getName()) + '(' +
-                        on(", ")
-                                .join(method.getParameterTypes()) +
-                        ')';
+        String declaringClassName = method.getDeclaringClass()
+                                          .getCanonicalName();
+        String parameterTypes = PARAMETER_TYPE_JOINER.join(method.getParameterTypes());
+        String result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
     }
 }

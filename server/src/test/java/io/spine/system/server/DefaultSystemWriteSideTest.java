@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
-import io.spine.system.server.given.client.SystemClientTestEnv;
+import io.spine.system.server.given.client.ShoppingListAggregate;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +35,7 @@ import java.util.List;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.client.SystemClientTestEnv.contextWithSystemAggregate;
+import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -62,7 +63,7 @@ class DefaultSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             domainContext = contextWithSystemAggregate();
-            systemWriteSide = domainContext.getSystemClient().writeSide();
+            systemWriteSide = domainContext.systemClient().writeSide();
             systemContext = systemOf(domainContext);
             createAggregate();
         }
@@ -75,7 +76,7 @@ class DefaultSystemWriteSideTest {
         @Test
         @DisplayName("events")
         void events() {
-            int copiesCount = aggregate().getHardCopiesCount();
+            int copiesCount = aggregateState().getHardCopiesCount();
 
             HardCopyPrinted event = HardCopyPrinted
                     .newBuilder()
@@ -83,14 +84,14 @@ class DefaultSystemWriteSideTest {
                     .build();
             systemWriteSide.postEvent(event);
 
-            int newCopiesCount = aggregate().getHardCopiesCount();
+            int newCopiesCount = aggregateState().getHardCopiesCount();
             assertEquals(copiesCount + 1, newCopiesCount);
         }
 
         @Test
         @DisplayName("commands")
         void commands() {
-            List<String> items = aggregate().getItemList();
+            List<String> items = aggregateState().getItemList();
             assertTrue(items.isEmpty());
 
             AddListItem command = AddListItem
@@ -100,13 +101,14 @@ class DefaultSystemWriteSideTest {
                     .build();
             systemWriteSide.postCommand(command);
 
-            List<String> newItems = aggregate().getItemList();
+            List<String> newItems = aggregateState().getItemList();
             assertEquals(1, newItems.size());
             assertEquals(command.getItem(), newItems.get(0));
         }
 
-        private ShoppingList aggregate() {
-            return SystemClientTestEnv.findAggregate(aggregateId, systemContext);
+        private ShoppingList aggregateState() {
+            ShoppingListAggregate aggregate = findAggregate(aggregateId, systemContext);
+            return aggregate.state();
         }
 
         private void createAggregate() {
@@ -117,5 +119,4 @@ class DefaultSystemWriteSideTest {
             systemWriteSide.postCommand(command);
         }
     }
-
 }

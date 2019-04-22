@@ -22,8 +22,6 @@ package io.spine.server.command;
 
 /**
  * Common interface for all objects that receive commands in the end of the dispatching.
- *
- * @author Alexander Yevsyukov
  */
 public interface CommandReceiver {
 }

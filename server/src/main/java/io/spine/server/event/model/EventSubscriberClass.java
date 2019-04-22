@@ -21,11 +21,12 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -36,15 +37,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Provides type information on an {@link AbstractEventSubscriber} class.
  *
- * @param <S> the type of event subscribers
- * @author Alexander Yevsyukov
+ * @param <S>
+ *         the type of event subscribers
  */
 public final class EventSubscriberClass<S extends AbstractEventSubscriber> extends ModelClass<S>
     implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, SubscriberMethod> eventSubscriptions;
+    private final MessageHandlerMap<EventClass, EmptyClass, SubscriberMethod> eventSubscriptions;
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 
@@ -69,12 +70,12 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> incomingEvents() {
         return domesticSubscriptions;
     }
 
     @Override
-    public Set<EventClass> getExternalEventClasses() {
+    public Set<EventClass> externalEvents() {
         return externalSubscriptions;
     }
 

@@ -26,13 +26,12 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.given.CommandHandlerTestEnv.EventCatcher;
 import io.spine.server.event.given.CommandHandlerTestEnv.TestCommandHandler;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +48,7 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.List;
 import java.util.Queue;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,6 +56,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
+
+    private static final TestActorRequestFactory requestFactory =
+            new TestActorRequestFactory(CommandHandlerTest.class);
 
     private CommandBus commandBus;
     private EventBus eventBus;
@@ -67,8 +70,8 @@ class CommandHandlerTest {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setMultitenant(true)
                                                       .build();
-        commandBus = boundedContext.getCommandBus();
-        eventBus = boundedContext.getEventBus();
+        commandBus = boundedContext.commandBus();
+        eventBus = boundedContext.eventBus();
         handler = new TestCommandHandler(eventBus);
 
         commandBus.register(handler);
@@ -84,7 +87,7 @@ class CommandHandlerTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(CommandEnvelope.class, givenCommandEnvelope())
+                .setDefault(CommandEnvelope.class, generate())
                 .testAllPublicInstanceMethods(handler);
     }
 
@@ -126,8 +129,11 @@ class CommandHandlerTest {
         List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
             Message expected = expectedMessages.get(i);
-            Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
-            assertEquals(expected, actual);
+            Message actual = actualEvents.get(i)
+                                         .outerObject()
+                                         .enclosedMessage();
+            assertThat(actual)
+                    .isEqualTo(expected);
         }
     }
 
@@ -146,7 +152,8 @@ class CommandHandlerTest {
             handler.handle(cmd);
 
             List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
-            assertEquals(2, dispatchedEvents.size());
+            assertThat(dispatchedEvents)
+                    .hasSize(2);
         }
 
         @Test
@@ -160,7 +167,8 @@ class CommandHandlerTest {
             handler.handle(cmd);
 
             List<EventEnvelope> dispatchedEvents = eventCatcher.getDispatched();
-            assertEquals(1, dispatchedEvents.size());
+            assertThat(dispatchedEvents)
+                    .hasSize(1);
         }
     }
 
@@ -183,7 +191,7 @@ class CommandHandlerTest {
     @Test
     @DisplayName("log errors")
     void logErrors() {
-        CommandEnvelope commandEnvelope = givenCommandEnvelope();
+        CommandEnvelope commandEnvelope = generate();
 
         // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
         SubstituteLogger log = (SubstituteLogger) handler.log();
@@ -199,13 +207,15 @@ class CommandHandlerTest {
 
         loggingEvent = queue.poll();
 
-        assertEquals(Level.ERROR, loggingEvent.getLevel());
-        assertEquals(commandEnvelope, handler.getLastErrorEnvelope());
-        assertEquals(exception, handler.getLastException());
+        assertThat(loggingEvent.getLevel())
+                .isEqualTo(Level.ERROR);
+        assertThat(handler.getLastErrorEnvelope())
+                .isEqualTo(commandEnvelope);
+        assertThat(handler.getLastException())
+                .isEqualTo(exception);
     }
 
-    private CommandEnvelope givenCommandEnvelope() {
-        return TestActorRequestFactory.newInstance(getClass())
-                                      .generateEnvelope();
+    private static CommandEnvelope generate() {
+        return CommandEnvelope.of(requestFactory.generateCommand());
     }
 }

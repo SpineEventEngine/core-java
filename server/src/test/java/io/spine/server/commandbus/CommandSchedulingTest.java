@@ -25,14 +25,14 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandbus.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.Durations2.minutes;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
@@ -115,11 +115,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @DisplayName("scheduling options")
         void schedulingOptions() {
             Command cmd = createCommand();
-            Timestamp schedulingTime = getCurrentTime();
+            Timestamp schedulingTime = currentTime();
             Duration delay = minutes(5);
 
             Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
-            CommandContext.Schedule schedule = cmdUpdated.getContext()
+            CommandContext.Schedule schedule = cmdUpdated.context()
                                                          .getSchedule();
 
             assertEquals(delay, schedule.getDelay());
@@ -131,7 +131,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @DisplayName("scheduling time")
         void schedulingTime() {
             Command cmd = createCommand();
-            Timestamp schedulingTime = getCurrentTime();
+            Timestamp schedulingTime = currentTime();
 
             Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
 

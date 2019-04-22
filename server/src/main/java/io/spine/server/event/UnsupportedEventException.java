@@ -22,9 +22,9 @@ package io.spine.server.event;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
-import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
+import io.spine.server.type.EventClass;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;
@@ -43,7 +43,7 @@ public class UnsupportedEventException extends EventException implements Message
 
     private static String messageFormat(Message eventMsg) {
         EventClass eventClass = EventClass.of(eventMsg);
-        TypeName typeName = eventClass.getTypeName();
+        TypeName typeName = eventClass.typeName();
         String result = format(
                 "There is no registered handler or dispatcher for the event of the class: `%s` " +
                 " (proto type: `%s`).",

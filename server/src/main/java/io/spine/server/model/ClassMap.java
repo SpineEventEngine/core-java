@@ -22,8 +22,8 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlingClass;
+import io.spine.server.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -33,8 +33,6 @@ import static com.google.common.collect.Sets.intersection;
 
 /**
  * Maps a Java class to its {@link ModelClass}.
- *
- * @author Alexander Yevsyukov
  */
 final class ClassMap {
 
@@ -105,7 +103,7 @@ final class ClassMap {
         ModelClass<T> modelClass;
         modelClass = supplier.get();
         if (modelClass instanceof CommandHandlingClass) {
-            checkDuplicates((CommandHandlingClass<?>) modelClass);
+            checkDuplicates((CommandHandlingClass<?, ?>) modelClass);
         }
         classes.put(key, modelClass);
         return modelClass;
@@ -115,16 +113,17 @@ final class ClassMap {
         classes.clear();
     }
 
-    private void checkDuplicates(CommandHandlingClass<?> candidate)
+    private void checkDuplicates(CommandHandlingClass<?, ?> candidate)
             throws DuplicateCommandHandlerError {
-        Set<CommandClass> candidateCommands = candidate.getCommands();
+        Set<CommandClass> candidateCommands = candidate.commands();
         ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> duplicates =
                 ImmutableMap.builder();
 
         for (ModelClass<?> modelClass : classes.values()) {
             if (modelClass instanceof CommandHandlingClass) {
-                CommandHandlingClass<?> commandHandler = (CommandHandlingClass<?>) modelClass;
-                Set<CommandClass> alreadyHandled = commandHandler.getCommands();
+                CommandHandlingClass<?, ?> commandHandler =
+                        (CommandHandlingClass<?, ?>) modelClass;
+                Set<CommandClass> alreadyHandled = commandHandler.commands();
                 Set<CommandClass> intersection = intersection(alreadyHandled, candidateCommands);
                 if (intersection.size() > 0) {
                     duplicates.put(intersection, commandHandler);

@@ -23,28 +23,30 @@ package io.spine.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
-import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.core.EventId;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
+import io.spine.server.type.AbstractMessageEnvelope;
+import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.RejectionClass;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Events.rejectionContext;
+import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -65,7 +67,7 @@ public final class RejectionEnvelope
     private final EventEnvelope event;
 
     private RejectionEnvelope(EventEnvelope event) {
-        super(event.getOuterObject());
+        super(event.outerObject());
         this.event = event;
     }
 
@@ -79,7 +81,7 @@ public final class RejectionEnvelope
      */
     public static RejectionEnvelope from(EventEnvelope event) {
         checkNotNull(event);
-        checkArgument(event.isRejection(), "%s is not a rejection", event.getMessageClass());
+        checkArgument(event.isRejection(), "`%s` is not a rejection", event.messageClass());
         return new RejectionEnvelope(event);
     }
 
@@ -102,9 +104,9 @@ public final class RejectionEnvelope
 
         ThrowableMessage throwableMessage = unwrap(throwable);
         Event rejectionEvent = produceEvent(origin, throwableMessage);
-        EventEnvelope envelope = EventEnvelope.of(rejectionEvent);
+        EventEnvelope event = EventEnvelope.of(rejectionEvent);
 
-        return from(envelope);
+        return from(event);
     }
 
     private static ThrowableMessage unwrap(Throwable causedByRejection) {
@@ -119,35 +121,58 @@ public final class RejectionEnvelope
         Any producerId = throwableMessage.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        RejectionMessage thrownMessage = throwableMessage.getMessageThrown();
-        RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
+        RejectionMessage thrownMessage = throwableMessage.messageThrown();
+        RejectionEventContext context = rejectionContext(origin.message(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
     }
 
-    @Override
-    public TenantId getTenantId() {
-        return event.getTenantId();
+    /**
+     * Constructs a new {@link RejectionEventContext} from the given command message and
+     * {@link ThrowableMessage}.
+     *
+     * @param commandMessage
+     *         rejected command
+     * @param throwableMessage
+     *         thrown rejection
+     * @return new instance of {@code RejectionEventContext}
+     */
+    private static RejectionEventContext rejectionContext(CommandMessage commandMessage,
+                                                          ThrowableMessage throwableMessage) {
+        checkNotNull(commandMessage);
+        checkNotNull(throwableMessage);
+
+        String stacktrace = getStackTraceAsString(throwableMessage);
+        return RejectionEventContext
+                .newBuilder()
+                .setCommandMessage(pack(commandMessage))
+                .setStacktrace(stacktrace)
+                .build();
     }
 
     @Override
-    public ActorContext getActorContext() {
-        return event.getActorContext();
+    public TenantId tenantId() {
+        return event.tenantId();
     }
 
     @Override
-    public EventId getId() {
-        return event.getId();
+    public ActorContext actorContext() {
+        return event.actorContext();
     }
 
     @Override
-    public RejectionMessage getMessage() {
-        return (RejectionMessage) event.getMessage();
+    public EventId id() {
+        return event.id();
     }
 
     @Override
-    public RejectionClass getMessageClass() {
-        EventClass eventClass = event.getMessageClass();
+    public RejectionMessage message() {
+        return (RejectionMessage) event.message();
+    }
+
+    @Override
+    public RejectionClass messageClass() {
+        EventClass eventClass = event.messageClass();
         @SuppressWarnings("unchecked") // Checked at runtime.
         Class<? extends RejectionMessage> value =
                 (Class<? extends RejectionMessage>) eventClass.value();
@@ -156,8 +181,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public EventContext getMessageContext() {
-        return event.getMessageContext();
+    public EventContext context() {
+        return event.context();
     }
 
     @Override
@@ -176,12 +201,12 @@ public final class RejectionEnvelope
      * @return the rejected command
      */
     public DispatchedCommand getOrigin() {
-        EventContext context = getMessageContext();
-        RejectionEventContext rejectionContext = getMessageContext().getRejection();
+        EventContext context = context();
+        RejectionEventContext rejectionContext = context().getRejection();
         Any commandMessage = rejectionContext.getCommandMessage();
         CommandContext commandContext = context.getCommandContext();
         DispatchedCommand result = DispatchedCommand
-                .newBuilder()
+                .vBuilder()
                 .setMessage(commandMessage)
                 .setContext(commandContext)
                 .build();
@@ -194,7 +219,7 @@ public final class RejectionEnvelope
      * @return the rejected command message
      */
     public Message getOriginMessage() {
-        RejectionEventContext context = getMessageContext().getRejection();
+        RejectionEventContext context = context().getRejection();
         Any commandMessage = context.getCommandMessage();
         return unpack(commandMessage);
     }

@@ -24,8 +24,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
-import io.spine.client.Filter;
 import io.spine.client.CompositeFilter.CompositeOperator;
+import io.spine.client.Filter;
 import io.spine.server.entity.storage.CompositeQueryParameter;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
@@ -49,8 +49,8 @@ import static java.util.stream.Collectors.toSet;
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
  * {@link EntityQuery}.
  *
- * @param <I> the type of the IDs of the matched records
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         the type of the IDs of the matched records
  * @see EntityQuery for the matching contract
  */
 final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWithColumns> {

@@ -28,7 +28,6 @@ import java.util.Optional;
 /**
  * An abstract base for operations on a tenant data.
  *
- * @author Alexander Yevsyukov
  * @see #execute()
  */
 @SPI

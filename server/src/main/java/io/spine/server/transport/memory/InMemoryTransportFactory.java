@@ -36,8 +36,6 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  *
  * <p>Publishers and subscribers must be in the same JVM. Therefore this factory usage should
  * be limited to tests.
- *
- * @author Alex Tymchenko
  */
 public class InMemoryTransportFactory implements TransportFactory {
 

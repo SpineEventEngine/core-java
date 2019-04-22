@@ -42,8 +42,6 @@ import java.util.List;
 /**
  * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
  * the question are answered using {@link PmAnswerQuestion Answer Question commands}.
- * 
- * @author Mykhailo Drachuk
  */
 class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
@@ -53,7 +51,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
     @Assign
     PmQuizStarted handle(PmStartQuiz command) {
-        getBuilder().setId(command.getQuizId());
+        builder().setId(command.getQuizId());
         return PmQuizStarted.newBuilder()
                             .setQuizId(command.getQuizId())
                             .addAllQuestion(command.getQuestionList())
@@ -72,7 +70,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
     @React
     Nothing on(PmQuizStarted event) {
-        getBuilder().setId(event.getQuizId());
+        builder().setId(event.getQuizId());
         return nothing();
     }
 
@@ -105,7 +103,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     private boolean questionIsClosed(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        List<PmQuestionId> openQuestions = builder().getOpenQuestion();
         boolean containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
@@ -114,7 +112,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     Nothing on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
-        getBuilder().addSolvedQuestion(questionId);
+        builder().addSolvedQuestion(questionId);
         return nothing();
     }
 
@@ -122,13 +120,13 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     Nothing on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
-        getBuilder().addFailedQuestion(questionId);
+        builder().addFailedQuestion(questionId);
         return nothing();
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        List<PmQuestionId> openQuestions = builder().getOpenQuestion();
         int index = openQuestions.indexOf(questionId);
-        getBuilder().removeOpenQuestion(index);
+        builder().removeOpenQuestion(index);
     }
 }

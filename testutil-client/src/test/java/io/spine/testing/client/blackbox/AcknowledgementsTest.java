@@ -22,8 +22,8 @@ package io.spine.testing.client.blackbox;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Ack;
-import io.spine.core.RejectionClass;
 import io.spine.testing.client.blackbox.given.CommandAcksTestEnv;
+import io.spine.type.RejectionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -118,16 +118,16 @@ class AcknowledgementsTest {
                 newRejectionAck(taskLimitReached())
         ));
 
-        RejectionClass taskInCompletedProject =
-                RejectionClass.of(Rejections.BbTaskCreatedInCompletedProject.class);
+        RejectionType taskInCompletedProject =
+                new RejectionType(Rejections.BbTaskCreatedInCompletedProject.getDescriptor());
         assertEquals(0, acks.countRejections(taskInCompletedProject));
 
-        RejectionClass projectAlreadyStarted =
-                RejectionClass.of(Rejections.BbProjectAlreadyStarted.class);
+        RejectionType projectAlreadyStarted =
+                new RejectionType(Rejections.BbProjectAlreadyStarted.getDescriptor());
         assertEquals(1, acks.countRejections(projectAlreadyStarted));
 
-        RejectionClass taskLimitReached =
-                RejectionClass.of(Rejections.BbTaskLimitReached.class);
+        RejectionType taskLimitReached =
+                new RejectionType(Rejections.BbTaskLimitReached.getDescriptor());
         assertEquals(2, acks.countRejections(taskLimitReached));
     }
 
@@ -141,16 +141,16 @@ class AcknowledgementsTest {
         );
         Acknowledgements acks = new Acknowledgements(items);
 
-        RejectionClass completedProject =
-                RejectionClass.of(Rejections.BbTaskCreatedInCompletedProject.class);
+        RejectionType completedProject =
+                new RejectionType(Rejections.BbTaskCreatedInCompletedProject.getDescriptor());
         assertFalse(acks.containRejections(completedProject));
 
-        RejectionClass projectAlreadyStarted =
-                RejectionClass.of(Rejections.BbProjectAlreadyStarted.class);
+        RejectionType projectAlreadyStarted =
+                new RejectionType(Rejections.BbProjectAlreadyStarted.getDescriptor());
         assertTrue(acks.containRejections(projectAlreadyStarted));
 
-        RejectionClass taskLimitReached =
-                RejectionClass.of(Rejections.BbTaskLimitReached.class);
+        RejectionType taskLimitReached =
+                new RejectionType(Rejections.BbTaskLimitReached.getDescriptor());
         assertTrue(acks.containRejections(taskLimitReached));
     }
 

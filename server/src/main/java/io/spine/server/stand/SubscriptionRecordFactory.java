@@ -23,7 +23,7 @@ package io.spine.server.stand;
 import io.spine.base.EventMessage;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 /**
@@ -75,7 +75,7 @@ final class SubscriptionRecordFactory {
 
     private static boolean isEventSubscription(Subscription subscription) {
         TypeUrl type = getSubscriptionType(subscription);
-        Class<?> javaClass = type.getJavaClass();
+        Class<?> javaClass = type.toJavaClass();
         boolean result = EventMessage.class.isAssignableFrom(javaClass);
         return result;
     }

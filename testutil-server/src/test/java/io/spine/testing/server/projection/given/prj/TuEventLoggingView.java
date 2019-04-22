@@ -41,12 +41,12 @@ public class TuEventLoggingView
     }
 
     @Subscribe
-    public void on(TuProjectAssigned event) {
-        getBuilder().addEvent(pack(event));
+    void on(TuProjectAssigned event) {
+        builder().addEvent(pack(event));
     }
 
     @Subscribe
-    public void on(TuProjectCreated event) {
-        getBuilder().addEvent(pack(event));
+    void on(TuProjectCreated event) {
+        builder().addEvent(pack(event));
     }
 }

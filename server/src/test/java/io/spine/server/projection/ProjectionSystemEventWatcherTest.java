@@ -25,12 +25,13 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.entity.EntityHistoryIds;
+import io.spine.server.event.DuplicateEventException;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EventDispatchedToSubscriber;
-import io.spine.system.server.EventDispatchedToSubscriberVBuilder;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
+import io.spine.system.server.event.EventDispatchedToSubscriberVBuilder;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
+import static io.spine.system.server.rejection.HistoryRejections.CannotDispatchEventTwice;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,7 +62,7 @@ class ProjectionSystemEventWatcherTest {
     @BeforeEach
     void setUp() {
         repository = mock(ProjectionRepository.class);
-        when(repository.getEntityStateType()).thenReturn(REPOSITORY_TYPE);
+        when(repository.entityStateType()).thenReturn(REPOSITORY_TYPE);
     }
 
     @Test
@@ -94,7 +96,7 @@ class ProjectionSystemEventWatcherTest {
                 .newBuilder()
                 .setPayload(payload)
                 .setReceiver(historyId())
-                .setWhenDispatched(getCurrentTime())
+                .setWhenDispatched(currentTime())
                 .build();
         watcher.on(systemEvent);
 
@@ -126,7 +128,6 @@ class ProjectionSystemEventWatcherTest {
 
         private ProjectionSystemEventWatcher<?> watcher;
 
-        @SuppressWarnings("unchecked") // `clearInvocations` expects a vararg. OK for tests.
         @BeforeEach
         void setUp() {
             watcher = new ProjectionSystemEventWatcher<>(repository);
@@ -140,7 +141,7 @@ class ProjectionSystemEventWatcherTest {
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
-                    .setWhenDispatched(getCurrentTime())
+                    .setWhenDispatched(currentTime())
                     .build();
             checkCannotDispatch(systemEvent, systemEvent.getReceiver());
         }

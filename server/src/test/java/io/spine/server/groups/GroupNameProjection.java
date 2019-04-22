@@ -20,12 +20,13 @@
 
 package io.spine.server.groups;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.Subscribe;
 import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
+
+import static io.spine.server.route.EventRoute.withId;
 
 public final class GroupNameProjection
         extends Projection<GroupId, GroupName, GroupNameVBuilder> {
@@ -35,9 +36,9 @@ public final class GroupNameProjection
     }
 
     @Subscribe(external = true)
-    public void onUpdate(Organization organization) {
-        getBuilder()
-                .setId(getId())
+    void onUpdate(Organization organization) {
+        builder()
+                .setId(id())
                 .setName(organization.getName());
     }
 
@@ -49,12 +50,12 @@ public final class GroupNameProjection
             super.onRegistered();
 
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
-            routing.route(Organization.class, (org, ctx) -> ImmutableSet.of(
+            routing.route(Organization.class, (org, ctx) -> withId(
                     GroupId.newBuilder()
                            .setUuid(org.getId()
                                        .getUuid())
                            .build()));
-            getEventRouting().routeEntityStateUpdates(routing);
+            eventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

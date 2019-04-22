@@ -20,18 +20,23 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
+
+import java.util.Set;
 
 /**
  * Provides message handling information on a class that reacts on messages.
- *
- * @author Alexander Yevsyukov
  */
 public interface ReactingClass extends EventReceiverClass {
 
     /**
      * Obtains the method that reacts on the passed projection class.
      */
-    EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass);
+    EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass);
+
+    /**
+     * Obtains the classes of events produced from the event reaction.
+     */
+    Set<EventClass> reactionOutput();
 }

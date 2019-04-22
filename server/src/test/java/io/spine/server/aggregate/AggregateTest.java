@@ -21,16 +21,15 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.DefaultSubject;
+import com.google.common.truth.Subject;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.Given;
@@ -44,6 +43,9 @@ import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -77,8 +79,7 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.Commands.getMessage;
-import static io.spine.core.Events.getRootCommandId;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
@@ -101,8 +102,6 @@ import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispa
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -164,9 +163,10 @@ public class AggregateTest {
         ModelTests.dropAllModels();
         aggregate = newAggregate(ID);
         amishAggregate = newAmishAggregate(ID);
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
+        boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
         repository = new TestAggregateRepository();
         boundedContext.register(repository);
     }
@@ -185,7 +185,7 @@ public class AggregateTest {
         void handledCommandClasses() {
             Set<CommandClass> commandClasses =
                     asAggregateClass(TestAggregate.class)
-                            .getCommands();
+                            .commands();
 
             assertEquals(3, commandClasses.size());
 
@@ -198,12 +198,12 @@ public class AggregateTest {
         @Test
         @DisplayName("current state")
         void currentState() {
-            dispatchCommand(aggregate, env(createProject));
-            assertEquals(Status.CREATED, aggregate.getState()
+            dispatchCommand(aggregate, command(createProject));
+            assertEquals(Status.CREATED, aggregate.state()
                                                   .getStatus());
 
-            dispatchCommand(aggregate, env(startProject));
-            assertEquals(Status.STARTED, aggregate.getState()
+            dispatchCommand(aggregate, command(startProject));
+            assertEquals(Status.STARTED, aggregate.state()
                                                   .getStatus());
         }
 
@@ -218,7 +218,7 @@ public class AggregateTest {
     @Test
     @DisplayName("handle one command and apply appropriate event")
     void handleCommandProperly() {
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -233,7 +233,7 @@ public class AggregateTest {
         void byOne() {
             int version = aggregate.versionNumber();
 
-            dispatchCommand(aggregate, env(createProject));
+            dispatchCommand(aggregate, command(createProject));
 
             assertEquals(version + 1, aggregate.versionNumber());
         }
@@ -246,7 +246,8 @@ public class AggregateTest {
         void byOneForEmptyApplier() {
             int version = amishAggregate.versionNumber();
 
-            List<? extends Message> messages = dispatchCommand(amishAggregate, env(pauseProject));
+            List<? extends Message> messages =
+                    dispatchCommand(amishAggregate, command(pauseProject));
             assertEquals(1, messages.size());
 
             assertEquals(version + 1, amishAggregate.versionNumber());
@@ -261,7 +262,7 @@ public class AggregateTest {
             int version = amishAggregate.versionNumber();
 
             List<? extends Message> eventMessages =
-                    dispatchCommand(amishAggregate, env(cancelProject));
+                    dispatchCommand(amishAggregate, command(cancelProject));
             // Expecting to return more than one to differ from other testing scenarios.
             assertTrue(eventMessages.size() > 1);
 
@@ -273,9 +274,9 @@ public class AggregateTest {
         void byNumberOfCommands() {
             int version = aggregate.versionNumber();
 
-            dispatchCommand(aggregate, env(createProject));
-            dispatchCommand(aggregate, env(startProject));
-            dispatchCommand(aggregate, env(addTask));
+            dispatchCommand(aggregate, command(createProject));
+            dispatchCommand(aggregate, command(startProject));
+            dispatchCommand(aggregate, command(addTask));
 
             assertEquals(version + 3, aggregate.versionNumber());
         }
@@ -284,21 +285,21 @@ public class AggregateTest {
     @Test
     @DisplayName("write its version into event context")
     void writeVersionIntoEventContext() {
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
 
         // Get the first event since the command handler produces only one event message.
         Aggregate<?, ?, ?> agg = this.aggregate;
         List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
-        assertEquals(this.aggregate.getVersion(), event.getContext()
-                                                       .getVersion());
+        assertEquals(this.aggregate.version(), event.context()
+                                                    .getVersion());
     }
 
     @Test
     @DisplayName("handle only dispatched commands")
     void handleOnlyDispatchedCommands() {
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -313,15 +314,15 @@ public class AggregateTest {
     @Test
     @DisplayName("invoke event applier after command handler")
     void invokeApplierAfterCommandHandler() {
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
 
-        dispatchCommand(aggregate, env(addTask));
+        dispatchCommand(aggregate, command(addTask));
         assertTrue(aggregate.isAddTaskCommandHandled);
         assertTrue(aggregate.isTaskAddedEventApplied);
 
-        dispatchCommand(aggregate, env(startProject));
+        dispatchCommand(aggregate, command(startProject));
         assertTrue(aggregate.isStartProjectCommandHandled);
         assertTrue(aggregate.isProjectStartedEventApplied);
     }
@@ -338,7 +339,7 @@ public class AggregateTest {
 
             // Pass a command for which the target aggregate does not have a handling method.
             assertThrows(IllegalStateException.class,
-                         () -> dispatchCommand(aggregate, env(addTask)));
+                         () -> dispatchCommand(aggregate, command(addTask)));
         }
 
         @Test
@@ -349,7 +350,7 @@ public class AggregateTest {
                     new AggregateWithMissingApplier(ID);
             assertThrows(IllegalStateException.class, () -> {
                 try {
-                    dispatchCommand(aggregate, env(createProject));
+                    dispatchCommand(aggregate, command(createProject));
                 } catch (IllegalStateException e) { // expected exception
                     assertTrue(aggregate.isCreateProjectCommandHandled());
                     throw e;
@@ -365,9 +366,9 @@ public class AggregateTest {
         @Test
         @DisplayName("updated when command is handled")
         void updatedUponCommandHandled() {
-            dispatchCommand(aggregate, env(createProject));
+            dispatchCommand(aggregate, command(createProject));
 
-            Project state = aggregate.getState();
+            Project state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -378,10 +379,10 @@ public class AggregateTest {
     @DisplayName("record modification time when command is handled")
     void recordModificationUponCommandHandled() {
         try {
-            Timestamp frozenTime = Time.getCurrentTime();
+            Timestamp frozenTime = Time.currentTime();
             Time.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
 
-            dispatchCommand(aggregate, env(createProject));
+            dispatchCommand(aggregate, command(createProject));
 
             assertEquals(frozenTime, aggregate.whenModified());
         } finally {
@@ -410,11 +411,11 @@ public class AggregateTest {
     @Test
     @DisplayName("restore snapshot during play")
     void restoreSnapshot() {
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
 
         Snapshot snapshot = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.play(AggregateHistory.newBuilder()
@@ -502,7 +503,7 @@ public class AggregateTest {
     @DisplayName("transform current state to snapshot event")
     void transformCurrentStateToSnapshot() {
 
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
 
         Snapshot snapshot = aggregate().toSnapshot();
         Project state = unpack(snapshot.getState(), Project.class);
@@ -515,30 +516,30 @@ public class AggregateTest {
     @DisplayName("restore state from snapshot")
     void restoreStateFromSnapshot() {
 
-        dispatchCommand(aggregate, env(createProject));
+        dispatchCommand(aggregate, command(createProject));
 
         Snapshot snapshotNewProject = aggregate().toSnapshot();
 
-        Aggregate anotherAggregate = newAggregate(aggregate.getId());
+        Aggregate anotherAggregate = newAggregate(aggregate.id());
 
         AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
         tx.commit();
 
-        assertEquals(aggregate.getState(), anotherAggregate.getState());
-        assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
-        assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
+        assertEquals(aggregate.state(), anotherAggregate.state());
+        assertEquals(aggregate.version(), anotherAggregate.version());
+        assertEquals(aggregate.lifecycleFlags(), anotherAggregate.lifecycleFlags());
     }
 
     @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
-        int version = aggregate.getVersion()
+        int version = aggregate.version()
                                .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(command(createProject), command(startProject));
 
-        assertEquals(version + 2, aggregate.getVersion()
+        assertEquals(version + 2, aggregate.version()
                                            .getNumber());
     }
 
@@ -549,7 +550,7 @@ public class AggregateTest {
             TimeTests.BackToTheFuture provider = new TimeTests.BackToTheFuture();
             Time.setProvider(provider);
 
-            Timestamp currentTime = Time.getCurrentTime();
+            Timestamp currentTime = Time.currentTime();
 
             aggregate.dispatchCommands(command(createProject));
 
@@ -578,7 +579,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(getMessage(command)));
+                dispatchCommand(faultyAggregate, env(command));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);
@@ -596,7 +597,7 @@ public class AggregateTest {
 
             Command command = Given.ACommand.createProject();
             try {
-                dispatchCommand(faultyAggregate, env(getMessage(command)));
+                dispatchCommand(faultyAggregate, env(command));
                 failNotThrows();
             } catch (RuntimeException e) {
                 Throwable cause = getRootCause(e);
@@ -635,12 +636,14 @@ public class AggregateTest {
     @Test
     @DisplayName("not allow getting state builder from outside event applier")
     void notGetStateBuilderOutsideOfApplier() {
-        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
+        assertThrows(IllegalStateException.class, () -> new IntAggregate(100).builder());
     }
 
     @Nested
     @DisplayName("traverse history")
     class TraverseHistory {
+
+        private Iterator<Event> history;
 
         @Test
         @DisplayName("iterating through newest events first")
@@ -651,21 +654,27 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(addTaskCommand, noOpObserver);
             commandBus.post(newArrayList(addTaskCommand2, startCommand), noOpObserver);
 
             TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
+            history = aggregate.historyBackward();
 
-            Iterator<Event> history = aggregate.historyBackward();
+            assertNextCommandId().isEqualTo(startCommand.id());
+            assertNextCommandId().isEqualTo(addTaskCommand2.id());
+            assertNextCommandId().isEqualTo(addTaskCommand.id());
+            assertNextCommandId().isEqualTo(createCommand.id());
 
-            assertEquals(startCommand.getId(), getRootCommandId(history.next()));
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
-            assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
-            assertEquals(createCommand.getId(), getRootCommandId(history.next()));
-            assertFalse(history.hasNext());
+            assertThat(history.hasNext())
+                    .isFalse();
+        }
+
+        private Subject<DefaultSubject, Object> assertNextCommandId() {
+            return assertThat(history.next()
+                                     .rootCommandId());
         }
 
         @Test
@@ -679,7 +688,7 @@ public class AggregateTest {
             Command addTaskCommand = command(addTask, tenantId);
             Command addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);
@@ -687,11 +696,12 @@ public class AggregateTest {
 
             TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
 
-            Iterator<Event> history = aggregate.historyBackward();
+            history = aggregate.historyBackward();
 
-            Event singleEvent = history.next();
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(singleEvent));
-            assertFalse(history.hasNext());
+            assertNextCommandId()
+                    .isEqualTo(addTaskCommand2.id());
+            assertThat(history.hasNext())
+                    .isFalse();
         }
     }
 
@@ -709,7 +719,8 @@ public class AggregateTest {
         RuntimeException exception = assertThrows(RuntimeException.class,
                                                   () -> repository.dispatch(envelope));
         Throwable cause = getRootCause(exception);
-        assertThat(cause, instanceOf(DuplicateCommandException.class));
+        assertThat(cause)
+             .isInstanceOf(DuplicateCommandException.class);
     }
 
     @Nested

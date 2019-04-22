@@ -22,18 +22,17 @@ package io.spine.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.validate.ValidationException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Commands.generateId;
+import static io.spine.base.Time.currentTime;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -43,8 +42,9 @@ import static io.spine.validate.Validate.checkValid;
  * such as the actor, the tenant, etc.
  *
  * <p>The command messages passed to the factory are
- * {@linkplain io.spine.validate.Validate#checkValid(Message) validated} according to their
- * Proto definitions. If a given message is invalid, a {@link ValidationException} is thrown.
+ * {@linkplain io.spine.validate.Validate#checkValid(com.google.protobuf.Message) validated}
+ * according to their Proto definitions. If a given message is invalid,
+ * a {@link ValidationException} is thrown.
  *
  * @see ActorRequestFactory#command()
  */
@@ -136,7 +136,7 @@ public final class CommandFactory {
         Any packed = AnyPacker.pack(message);
         Command.Builder result = Command
                 .newBuilder()
-                .setId(generateId())
+                .setId(CommandId.generate())
                 .setMessage(packed)
                 .setContext(context);
         return result.build();
@@ -168,13 +168,15 @@ public final class CommandFactory {
      * Creates a copy of the passed {@code CommandContext} updated with the current time.
      */
     private static CommandContext withCurrentTime(CommandContext value) {
-        ActorContext.Builder withCurrentTime =
+        ActorContext withCurrentTime =
                 value.getActorContext()
-                     .toBuilder()
-                     .setTimestamp(getCurrentTime());
-        CommandContext.Builder result =
-                value.toBuilder()
-                     .setActorContext(withCurrentTime);
-        return result.build();
+                     .toVBuilder()
+                     .setTimestamp(currentTime())
+                     .build();
+        CommandContext result =
+                value.toVBuilder()
+                     .setActorContext(withCurrentTime)
+                     .build();
+        return result;
     }
 }

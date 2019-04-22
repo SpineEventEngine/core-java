@@ -43,10 +43,6 @@ import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Vladyslav Lubenskyi
- */
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregateCommandTest should")
 class AggregateCommandTestShould {
 
@@ -75,7 +71,7 @@ class AggregateCommandTestShould {
         void shouldDispatchCommand() {
             TuAggregate testAggregate = TuAggregate.newInstance();
             aggregateCommandTest.expectThat(testAggregate);
-            Timestamp newState = testAggregate.getState()
+            Timestamp newState = testAggregate.state()
                                               .getTimestamp();
             assertTrue(isNotDefault(newState));
         }
@@ -116,7 +112,7 @@ class AggregateCommandTestShould {
             TuAggregateRoot root = TuAggregateRoot.newInstance(TuAggregatePart.ID);
             TuAggregatePart part = TuAggregatePart.newInstance(root);
             partCommandTest.expectThat(part);
-            Timestamp newState = part.getState()
+            Timestamp newState = part.state()
                                      .getTimestamp();
             assertTrue(isNotDefault(newState));
         }

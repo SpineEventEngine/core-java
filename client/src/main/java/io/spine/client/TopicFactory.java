@@ -23,12 +23,13 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Targets.composeTarget;
-import static io.spine.client.Topics.generateId;
+import static java.lang.String.format;
 
 /**
  * A factory of {@link Topic} instances.
@@ -39,6 +40,11 @@ import static io.spine.client.Topics.generateId;
  * @see ActorRequestFactory#topic()
  */
 public final class TopicFactory {
+
+    /**
+     * The format of all {@linkplain TopicId topic identifiers}.
+     */
+    private static final String TOPIC_ID_FORMAT = "t-%s";
 
     private final ActorContext actorContext;
 
@@ -117,5 +123,12 @@ public final class TopicFactory {
                             .setId(generateId())
                             .setContext(actorContext)
                             .setTarget(target);
+    }
+
+    private static TopicId generateId() {
+        String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
+        return TopicId.newBuilder()
+                      .setValue(formattedId)
+                      .build();
     }
 }

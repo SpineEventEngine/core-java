@@ -45,9 +45,6 @@ class GivenTestEnv {
 
     static class AnAggregate
             extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
-        protected AnAggregate(TuProjectId id) {
-            super(id);
-        }
     }
 
     static class AnAggregatePart
@@ -59,16 +56,10 @@ class GivenTestEnv {
 
     static class AProjection
             extends Projection<TuTaskId, TuComments, TuCommentsVBuilder> {
-        protected AProjection(TuTaskId id) {
-            super(id);
-        }
     }
 
     static class AProcessManager
             extends ProcessManager<TuProjectId, TuPmState, TuPmStateVBuilder> {
-        protected AProcessManager(TuProjectId id) {
-            super(id);
-        }
     }
 
     private static class ARoot extends AggregateRoot<TuProjectId> {

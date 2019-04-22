@@ -38,7 +38,6 @@ import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_OFFSET;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
 import static io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND;
-import static io.spine.protobuf.Timestamps2.isBetween;
 import static io.spine.time.testing.TimeTests.Future.secondsFromNow;
 import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,10 +78,7 @@ class CommandFactoryTest {
             Command command = factory.create(commandMessage);
             Timestamp afterCall = secondsFromNow(1);
 
-            Timestamp timestamp = command.getContext()
-                                         .getActorContext()
-                                         .getTimestamp();
-            assertTrue(isBetween(timestamp, beforeCall, afterCall));
+            assertTrue(command.isBetween(beforeCall, afterCall));
         }
 
         @Test
@@ -90,7 +86,7 @@ class CommandFactoryTest {
         void withEntityVersion() {
             Command command = factory.create(command(), 2);
 
-            CommandContext context = command.getContext();
+            CommandContext context = command.context();
             assertEquals(2, context.getTargetVersion());
         }
 
@@ -107,7 +103,7 @@ class CommandFactoryTest {
                     .setZoneOffset(ZONE_OFFSET)
                     .build();
             Command command = mtFactory.command().create(command());
-            assertEquals(tenantId, command.getContext()
+            assertEquals(tenantId, command.context()
                                           .getActorContext()
                                           .getTenantId());
         }

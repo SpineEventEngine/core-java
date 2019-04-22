@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.server.event.EventDispatcher;
 
@@ -51,7 +51,7 @@ public enum NoOpSystemReadSide implements SystemReadSide {
     }
 
     @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
+    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
         return emptyIterator();
     }
 }

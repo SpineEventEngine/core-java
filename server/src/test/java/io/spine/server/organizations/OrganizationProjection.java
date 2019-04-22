@@ -32,10 +32,10 @@ public final class OrganizationProjection
     }
 
     @Subscribe
-    public void on(OrganizationEstablished event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName())
-                    .setHead(event.getHead());
+    void on(OrganizationEstablished event) {
+        builder().setId(event.getId())
+                 .setName(event.getName())
+                 .setHead(event.getHead());
     }
 
     public static final class Repository

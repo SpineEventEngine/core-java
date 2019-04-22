@@ -26,10 +26,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.model.Nothing;
 import io.spine.testing.server.given.entity.command.TuRemoveProject;
 
-/**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
- */
 public class ModelTestsTestEnv {
 
     /** Prevents instantiation of this utility class. */

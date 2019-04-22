@@ -33,16 +33,22 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.event.CommandErrored;
+import io.spine.system.server.event.CommandHandled;
+import io.spine.system.server.event.CommandReceived;
+import io.spine.system.server.event.CommandRejected;
+import io.spine.system.server.event.TargetAssignedToCommand;
 import io.spine.system.server.given.command.CommandLifecycleWatcher;
 import io.spine.system.server.given.command.CompanyAggregate;
 import io.spine.system.server.given.command.CompanyNameProcman;
 import io.spine.system.server.given.command.CompanyNameProcmanRepo;
-import io.spine.system.server.given.command.CompanyRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
@@ -62,14 +68,11 @@ import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("CommandLifecycle should")
 class CommandLifecycleTest {
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EntityHistoryTest.class);
+            new TestActorRequestFactory(EntityHistoryTest.class);
 
     private BoundedContext context;
     private BoundedContext system;
@@ -87,7 +90,7 @@ class CommandLifecycleTest {
                 .build();
         system = systemOf(context);
 
-        context.register(new CompanyRepository());
+        context.register(DefaultRepository.of(CompanyAggregate.class));
         context.register(new CompanyNameProcmanRepo());
     }
 
@@ -101,8 +104,8 @@ class CommandLifecycleTest {
         @BeforeEach
         void setUp() {
             this.eventAccumulator = new CommandLifecycleWatcher();
-            system.getEventBus().register(eventAccumulator);
-            id = Identifier.generate(CompanyId.class);
+            system.eventBus().register(eventAccumulator);
+            id = CompanyId.generate();
         }
 
         @Test
@@ -191,9 +194,8 @@ class CommandLifecycleTest {
 
         private Command buildInvalidCommand() {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
-            CommandId commandId = Commands.generateId();
             UserId actor = GivenUserId.newUuid();
-            Timestamp now = Time.getCurrentTime();
+            Timestamp now = Time.currentTime();
             ActorContext actorContext = ActorContext
                     .newBuilder()
                     .setTimestamp(now)
@@ -205,7 +207,7 @@ class CommandLifecycleTest {
                     .build();
             Command command = Command
                     .newBuilder()
-                    .setId(commandId)
+                    .setId(CommandId.generate())
                     .setMessage(pack(invalidCommand))
                     .setContext(context)
                     .build();
@@ -255,7 +257,7 @@ class CommandLifecycleTest {
             CommandRejected rejected = eventAccumulator.assertNextEventIs(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
-            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejectionEvent.getMessage());
+            TypeUrl rejectionType = rejectionEvent.typeUrl();
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }
@@ -266,7 +268,7 @@ class CommandLifecycleTest {
         }
 
         private CommandId postBuiltCommand(Command command) {
-            CommandBus commandBus = context.getCommandBus();
+            CommandBus commandBus = context.commandBus();
             commandBus.post(command, noOpObserver());
             return command.getId();
         }

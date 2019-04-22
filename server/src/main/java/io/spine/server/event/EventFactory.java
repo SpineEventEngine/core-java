@@ -29,17 +29,17 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.type.TypeName;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.validate.Validate.checkValid;
 
@@ -161,7 +161,7 @@ public class EventFactory {
         checkNotNull(context);
         Any packed = pack(message);
         Event result = Event
-                .newBuilder()
+                .vBuilder()
                 .setId(id)
                 .setMessage(packed)
                 .setContext(context)
@@ -185,7 +185,7 @@ public class EventFactory {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext.Builder newContext(@Nullable Version version) {
-        Timestamp timestamp = getCurrentTime();
+        Timestamp timestamp = currentTime();
         EventContext.Builder builder = EventContext
                 .newBuilder()
                 .setTimestamp(timestamp)

@@ -22,7 +22,7 @@ package io.spine.server.integration;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.EventClass;
+import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

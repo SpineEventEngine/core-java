@@ -35,7 +35,6 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static io.spine.core.Events.clearEnrichments;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -57,7 +56,6 @@ public abstract class AggregateStorage<I>
      *
      * <p>Opens the method for the package.
      */
-    @SuppressWarnings("RedundantMethodOverride")
     @Override
     protected void checkNotClosed() throws IllegalStateException {
         super.checkNotClosed();
@@ -106,7 +104,7 @@ public abstract class AggregateStorage<I>
     /**
      * Writes an event to the storage by an aggregate ID.
      *
-     * <p>Before the storing, {@linkplain io.spine.core.Events#clearEnrichments(Event) enrichments}
+     * <p>Before the storing, {@linkplain io.spine.core.Event#clearEnrichments() enrichments}
      * will be removed from the event.
      *
      * @param id    the aggregate ID
@@ -115,7 +113,7 @@ public abstract class AggregateStorage<I>
     void writeEvent(I id, Event event) {
         checkNotClosedAndArguments(id, event);
 
-        Event eventWithoutEnrichments = clearEnrichments(event);
+        Event eventWithoutEnrichments = event.clearEnrichments();
         AggregateEventRecord record = toStorageRecord(eventWithoutEnrichments);
         writeRecord(id, record);
     }
@@ -141,7 +139,7 @@ public abstract class AggregateStorage<I>
 
     private static AggregateEventRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");
-        EventContext context = event.getContext();
+        EventContext context = event.context();
 
         String eventIdStr = Identifier.toString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID");

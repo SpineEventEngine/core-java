@@ -20,16 +20,17 @@
 
 package io.spine.server.stand;
 
+import io.spine.client.EventUpdates;
+import io.spine.client.EventUpdatesVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.core.EventEnvelope;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
+import io.spine.client.SubscriptionUpdateVBuilder;
+import io.spine.core.Event;
+import io.spine.core.Responses;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * Updates an event subscription based on the incoming event.
- *
- * <p>Currently event subscriptions are not supported.
  */
 final class EventSubscriptionCallback extends SubscriptionCallback {
 
@@ -38,10 +39,26 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
     }
 
     /**
-     * Always throws {@link IllegalStateException} as event subscriptions are not supported yet.
+     * Creates a subscription update with a single {@link Event} obtained from the envelope.
      */
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
-        throw newIllegalStateException("Event subscriptions are not implemented");
+        EventUpdates updates = extractEventUpdates(event);
+        SubscriptionUpdate result = SubscriptionUpdateVBuilder
+                .newBuilder()
+                .setSubscription(subscription())
+                .setResponse(Responses.ok())
+                .setEventUpdates(updates)
+                .build();
+        return result;
+    }
+
+    private static EventUpdates extractEventUpdates(EventEnvelope event) {
+        Event eventObject = event.outerObject();
+        EventUpdates result = EventUpdatesVBuilder
+                .newBuilder()
+                .addEvents(eventObject)
+                .build();
+        return result;
     }
 }

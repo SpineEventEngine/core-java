@@ -34,35 +34,33 @@ import io.spine.type.TypeUrl;
 
 /**
  * A process manager which handles person creation.
- *
- * @author Dmytro Dashenkov
  */
-public class PersonProcman
+public final class PersonProcman
         extends ProcessManager<PersonId, PersonCreation, PersonCreationVBuilder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(PersonCreation.class);
 
-    protected PersonProcman(PersonId id) {
+    PersonProcman(PersonId id) {
         super(id);
     }
 
     @Assign
     Nothing handle(StartPersonCreation command) {
-        getBuilder().setId(command.getId());
+        builder().setId(command.getId());
         return nothing();
     }
 
     @Assign
     Nothing handle(CompletePersonCreation command) {
-        getBuilder().setId(command.getId())
+        builder().setId(command.getId())
                     .setCreated(true);
         return nothing();
     }
 
     @React
     Nothing reactOn(PersonNameCreated event) {
-        getBuilder().setId(event.getId())
-                    .setCreated(true);
+        builder().setId(event.getId())
+                 .setCreated(true);
         return nothing();
     }
 }

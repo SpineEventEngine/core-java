@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.Filter.Operator;
 import static io.spine.client.Filter.Operator.CFO_UNDEFINED;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -95,7 +95,7 @@ class OperatorEvaluatorTest {
         @DisplayName("`GREATER_THAN`")
         void gt() {
             Duration delta = seconds(5);
-            Timestamp small = getCurrentTime();
+            Timestamp small = currentTime();
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
@@ -112,7 +112,7 @@ class OperatorEvaluatorTest {
         @DisplayName("`GREATER_OR_EQUAL`")
         void ge() {
             Duration delta = seconds(5);
-            Timestamp small = getCurrentTime();
+            Timestamp small = currentTime();
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
@@ -129,7 +129,7 @@ class OperatorEvaluatorTest {
         @DisplayName("`LESS_THAN`")
         void lt() {
             Duration delta = seconds(5);
-            Timestamp small = getCurrentTime();
+            Timestamp small = currentTime();
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 
@@ -146,7 +146,7 @@ class OperatorEvaluatorTest {
         @DisplayName("`LESS_OR_EQUAL`")
         void le() {
             Duration delta = seconds(5);
-            Timestamp small = getCurrentTime();
+            Timestamp small = currentTime();
             Timestamp medium = add(small, delta);
             Timestamp big = add(medium, delta);
 

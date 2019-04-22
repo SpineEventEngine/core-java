@@ -20,12 +20,14 @@
 
 package io.spine.server.route;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptySet;
 
 /**
  * Obtains a set of entity IDs for which to deliver an event.
@@ -72,7 +74,28 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
     ignoreEntityUpdates(EventRoute<I, EventMessage> forOthers) {
         checkNotNull(forOthers);
         return (message, context) -> message instanceof EntityStateChanged
-                                     ? emptySet()
+                                     ? noTargets()
                                      : forOthers.apply(message, context);
+    }
+
+    /**
+     * Returns the empty immutable set.
+     *
+     * @apiNote This is a convenience method for ignoring a type of messages when building
+     *          a routing schema in a repository.
+     */
+    static <I> Set<I> noTargets() {
+        return ImmutableSet.of();
+    }
+
+    /**
+     * Creates an immutable singleton set with the passed ID.
+     *
+     * @apiNote This is a convenience method for customizing routing schemas when the target is
+     *          only one entity.
+     */
+    static <I> Set<I> withId(I id) {
+        checkNotNull(id);
+        return ImmutableSet.of(id);
     }
 }

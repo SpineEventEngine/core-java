@@ -28,8 +28,10 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.test.queries.ProjectId;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filter.Operator.EQUAL;
@@ -55,14 +57,12 @@ import static io.spine.client.Filters.ge;
 import static io.spine.client.Filters.gt;
 import static io.spine.client.Filters.le;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.TopicBuilderTestEnv.TEST_ENTITY_TYPE;
-import static io.spine.client.given.TopicBuilderTestEnv.TEST_ENTITY_TYPE_URL;
-import static io.spine.client.given.TopicBuilderTestEnv.findByName;
-import static io.spine.client.given.TopicBuilderTestEnv.newMessageId;
+import static io.spine.client.given.TestEntities.randomId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -70,6 +70,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,7 +80,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("DuplicateStringLiteralInspection")
 class TopicBuilderTest {
 
+    private static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
+    private static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
     private TopicFactory factory;
+
+    static Filter findByName(Iterable<Filter> filters, String name) {
+        for (Filter filter : filters) {
+            if (filter.getFieldPath()
+                      .getFieldName(0)
+                      .equals(name)) {
+                return filter;
+            }
+        }
+        fail(format("No Filter found for %s. field", name));
+        // avoid returning `null`
+        throw new RuntimeException("never happens unless JUnit is broken");
+    }
 
     @BeforeEach
     void createFactory() {
@@ -189,7 +205,7 @@ class TopicBuilderTest {
             String columnName1 = "myColumn";
             Object columnValue1 = 42;
             String columnName2 = "oneMore";
-            Object columnValue2 = newMessageId();
+            Object columnValue2 = randomId();
 
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .where(eq(columnName1, columnValue1),
@@ -226,7 +242,7 @@ class TopicBuilderTest {
             String countryColumn = "country";
             String countryName = "Ukraine";
 
-            Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
+            Timestamp twoDaysAgo = subtract(currentTime(), fromHours(-48));
 
             Topic topic = factory.select(TEST_ENTITY_TYPE)
                                  .where(all(ge(companySizeColumn, 50),
@@ -298,7 +314,7 @@ class TopicBuilderTest {
             String columnName1 = "column1";
             Object columnValue1 = 42;
             String columnName2 = "column2";
-            Object columnValue2 = newMessageId();
+            Object columnValue2 = randomId();
             String fieldName = "TestEntity.secondField";
             Topic query = factory.select(TEST_ENTITY_TYPE)
                                  .withMask(fieldName)
@@ -359,9 +375,9 @@ class TopicBuilderTest {
         @Test
         @DisplayName("IDs")
         void lastIds() {
-            Iterable<?> genericIds = asList(newUuid(), -1, newMessageId());
+            Iterable<?> genericIds = asList(newUuid(), -1, randomId());
             Long[] longIds = {1L, 2L, 3L};
-            Message[] messageIds = {newMessageId(), newMessageId(), newMessageId()};
+            Message[] messageIds = {randomId(), randomId(), randomId()};
             String[] stringIds = {newUuid(), newUuid(), newUuid()};
             Integer[] intIds = {4, 5, 6};
 
@@ -415,7 +431,7 @@ class TopicBuilderTest {
         String columnName1 = "column1";
         Object columnValue1 = 42;
         String columnName2 = "column2";
-        Message columnValue2 = newMessageId();
+        Message columnValue2 = randomId();
         String fieldName = "TestEntity.secondField";
         TopicBuilder builder = factory.select(TEST_ENTITY_TYPE)
                                       .withMask(fieldName)

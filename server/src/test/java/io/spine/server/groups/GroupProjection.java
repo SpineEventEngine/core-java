@@ -36,12 +36,12 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
     }
 
     @Subscribe(external = true)
-    public void on(Organization organization, EventContext systemContext) {
+    void on(Organization organization, EventContext systemContext) {
         Timestamp updateTime = systemContext.getTimestamp();
-        getBuilder().setId(getId())
-                    .setName(organization.getName() + updateTime)
-                    .addAllParticipants(organization.getMembersList())
-                    .addParticipants(organization.getHead());
+        builder().setId(id())
+                 .setName(organization.getName() + updateTime)
+                 .addAllParticipants(organization.getMembersList())
+                 .addParticipants(organization.getHead());
     }
 
     public static final class Repository
@@ -56,7 +56,7 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
                                            .setUuid(org.getHead()
                                                        .getValue())
                                            .build()));
-            getEventRouting().routeEntityStateUpdates(routing);
+            eventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

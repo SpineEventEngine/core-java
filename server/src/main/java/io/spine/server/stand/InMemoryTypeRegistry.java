@@ -20,7 +20,6 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
@@ -33,15 +32,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.util.Optional.ofNullable;
 
 /**
- * The in-memory concurrency-friendly implementation of {
- * @linkplain TypeRegistry Stand type registry}.
- *
- * @author Alex Tymchenko
+ * The in-memory concurrency-friendly implementation of
+ * {@linkplain TypeRegistry Stand type registry}.
  */
-class InMemoryTypeRegistry implements TypeRegistry {
+final class InMemoryTypeRegistry implements TypeRegistry {
 
     /**
      * The mapping between {@code TypeUrl} instances and repositories providing
@@ -54,10 +52,10 @@ class InMemoryTypeRegistry implements TypeRegistry {
      * Stores  known {@code Aggregate} types in order to distinguish
      * them among all instances of {@code TypeUrl}.
      */
-    private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
+    private final Set<TypeUrl> knownAggregateTypes = newConcurrentHashSet();
 
+    /** Prevents instantiation from the outside. */
     private InMemoryTypeRegistry() {
-        // Prevent instantiation from the outside.
     }
 
     static TypeRegistry newInstance() {
@@ -67,7 +65,7 @@ class InMemoryTypeRegistry implements TypeRegistry {
     @SuppressWarnings("ChainOfInstanceofChecks")
     @Override
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        TypeUrl entityType = repository.getEntityStateType();
+        TypeUrl entityType = repository.entityStateType();
 
         if (repository instanceof RecordBasedRepository) {
             typeToRepositoryMap.put(entityType,
@@ -78,11 +76,16 @@ class InMemoryTypeRegistry implements TypeRegistry {
         }
     }
 
-
     @Override
     public Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type) {
-        RecordBasedRepository<?, ?, ? > repo = typeToRepositoryMap.get(type);
+        RecordBasedRepository<?, ?, ?> repo = typeToRepositoryMap.get(type);
         Optional<? extends RecordBasedRepository<?, ?, ?>> result = ofNullable(repo);
+        return result;
+    }
+
+    @Override
+    public ImmutableSet<TypeUrl> getAggregateTypes() {
+        ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
         return result;
     }
 
@@ -93,12 +96,6 @@ class InMemoryTypeRegistry implements TypeRegistry {
         resultBuilder.addAll(projectionTypes)
                      .addAll(knownAggregateTypes);
         ImmutableSet<TypeUrl> result = resultBuilder.build();
-        return result;
-    }
-
-    @Override
-    public ImmutableSet<TypeUrl> getAggregateTypes() {
-        ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
         return result;
     }
 

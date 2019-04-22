@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import io.spine.core.Ack;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -39,18 +39,15 @@ import static java.util.stream.Collectors.joining;
  * the order direct of the initial {@link Deque}.
  *
  * <p>The {@link #close() close()} method closes all the underlying filters.
- *
- * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>>
-        implements BusFilter<E> {
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
 
     private final Deque<BusFilter<E>> chain;
 
     private volatile boolean closed;
 
     FilterChain(ChainBuilder<E> builder) {
-        this.chain = builder.getFilters();
+        this.chain = builder.filters();
     }
 
     static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {

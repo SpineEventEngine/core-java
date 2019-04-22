@@ -23,7 +23,7 @@ package io.spine.server.delivery.given;
 import com.google.protobuf.Empty;
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.SystemEventWatcher;
-import io.spine.system.server.EntityCreated;
+import io.spine.system.server.event.EntityCreated;
 import io.spine.test.delivery.SewProjectCreated;
 import io.spine.type.TypeUrl;
 
@@ -44,7 +44,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
+        void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("External events are not allowed in SystemEventWatchers.");
         }
     }
@@ -56,7 +56,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
+        void on(@SuppressWarnings("unused") SewProjectCreated ignored) {
             fail("Only spine.system.server events are allowed.");
         }
     }
@@ -68,7 +68,7 @@ public class SystemEventWatcherTestEnv {
         }
 
         @Subscribe
-        public void on(@SuppressWarnings("unused") EntityCreated unused) {
+        void on(@SuppressWarnings("unused") EntityCreated unused) {
             // NoOp.
         }
     }

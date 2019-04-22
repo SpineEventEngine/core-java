@@ -20,10 +20,10 @@
 package io.spine.server.transport;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import io.spine.annotation.SPI;
 import io.spine.server.integration.ChannelId;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,22 +36,20 @@ import static java.util.Collections.synchronizedMap;
  *
  * <p>Serves for channel creation and storage-per-ID, which in a way makes the hub similar to
  * an entity repository.
- *
- * @author Alex Tymchenko
  */
 @SPI
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
     private final Map<ChannelId, C> channels =
-            synchronizedMap(Maps.<ChannelId, C>newHashMap());
+            synchronizedMap(new HashMap<>());
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
     }
 
     /**
-     * Creates a new channel under the specified ID
+     * Creates a new channel under the specified ID.
      *
      * @param channelId the channel ID to use
      * @return the created channel.

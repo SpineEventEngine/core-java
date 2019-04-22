@@ -21,82 +21,121 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandEnvelope;
+import io.spine.client.Query;
+import io.spine.client.QueryResponse;
+import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
-import io.spine.server.aggregate.given.part.TaskDescriptionPart;
-import io.spine.server.aggregate.given.part.TaskDescriptionRepository;
+import io.spine.server.aggregate.given.part.TaskCommentsPart;
+import io.spine.server.aggregate.given.part.TaskCommentsRepository;
 import io.spine.server.aggregate.given.part.TaskPart;
 import io.spine.server.aggregate.given.part.TaskRepository;
+import io.spine.server.aggregate.given.part.TaskRoot;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.task.AggTask;
+import io.spine.test.aggregate.task.AggTaskComments;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
+import java.util.Collection;
 
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.testdata.Sample.builderForType;
+import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.ASSIGNEE;
+import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.ID;
+import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.commentTask;
+import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.createTask;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("AggregatePart should")
 class AggregatePartTest {
 
-    private static final String TASK_DESCRIPTION = "Description";
     private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregatePartTest.class);
-    private BoundedContext boundedContext;
-    private AnAggregateRoot root;
-    private TaskPart taskPart;
-    private TaskDescriptionPart taskDescriptionPart;
-    private TaskRepository taskRepository;
+            new TestActorRequestFactory(AggregatePartTest.class);
 
-    private static CommandEnvelope env(CommandMessage commandMessage) {
-        return CommandEnvelope.of(factory.command()
-                                         .create(commandMessage));
-    }
+    private BoundedContext boundedContext;
+    private TaskRoot root;
+    private TaskPart taskPart;
+    private TaskCommentsPart taskCommentsPart;
+    private TaskRepository taskRepository;
+    private TaskCommentsRepository taskCommentsRepository;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        root = new AnAggregateRoot(boundedContext, newUuid());
+        root = new TaskRoot(boundedContext, ID);
         taskPart = new TaskPart(root);
-        prepareAggregatePart();
-        taskDescriptionPart = new TaskDescriptionPart(root);
+        taskCommentsPart = new TaskCommentsPart(root);
         taskRepository = new TaskRepository();
-        TaskDescriptionRepository taskDescriptionRepository = new TaskDescriptionRepository();
+        taskCommentsRepository = new TaskCommentsRepository();
         boundedContext.register(taskRepository);
-        boundedContext.register(taskDescriptionRepository);
+        boundedContext.register(taskCommentsRepository);
+        prepareAggregatePart();
     }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws NoSuchMethodException {
         createNullPointerTester()
-                .testStaticMethods(AggregatePart.class, NullPointerTester.Visibility.PACKAGE);
+                .testStaticMethods(AggregatePart.class, PACKAGE);
         createNullPointerTester().testAllPublicInstanceMethods(taskPart);
+    }
+
+    @Test
+    @DisplayName("not override other parts with common ID when querying")
+    @SuppressWarnings("CheckReturnValue") // Message dispatching called for the side effect.
+    void notOverrideOtherParts() {
+        assertEntityCount(AggTaskComments.class, 0);
+        assertEntityCount(AggTask.class, 1);
+
+        taskCommentsRepository.dispatch(command(commentTask()));
+
+        assertEntityCount(AggTaskComments.class, 1);
+        assertEntityCount(AggTask.class, 1);
     }
 
     @Test
     @DisplayName("return aggregate part state by class")
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
-        Task task = taskDescriptionPart.getPartState(Task.class);
-        assertEquals(TASK_DESCRIPTION, task.getDescription());
+        AggTask task = taskCommentsPart.getPartState(AggTask.class);
+        assertEquals(ASSIGNEE, task.getAssignee());
+    }
+
+    private void assertEntityCount(Class<? extends Message> stateType, int expectedCount) {
+        Collection<? extends Message> messages = queryEntities(stateType);
+        assertThat(messages).hasSize(expectedCount);
+    }
+
+    private Collection<? extends Message> queryEntities(Class<? extends Message> entityClass) {
+        Query query = factory.query()
+                             .all(entityClass);
+        MemoizingObserver<QueryResponse> observer = memoizingObserver();
+        boundedContext.stand()
+                      .execute(query, observer);
+        return observer.firstResponse()
+                       .getMessagesList()
+                       .stream()
+                       .map(state -> unpack(state.getState()))
+                       .collect(toList());
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
         Constructor constructor =
-                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, ProjectId.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
@@ -104,11 +143,13 @@ class AggregatePartTest {
         return tester;
     }
 
+    @SuppressWarnings("CheckReturnValue")
     private void prepareAggregatePart() {
-        AggAddTask.Builder addTask = builderForType(AggAddTask.class);
-        addTask.setProjectId(ProjectId.newBuilder()
-                                      .setId("agg-part-ID"))
-               .build();
-        AggregateMessageDispatcher.dispatchCommand(taskPart, env(addTask.build()));
+        taskRepository.dispatch(command(createTask()));
+    }
+
+    private static CommandEnvelope command(CommandMessage commandMessage) {
+        return CommandEnvelope.of(factory.command()
+                                         .create(commandMessage));
     }
 }

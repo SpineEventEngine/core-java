@@ -26,12 +26,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -40,8 +40,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The factory or producing events for tests.
- *
- * @author Alexander Yevsyukov
  */
 @CheckReturnValue
 public class TestEventFactory extends EventFactory {
@@ -58,26 +56,26 @@ public class TestEventFactory extends EventFactory {
 
     public static TestEventFactory newInstance(Message producerId, Class<?> testSuiteClass) {
         Any id = toAny(producerId);
-        return newInstance(id, TestActorRequestFactory.newInstance(testSuiteClass));
+        return newInstance(id, new TestActorRequestFactory(testSuiteClass));
     }
 
-    public static
-    TestEventFactory newInstance(Message producerId, TestActorRequestFactory requestFactory) {
+    public static TestEventFactory newInstance(Message producerId,
+                                               TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
         Any id = toAny(producerId);
-        CommandEnvelope cmd = requestFactory.generateEnvelope();
+        CommandEnvelope cmd = CommandEnvelope.of(requestFactory.generateCommand());
         return new TestEventFactory(cmd, id);
     }
 
     public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        Message producerId = requestFactory.getActor();
+        Message producerId = requestFactory.actor();
         return newInstance(pack(producerId), requestFactory);
     }
 
     public static TestEventFactory newInstance(Class<?> testSuiteClass) {
         checkNotNull(testSuiteClass);
-        return newInstance(TestActorRequestFactory.newInstance(testSuiteClass));
+        return newInstance(new TestActorRequestFactory(testSuiteClass));
     }
 
     /**
@@ -94,11 +92,11 @@ public class TestEventFactory extends EventFactory {
         checkNotNull(message);
         checkNotNull(atTime);
         Event event = createEvent(message, version);
-        EventContext context = event.getContext()
-                                    .toBuilder()
+        EventContext context = event.context()
+                                    .toVBuilder()
                                     .setTimestamp(atTime)
                                     .build();
-        Event result = event.toBuilder()
+        Event result = event.toVBuilder()
                             .setContext(context)
                             .build();
         return result;

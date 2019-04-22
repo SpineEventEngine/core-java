@@ -40,16 +40,19 @@ import java.util.List;
  * <li>the state of an entity is correctly changed after the events are emitted.
  * </ol>
  *
- * @param <I> ID message of the command and the handling entity
- * @param <M> the type of the event message to test
- * @param <S> state message of the handling entity
- * @param <E> the type of the {@link CommandHandlingEntity} being tested
- * @author Dmytro Dashenkov
+ * @param <I>
+ *         ID message of the command and the handling entity
+ * @param <M>
+ *         the type of the event message to test
+ * @param <S>
+ *         state message of the handling entity
+ * @param <E>
+ *         the type of the {@link CommandHandlingEntity} being tested
  */
 public abstract class EventReactionTest<I,
-                                        M extends EventMessage,
-                                        S extends Message,
-                                        E extends CommandHandlingEntity<I, S, ?>>
+        M extends EventMessage,
+        S extends Message,
+        E extends CommandHandlingEntity<I, S, ?>>
         extends MessageHandlerTest<I, M, S, E, EventReactorExpected<S>> {
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
@@ -60,25 +63,26 @@ public abstract class EventReactionTest<I,
 
     @Override
     protected EventReactorExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         List<? extends Message> events = dispatchTo(entity);
-        return new EventReactorExpected<>(events, initialState, entity.getState(),
+        return new EventReactorExpected<>(events, initialState, entity.state(),
                                           interceptedCommands());
     }
 
     /**
      * Creates {@link Event} from the given message and supplies it with {@link EventContext}.
      *
-     * @param message an event message
+     * @param message
+     *         an event message
      * @return a new {@link Event}
      */
     protected final Event createEvent(M message) {
         Event event = eventFactory.createEvent(message);
-        EventContext context = event.getContext()
-                                    .toBuilder()
+        EventContext context = event.context()
+                                    .toVBuilder()
                                     .setExternal(externalMessage())
                                     .build();
-        return event.toBuilder()
+        return event.toVBuilder()
                     .setContext(context)
                     .build();
     }

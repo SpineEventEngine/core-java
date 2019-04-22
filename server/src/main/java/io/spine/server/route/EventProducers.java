@@ -23,14 +23,11 @@ package io.spine.server.route;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
-import io.spine.core.Events;
 
 import java.util.Set;
 
 /**
  * Provides default {@link EventRoute}s for obtaining a producer ID from an event.
- *
- * @author Alexander Yevsyukov
  */
 final class EventProducers {
 
@@ -48,7 +45,7 @@ final class EventProducers {
         @Override
         public Set<I> apply(EventMessage message, EventContext context) {
             @SuppressWarnings("unchecked") // The route creator is responsible for the type check.
-            I id = (I) Events.getProducer(context);
+            I id = (I) context.producer();
             return ImmutableSet.of(id);
         }
 

@@ -39,8 +39,12 @@ import "spine/core/enrichment.proto";
 
 // Event identifier.
 message EventId {
+    option (is).java_type = "io.spine.core.MessageId";
 
-    // A random UUID string value.
+    // A value of the event identifier.
+    //
+    // In most cases it would be a generated UUID-based string.
+    //
     string value = 1;
 }
 
@@ -63,11 +67,12 @@ message EventId {
 //
 // There is a special case of an event - a rejection event.
 // A rejection event represents erroneous conditions in business, which do not allow to execute
-// a command. The event is a rejection event iff the `EventContext.rejection` field is present.
+// a command. The event is a rejection event if the `EventContext.rejection` field is present.
 //
-// See `EventContext.rejection` to detemine the event kind.
+// See `EventContext.rejection` to determine the event kind.
 //
 message Event {
+    option (is).java_type = "io.spine.core.EventMixin";
 
     // The ID of the event.
     EventId id = 1 [(required) = true];
@@ -81,20 +86,21 @@ message Event {
 
 // Meta-information for an event.
 message EventContext {
-    option (is) = {java_type: "io.spine.core.MessageContext" generate: true};
+    option (is).java_type = "io.spine.core.EventContextMixin";
+    option (required_field) = "command_context | event_context | import_context";
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
     oneof origin {
         // The context of the command which generated this event.
-        CommandContext command_context = 2 [(required) = true];
+        CommandContext command_context = 2 [(valid) = true];
 
         // The context of the event which generated this event.
-        EventContext event_context = 6 [(required) = true];
+        EventContext event_context = 6 [(valid) = true];
 
         // The event was imported using this `ActorContext`.
-        ActorContext import_context = 11 [(required) = true];
+        ActorContext import_context = 11 [(valid) = true];
     }
 
     // An ID of the root command, which lead to this event.
@@ -114,7 +120,7 @@ message EventContext {
     google.protobuf.Any producer_id = 3 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 4 [(required) = true];
+    Version version = 4 [(valid) = true];
 
     // Optional enrichment of the event.
     Enrichment enrichment = 5;
@@ -129,7 +135,7 @@ message EventContext {
     //
     RejectionEventContext rejection = 10;
 
-    // An ID of the origin messsage.
+    // An ID of the origin message.
     //
     // The case of this `oneof` is always the same as the case of `origin` (except for
     // the `import_context`, which does not have a corresponding field in `origin_id`).

@@ -51,9 +51,9 @@ import static java.lang.String.format;
  * the changes are only applied to the actual object upon {@linkplain #commit() commit}.
  *
  * <p>The transaction is injected to the entity, which state should be modified. By doing so,
- * the {@linkplain Transaction#getBuilder() "buffering" builder} is exposed to concrete
+ * the {@linkplain Transaction#builder() "buffering" builder} is exposed to concrete
  * {@code TransactionalEntity} subclasses. In turn, they receive an ability to change the entity
- * state by modifying {@link TransactionalEntity#getBuilder() entity state builder}.
+ * state by modifying {@link TransactionalEntity#builder() entity state builder}.
  *
  * <p>Same applies to the entity lifecycle flags.
  *
@@ -71,9 +71,9 @@ import static java.lang.String.format;
 @SuppressWarnings("ClassWithTooManyMethods")
 @Internal
 public abstract class Transaction<I,
-                                  E extends TransactionalEntity<I, S, B>,
-                                  S extends Message,
-                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+        E extends TransactionalEntity<I, S, B>,
+        S extends Message,
+        B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
      * The entity, which state and attributes are modified in this transaction.
@@ -158,8 +158,8 @@ public abstract class Transaction<I,
 
         this.entity = entity;
         this.builder = entity.builderFromState();
-        this.version = entity.getVersion();
-        this.lifecycleFlags = entity.getLifecycleFlags();
+        this.version = entity.version();
+        this.lifecycleFlags = entity.lifecycleFlags();
         this.active = true;
 
         this.transactionListener = new SilentWitness<>();
@@ -198,22 +198,22 @@ public abstract class Transaction<I,
         return active;
     }
 
-    LifecycleFlags getLifecycleFlags() {
+    LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
     }
 
-    protected E getEntity() {
+    protected E entity() {
         return entity;
     }
 
     /**
      * Returns the version of the entity, modified within this transaction.
      */
-    Version getVersion() {
+    Version version() {
         return version;
     }
 
-    List<Phase<I, ?>> getPhases() {
+    List<Phase<I, ?>> phases() {
         return ImmutableList.copyOf(phases);
     }
 
@@ -251,7 +251,7 @@ public abstract class Transaction<I,
      *         in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
-        B builder = getBuilder();
+        B builder = builder();
 
         if (builder.isDirty()) {
             commitChangedState(builder);
@@ -273,7 +273,7 @@ public abstract class Transaction<I,
         try {
             S newState = builder.build();
             markStateChanged();
-            Version pendingVersion = getVersion();
+            Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
@@ -287,7 +287,7 @@ public abstract class Transaction<I,
 
             throw invalidStateException;
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") // Catch all unexpected exceptions.
-                 RuntimeException genericException) {
+                RuntimeException genericException) {
             rollback(genericException);
             throw illegalStateWithCauseOf(genericException);
         } finally {
@@ -301,10 +301,10 @@ public abstract class Transaction<I,
      * <p>This method is called when none of the transaction phases has changed the entity state.
      */
     private void commitUnchangedState() {
-        S unchanged = getEntity().getState();
-        Version pendingVersion = getVersion();
+        S unchanged = entity().state();
+        Version pendingVersion = version();
         beforeCommit(unchanged, pendingVersion);
-        if(!pendingVersion.equals(entity.getVersion())) {
+        if (!pendingVersion.equals(entity.version())) {
             entity.updateState(unchanged, pendingVersion);
         }
         commitAttributeChanges();
@@ -314,8 +314,8 @@ public abstract class Transaction<I,
     }
 
     private void beforeCommit(S newState, Version newVersion) {
-        E entity = getEntity();
-        LifecycleFlags newFlags = getLifecycleFlags();
+        E entity = entity();
+        LifecycleFlags newFlags = lifecycleFlags();
         transactionListener.onBeforeCommit(entity, newState, newVersion, newFlags);
     }
 
@@ -336,12 +336,21 @@ public abstract class Transaction<I,
      *         the reason of the rollback
      */
     void rollback(Throwable cause) {
+        beforeRollback(cause);
         S currentState = currentBuilderState();
         TransactionListener<I, E, S, B> listener = getListener();
-        listener.onTransactionFailed(cause, getEntity(), currentState,
-                                     getVersion(), getLifecycleFlags());
+        listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
+    }
+
+    /**
+     * Does necessary preparations before the transaction is marked as inactive and released.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass")
+    // Do not force descendants to override the method.
+    protected void beforeRollback(Throwable cause) {
+        // NO-OP.
     }
 
     /**
@@ -350,11 +359,11 @@ public abstract class Transaction<I,
      * @return new {@link EntityRecord}
      */
     private EntityRecord createRecord() {
-        E entity = getEntity();
-        Any entityId = Identifier.pack(entity.getId());
-        Version version = entity.getVersion();
-        Any state = pack(entity.getState());
-        LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
+        E entity = entity();
+        Any entityId = Identifier.pack(entity.id());
+        Version version = entity.version();
+        Any state = pack(entity.state());
+        LifecycleFlags lifecycleFlags = entity.lifecycleFlags();
         return EntityRecord
                 .newBuilder()
                 .setEntityId(entityId)
@@ -380,13 +389,16 @@ public abstract class Transaction<I,
         entity.releaseTransaction();
     }
 
-    private void commitAttributeChanges() {
-        entity.setLifecycleFlags(getLifecycleFlags());
+    /**
+     * Applies lifecycle flag modifications to the entity under transaction.
+     */
+    protected void commitAttributeChanges() {
+        entity.setLifecycleFlags(lifecycleFlags());
         entity.updateStateChanged();
     }
 
     void initAll(S state, Version version) {
-        B builder = getBuilder();
+        B builder = builder();
         builder.clear();
         builder.mergeFrom(state);
         initVersion(version);
@@ -395,7 +407,7 @@ public abstract class Transaction<I,
     /**
      * Obtains the builder for the current transaction.
      */
-    B getBuilder() {
+    B builder() {
         return builder;
     }
 
@@ -442,8 +454,8 @@ public abstract class Transaction<I,
 
         int versionNumber = this.version.getNumber();
         if (versionNumber > 0) {
-            String errMsg =
-                    format("initVersion() called on an entity with non-zero version number (%d).",
+            String errMsg = format(
+                    "initVersion() called on an entity with non-zero version number (%d).",
                     versionNumber
             );
             throw new IllegalStateException(errMsg);
@@ -474,13 +486,13 @@ public abstract class Transaction<I,
     }
 
     public void setArchived(boolean archived) {
-        lifecycleFlags = lifecycleFlags.toBuilder()
+        lifecycleFlags = lifecycleFlags.toVBuilder()
                                        .setArchived(archived)
                                        .build();
     }
 
     public void setDeleted(boolean deleted) {
-        lifecycleFlags = lifecycleFlags.toBuilder()
+        lifecycleFlags = lifecycleFlags.toVBuilder()
                                        .setDeleted(deleted)
                                        .build();
     }

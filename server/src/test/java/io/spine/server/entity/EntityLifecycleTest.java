@@ -27,8 +27,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.EventId;
-import io.spine.system.server.EntityCreated;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.MemoizedSystemMessage;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -46,9 +46,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-/**
- * @author Dmytro Dashenkov
- */
 @DisplayName("EntityLifecycle should")
 class EntityLifecycleTest {
 
@@ -102,7 +99,7 @@ class EntityLifecycleTest {
                 .build();
         EntityRecord newRecord = previousRecord
                 .toBuilder()
-                .setState(pack(Time.getCurrentTime()))
+                .setState(pack(Time.currentTime()))
                 .build();
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()

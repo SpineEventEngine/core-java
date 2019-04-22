@@ -35,8 +35,6 @@ import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
 
 /**
  * Serves as a converter from {@link Error} to {@link Metadata} and vice versa.
- *
- * @author Dmytro Grankin
  */
 @Internal
 public class MetadataConverter {

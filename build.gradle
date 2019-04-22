@@ -36,6 +36,15 @@ buildscript { final scriptHandler ->
     }
 
     forceConfiguration(scriptHandler)
+    configurations.all {
+        resolutionStrategy {
+            //noinspection GroovyAssignabilityCheck
+            force(
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-time:$spineTimeVersion"
+            )
+        }
+    }
 }
 
 apply from: 'version.gradle'
@@ -46,6 +55,7 @@ ext {
 
     credentialsPropertyFile = 'credentials.properties'
     publishPlugin = "$rootDir/config/gradle/publish.gradle"
+    modelCompilerConfiguration = "$rootDir/config/gradle/model-compiler.gradle"
     projectsToPublish = ["core",
                          "client",
                          "server",
@@ -68,20 +78,6 @@ allprojects {
 
 final boolean isTravis = System.env.TRAVIS == 'true'
 
-/**
- * Determines whether the given {@code project} should expose its Javadoc to
- * SpineEventEngine.github.io website.
- *
- * <p>Currently, the {@code testutil} projects are excluded from publishing, as well as the modules
- * that perform the model compile-time checks.
- *
- * @param project the project to check
- * @return {@code true} is the project Javadoc should be published, {@code false} otherwise
- */
-static boolean shouldPublishJavadoc(final Project project) {
-    return !project.name.startsWith('testutil') && !project.name.startsWith("model")
-}
-
 subprojects {
     project.ext {
         sourcesRootDir = "$projectDir/src"
@@ -96,17 +92,19 @@ subprojects {
         generatedSpineDir = "$generatedRootDir/main/spine"
         generatedTestSpineDir = "$generatedRootDir/test/spine"
 
-        testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
         filterInternalJavadocsScript = "${rootDir}/config/gradle/filter-internal-javadoc.gradle"
-        updateDocsPlugin = "$rootDir/scripts/update-gh-pages.gradle"
+        updateDocsPlugin = "$rootDir/gradle/update-gh-pages.gradle"
     }
 
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java-library'
     apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'pmd'
     apply plugin: spineProtobufPluginId
 
     apply from: deps.scripts.javacArgs
+    apply from: modelCompilerConfiguration
+    apply from: deps.scripts.projectLicenseReport
 
     // Specific setup for a Travis build,
     // which prevents appearing of warning messages in build logs.
@@ -141,8 +139,7 @@ subprojects {
 
         implementation deps.build.guava
 
-        //TODO:2018-05-11:alexander.yevsyukov: Replace the below with Checker Framework
-        // after Guava fully migrates from it too.
+        // See: https://github.com/SpineEventEngine/base/issues/108
         implementation deps.build.jsr305Annotations
 
         implementation deps.build.checkerAnnotations
@@ -157,6 +154,7 @@ subprojects {
         testImplementation deps.test.guavaTestlib
         testImplementation deps.test.junit5Api
         testImplementation deps.test.junit5Runner
+        testImplementation "io.spine.tools:spine-mute-logging:$spineBaseVersion"
     }
 
     forceConfiguration(project)
@@ -164,7 +162,10 @@ subprojects {
         all {
             resolutionStrategy {
                 //noinspection GroovyAssignabilityCheck
-                force "io.spine:spine-base:$spineBaseVersion"
+                force(
+                        "io.spine:spine-base:$spineBaseVersion",
+                        "io.spine:spine-time:$spineTimeVersion"
+                )
             }
         }
         // Avoid collisions of Java classes defined both in `protobuf-lite` and `protobuf-java`
@@ -235,12 +236,28 @@ subprojects {
         }
     }
 
+    /**
+     * Determines whether the given {@code project} should expose its Javadoc to
+     * SpineEventEngine.github.io website.
+     *
+     * <p>Currently, the {@code testutil} projects are excluded from publishing, as well as the modules
+     * that perform the model compile-time checks.
+     *
+     * @param project the project to check
+     * @return {@code true} is the project Javadoc should be published, {@code false} otherwise
+     */
+    ext.shouldPublishJavadoc = {
+        return !project.name.startsWith('testutil') && !project.name.startsWith("model")
+    }
+
     // Apply the Javadoc publishing plugin.
     // This plugin *must* be applied here, not in the module `build.gradle` files.
     //
-    if (shouldPublishJavadoc(project)) {
+    if (shouldPublishJavadoc()) {
         apply from: updateDocsPlugin
     }
+    
+    apply from: deps.scripts.pmd
 }
 
 apply from: publishPlugin
@@ -263,3 +280,6 @@ idea {
 
 // Aggregated coverage report across all subprojects.
 apply from: spineJacocoScript
+
+// Generate a repository-wide report of 3rd-party dependencies and their licenses.
+apply from: deps.scripts.repoLicenseReport

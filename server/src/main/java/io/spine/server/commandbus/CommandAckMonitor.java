@@ -28,8 +28,8 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.system.server.CommandAcknowledged;
-import io.spine.system.server.CommandErrored;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandErrored;
 import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,8 +45,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>{@code CommandAckMonitor} is designed to wrap instances of {@link StreamObserver}.
  * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
  * invoke respective methods on a {@code delegate} instance.
- *
- * @author Dmytro Dashenkov
  */
 final class CommandAckMonitor implements StreamObserver<Ack> {
 

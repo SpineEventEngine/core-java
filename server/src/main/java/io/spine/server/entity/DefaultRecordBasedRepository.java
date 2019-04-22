@@ -20,45 +20,60 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
- *
- * @author Alexander Yevsyukov
  */
 public abstract class DefaultRecordBasedRepository<I,
                                                    E extends AbstractEntity<I, S>,
                                                    S extends Message>
                 extends RecordBasedRepository<I, E, S> {
 
-    private final EntityFactory<I, E> entityFactory;
-    private final EntityStorageConverter<I, E, S> storageConverter;
+    @LazyInit
+    private @MonotonicNonNull StorageConverter<I, E, S> storageConverter;
 
     /**
      * Creates a new instance with the {@linkplain #entityFactory() factory} of entities of class
      * specified as the {@code <E>} generic parameter, and with the default
-     * {@linkplain #entityConverter() entity storage converter}.
+     * {@linkplain #storageConverter() entity storage converter}.
      */
     protected DefaultRecordBasedRepository() {
         super();
-        @SuppressWarnings("OverridableMethodCallDuringObjectConstruction") // get generic param
-        Class<E> entityClass = getEntityClass();
-        this.entityFactory = new DefaultEntityFactory<>(entityClass);
-        TypeUrl stateType = entityClass().getStateType();
-        this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
-                                                                           this.entityFactory);
     }
 
     @Override
-    protected EntityFactory<I, E> entityFactory() {
-        return this.entityFactory;
+    protected EntityFactory<E> entityFactory() {
+        return entityModelClass().factory();
     }
 
     @Override
-    protected EntityStorageConverter<I, E, S> entityConverter() {
-        return this.storageConverter;
+    @CanIgnoreReturnValue
+    protected StorageConverter<I, E, S> storageConverter() {
+        if (storageConverter == null) {
+            EntityClass<E> entityClass = entityModelClass();
+            TypeUrl stateType = entityClass.stateType();
+            storageConverter = DefaultConverter.forAllFields(stateType, entityFactory());
+        }
+        return storageConverter;
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * <p>Performs validation of the entity class and initializes the storage converter.
+     */
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        storageConverter();
     }
 }

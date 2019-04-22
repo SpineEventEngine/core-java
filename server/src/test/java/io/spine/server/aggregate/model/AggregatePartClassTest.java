@@ -25,6 +25,7 @@ import io.spine.server.aggregate.given.part.AnAggregatePart;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.WrongAggregatePart;
 import io.spine.server.model.ModelError;
+import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,9 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alexander Yevsyukov
- */
 @DisplayName("AggregatePartClass should")
 class AggregatePartClassTest {
 
@@ -49,15 +47,20 @@ class AggregatePartClassTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .build();
-        root = new AnAggregateRoot(boundedContext, newUuid());
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .build();
+        ProjectId projectId = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        root = new AnAggregateRoot(boundedContext, projectId);
     }
 
     @Test
     @DisplayName("obtain aggregate part constructor")
     void getAggregatePartConstructor() {
-        assertNotNull(partClass.getConstructor());
+        assertNotNull(partClass.constructor());
     }
 
     @Test
@@ -65,15 +68,15 @@ class AggregatePartClassTest {
     void throwOnNoProperCtorAvailable() {
         AggregatePartClass<WrongAggregatePart> wrongPartClass =
                 asAggregatePartClass(WrongAggregatePart.class);
-        assertThrows(ModelError.class, wrongPartClass::getConstructor);
+        assertThrows(ModelError.class, wrongPartClass::constructor);
     }
 
     @Test
     @DisplayName("create aggregate part entity")
     void createAggregatePartEntity() {
-        AnAggregatePart part = partClass.createEntity(root);
+        AnAggregatePart part = partClass.create(root);
 
         assertNotNull(part);
-        assertEquals(root.getId(), part.getId());
+        assertEquals(root.getId(), part.id());
     }
 }

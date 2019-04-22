@@ -42,7 +42,7 @@ import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.testing.TestValues.random;
 
 public class Given {
@@ -87,13 +87,13 @@ public class Given {
                                                  .setValue(newUuid())
                                                  .build();
             TestActorRequestFactory factory =
-                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+                    new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
             return result;
         }
 
         public static Command withMessage(io.spine.base.CommandMessage message) {
-            return create(message, USER_ID, getCurrentTime());
+            return create(message, USER_ID, currentTime());
         }
 
         public static Command createTask(boolean startTask) {
@@ -101,22 +101,22 @@ public class Given {
         }
 
         public static Command addTask() {
-            return addTask(USER_ID, PROJECT_ID, getCurrentTime());
+            return addTask(USER_ID, PROJECT_ID, currentTime());
         }
 
         static Command secondStartProject() {
             SecondCmdStartProject command = CommandMessage.secondStartProject(newProjectId());
-            return create(command, USER_ID, getCurrentTime());
+            return create(command, USER_ID, currentTime());
         }
 
         static Command firstCreateProject() {
             FirstCmdCreateProject command = CommandMessage.firstCreateProject(newProjectId());
-            return create(command, USER_ID, getCurrentTime());
+            return create(command, USER_ID, currentTime());
         }
 
         static Command createTask(TaskId taskId, UserId userId, boolean startTask) {
             CmdCreateTask command = CommandMessage.createTask(taskId, userId, startTask);
-            return create(command, userId, getCurrentTime());
+            return create(command, userId, currentTime());
         }
 
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
@@ -126,12 +126,12 @@ public class Given {
 
         static Command removeTask() {
             CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
-            return create(command, USER_ID, getCurrentTime());
+            return create(command, USER_ID, currentTime());
         }
 
         /** Creates a new {@code ACommand} with default properties (current time etc). */
         public static Command createProject() {
-            return createProject(getCurrentTime());
+            return createProject(currentTime());
         }
 
         static Command createProject(Timestamp when) {
@@ -142,8 +142,7 @@ public class Given {
 
             CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
             CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
-            CommandFactory commandFactory = TestActorRequestFactory.newInstance(ACommand.class)
-                                                                   .command();
+            CommandFactory commandFactory = new TestActorRequestFactory(ACommand.class).command();
             Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }
@@ -156,7 +155,7 @@ public class Given {
         }
 
         public static Command startProject() {
-            return startProject(USER_ID, PROJECT_ID, getCurrentTime());
+            return startProject(USER_ID, PROJECT_ID, currentTime());
         }
 
         static Command startProject(UserId userId,

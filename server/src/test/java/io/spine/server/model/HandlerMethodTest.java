@@ -25,9 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-/**
- * @author Alex Tymchenko
- */
 @DisplayName("HandlerMethod static methods should")
 class HandlerMethodTest {
 

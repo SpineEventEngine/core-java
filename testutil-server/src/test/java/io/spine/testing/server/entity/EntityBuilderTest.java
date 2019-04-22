@@ -27,9 +27,9 @@ import io.spine.base.Time;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.testing.server.User;
-import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntity;
-import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntityBuilder;
-import io.spine.testing.server.entity.EntityBuilderTestEnv.UserAggregate;
+import io.spine.testing.server.entity.testenv.ebuilder.TestEntity;
+import io.spine.testing.server.entity.testenv.ebuilder.TestEntityBuilder;
+import io.spine.testing.server.entity.testenv.ebuilder.UserAggregate;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,7 +83,7 @@ class EntityBuilderTest {
     @Test
     @DisplayName("obtain entity ID class")
     void getEntityIdClass() {
-        assertEquals(Long.class, givenEntity().getIdClass());
+        assertEquals(Long.class, givenEntity().idClass());
     }
 
     @Test
@@ -92,7 +92,7 @@ class EntityBuilderTest {
         long id = 1024L;
         int version = 100500;
         StringValue state = StringValue.of(getClass().getName());
-        Timestamp timestamp = Time.getCurrentTime();
+        Timestamp timestamp = Time.currentTime();
 
         Entity entity = givenEntity()
                 .withId(id)
@@ -102,7 +102,7 @@ class EntityBuilderTest {
                 .build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(id, entity.getId());
+        assertEquals(id, entity.id());
     }
 
     @Test
@@ -111,8 +111,8 @@ class EntityBuilderTest {
         Entity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
-        assertEquals(0L, entity.getId());
-        assertEquals(StringValue.of(""), entity.getState());
+        assertEquals(0L, entity.id());
+        assertEquals(StringValue.of(""), entity.state());
         assertEquals(0, entity.getVersion().getNumber());
     }
 
@@ -152,6 +152,6 @@ class EntityBuilderTest {
                 .withState(user)
                 .build();
 
-        assertEquals(user, aggregate.getState());
+        assertEquals(user, aggregate.state());
     }
 }

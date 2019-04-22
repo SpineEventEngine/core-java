@@ -20,13 +20,13 @@
 
 package io.spine.server.entity;
 
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
+import io.spine.core.EventId;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenEvent;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.model.InsufficientVisibilityError;
 import io.spine.server.groups.FilteredStateSubscriber;
@@ -39,8 +39,10 @@ import io.spine.server.groups.WronglyExternalSubscriber;
 import io.spine.server.organizations.Organization;
 import io.spine.server.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.server.type.given.GivenEvent;
+import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityStateChanged;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,11 +52,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("AbstractEventSubscriber should")
 class AbstractEventSubscriberTest {
 
     private TestSubscriber subscriber;
@@ -83,7 +84,7 @@ class AbstractEventSubscriberTest {
     void receiveEntityStateUpdates() {
         Group state = Group
                 .newBuilder()
-                .setId(Identifier.generate(GroupId.class))
+                .setId(GroupId.generate())
                 .setName("Admins")
                 .addParticipants(UserId.getDefaultInstance())
                 .addParticipants(UserId.getDefaultInstance())
@@ -91,16 +92,19 @@ class AbstractEventSubscriberTest {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setId(historyId(Group.class))
-                .setWhen(Time.getCurrentTime())
+                .setWhen(Time.currentTime())
                 .setNewState(pack(state))
+                .addMessageId(dispatchedMessageId())
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
-                             .getEventBus()
+                             .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Group> receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
-        assertEquals(state, receivedState.get());
-        assertFalse(subscriber.external().isPresent());
+        Truth8.assertThat(receivedState)
+              .hasValue(state);
+        Truth8.assertThat(subscriber.external())
+              .isEmpty();
     }
 
     @Test
@@ -108,7 +112,7 @@ class AbstractEventSubscriberTest {
     void receiveExternalEntityStateUpdates() {
         Organization state = Organization
                 .newBuilder()
-                .setId(Identifier.generate(OrganizationId.class))
+                .setId(OrganizationId.generate())
                 .setName("Developers")
                 .setHead(UserId.getDefaultInstance())
                 .addMembers(UserId.getDefaultInstance())
@@ -117,16 +121,18 @@ class AbstractEventSubscriberTest {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setId(historyId(Organization.class))
-                .setWhen(Time.getCurrentTime())
+                .setWhen(Time.currentTime())
                 .setNewState(pack(state))
+                .addMessageId(dispatchedMessageId())
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)
-                             .getEventBus()
+                             .eventBus()
                              .post(GivenEvent.withMessage(event));
         Optional<Organization> receivedState = subscriber.external();
-        assertTrue(receivedState.isPresent());
-        assertEquals(state, receivedState.get());
-        assertFalse(subscriber.domestic().isPresent());
+        Truth8.assertThat(receivedState)
+              .hasValue(state);
+        Truth8.assertThat(subscriber.domestic())
+              .isEmpty();
     }
 
     @Test
@@ -153,7 +159,6 @@ class AbstractEventSubscriberTest {
         assertThrows(InsufficientVisibilityError.class, HiddenEntitySubscriber::new);
     }
 
-
     private static EntityHistoryId historyId(Class<? extends Message> type) {
         EntityId entityId = EntityId
                 .newBuilder()
@@ -165,5 +170,12 @@ class AbstractEventSubscriberTest {
                 .setTypeUrl(TypeUrl.of(type).value())
                 .build();
         return historyId;
+    }
+
+    private static DispatchedMessageId dispatchedMessageId() {
+        return DispatchedMessageId
+                .newBuilder()
+                .setEventId(EventId.getDefaultInstance())
+                .build();
     }
 }

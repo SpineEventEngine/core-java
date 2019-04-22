@@ -128,7 +128,7 @@ class TransactionalEntityTest {
     void allowInjectingTx() {
         TransactionalEntity entity = newEntity();
         Transaction tx = mock(Transaction.class);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
         entity.injectTransaction(tx);
 
         assertEquals(tx, entity.getTransaction());
@@ -140,7 +140,7 @@ class TransactionalEntityTest {
     void disallowOtherInstanceTx() {
         TransactionalEntity entity = newEntity();
         Transaction tx = mock(Transaction.class);
-        when(tx.getEntity()).thenReturn(newEntity());
+        when(tx.entity()).thenReturn(newEntity());
         assertThrows(IllegalStateException.class, () -> entity.injectTransaction(tx));
     }
 
@@ -185,9 +185,9 @@ class TransactionalEntityTest {
     @DisplayName("return transaction `lifecycleFlags` if transaction is active")
     void returnActiveTxFlags() {
         TransactionalEntity entity = entityWithInactiveTx();
-        LifecycleFlags originalFlags = entity.getLifecycleFlags();
+        LifecycleFlags originalFlags = entity.lifecycleFlags();
 
-        LifecycleFlags modifiedFlags = originalFlags.toBuilder()
+        LifecycleFlags modifiedFlags = originalFlags.toVBuilder()
                                                     .setDeleted(true)
                                                     .build();
 
@@ -196,9 +196,9 @@ class TransactionalEntityTest {
         Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
         when(txMock.isActive()).thenReturn(true);
-        when(txMock.getLifecycleFlags()).thenReturn(modifiedFlags);
+        when(txMock.lifecycleFlags()).thenReturn(modifiedFlags);
 
-        LifecycleFlags actual = entity.getLifecycleFlags();
+        LifecycleFlags actual = entity.lifecycleFlags();
         assertEquals(modifiedFlags, actual);
     }
 
@@ -220,7 +220,7 @@ class TransactionalEntityTest {
             Message originalState = entity.builderFromState()
                                           .build();
 
-            EmptyEntity newState = EmptyEntity.newBuilder()
+            EmptyEntity newState = EmptyEntity.vBuilder()
                                               .setId(newUuidValue().getValue())
                                               .build();
             assertNotEquals(originalState, newState);
@@ -239,7 +239,7 @@ class TransactionalEntityTest {
 
         Transaction tx = mock(Transaction.class);
         when(tx.isActive()).thenReturn(false);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
         entity.injectTransaction(tx);
         return entity;
     }
@@ -250,7 +250,7 @@ class TransactionalEntityTest {
         Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
-        when(tx.getEntity()).thenReturn(entity);
+        when(tx.entity()).thenReturn(entity);
 
         entity.injectTransaction(tx);
         return entity;

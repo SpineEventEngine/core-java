@@ -25,10 +25,11 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
+import io.spine.core.CommandContextVBuilder;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 
 /**
  * Factory methods to create {@code CommandContext} instances for test purposes.
@@ -47,7 +48,7 @@ public final class GivenCommandContext {
      */
     public static CommandContext withRandomActor() {
         UserId userId = GivenUserId.newUuid();
-        Timestamp now = getCurrentTime();
+        Timestamp now = currentTime();
         return withActorAndTime(userId, now);
     }
 
@@ -58,13 +59,15 @@ public final class GivenCommandContext {
      */
     public static CommandContext withActorAndTime(UserId actor, Timestamp when) {
         TenantId tenantId = GivenTenantId.newUuid();
-        ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                        .setActor(actor)
-                                                        .setTimestamp(when)
-                                                        .setTenantId(tenantId);
-        CommandContext.Builder builder = CommandContext.newBuilder()
-                                                       .setActorContext(actorContext);
-        return builder.build();
+        ActorContext actorContext = ActorContext.vBuilder()
+                                                .setActor(actor)
+                                                .setTimestamp(when)
+                                                .setTenantId(tenantId)
+                                                .build();
+        CommandContext result = CommandContext.vBuilder()
+                                              .setActorContext(actorContext)
+                                              .build();
+        return result;
     }
 
     /**
@@ -75,7 +78,7 @@ public final class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     public static CommandContext withScheduledDelayOf(Duration delay) {
-        Schedule schedule = Schedule.newBuilder()
+        Schedule schedule = Schedule.vBuilder()
                                     .setDelay(delay)
                                     .build();
         return withSchedule(schedule);
@@ -89,7 +92,7 @@ public final class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     private static CommandContext withSchedule(Schedule schedule) {
-        CommandContext.Builder builder = withRandomActor().toBuilder()
+        CommandContextVBuilder builder = withRandomActor().toVBuilder()
                                                           .setSchedule(schedule);
         return builder.build();
     }

@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
+import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
 
@@ -39,14 +39,14 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope envelope) {
-        repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
-        return aggregate.reactOn(envelope);
+    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
+        repository().onDispatchEvent(aggregate.id(), event.outerObject());
+        return aggregate.reactOn(event);
     }
 
     @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
+    protected void onError(EventEnvelope event, RuntimeException exception) {
+        repository().onError(event, exception);
     }
 
     /**
@@ -54,7 +54,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
+    protected void onEmptyResult(A aggregate, EventEnvelope event) {
         // Do nothing.
     }
 }

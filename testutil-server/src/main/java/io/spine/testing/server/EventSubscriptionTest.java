@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <M> the type of the event message to test
  * @param <S> the type of the state message of the handling entity
  * @param <E> the type of the event subscriber being tested
- * @author Vladyslav Lubenskyi
  */
 @CheckReturnValue
 public abstract class EventSubscriptionTest<I,
@@ -54,9 +53,9 @@ public abstract class EventSubscriptionTest<I,
     @Override
     @SuppressWarnings("CheckReturnValue")
     protected EventSubscriberExpected<S> expectThat(E entity) {
-        S initialState = entity.getState();
+        S initialState = entity.state();
         dispatchTo(entity);
-        return new EventSubscriberExpected<>(initialState, entity.getState());
+        return new EventSubscriberExpected<>(initialState, entity.state());
     }
 
     /**

@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class WronglyExternalSubscriber extends AbstractEventSubscriber {
 
     @Subscribe(external = true) // <-- Error here. Should be domestic.
-    public void on(Group group) {
+    void on(Group group) {
         fail(WronglyExternalSubscriber.class.getSimpleName() +
                      " should not be able to receive domestic updates.");
     }

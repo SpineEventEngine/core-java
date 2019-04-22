@@ -38,11 +38,27 @@ message BbCreateProject {
 
 message BbInitProject {
     BbProjectId project_id = 1;
+
+    // The project team.
+    repeated spine.core.UserId member = 2 [(required) = true];
+
+    // If absent, the project methodology is not Scrum.
+    spine.core.UserId scrum_master = 3;
+}
+
+message BbAssignTeam {
+    BbProjectId project_id = 1;
+    repeated spine.core.UserId member = 2 [(required) = true];
+}
+
+message BbAssignScrumMaster {
+    BbProjectId project_id = 1;
+    spine.core.UserId scrum_master = 2 [(required) = true];
 }
 
 message BbAddTask {
     BbProjectId project_id = 1;
-    BbTask task = 2;
+    BbTask task = 2 [(required) = true];
 }
 
 message BbStartProject {
@@ -54,7 +70,12 @@ message BbCreateReport {
     repeated BbProjectId project_id = 2;
 }
 
+// Add the user to the list of project assignees.
 message BbAssignProject {
     BbProjectId id = 1;
     spine.core.UserId user_id = 2;
+}
+
+message BbRegisterCommandDispatcher {
+    string dispatcher_name = 1;
 }

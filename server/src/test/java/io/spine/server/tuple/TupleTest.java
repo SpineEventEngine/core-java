@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class TupleTest {
 
     private final StringValue a = TestValues.newUuidValue();
-    private final EitherOf2<Timestamp, BoolValue> b = EitherOf2.withA(Time.getCurrentTime());
+    private final EitherOf2<Timestamp, BoolValue> b = EitherOf2.withA(Time.currentTime());
 
     private TTuple<StringValue, EitherOf2<Timestamp, BoolValue>> tuple;
 

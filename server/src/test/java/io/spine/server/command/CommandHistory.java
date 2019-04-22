@@ -24,8 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
 
@@ -34,10 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Test utility for keeping the history of command messages and their contexts
  * handled by an aggregate.
- *
- * @author Alexander Yevsyukov
  */
-public class CommandHistory {
+public final class CommandHistory {
 
     private final List<Message> messages = Lists.newArrayList();
     private final List<CommandContext> contexts = Lists.newArrayList();
@@ -48,15 +45,15 @@ public class CommandHistory {
     }
 
     public void add(CommandEnvelope e) {
-        add(e.getMessage(), e.getCommandContext());
+        add(e.message(), e.context());
     }
 
     public boolean contains(Command command) {
-        Message message = Commands.getMessage(command);
+        Message message = command.enclosedMessage();
 
         if (messages.contains(message)) {
             int messageIndex = messages.indexOf(message);
-            CommandContext actualContext = command.getContext();
+            CommandContext actualContext = command.context();
             CommandContext storedContext = contexts.get(messageIndex);
             return actualContext.equals(storedContext);
         }
@@ -75,7 +72,7 @@ public class CommandHistory {
     }
 
     public void assertHandled(Command expected) {
-        String cmdName = Commands.getMessage(expected)
+        String cmdName = expected.enclosedMessage()
                                  .getClass()
                                  .getName();
         assertTrue(contains(expected), "Expected but wasn't handled, command: " + cmdName);

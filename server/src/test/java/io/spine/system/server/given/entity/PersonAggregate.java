@@ -39,8 +39,6 @@ import io.spine.type.TypeUrl;
 
 /**
  * Test aggregate on which to track history.
- *
- * @author Dmytro Dashenkov
  */
 public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder> {
 
@@ -81,27 +79,29 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     }
 
     @Apply
-    void on(PersonCreated event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName());
+    private void on(PersonCreated event) {
+        builder().setId(event.getId())
+                 .setName(event.getName());
     }
 
     @Apply
-    void on(PersonHidden event) {
+    private void on(PersonHidden event) {
         setArchived(true);
     }
 
     @Apply
-    void on(PersonExposed event) {
+    private void on(PersonExposed event) {
         setArchived(false);
     }
 
     @Apply
-    void on(PersonRenamed event) {
-        PersonName newName = getBuilder().getName()
-                                         .toBuilder()
-                                         .setGivenName(event.getNewFirstName())
-                                         .build();
-        getBuilder().setName(newName);
+    private void on(PersonRenamed event) {
+        PersonVBuilder builder = builder();
+        PersonName newName =
+                builder.getName()
+                       .toBuilder()
+                       .setGivenName(event.getNewFirstName())
+                       .build();
+        builder.setName(newName);
     }
 }

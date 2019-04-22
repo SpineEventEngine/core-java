@@ -33,7 +33,7 @@ import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findM
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findMessageAndContext;
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findMessageOnly;
 import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findReturnsValue;
-import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findThrowsUnchckedException;
+import static io.spine.server.event.model.given.SubscriberSignatureTestEnv.findThrowsUncheckedException;
 
 class SubscriberSignatureTest extends MethodSignatureTest<SubscriberSignature> {
 
@@ -51,7 +51,7 @@ class SubscriberSignatureTest extends MethodSignatureTest<SubscriberSignature> {
         return Stream.of(findReturnsValue(),
                          findContextArgumentMismatch(),
                          findFirstArgumentMismatch(),
-                         findThrowsUnchckedException());
+                         findThrowsUncheckedException());
     }
 
     @Override

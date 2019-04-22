@@ -51,10 +51,10 @@ public class ReactingAggregate
     @React
     Optional<AggProjectArchived> on(AggProjectArchived event) {
         if (event.getChildProjectIdList()
-                 .contains(getId())) {
+                 .contains(id())) {
             AggProjectArchived reaction = AggProjectArchived
                     .newBuilder()
-                    .setProjectId(getId())
+                    .setProjectId(id())
                     .build();
             return Optional.of(reaction);
         } else {
@@ -69,10 +69,10 @@ public class ReactingAggregate
     @React
     Optional<AggProjectDeleted> on(AggProjectDeleted event) {
         if (event.getChildProjectIdList()
-                 .contains(getId())) {
+                 .contains(id())) {
             AggProjectDeleted reaction = AggProjectDeleted
                     .newBuilder()
-                    .setProjectId(getId())
+                    .setProjectId(id())
                     .build();
             return Optional.of(reaction);
         } else {
@@ -81,12 +81,12 @@ public class ReactingAggregate
     }
 
     @Apply
-    void apply(AggProjectArchived event) {
-        getBuilder().setValue(PROJECT_ARCHIVED);
+    private void apply(AggProjectArchived event) {
+        builder().setValue(PROJECT_ARCHIVED);
     }
 
     @Apply
-    void apply(AggProjectDeleted event) {
-        getBuilder().setValue(PROJECT_DELETED);
+    private void apply(AggProjectDeleted event) {
+        builder().setValue(PROJECT_DELETED);
     }
 }

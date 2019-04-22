@@ -24,11 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
@@ -41,6 +37,10 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.procman.model.ProcessManagerClass;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -86,9 +86,15 @@ public abstract class ProcessManager<I,
 
     /**
      * Creates a new instance.
+     */
+    protected ProcessManager() {
+        super();
+    }
+
+    /**
+     * Creates a new instance.
      *
      * @param  id an ID for the new instance
-     * @throws IllegalArgumentException if the ID type is unsupported
      */
     protected ProcessManager(I id) {
         super(id);
@@ -96,7 +102,7 @@ public abstract class ProcessManager<I,
 
     @Internal
     @Override
-    protected ProcessManagerClass<?> getModelClass() {
+    protected ProcessManagerClass<?> modelClass() {
         return asProcessManagerClass(getClass());
     }
 
@@ -120,15 +126,15 @@ public abstract class ProcessManager<I,
      *         or a command handler
      * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
      *          It does not affect the visibility for inheritors, which stays {@code protected}
-     *          {@linkplain io.spine.server.entity.TransactionalEntity#getBuilder() as originally 
+     *          {@linkplain io.spine.server.entity.TransactionalEntity#builder() as originally
      *          defined in parents}.
      *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
      *          for reason behind the warning.
      */
     @Override
     @VisibleForTesting
-    protected B getBuilder() {
-        return super.getBuilder();
+    protected final B builder() {
+        return super.builder();
     }
 
     /**
@@ -152,10 +158,10 @@ public abstract class ProcessManager<I,
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         ProcessManagerClass<?> thisClass = thisClass();
-        CommandClass commandClass = command.getMessageClass();
+        CommandClass commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
-            CommandHandlerMethod method = thisClass.getHandler(commandClass);
+            CommandHandlerMethod method = thisClass.handlerOf(commandClass);
             CommandHandlerMethod.Result result =
                     method.invoke(this, command);
             List<Event> events = result.produceEvents(command);
@@ -163,7 +169,7 @@ public abstract class ProcessManager<I,
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
-            CommandSubstituteMethod method = thisClass.getCommander(commandClass);
+            CommandSubstituteMethod method = thisClass.commanderOf(commandClass);
             CommandSubstituteMethod.Result result = method.invoke(this, command);
             result.transformOrSplitAndPost(command, commandBus);
             return noEvents();
@@ -174,7 +180,7 @@ public abstract class ProcessManager<I,
         throw newIllegalStateException(
                 "ProcessManager `%s` neither handled nor transformed the command " +
                         "(id: `%s` class: `%s`).",
-                this, command.getId(), commandClass
+                this, command.id(), commandClass
         );
     }
 
@@ -192,16 +198,16 @@ public abstract class ProcessManager<I,
      */
     List<Event> dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();
-        EventClass eventClass = event.getMessageClass();
+        EventClass eventClass = event.messageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
-            EventReactorMethod method = thisClass.getReactor(eventClass, event.getOriginClass());
+            EventReactorMethod method = thisClass.reactorOf(eventClass, event.originClass());
             ReactorMethodResult methodResult = method.invoke(this, event);
             List<Event> result = methodResult.produceEvents(event);
             return result;
         }
 
         if (thisClass.producesCommandsOn(eventClass)) {
-            CommandReactionMethod method = thisClass.getCommander(eventClass);
+            CommandReactionMethod method = thisClass.commanderOf(eventClass);
             CommandReactionMethod.Result result = method.invoke(this, event);
             result.produceAndPost(event, commandBus);
             return noEvents();
@@ -212,7 +218,7 @@ public abstract class ProcessManager<I,
         throw newIllegalStateException(
                 "ProcessManager `%s` neither reacted on the event (id: `%s` class: `%s`)," +
                         " nor produced commands.",
-                this, event.getId(), eventClass
+                this, event.id(), eventClass
         );
     }
 
@@ -221,7 +227,7 @@ public abstract class ProcessManager<I,
     }
 
     @Override
-    protected String getMissingTxMessage() {
+    protected String missingTxMessage() {
         return "ProcessManager modification is not available this way. " +
                 "Please modify the state from a command handling or event reacting method.";
     }

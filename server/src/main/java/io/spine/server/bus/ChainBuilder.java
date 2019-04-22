@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.MessageEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -32,7 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A builder for a chain of {@linkplain BusFilter bus filters}.
  *
  * @param <E> type of the filtered envelopes
- * @author Dmytro Dashenkov
  */
 @CanIgnoreReturnValue
 final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
@@ -62,7 +61,7 @@ final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
      *
      * @return new {@link Deque} containing all the filters
      */
-    Deque<BusFilter<E>> getFilters() {
+    Deque<BusFilter<E>> filters() {
         return new ConcurrentLinkedDeque<>(filters);
     }
 

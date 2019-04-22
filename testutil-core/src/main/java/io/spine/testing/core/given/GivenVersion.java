@@ -37,6 +37,6 @@ public final class GivenVersion {
      * Creates {@link Version} with the passed number and current time.
      */
     public static Version withNumber(int number) {
-        return Versions.newVersion(number, Time.getCurrentTime());
+        return Versions.newVersion(number, Time.currentTime());
     }
 }

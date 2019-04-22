@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandClass;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandDispatcher;
@@ -34,6 +33,7 @@ import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDi
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.type.CommandClass;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
@@ -49,11 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings({"OverlyCoupledClass",
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("CommandDispatcherRegistry should")
 class CommandDispatcherRegistryTest {
 
@@ -74,7 +69,7 @@ class CommandDispatcherRegistryTest {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setName(getClass().getSimpleName())
                                                       .build();
-        eventBus = boundedContext.getEventBus();
+        eventBus = boundedContext.eventBus();
         registry = new CommandDispatcherRegistry();
     }
 

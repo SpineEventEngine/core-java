@@ -1,0 +1,169 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import com.google.common.io.Files
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+
+    apply from: "$rootDir/config/gradle/dependencies.gradle"
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath deps.build.guava
+    }
+}
+
+apply from: deps.scripts.filterInternalJavadocs
+
+ext {
+    javaDocFolder = Files.createTempDir()
+    repositoryTempDir = Files.createTempDir()
+}
+
+/**
+ * Copies the Javadoc produced by {@code :noInternalJavadoc} task into a temporary folder.
+ */
+task copyJavadoc(type: Copy) {
+    from noInternalJavadoc
+    into javaDocFolder
+}
+
+/**
+ * Updates the Javadoc documentation on the {@code gh-pages} Git branch.
+ *
+ * <p>Run this task when it is required to update the Javadoc e.g. when merging a branch into
+ * {@code master}.
+ */
+task updateGitHubPages {
+    description "Updates the Javadoc published to GitHub Pages website."
+    dependsOn copyJavadoc
+}
+
+/**
+ * Waits for the given {@code process} to finish and retrieves the result of execution.
+ *
+ * @param process the process to execute
+ * @return a tuple of format: [exitCode:<Process exit code integer>,
+ *                             out: <Process stdout output as a String>,
+ *                             error: <Process stderr output as a String>]
+ */
+static def executeForResult(final Process process) {
+    final def outWriter = new StringWriter()
+    final def errWriter = new StringWriter()
+    process.consumeProcessOutputStream(outWriter)
+    process.consumeProcessErrorStream(errWriter)
+    final int exitCode = process.waitFor()
+    final def result = [out: outWriter.toString(), error: errWriter.toString(), exitCode: exitCode]
+    return result
+}
+
+/**
+ * Executes the given terminal command and retrieves the command output.
+ *
+ * <p>{@link Runtime#exec(String[], String[], File) Executes} the given {@code String} array as
+ * a CLI command. If the execution is successful, returns the command output. Throws
+ * an {@link IllegalStateException} otherwise.
+ *
+ * @param baseDir the directory of the command execution
+ * @param command the command to execute
+ * @return the command line output
+ * @throws IllegalStateException upon an execution error
+ */
+String execute(final File baseDir, final String... command) {
+    final Runtime runtime = Runtime.getRuntime()
+    final Process proc = runtime.exec(command, /*env=*/ (String[]) null, baseDir)
+    final def result = executeForResult(proc)
+    if (result.exitCode == 0) {
+        return result.out
+    } else {
+        final String errorMsg = "Command `$command` finished with exit code $result.exitCode:" +
+                " ${System.lineSeparator()}${result.error}"
+        throw new IllegalStateException(errorMsg)
+    }
+}
+
+/**
+ * Executes the given terminal command and retrieves the command output.
+ *
+ * <p>This is a convenience method. Calling this method is equivalent to calling
+ * {@code execute(project.rootDir, command)}.
+ */
+String execute(final String... command) {
+    return execute(rootDir, command)
+}
+
+/**
+ * The GitHub URL to the {@code core-java} project.
+ *
+ * <p>The host name is {@code github.com-publish}, though resolved to {@code github.com} by SSH on
+ * Travis due to the {@code .travis_ssh_config} configuration. This is used to make it possible
+ * to have multiple SSH private keys on Travis (since there is one already on Travis).
+ */
+final String GIT_HOST = "git@github.com-publish:SpineEventEngine/core-java.git"
+
+/**
+ * The GitHub deploy key used to push the Javadoc changes to the {@code gh-pages} branch.
+ */
+final File gitHubAccessKey = "$rootDir/deploy_key_rsa" as File
+
+updateGitHubPages.doLast {
+    final def GH_PAGES_BRANCH = "gh-pages"
+
+    final def repoBaseDir = "$repositoryTempDir/$GH_PAGES_BRANCH" as File
+    final def javaDocDirPostfix = "javadoc/$project.name"
+    final def javaDocDir = "$repoBaseDir/$javaDocDirPostfix" as File
+
+    copy {
+        from "$rootDir/.travis_ssh_config"
+        into "${System.getProperty("user.home")}/.ssh/"
+        rename { 'config' }
+        filter(ReplaceTokens, tokens: [rsakey: gitHubAccessKey.absolutePath])
+    }
+    execute "$rootDir/scripts/add-to-ssh.sh", gitHubAccessKey.absolutePath
+    execute "git", "clone", GIT_HOST, "$repoBaseDir"
+    execute repoBaseDir, "git", "checkout", GH_PAGES_BRANCH
+    logger.debug("Updating Javadoc on GitHub Pages in directory `$javaDocDir`")
+    javaDocDir.mkdir()
+
+    copy {
+        from javaDocFolder
+        into javaDocDir
+    }
+
+    execute repoBaseDir, "git", "add", javaDocDirPostfix
+
+    /**
+     * Publish the changes under "UpdateGitHubPages Plugin" Git user name and email stored in
+     * "FORMAL_GIT_HUB_PAGES_AUTHOR" env variable.
+     *
+     * <p>When changing the value of "FORMAL_GIT_HUB_PAGES_AUTHOR", also change the SSH private
+     * (deploy_key_rsa.enc) and public ("GitHub Pages publisher (Travis CI)" on GitHub) keys.
+     */
+    execute repoBaseDir, "git", "config", "user.name", "\"UpdateGitHubPages Plugin\""
+    execute repoBaseDir, "git", "config", "user.email", System.env.FORMAL_GIT_HUB_PAGES_AUTHOR
+
+    execute repoBaseDir, "git", "commit", "--message=\"Update Javadoc for module $project.name as for version $project.version\""
+    execute repoBaseDir, "git", "push"
+    logger.debug("Updated Javadoc on GitHub Pages in directory `$javaDocDir` sucessfully")
+}

@@ -33,24 +33,18 @@ import io.spine.type.TypeUrl;
 
 /**
  * An aggregate handling company-related commands.
- *
- * @author Dmytro Dashenkov
  */
 public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuilder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(Company.class);
     public static final String TAKEN_NAME = "NameIsTaken!";
 
-    private CompanyAggregate(CompanyId id) {
-        super(id);
-    }
-
     @Assign
     CompanyEstablished handle(EstablishCompany command) throws CompanyNameAlreadyTaken {
         if (TAKEN_NAME.equals(command.getFinalName())) {
             throw CompanyNameAlreadyTaken
                     .newBuilder()
-                    .setId(getId())
+                    .setId(id())
                     .setTakenName(TAKEN_NAME)
                     .build();
         }
@@ -62,8 +56,8 @@ public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuil
     }
 
     @Apply
-    void on(CompanyEstablished event) {
-        getBuilder().setId(event.getId())
-                    .setName(event.getName());
+    private void on(CompanyEstablished event) {
+        builder().setId(event.getId())
+                 .setName(event.getName());
     }
 }

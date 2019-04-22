@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "MirrorProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/core/version.proto";
+import "spine/server/entity/entity.proto";
+
+// A state of a domain aggregate represented in the associated System context.
+//
+message Mirror {
+    option (entity).kind = PROJECTION;
+
+    MirrorId id = 1 [(required) = true, (valid) = true];
+
+    // The state of the aggregate.
+    google.protobuf.Any state = 2 [(required) = false, (valid) = true];
+
+    // The lifecycle flags of the aggregate.
+    //
+    // This field is here for convenience. The own lifecycle flags of a mirror projection duplicate
+    // the flags of corresponding aggregate.
+    //
+    spine.server.entity.LifecycleFlags lifecycle = 3;
+
+    // Custom entity columns of the aggregate.
+    EntityColumns columns = 4;
+
+    // The version of the aggregate.
+    core.Version version = 5;
+}
+
+// An ID of a mirror projection.
+//
+message MirrorId {
+
+    // The ID of the corresponding aggregate packed as Any.
+    google.protobuf.Any value = 1 [(required) = true, (valid) = true];
+
+    string type_url = 2 [(required) = true];
+}
+
+// Entity columns of the associated aggregate.
+message EntityColumns {
+
+    // TODO:2018-09-06:dmytro.dashenkov: Support entity columns.
+    // https://github.com/SpineEventEngine/core-java/issues/400
+
+    map<string, google.protobuf.Any> columns = 1;
+}

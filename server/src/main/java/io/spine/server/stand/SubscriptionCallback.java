@@ -22,8 +22,8 @@ package io.spine.server.stand;
 
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.core.EventEnvelope;
 import io.spine.server.stand.Stand.NotifySubscriptionAction;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -63,7 +63,7 @@ abstract class SubscriptionCallback {
     protected void run(EventEnvelope event) {
         checkState(isActive(),
                    "Dispatched an event of type %s to the non-active subscription with ID %s",
-                   TypeUrl.of(event.getMessage()), subscription.getId().getValue());
+                   TypeUrl.of(event.message()), subscription.getId().getValue());
 
         SubscriptionUpdate update = createSubscriptionUpdate(event);
         notifyAction.accept(update);

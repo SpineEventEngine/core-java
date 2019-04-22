@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static io.spine.core.Events.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
@@ -38,8 +37,8 @@ import static io.spine.protobuf.AnyPacker.pack;
  * <p>A filter may {@linkplain #allowAll() allow any event}, reject certain types of events, or
  * change the event content.
  *
- * @apiNote This type is a {@link FunctionalInterface}, so that an event filter may be defined
- *          with a lambda expression.
+ * @apiNote This type is a {@link FunctionalInterface}, so that an event filter may be
+ *         defined with a lambda expression.
  */
 @SPI
 @FunctionalInterface
@@ -69,8 +68,8 @@ public interface EventFilter {
      * @param event
      *         the event to apply the filter to
      * @return processed event or {@link Optional#empty()} if the event should not be posted
-     * @apiNote This method may never return a present value or return a value not derived from
-     *          the input event. See the implementations for the details for each case.
+     * @apiNote This method may never return a present value or return a value not derived
+     *         from the input event. See the implementations for the details for each case.
      */
     Optional<? extends EventMessage> filter(EventMessage event);
 
@@ -81,15 +80,15 @@ public interface EventFilter {
      *         the events to apply the filter to
      * @return non-empty filtering results for the given events
      * @apiNote This method should have the same behaviour in any descendant.
-     *          Override this method <b>only</b> for performance improvement.
+     *         Override this method <b>only</b> for performance improvement.
      */
     default ImmutableCollection<Event> filter(Collection<Event> events) {
         ImmutableCollection<Event> filteredEvents = events
                 .stream()
                 .map(event -> {
-                    EventMessage eventMessage = getMessage(event);
+                    EventMessage eventMessage = event.enclosedMessage();
                     Optional<? extends EventMessage> filtered = filter(eventMessage);
-                    Optional<Event> result = filtered.map(message -> event.toBuilder()
+                    Optional<Event> result = filtered.map(message -> event.toVBuilder()
                                                                           .setMessage(pack(message))
                                                                           .build());
                     return result;

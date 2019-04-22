@@ -24,8 +24,6 @@ import io.spine.server.aggregate.model.AggregateClass;
 
 /**
  * Provides information on model classes for entities of {@link io.spine.system.server} package.
- *
- * @author Alexander Yevsyukov
  */
 public final class ModelInfo {
 

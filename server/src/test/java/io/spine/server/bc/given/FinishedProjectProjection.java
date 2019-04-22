@@ -34,7 +34,7 @@ public class FinishedProjectProjection extends Projection<ProjectId, Project, Pr
     }
 
     @Subscribe
-    public void on(ProjectFinished finished) {
+    void on(ProjectFinished finished) {
         // For testing purposes ignoring the event is fine.
     }
 }

@@ -67,8 +67,8 @@ final class Write<I> {
         checkNotNull(aggregate);
 
         AggregateStorage<I> storage = repository.aggregateStorage();
-        int snapshotTrigger = repository.getSnapshotTrigger();
-        I id = aggregate.getId();
+        int snapshotTrigger = repository.snapshotTrigger();
+        I id = aggregate.id();
         return new Write<>(storage, aggregate, id, snapshotTrigger);
     }
 
@@ -82,7 +82,7 @@ final class Write<I> {
     }
 
     private void writeEvents(List<Event> events) {
-        int eventCount = aggregate.getEventCountAfterLastSnapshot();
+        int eventCount = aggregate.eventCountAfterLastSnapshot();
         Collection<Event> eventBatch = newArrayListWithCapacity(snapshotTrigger);
         for (Event event : events) {
             eventBatch.add(event);
@@ -126,7 +126,7 @@ final class Write<I> {
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
         aggregate.setEventCountAfterLastSnapshot(eventCount);
         if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
+            storage.writeLifecycleFlags(aggregate.id(), aggregate.lifecycleFlags());
         }
     }
 }

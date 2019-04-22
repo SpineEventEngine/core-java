@@ -49,7 +49,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.FieldMaskUtil.fromStringList;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.Time.getCurrentTime;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.server.storage.given.RecordStorageTestEnv.withLifecycleColumns;
@@ -226,13 +226,13 @@ public abstract class ProjectionStorageTest
         @Test
         @DisplayName("once")
         void once() {
-            writeAndReadLastEventTimeTest(getCurrentTime());
+            writeAndReadLastEventTimeTest(currentTime());
         }
 
         @Test
         @DisplayName("several times")
         void severalTimes() {
-            Timestamp time1 = getCurrentTime();
+            Timestamp time1 = currentTime();
             Timestamp time2 = add(time1, fromSeconds(10L));
             writeAndReadLastEventTimeTest(time1);
             writeAndReadLastEventTimeTest(time2);

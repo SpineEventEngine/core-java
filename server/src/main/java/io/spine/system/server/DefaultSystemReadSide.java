@@ -20,8 +20,8 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -44,7 +44,7 @@ final class DefaultSystemReadSide implements SystemReadSide {
 
     DefaultSystemReadSide(SystemContext context) {
         this.context = context;
-        this.eventBus = context.getEventBus();
+        this.eventBus = context.eventBus();
     }
 
     @Override
@@ -60,18 +60,17 @@ final class DefaultSystemReadSide implements SystemReadSide {
     }
 
     @Override
-    public Iterator<Any> readDomainAggregate(Query query) {
-        @SuppressWarnings("unchecked") // Logically checked.
+    public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
         MirrorRepository repository = (MirrorRepository)
                 context.findRepository(Mirror.class)
                        .orElseThrow(
                                () -> newIllegalStateException(
-                                       "Mirror projection repository is not registered in %s.",
-                                       context.getName()
+                                       "Mirror projection repository is not registered in `%s`.",
+                                       context.name()
                                               .getValue()
                                )
                        );
-        Iterator<Any> result = repository.execute(query);
+        Iterator<EntityStateWithVersion> result = repository.execute(query);
         return result;
     }
 }
