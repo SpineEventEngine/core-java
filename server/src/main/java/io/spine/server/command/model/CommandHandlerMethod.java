@@ -20,13 +20,11 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.server.EventProducer;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.procman.ProcessManager;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 
@@ -44,7 +42,8 @@ public final class CommandHandlerMethod
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method   command handler method
+     * @param method
+     *         command handler method
      */
     CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);
@@ -67,31 +66,12 @@ public final class CommandHandlerMethod
             super(producer, rawMethodResult);
             List<EventMessage> eventMessages = toMessages(rawMethodResult);
             List<EventMessage> filtered = filterIgnored(eventMessages);
-            ensureNotEmptyIfNotProcessManager(filtered, producer);
-            setMessages(filtered);
-        }
-
-        /**
-         * Ensures that a command handler method produces one or more event messages.
-         *
-         * <p>The only allowed exception to this are {@link ProcessManager} instances returning
-         * empty from command handlers.
-         *
-         * @param eventMessages  the events produced as the result of the command handling
-         * @param target         the target on which the method was executed
-         * @throws IllegalStateException if the command handling method did not produce any events
-         */
-        private static void ensureNotEmptyIfNotProcessManager(List<? extends Message> eventMessages,
-                                                              Object target) {
-
+            
             //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning empty events from `ProcessManager`
-            //todo    in favor of "Expect<...>" construction.
-            //todo    See https://github.com/SpineEventEngine/core-java/issues/790.
-            boolean empty = eventMessages.isEmpty();
-            if (empty) {
-                boolean procman = target instanceof ProcessManager;
-                checkState(procman, "Command handling method did not produce events");
-            }
+            // in favor of "Expect<...>" construction.
+            // See https://github.com/SpineEventEngine/core-java/issues/790.
+            checkState(!filtered.isEmpty(), "Command handling method did not produce events");
+            setMessages(filtered);
         }
     }
 }

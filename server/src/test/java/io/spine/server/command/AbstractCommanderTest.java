@@ -60,8 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AbstractCommanderTest {
 
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
-    private final EventFactory eventFactory =
-            TestEventFactory.newInstance(getClass());
+    private final EventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     private final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                 .build();
@@ -85,7 +84,7 @@ class AbstractCommanderTest {
     @DisplayName("create a command in response to a command")
     void commandOnCommand() {
         CmdCreateProject commandMessage = CmdCreateProject
-                .newBuilder()
+                .vBuilder()
                 .setProjectId(newProjectId())
                 .build();
         createCommandAndPost(commandMessage);
@@ -97,9 +96,11 @@ class AbstractCommanderTest {
     @DisplayName("create a command on an event")
     void commandOnEvent() {
         CmdTaskAdded eventMessage = CmdTaskAdded
-                .newBuilder()
+                .vBuilder()
                 .setProjectId(newProjectId())
-                .setTask(Task.newBuilder().setTaskId(newTaskId()))
+                .setTask(Task.vBuilder()
+                             .setTaskId(newTaskId())
+                             .build())
                 .build();
 
         createEventAndPost(eventMessage);
@@ -132,21 +133,21 @@ class AbstractCommanderTest {
 
     private static ProjectId newProjectId() {
         return ProjectId
-                .newBuilder()
+                .vBuilder()
                 .setId(newUuid())
                 .build();
     }
 
     private static TaskId newTaskId() {
         return TaskId
-                .newBuilder()
+                .vBuilder()
                 .setId(random(1, 100))
                 .build();
     }
 
     private static UserId newUserId() {
         return UserId
-                .newBuilder()
+                .vBuilder()
                 .setValue(newUuid())
                 .build();
 
@@ -168,12 +169,12 @@ class AbstractCommanderTest {
         TaskId taskId = newTaskId();
         UserId userId = newUserId();
         Task task = Task
-                .newBuilder()
+                .vBuilder()
                 .setTaskId(taskId)
                 .setAssignee(userId)
                 .build();
         CmdCreateTask commandMessage = CmdCreateTask
-                .newBuilder()
+                .vBuilder()
                 .setTaskId(taskId)
                 .setTask(task)
                 .setStart(startTask)
@@ -193,7 +194,7 @@ class AbstractCommanderTest {
         @Command
         FirstCmdCreateProject on(CmdCreateProject command) {
             return FirstCmdCreateProject
-                    .newBuilder()
+                    .vBuilder()
                     .setId(command.getProjectId())
                     .build();
         }
@@ -201,7 +202,7 @@ class AbstractCommanderTest {
         @Command
         CmdSetTaskDescription on(CmdTaskAdded event) {
             return CmdSetTaskDescription
-                    .newBuilder()
+                    .vBuilder()
                     .setTaskId(event.getTask()
                                     .getTaskId())
                     .setDescription("Testing command creation on event")
@@ -214,13 +215,13 @@ class AbstractCommanderTest {
             UserId assignee = command.getTask()
                                      .getAssignee();
             CmdAssignTask cmdAssignTask = CmdAssignTask
-                    .newBuilder()
+                    .vBuilder()
                     .setTaskId(taskId)
                     .setAssignee(assignee)
                     .build();
             CmdStartTask cmdStartTask = command.getStart()
                                         ? CmdStartTask
-                                                .newBuilder()
+                                                .vBuilder()
                                                 .setTaskId(taskId)
                                                 .build()
                                         : null;

@@ -50,32 +50,36 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Assign
     PersonCreated handle(CreatePerson command) {
-        return PersonCreated.newBuilder()
-                            .setId(command.getId())
-                            .setName(command.getName())
-                            .build();
+        return PersonCreated
+                .vBuilder()
+                .setId(command.getId())
+                .setName(command.getName())
+                .build();
     }
 
     @Assign
     PersonHidden handle(HidePerson command) {
-        return PersonHidden.newBuilder()
-                           .setId(command.getId())
-                           .build();
+        return PersonHidden
+                .vBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
     PersonExposed handle(ExposePerson command) {
-        return PersonExposed.newBuilder()
-                            .setId(command.getId())
-                            .build();
+        return PersonExposed
+                .vBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
     PersonRenamed handle(RenamePerson command) {
-        return PersonRenamed.newBuilder()
-                            .setId(command.getId())
-                            .setNewFirstName(command.getNewFirstName())
-                            .build();
+        return PersonRenamed
+                .vBuilder()
+                .setId(command.getId())
+                .setNewFirstName(command.getNewFirstName())
+                .build();
     }
 
     @Apply
@@ -97,11 +101,11 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Apply
     private void on(PersonRenamed event) {
         PersonVBuilder builder = builder();
-        PersonName newName =
-                builder.getName()
-                       .toBuilder()
-                       .setGivenName(event.getNewFirstName())
-                       .build();
+        PersonName newName = builder
+                .getName()
+                .toBuilder()
+                .setGivenName(event.getNewFirstName())
+                .build();
         builder.setName(newName);
     }
 }
