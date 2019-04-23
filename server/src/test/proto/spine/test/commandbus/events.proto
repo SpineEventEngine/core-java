@@ -17,58 +17,54 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 syntax = "proto3";
 
-package spine.test.system.server;
+package spine.test.commandbus;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.system.server";
-option java_outer_classname = "EHCommandsProto";
+option java_package="io.spine.test.commandbus.event";
+option java_outer_classname = "CommandBusEventsProto";
 option java_multiple_files = true;
 
-import "spine/people/person_name.proto";
-import "spine/test/system/server/entity_history_test.proto";
+import "spine/core/user_id.proto";
+import "spine/test/commandbus/project.proto";
 
-message CreatePerson {
+message CmdBusProjectCreated {
 
-    PersonId id = 1 [(required) = true];
-
-    spine.people.PersonName name = 2;
+    ProjectId project_id = 1;
 }
 
-message CreatePersonName {
-
-    PersonId id = 1 [(required) = true];
-
-    string first_name = 2;
+message CmdBusTaskAdded {
+    ProjectId project_id = 1;
+    Task task = 2;
 }
 
-message RenamePerson {
-
-    PersonId id = 1 [(required) = true];
-
-    string new_first_name = 2;
+message CmdBusTaskRemoved {
+    ProjectId project_id = 1;
+    Task task = 2;
 }
 
-message HidePerson {
-
-    PersonId id = 1 [(required) = true];
+message CmdBusTaskAssigned {
+    TaskId task_id = 1;
+    core.UserId assignee = 2;
 }
 
-message ExposePerson {
-
-    PersonId id = 1 [(required) = true];
+message CmdBusTaskStarted {
+    TaskId task_id = 1;
 }
 
-message CompletePersonCreation {
-
-    PersonId id = 1 [(required) = true];
+message CmdBusProjectStarted {
+    ProjectId project_id = 1;
 }
 
-message StartPersonCreation {
+message CmdBusMandatoryFieldEvent {
+    ProjectId project_id = 1 [(required) = true];
+}
 
-    PersonId id = 1 [(required) = true];
+// An event emitted when a project is created for duplicate command tests.
+//
+message DCmdBusProjectCreated {
+    ProjectId project_id = 1;
 }
