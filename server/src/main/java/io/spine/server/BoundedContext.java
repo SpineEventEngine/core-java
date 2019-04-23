@@ -301,7 +301,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Obtains a set of entity type names by their visibility.
      */
     public Set<TypeName> entityStateTypes(Visibility visibility) {
-        Set<TypeName> result = guard.getEntityStateTypes(visibility);
+        Set<TypeName> result = guard.entityStateTypes(visibility);
         return result;
     }
 
@@ -330,7 +330,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
             throw newIllegalStateException("No repository found for the the entity state class %s",
                                            entityStateClass.getName());
         }
-        Optional<Repository> repository = guard.getRepository(entityStateClass);
+        Optional<Repository> repository = guard.repositoryFor(entityStateClass);
         return repository;
     }
 

@@ -65,9 +65,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
@@ -236,14 +238,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @VisibleForTesting
     Set<TypeName> getAllEntityStateTypes() {
-        ImmutableSet.Builder<TypeName> result = ImmutableSet.builder();
-        for (Visibility visibility : Visibility.values()) {
-            if (visibility == Visibility.VISIBILITY_UNKNOWN) {
-                continue;
-            }
-            result.addAll(boundedContext.entityStateTypes(visibility));
-        }
-        return result.build();
+        ImmutableSet<TypeName> types = Stream
+                .of(Visibility.values())
+                .flatMap(visibility -> boundedContext.entityStateTypes(visibility).stream())
+                .collect(toImmutableSet());
+        return types;
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */

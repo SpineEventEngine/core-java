@@ -23,11 +23,9 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.option.EntityOptions;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,15 +33,12 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.common.collect.Maps.filterValues;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A registry of repositories that controls access to them depending on the visibility of
  * corresponding entity states.
- *
- * @see EntityOptions
  */
 @Internal
 public final class VisibilityGuard {
@@ -103,7 +98,7 @@ public final class VisibilityGuard {
      *         prior to this call, or if all repositories were
      *         {@linkplain #shutDownRepositories() shut down}
      */
-    public Optional<Repository> getRepository(Class<? extends Message> stateClass) {
+    public Optional<Repository> repositoryFor(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
         RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
@@ -117,24 +112,16 @@ public final class VisibilityGuard {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityStateTypes(Visibility visibility) {
+    public Set<TypeName> entityStateTypes(Visibility visibility) {
         checkNotNull(visibility);
-
-        // Filter repositories of entities with this visibility.
-        Collection<RepositoryAccess> repos =
-                filterValues(repositories,
-                             input -> {
-                                 checkNotNull(input);
-                                 return input.visibility == visibility;
-                             }).values();
-
-        // Get type names for entities of the filtered repositories.
-        Set<TypeName> entityTypes =
-                repos.stream()
-                     .map(input -> input.repository.entityStateType()
+        Set<TypeName> result = repositories.values()
+                                           .stream()
+                                           .filter(access -> access.visibility.is(visibility))
+                                           .map(access -> access.repository
+                                                   .entityStateType()
                                                    .toTypeName())
-                     .collect(toImmutableSet());
-        return entityTypes;
+                                           .collect(toImmutableSet());
+        return result;
     }
 
     /**
@@ -153,20 +140,20 @@ public final class VisibilityGuard {
     private static class RepositoryAccess {
 
         private final Repository repository;
-        private final Visibility visibility;
+        private final EntityVisibility visibility;
 
         private RepositoryAccess(Repository repository) {
             this.repository = repository;
             @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
             Class<? extends Message> stateClass = repository.entityModelClass()
                                                             .stateClass();
-            this.visibility = EntityOptions.getVisibility(stateClass);
+            this.visibility = EntityVisibility.of(stateClass);
         }
 
         private Optional<Repository> get() {
-            return (visibility == Visibility.NONE)
-                    ? Optional.empty()
-                    : Optional.of(repository);
+            return visibility.isNotNone()
+                   ? Optional.of(repository)
+                   : Optional.empty();
         }
     }
 }
