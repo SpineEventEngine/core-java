@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 
 /**
- * A factory for the various requests fired from the client-side by an actor.
+ * A factory for various requests fired from the client-side by an actor.
  */
 public class ActorRequestFactory {
 
@@ -114,7 +114,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Obtains the ID of the tenant to which the actor belongs, or {@code null}
+     * Obtains the ID of the tenant to which the actor belongs or {@code null}
      * for single-tenant execution context.
      */
     public @Nullable TenantId tenantId() {
@@ -122,7 +122,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates a copy of this factory placed at new time zone with the passed offset and ID.
+     * Creates a copy of this factory placed at a new time zone with the passed offset and ID.
      *
      * <p>Use this method for obtaining new request factory as the user moves to a new location.
      *
@@ -143,7 +143,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates a copy of this factory placed at new time zone with the passed ID.
+     * Creates a copy of this factory placed at a new time zone with the passed ID.
      *
      * <p>The zone offset is calculated using the current time.
      *
@@ -199,7 +199,7 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
+     * Creates an {@linkplain ActorContext actor context} based on the factory properties.
      *
      * <p>Sets the timestamp value to the
      * {@linkplain io.spine.base.Time#currentTime() current time}.
