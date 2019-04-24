@@ -35,6 +35,7 @@ message Project {
 
     // Keep the message generic. It is used both as an aggregate and a projection state.
     option (entity).kind = ENTITY;
+    option (entity).visibility = SUBSCRIBE;
 
     ProjectId id = 1 [(required) = false, (set_once) = false];
 
