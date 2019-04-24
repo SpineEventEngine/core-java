@@ -49,8 +49,10 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * Abstract base for entities.
  *
- * @param <I> the type of entity identifiers
- * @param <S> the type of entity state objects
+ * @param <I>
+ *         the type of entity identifiers
+ * @param <S>
+ *         the type of entity state objects
  */
 @SuppressWarnings({
         "SynchronizeOnThis" /* This class uses double-check idiom for lazy init of some
@@ -141,8 +143,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Creates a new instance with the passed ID and default entity state obtained
      * from the passed function.
      *
-     * @param id the ID of the new entity
-     * @param defaultState the function to obtain new entity state
+     * @param id
+     *         the ID of the new entity
+     * @param defaultState
+     *         the function to obtain new entity state
      */
     protected AbstractEntity(I id, Function<I, S> defaultState) {
         this(id);
@@ -225,11 +229,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * <p>The new state must be {@linkplain #validate(Message) valid}.
      *
-     * @param  state the new state to set
+     * @param state
+     *         the new state to set
      * @throws InvalidEntityStateException
      *         if the passed state is not {@linkplain #validate(Message) valid}
      */
-    protected final void updateState(S state) {
+    final void updateState(S state) {
         validate(state);
         setState(state);
     }
@@ -355,7 +360,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
-     * @throws CannotModifyArchivedEntity if the entity in in the archived status
+     * @throws CannotModifyArchivedEntity
+     *         if the entity in in the archived status
      * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getArchived()
      */
@@ -372,7 +378,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Ensures that the entity is not marked as {@code deleted}.
      *
-     * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
+     * @throws CannotModifyDeletedEntity
+     *         if the entity is marked as {@code deleted}
      * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getDeleted()
      */
@@ -439,7 +446,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         if (currentVersionNumber > newVersionNumber) {
             throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
-                    "of the entity with the version number %d.",
+                            "of the entity with the version number %d.",
                     newVersionNumber, currentVersionNumber);
         }
         setVersion(newVersion);
@@ -453,7 +460,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * <p>Please use {@link #updateState(Message, Version)} directly in the production code.
      *
-     * @param newState a new state to set
+     * @param newState
+     *         a new state to set
      */
     @VisibleForTesting
     void incrementState(S newState) {
