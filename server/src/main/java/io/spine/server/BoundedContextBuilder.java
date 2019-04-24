@@ -57,8 +57,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A builder for producing {@code BoundedContext} instances.
  *
- * <p>An application can have more than one bounded context. To distinguish
- * them use {@link #setName(String)}. If no ID is given the default ID will be assigned.
+ * <p>An application can have more than one Bounded Context. To distinguish
+ * them, use {@link #setName(String)}. If no ID is given the default, an ID will be assigned.
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
@@ -89,15 +89,15 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Sets the value of the name for a new bounded context.
+     * Sets the value of the name for a new Bounded Context.
      *
      * <p>It is the responsibility of an application developer to provide meaningful and unique
-     * names for bounded contexts. The framework does not check for duplication of names.
+     * names for Bounded Contexts. The framework does not check for duplication of names.
      *
      * <p>If the name is not defined in the builder, the context will get
      * {@link BoundedContextNames#assumingTests()} name.
      *
-     * @param name an identifier string for a new bounded context.
+     * @param name an identifier string for a new Bounded Context.
      *             Cannot be null, empty, or blank
      */
     @CanIgnoreReturnValue
@@ -106,15 +106,15 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Sets the name for a new bounded context.
+     * Sets the name for a new Bounded Context.
      *
      * <p>It is the responsibility of an application developer to provide meaningful and unique
-     * names for bounded contexts. The framework does not check for duplication of names.
+     * names for Bounded Contexts. The framework does not check for duplication of names.
      *
      * <p>If the name is not defined in the builder, the context will get
      * {@link BoundedContextNames#assumingTests()} name.
      *
-     * @param name an identifier string for a new bounded context.
+     * @param name an identifier string for a new Bounded Context.
      *             Cannot be null, empty, or blank
      */
     @CanIgnoreReturnValue
@@ -286,7 +286,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Creates a new instance of {@code BoundedContext} with the set configurations.
      *
-     * <p>The resulting domain-specific bounded context has as internal System Bounded Context.
+     * <p>The resulting domain-specific Bounded Context has as internal System Bounded Context.
      * The entities of the System domain describe the entities of the resulting Bounded Context.
      *
      * <p>The System Bounded Context shares some configuration with the Domain Bounded Context,
@@ -299,8 +299,8 @@ public final class BoundedContextBuilder implements Logging {
      *
      * <p>All the other configuration is NOT shared.
      *
-     * <p>The name of the System bounded context is derived from the name of the domain bounded
-     * context.
+     * <p>The name of the System Bounded Context is derived from the name of the Domain Bounded
+     * Context.
      *
      * @return new {@code BoundedContext}
      */

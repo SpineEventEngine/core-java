@@ -94,7 +94,7 @@ public class CommandService
          */
         @CanIgnoreReturnValue
         public Builder add(BoundedContext boundedContext) {
-            // Save it to a temporary set so that it is easy to remove it if needed.
+            // Saves it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
             return this;
         }
