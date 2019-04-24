@@ -64,7 +64,8 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @Assign
-    EitherOf3<PmQuestionSolved, PmQuestionFailed, PmQuestionAlreadySolved> handle(PmAnswerQuestion command) {
+    EitherOf3<PmQuestionSolved, PmQuestionFailed, PmQuestionAlreadySolved>
+    handle(PmAnswerQuestion command) {
         PmAnswer answer = command.getAnswer();
         PmQuizId examId = command.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
