@@ -46,6 +46,11 @@ message PmQuestionSolved {
     PmQuestionId question_id = 2 [(required) = true];
 }
 
+message PmQuestionAlreadySolved {
+    PmQuizId quiz_id = 1 [(required) = true];
+    PmQuestionId question_id = 2 [(required) = true];
+}
+
 message PmQuestionFailed {
     PmQuizId quiz_id = 1 [(required) = true];
     PmQuestionId question_id = 2 [(required) = true];
