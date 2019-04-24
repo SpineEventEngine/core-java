@@ -97,12 +97,12 @@ public final class QueryFactory {
      * such invalid paths are silently ignored.
      *
      * @param entityClass
-     *         class of a target entity
+     *         the class of a target entity
      * @param ids
-     *         IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
      *         which is supported as identifier}
      * @param maskPaths
-     *         property paths for the {@code FieldMask} applied
+     *         the property paths for the {@code FieldMask} applied
      *         to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
@@ -127,9 +127,9 @@ public final class QueryFactory {
      * will not change the resulting entities.
      *
      * @param entityClass
-     *         class of a target entity
+     *         the class of a target entity
      * @param ids
-     *         IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
+     *         the IDs of interest of type {@link io.spine.base.Identifier#checkSupported(Class)
      *         which is supported as identifier}
      * @return an instance of {@code Query} formed according to the passed parameters
      * @throws IllegalArgumentException
@@ -155,9 +155,9 @@ public final class QueryFactory {
      * are silently ignored.
      *
      * @param entityClass
-     *         class of a target entity
+     *        the class of a target entity
      * @param maskPaths
-     *         property paths for the {@code FieldMask} applied to each of the results
+     *        the property paths for the {@code FieldMask} applied to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
