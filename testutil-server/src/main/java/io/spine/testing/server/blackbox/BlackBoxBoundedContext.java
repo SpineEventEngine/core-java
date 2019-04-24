@@ -21,7 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -34,7 +33,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
-import io.spine.option.EntityOption.Visibility;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -65,11 +63,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
@@ -237,12 +233,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting
-    Set<TypeName> getAllEntityStateTypes() {
-        ImmutableSet<TypeName> types = Stream
-                .of(Visibility.values())
-                .flatMap(visibility -> boundedContext.entityStateTypes(visibility).stream())
-                .collect(toImmutableSet());
-        return types;
+    Set<TypeName> allEntityStateTypes() {
+        return boundedContext.entityStateTypes();
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */

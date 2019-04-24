@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.spine.base.CommandMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -34,13 +35,16 @@ import io.spine.client.grpc.QueryServiceGrpc.QueryServiceBlockingStub;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.UserId;
+import io.spine.grpc.StreamObservers;
 import io.spine.logging.Logging;
+import io.spine.string.Stringifiers;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -98,8 +102,17 @@ public class TestClient implements Logging {
     public QueryResponse queryAll(Class<? extends Message> messageType) {
         Query query = requestFactory.query()
                                     .all(messageType);
-        QueryResponse result = queryClient.read(query);
-        return result;
+        try {
+            QueryResponse result = queryClient.read(query);
+            return result;
+        } catch (StatusRuntimeException e) {
+            String message = e.getMessage();
+            _error("Error occurred when executing query: {}",
+                   StreamObservers.fromStreamError(e)
+                                  .map(Stringifiers::toString)
+                                  .orElse(message));
+            throw newIllegalStateException(e, message);
+        }
     }
 
     /**
