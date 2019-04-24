@@ -20,6 +20,9 @@
 
 package io.spine.server.entity;
 
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.ImmutableGraph;
+import com.google.common.graph.MutableGraph;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
@@ -32,6 +35,7 @@ import io.spine.type.TypeName;
 
 import java.io.Serializable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.option.EntityOption.Visibility.DEFAULT;
@@ -45,6 +49,29 @@ import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 public final class EntityVisibility implements Serializable {
 
     private static final long serialVersionUID = 0L;
+
+    private static final ImmutableGraph<Visibility> ALLOWED_VISIBILITIES;
+
+    static {
+        MutableGraph<Visibility> mutableGraph = GraphBuilder
+                .directed()
+                .expectedNodeCount(Visibility.values().length)
+                .allowsSelfLoops(true)
+                .build();
+        mutableGraph.addNode(NONE);
+        mutableGraph.addNode(QUERY);
+        mutableGraph.addNode(SUBSCRIBE);
+        mutableGraph.addNode(FULL);
+
+        mutableGraph.putEdge(QUERY, NONE);
+        mutableGraph.putEdge(SUBSCRIBE, NONE);
+        mutableGraph.putEdge(FULL, SUBSCRIBE);
+        mutableGraph.putEdge(FULL, QUERY);
+        mutableGraph.putEdge(FULL, NONE);
+
+        mutableGraph.nodes().forEach(visibility -> mutableGraph.putEdge(visibility, visibility));
+        ALLOWED_VISIBILITIES = ImmutableGraph.copyOf(mutableGraph);
+    }
 
     private final Visibility value;
 
@@ -66,11 +93,11 @@ public final class EntityVisibility implements Serializable {
     }
 
     public boolean canSubscribe() {
-        return value == SUBSCRIBE || value == FULL;
+        return isAsLeast(SUBSCRIBE);
     }
 
     public boolean canQuery() {
-        return value == QUERY || value == FULL;
+        return isAsLeast(QUERY);
     }
 
     public boolean isNotNone() {
@@ -79,7 +106,19 @@ public final class EntityVisibility implements Serializable {
 
     public boolean is(Visibility visibility) {
         checkNotNull(visibility);
+        checkNotDefault(visibility);
         return value == visibility;
+    }
+
+    public boolean isAsLeast(Visibility visibility) {
+        checkNotNull(visibility);
+        checkNotDefault(visibility);
+
+        return ALLOWED_VISIBILITIES.hasEdgeConnecting(value, visibility);
+    }
+
+    private static void checkNotDefault(Visibility visibility) {
+        checkArgument(visibility != DEFAULT, "Unexpected visibility level: %s.", DEFAULT);
     }
 
     @Override
