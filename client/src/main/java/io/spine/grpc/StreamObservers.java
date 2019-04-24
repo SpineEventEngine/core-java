@@ -58,7 +58,7 @@ public class StreamObservers {
 
     /**
      * A utility method which sends {@linkplain Responses#ok() acknowledgement}
-     * to the client via the {@code responseObserver} provided and
+     * to the client using the {@code responseObserver} provided and
      * {@linkplain StreamObserver#onCompleted() completes} the response.
      */
     public static void ack(StreamObserver<Response> responseObserver) {
@@ -67,11 +67,11 @@ public class StreamObservers {
     }
 
     /**
-     * Wraps the given {@code delegate} into a {@code StreamObserver}, and proxy only errors to it.
+     * Wraps the given {@code delegate} into a {@code StreamObserver} and proxies only errors to it.
      *
      * @param delegate the delegate observer
-     * @param <T>      the generic parameter type of the delegating observer to be created.
-     * @return delegating observer, which only proxies errors.
+     * @param <T>      generic parameter type of the delegating observer to be created.
+     * @return delegating observer which only proxies errors.
      */
     @Internal
     public static <T> StreamObserver<T> forwardErrorsOnly(StreamObserver<?> delegate) {
@@ -79,10 +79,10 @@ public class StreamObservers {
     }
 
     /**
-     * Creates an instance of observer, which memoizes the responses.
+     * Creates an instance of observer which memoizes the responses.
      *
-     * @param <T> the type of objects streamed to this observer
-     * @return the memoizing observer
+     * @param <T> type of objects streamed to this observer
+     * @return memoizing observer
      */
     @Internal
     public static <T> MemoizingObserver<T> memoizingObserver() {
@@ -91,7 +91,7 @@ public class StreamObservers {
 
     /**
      * Extracts a {@linkplain Error system error} from the
-     * {@linkplain StreamObserver#onError(Throwable) Throwable},
+     * {@linkplain StreamObserver#onError(Throwable) Throwable}
      * received on a client-side as a result of a failed gRPC call to server-side routines.
      *
      * <p>The {@code Error} is extracted from the trailer metadata of
@@ -147,10 +147,10 @@ public class StreamObservers {
     }
 
     /**
-     * An observer which forward error handling to the passed delegate.
+     * An observer which forwards error handling to the passed delegate.
      * Otherwise does nothing.
      *
-     * @param <T> the type of the observable value
+     * @param <T> type of the observable value
      */
     private static class ErrorForwardingObserver<T> implements StreamObserver<T> {
 
