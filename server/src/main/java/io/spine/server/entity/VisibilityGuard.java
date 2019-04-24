@@ -124,6 +124,16 @@ public final class VisibilityGuard {
         return result;
     }
 
+    public Set<TypeName> allEntityTypes() {
+        Set<TypeName> result = repositories.values()
+                                           .stream()
+                                           .map(access -> access.repository
+                                                   .entityStateType()
+                                                   .toTypeName())
+                                           .collect(toImmutableSet());
+        return result;
+    }
+
     /**
      * Closes all registered repositories and clears the registration list.
      */

@@ -306,6 +306,14 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
+     * Obtains the set of all entity type names.
+     */
+    public Set<TypeName> entityStateTypes() {
+        Set<TypeName> result = guard.allEntityTypes();
+        return result;
+    }
+
+    /**
      * Finds a repository by the state class of entities.
      *
      * <p>This method assumes that a repository for the given entity state class <b>is</b>
