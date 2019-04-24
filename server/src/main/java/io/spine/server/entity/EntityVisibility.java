@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -29,6 +30,8 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.option.OptionsProto;
 import io.spine.type.TypeName;
 
+import java.io.Serializable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.option.EntityOption.Visibility.DEFAULT;
@@ -37,8 +40,11 @@ import static io.spine.option.EntityOption.Visibility.NONE;
 import static io.spine.option.EntityOption.Visibility.QUERY;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 
+@Immutable
 @Internal
-public final class EntityVisibility {
+public final class EntityVisibility implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private final Visibility value;
 

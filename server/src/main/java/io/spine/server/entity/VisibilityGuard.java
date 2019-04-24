@@ -144,10 +144,8 @@ public final class VisibilityGuard {
 
         private RepositoryAccess(Repository repository) {
             this.repository = repository;
-            @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
-            Class<? extends Message> stateClass = repository.entityModelClass()
-                                                            .stateClass();
-            this.visibility = EntityVisibility.of(stateClass);
+            EntityClass entityClass = repository.entityModelClass();
+            this.visibility = entityClass.visibility();
         }
 
         private Optional<Repository> get() {
