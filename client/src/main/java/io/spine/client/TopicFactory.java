@@ -34,7 +34,7 @@ import static java.lang.String.format;
 /**
  * A factory of {@link Topic} instances.
  *
- * <p>Uses the given {@link ActorRequestFactory} as the source of the topic meta information,
+ * <p>Uses the given {@link ActorRequestFactory} as a source of the topic meta information
  * such as the actor.
  *
  * @see ActorRequestFactory#topic()
@@ -54,7 +54,7 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a new instance of {@link TopicBuilder} for the further {@link Topic}
+     * Creates a new instance of {@link TopicBuilder} for further {@link Topic}
      * construction.
      *
      * @param targetType
@@ -72,7 +72,7 @@ public final class TopicFactory {
      *
      * @param targetType
      *         a class of target events/entities
-     * @return the instance of {@code Topic} assembled according to the parameters
+     * @return an instance of {@code Topic} assembled according to the parameters
      */
     public Topic allOf(Class<? extends Message> targetType) {
         checkNotNull(targetType);
@@ -83,7 +83,7 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for the specified {@link Target}, updates for which will include
+     * Creates a {@link Topic} for the specified {@link Target}; updates for it will include
      * only the fields specified by the {@link FieldMask}.
      *
      * @param target
@@ -105,7 +105,7 @@ public final class TopicFactory {
     /**
      * Creates a {@link Topic} for the specified {@link Target}.
      *
-     * <p>This method is intended for internal use only. To achieve the similar result use
+     * <p>This method is intended for internal use only. To achieve the similar result, use
      * {@linkplain #allOf(Class)}.
      *
      * @param target
