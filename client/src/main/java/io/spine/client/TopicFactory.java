@@ -83,8 +83,8 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for the specified {@link Target}; updates for it will include
-     * only the fields specified by the {@link FieldMask}.
+     * Creates a {@link Topic} for the specified {@link Target};
+     * updates for it will include only the fields specified by the {@link FieldMask}.
      *
      * @param target
      *         a {@code Target} to create a topic for
