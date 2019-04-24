@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.given;
+package io.spine.server.commandbus.given;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -36,17 +36,17 @@ import io.spine.server.tuple.Pair;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.CmdCreateTask;
-import io.spine.test.command.CmdStartProject;
-import io.spine.test.command.ProjectId;
-import io.spine.test.command.TaskId;
-import io.spine.test.command.event.CmdProjectCreated;
-import io.spine.test.command.event.CmdProjectStarted;
-import io.spine.test.command.event.CmdTaskAdded;
-import io.spine.test.command.event.CmdTaskAssigned;
-import io.spine.test.command.event.CmdTaskStarted;
+import io.spine.test.commandbus.ProjectId;
+import io.spine.test.commandbus.TaskId;
+import io.spine.test.commandbus.command.CmdBusAddTask;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
+import io.spine.test.commandbus.command.CmdBusCreateTask;
+import io.spine.test.commandbus.command.CmdBusStartProject;
+import io.spine.test.commandbus.event.CmdBusProjectCreated;
+import io.spine.test.commandbus.event.CmdBusProjectStarted;
+import io.spine.test.commandbus.event.CmdBusTaskAdded;
+import io.spine.test.commandbus.event.CmdBusTaskAssigned;
+import io.spine.test.commandbus.event.CmdBusTaskStarted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
@@ -70,9 +70,9 @@ public class CommandHandlerTestEnv {
         @Override
         public Set<EventClass> messageClasses() {
             return EventClass.setOf(
-                    CmdProjectStarted.class,
-                    CmdTaskAssigned.class,
-                    CmdTaskStarted.class
+                    CmdBusProjectStarted.class,
+                    CmdBusTaskAssigned.class,
+                    CmdBusTaskStarted.class
             );
         }
 
@@ -139,26 +139,26 @@ public class CommandHandlerTestEnv {
         }
 
         @Assign
-        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
+        CmdBusProjectCreated handle(CmdBusCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return CmdProjectCreated.getDefaultInstance();
+            return CmdBusProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) {
+        CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return CmdTaskAdded.getDefaultInstance();
+            return CmdBusTaskAdded.getDefaultInstance();
         }
 
         @Assign
-        List<EventMessage> handle(CmdStartProject msg, CommandContext context) {
+        List<EventMessage> handle(CmdBusStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return eventsOnStartProjectCmd;
         }
 
         @Assign
-        Pair<CmdTaskAssigned, Optional<CmdTaskStarted>>
-        handle(CmdCreateTask msg, CommandContext context) {
+        Pair<CmdBusTaskAssigned, Optional<CmdBusTaskStarted>>
+        handle(CmdBusCreateTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return createEventsOnCreateTaskCmd(msg);
         }
@@ -180,30 +180,30 @@ public class CommandHandlerTestEnv {
 
         private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {
             ProjectId id = ProjectId
-                    .newBuilder()
+                    .vBuilder()
                     .setId(getId())
                     .build();
-            CmdProjectStarted startedEvent = CmdProjectStarted
-                    .newBuilder()
+            CmdBusProjectStarted startedEvent = CmdBusProjectStarted
+                    .vBuilder()
                     .setProjectId(id)
                     .build();
-            CmdProjectStarted defaultEvent = CmdProjectStarted.getDefaultInstance();
+            CmdBusProjectStarted defaultEvent = CmdBusProjectStarted.getDefaultInstance();
             return ImmutableList.of(startedEvent, defaultEvent);
         }
 
-        private static Pair<CmdTaskAssigned, Optional<CmdTaskStarted>>
-        createEventsOnCreateTaskCmd(CmdCreateTask msg) {
+        private static Pair<CmdBusTaskAssigned, Optional<CmdBusTaskStarted>>
+        createEventsOnCreateTaskCmd(CmdBusCreateTask msg) {
             TaskId taskId = msg.getTaskId();
-            CmdTaskAssigned cmdTaskAssigned = CmdTaskAssigned
-                    .newBuilder()
+            CmdBusTaskAssigned cmdTaskAssigned = CmdBusTaskAssigned
+                    .vBuilder()
                     .setTaskId(taskId)
                     .build();
-            CmdTaskStarted cmdTaskStarted = msg.getStart()
-                                            ? CmdTaskStarted
-                                                    .newBuilder()
-                                                    .setTaskId(taskId)
-                                                    .build()
-                                            : null;
+            CmdBusTaskStarted cmdTaskStarted = msg.getStart()
+                                               ? CmdBusTaskStarted
+                                                       .vBuilder()
+                                                       .setTaskId(taskId)
+                                                       .build()
+                                               : null;
             return Pair.withNullable(cmdTaskAssigned, cmdTaskStarted);
         }
     }

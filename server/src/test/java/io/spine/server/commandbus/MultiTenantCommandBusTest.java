@@ -29,8 +29,8 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.commandbus.given.MultitenantCommandBusTestEnv.AddTaskDispatcher;
 import io.spine.server.type.CommandClass;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdCreateProject;
+import io.spine.test.commandbus.command.CmdBusAddTask;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -93,7 +93,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         checkCommandError(observer.firstResponse(),
                           UNSUPPORTED_COMMAND,
-                          CommandValidationError.getDescriptor().getFullName(),
+                          CommandValidationError.getDescriptor()
+                                                .getFullName(),
                           command);
     }
 
@@ -205,7 +206,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
-        assertTrue(cmdClasses.contains(CommandClass.from(CmdCreateProject.class)));
-        assertTrue(cmdClasses.contains(CommandClass.from(CmdAddTask.class)));
+        assertTrue(cmdClasses.contains(CommandClass.from(CmdBusCreateProject.class)));
+        assertTrue(cmdClasses.contains(CommandClass.from(CmdBusAddTask.class)));
     }
 }

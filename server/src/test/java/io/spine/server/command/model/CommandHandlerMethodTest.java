@@ -28,7 +28,6 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
@@ -70,7 +69,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.testing.Helpers.assertEmpty;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -184,7 +182,7 @@ class CommandHandlerMethodTest {
 
         @Test
         @DisplayName("`Nothing` event")
-        void emptyEvent() {
+        void nothingEvent() {
             HandlerReturnsNothing handlerObject = new HandlerReturnsNothing();
             Optional<CommandHandlerMethod> method =
                     new CommandHandlerSignature().create(handlerObject.getHandler());
@@ -196,18 +194,18 @@ class CommandHandlerMethodTest {
             assertThrows(IllegalStateException.class,
                          () -> handler.invoke(handlerObject, envelope));
         }
-    }
 
-    @Test
-    @DisplayName("allow `ProcessManager` methods producing `Empty`")
-    void allowEmptyInProcman() {
-        RefCreateProject commandMessage = createProject();
-        ProcessManager<String, ?, ?> entity =
-                new ProcessManagerDoingNothing(commandMessage.getProjectId()
-                                                             .getId());
-        CommandEnvelope cmd = newCommand(commandMessage);
-        List<Event> events = PmDispatcher.dispatch(entity, cmd);
-        assertEmpty(events);
+        @Test
+        @DisplayName("`Nothing` event from PM")
+        void nothingEventInPm() {
+            RefCreateProject commandMessage = createProject();
+            ProcessManager<String, ?, ?> entity =
+                    new ProcessManagerDoingNothing(commandMessage.getProjectId()
+                                                                 .getId());
+            CommandEnvelope cmd = newCommand(commandMessage);
+            assertThrows(IllegalStateException.class,
+                         () -> PmDispatcher.dispatch(entity, cmd));
+        }
     }
 
     @Nested

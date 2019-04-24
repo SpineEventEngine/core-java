@@ -27,7 +27,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.command.CmdCreateProject;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
@@ -57,9 +57,10 @@ class CommandValidatorViolationCheckTest {
     @DisplayName("not allow commands without IDs")
     void notAllowDefaultId() {
         Command cmd = Given.ACommand.createProject();
-        Command unidentifiableCommand = cmd.toBuilder()
-                                           .setId(CommandId.getDefaultInstance())
-                                           .build();
+        Command unidentifiableCommand = cmd
+                .toBuilder()
+                .setId(CommandId.getDefaultInstance())
+                .build();
         List<ConstraintViolation> violations = inspect(CommandEnvelope.of(unidentifiableCommand));
 
         assertEquals(1, violations.size());
@@ -68,12 +69,13 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("return violations if command has invalid Message")
     void notAllowInvalidMessage() {
-        Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
-        Command commandWithEmptyMessage = Command.newBuilder()
-                                                 .setId(CommandId.generate())
-                                                 .setMessage(invalidMessagePacked)
-                                                 .setContext(withRandomActor())
-                                                 .build();
+        Any invalidMessagePacked = AnyPacker.pack(CmdBusCreateProject.getDefaultInstance());
+        Command commandWithEmptyMessage = Command
+                .newBuilder()
+                .setId(CommandId.generate())
+                .setMessage(invalidMessagePacked)
+                .setContext(withRandomActor())
+                .build();
 
         List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithEmptyMessage));
 
@@ -85,9 +87,10 @@ class CommandValidatorViolationCheckTest {
     void notAllowInvalidContext() {
         TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
         Command command = factory.createCommand(createProjectMessage(), Time.currentTime());
-        Command commandWithoutContext = command.toBuilder()
-                                               .setContext(CommandContext.getDefaultInstance())
-                                               .build();
+        Command commandWithoutContext = command
+                .toBuilder()
+                .setContext(CommandContext.getDefaultInstance())
+                .build();
 
         List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithoutContext));
 

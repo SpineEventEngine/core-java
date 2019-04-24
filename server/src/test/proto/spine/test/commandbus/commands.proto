@@ -5,10 +5,75 @@ package spine.test.commandbus;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.commandbus";
-option java_outer_classname = "CommandsProto";
+option java_package = "io.spine.test.commandbus.command";
+option java_outer_classname = "CommandBusCommandsProto";
 option java_multiple_files = true;
 
+import "spine/core/user_id.proto";
+import "spine/test/commandbus/project.proto";
+
 message CmdBusStartProject {
-    string id = 1;
+
+    ProjectId project_id = 1;
+}
+
+message CmdBusCreateProject {
+
+    ProjectId project_id = 1;
+}
+
+message CmdBusAddTask {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
+message CmdBusRemoveTask {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
+// A command to create a project for duplicate command tests.
+//
+message DCmdBusCreateProject {
+    ProjectId project_id = 1;
+}
+
+// A command to create a project to test the command posting order.
+//
+// This command is to be sent first.
+//
+message FirstCmdBusCreateProject {
+
+    ProjectId id = 1;
+
+    string name = 2;
+}
+
+// A command to start a project to test the command posting order.
+//
+// This command is to be sent second, as a part of the `FirstCmdCreateProject` handling.
+//
+message SecondCmdBusStartProject {
+
+    ProjectId id = 1;
+}
+
+message CmdBusCreateTask {
+    TaskId task_id = 1;
+    Task task = 2;
+    bool start = 3;
+}
+
+message CmdBusAssignTask {
+    TaskId task_id = 1;
+    core.UserId assignee = 2;
+}
+
+message CmdBusStartTask {
+    TaskId task_id = 1;
+}
+
+message CmdBusSetTaskDescription {
+    TaskId task_id = 1;
+    string description = 3;
 }
