@@ -42,8 +42,9 @@ final class EntityStateChangedFilter implements EventFilter {
     /**
      * Creates a new filter for the given type.
      *
-     * <p>If the visibility of the entity type is sufficient for subscription, the resulting filter
-     * allows all events. Otherwise, the filter discards {@link EntityStateChanged} events.
+     * <p>If the visibility of the entity type is sufficient for subscription or querying,
+     * the resulting filter allows all events. Otherwise, the filter discards
+     * {@link EntityStateChanged} events.
      *
      * @param entityClass
      *         the class of entity to create a filter for
@@ -52,7 +53,7 @@ final class EntityStateChangedFilter implements EventFilter {
     static EntityStateChangedFilter forType(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
         boolean allowUpdates = entityClass.visibility()
-                                          .canSubscribe();
+                                          .isNotNone();
         return new EntityStateChangedFilter(allowUpdates);
     }
 
