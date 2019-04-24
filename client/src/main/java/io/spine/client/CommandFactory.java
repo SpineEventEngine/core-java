@@ -126,7 +126,7 @@ public final class CommandFactory {
      * <p>If an instance of {@link Any} is passed as the {@code message} parameter, the packed
      * message is used for the command construction.
      *
-     * <p>The ID of a new command instance is automatically generated.
+     * <p>The ID of the new command instance is automatically generated.
      *
      * @param message the command message
      * @param context the context of the command
