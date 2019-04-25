@@ -82,7 +82,7 @@ public abstract class ProcessManager<I,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventReactor, Commander, HasVersionColumn {
+        implements EventReactor, Commander, HasVersionColumn<I, S> {
 
     /** The Command Bus to post routed commands. */
     private volatile @MonotonicNonNull CommandBus commandBus;

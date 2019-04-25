@@ -52,7 +52,7 @@ public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer, EventSubscriber, HasVersionColumn {
+        implements EventPlayer, EventSubscriber, HasVersionColumn<I, M> {
 
     /**
      * Creates a new instance.
