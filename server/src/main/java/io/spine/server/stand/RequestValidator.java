@@ -21,8 +21,6 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
@@ -33,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static java.lang.String.format;
 
 /**
@@ -182,10 +179,5 @@ abstract class RequestValidator<M extends Message> {
     private String errorConstraintsViolated(M request) {
         return format("`%s` message does not satisfy the validation constraints.",
                       TypeName.of(request));
-    }
-
-    private static void feedToResponse(InvalidRequestException cause, StreamObserver<?> observer) {
-        StatusRuntimeException validationException = invalidArgumentWithCause(cause);
-        observer.onError(validationException);
     }
 }
