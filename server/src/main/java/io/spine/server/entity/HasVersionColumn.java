@@ -18,18 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.entity;
 
+import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.server.entity.storage.Column;
 
 /**
  * Applies {@link Column} annotation to {@code getVersion} method.
+ *
+ * <p>The interface is implemented by {@link Entity entities} that have a stored version.
  */
-public interface HasVersionColumn {
+public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * Obtains the version of the entity.
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
      */
+    @Override
     @Column
     Version getVersion();
 }

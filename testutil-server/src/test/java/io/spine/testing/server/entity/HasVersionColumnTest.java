@@ -18,9 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity.storage;
+package io.spine.testing.server.entity;
 
-import io.spine.server.entity.storage.HasVersionColumn;
+import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.projection.Projection;
 import org.junit.jupiter.api.DisplayName;
