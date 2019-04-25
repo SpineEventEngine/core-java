@@ -38,7 +38,7 @@ import static java.lang.String.format;
 /**
  * A factory of {@link Query} instances.
  *
- * <p>Uses the given {@link ActorRequestFactory} as the source of the query meta information,
+ * <p>Uses the given {@link ActorRequestFactory} as a source of the query meta information,
  * such as the actor.
  *
  * @see ActorRequestFactory#query()
@@ -88,12 +88,12 @@ public final class QueryFactory {
      * The processing results will contain only the entities, which IDs are present among
      * the {@code ids}.
      *
-     * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
+     * <p>Allows to set property paths for a {@link FieldMask} applied to each of the query
      * results. This processing is performed according to the
      * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-     * (e.g. a {@code path} references a missing field),
+     * <p>If the {@code paths} array contains entries inapplicable to the resulting entity
+     * (for example a {@code path} references a missing field),
      * such invalid paths are silently ignored.
      *
      * @param entityClass
@@ -103,7 +103,7 @@ public final class QueryFactory {
      *         which is supported as identifier}
      * @param maskPaths
      *         the property paths for the {@code FieldMask} applied
-     *         to each of results
+     *         to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query byIdsWithMask(Class<? extends Message> entityClass,
@@ -120,7 +120,7 @@ public final class QueryFactory {
      * Creates a {@link Query} to read certain entity states by IDs.
      *
      * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
-     * The processing results will contain only the entities, which IDs are present among
+     * The processing results will contain only the entities which IDs are present among
      * the {@code ids}.
      *
      * <p>Unlike {@link #byIdsWithMask(Class, Set, String...)}, the {@code Query} processing
@@ -150,14 +150,14 @@ public final class QueryFactory {
      * results. This processing is performed according to the
      * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
+     * <p>If the {@code paths} array contains entries inapplicable to the resulting entity
      * (e.g. a {@code path} references a missing field), such invalid paths
      * are silently ignored.
      *
      * @param entityClass
-     *         the class of a target entity
+     *        the class of a target entity
      * @param maskPaths
-     *         the property paths for the {@code FieldMask} applied to each of results
+     *        the property paths for the {@code FieldMask} applied to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
