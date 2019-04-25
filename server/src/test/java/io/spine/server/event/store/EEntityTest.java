@@ -13,9 +13,9 @@ import static com.google.common.truth.Truth.assertThat;
 @DisplayName("EEntity should")
 final class EEntityTest {
 
-    @DisplayName("clear enrichments from event")
+    @DisplayName("clear enrichments from an event")
     @Test
-    void shouldClearEnrichments() {
+    void clearEnrichments() {
         Enrichment enrichment = GivenEnrichment.withOneAttribute();
         Event event = GivenEvent.arbitrary();
         EventContext contextWithEnrichment = event
@@ -28,7 +28,7 @@ final class EEntityTest {
                 .setContext(contextWithEnrichment)
                 .build();
         EEntity entity = EEntity.create(eventWithEnrichment);
-        Event state = entity.state();
-        assertThat(state).isEqualTo(event);
+
+        assertThat(entity.state()).isEqualTo(event);
     }
 }
