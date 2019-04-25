@@ -58,7 +58,7 @@ public class StreamObservers {
 
     /**
      * A utility method which sends {@linkplain Responses#ok() acknowledgement}
-     * to the client using the {@code responseObserver} provided and
+     * to the client via the {@code responseObserver} provided and
      * {@linkplain StreamObserver#onCompleted() completes} the response.
      */
     public static void ack(StreamObserver<Response> responseObserver) {
