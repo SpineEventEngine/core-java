@@ -18,31 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity;
+package io.spine.server.entity.storage;
 
-import io.spine.server.entity.PersistentEntity;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.projection.Projection;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import io.spine.core.Version;
 
-import java.util.stream.Stream;
+/**
+ * Applies {@link Column} annotation to {@code getVersion} method.
+ */
+public interface HasVersionColumn {
 
-import static com.google.common.truth.Truth.assertThat;
-
-@DisplayName("PersistentEntity should")
-final class PersistentEntityTest {
-
-    @ParameterizedTest(name = "\"{0}\"")
-    @MethodSource("classes")
-    @DisplayName("be implemented by")
-    void beImplementedBy(Class<?> cls) {
-        assertThat(cls).isAssignableTo(PersistentEntity.class);
-    }
-
-    private static Stream<Arguments> classes() {
-        return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
-    }
+    /**
+     * Obtains the version of the entity.
+     */
+    @Column
+    Version getVersion();
 }

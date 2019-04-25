@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.reflect.GenericTypeIndex;
+import io.spine.server.entity.storage.Column;
 import io.spine.string.Stringifiers;
 
 /**
@@ -62,6 +63,24 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
      * Obtains the state of the entity.
      */
     S state();
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
+     */
+    @Column
+    @Override
+    boolean isArchived();
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add {@code Column} annotation.
+     */
+    @Column
+    @Override
+    boolean isDeleted();
 
     /**
      * Tells whether lifecycle flags of the entity changed since its initialization.
