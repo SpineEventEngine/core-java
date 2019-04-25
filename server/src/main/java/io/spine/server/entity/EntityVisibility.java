@@ -44,15 +44,147 @@ import static io.spine.option.EntityOption.Visibility.NONE;
 import static io.spine.option.EntityOption.Visibility.QUERY;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 
+/**
+ * The visibility of an entity type.
+ *
+ * <p>An entity can have one of the following visibility levels:
+ * <ol>
+ * <li>{@code NONE} - the entity is not visible to the clients for reading;
+ * <li>{@code QUERY} - the entity is visible for querying, but not for subscription;
+ * <li>{@code SUBSCRIBE} - the entity is visible for subscription, but not for querying;
+ * <li>{@code FULL} - the entity is visible for both subscription and querying.
+ * </ol>
+ *
+ * <p>The visibility of an entity is defined by the {@code (entity)} option. By default, any entity
+ * is has the {@code NONE} level except for projections, which have the {@code FULL} level.
+ */
 @Immutable
 @Internal
 public final class EntityVisibility implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private static final ImmutableGraph<Visibility> ALLOWED_VISIBILITIES;
+    /**
+     * An ordered immutable graph of the visibility levels.
+     *
+     * <p>This graph is used for checking if a certain level includes another level. For example,
+     * {@code FULL} includes {@code QUERY}. To represent this, there is an edge from {@code FULL}
+     * to {@code QUERY} in the graph.
+     *
+     * @see #isAsLeast(Visibility)
+     */
+    private static final ImmutableGraph<Visibility> VISIBILITIES = buildVisibilityGraph();
 
-    static {
+    private final Visibility value;
+
+    private EntityVisibility(Visibility value) {
+        this.value = value;
+    }
+
+    /**
+     * Obtains an instance of {@code EntityVisibility} for the given entity state class.
+     *
+     * @param stateClass
+     *         the entity state class
+     * @return new instance
+     */
+    public static EntityVisibility of(Class<? extends Message> stateClass) {
+        checkNotNull(stateClass);
+        Descriptor descriptor = TypeName.of(stateClass)
+                                        .messageDescriptor();
+        EntityOption entityOption = descriptor.getOptions()
+                                              .getExtension(OptionsProto.entity);
+        Visibility visibility = entityOption.getVisibility();
+        if (visibility == DEFAULT) {
+            Kind kind = entityOption.getKind();
+            visibility = kind == PROJECTION ? FULL : NONE;
+        }
+        return new EntityVisibility(visibility);
+    }
+
+    /**
+     * Checks if the visibility level is sufficient for subscription.
+     *
+     * <p>If the level is sufficient, it is allowed to subscribe to the entity state updates via
+     * {@link io.spine.core.Subscribe} or {@link io.spine.server.SubscriptionService}.
+     *
+     * @return {@code true} if the visibility is {@code SUBSCRIBE} or {@code FULL}, {@code false}
+     *         otherwise
+     */
+    public boolean canSubscribe() {
+        return isAsLeast(SUBSCRIBE);
+    }
+
+    /**
+     * Checks if the visibility level is sufficient for querying.
+     *
+     * <p>If the level is sufficient, it is allowed to query the entity states via
+     * {@link io.spine.server.QueryService}.
+     *
+     * @return {@code true} if the visibility is {@code QUERY} or {@code FULL}, {@code false}
+     *         otherwise
+     */
+    public boolean canQuery() {
+        return isAsLeast(QUERY);
+    }
+
+    /**
+     * Checks if the visibility level is not {@code NONE}.
+     *
+     * @return {@code true} if the visibility is anything but {@code NONE}, {@code false} otherwise
+     */
+    public boolean isNotNone() {
+        return value != NONE;
+    }
+
+    /**
+     * Checks if the visibility is exactly of the given level.
+     *
+     * @param visibility
+     *         the visibility to compare to
+     * @return {@code true} if this visibility is equal to the given visibility
+     * @throws IllegalArgumentException
+     *         if the given visibility is {@code DEFAULT}
+     */
+    public boolean is(Visibility visibility) {
+        checkNotNull(visibility);
+        checkNotDefault(visibility);
+        return value == visibility;
+    }
+
+    /**
+     * Checks if the visibility is at least as allowing as the given one.
+     *
+     * <p>Call {@code isAsLeast(NONE)} always returns {@code true}. Call {@code isAtLeast(FULL)}
+     * returns {@code true} only if this visibility is exactly {@code FULL}.
+     *
+     * @param visibility
+     *         the visibility to compare to
+     * @return {@code true} if this visibility is equal to the given visibility
+     * @throws IllegalArgumentException
+     *         if the given visibility is {@code DEFAULT}
+     */
+    public boolean isAsLeast(Visibility visibility) {
+        checkNotNull(visibility);
+        checkNotDefault(visibility);
+        return VISIBILITIES.hasEdgeConnecting(value, visibility);
+    }
+
+    private static void checkNotDefault(Visibility visibility) {
+        checkArgument(visibility != DEFAULT, "Unexpected visibility level: %s.", DEFAULT);
+    }
+
+    @Override
+    public String toString() {
+        return value.name();
+    }
+
+    /**
+     * Builds the graph of the visibilities hierarchy.
+     *
+     * @see #VISIBILITIES
+     */
+    private static ImmutableGraph<Visibility> buildVisibilityGraph() {
         MutableGraph<Visibility> mutableGraph = GraphBuilder
                 .directed()
                 .expectedNodeCount(Visibility.values().length)
@@ -69,60 +201,8 @@ public final class EntityVisibility implements Serializable {
         mutableGraph.putEdge(FULL, QUERY);
         mutableGraph.putEdge(FULL, NONE);
 
-        mutableGraph.nodes().forEach(visibility -> mutableGraph.putEdge(visibility, visibility));
-        ALLOWED_VISIBILITIES = ImmutableGraph.copyOf(mutableGraph);
-    }
-
-    private final Visibility value;
-
-    private EntityVisibility(Visibility value) {
-        this.value = value;
-    }
-
-    public static EntityVisibility of(Class<? extends Message> stateClass) {
-        checkNotNull(stateClass);
-        Descriptor descriptor = TypeName.of(stateClass).messageDescriptor();
-        EntityOption entityOption = descriptor.getOptions()
-                                              .getExtension(OptionsProto.entity);
-        Visibility visibility = entityOption.getVisibility();
-        if (visibility == DEFAULT) {
-            Kind kind = entityOption.getKind();
-            visibility = kind == PROJECTION ? FULL : NONE;
-        }
-        return new EntityVisibility(visibility);
-    }
-
-    public boolean canSubscribe() {
-        return isAsLeast(SUBSCRIBE);
-    }
-
-    public boolean canQuery() {
-        return isAsLeast(QUERY);
-    }
-
-    public boolean isNotNone() {
-        return value != NONE;
-    }
-
-    public boolean is(Visibility visibility) {
-        checkNotNull(visibility);
-        checkNotDefault(visibility);
-        return value == visibility;
-    }
-
-    public boolean isAsLeast(Visibility visibility) {
-        checkNotNull(visibility);
-        checkNotDefault(visibility);
-
-        return ALLOWED_VISIBILITIES.hasEdgeConnecting(value, visibility);
-    }
-
-    private static void checkNotDefault(Visibility visibility) {
-        checkArgument(visibility != DEFAULT, "Unexpected visibility level: %s.", DEFAULT);
-    }
-
-    @Override
-    public String toString() {
-        return value.name();
+        mutableGraph.nodes()
+                    .forEach(visibility -> mutableGraph.putEdge(visibility, visibility));
+        return ImmutableGraph.copyOf(mutableGraph);
     }
 }

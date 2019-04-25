@@ -19,35 +19,81 @@
  */
 syntax = "proto3";
 
-//Cannot use `.entity` package due to a conflict with `(entity)` annotation.
 package spine.test.serverentity;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.entity";
+option java_package = "io.spine.test.entity";
 option java_multiple_files = true;
-option java_outer_classname = "VisibilityGuardShouldProto";
+option java_outer_classname = "VisibilityTestProto";
 
+import "spine/core/user_id.proto";
+import "spine/net/url.proto";
+import "spine/time/time.proto";
 
-message FullAccessAggregate {
-    option (entity) = {kind: AGGREGATE visibility: FULL};
-
-    uint64 id = 1;
-    string name = 2;
-}
-
-message SubscribableAggregate {
-    option (entity) = {kind: AGGREGATE visibility: SUBSCRIBE};
-
-    uint64 id = 1;
-    string description = 2;
-}
-
-message HiddenAggregate {
-    // Default visibility for aggregates is NONE.
+// A non-visible aggregate.
+//
+message Password {
     option (entity).kind = AGGREGATE;
 
-    string uuid = 1;
-    string secret = 2;
+    core.UserId user_id = 1;
+
+    string password = 2;
+
+    sint64 hash = 3;
+}
+
+// A visible for querying aggregate.
+//
+message AccountDetails {
+    option (entity) = {kind: AGGREGATE visibility: QUERY};
+
+    core.UserId user_id = 1;
+
+    string display_name = 2;
+
+    net.Url avatar_url = 3;
+}
+
+// A visible for subscription aggregate.
+//
+message UserActivity {
+    option (entity) = {kind: AGGREGATE visibility: SUBSCRIBE};
+
+    core.UserId user_id = 1;
+
+    repeated net.Url post_url = 2;
+}
+
+// A visible aggregate.
+//
+message LastSeen {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
+    core.UserId user_id = 1;
+
+    time.ZonedDateTime when = 2;
+}
+
+// A non-visible procman.
+//
+message UserSignIn {
+    option (entity).kind = PROCESS_MANAGER;
+
+    core.UserId user_id = 1;
+
+    string password = 2;
+
+    uint32 attempts = 3;
+}
+
+// A visible projection.
+//
+message UserFeed {
+    option (entity).kind = PROJECTION;
+
+    core.UserId user_id = 1;
+
+    repeated net.Url post_url = 2;
 }
