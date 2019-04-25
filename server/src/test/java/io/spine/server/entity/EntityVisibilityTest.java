@@ -25,6 +25,7 @@ import io.spine.test.entity.AccountDetails;
 import io.spine.test.entity.LastSeen;
 import io.spine.test.entity.Password;
 import io.spine.test.entity.UserActivity;
+import io.spine.test.entity.UserFeed;
 import io.spine.test.entity.UserSignIn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,7 @@ class EntityVisibilityTest {
     @Test
     @DisplayName("report FULL level for projections by default")
     void projectionDefaults() {
-        EntityVisibility visibility = EntityVisibility.of(UserSignIn.class);
+        EntityVisibility visibility = EntityVisibility.of(UserFeed.class);
         assertTrue(visibility.is(FULL));
         assertTrue(visibility.isNotNone());
     }
