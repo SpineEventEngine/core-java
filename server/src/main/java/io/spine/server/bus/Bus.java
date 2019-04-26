@@ -117,7 +117,7 @@ public abstract class Bus<T extends Message,
      * of the call. The {@link StreamObserver#onNext StreamObserver.onNext()} is called for each
      * message posted to the bus.
      *
-     * <p>In case the message is accepted by the bus, {@link Ack} with the
+     * <p>If the message is accepted by the bus, {@link Ack} with the
      * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
@@ -125,8 +125,8 @@ public abstract class Bus<T extends Message,
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@linkplain io.spine.base.ThrowableMessage rejection} may result either a rejection status or
-     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
-     * the rejection status may only pop up if the {@link MessageDispatcher} processes the message
+     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance.
+     * The rejection status may only pop up if the {@link MessageDispatcher} processes the message
      * sequentially and throws the rejection (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
@@ -156,7 +156,7 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Prepares the given {@link StreamObserver} in order to post messages into this bus.
+     * Prepares the given {@link StreamObserver} to post messages into this bus.
      *
      * <p>This method is an extension point of a {@code Bus}.
      *
@@ -169,7 +169,7 @@ public abstract class Bus<T extends Message,
      * this convention, the {@code Bus} implementation should specify the altered behavior
      * explicitly.
      *
-     * <p>The {@code messages} can be used in order to construct the observer. The resulting
+     * <p>The {@code messages} can be used to construct the observer. The resulting
      * observer is used only for acknowledgment of the given messages.
      *
      * <p>By default, this method returns the {@code source} observer. See {@code Bus} subclasses
