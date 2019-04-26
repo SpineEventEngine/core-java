@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.model.EntityStateClass;
 import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
@@ -42,7 +41,7 @@ import java.util.Set;
  *         the type of the entity IDs to which the updates are routed
  */
 public class StateUpdateRouting<I>
-        extends MessageRouting<Message, EventContext, EntityStateClass, Set<I>> {
+        extends MessageRouting<Message, EventContext, Set<I>> {
 
     private static final long serialVersionUID = 0L;
 
@@ -62,16 +61,6 @@ public class StateUpdateRouting<I>
      */
     public static <I> StateUpdateRouting<I> newInstance() {
         return new StateUpdateRouting<>();
-    }
-
-    @Override
-    EntityStateClass toMessageClass(Class<? extends Message> classOfMessages) {
-        return EntityStateClass.from(classOfMessages);
-    }
-
-    @Override
-    EntityStateClass toMessageClass(Message outerOrMessage) {
-        return EntityStateClass.of(outerOrMessage);
     }
 
     /**

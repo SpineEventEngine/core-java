@@ -21,11 +21,9 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.server.type.CommandClass;
-import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,16 +36,13 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <M> the type of the message to route
  * @param <C> the type of message context objects
- * @param <K> the type of message class objects such as {@link EventClass EventClass}
- *            or {@link CommandClass CommandClass}
  * @param <R> the type returned by the {@linkplain Route#apply(Message, Message) routing function}
  */
-abstract class MessageRouting<M extends Message, C extends Message, K extends MessageClass, R>
-        implements Route<M, C, R> {
+abstract class MessageRouting<M extends Message, C extends Message, R> implements Route<M, C, R> {
 
     private static final long serialVersionUID = 0L;
 
-    private final HashMap<K, Route<M, C, R>> routes = new HashMap<>();
+    private final HashMap<Class<? extends M>, Route<M, C, R>> routes = new LinkedHashMap<>();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
     private Route<M, C, R> defaultRoute;
@@ -68,21 +63,11 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      *
      * @param newDefault the new route to be used as default
      */
-    MessageRouting<M, C, K, R> replaceDefault(Route<M, C, R> newDefault) {
+    MessageRouting<M, C, R> replaceDefault(Route<M, C, R> newDefault) {
         checkNotNull(newDefault);
         defaultRoute = newDefault;
         return this;
     }
-
-    /**
-     * Creates an instance of {@link MessageClass} by the passed class of messages.
-     */
-    abstract K toMessageClass(Class<? extends M> classOfMessages);
-
-    /**
-     * Creates an instance of {@link MessageClass} by the passed outer message object.
-     */
-    abstract K toMessageClass(Message outerOrMessage);
 
     /**
      * Sets a custom route for the passed message class.
@@ -101,8 +86,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      * @param via          the instance of the route to be used
      * @throws IllegalStateException if the route for this message class is already set
      */
-    void doRoute(Class<? extends M> messageClass, Route<M, C, R> via)
-            throws IllegalStateException {
+    void doRoute(Class<? extends M> messageClass, Route<M, C, R> via) throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
         Optional route = doGet(messageClass);
@@ -112,8 +96,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
                             "Please remove the route (%s) before setting new route.",
                     messageClass.getName(), route.get());
         }
-        K cls = toMessageClass(messageClass);
-        routes.put(cls, via);
+        routes.put(messageClass, via);
     }
 
     /**
@@ -124,8 +107,7 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      */
     Optional<? extends Route<M, C, R>> doGet(Class<? extends M> msgCls) {
         checkNotNull(msgCls);
-        K cls = toMessageClass(msgCls);
-        Route<M, C, R> route = routes.get(cls);
+        Route<M, C, R> route = routes.get(msgCls);
         return Optional.ofNullable(route);
     }
 
@@ -136,13 +118,12 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
      */
     public void remove(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
-        K cls = toMessageClass(messageClass);
-        if (!routes.containsKey(cls)) {
+        if (!routes.containsKey(messageClass)) {
             throw newIllegalStateException("Cannot remove the route for the message class (%s):" +
                                                    " a custom route was not previously set.",
                                            messageClass.getName());
         }
-        routes.remove(cls);
+        routes.remove(messageClass);
     }
 
     /**
@@ -158,8 +139,9 @@ abstract class MessageRouting<M extends Message, C extends Message, K extends Me
     public R apply(M message, C context) {
         checkNotNull(message);
         checkNotNull(context);
-        K messageClass = toMessageClass(message);
-        Route<M, C, R> func = routes.get(messageClass);
+        @SuppressWarnings("unchecked") Class<? extends M>
+        cls = (Class<? extends M>) message.getClass();
+        Route<M, C, R> func = routes.get(cls);
         if (func != null) {
             R result = func.apply(message, context);
             return result;

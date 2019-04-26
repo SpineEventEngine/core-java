@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
-import io.spine.server.type.CommandClass;
 
 import java.util.Optional;
 
@@ -41,8 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I> the type of the entity IDs of this repository
  */
-public final class CommandRouting<I>
-        extends MessageRouting<CommandMessage, CommandContext, CommandClass, I> {
+public final class CommandRouting<I> extends MessageRouting<CommandMessage, CommandContext, I> {
 
     private static final long serialVersionUID = 0L;
 
@@ -96,8 +94,8 @@ public final class CommandRouting<I>
      * @throws IllegalStateException if the route for this command class is already set
      */
     @CanIgnoreReturnValue
-    public <M extends CommandMessage> CommandRouting<I> route(Class<M> commandClass,
-                                                              CommandRoute<I, M> via)
+    public <M extends CommandMessage>
+    CommandRouting<I> route(Class<M> commandClass, CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<CommandMessage, CommandContext, I> casted =
@@ -123,15 +121,5 @@ public final class CommandRouting<I>
             return Optional.of(commandRoute);
         }
         return Optional.empty();
-    }
-
-    @Override
-    CommandClass toMessageClass(Class<? extends CommandMessage> classOfMessages) {
-        return CommandClass.from(classOfMessages);
-    }
-
-    @Override
-    CommandClass toMessageClass(Message outerOrMessage) {
-        return CommandClass.of(outerOrMessage);
     }
 }

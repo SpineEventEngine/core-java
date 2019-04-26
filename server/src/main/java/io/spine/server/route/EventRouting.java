@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
-import io.spine.server.type.EventClass;
 import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Optional;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of the entity IDs to which events are routed
  */
 public final class EventRouting<I>
-        extends MessageRouting<EventMessage, EventContext, EventClass, Set<I>>
+        extends MessageRouting<EventMessage, EventContext, Set<I>>
         implements EventRoute<I, EventMessage> {
 
     private static final long serialVersionUID = 0L;
@@ -159,19 +158,4 @@ public final class EventRouting<I>
         return result;
     }
 
-    /**
-     * Creates {@link EventClass} by the passed class value.
-     */
-    @Override
-    EventClass toMessageClass(Class<? extends EventMessage> classOfEvents) {
-        return EventClass.from(classOfEvents);
-    }
-
-    /**
-     * Obtains the {@link EventClass} for the passed event or event message.
-     */
-    @Override
-    EventClass toMessageClass(Message eventOrMessage) {
-        return EventClass.of(eventOrMessage);
-    }
 }
