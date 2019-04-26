@@ -34,7 +34,7 @@ import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 /**
  * A builder for the {@link Query} instances.
  *
- * <p>None of the parameters set by builder methods are required. Call {@link #build()} to retrieve
+ * <p>None of the parameters set by the builder methods are required. Call {@link #build()} to retrieve
  * the resulting {@link Query} instance.
  *
  * <p>Usage example:
@@ -71,12 +71,12 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     }
 
     /**
-     * Sets the sorting order to query, represented by the target column and order direction.
+     * Sets the sorting order for the query represented by the target column and order direction.
      *
      * @param column
      *         an entity column to sort by
      * @param direction
-     *         a direction of the sorting
+     *         sorting direction
      * @return this builder instance
      */
     public QueryBuilder orderBy(String column, OrderBy.Direction direction) {
@@ -96,7 +96,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
      * Limits the number of results returned by the query.
      *
      * @param count
-     *         an amount of the results to be returned
+     *         number of results to be returned
      * @return this builder instance
      */
     public QueryBuilder limit(int count) {
