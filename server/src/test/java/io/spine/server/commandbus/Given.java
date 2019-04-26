@@ -27,16 +27,16 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.CmdCreateTask;
-import io.spine.test.command.CmdRemoveTask;
-import io.spine.test.command.CmdStartProject;
-import io.spine.test.command.FirstCmdCreateProject;
-import io.spine.test.command.ProjectId;
-import io.spine.test.command.SecondCmdStartProject;
-import io.spine.test.command.Task;
-import io.spine.test.command.TaskId;
+import io.spine.test.commandbus.ProjectId;
+import io.spine.test.commandbus.Task;
+import io.spine.test.commandbus.TaskId;
+import io.spine.test.commandbus.command.CmdBusAddTask;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
+import io.spine.test.commandbus.command.CmdBusCreateTask;
+import io.spine.test.commandbus.command.CmdBusRemoveTask;
+import io.spine.test.commandbus.command.CmdBusStartProject;
+import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
+import io.spine.test.commandbus.command.SecondCmdBusStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
@@ -59,14 +59,6 @@ public class Given {
                 .build();
     }
 
-    private static TaskId newTaskId() {
-        int id = random(1, 100);
-        return TaskId
-                .newBuilder()
-                .setId(id)
-                .build();
-    }
-
     public static class ACommand {
 
         private static final UserId USER_ID = GivenUserId.newUuid();
@@ -83,9 +75,10 @@ public class Given {
          */
         private static Command create(io.spine.base.CommandMessage command, UserId userId,
                                       Timestamp when) {
-            TenantId generatedTenantId = TenantId.newBuilder()
-                                                 .setValue(newUuid())
-                                                 .build();
+            TenantId generatedTenantId = TenantId
+                    .vBuilder()
+                    .setValue(newUuid())
+                    .build();
             TestActorRequestFactory factory =
                     new TestActorRequestFactory(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
@@ -105,27 +98,27 @@ public class Given {
         }
 
         static Command secondStartProject() {
-            SecondCmdStartProject command = CommandMessage.secondStartProject(newProjectId());
+            SecondCmdBusStartProject command = CommandMessage.secondStartProject(newProjectId());
             return create(command, USER_ID, currentTime());
         }
 
         static Command firstCreateProject() {
-            FirstCmdCreateProject command = CommandMessage.firstCreateProject(newProjectId());
+            FirstCmdBusCreateProject command = CommandMessage.firstCreateProject(newProjectId());
             return create(command, USER_ID, currentTime());
         }
 
         static Command createTask(TaskId taskId, UserId userId, boolean startTask) {
-            CmdCreateTask command = CommandMessage.createTask(taskId, userId, startTask);
+            CmdBusCreateTask command = CommandMessage.createTask(taskId, userId, startTask);
             return create(command, userId, currentTime());
         }
 
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
-            CmdAddTask command = CommandMessage.addTask(projectId);
+            CmdBusAddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
         static Command removeTask() {
-            CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
+            CmdBusRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
             return create(command, USER_ID, currentTime());
         }
 
@@ -140,17 +133,15 @@ public class Given {
 
         static Command createProject(Duration delay) {
 
-            CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
+            CmdBusCreateProject projectMessage = CommandMessage.createProjectMessage();
             CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
             CommandFactory commandFactory = new TestActorRequestFactory(ACommand.class).command();
             Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }
 
-        static Command createProject(UserId userId,
-                                     ProjectId projectId,
-                                     Timestamp when) {
-            CmdCreateProject command = CommandMessage.createProjectMessage(projectId);
+        static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+            CmdBusCreateProject command = CommandMessage.createProjectMessage(projectId);
             return create(command, userId, when);
         }
 
@@ -158,11 +149,17 @@ public class Given {
             return startProject(USER_ID, PROJECT_ID, currentTime());
         }
 
-        static Command startProject(UserId userId,
-                                    ProjectId projectId,
-                                    Timestamp when) {
-            CmdStartProject command = CommandMessage.startProject(projectId);
+        static Command startProject(UserId userId, ProjectId projectId, Timestamp when) {
+            CmdBusStartProject command = CommandMessage.startProject(projectId);
             return create(command, userId, when);
+        }
+
+        private static TaskId newTaskId() {
+            int id = random(1, 100);
+            return TaskId
+                    .newBuilder()
+                    .setId(id)
+                    .build();
         }
     }
 
@@ -172,70 +169,74 @@ public class Given {
             // Prevent construction from outside.
         }
 
-        static CmdCreateTask createTask(TaskId taskId, UserId userId, boolean startTask) {
+        static CmdBusCreateTask createTask(TaskId taskId, UserId userId, boolean startTask) {
             Task task = Task
                     .newBuilder()
                     .setTaskId(taskId)
                     .setAssignee(userId)
                     .build();
-            return CmdCreateTask
-                    .newBuilder()
+            return CmdBusCreateTask
+                    .vBuilder()
                     .setTaskId(taskId)
                     .setTask(task)
                     .setStart(startTask)
                     .build();
         }
 
-        static CmdAddTask addTask(String projectId) {
+        static CmdBusAddTask addTask(String projectId) {
             return addTask(ProjectId.newBuilder()
                                     .setId(projectId)
                                     .build());
         }
 
-        static CmdAddTask addTask(ProjectId id) {
-            return CmdAddTask.newBuilder()
-                             .setProjectId(id)
-                             .build();
-        }
-
-        static CmdRemoveTask removeTask(ProjectId projectId) {
-            return CmdRemoveTask.newBuilder()
-                                .setProjectId(projectId)
+        static CmdBusAddTask addTask(ProjectId id) {
+            return CmdBusAddTask.newBuilder()
+                                .setProjectId(id)
                                 .build();
         }
 
-        public static CmdCreateProject createProjectMessage() {
-            return createProjectMessage(newProjectId());
-        }
-
-        static CmdCreateProject createProjectMessage(ProjectId id) {
-            return CmdCreateProject.newBuilder()
-                                   .setProjectId(id)
+        static CmdBusRemoveTask removeTask(ProjectId projectId) {
+            return CmdBusRemoveTask.newBuilder()
+                                   .setProjectId(projectId)
                                    .build();
         }
 
-        static CmdCreateProject createProjectMessage(String projectId) {
-            return createProjectMessage(ProjectId.newBuilder()
+        public static CmdBusCreateProject createProjectMessage() {
+            return createProjectMessage(newProjectId());
+        }
+
+        static CmdBusCreateProject createProjectMessage(ProjectId id) {
+            return CmdBusCreateProject
+                    .vBuilder()
+                    .setProjectId(id)
+                    .build();
+        }
+
+        static CmdBusCreateProject createProjectMessage(String projectId) {
+            return createProjectMessage(ProjectId.vBuilder()
                                                  .setId(projectId)
                                                  .build());
         }
 
-        static CmdStartProject startProject(ProjectId id) {
-            return CmdStartProject.newBuilder()
-                                  .setProjectId(id)
-                                  .build();
+        static CmdBusStartProject startProject(ProjectId id) {
+            return CmdBusStartProject
+                    .vBuilder()
+                    .setProjectId(id)
+                    .build();
         }
 
-        static FirstCmdCreateProject firstCreateProject(ProjectId projectId) {
-            return FirstCmdCreateProject.newBuilder()
-                                        .setId(projectId)
-                                        .build();
+        static FirstCmdBusCreateProject firstCreateProject(ProjectId projectId) {
+            return FirstCmdBusCreateProject
+                    .vBuilder()
+                    .setId(projectId)
+                    .build();
         }
 
-        static SecondCmdStartProject secondStartProject(ProjectId projectId) {
-            return SecondCmdStartProject.newBuilder()
-                                        .setId(projectId)
-                                        .build();
+        static SecondCmdBusStartProject secondStartProject(ProjectId projectId) {
+            return SecondCmdBusStartProject
+                    .vBuilder()
+                    .setId(projectId)
+                    .build();
         }
     }
 }

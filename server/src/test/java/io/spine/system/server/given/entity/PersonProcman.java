@@ -26,6 +26,8 @@ import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.PersonCreation;
+import io.spine.system.server.PersonCreationCompleted;
+import io.spine.system.server.PersonCreationStarted;
 import io.spine.system.server.PersonCreationVBuilder;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonNameCreated;
@@ -45,16 +47,22 @@ public final class PersonProcman
     }
 
     @Assign
-    Nothing handle(StartPersonCreation command) {
+    PersonCreationStarted handle(StartPersonCreation command) {
         builder().setId(command.getId());
-        return nothing();
+        return PersonCreationStarted
+                .vBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
-    Nothing handle(CompletePersonCreation command) {
+    PersonCreationCompleted handle(CompletePersonCreation command) {
         builder().setId(command.getId())
-                    .setCreated(true);
-        return nothing();
+                 .setCreated(true);
+        return PersonCreationCompleted
+                .vBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @React

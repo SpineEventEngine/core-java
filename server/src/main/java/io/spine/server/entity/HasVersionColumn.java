@@ -18,57 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-syntax = "proto3";
+package io.spine.server.entity;
 
-package spine.test.system.server;
+import com.google.protobuf.Message;
+import io.spine.core.Version;
+import io.spine.server.entity.storage.Column;
 
-import "spine/options.proto";
+/**
+ * Applies {@link Column} annotation to {@code getVersion} method.
+ *
+ * <p>The interface is implemented by {@link Entity entities} that have a stored version.
+ */
+public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.system.server";
-option java_outer_classname = "EHCommandsProto";
-option java_multiple_files = true;
-
-import "spine/people/person_name.proto";
-import "spine/test/system/server/entity_history_test.proto";
-
-message CreatePerson {
-
-    PersonId id = 1 [(required) = true];
-
-    spine.people.PersonName name = 2;
-}
-
-message CreatePersonName {
-
-    PersonId id = 1 [(required) = true];
-
-    string first_name = 2;
-}
-
-message RenamePerson {
-
-    PersonId id = 1 [(required) = true];
-
-    string new_first_name = 2;
-}
-
-message HidePerson {
-
-    PersonId id = 1 [(required) = true];
-}
-
-message ExposePerson {
-
-    PersonId id = 1 [(required) = true];
-}
-
-message CompletePersonCreation {
-
-    PersonId id = 1 [(required) = true];
-}
-
-message StartPersonCreation {
-
-    PersonId id = 1 [(required) = true];
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
+     */
+    @Override
+    @Column
+    Version getVersion();
 }

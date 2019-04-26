@@ -28,7 +28,7 @@ import io.spine.core.Command;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.commandbus.CmdBusStartProject;
+import io.spine.test.commandbus.command.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

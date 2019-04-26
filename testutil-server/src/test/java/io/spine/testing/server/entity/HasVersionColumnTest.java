@@ -18,57 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-syntax = "proto3";
+package io.spine.testing.server.entity;
 
-package spine.test.system.server;
+import io.spine.server.entity.HasVersionColumn;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.projection.Projection;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import "spine/options.proto";
+import java.util.stream.Stream;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.system.server";
-option java_outer_classname = "EHCommandsProto";
-option java_multiple_files = true;
+import static com.google.common.truth.Truth.assertThat;
 
-import "spine/people/person_name.proto";
-import "spine/test/system/server/entity_history_test.proto";
+@DisplayName("HasVersionColumn should")
+public class HasVersionColumnTest {
 
-message CreatePerson {
+    @ParameterizedTest(name = "\"{0}\"")
+    @MethodSource("classes")
+    @DisplayName("be implemented by")
+    void beImplementedBy(Class<?> cls) {
+        assertThat(cls).isAssignableTo(HasVersionColumn.class);
+    }
 
-    PersonId id = 1 [(required) = true];
-
-    spine.people.PersonName name = 2;
-}
-
-message CreatePersonName {
-
-    PersonId id = 1 [(required) = true];
-
-    string first_name = 2;
-}
-
-message RenamePerson {
-
-    PersonId id = 1 [(required) = true];
-
-    string new_first_name = 2;
-}
-
-message HidePerson {
-
-    PersonId id = 1 [(required) = true];
-}
-
-message ExposePerson {
-
-    PersonId id = 1 [(required) = true];
-}
-
-message CompletePersonCreation {
-
-    PersonId id = 1 [(required) = true];
-}
-
-message StartPersonCreation {
-
-    PersonId id = 1 [(required) = true];
+    private static Stream<Arguments> classes() {
+        return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
+    }
 }
