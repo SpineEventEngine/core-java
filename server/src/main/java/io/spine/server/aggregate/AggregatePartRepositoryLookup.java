@@ -85,7 +85,7 @@ final class AggregatePartRepositoryLookup<I, S extends Message> {
     }
 
     /**
-     * Ensures that the passed repository is instance of {@code AggregatePartRepository}.
+     * Ensures that the passed repository is an instance of {@code AggregatePartRepository}.
      *
      * <p>We check this to make sure that expectations of this {@code AggregateRoot} are supported
      * by correct configuration of the {@code BoundedContext}.
