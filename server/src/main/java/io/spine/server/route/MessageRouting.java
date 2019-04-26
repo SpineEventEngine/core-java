@@ -137,9 +137,10 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
     public void remove(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
         if (!routes.containsKey(messageClass)) {
-            throw newIllegalStateException("Cannot remove the route for the message class (%s): " +
-                                                   "a custom route was not previously set.",
-                                           messageClass.getName());
+            throw newIllegalStateException(
+                    "Cannot remove the route for the message class (`%s`): " +
+                            "a custom route was not previously set.",
+                    messageClass.getName());
         }
         routes.remove(messageClass);
     }
