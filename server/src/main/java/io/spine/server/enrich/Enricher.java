@@ -51,7 +51,7 @@ public abstract class Enricher<M extends Message, C extends EnrichableMessageCon
      * <ol>
      *     <li>There is one or more enrichments defined in Protobuf using
      *     {@code enrichment_for} and/or {@code by} options.
-     *     <li>There is one or more field enrichment schema registered for
+     *     <li>There is one or more field enrichment schemas registered for
      *     the class of the passed message.
      *     <li>The flag {@code do_not_enrich} is not set in the {@link io.spine.core.Enrichment
      *     Enrichment} instance of the context of the outer object of the message.
