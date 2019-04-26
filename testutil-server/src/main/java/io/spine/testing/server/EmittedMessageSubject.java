@@ -102,7 +102,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
     }
 
     private IterableSubject assertActual() {
-        return check().that(actual());
+        return check("actual()").that(actual());
     }
 
     /**
@@ -143,9 +143,13 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         } else {
             List<T> filtered =
                     Streams.stream(actual)
-                           .filter(m -> m.is(messageClass))
+                           .filter(m -> {
+                               @SuppressWarnings({"unchecked", "RedundantSuppression"})
+                               boolean match = m.is(messageClass);
+                               return match;
+                           })
                            .collect(toImmutableList());
-            return check().about(factory())
+            return check("withType()").about(factory())
                           .that(filtered);
         }
     }

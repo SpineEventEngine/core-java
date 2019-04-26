@@ -112,13 +112,9 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
      * @return optionally available route
      */
     public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
-        Optional<? extends Route<CommandMessage, CommandContext, I>> optional = doGet(commandClass);
-        if (optional.isPresent()) {
-            Route<CommandMessage, CommandContext, I> route = optional.get();
-            @SuppressWarnings({"unchecked", "RedundantSuppression"})
-                // The cast is safe as we deal only with CommandRoute's.
-            CommandRoute<I, M> commandRoute = (CommandRoute<I, M>) route;
-            return Optional.of(commandRoute);
+        RoutingMatch match = routeFor(commandClass);
+        if (match.found()) {
+            return Optional.of((CommandRoute<I, M>) match.route());
         }
         return Optional.empty();
     }

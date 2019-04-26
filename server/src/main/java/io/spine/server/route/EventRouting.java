@@ -116,7 +116,8 @@ public final class EventRouting<I>
      *         if the route for this event class is already set
      */
     @CanIgnoreReturnValue
-    public <E extends EventMessage> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
+    public <E extends EventMessage>
+    EventRouting<I> route(Class<E> eventClass, EventRoute<I, ? super E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<EventMessage, EventContext, Set<I>> casted =
@@ -152,10 +153,11 @@ public final class EventRouting<I>
      * @return optionally available route
      */
     public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        Optional<? extends Route<EventMessage, EventContext, Set<I>>> optional = doGet(eventClass);
-        @SuppressWarnings({"unchecked", "RedundantSuppression"})
-        Optional<EventRoute<I, M>> result = optional.map(r -> (EventRoute<I, M>) r);
+        RoutingMatch match = routeFor(eventClass);
+        Optional<EventRoute<I, M>> result =
+                match.found()
+                ? Optional.of((EventRoute<I, M>) match.route())
+                : Optional.empty();
         return result;
     }
-
 }

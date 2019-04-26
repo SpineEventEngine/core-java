@@ -22,12 +22,19 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.OptionalSubject;
+import com.google.common.truth.Truth8;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.test.route.UsedLoggedIn;
+import io.spine.test.route.AccountSuspended;
+import io.spine.test.route.LoginEvent;
+import io.spine.test.route.UserAccountEvent;
+import io.spine.test.route.UserEvent;
+import io.spine.test.route.UserLoggedIn;
+import io.spine.test.route.UserLoggedOut;
 import io.spine.test.route.UserRegistered;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,50 +43,37 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.random;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /* OK as custom routes do not refer to the test suite. */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 @DisplayName("EventRouting should")
 class EventRoutingTest {
 
+    /** The set of IDs returned by the {@link #defaultRoute}. */
+    private static final ImmutableSet<Long> DEFAULT_ROUTE = ImmutableSet.of(0L, 1L);
+
     /** The set of IDs returned by the {@link #customRoute}. */
     private static final ImmutableSet<Long> CUSTOM_ROUTE = ImmutableSet.of(5L, 6L, 7L);
 
-    /** The set of IDs returned by the {@link #defaultRoute}. */
-    private static final ImmutableSet<Long> DEFAULT_ROUTE = ImmutableSet.of(0L, 1L);
+    /** The set of IDs returned by the {@link #alternativeRoute}. */
+    private static final ImmutableSet<Long> ALT_ROUTE = ImmutableSet.of(100L, 200L, 300L, 400L);
 
     /** The object under the test. */
     private EventRouting<Long> eventRouting;
 
-    /** A custom route for {@code StringValue} messages. */
-    private final EventRoute<Long, UserRegistered> customRoute = new EventRoute<Long, UserRegistered>() {
-
-        private static final long serialVersionUID = 0L;
-
-        @Override
-        public Set<Long> apply(UserRegistered message, EventContext context) {
-            return CUSTOM_ROUTE;
-        }
-    };
-
     /** The default route to be used by the routing under the test. */
-    private final EventRoute<Long, EventMessage> defaultRoute = new EventRoute<Long, EventMessage>() {
+    private final EventRoute<Long, EventMessage> defaultRoute = (event, context) -> DEFAULT_ROUTE;
 
-        private static final long serialVersionUID = 0L;
+    /** A custom route. */
+    private final EventRoute<Long, UserEvent> customRoute = (event, context) -> CUSTOM_ROUTE;
 
-        @Override
-        public Set<Long> apply(EventMessage message, EventContext context) {
-            return DEFAULT_ROUTE;
-        }
-    };
+    /** Another custom route. */
+    private final EventRoute<Long, UserEvent> alternativeRoute = (event, context) -> ALT_ROUTE;
 
     @BeforeEach
     void setUp() {
@@ -115,20 +109,23 @@ class EventRoutingTest {
             }
         };
 
-        assertSame(eventRouting, eventRouting.replaceDefault(newDefault));
-
-        assertSame(newDefault, eventRouting.getDefault());
+        assertThat(eventRouting.replaceDefault(newDefault))
+                .isSameInstanceAs(eventRouting);
+        assertThat(eventRouting.getDefault())
+                .isSameInstanceAs(newDefault);
     }
 
     @Test
     @DisplayName("set custom route")
     void setCustomRoute() {
-        assertSame(eventRouting, eventRouting.route(UserRegistered.class, customRoute));
+        assertThat(eventRouting.route(UserRegistered.class, customRoute))
+                .isSameInstanceAs(eventRouting);
 
         Optional<EventRoute<Long, UserRegistered>> route = eventRouting.get(UserRegistered.class);
 
-        assertTrue(route.isPresent());
-        assertSame(customRoute, route.get());
+        OptionalSubject assertRoute = Truth8.assertThat(route);
+        assertRoute.isPresent();
+        assertRoute.hasValue(customRoute);
     }
 
     @Test
@@ -145,8 +142,9 @@ class EventRoutingTest {
         eventRouting.route(UserRegistered.class, customRoute);
         eventRouting.remove(UserRegistered.class);
 
-        assertFalse(eventRouting.doGet(UsedLoggedIn.class)
-                                .isPresent());
+        assertThat(eventRouting.routeFor(UserLoggedIn.class)
+                               .found())
+                .isFalse();
     }
 
     @Test
@@ -161,12 +159,11 @@ class EventRoutingTest {
         // Have custom route too.
         eventRouting.route(UserRegistered.class, customRoute);
 
-        // An event which has `Timestamp` as its message.
-        // It should go through the default route, because only `StringValue` has a custom route.
         Event event = GivenEvent.arbitrary();
-
         Set<Long> ids = eventRouting.apply(event.enclosedMessage(), event.context());
-        assertEquals(DEFAULT_ROUTE, ids);
+
+        assertThat(ids)
+                .isEqualTo(DEFAULT_ROUTE);
     }
 
     @Test
@@ -181,6 +178,33 @@ class EventRoutingTest {
         EventEnvelope event = EventEnvelope.of(GivenEvent.withMessage(eventMessage));
 
         Set<Long> ids = eventRouting.apply(event.message(), event.context());
-        assertEquals(CUSTOM_ROUTE, ids);
+        assertThat(ids)
+                .isEqualTo(CUSTOM_ROUTE);
+    }
+
+    @Test
+    @DisplayName("allow routing via interface")
+    void routesViaInterface() {
+        eventRouting.route(UserLoggedOut.class, alternativeRoute)
+                    .route(LoginEvent.class, customRoute);
+
+        EventContext ctx = EventContext.getDefaultInstance();
+
+        // Check routing via common interface `LoginEvent`.
+        assertThat(eventRouting.apply(UserLoggedIn.getDefaultInstance(), ctx))
+                .isEqualTo(CUSTOM_ROUTE);
+
+        // Check routing via specific type.
+        assertThat(eventRouting.apply(UserLoggedOut.getDefaultInstance(), ctx))
+                .isEqualTo(ALT_ROUTE);
+    }
+
+    @Test
+    @DisplayName("prohibit adding specific type after interface routing")
+    void overridingInterfaceRouting() {
+        assertThrows(IllegalStateException.class, () ->
+                eventRouting.route(UserAccountEvent.class, alternativeRoute)
+                            .route(AccountSuspended.class, customRoute)
+        );
     }
 }

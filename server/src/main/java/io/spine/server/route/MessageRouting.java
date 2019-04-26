@@ -21,10 +21,10 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Optional;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -42,7 +42,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
 
     private static final long serialVersionUID = 0L;
 
-    private final HashMap<Class<? extends M>, Route<M, C, R>> routes = new LinkedHashMap<>();
+    private final Map<Class<? extends M>, Route<M, C, R>> routes = new LinkedHashMap<>();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
     private Route<M, C, R> defaultRoute;
@@ -89,12 +89,23 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
     void doRoute(Class<? extends M> messageClass, Route<M, C, R> via) throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
-        Optional route = doGet(messageClass);
-        if (route.isPresent()) {
-            throw newIllegalStateException(
-                    "The route for the message class %s already set. " +
-                            "Please remove the route (%s) before setting new route.",
-                    messageClass.getName(), route.get());
+        RoutingMatch match = routeFor(messageClass);
+        if (match.found()) {
+            String requestedClass = messageClass.getName();
+            String entryClass = match.entryClass()
+                                     .getName();
+            if (match.direct()) {
+                throw newIllegalStateException(
+                        "The route for the message class `%s` already set. " +
+                                "Please remove the route (`%s`) before setting new route.",
+                        requestedClass, entryClass);
+            } else {
+                throw newIllegalStateException(
+                        "The route for the message class `%s` already defined via the interface `%s`. " +
+                        "If you want to have specific routing for the class `%s` please put it " +
+                        "before the routing for the superinterface.",
+                        requestedClass, entryClass, requestedClass);
+            }
         }
         routes.put(messageClass, via);
     }
@@ -105,10 +116,16 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
      * @param msgCls the class of the messages
      * @return optionally available route
      */
-    Optional<? extends Route<M, C, R>> doGet(Class<? extends M> msgCls) {
+    RoutingMatch routeFor(Class<? extends M> msgCls) {
         checkNotNull(msgCls);
-        Route<M, C, R> route = routes.get(msgCls);
-        return Optional.ofNullable(route);
+        // Iterate keys to match either by equality or superinterface.
+        for (Map.Entry<Class<? extends M>, Route<M, C, R>> entry : routes.entrySet()) {
+            Class<? extends M> key = entry.getKey();
+            if (key.isAssignableFrom(msgCls)) {
+                return new RoutingMatch(msgCls, key, entry.getValue());
+            }
+        }
+        return new RoutingMatch(msgCls, null, null);
     }
 
     /**
@@ -141,12 +158,47 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
         checkNotNull(context);
         @SuppressWarnings("unchecked") Class<? extends M>
         cls = (Class<? extends M>) message.getClass();
-        Route<M, C, R> func = routes.get(cls);
-        if (func != null) {
+        RoutingMatch match = routeFor(cls);
+        if (match.found()) {
+            Route<M, C, R> func = match.route();
             R result = func.apply(message, context);
             return result;
         }
         R result = getDefault().apply(message, context);
         return result;
+    }
+
+    /**
+     * Provides information on routing availability.
+     */
+    final class RoutingMatch {
+
+        private final Class<? extends M> requestedClass;
+        private final @Nullable Route<M, C, R> route;
+        private final @Nullable Class<? extends M> entryClass;
+
+        private RoutingMatch(Class<? extends M> requestedClass,
+                             @Nullable Class<? extends M> entryClass,
+                             @Nullable Route<M, C, R> route) {
+            this.requestedClass = requestedClass;
+            this.route = route;
+            this.entryClass = entryClass;
+        }
+
+        boolean found() {
+            return route != null;
+        }
+
+        boolean direct() {
+            return requestedClass.equals(entryClass);
+        }
+
+        Class<? extends M> entryClass() {
+            return checkNotNull(entryClass);
+        }
+
+        Route<M, C, R> route() {
+            return checkNotNull(route);
+        }
     }
 }
