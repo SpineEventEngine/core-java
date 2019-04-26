@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
-import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.given.column.BrokenTestEntity;
@@ -67,7 +66,7 @@ class ColumnTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        EntityColumn column = forMethod("getVersion", Entity.class);
+        EntityColumn column = forMethod("isArchived", Entity.class);
         reserializeAndAssert(column);
     }
 
@@ -80,7 +79,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null getter without errors")
         void getter() {
-            EntityColumn column = forMethod("getVersion", Entity.class);
+            EntityColumn column = forMethod("isArchived", Entity.class);
             column.restoreGetter();
         }
 
@@ -89,7 +88,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null value converter without errors")
         void valueConverter() {
-            EntityColumn column = forMethod("getVersion", Entity.class);
+            EntityColumn column = forMethod("isArchived", Entity.class);
             column.restoreValueConverter();
         }
     }
@@ -97,28 +96,26 @@ class ColumnTest {
     @Test
     @DisplayName("support `toString`")
     void supportToString() {
-        EntityColumn column = forMethod("getVersion", Entity.class);
-        assertEquals("Entity.version", column.toString());
+        EntityColumn column = forMethod("isArchived", Entity.class);
+        assertEquals("Entity.archived", column.toString());
     }
 
     @Test
     @DisplayName("invoke getter")
     void invokeGetter() {
-        int version = 2;
-        EntityColumn column = forMethod("getVersion", Entity.class);
+        EntityColumn column = forMethod("isArchived", Entity.class);
         TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
                                     .withId(1L)
-                                    .withVersion(version)
                                     .build();
-        Version actualVersion = (Version) column.getFor(entity);
-        assertEquals(version, actualVersion.getNumber());
+        boolean isArchived = (boolean) column.getFor(entity);
+        assertFalse(isArchived);
     }
 
     @Test
     @DisplayName("have `equals` and `hashCode`")
     void haveEqualsAndHashCode() {
-        EntityColumn col1 = forMethod("getVersion", Entity.class);
-        EntityColumn col2 = forMethod("getVersion", Entity.class);
+        EntityColumn col1 = forMethod("isArchived", Entity.class);
+        EntityColumn col2 = forMethod("isArchived", Entity.class);
         EntityColumn col3 = forMethod("isDeleted", Entity.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)

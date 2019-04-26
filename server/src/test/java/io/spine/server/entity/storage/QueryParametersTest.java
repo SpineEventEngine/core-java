@@ -55,7 +55,6 @@ import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.given.QueryParametersTestEnv.mockColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -70,7 +69,7 @@ class QueryParametersTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        String columnName = version.name();
+        String columnName = archived.name();
         EntityColumn column = findColumn(Entity.class, columnName);
         Filter filter = Filters.eq(columnName, 1);
         CompositeQueryParameter parameter = aggregatingParameter(column, filter);

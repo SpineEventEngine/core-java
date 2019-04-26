@@ -42,7 +42,7 @@ import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.entity.storage.Columns.extractColumnValues;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import static io.spine.server.storage.VersionField.version;
+import static io.spine.server.storage.LifecycleFlagField.archived;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,7 +56,7 @@ class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns newRecord() {
         return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                  Collections.emptyMap());
+                                          Collections.emptyMap());
     }
 
     private static EntityRecordWithColumns newEmptyRecord() {
@@ -78,7 +78,7 @@ class EntityRecordWithColumnsTest {
         Entity<?, ?> entity = new TestEntityBuilder().setResultClass(TestEntity.class)
                                                      .withVersion(1)
                                                      .build();
-        String columnName = version.name();
+        String columnName = archived.name();
         EntityColumn column = findColumn(Entity.class, columnName);
         MemoizedValue value = column.memoizeFor(entity);
 
@@ -183,7 +183,6 @@ class EntityRecordWithColumnsTest {
         Class<? extends Entity> entityClass = entity.getClass();
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
-
 
         assertThat(columnValues).hasSize(defaultColumns.size());
 
