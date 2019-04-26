@@ -36,7 +36,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
- * and post resulting events to to {@link EventBus}.
+ * and post resulting events to {@link EventBus}.
  */
 public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
 
@@ -94,7 +94,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     }
 
     /**
-     * Indicates whether some another command handler is "equal to" this one.
+     * Indicates whether some other command handler is "equal to" this one.
      *
      * <p>Two command handlers are equal if they handle the same set of commands.
      *
