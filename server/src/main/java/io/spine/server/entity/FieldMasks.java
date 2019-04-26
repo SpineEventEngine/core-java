@@ -45,7 +45,7 @@ public final class FieldMasks {
      * Applies the given {@code FieldMask} to given collection of {@link Message}s.
      * Does not change the {@link Collection} itself.
      *
-     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are
+     * <p>If the {@code FieldMask} instance contains invalid field declarations, they are
      * ignored and do not affect the execution result.
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
@@ -64,13 +64,13 @@ public final class FieldMasks {
      * Applies the {@code FieldMask} to the given {@link Message}
      * if the {@code mask} parameter is valid.
      *
-     * <p>In case the {@code FieldMask} instance contains invalid field declarations,
+     * <p>If the {@code FieldMask} instance contains invalid field declarations,
      * they are ignored and do not affect the execution result.
      *
      * @param mask    the {@code FieldMask} to apply.
      * @param message the {@link Message} to apply given mask to.
-     * @return the message of the same type as the given one with only selected fields if
-     * the {@code mask} is valid, original message otherwise.
+     * @return the message of the same type as the given one with only selected fields. Otherwise if
+     * the {@code mask} is valid, original message is returned.
      */
     public static <M extends Message> M applyMask(FieldMask mask, M message) {
         checkNotNull(mask);

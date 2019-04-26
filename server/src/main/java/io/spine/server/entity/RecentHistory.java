@@ -49,7 +49,7 @@ public final class RecentHistory {
     private final Deque<Event> history = newArrayDeque();
 
     /**
-     * Creates new instance.
+     * Creates a new instance.
      */
     RecentHistory() {
         super();
@@ -72,8 +72,8 @@ public final class RecentHistory {
     /**
      * Creates a new iterator over the recent history items.
      *
-     * <p>The iterator returns events in the reverse chronological order. That is, most recent
-     * event would be returned first.
+     * <p>The iterator returns events in the reverse chronological order. Thus the most recent
+     * event will be returned first.
      *
      * @return an events iterator
      */
@@ -86,7 +86,7 @@ public final class RecentHistory {
      * Creates a new {@link Stream} of the recent history items.
      *
      * <p>The produced stream is sequential and emits items in the reverse chronological order.
-     * That is, most recent event would be returned first.
+     * Thus the most recent event will be returned first.
      *
      * @return a stream of the recent events
      */
