@@ -101,9 +101,10 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
                         requestedClass, entryClass);
             } else {
                 throw newIllegalStateException(
-                        "The route for the message class `%s` already defined via the interface `%s`. " +
-                        "If you want to have specific routing for the class `%s` please put it " +
-                        "before the routing for the superinterface.",
+                        "The route for the message class `%s` already defined via " +
+                                "the interface `%s`. If you want to have specific routing for " +
+                                "the class `%s` please put it before the routing for " +
+                                "the superinterface.",
                         requestedClass, entryClass, requestedClass);
             }
         }
