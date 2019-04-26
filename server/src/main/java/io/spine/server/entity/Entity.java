@@ -37,8 +37,10 @@ import io.spine.string.Stringifiers;
  * If an entity is {@linkplain #isArchived() archived} or {@linkplain #isDeleted() deleted},
  * then it’s regarded to be inactive.
  *
- * @param <I> the type of entity identifier
- * @param <S> the type of entity state
+ * @param <I>
+ *         the type of entity identifier
+ * @param <S>
+ *         the type of entity state
  */
 public interface Entity<I, S extends Message> extends WithLifecycle {
 
@@ -50,8 +52,8 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
     /**
      * Obtains string representation of the entity identifier.
      *
-     * @apiNote The primary purpose of this method is to display the identifier in human-readable
-     *          form in debug and error messages.
+     * @apiNote The primary purpose of this method is to display the identifier in
+     *         human-readable form in debug and error messages.
      */
     default String idAsString() {
         return Stringifiers.toString(id());
@@ -88,11 +90,10 @@ public interface Entity<I, S extends Message> extends WithLifecycle {
     /**
      * Obtains the version of the entity.
      *
-     * @apiNote This method has the {@code get} prefix for conforming to Java Beans convention which
-     *          is used for the column methods.
+     * @apiNote This method has the {@code get} prefix for conforming to Java Beans
+     *         convention which is used for the column methods.
      * @see #version()
      */
-    @Column
     Version getVersion();
 
     /**

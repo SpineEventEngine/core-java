@@ -45,7 +45,6 @@ import static io.spine.server.entity.storage.ColumnTests.assertNotContainsColumn
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -84,7 +83,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    version.name(), archived.name(), deleted.name(),
+                    archived.name(), deleted.name(),
                     "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
             );
         }
@@ -104,7 +103,7 @@ class ColumnReaderTest {
                                  .map(EntityColumn::getName)
                                  .collect(toList());
             assertThat(columnNames)
-                    .containsAllIn(defaultColumns);
+                    .containsAtLeastElementsIn(defaultColumns);
         }
 
         @Test
@@ -115,7 +114,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    version.name(), archived.name(), deleted.name(), "visible", "someTime"
+                    archived.name(), deleted.name(), "visible", "someTime"
             );
         }
 
@@ -125,7 +124,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
             assertContainsColumns(entityColumns,
-                                  version.name(), archived.name(), deleted.name(),
+                                  archived.name(), deleted.name(),
                                   "integerFieldValue");
         }
     }

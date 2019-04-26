@@ -22,7 +22,6 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.storage.LifecycleFlagField;
-import io.spine.server.storage.VersionField;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -42,11 +41,7 @@ final class ColumnTests {
                   .map(Enum::name)
                   .collect(toImmutableSet());
 
-    static final ImmutableSet<String> defaultColumns =
-            ImmutableSet.<String>builder()
-                    .addAll(lifecycleColumns)
-                    .add(VersionField.version.name())
-                    .build();
+    static final ImmutableSet<String> defaultColumns = lifecycleColumns;
 
     /** Prevent instantiation of this utility class. */
     private ColumnTests() {
