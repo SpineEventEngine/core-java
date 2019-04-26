@@ -42,7 +42,7 @@ public final class RecentHistory {
     /**
      * Holds the history of all events which happened to the aggregate since the last snapshot.
      *
-     * <p>Most recent event come first.
+     * <p>Most recent event comes first.
      *
      * @see #iterator()
      */
