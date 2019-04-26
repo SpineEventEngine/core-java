@@ -40,7 +40,7 @@ import static java.lang.String.format;
 /**
  * The exception for reporting invalid commands.
  *
- * <p>A command is invalid if it's supported (there's a handler for the command), but it's
+ * <p>A command is invalid if it's supported (there's a handler for the command), but its
  * attributes are not populated according to framework conventions or validation constraints.
  */
 public class InvalidCommandException extends CommandException implements MessageInvalid {
@@ -71,7 +71,7 @@ public class InvalidCommandException extends CommandException implements Message
 
     /**
      * Creates an exception for a command with missing {@code tenant_id} attribute in
-     * the {@code CommandContext}, which is required in a multitenant application.
+     * the {@code CommandContext} which is required in a multitenant application.
      */
     public static InvalidCommandException missingTenantId(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -90,7 +90,7 @@ public class InvalidCommandException extends CommandException implements Message
 
     /**
      * Creates an error for a command with missing {@code tenant_id}
-     * attribute in the {@code CommandContext}, which is required in a multitenant application.
+     * attribute in the {@code CommandContext} which is required in a multitenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         Error error = Error
