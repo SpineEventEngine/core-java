@@ -21,7 +21,7 @@
 package io.spine.client;
 
 /**
- * Constant values shared between client and server code.
+ * Constant values shared between the client and the server code.
  */
 public final class ConnectionConstants {
 

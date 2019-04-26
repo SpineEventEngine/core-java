@@ -51,10 +51,10 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * <em>without</em> having intermediate commands or events.
  *
  * <p>Adding an event to an aggregate history normally requires
- * either a command (handling of which produces the event), or an event (reaction on which may
+ * either a command (handling of which produces the event) or an event (reaction on which may
  * produce the event). Such a command or an event:
  * <ol>
- *   <li>serves as a dispatched message type, which is used as the first argument of the
+ *   <li>serves as a dispatched message type which is used as the first argument of the
  *       corresponding aggregate handler method;
  *   <li>carries the information about the fact we want to remember.
  * </ol>
