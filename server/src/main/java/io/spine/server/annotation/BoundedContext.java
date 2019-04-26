@@ -30,13 +30,13 @@ import java.lang.annotation.Target;
  * Marks a package as one belonging to a Bounded Context with
  * the {@linkplain #value() specified name}.
  *
- * <p>Java does not have the notion of package nesting. Packages in Java are separated namespaces,
- * which seem hierarchical for convenience.
+ * <p>Java does not have the notion of package nesting. Packages in Java are separated namespaces
+ * which seem to have a hierarchical structure for convenience.
  *
  * <h3>Nesting Convention</h3>
- * <p>This annotation assumes that nesting formed by a programmer when naming packages, <em>is</em>
+ * <p>This annotation assumes that nesting formed by a programmer when naming packages <em>is</em>
  * a hierarchy. Terms mentioned below assume that package “inheritance” or “hierarchy” is a
- * convention supported by this framework, and not a standard feature of Java.
+ * convention supported by this framework and is not a standard feature of Java.
  *
  * <h3>Inheriting Package Annotation</h3>
  * <p>Packages which names start with the name of the annotated package “inherit” the annotation.
@@ -46,8 +46,8 @@ import java.lang.annotation.Target;
  * <p>A possible usage scenario would be to have an aggregate root class placed in a “parent”
  * package, and aggregate parts being under “sub-packages”.
  *
- * <p>Packages that do not have a common “parent”, but annotated with the same name of a
- * Bounded Context, belong to the same Bounded Context.
+ * <p>Packages that do not have a common “parent” but annotated with the same name of a
+ * Bounded Context belong to the same Bounded Context.
  */
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)

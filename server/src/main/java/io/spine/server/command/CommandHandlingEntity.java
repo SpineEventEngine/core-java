@@ -84,7 +84,7 @@ class CommandHandlingEntity<I,
      ******************************************************************************/
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a non-default value,
+     * Creates {@code ValueMismatch} for the case of discovering a non-default value
      * when the default value was expected by a command.
      *
      * @param  actual   the value discovered instead of the default value
@@ -144,7 +144,7 @@ class CommandHandlingEntity<I,
     }
 
     /**
-     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value,
+     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value
      * but discovered that the field is already empty.
      *
      * @param expected the value of the field that the command wanted to clear

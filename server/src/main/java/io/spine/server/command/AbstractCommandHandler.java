@@ -50,8 +50,8 @@ import static io.spine.server.command.model.CommandHandlerClass.asCommandHandler
  *
  * <p>Event messages are returned as values of command handling methods.
  *
- * <p>A command handler does not have own state. So the state of the business
- * model it changes is external to it. Even though such a behaviour may be needed in
+ * <p>A command handler does not have its own state. So the state of the business
+ * model it changes is external to it. Even though such behaviour may be needed in
  * some rare cases, using {@linkplain io.spine.server.aggregate.Aggregate aggregates}
  * is a preferred way of handling commands.
  *
