@@ -38,7 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>An underlying event doesn't contain {@linkplain Event#clearEnrichments() enrichments}.
  *
  * @apiNote This class is public so that {@link io.spine.server.entity.storage.EntityColumn
- * EntityColumn} can access its column declarations.
+ *         EntityColumn} can access its column declarations.
  */
 @Internal
 public final class EEntity extends TransactionalEntity<EventId, Event, EventVBuilder> {

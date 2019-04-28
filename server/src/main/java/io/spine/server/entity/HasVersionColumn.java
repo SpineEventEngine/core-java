@@ -18,19 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client;
+package io.spine.server.entity;
+
+import com.google.protobuf.Message;
+import io.spine.core.Version;
+import io.spine.server.entity.storage.Column;
 
 /**
- * Constant values shared between the client and the server code.
+ * Applies {@link Column} annotation to {@code getVersion} method.
+ *
+ * <p>The interface is implemented by {@link Entity entities} that have a stored version.
  */
-public final class ConnectionConstants {
+public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * The default port number on which a client server runs.
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
      */
-    public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
-
-    /** Prevents instantiation of this utility class. */
-    private ConnectionConstants() {
-    }
+    @Override
+    @Column
+    Version getVersion();
 }

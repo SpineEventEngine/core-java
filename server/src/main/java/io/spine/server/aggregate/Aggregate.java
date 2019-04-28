@@ -65,11 +65,11 @@ import static io.spine.validate.Validate.isNotDefault;
  *
  * <h1>Creating an aggregate class</h1>
  *
- * <p>In order to create a new aggregate class you need to:
+ * <p>To create a new aggregate class:
  * <ol>
  *     <li>Select a type for identifiers of the aggregate.
  *      If you select to use a typed identifier (which is recommended),
- *      you need to define a protobuf message for the ID type.
+ *      define a protobuf message for the ID type.
  *     <li>Define the structure of the aggregate state as a Protobuf message.
  *     <li>Generate Java code for ID and state types.
  *     <li>Create new Java class derived from {@code Aggregate} passing ID and
@@ -95,7 +95,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * in response to an event. An event applier takes a single parameter of the
  * event message it handles and returns {@code void}.
  *
- * <p>The modification of the state is done via a builder instance obtained
+ * <p>The modification of the state is done using a builder instance obtained
  * from {@link #builder()}.
  *
  * <p>An {@code Aggregate} class must have applier methods for
@@ -103,7 +103,7 @@ import static io.spine.validate.Validate.isNotDefault;
  *
  * <h1>Performance considerations</h1>
  *
- * <p>In order to improve performance of loading aggregates an
+ * <p>To improve performance of loading aggregates, an
  * {@link AggregateRepository} periodically stores aggregate snapshots.
  * See {@link AggregateRepository#setSnapshotTrigger(int)} for details.
  *
@@ -149,10 +149,10 @@ public abstract class Aggregate<I,
      *           <li>These constructors need to be accessible from tests in the same package.
      *         </ol>
      *
-     *         <p>If you do have tests that create aggregates via constructors, consider annotating
+     *         <p>If you do have tests that create aggregates using constructors, consider annotating
      *         them with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are
      *         invoked by {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
-     *         via Reflection) may be left {@code private}.
+     *         using Reflection) may be left {@code private}.
      */
     protected Aggregate() {
         super();
@@ -206,7 +206,7 @@ public abstract class Aggregate<I,
     /**
      * {@inheritDoc}
      *
-     * <p>In {@code Aggregate}, this method must be called only from within an event applier.
+     * <p>In {@code Aggregate} this method must be called only from within an event applier.
      *
      * @throws IllegalStateException if the method is called from outside an event applier
      */

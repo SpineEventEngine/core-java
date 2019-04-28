@@ -41,7 +41,7 @@ import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.core.BoundedContextNames.assumingTests;
 
 /**
- * Exposes one or more Bounded Contexts via {@link io.spine.server.CommandService CommandService}
+ * Exposes one or more Bounded Contexts using {@link io.spine.server.CommandService CommandService}
  * and {@link io.spine.server.QueryService QueryService}.
  */
 public final class Server implements Logging {

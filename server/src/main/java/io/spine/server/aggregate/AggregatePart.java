@@ -43,10 +43,10 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  *   <li>managed by a separate repository class derived from {@link AggregateRepository}
  * </ul>
  *
- * <p>In order to access parts of the aggregate {@link AggregateRoot} should be used.
+ * <p>To access parts of the aggregate, {@link AggregateRoot} should be used.
  *
- * <p>If your business logic cannot be split into parts that can be modified separately,
- * consider extending {@link Aggregate} instead of several {@code AggregatePart}s.
+ * <p>If your business logic cannot be split into parts, it can be modified separately.
+ * Consider extending {@link Aggregate} instead of several {@code AggregatePart}s.
  *
  * @param <I>
  *         the type for IDs of this class of aggregates

@@ -64,16 +64,16 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A logical and structural boundary of a model.
  *
- * <p>Logically, a bounded context represents a sub-system, built to be described with the same
- * ubiquitous language. Any term within a single bounded context has a single meaning and
- * may or may not map to another term in the language of another bounded context.
+ * <p>Logically, a Bounded Context represents a sub-system built to be described with the same
+ * Ubiquitous Language. Any term within a single bounded context has a single meaning and
+ * may or may not map to another term in the language of another Bounded Context.
  *
- * <p>The ubiquitous language of a bounded context is represented by the entity state, event,
- * and command types, entity types, etc. An entity and its adjacent types belong to the bounded
- * context, which the entity {@link Repository} is
+ * <p>The Ubiquitous Language of a Bounded Context is represented by such concepts as the entity state, event,
+ * and command types, entity types, and others. An entity and its adjacent types belong to the Bounded
+ * Context which the entity {@link Repository} is
  * {@linkplain BoundedContext#register(Repository) registered} in.
  *
- * <p>Structurally, a bounded context brings together all the infrastructure required for
+ * <p>Structurally, a Bounded Context brings together all the infrastructure required for
  * the components of a model to cooperate.
  *
  * <p>An instance of {@code BoundedContext} acts as a major point of configuration for all
@@ -86,12 +86,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
-     * The name of the bounded context, which is used to distinguish the context in an application
+     * The name of the bounded context which is used to distinguish the context in an application
      * with several bounded contexts.
      */
     private final BoundedContextName name;
 
-    /** If {@code true} the bounded context serves many tenants. */
+    /** If {@code true}, the Bounded Context serves many tenants. */
     private final boolean multitenant;
 
     private final CommandBus commandBus;
@@ -163,7 +163,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * @param builder    the {@link BoundedContextBuilder} to obtain
      *                   the {@link IntegrationBus.Builder} from
      * @param eventBus   the initialized {@link EventBus}
-     * @param name       the name of the constructed bounded context
+     * @param name       the name of the constructed Bounded Context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
@@ -368,10 +368,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Obtains an ID of the bounded context.
+     * Obtains an ID of the Bounded Context.
      *
-     * <p>The ID allows to identify a bounded context if a multi-context application.
-     * If the ID was not defined, during the building process, the context would get
+     * <p>The ID allows to identify a Bounded Context if a multi-context application.
+     * If the ID was not defined during the building process, the Bounded Context gets
      * {@link BoundedContextNames#assumingTests()} name.
      *
      * @return the ID of this {@code BoundedContext}
