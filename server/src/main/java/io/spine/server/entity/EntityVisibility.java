@@ -35,7 +35,6 @@ import io.spine.type.TypeName;
 
 import java.io.Serializable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.option.EntityOption.Visibility.DEFAULT;
@@ -155,8 +154,8 @@ public final class EntityVisibility implements Serializable {
     /**
      * Checks if the visibility is at least as allowing as the given one.
      *
-     * <p>Call {@code isAsLeast(NONE)} always returns {@code true}. Call {@code isAtLeast(FULL)}
-     * returns {@code true} only if this visibility is exactly {@code FULL}.
+     * <p>{@code isAsLeast(NONE)} always returns {@code true}. {@code isAtLeast(FULL)} returns
+     * {@code true} only if this visibility is exactly {@code FULL}.
      *
      * @param visibility
      *         the visibility to compare to
