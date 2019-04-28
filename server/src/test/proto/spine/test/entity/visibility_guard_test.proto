@@ -19,7 +19,7 @@
  */
 syntax = "proto3";
 
-//Cannot use `.entity` package due to a conflict with `(entity)` annotation.
+// Cannot use `.entity` package due to a conflict with `(entity)` annotation.
 package spine.test.serverentity;
 
 import "spine/options.proto";
