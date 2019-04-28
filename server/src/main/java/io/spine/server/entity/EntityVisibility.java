@@ -48,10 +48,10 @@ import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
  *
  * <p>An entity can have one of the following visibility levels:
  * <ol>
- * <li>{@code NONE} - the entity is not visible to the clients for reading;
- * <li>{@code QUERY} - the entity is visible for querying, but not for subscription;
- * <li>{@code SUBSCRIBE} - the entity is visible for subscription, but not for querying;
- * <li>{@code FULL} - the entity is visible for both subscription and querying.
+ *     <li>{@code NONE} - the entity is not visible to the clients for reading;
+ *     <li>{@code QUERY} - the entity is visible for querying, but not for subscription;
+ *     <li>{@code SUBSCRIBE} - the entity is visible for subscription, but not for querying;
+ *     <li>{@code FULL} - the entity is visible for both subscription and querying.
  * </ol>
  *
  * <p>The visibility of an entity is defined by the {@code (entity)} option. By default, any entity
