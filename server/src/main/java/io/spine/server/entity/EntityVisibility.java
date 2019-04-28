@@ -35,6 +35,7 @@ import io.spine.type.TypeName;
 
 import java.io.Serializable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.option.EntityOption.Visibility.DEFAULT;
