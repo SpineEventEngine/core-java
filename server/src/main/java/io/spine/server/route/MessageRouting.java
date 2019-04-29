@@ -86,7 +86,8 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
      * @param via          the instance of the route to be used
      * @throws IllegalStateException if the route for this message class is already set
      */
-    void doRoute(Class<? extends M> messageClass, Route<M, C, R> via) throws IllegalStateException {
+    void addRoute(Class<? extends M> messageClass, Route<M, C, R> via)
+            throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
         RoutingMatch match = routeFor(messageClass);

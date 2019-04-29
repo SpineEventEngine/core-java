@@ -100,7 +100,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<CommandMessage, CommandContext, I> casted =
                 (Route<CommandMessage, CommandContext, I>) via;
-        doRoute(commandClass, casted);
+        addRoute(commandClass, casted);
         return this;
     }
 

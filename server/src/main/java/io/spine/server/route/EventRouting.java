@@ -122,7 +122,7 @@ public final class EventRouting<I>
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<EventMessage, EventContext, Set<I>> casted =
                 (Route<EventMessage, EventContext, Set<I>>) via;
-        doRoute(eventClass, casted);
+        addRoute(eventClass, casted);
         return this;
     }
 

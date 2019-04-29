@@ -85,7 +85,7 @@ public class StateUpdateRouting<I>
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
         Route<Message, EventContext, Set<I>> route = (Route<Message, EventContext, Set<I>>) via;
-        doRoute(stateClass, route);
+        addRoute(stateClass, route);
         return this;
     }
 
