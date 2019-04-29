@@ -19,6 +19,7 @@
  */
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -31,9 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.checkSupported;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -109,15 +108,26 @@ public final class Targets {
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
-            List<?> idsList = notNullList(ids);
+            List<?> idsList = toImmutableList(ids);
             IdFilter idFilter = composeIdFilter(idsList);
 
-            List<CompositeFilter> filterList = notNullList(filters);
+            List<CompositeFilter> filterList = toImmutableList(filters);
             TargetFilters targetFilters = targetFilters(filterList, idFilter);
             builder.setFilters(targetFilters);
         }
 
         return builder.build();
+    }
+
+    /**
+     * Transforms the passed iterable to an immutable list, returning an empty list in
+     * case of {@code null} input.
+     */
+    private static <T> ImmutableList<T> toImmutableList(@Nullable Iterable<T> input) {
+        if (input == null) {
+            return ImmutableList.of();
+        }
+        return ImmutableList.copyOf(input);
     }
 
     private static IdFilter composeIdFilter(Collection<?> items) {
@@ -158,17 +168,5 @@ public final class Targets {
                             .setIdFilter(idFilter)
                             .addAllFilter(filters)
                             .build();
-    }
-
-    /**
-     * Returns an empty list in case of {@code null} input.
-     *
-     * @return a new {@link List} instance
-     */
-    private static <T> List<T> notNullList(@Nullable Iterable<T> input) {
-        if (input == null) {
-            return emptyList();
-        }
-        return newLinkedList(input);
     }
 }

@@ -63,7 +63,7 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
         assertThat(envelope.context())
                 .isEqualTo(command.context());
         assertThat(envelope.context())
-                .isSameAs(envelope.context());
+                .isSameInstanceAs(envelope.context());
     }
 
     @Test

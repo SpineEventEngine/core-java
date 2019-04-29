@@ -416,7 +416,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         private void assertEntityTypes() {
-            assertThat(blackBox.getAllEntityStateTypes()).containsAllIn(types);
+            assertThat(blackBox.getAllEntityStateTypes()).containsAtLeastElementsIn(types);
         }
 
         private void assertEnricher() {

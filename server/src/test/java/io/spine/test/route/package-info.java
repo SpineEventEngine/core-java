@@ -18,9 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Test environment events for {@link io.spine.server.route.EventRoutingTest}.
+ */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server;
+package io.spine.test.route;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

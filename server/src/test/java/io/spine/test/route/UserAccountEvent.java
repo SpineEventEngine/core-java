@@ -18,10 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server;
+package io.spine.test.route;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.Immutable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * Common interface for account events.
+ */
+@Immutable
+public interface UserAccountEvent extends UserEvent {
+}
