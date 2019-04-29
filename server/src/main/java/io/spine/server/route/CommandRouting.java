@@ -77,30 +77,47 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
     }
 
     /**
-     * Sets a custom route for the passed command class.
+     * Sets a custom route for the passed command type.
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     * <li>The first field of the command message is not an ID of the entity which handles the
-     * command (as required by the {@linkplain DefaultCommandRoute default route}.
-     * <li>The command need to be dispatched to an entity which ID differs from the value set in the
-     * first command attribute.
+     *   <li>The first field of the command message is not an ID of the entity which handles the
+     *   command (as required by the {@linkplain DefaultCommandRoute default route}.
+     *   <li>The command need to be dispatched to an entity which ID differs from the value set
+     *   in the first command message field.
      * </ul>
      *
-     * @param commandClass the class of the command message
-     * @param via          the route to be used for this class of commands
-     * @param <M>          the type of the command message
+     * <p>The type of the command can be a class or an interface. If a routing schema needs to
+     * contain entries for specific classes and an interface that these classes implement, routes
+     * for interfaces should be defined <em>after</em> entries for the classes:
+     *
+     * <pre>{@code
+     * customRouting.route(MyCommandClass.class, (event, context) -> { ... })
+     *              .route(MyCommandInterface.class, (event, context) -> { ... });
+     * }</pre>
+     *
+     * Defining an entry for an interface and then for the class which implements the interface will
+     * result in {@code IllegalStateException}.
+     *
+     * @param commandType
+     *         the type of the command message
+     * @param via
+     *         the route to be used for this type of commands
+     * @param <M>
+     *         the type of the command message
      * @return {@code this} to allow chained calls when configuring the routing
-     * @throws IllegalStateException if the route for this command class is already set
+     * @throws IllegalStateException
+     *         if the route for this command class is already set either directly or
+     *         via a super-interface
      */
     @CanIgnoreReturnValue
     public <M extends CommandMessage>
-    CommandRouting<I> route(Class<M> commandClass, CommandRoute<I, M> via)
+    CommandRouting<I> route(Class<M> commandType, CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<CommandMessage, CommandContext, I> casted =
                 (Route<CommandMessage, CommandContext, I>) via;
-        addRoute(commandClass, casted);
+        addRoute(commandType, casted);
         return this;
     }
 

@@ -70,29 +70,31 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
     }
 
     /**
-     * Sets a custom route for the passed message class.
+     * Sets a custom route for the passed message type.
      *
-     * <p>Such a mapping may be required when...
-     * <ul>
-     *     <li>A message should be matched to more than one entity.
-     *     <li>The type of an message producer ID (stored in the message context) differs from the
-     *         type of entity identifiers.
-     * </ul>
+     * <p>The type can be either a class or interface. If the routing schema already contains an
+     * entry with the same type or a super-interface of the passed type
+     * {@link IllegalStateException} will be thrown.
      *
-     * <p>If there is no specific route for the class of the passed message, the routing will use
-     * the {@linkplain #defaultRoute() default route}.
+     * <p>In order to provide a mapping for a specific class <em>and</em> an interface common
+     * to this and other message classes, please add the routing for the class <em>before</em>
+     * the interface.
      *
-     * @param messageClass the class of messages to route
-     * @param via          the instance of the route to be used
-     * @throws IllegalStateException if the route for this message class is already set
+     * @param messageType
+     *         the type of messages to route
+     * @param via
+     *         the instance of the route to be used
+     * @throws IllegalStateException
+     *         if the route for this message class is already set either directly or
+     *         via a super-interface
      */
-    void addRoute(Class<? extends M> messageClass, Route<M, C, R> via)
+    void addRoute(Class<? extends M> messageType, Route<M, C, R> via)
             throws IllegalStateException {
-        checkNotNull(messageClass);
+        checkNotNull(messageType);
         checkNotNull(via);
-        RoutingMatch match = routeFor(messageClass);
+        RoutingMatch match = routeFor(messageType);
         if (match.found()) {
-            String requestedClass = messageClass.getName();
+            String requestedClass = messageType.getName();
             String entryClass = match.entryClass()
                                      .getName();
             if (match.direct()) {
@@ -105,11 +107,11 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
                         "The route for the message class `%s` already defined via " +
                                 "the interface `%s`. If you want to have specific routing for " +
                                 "the class `%s` please put it before the routing for " +
-                                "the superinterface.",
+                                "the super-interface.",
                         requestedClass, entryClass, requestedClass);
             }
         }
-        routes.put(messageClass, via);
+        routes.put(messageType, via);
     }
 
     /**
@@ -120,7 +122,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
      */
     RoutingMatch routeFor(Class<? extends M> msgCls) {
         checkNotNull(msgCls);
-        // Iterate keys to match either by equality or superinterface.
+        // Iterate keys to match either by equality or super-interface.
         for (Map.Entry<Class<? extends M>, Route<M, C, R>> entry : routes.entrySet()) {
             Class<? extends M> key = entry.getKey();
             if (key.isAssignableFrom(msgCls)) {
