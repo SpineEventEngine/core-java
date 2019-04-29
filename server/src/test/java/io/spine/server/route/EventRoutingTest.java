@@ -229,4 +229,21 @@ class EventRoutingTest {
         assertThat(secondMatch.entryClass())
                 .isEqualTo(UserLoggedIn.class);
     }
+
+    @Test
+    @DisplayName("use default route when neither direct nor interface routing is defined")
+    void useDefaultRoute() {
+        eventRouting.route(UserAccountEvent.class, alternativeRoute);
+
+        // Obtain a match for the type from another “branch” of events.
+        Match match = eventRouting.routeFor(UserLoggedIn.class);
+
+        assertThat(match.found())
+                .isFalse();
+
+        Set<Long> route = eventRouting.apply(UserLoggedIn.getDefaultInstance(),
+                                             EventContext.getDefaultInstance());
+        assertThat(route)
+                .isEqualTo(DEFAULT_ROUTE);
+    }
 }
