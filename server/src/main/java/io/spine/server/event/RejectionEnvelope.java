@@ -132,10 +132,10 @@ public final class RejectionEnvelope
      * {@link ThrowableMessage}.
      *
      * @param commandMessage
-     *         rejected command
+     *         the rejected command
      * @param throwableMessage
-     *         thrown rejection
-     * @return new instance of {@code RejectionEventContext}
+     *         the thrown rejection
+     * @return the new instance of {@code RejectionEventContext}
      */
     private static RejectionEventContext rejectionContext(CommandMessage commandMessage,
                                                           ThrowableMessage throwableMessage) {
