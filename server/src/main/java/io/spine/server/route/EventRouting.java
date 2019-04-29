@@ -98,7 +98,7 @@ public final class EventRouting<I>
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     *   <li>An an event message should be matched to more than one entity (e.g. several
+     *   <li>An event message should be matched to more than one entity (e.g. several
      *   projections updated in response to one event).
      *   <li>The type of an event producer ID (stored in the event context) differs from the type
      *   of entity identifiers ({@code <I>}.
