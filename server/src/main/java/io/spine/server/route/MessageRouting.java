@@ -24,10 +24,12 @@ import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A routing schema for a kind of messages such as commands, events, rejections, or documents.
@@ -92,7 +94,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
             throws IllegalStateException {
         checkNotNull(messageType);
         checkNotNull(via);
-        RoutingMatch match = routeFor(messageType);
+        Match match = routeFor(messageType);
         if (match.found()) {
             String requestedClass = messageType.getName();
             String entryClass = match.entryClass()
@@ -120,16 +122,45 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
      * @param msgCls the class of the messages
      * @return optionally available route
      */
-    RoutingMatch routeFor(Class<? extends M> msgCls) {
+    Match routeFor(Class<? extends M> msgCls) {
         checkNotNull(msgCls);
-        // Iterate keys to match either by equality or super-interface.
-        for (Map.Entry<Class<? extends M>, Route<M, C, R>> entry : routes.entrySet()) {
+        Match direct = findDirect(msgCls);
+        if (direct.found()) {
+            return direct;
+        }
+
+        Match viaInterface = findViaInterface(msgCls);
+        if (viaInterface.found()) {
+            // Store the found route for later direct use.
+            routes.put(msgCls, viaInterface.route());
+            return viaInterface;
+        }
+
+        return new Match(msgCls, null, null);
+    }
+
+    private Match findDirect(Class<? extends M> msgCls) {
+        Route<M, C, R> route = routes.get(msgCls);
+        if (route != null) {
+            return new Match(msgCls, msgCls, route);
+        }
+        return new Match(msgCls, null, null);
+    }
+
+    private Match findViaInterface(Class<? extends M> msgCls) {
+        List<Map.Entry<Class<? extends M>, Route<M, C, R>>> interfaceEntries =
+                routes.entrySet()
+                      .stream()
+                      .filter(e -> e.getKey()
+                                    .isInterface())
+                      .collect(toList());
+        for (Map.Entry<Class<? extends M>, Route<M, C, R>> entry : interfaceEntries) {
             Class<? extends M> key = entry.getKey();
             if (key.isAssignableFrom(msgCls)) {
-                return new RoutingMatch(msgCls, key, entry.getValue());
+                return new Match(msgCls, key, entry.getValue());
             }
         }
-        return new RoutingMatch(msgCls, null, null);
+        return new Match(msgCls, null, null);
     }
 
     /**
@@ -163,7 +194,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
         checkNotNull(context);
         @SuppressWarnings("unchecked") Class<? extends M>
         cls = (Class<? extends M>) message.getClass();
-        RoutingMatch match = routeFor(cls);
+        Match match = routeFor(cls);
         if (match.found()) {
             Route<M, C, R> func = match.route();
             R result = func.apply(message, context);
@@ -176,15 +207,15 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
     /**
      * Provides information on routing availability.
      */
-    final class RoutingMatch {
+    final class Match {
 
         private final Class<? extends M> requestedClass;
         private final @Nullable Route<M, C, R> route;
         private final @Nullable Class<? extends M> entryClass;
 
-        private RoutingMatch(Class<? extends M> requestedClass,
-                             @Nullable Class<? extends M> entryClass,
-                             @Nullable Route<M, C, R> route) {
+        private Match(Class<? extends M> requestedClass,
+                      @Nullable Class<? extends M> entryClass,
+                      @Nullable Route<M, C, R> route) {
             this.requestedClass = requestedClass;
             this.route = route;
             this.entryClass = entryClass;

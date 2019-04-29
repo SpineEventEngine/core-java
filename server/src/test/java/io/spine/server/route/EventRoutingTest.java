@@ -27,6 +27,7 @@ import com.google.common.truth.Truth8;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.server.route.MessageRouting.Match;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.test.route.AccountSuspended;
@@ -206,5 +207,26 @@ class EventRoutingTest {
                 eventRouting.route(UserAccountEvent.class, alternativeRoute)
                             .route(AccountSuspended.class, customRoute)
         );
+    }
+
+    @Test
+    @DisplayName("cache routing defined via interface")
+    void cacheInterfaceRouting() {
+        eventRouting.route(LoginEvent.class, customRoute);
+
+        Match firstMatch = eventRouting.routeFor(UserLoggedIn.class);
+
+        assertThat(firstMatch.found())
+                .isTrue();
+        assertThat(firstMatch.entryClass())
+                .isEqualTo(LoginEvent.class);
+
+
+        Match secondMatch = eventRouting.routeFor(UserLoggedIn.class);
+
+        assertThat(secondMatch.found())
+                .isTrue();
+        assertThat(secondMatch.entryClass())
+                .isEqualTo(UserLoggedIn.class);
     }
 }

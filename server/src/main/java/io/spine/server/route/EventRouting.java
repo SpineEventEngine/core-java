@@ -168,7 +168,7 @@ public final class EventRouting<I>
      * @return optionally available route
      */
     public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        RoutingMatch match = routeFor(eventClass);
+        Match match = routeFor(eventClass);
         if (match.found()) {
             @SuppressWarnings({"unchecked", "RedundantSuppression"})
             // protected by generic params of this class

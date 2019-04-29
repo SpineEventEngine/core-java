@@ -131,7 +131,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
      * @return optionally available route
      */
     public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
-        RoutingMatch match = routeFor(commandClass);
+        Match match = routeFor(commandClass);
         if (match.found()) {
             @SuppressWarnings({"unchecked", "RedundantSuppression"})
             // protected by generic params of this class
