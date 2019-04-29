@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server;
+package io.spine.test.route;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EventMessage;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+@Immutable
+public interface UserEvent extends EventMessage {
+    long getId();
+}

@@ -107,6 +107,6 @@ class ColumnRecordsTest {
 
         int indexOfNull = destination.indexOf(null);
         assertTrue(indexOfNull >= 0, "Null value was not saved to the destination");
-        assertThat(destination).containsAllIn(getNonNullColumnValues());
+        assertThat(destination).containsAtLeastElementsIn(getNonNullColumnValues());
     }
 }
