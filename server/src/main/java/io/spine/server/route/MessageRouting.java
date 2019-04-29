@@ -76,7 +76,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
      *
      * <p>The type can be either a class or interface. If the routing schema already contains an
      * entry with the same type or a super-interface of the passed type
-     * {@link IllegalStateException} will be thrown.
+     * an {@link IllegalStateException} will be thrown.
      *
      * <p>In order to provide a mapping for a specific class <em>and</em> an interface common
      * to this and other message classes, please add the routing for the class <em>before</em>
@@ -108,7 +108,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
                 throw newIllegalStateException(
                         "The route for the message class `%s` already defined via " +
                                 "the interface `%s`. If you want to have specific routing for " +
-                                "the class `%s` please put it before the routing for " +
+                                "the class `%s`, please put it before the routing for " +
                                 "the super-interface.",
                         requestedClass, entryClass, requestedClass);
             }
