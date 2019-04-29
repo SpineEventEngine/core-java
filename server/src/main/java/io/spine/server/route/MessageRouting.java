@@ -213,18 +213,36 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
         private final @Nullable Route<M, C, R> route;
         private final @Nullable Class<? extends M> entryClass;
 
+        /**
+         * Creates new instance.
+         *
+         * @param requestedClass
+         *         the class of the message which needs to be routed
+         * @param entryType
+         *         the type through which the route is found.
+         *         Can be a class (for the {@link #direct()} match) or a super-interface
+         *         of the requested class.
+         *         Is {@code null} if there is no routing found for the {@code requestedClass}.
+         * @param route
+         *         the routing function or {@code null} if there is no route defined neither
+         *         for the class or a super-interface of the class
+         */
         private Match(Class<? extends M> requestedClass,
-                      @Nullable Class<? extends M> entryClass,
+                      @Nullable Class<? extends M> entryType,
                       @Nullable Route<M, C, R> route) {
             this.requestedClass = requestedClass;
             this.route = route;
-            this.entryClass = entryClass;
+            this.entryClass = entryType;
         }
 
         boolean found() {
             return route != null;
         }
 
+        /**
+         * Returns {@code true} if the routing was defined directly for the requested class,
+         * otherwise {@code false}.
+         */
         boolean direct() {
             return requestedClass.equals(entryClass);
         }
