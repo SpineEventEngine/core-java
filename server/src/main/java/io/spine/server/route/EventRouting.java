@@ -76,8 +76,8 @@ public final class EventRouting<I>
      * <p>Overrides for return type covariance.
      */
     @Override
-    public final EventRoute<I, EventMessage> getDefault() {
-        return (EventRoute<I, EventMessage>) super.getDefault();
+    public final EventRoute<I, EventMessage> defaultRoute() {
+        return (EventRoute<I, EventMessage>) super.defaultRoute();
     }
 
     /**
@@ -103,7 +103,7 @@ public final class EventRouting<I>
      * </ul>
      *
      * <p>If there is no specific route for the class of the passed event, the routing will use
-     * the {@linkplain #getDefault() default route}.
+     * the {@linkplain #defaultRoute() default route}.
      *
      * @param eventClass
      *         the class of events to route

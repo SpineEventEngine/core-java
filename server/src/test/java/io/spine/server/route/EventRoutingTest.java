@@ -93,7 +93,7 @@ class EventRoutingTest {
     @Test
     @DisplayName("have default route")
     void haveDefaultRoute() {
-        assertNotNull(eventRouting.getDefault());
+        assertNotNull(eventRouting.defaultRoute());
     }
 
     @Test
@@ -111,7 +111,7 @@ class EventRoutingTest {
 
         assertThat(eventRouting.replaceDefault(newDefault))
                 .isSameInstanceAs(eventRouting);
-        assertThat(eventRouting.getDefault())
+        assertThat(eventRouting.defaultRoute())
                 .isSameInstanceAs(newDefault);
     }
 

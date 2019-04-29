@@ -54,7 +54,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
     /**
      * Obtains the default route used by the schema.
      */
-    protected Route<M, C, R> getDefault() {
+    protected Route<M, C, R> defaultRoute() {
         return defaultRoute;
     }
 
@@ -80,7 +80,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
      * </ul>
      *
      * <p>If there is no specific route for the class of the passed message, the routing will use
-     * the {@linkplain #getDefault() default route}.
+     * the {@linkplain #defaultRoute() default route}.
      *
      * @param messageClass the class of messages to route
      * @param via          the instance of the route to be used
@@ -166,7 +166,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
             R result = func.apply(message, context);
             return result;
         }
-        R result = getDefault().apply(message, context);
+        R result = defaultRoute().apply(message, context);
         return result;
     }
 

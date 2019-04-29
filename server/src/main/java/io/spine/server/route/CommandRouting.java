@@ -60,8 +60,8 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
     }
 
     @Override
-    public final CommandRoute<I, CommandMessage> getDefault() {
-        return (CommandRoute<I, CommandMessage>) super.getDefault();
+    public final CommandRoute<I, CommandMessage> defaultRoute() {
+        return (CommandRoute<I, CommandMessage>) super.defaultRoute();
     }
 
     /**

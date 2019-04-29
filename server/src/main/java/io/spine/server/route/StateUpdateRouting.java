@@ -67,7 +67,7 @@ public class StateUpdateRouting<I>
      * Sets a custom route for the passed entity state class.
      *
      * <p>If there is no specific route for the class of the passed entity state, the routing will
-     * use the {@linkplain #getDefault() default route}.
+     * use the {@linkplain #defaultRoute() default route}.
      *
      * @param stateClass
      *         the class of entity states to route
