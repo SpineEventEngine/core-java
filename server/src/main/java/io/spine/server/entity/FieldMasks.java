@@ -69,8 +69,8 @@ public final class FieldMasks {
      *
      * @param mask    the {@code FieldMask} to apply.
      * @param message the {@link Message} to apply given mask to.
-     * @return the message of the same type as the given one with only selected fields. Otherwise if
-     * the {@code mask} is valid, original message is returned.
+     * @return the message of the same type as the given one with only selected fields if
+     * the {@code mask} is valid, original message otherwise.
      */
     public static <M extends Message> M applyMask(FieldMask mask, M message) {
         checkNotNull(mask);

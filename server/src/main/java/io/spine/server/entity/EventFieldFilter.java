@@ -42,8 +42,8 @@ import static io.spine.validate.Validate.isDefault;
  * An {@link EventFilter} which allows all the events but trims some of their message fields.
  *
  * <p>By default, the input event is returned unchanged. Specify a {@link FieldMask} for an event
- * type to trim certain fields off the event messages (the fields in the mask are
- * retained, all the others are cleared).
+ * type to trim certain fields off the event messages. The fields in the mask are
+ * retained, all the others are cleared.
  *
  * <p>Note that the mask should contain all the {@code (required) = true} fields. Otherwise,
  * the event will not be acknowledged by the bus.
