@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
-import io.spine.server.type.EventClass;
 import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Optional;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of the entity IDs to which events are routed
  */
 public final class EventRouting<I>
-        extends MessageRouting<EventMessage, EventContext, EventClass, Set<I>>
+        extends MessageRouting<EventMessage, EventContext, Set<I>>
         implements EventRoute<I, EventMessage> {
 
     private static final long serialVersionUID = 0L;
@@ -61,8 +60,10 @@ public final class EventRouting<I>
     /**
      * Creates a new event routing with the passed default route.
      *
-     * @param defaultRoute the default route
-     * @param <I>          the type of entity identifiers returned by new routing
+     * @param defaultRoute
+     *         the default route
+     * @param <I>
+     *         the type of entity identifiers returned by new routing
      * @return new routing instance
      */
     @CanIgnoreReturnValue
@@ -77,8 +78,8 @@ public final class EventRouting<I>
      * <p>Overrides for return type covariance.
      */
     @Override
-    public final EventRoute<I, EventMessage> getDefault() {
-        return (EventRoute<I, EventMessage>) super.getDefault();
+    public final EventRoute<I, EventMessage> defaultRoute() {
+        return (EventRoute<I, EventMessage>) super.defaultRoute();
     }
 
     /**
@@ -93,36 +94,50 @@ public final class EventRouting<I>
     }
 
     /**
-     * Sets a custom route for the passed event class.
+     * Sets a custom route for the passed event type.
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     *     <li>An an event message should be matched to more than one entity (e.g. several
-     *         projections updated in response to one event).
-     *     <li>The type of an event producer ID (stored in the event context) differs from the type
-     *         of entity identifiers ({@code <I>}.
+     *   <li>An event message should be matched to more than one entity (e.g. several
+     *   projections updated in response to one event).
+     *   <li>The type of an event producer ID (stored in the event context) differs from the type
+     *   of entity identifiers ({@code <I>}.
      * </ul>
      *
-     * <p>If there is no specific route for the class of the passed event, the routing will use
-     * the {@linkplain #getDefault() default route}.
+     * <p>The type of the event can be a class or an interface. If a routing schema needs to contain
+     * entries for specific classes and an interface that these classes implement, routes for
+     * interfaces should be defined <em>after</em> entries for the classes:
      *
-     * @param eventClass
-     *         the class of events to route
+     * <pre>{@code
+     * customRouting.route(MyEventClass.class, (event, context) -> { ... })
+     *              .route(MyEventInterface.class, (event, context) -> { ... });
+     * }</pre>
+     *
+     * Defining an entry for an interface and then for the class which implements the interface will
+     * result in {@code IllegalStateException}.
+     *
+     * <p>If there is no specific route for an event type, the {@linkplain #defaultRoute()
+     * default route} will be used.
+     *
+     * @param eventType
+     *         the type of events to route
      * @param via
      *         the instance of the route to be used
      * @param <E>
      *         the type of the event message
      * @return {@code this} to allow chained calls when configuring the routing
      * @throws IllegalStateException
-     *         if the route for this event class is already set
+     *         if the route for this event type is already set either directly or
+     *         via a super-interface
      */
     @CanIgnoreReturnValue
-    public <E extends EventMessage> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
+    public <E extends EventMessage>
+    EventRouting<I> route(Class<E> eventType, EventRoute<I, ? super E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<EventMessage, EventContext, Set<I>> casted =
                 (Route<EventMessage, EventContext, Set<I>>) via;
-        doRoute(eventClass, casted);
+        addRoute(eventType, casted);
         return this;
     }
 
@@ -153,25 +168,13 @@ public final class EventRouting<I>
      * @return optionally available route
      */
     public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        Optional<? extends Route<EventMessage, EventContext, Set<I>>> optional = doGet(eventClass);
-        @SuppressWarnings({"unchecked", "RedundantSuppression"})
-        Optional<EventRoute<I, M>> result = optional.map(r -> (EventRoute<I, M>) r);
-        return result;
-    }
-
-    /**
-     * Creates {@link EventClass} by the passed class value.
-     */
-    @Override
-    EventClass toMessageClass(Class<? extends EventMessage> classOfEvents) {
-        return EventClass.from(classOfEvents);
-    }
-
-    /**
-     * Obtains the {@link EventClass} for the passed event or event message.
-     */
-    @Override
-    EventClass toMessageClass(Message eventOrMessage) {
-        return EventClass.of(eventOrMessage);
+        Match match = routeFor(eventClass);
+        if (match.found()) {
+            @SuppressWarnings({"unchecked", "RedundantSuppression"})
+            // protected by generic params of this class
+            Optional<EventRoute<I, M>> result = Optional.of((EventRoute<I, M>) match.route());
+            return result;
+        }
+        return Optional.empty();
     }
 }

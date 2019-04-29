@@ -175,7 +175,7 @@ class ProjectionEndToEndTest {
         Group actualGroup = singleGroup.state();
         assertEquals(actualGroup.getName(), organizationName + producedAt);
         IterableSubject assertParticipants = assertThat(actualGroup.getParticipantsList());
-        assertParticipants.containsAllIn(newState.getMembersList());
+        assertParticipants.containsAtLeastElementsIn(newState.getMembersList());
         assertParticipants.contains(organizationHead);
 
         groups.close();

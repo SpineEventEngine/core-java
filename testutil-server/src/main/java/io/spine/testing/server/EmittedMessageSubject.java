@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.truth.FailureMetadata;
-import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
@@ -88,21 +87,20 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
 
     /** Fails if the subject does not have the given size. */
     public final void hasSize(int expectedSize) {
-        assertActual().hasSize(expectedSize);
+        check("size()").that(actual())
+                       .hasSize(expectedSize);
     }
 
     /** Fails if the subject is not empty. */
     public final void isEmpty() {
-        assertActual().isEmpty();
+        check("isEmpty()").that(actual())
+                          .isEmpty();
     }
 
     /** Fails if the subject is empty. */
     public final void isNotEmpty() {
-        assertActual().isNotEmpty();
-    }
-
-    private IterableSubject assertActual() {
-        return check().that(actual());
+        check("isNotEmpty()").that(actual())
+                             .isNotEmpty();
     }
 
     /**
@@ -143,9 +141,16 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         } else {
             List<T> filtered =
                     Streams.stream(actual)
-                           .filter(m -> m.is(messageClass))
+                           .filter(m -> {
+                               @SuppressWarnings({"unchecked", "RedundantSuppression"})
+                               /* avoid `unchecked` warning when calling raw instance
+                               of `MessageWithContext` when filtering. This warning is given only
+                               when compiling. Hence, the second suppression. */
+                               boolean match = m.is(messageClass);
+                               return match;
+                           })
                            .collect(toImmutableList());
-            return check().about(factory())
+            return check("withType()").about(factory())
                           .that(filtered);
         }
     }

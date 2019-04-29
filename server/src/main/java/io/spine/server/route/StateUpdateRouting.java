@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.model.EntityStateClass;
 import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
@@ -42,7 +41,7 @@ import java.util.Set;
  *         the type of the entity IDs to which the updates are routed
  */
 public class StateUpdateRouting<I>
-        extends MessageRouting<Message, EventContext, EntityStateClass, Set<I>> {
+        extends MessageRouting<Message, EventContext, Set<I>> {
 
     private static final long serialVersionUID = 0L;
 
@@ -64,21 +63,11 @@ public class StateUpdateRouting<I>
         return new StateUpdateRouting<>();
     }
 
-    @Override
-    EntityStateClass toMessageClass(Class<? extends Message> classOfMessages) {
-        return EntityStateClass.from(classOfMessages);
-    }
-
-    @Override
-    EntityStateClass toMessageClass(Message outerOrMessage) {
-        return EntityStateClass.of(outerOrMessage);
-    }
-
     /**
      * Sets a custom route for the passed entity state class.
      *
      * <p>If there is no specific route for the class of the passed entity state, the routing will
-     * use the {@linkplain #getDefault() default route}.
+     * use the {@linkplain #defaultRoute() default route}.
      *
      * @param stateClass
      *         the class of entity states to route
@@ -96,7 +85,7 @@ public class StateUpdateRouting<I>
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
         Route<Message, EventContext, Set<I>> route = (Route<Message, EventContext, Set<I>>) via;
-        doRoute(stateClass, route);
+        addRoute(stateClass, route);
         return this;
     }
 
