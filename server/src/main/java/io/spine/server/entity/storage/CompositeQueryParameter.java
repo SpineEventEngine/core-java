@@ -60,7 +60,7 @@ public final class CompositeQueryParameter implements Serializable {
 
     /**
      * A flag that shows if current instance of {@code CompositeQueryParameter} has
-     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set of not.
+     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set or not.
      */
     private final boolean hasLifecycle;
 

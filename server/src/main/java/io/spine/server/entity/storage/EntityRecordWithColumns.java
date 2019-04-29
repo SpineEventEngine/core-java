@@ -137,7 +137,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Obtains the memoized value of the entity column
+     * Obtains the memorized value of the entity column
      * by the specified {@linkplain EntityColumn#getStoredName() name}.
      *
      * @param columnName the stored column name
@@ -156,13 +156,12 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Determines whether or not there are any {@linkplain EntityColumn columns}
-     * associated with this record.
+     * Determines if there are any {@linkplain EntityColumn columns} associated with this record.
      *
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via
+     * @return {@code true} if the object was constructed using
      *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;
      *  {@code false} otherwise
      */
