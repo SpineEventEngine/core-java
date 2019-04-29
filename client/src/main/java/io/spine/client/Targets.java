@@ -108,10 +108,10 @@ public final class Targets {
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
-            List<?> idsList = notNullList(ids);
+            List<?> idsList = toImmutableList(ids);
             IdFilter idFilter = composeIdFilter(idsList);
 
-            List<CompositeFilter> filterList = notNullList(filters);
+            List<CompositeFilter> filterList = toImmutableList(filters);
             TargetFilters targetFilters = targetFilters(filterList, idFilter);
             builder.setFilters(targetFilters);
         }
@@ -123,7 +123,7 @@ public final class Targets {
      * Transforms the passed iterable to an immutable list, returning an empty list in
      * case of {@code null} input.
      */
-    private static <T> ImmutableList<T> notNullList(@Nullable Iterable<T> input) {
+    private static <T> ImmutableList<T> toImmutableList(@Nullable Iterable<T> input) {
         if (input == null) {
             return ImmutableList.of();
         }
