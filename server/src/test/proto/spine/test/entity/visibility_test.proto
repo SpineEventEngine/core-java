@@ -19,8 +19,7 @@
  */
 syntax = "proto3";
 
-// Cannot use `.entity` package due to a conflict with `(entity)` annotation.
-package spine.test.serverentity;
+package spine.test.visibility;
 
 import "spine/options.proto";
 
