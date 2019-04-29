@@ -145,6 +145,9 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
                     Streams.stream(actual)
                            .filter(m -> {
                                @SuppressWarnings({"unchecked", "RedundantSuppression"})
+                               /* avoid `unchecked` warning when calling raw instance
+                               of `MessageWithContext` when filtering. This warning is given only
+                               when compiling. Hence, the second suppression. */
                                boolean match = m.is(messageClass);
                                return match;
                            })
