@@ -93,31 +93,31 @@ class VisibilityGuardTest {
     @Test
     @DisplayName("give access to visible repos")
     void giveAccessToVisible() {
-        assertTrue(guard.getRepository(FullAccessAggregate.class)
+        assertTrue(guard.repositoryFor(FullAccessAggregate.class)
                         .isPresent());
-        assertTrue(guard.getRepository(SubscribableAggregate.class)
+        assertTrue(guard.repositoryFor(SubscribableAggregate.class)
                         .isPresent());
     }
 
     @Test
     @DisplayName("deny access to invisible repos")
     void denyAccessToInvisible() {
-        assertFalse(guard.getRepository(HiddenAggregate.class)
+        assertFalse(guard.repositoryFor(HiddenAggregate.class)
                          .isPresent());
     }
 
     @Test
     @DisplayName("obtain repos by visibility")
     void obtainByVisibility() {
-        Set<TypeName> full = guard.getEntityStateTypes(Visibility.FULL);
+        Set<TypeName> full = guard.entityStateTypes(Visibility.FULL);
         assertEquals(1, full.size());
         assertTrue(full.contains(TypeName.of(FullAccessAggregate.class)));
 
-        Set<TypeName> subscribable = guard.getEntityStateTypes(Visibility.SUBSCRIBE);
+        Set<TypeName> subscribable = guard.entityStateTypes(Visibility.SUBSCRIBE);
         assertEquals(1, subscribable.size());
         assertTrue(subscribable.contains(TypeName.of(SubscribableAggregate.class)));
 
-        Set<TypeName> hidden = guard.getEntityStateTypes(Visibility.NONE);
+        Set<TypeName> hidden = guard.entityStateTypes(Visibility.NONE);
         assertEquals(1, hidden.size());
         assertTrue(hidden.contains(TypeName.of(HiddenAggregate.class)));
     }
@@ -141,6 +141,6 @@ class VisibilityGuardTest {
     @Test
     @DisplayName("reject unregistered state class")
     void rejectUnregisteredStateClass() {
-        assertThrows(IllegalArgumentException.class, () -> guard.getRepository(Empty.class));
+        assertThrows(IllegalArgumentException.class, () -> guard.repositoryFor(Empty.class));
     }
 }

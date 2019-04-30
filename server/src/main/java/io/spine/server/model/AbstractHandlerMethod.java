@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static java.lang.String.format;
 
 /**
@@ -232,7 +233,7 @@ public abstract class AbstractHandlerMethod<T,
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             Message message = envelope.message();
             Message context = envelope.context();
-            throw new HandlerMethodFailedException(target, message, context, e);
+            throw new HandlerMethodFailedException(target, message, context, getRootCause(e));
         }
     }
 

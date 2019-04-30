@@ -355,8 +355,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>All the events posted by this repository, domain and system, are first passed through this
      * filter.
      *
-     * <p>By default, the filter {@linkplain EventFilter#allowAll() allows all} the events to be
-     * posted. Override this method to change this behaviour.
+     * <p>By default, the filter allows all the events to be posted. For entities which do not allow
+     * state subscription, the {@link io.spine.system.server.event.EntityStateChanged} event is
+     * filtered out. Override this method to change this behaviour.
      *
      * @return an {@link EventFilter} to apply to all posted events
      * @implNote This method may be called many times for a single repository. It is reasonable that
@@ -367,7 +368,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @SPI
     @Pure
     protected EventFilter eventFilter() {
-        return EventFilter.allowAll();
+        EntityClass<E> entityClass = entityModelClass();
+        return EntityStateChangedFilter.forType(entityClass);
     }
 
     /**
