@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * for delivering a command to its handler.
  *
  * <p>A routing schema consists of a default route and custom routes per command class.
- * When finding a command target the {@code CommandRouting} would see if there is a custom route
+ * When finding a command target, the {@code CommandRouting} will see if there is a custom route
  * set for the type of the command. If not found, the {@linkplain DefaultCommandRoute default route}
  * will be {@linkplain CommandRoute#apply(Message, Message) applied}.
  *
@@ -79,11 +79,11 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
     /**
      * Sets a custom route for the passed command type.
      *
-     * <p>Such a mapping may be required when...
+     * <p>Such mapping may be required for the following cases:
      * <ul>
      *   <li>The first field of the command message is not an ID of the entity which handles the
-     *   command (as required by the {@linkplain DefaultCommandRoute default route}.
-     *   <li>The command need to be dispatched to an entity which ID differs from the value set
+     *   command as required by the {@linkplain DefaultCommandRoute default route}.
+     *   <li>The command needs to be dispatched to an entity which ID differs from the value set
      *   in the first command message field.
      * </ul>
      *
