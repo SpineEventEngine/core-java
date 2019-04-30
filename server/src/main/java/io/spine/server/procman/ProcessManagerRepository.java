@@ -164,14 +164,14 @@ public abstract class ProcessManagerRepository<I,
         if (!dispatchesCommands() && !dispatchesEvents) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
-                            "and do not react on any events.", this);
+                            "and do not react to any events.", this);
         }
     }
 
     /**
-     * Obtains a set of event classes on which process managers of this repository react.
+     * Obtains a set of event classes to which process managers of this repository react.
      *
-     * @return a set of event classes or empty set if process managers do not react on
+     * @return a set of event classes or empty set if process managers do not react to
      *         domestic events
      */
     @Override
@@ -180,10 +180,10 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Obtains classes of external events on which process managers managed by this repository
+     * Obtains classes of external events to which the process managers managed by this repository
      * react.
      *
-     * @return a set of event classes or an empty set, if process managers do not react on
+     * @return a set of event classes or an empty set if process managers do not react on
      *         external events
      */
     @Override
@@ -333,7 +333,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Loads or creates a process manager by the passed ID.
      *
-     * <p>The process manager is created if there was no manager with such an ID stored before.
+     * <p>The process manager is created if there was no manager with such ID stored before.
      *
      * <p>The repository injects {@code CommandBus} from its {@code BoundedContext} into the
      * instance of the process manager so that it can post commands if needed.
