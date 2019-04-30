@@ -42,14 +42,14 @@ public enum EventContextField implements StorageField {
     /**
      * A field representing a {@link io.spine.core.CommandContext CommandContext}.
      *
-     * <p>Presumably the field would contain a serialized format, but other storage options
-     * (e.g. Json) are possible.
+     * <p>Presumably the field would contain a serialized format but other storage options
+     * (for example, JSON) are possible.
      */
     context_of_command,
 
     /**
      * A field representing a {@link EventContext#getVersion() version} of the
-     * entity, which produced the event.
+     * entity which produced the event.
      */
     context_version
 }
