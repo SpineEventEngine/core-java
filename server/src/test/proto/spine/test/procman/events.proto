@@ -48,6 +48,10 @@ message PmProjectStarted {
     ProjectId project_id = 1;
 }
 
+message PmNothingDone {
+    ProjectId project_id = 1;
+}
+
 message PmOwnerChanged {
     ProjectId project_id = 1;
 }

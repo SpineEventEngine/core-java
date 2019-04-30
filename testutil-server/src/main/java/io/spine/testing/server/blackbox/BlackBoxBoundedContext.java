@@ -21,7 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -34,7 +33,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
-import io.spine.option.EntityOption.Visibility;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -235,15 +233,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting
-    Set<TypeName> getAllEntityStateTypes() {
-        ImmutableSet.Builder<TypeName> result = ImmutableSet.builder();
-        for (Visibility visibility : Visibility.values()) {
-            if (visibility == Visibility.VISIBILITY_UNKNOWN) {
-                continue;
-            }
-            result.addAll(boundedContext.entityStateTypes(visibility));
-        }
-        return result.build();
+    Set<TypeName> allEntityStateTypes() {
+        return boundedContext.entityStateTypes();
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */

@@ -20,7 +20,7 @@
 
 package io.spine.server.event.model;
 
-import io.spine.option.EntityOption.Visibility;
+import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeName;
 
@@ -35,12 +35,12 @@ public final class InsufficientVisibilityError extends ModelError {
     private static final long serialVersionUID = 0L;
 
     InsufficientVisibilityError(TypeName entityType,
-                                Visibility entityVisibility) {
+                                EntityVisibility entityVisibility) {
         super(formatMessage(entityType, entityVisibility));
     }
 
     private static String formatMessage(TypeName entityType,
-                                        Visibility entityVisibility) {
+                                        EntityVisibility entityVisibility) {
         return format("Cannot subscribe to state updates of `%s`. Entity visibility is %s.",
                       entityType, entityVisibility);
     }

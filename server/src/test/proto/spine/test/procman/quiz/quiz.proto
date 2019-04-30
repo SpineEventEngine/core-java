@@ -33,6 +33,8 @@ message PmQuizId {
 }
 
 message PmQuiz {
+    option (entity).kind = PROCESS_MANAGER;
+
     PmQuizId id = 1 [(required) = true];
     repeated PmQuestionId open_question = 2;
     repeated PmQuestionId solved_question = 3;

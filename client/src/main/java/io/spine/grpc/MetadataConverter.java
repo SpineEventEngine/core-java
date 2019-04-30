@@ -39,7 +39,7 @@ import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
 @Internal
 public class MetadataConverter {
 
-    private static final String ERROR_KEY_NAME = "Spine-Error-bin";
+    private static final String ERROR_KEY_NAME = "spine-error-bin";
 
     /**
      * The {@link Metadata.Key} to store and get an {@link Error} from a {@link Metadata}.
