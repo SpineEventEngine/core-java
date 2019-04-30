@@ -59,7 +59,7 @@ import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
+import io.spine.time.Now;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -148,7 +148,8 @@ public class Given {
         }
 
         static Command createCustomer() {
-            LocalDate localDate = LocalDates.now();
+            LocalDate localDate = Now.get()
+                                     .asLocalDate();
             CustomerId customerId = CustomerId
                     .newBuilder()
                     .setRegistrationDate(localDate)

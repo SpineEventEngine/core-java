@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.time.TimestampTemporal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -30,7 +31,6 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator;
-import static io.spine.core.Utils.toTemporal;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
@@ -63,9 +63,9 @@ public enum OperatorEvaluator {
                 );
             }
             if (left instanceof Timestamp) {
-                Timestamp tsLeft = (Timestamp) left;
-                Timestamp tsRight = (Timestamp) right;
-                return toTemporal(tsLeft).isLaterThan(toTemporal(tsRight));
+                TimestampTemporal timeLeft = TimestampTemporal.from((Timestamp) left);
+                TimestampTemporal timeRight = TimestampTemporal.from((Timestamp) right);
+                return timeLeft.isLaterThan(timeRight);
             }
             if (left instanceof Comparable<?>) {
                 Comparable cmpLeft = (Comparable<?>) left;

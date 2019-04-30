@@ -35,6 +35,7 @@ message AggTaskId {
 
 message AggTask {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = FULL;
 
     // The ID of the aggregate.
     //
@@ -47,6 +48,7 @@ message AggTask {
 
 message AggTaskComments {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = FULL;
 
     AggTaskId id = 1;
 
