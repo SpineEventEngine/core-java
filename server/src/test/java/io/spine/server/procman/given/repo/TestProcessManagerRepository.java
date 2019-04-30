@@ -20,6 +20,7 @@
 
 package io.spine.server.procman.given.repo;
 
+import io.spine.server.entity.EventFilter;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -50,5 +51,10 @@ public class TestProcessManagerRepository
 
     public @Nullable RuntimeException getLatestException() {
         return latestException;
+    }
+
+    @Override
+    public EventFilter eventFilter() {
+        return super.eventFilter();
     }
 }

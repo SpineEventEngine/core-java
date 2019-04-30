@@ -108,26 +108,15 @@ public final class Targets {
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
-            List<?> idsList = toImmutableList(ids);
+            List<?> idsList = notNullList(ids);
             IdFilter idFilter = composeIdFilter(idsList);
 
-            List<CompositeFilter> filterList = toImmutableList(filters);
+            List<CompositeFilter> filterList = notNullList(filters);
             TargetFilters targetFilters = targetFilters(filterList, idFilter);
             builder.setFilters(targetFilters);
         }
 
         return builder.build();
-    }
-
-    /**
-     * Transforms the passed iterable to an immutable list, returning an empty list in
-     * case of {@code null} input.
-     */
-    private static <T> ImmutableList<T> toImmutableList(@Nullable Iterable<T> input) {
-        if (input == null) {
-            return ImmutableList.of();
-        }
-        return ImmutableList.copyOf(input);
     }
 
     private static IdFilter composeIdFilter(Collection<?> items) {
@@ -142,9 +131,10 @@ public final class Targets {
     }
 
     private static IdFilter idFilter(List<Any> ids) {
-        return IdFilter.vBuilder()
-                       .addAllIds(ids)
-                       .build();
+        return IdFilter
+                .vBuilder()
+                .addAllIds(ids)
+                .build();
     }
 
     /**
@@ -168,5 +158,17 @@ public final class Targets {
                             .setIdFilter(idFilter)
                             .addAllFilter(filters)
                             .build();
+    }
+
+    /**
+     * Returns an empty list in case of {@code null} input.
+     *
+     * @return a new {@link List} instance
+     */
+    private static <T> ImmutableList<T> notNullList(@Nullable Iterable<T> input) {
+        if (input == null) {
+            return ImmutableList.of();
+        }
+        return ImmutableList.copyOf(input);
     }
 }

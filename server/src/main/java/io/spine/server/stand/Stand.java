@@ -54,8 +54,8 @@ import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -257,8 +257,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param topic
      *         a {@link Topic} defining the subscription target
      */
-    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
-        topicValidator.validate(topic, responseObserver);
+    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver)
+            throws InvalidRequestException {
+        topicValidator.validate(topic);
 
         TenantId tenantId = topic.getContext()
                                  .getTenantId();
@@ -288,11 +289,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     public void activate(Subscription subscription,
                          NotifySubscriptionAction notifyAction,
-                         StreamObserver<Response> responseObserver) {
+                         StreamObserver<Response> responseObserver)
+            throws InvalidRequestException {
         checkNotNull(subscription);
         checkNotNull(notifyAction);
 
-        subscriptionValidator.validate(subscription, responseObserver);
+        subscriptionValidator.validate(subscription);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
@@ -317,9 +319,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param subscription
      *         a subscription to cancel
      */
-    public void cancel(Subscription subscription,
-                       StreamObserver<Response> responseObserver) {
-        subscriptionValidator.validate(subscription, responseObserver);
+    public void cancel(Subscription subscription, StreamObserver<Response> responseObserver)
+            throws InvalidRequestException {
+        subscriptionValidator.validate(subscription);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
@@ -387,9 +389,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param responseObserver
      *         an observer to feed the query results to
      */
-    public void execute(Query query,
-                        StreamObserver<QueryResponse> responseObserver) {
-        queryValidator.validate(query, responseObserver);
+    public void execute(Query query, StreamObserver<QueryResponse> responseObserver)
+            throws InvalidRequestException {
+        queryValidator.validate(query);
 
         TypeUrl type = typeOf(query);
         QueryProcessor queryProcessor = processorFor(type);

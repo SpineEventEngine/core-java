@@ -22,7 +22,7 @@ message VideoId {
 }
 
 message Photo {
-    option (entity).kind = AGGREGATE;
+    option (entity) = {kind: AGGREGATE visibility: QUERY};
 
     PhotoId id = 1;
 
@@ -34,7 +34,7 @@ message Photo {
 }
 
 message Video {
-    option (entity).kind = AGGREGATE;
+    option (entity) = {kind: AGGREGATE visibility: QUERY};
 
     VideoId id = 1;
 
