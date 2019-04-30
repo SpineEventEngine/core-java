@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Queries;
 import io.spine.client.Query;
@@ -30,11 +31,14 @@ import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
 import io.spine.server.model.UnknownEntityTypeException;
+import io.spine.server.stand.InvalidRequestException;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;
+
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
@@ -75,6 +79,10 @@ public class QueryService
         Stand stand = boundedContext.stand();
         try {
             stand.execute(query, responseObserver);
+        } catch (InvalidRequestException e) {
+            _error("Invalid request. {}", e.asError());
+            StatusRuntimeException exception = invalidArgumentWithCause(e);
+            responseObserver.onError(exception);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error(e, "Error processing query.");
             responseObserver.onError(e);

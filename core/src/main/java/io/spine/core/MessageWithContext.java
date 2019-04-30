@@ -27,10 +27,10 @@ import io.spine.annotation.GeneratedMixin;
 import io.spine.base.MessageContext;
 import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
+import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Utils.toTemporal;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
@@ -124,7 +124,9 @@ public interface MessageWithContext<I extends MessageId,
      */
     default boolean isAfter(Timestamp bound) {
         checkNotNull(bound);
-        return toTemporal(time()).isLaterThan(toTemporal(bound));
+        TimestampTemporal timeTemporal = TimestampTemporal.from(time());
+        TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
+        return timeTemporal.isLaterThan(boundTemporal);
     }
 
     /**
@@ -132,7 +134,9 @@ public interface MessageWithContext<I extends MessageId,
      */
     default boolean isBefore(Timestamp bound) {
         checkNotNull(bound);
-        return toTemporal(time()).isEarlierThan(toTemporal(bound));
+        TimestampTemporal timeTemporal = TimestampTemporal.from(time());
+        TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
+        return timeTemporal.isEarlierThan(boundTemporal);
     }
 
     /**
@@ -147,6 +151,9 @@ public interface MessageWithContext<I extends MessageId,
     default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
         checkNotNull(periodStart);
         checkNotNull(periodEnd);
-        return toTemporal(time()).isBetween(toTemporal(periodStart), toTemporal(periodEnd));
+        TimestampTemporal timeTemporal = TimestampTemporal.from(time());
+        TimestampTemporal start = TimestampTemporal.from(periodStart);
+        TimestampTemporal end = TimestampTemporal.from(periodEnd);
+        return timeTemporal.isBetween(start, end);
     }
 }

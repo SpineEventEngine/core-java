@@ -23,10 +23,12 @@ import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
+import io.spine.client.Target;
 import io.spine.type.TypeUrl;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
+import static io.spine.option.EntityOption.Visibility.QUERY;
 import static java.lang.String.format;
 
 /**
@@ -35,7 +37,7 @@ import static java.lang.String.format;
 final class QueryValidator extends AbstractTargetValidator<Query> {
 
     QueryValidator(TypeRegistry typeRegistry) {
-        super(typeRegistry);
+        super(QUERY, typeRegistry);
     }
 
     @Override
@@ -57,7 +59,8 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
 
     @Override
     protected boolean isSupported(Query request) {
-        return typeRegistryContains(request.getTarget());
+        Target target = request.getTarget();
+        return typeRegistryContains(target) && visibilitySufficient(target);
     }
 
     @Override

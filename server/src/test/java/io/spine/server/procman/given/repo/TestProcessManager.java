@@ -46,6 +46,7 @@ import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.event.PmNothingDone;
 import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectDeleted;
@@ -166,9 +167,12 @@ public class TestProcessManager
     }
 
     @Assign
-    Nothing handle(PmDoNothing command, CommandContext ignored) {
+    PmNothingDone handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
-        return nothing();
+        return PmNothingDone
+                .vBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
     }
 
     @Assign

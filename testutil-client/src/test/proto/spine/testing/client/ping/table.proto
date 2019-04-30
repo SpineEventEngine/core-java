@@ -18,5 +18,7 @@ enum TableSide {
 
 // A tennis table.
 message Table {
+    option (entity) = {kind: PROCESS_MANAGER visibility: QUERY};
+
     int32 number = 1;
 }
