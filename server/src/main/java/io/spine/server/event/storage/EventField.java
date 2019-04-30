@@ -32,7 +32,7 @@ import io.spine.server.storage.StorageField;
 public enum EventField implements StorageField {
 
     /**
-     * A field a string value of an identifier of an entity produced the event.
+     * A field containing a string value of an identifier of an entity which produced the event.
      */
     producer_id,
 

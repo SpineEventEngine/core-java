@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A routing schema used to deliver events.
  *
  * <p>A routing schema consists of a default route and custom routes per event class.
- * When calculating a set of event targets, {@code EventRouting} would see if there is
+ * When calculating a set of event targets, {@code EventRouting} will see if there is
  * a custom route set for the type of the event. If not found, the default route will be
  * {@linkplain EventRoute#apply(Message, Message) applied}.
  *
@@ -48,7 +48,7 @@ public final class EventRouting<I>
     private static final long serialVersionUID = 0L;
 
     /**
-     * Creates new instance with the passed default route.
+     * Creates a new instance with the passed default route.
      *
      * @param defaultRoute
      *        the route to use if a custom one is not {@linkplain #route(Class, EventRoute) set}
@@ -96,10 +96,10 @@ public final class EventRouting<I>
     /**
      * Sets a custom route for the passed event type.
      *
-     * <p>Such a mapping may be required when...
+     * <p>Such mapping may be required for the following cases:
      * <ul>
-     *   <li>An event message should be matched to more than one entity (e.g. several
-     *   projections updated in response to one event).
+     *   <li>An event message should be matched to more than one entity, for example, several
+     *   projections updated in response to one event.
      *   <li>The type of an event producer ID (stored in the event context) differs from the type
      *   of entity identifiers ({@code <I>}.
      * </ul>

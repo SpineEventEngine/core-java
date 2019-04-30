@@ -19,6 +19,7 @@
  */
 package io.spine.client;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
@@ -29,7 +30,6 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.client.Targets.allOf;
 import static io.spine.client.Targets.someOf;
 import static io.spine.client.given.TargetsTestEnv.filtersForIds;
@@ -61,7 +61,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
     @DisplayName("compose Target with Message IDs")
     void composeWithMessageIds() {
         TaskId taskId = newTaskId();
-        Target target = someOf(TestEntity.class, newHashSet(taskId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(taskId));
 
         assertUrl(target);
 
@@ -76,7 +76,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
         String secondId = "b";
         String thirdId = "c";
 
-        Target target = someOf(TestEntity.class, newHashSet(firstId, secondId, thirdId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
@@ -93,7 +93,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
         int secondId = 2;
         int thirdId = 3;
 
-        Target target = someOf(TestEntity.class, newHashSet(firstId, secondId, thirdId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
@@ -110,7 +110,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
         long secondId = 2L;
         long thirdId = 3L;
 
-        Target target = someOf(TestEntity.class, newHashSet(firstId, secondId, thirdId));
+        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
@@ -124,6 +124,6 @@ class TargetsTest extends UtilityClassTest<Targets> {
     @DisplayName("throw IAE for unsupported IDs")
     void throwIaeForUnsupportedIds() {
         assertThrows(IllegalArgumentException.class,
-                     () -> someOf(TaskId.class, newHashSet(new Object())));
+                     () -> someOf(TaskId.class, ImmutableSet.of(new Object())));
     }
 }

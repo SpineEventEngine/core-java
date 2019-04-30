@@ -17,6 +17,7 @@ message GroupId {
 
 message Group {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = SUBSCRIBE;
 
     GroupId id = 1;
 
@@ -26,7 +27,6 @@ message Group {
 }
 
 message GroupName {
-
     option (entity).kind = PROJECTION;
 
     GroupId id = 1;
