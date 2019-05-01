@@ -28,7 +28,7 @@ import io.spine.annotation.SPI;
  * @param <T>
  *         the type of the storage field
  * @param <R>
- *         the type of the record in the database, which holds a single cortege of data and
+ *         the type of the record in the database which holds a single cortege of data and
  *         is consumed by the database upon write
  * @param <C>
  *         the type of the column identifier in the {@code R}
