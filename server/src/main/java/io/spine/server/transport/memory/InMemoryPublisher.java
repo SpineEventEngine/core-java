@@ -62,7 +62,7 @@ public final class InMemoryPublisher extends AbstractChannel implements Publishe
     }
 
     /**
-     * Always returns {@code false}, as publishers don't get stale.
+     * Always returns {@code false} as publishers don't get stale.
      *
      * @return {@code false} always.
      */
