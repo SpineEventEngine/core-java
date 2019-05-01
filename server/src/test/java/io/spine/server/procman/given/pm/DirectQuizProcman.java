@@ -32,6 +32,7 @@ import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.PmQuizVBuilder;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
+import io.spine.test.procman.quiz.event.PmQuestionAlreadySolved;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuestionFailed;
 import io.spine.test.procman.quiz.event.PmQuestionSolved;
@@ -63,29 +64,37 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @Assign
-    EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> handle(PmAnswerQuestion command) {
+    EitherOf3<PmQuestionSolved, PmQuestionFailed, PmQuestionAlreadySolved>
+    handle(PmAnswerQuestion command) {
         PmAnswer answer = command.getAnswer();
         PmQuizId examId = command.getQuizId();
         PmQuestionId questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
-            return EitherOf3.withC(nothing());
+            PmQuestionAlreadySolved event = PmQuestionAlreadySolved
+                    .vBuilder()
+                    .setQuizId(examId)
+                    .setQuestionId(questionId)
+                    .build();
+            return EitherOf3.withC(event);
         }
 
         boolean answerIsCorrect = answer.getCorrect();
         if (answerIsCorrect) {
             PmQuestionSolved reaction =
-                    PmQuestionSolved.newBuilder()
-                                    .setQuizId(examId)
-                                    .setQuestionId(questionId)
-                                    .build();
+                    PmQuestionSolved
+                            .vBuilder()
+                            .setQuizId(examId)
+                            .setQuestionId(questionId)
+                            .build();
             return EitherOf3.withA(reaction);
         } else {
             PmQuestionFailed reaction =
-                    PmQuestionFailed.newBuilder()
-                                    .setQuizId(examId)
-                                    .setQuestionId(questionId)
-                                    .build();
+                    PmQuestionFailed
+                            .vBuilder()
+                            .setQuizId(examId)
+                            .setQuestionId(questionId)
+                            .build();
             return EitherOf3.withB(reaction);
         }
     }

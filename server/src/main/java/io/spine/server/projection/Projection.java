@@ -101,8 +101,8 @@ public abstract class Projection<I,
     /**
      * Plays events on the projection.
      *
-     * <p>Unlike {@link Projection#play(Iterable)} this static method opens the
-     * {@linkplain ProjectionTransaction transaction} before events are played, and closes it after.
+     * <p>Unlike {@link Projection#play(Iterable)}, this static method opens the
+     * {@linkplain ProjectionTransaction transaction} before events are played and closes it after.
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */

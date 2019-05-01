@@ -79,7 +79,7 @@ message EntityHistory {
 // The history of an entity lifecycle.
 //
 // Contains the current `LifecycleFlags` and the timestamps of the instants when
-// the lifecycle-changing mutations have occured to the entity for the most recent time.
+// the lifecycle-changing mutations have occurred to the entity for the most recent time.
 //
 // Since none of the lifecycle states is terminal, none of the fields are mutually exclusive.
 //
@@ -91,28 +91,28 @@ message LifecycleHistory {
     // Instant when the entity was archived.
     //
     // If the entity has been archived for multiple times in its history, this timestamp represents
-    // the most recent occurance.
+    // the most recent occurrence.
     //
     google.protobuf.Timestamp when_archived = 2;
 
     // Instant when the entity was deleted.
     //
     // If the entity has been deleted for multiple times in its history, this timestamp represents
-    // the most recent occurance.
+    // the most recent occurrence.
     //
     google.protobuf.Timestamp when_deleted = 3;
 
     // Instant when the entity was extracted from archive.
     //
     // If the entity has been extracted for multiple times in its history, this timestamp represents
-    // the most recent occurance.
+    // the most recent occurrence.
     //
     google.protobuf.Timestamp when_extracted_from_archive = 4;
 
     // Instant when the entity was restored after deletion.
     //
     // If the entity has been restored for multiple times in its history, this timestamp represents
-    // the most recent occurance.
+    // the most recent occurrence.
     //
     google.protobuf.Timestamp when_restored = 5;
 }

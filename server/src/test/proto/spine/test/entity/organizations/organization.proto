@@ -18,6 +18,7 @@ message OrganizationId {
 
 message Organization {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = SUBSCRIBE;
 
     OrganizationId id = 1;
 

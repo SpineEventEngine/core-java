@@ -43,7 +43,6 @@ import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -126,7 +125,7 @@ class RepositoryTest {
     @DisplayName("provide default event filter")
     void provideDefaultEventFilter() {
         EventFilter filter = repository.eventFilter();
-        assertSame(EventFilter.allowAll(), filter);
+        assertNotNull(filter);
     }
 
     @Test

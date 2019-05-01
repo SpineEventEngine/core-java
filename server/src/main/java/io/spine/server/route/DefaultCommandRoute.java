@@ -50,10 +50,10 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, CommandMessage, Comm
     /**
      * Tries to obtain a target ID from the passed command message.
      *
-     * @param commandMessage a message to get ID from
+     * @param commandMessage the message to get ID from
      * @return an {@link Optional} of the ID or {@code Optional.empty()}
      * if {@link DefaultCommandRoute#apply(Message, Message)} throws an exception
-     * (in the case if the command is not for an entity)
+     * if the command is not for an entity
      */
     public static <I> Optional<I> asOptional(CommandMessage commandMessage) {
         try {
