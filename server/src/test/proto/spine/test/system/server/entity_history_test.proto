@@ -39,7 +39,7 @@ message PersonId {
 // A state type of an aggregate.
 //
 message Person {
-    option (entity).kind = AGGREGATE;
+    option (entity) = {kind: AGGREGATE visibility: FULL};
 
     PersonId id = 1 [(required) = false];
 
@@ -49,9 +49,9 @@ message Person {
 // A state type of a process manager.
 //
 message PersonCreation {
-    option (entity).kind = PROCESS_MANAGER;
+    option (entity) = {kind: PROCESS_MANAGER visibility: FULL};
 
-    PersonId id = 1 [(required) = false, (set_once) = false];
+    PersonId id = 1 [(required) = false];
 
     bool created = 2;
 }
@@ -59,7 +59,7 @@ message PersonCreation {
 // A state type of an aggregate part.
 //
 message PersonFirstName {
-    option (entity).kind = AGGREGATE;
+    option (entity) = {kind: AGGREGATE visibility: FULL};
 
     PersonId id = 1 [(required) = false];
 
@@ -71,7 +71,7 @@ message PersonFirstName {
 message PersonDetails {
     option (entity).kind = PROJECTION;
 
-    PersonId id = 1 [(required) = false, (set_once) = false];
+    PersonId id = 1 [(required) = false];
 
     spine.people.PersonName name = 2;
 }

@@ -21,8 +21,6 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
@@ -33,8 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
@@ -87,17 +83,16 @@ abstract class RequestValidator<M extends Message> {
      *          and may be passed for the further processing.
      * </ol>
      *
-     * <p>In case the validation is not successful, the provide {@code responseObserver}
-     * is {@linkplain StreamObserver#onError(Throwable) notified of an error}.
-     * Also, an {@code IllegalArgumentException} is thrown exposing the validation failure.
+     * <p>In case the validation is not successful, an {@link InvalidRequestException} is thrown.
      *
-     * @param request          the request {@code Message} to validate
-     * @param responseObserver the observer to notify of a potenital validation error
-     * @throws IllegalArgumentException if the passed request is not valid
+     * @param request
+     *         the request {@code Message} to validate
+     * @throws IllegalArgumentException
+     *         if the passed request is not valid
      */
-    void validate(M request, StreamObserver<?> responseObserver) throws IllegalArgumentException {
-        handleValidationResult(validateMessage(request), responseObserver);
-        handleValidationResult(checkSupported(request), responseObserver);
+    void validate(M request) throws InvalidRequestException {
+        handleValidationResult(validateMessage(request));
+        handleValidationResult(checkSupported(request));
     }
 
     /**
@@ -107,11 +102,9 @@ abstract class RequestValidator<M extends Message> {
      * <p>The given {@code responseObserver} is fed with the exception details.
      * Also, the {@code exception} is thrown, wrapped as an {@code IllegalStateException}.
      */
-    private static void handleValidationResult(@Nullable InvalidRequestException exception,
-                                               StreamObserver<?> responseObserver) {
+    private static void handleValidationResult(@Nullable InvalidRequestException exception) {
         if (exception != null) {
-            feedToResponse(exception, responseObserver);
-            throw newIllegalArgumentException(exception, exception.getMessage());
+            throw exception;
         }
     }
 
@@ -186,10 +179,5 @@ abstract class RequestValidator<M extends Message> {
     private String errorConstraintsViolated(M request) {
         return format("`%s` message does not satisfy the validation constraints.",
                       TypeName.of(request));
-    }
-
-    private static void feedToResponse(InvalidRequestException cause, StreamObserver<?> observer) {
-        StatusRuntimeException validationException = invalidArgumentWithCause(cause);
-        observer.onError(validationException);
     }
 }

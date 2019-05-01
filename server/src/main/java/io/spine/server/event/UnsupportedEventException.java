@@ -31,7 +31,7 @@ import static java.lang.String.format;
 
 /**
  * Exception that is thrown when unsupported event is obtained
- * or in case there is no class for given Protobuf event message.
+ * or if there is no class for the given Protobuf event message.
  */
 public class UnsupportedEventException extends EventException implements MessageUnhandled {
 

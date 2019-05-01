@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandErrorHandler;
@@ -35,7 +34,6 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
@@ -48,9 +46,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -58,7 +54,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
-import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -79,8 +74,6 @@ public abstract class ProcessManagerRepository<I,
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
-    private final EventFilter entityStateChangedFilter = discardEvents(EntityStateChanged.class);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -362,22 +355,6 @@ public abstract class ProcessManagerRepository<I,
             return Optional.empty();
         }
         return Optional.of(new PmExternalEventDispatcher());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code ProcessManagerRepository} changes the default behaviour and allows all
-     * the events <b>except</b> for {@link EntityStateChanged}. It is supposed that the changes of
-     * a process manager state are not worth being published.
-     *
-     * <p>Override this method to change the behaviour.
-     */
-    @Pure
-    @SPI
-    @Override
-    protected EventFilter eventFilter() {
-        return entityStateChangedFilter;
     }
 
     /**

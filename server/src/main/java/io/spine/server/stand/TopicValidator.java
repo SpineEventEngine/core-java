@@ -28,6 +28,7 @@ import io.spine.type.TypeUrl;
 
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
+import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 import static java.lang.String.format;
 
 /**
@@ -38,7 +39,7 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
     private final EventRegistry eventRegistry;
 
     TopicValidator(TypeRegistry typeRegistry, EventRegistry eventRegistry) {
-        super(typeRegistry);
+        super(SUBSCRIBE, typeRegistry);
         this.eventRegistry = eventRegistry;
     }
 
@@ -62,7 +63,9 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
     @Override
     protected boolean isSupported(Topic request) {
         Target target = request.getTarget();
-        return typeRegistryContains(target) || eventRegistryContains(target);
+        boolean supportedEntityTopic = typeRegistryContains(target) && visibilitySufficient(target);
+        boolean supportedEventTopic = eventRegistryContains(target);
+        return supportedEntityTopic || supportedEventTopic;
     }
 
     @Override

@@ -32,18 +32,18 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * An envelope for the messages, produced outside of the current bounded context.
+ * An envelope for the messages produced outside of the current Bounded Context.
  */
 public final class ExternalMessageEnvelope
         extends AbstractMessageEnvelope<Message, ExternalMessage, ActorContext> {
 
-    /** An identifier of the original message (e.g. event ID). */
+    /** An identifier of the original message (for example, event ID). */
     private final Message id;
 
     /** An original message (e.g. instance of {@code io.spine.sample.TaskCreated}). */
     private final Message message;
 
-    /** A message class of the original message (e.g. {@code io.spine.sample.TaskCreated} class). */
+    /** A message class of the original message (for example, {@code io.spine.sample.TaskCreated} class). */
     private final MessageClass messageClass;
 
     /** An actor context representing the environment in which the original message was created. */
@@ -60,7 +60,7 @@ public final class ExternalMessageEnvelope
 
     /**
      * Creates a new instance of {@code ExternalMessageEnvelope} from the {@link ExternalMessage}
-     * instance and the message transferred inside the {@code ExternalMessage}, such as
+     * instance and the message transferred inside the {@code ExternalMessage} such as
      * a {@code io.spine.sample.TaskCreated} event message.
      *
      * <p>This factory method provides an optimal performance of
@@ -69,7 +69,7 @@ public final class ExternalMessageEnvelope
      *
      * @param externalMessage the instance of {@code ExternalMessage} to wrap into an envelope
      * @param originalMessage the message instance, which was originally transferred inside the
-     *                        {@code externalMessage}, such as a {@code io.spine.sample.TaskCreated}
+     *                        {@code externalMessage} such as a {@code io.spine.sample.TaskCreated}
      *                        event message.
      * @return the new instance of external message envelope.
      */
@@ -86,7 +86,7 @@ public final class ExternalMessageEnvelope
 
     /**
      * Obtains an originally transferred message. For instance, {@code io.spine.sample.TaskCreated}
-     * event message may returned for an external event, transferred inside
+     * event message may returned for an external event transferred inside
      * of this envelope instance.
      *
      * @return the instance of origin message
@@ -97,7 +97,7 @@ public final class ExternalMessageEnvelope
     }
 
     /**
-     * Obtains a message class of an originally transferred message, such as
+     * Obtains a message class of an originally transferred message such as
      * {@code io.spine.sample.TaskCreated} class.
      *
      * @return the event message
@@ -127,10 +127,10 @@ public final class ExternalMessageEnvelope
     /**
      * This method is not supported and always throws {@link UnsupportedOperationException}.
      *
-     * <p> This should never happen, as no event is caused directly by an {@code ExternalMessage}.
+     * <p> This should never happen as no event is caused directly by an {@code ExternalMessage}.
      *
-     * <p> Instead, the external messages are consumed by an anti-corruption layer, such as
-     * external reactor or subscriber methods in the destination bounded context.
+     * <p> Instead, the external messages are consumed by an anti-corruption layer such as
+     * external reactor or subscriber methods in the destination Bounded Context.
      * 
      * @param builder not used
      * @throws UnsupportedOperationException always

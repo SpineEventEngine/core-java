@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * tests on in the production mode.
  *
  * <p><b>Test mode.</b>
- * Under tests  this class returns {@link InMemoryStorageFactory} if
+ * Under tests this class returns {@link InMemoryStorageFactory} if
  * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
  *
  * <p><b>Production mode.</b>
@@ -75,7 +75,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     /**
      * Obtains the instance of the switch that corresponds to multi-tenancy mode.
      *
-     * @param boundedContextName the name of the bounded context in which this switch works
+     * @param boundedContextName the name of the Bounded Context in which this switch works
      * @param multitenant        if {@code true} the switch is requested for the multi-tenant
      *                           execution context, {@code false} for the single-tenant context
      */
