@@ -67,8 +67,8 @@ import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryPa
  * <p>If the query specifies the values of
  * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
  * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery,
- * com.google.protobuf.FieldMask) default behavior} will be overridden i.e. the records resulting
- * to such query may or may not be active.
+ * com.google.protobuf.FieldMask) default behavior} will be overridden meaning that the records resulting
+ * to such query may active or inactive.
  *
  * @param <I>
  *         the type of the IDs of the query target
@@ -85,7 +85,7 @@ public final class EntityQuery<I> implements Serializable {
      * Creates new instance of {@code EntityQuery}.
      *
      * @param ids
-     *         accepted ID values
+     *         the accepted ID values
      * @param parameters
      *         the values of the {@link EntityColumn}s stored in a mapping of the
      *         {@link EntityColumn}'s metadata to the (multiple) acceptable values;
