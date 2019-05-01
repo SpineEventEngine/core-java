@@ -164,7 +164,7 @@ class FiltersTest {
                                           CompositeOperator operator,
                                           Filter[] groupedFilters) {
             assertEquals(operator, filter.getOperator());
-            assertThat(filter.getFilterList()).containsAllIn(groupedFilters);
+            assertThat(filter.getFilterList()).containsAtLeastElementsIn(groupedFilters);
         }
     }
 

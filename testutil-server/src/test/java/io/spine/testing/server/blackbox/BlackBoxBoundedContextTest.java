@@ -23,7 +23,6 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
-import com.google.common.truth.Truth8;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -62,6 +61,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -416,13 +416,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         private void assertEntityTypes() {
-            assertThat(blackBox.getAllEntityStateTypes()).containsAllIn(types);
+            assertThat(blackBox.allEntityStateTypes()).containsAtLeastElementsIn(types);
         }
 
         private void assertEnricher() {
-            Truth8.assertThat(blackBox.eventBus()
-                                      .enricher())
-                  .hasValue(enricher);
+            assertThat(blackBox.eventBus().enricher()).hasValue(enricher);
         }
 
         @Test

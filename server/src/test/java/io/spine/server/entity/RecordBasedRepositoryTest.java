@@ -258,7 +258,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             Collection<E> found = newArrayList(loadMany(ids));
 
             assertThat(found).hasSize(ids.size());
-            assertThat(entities).containsAllIn(found);
+            assertThat(entities).containsAtLeastElementsIn(found);
         }
 
         @Test

@@ -22,25 +22,16 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.code.proto.EntityStateOption;
 import io.spine.core.EventContext;
-import io.spine.option.EntityOption;
+import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeName;
 
-import java.util.Optional;
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Sets.immutableEnumSet;
-import static io.spine.option.EntityOption.Visibility.FULL;
-import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
-import static io.spine.option.EntityOption.Visibility.VISIBILITY_UNKNOWN;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
@@ -64,13 +55,6 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         }
     };
 
-    /**
-     * The set of {@link io.spine.option.EntityOption.Visibility Visibility} modifiers which allow
-     * an entity state to be subscribed to.
-     */
-    private static final Set<EntityOption.Visibility> allowedVisibilityModifiers =
-            immutableEnumSet(VISIBILITY_UNKNOWN, SUBSCRIBE, FULL);
-
     private final ImmutableList<Class<?>> parameters;
 
     EntityStateSubscriberSpec(ImmutableList<Class<?>> parameters) {
@@ -85,16 +69,11 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         }
         @SuppressWarnings("unchecked") // Checked above.
         Class<? extends Message> firstParameter = (Class<? extends Message>) methodParams[0];
-        TypeName messageType = TypeName.of(firstParameter);
-        Optional<EntityOption> entityOption = getEntityOption(messageType);
-        if (!entityOption.isPresent()) {
-            return false;
-        }
-        EntityOption entity = entityOption.get();
-        if (visibleForSubscription(entity)) {
+        EntityVisibility visibility = EntityVisibility.of(firstParameter);
+        if (visibility.canSubscribe()) {
             return true;
         } else {
-            throw new InsufficientVisibilityError(messageType, entity.getVisibility());
+            throw new InsufficientVisibilityError(TypeName.of(firstParameter), visibility);
         }
     }
 
@@ -109,16 +88,4 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     }
 
     protected abstract Object[] arrangeArguments(Message entityState, EventEnvelope event);
-
-    private static Optional<EntityOption> getEntityOption(TypeName messageType) {
-        Descriptor descriptor = messageType.messageDescriptor();
-        Optional<EntityOption> result = EntityStateOption.valueOf(descriptor);
-        return result;
-    }
-
-    private static boolean visibleForSubscription(EntityOption entity) {
-        EntityOption.Visibility entityVisibility = entity.getVisibility();
-        boolean result = allowedVisibilityModifiers.contains(entityVisibility);
-        return result;
-    }
 }

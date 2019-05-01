@@ -18,15 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.entity;
+
+import com.google.protobuf.Message;
+import io.spine.core.Version;
+import io.spine.server.entity.storage.Column;
+
 /**
- * Tests for the no-op messages, {@link io.spine.server.model.Nothing Nothing} event
- * and {@link io.spine.test.aggregate.number.DoNothing DoNothing} command.
+ * Applies {@link Column} annotation to {@code getVersion} method.
+ *
+ * <p>The interface is implemented by {@link Entity entities} that have a stored version.
  */
+public interface HasVersionColumn<I, S extends Message> extends Entity<I, S> {
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.model.noops;
-
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to add the {@code Column} annotation.
+     */
+    @Override
+    @Column
+    Version getVersion();
+}

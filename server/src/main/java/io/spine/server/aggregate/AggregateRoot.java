@@ -51,7 +51,7 @@ public class AggregateRoot<I> {
             cache = createCache();
 
     /**
-     * Creates an new instance.
+     * Creates a new instance.
      *
      * @param boundedContext the bounded context to which the aggregate belongs
      * @param id             the ID of the aggregate

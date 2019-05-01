@@ -30,18 +30,14 @@ import io.spine.server.entity.Entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.CompositeFilter.CompositeOperator.CCF_CO_UNDEFINED;
 import static io.spine.client.Filters.eq;
-import static io.spine.client.Filters.ge;
-import static io.spine.client.Filters.lt;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -78,42 +74,24 @@ class CompositeQueryParameterTest {
 
         String archivedColumnName = archived.name();
         String deletedColumnName = deleted.name();
-        String versionColumnName = version.name();
 
         EntityColumn archivedColumn = findColumn(cls, archivedColumnName);
         EntityColumn deletedColumn = findColumn(cls, deletedColumnName);
-        EntityColumn versionColumn = findColumn(cls, versionColumnName);
 
         Filter archived = eq(archivedColumnName, true);
         Filter deleted = eq(archivedColumnName, false);
-        Filter versionLower = ge(archivedColumnName, 2);
-        Filter versionUpper = lt(archivedColumnName, 10);
 
         CompositeQueryParameter lifecycle =
                 CompositeQueryParameter.from(
                         ImmutableMultimap.of(archivedColumn, archived, deletedColumn, deleted),
                         ALL
                 );
-        CompositeQueryParameter versionLowerBound =
-                CompositeQueryParameter.from(
-                        ImmutableMultimap.of(versionColumn, versionLower),
-                        ALL
-                );
-        CompositeQueryParameter versionUpperBound =
-                CompositeQueryParameter.from(
-                        ImmutableMultimap.of(versionColumn, versionUpper),
-                        ALL
-                );
-        // Merge the instances
-        CompositeQueryParameter all =
-                lifecycle.conjunct(newArrayList(versionLowerBound, versionUpperBound));
 
         // Check
-        assertEquals(all.getOperator(), ALL);
+        assertEquals(lifecycle.getOperator(), ALL);
 
-        Multimap<EntityColumn, Filter> asMultimap = all.getFilters();
+        Multimap<EntityColumn, Filter> asMultimap = lifecycle.getFilters();
 
-        assertThat(asMultimap.get(versionColumn)).containsExactly(versionLower, versionUpper);
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
     }
@@ -125,30 +103,24 @@ class CompositeQueryParameterTest {
 
         String archivedColumnName = archived.name();
         String deletedColumnName = deleted.name();
-        String versionColumnName = version.name();
 
         EntityColumn archivedColumn = findColumn(cls, archivedColumnName);
         EntityColumn deletedColumn = findColumn(cls, deletedColumnName);
-        EntityColumn versionColumn = findColumn(cls, versionColumnName);
 
         Filter archived = eq(archivedColumnName, false);
         Filter deleted = eq(archivedColumnName, false);
-        Filter version = ge(archivedColumnName, 4);
 
         CompositeQueryParameter lifecycle =
                 CompositeQueryParameter.from(
                         ImmutableMultimap.of(archivedColumn, archived, deletedColumn, deleted),
                         ALL
                 );
-        // Merge the instances
-        CompositeQueryParameter all = lifecycle.and(versionColumn, version);
 
         // Check
-        assertEquals(all.getOperator(), ALL);
+        assertEquals(lifecycle.getOperator(), ALL);
 
-        Multimap<EntityColumn, Filter> asMultimap = all.getFilters();
+        Multimap<EntityColumn, Filter> asMultimap = lifecycle.getFilters();
 
-        assertThat(asMultimap.get(versionColumn)).containsExactly(version);
         assertThat(asMultimap.get(archivedColumn)).containsExactly(archived);
         assertThat(asMultimap.get(deletedColumn)).containsExactly(deleted);
     }

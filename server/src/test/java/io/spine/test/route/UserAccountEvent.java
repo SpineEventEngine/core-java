@@ -18,25 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.test.route;
 
-import com.google.protobuf.Timestamp;
-import io.spine.time.Temporals;
-import io.spine.time.TimestampTemporal;
+import com.google.errorprone.annotations.Immutable;
 
 /**
- * Utilities for working with core types.
+ * Common interface for account events.
  */
-public final class Utils {
-
-    /** Prevents instantiation of this utility class. */
-    private Utils() {
-    }
-
-    /**
-     * Converts the passed {@code Timestamp} to {@code TimestampTemporal}.
-     */
-    public static TimestampTemporal toTemporal(Timestamp t) {
-        return (TimestampTemporal) Temporals.from(t);
-    }
+@Immutable
+public interface UserAccountEvent extends UserEvent {
 }

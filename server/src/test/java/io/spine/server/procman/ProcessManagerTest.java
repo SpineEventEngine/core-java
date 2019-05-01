@@ -32,7 +32,6 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
-import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
@@ -472,44 +471,6 @@ class ProcessManagerTest {
                     .assertThat(emittedEvent(twice()))
                     .assertThat(emittedEvents(PmQuizStarted.class))
                     .assertThat(emittedEvents(PmQuestionAnswered.class))
-                    .assertThat(emittedEvent(Nothing.class, none()))
-                    .close();
-        }
-
-        /**
-         * This test executes two commands, thus checks for 2 Acks:
-         * <ol>
-         *     <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
-         *     <li>{@link PmAnswerQuestion Answer Question } — a target
-         * command that produces either of 3 events.
-         * </ol>
-         *
-         * <p>First command emits a {@link PmQuizStarted Quiz Started}
-         * event.
-         *
-         * <p>Because the quiz is started without any questions to solve,
-         * an {@link PmAnswerQuestion answer question command} can not
-         * match any questions. This results in emitting
-         * {@link io.spine.server.tuple.EitherOf3 EitherOf3}
-         * containing {@link Nothing}.
-         *
-         * @see io.spine.server.procman.given.pm.DirectQuizProcman
-         */
-        @Test
-        @DisplayName("for an either of three emitted upon handling a command")
-        void afterEmittingEitherOfThreeOnCommandDispatch() {
-            PmQuizId quizId = newQuizId();
-            Iterable<PmQuestionId> questions = newArrayList();
-            PmStartQuiz startQuiz = startQuiz(quizId, questions);
-            PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
-
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(new DirectQuizProcmanRepository())
-                    .receivesCommands(startQuiz, answerQuestion)
-                    .assertThat(acked(twice()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvent(once()))
-                    .assertThat(emittedEvents(PmQuizStarted.class))
                     .assertThat(emittedEvent(Nothing.class, none()))
                     .close();
         }

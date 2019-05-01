@@ -63,8 +63,8 @@ public abstract class AbstractEventSubscriber
      *
      * @param event
      *         the envelope with the event
-     * @return a one element set with the result of {@link #toString()} as the identify of the
-     *         subscriber, or empty set if dispatching failed
+     * @return the element set with the result of {@link #toString()} as the identify of the
+     *         subscriber or empty set if dispatching failed
      */
     @Override
     public final Set<String> dispatch(EventEnvelope event) {
@@ -86,7 +86,7 @@ public abstract class AbstractEventSubscriber
     /**
      * Handles an event dispatched to this subscriber instance.
      *
-     * <p>By default passes the event to the corresponding {@linkplain io.spine.core.Subscribe
+     * <p>By default, passes the event to the corresponding {@linkplain io.spine.core.Subscribe
      * subscriber} method of the entity.
      */
     protected void handle(EventEnvelope event) {

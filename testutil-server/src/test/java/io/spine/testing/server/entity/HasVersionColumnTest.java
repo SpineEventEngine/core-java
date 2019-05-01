@@ -18,29 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.noops;
+package io.spine.testing.server.entity;
 
-import io.spine.server.model.noops.given.ArchiverPm;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.server.entity.HasVersionColumn;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.projection.Projection;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static io.spine.server.model.noops.given.NoOpMessageTestEnv.archiveSingleFile;
-import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import java.util.stream.Stream;
 
-@DisplayName("When Nothing event is emitted")
-class NothingTest {
+import static com.google.common.truth.Truth.assertThat;
 
-    @Test
-    @DisplayName("the bus should not know")
-    void notPost() {
-        SingleTenantBlackBoxContext boundedContext = BlackBoxBoundedContext
-                .singleTenant()
-                .with(new ArchiverPm.Repository())
-                .receivesCommand(archiveSingleFile());
-        boundedContext.assertThat(emittedEvent(count(0)))
-                      .close();
+@DisplayName("HasVersionColumn should")
+public class HasVersionColumnTest {
+
+    @ParameterizedTest(name = "\"{0}\"")
+    @MethodSource("classes")
+    @DisplayName("be implemented by")
+    void beImplementedBy(Class<?> cls) {
+        assertThat(cls).isAssignableTo(HasVersionColumn.class);
+    }
+
+    private static Stream<Arguments> classes() {
+        return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
     }
 }
