@@ -78,7 +78,7 @@ public final class EntitySubject
             shouldExistButDoesNot();
             return ignoreCheck().that(false);
         } else {
-            return check().that(flags().getArchived());
+            return check("flags().getArchived()").that(flags().getArchived());
         }
     }
 
@@ -90,7 +90,7 @@ public final class EntitySubject
             shouldExistButDoesNot();
             return ignoreCheck().that(false);
         } else {
-            return check().that(flags().getDeleted());
+            return check("flags().getDeleted()").that(flags().getDeleted());
         }
     }
 
@@ -108,8 +108,8 @@ public final class EntitySubject
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         } else {
-            return check().about(protos())
-                          .that(entity.state());
+            return check("state()").about(protos())
+                                   .that(entity.state());
         }
     }
 

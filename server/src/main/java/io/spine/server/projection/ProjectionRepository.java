@@ -273,7 +273,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     EventStreamQuery createStreamQuery() {
         Set<EventFilter> eventFilters = createEventFilters();
 
-        // Get the timestamp of the last event. This also ensures we have the storage.
+        // Gets the timestamp of the last event. This also ensures we have the storage.
         Timestamp timestamp = readLastHandledEventTime();
         EventStreamQuery.Builder builder = EventStreamQuery
                 .newBuilder()

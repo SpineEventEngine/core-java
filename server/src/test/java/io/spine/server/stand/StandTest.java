@@ -77,7 +77,6 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
-import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,6 +119,7 @@ import static io.spine.test.projection.Project.Status.UNDEFINED;
 import static io.spine.testing.Tests.assertMatchesMask;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static io.spine.testing.server.entity.given.Given.projectionOfClass;
+import static io.spine.validate.Validate.isNotDefault;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -652,7 +652,7 @@ class StandTest extends TenantAwareTest {
                 .newBuilder()
                 .setId(Subscriptions.generateId())
                 .build();
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(InvalidSubscriptionException.class,
                      () -> stand.cancel(nonExistingSubscription, noOpObserver()));
     }
 
@@ -854,14 +854,13 @@ class StandTest extends TenantAwareTest {
             // So create a query for an unknown type.
             Query readAllCustomers = requestFactory.query()
                                                    .all(Customer.class);
+            InvalidQueryException exception =
+                    assertThrows(InvalidQueryException.class,
+                                 () -> stand.execute(readAllCustomers, noOpObserver()));
+            assertEquals(readAllCustomers, exception.getRequest());
 
-            try {
-                stand.execute(readAllCustomers, noOpObserver());
-                fail("Expected IllegalArgumentException upon executing query with unknown target," +
-                             " but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyUnsupportedQueryTargetException(readAllCustomers, e);
-            }
+            assertEquals(UNSUPPORTED_QUERY_TARGET.getNumber(),
+                         exception.asError().getCode());
         }
 
         @Test
@@ -870,43 +869,16 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand();
             Query invalidQuery = Query.getDefaultInstance();
 
-            try {
-                stand.execute(invalidQuery, noOpObserver());
-                fail("Expected IllegalArgumentException due to invalid query message passed," +
-                             " but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyInvalidQueryException(invalidQuery, e);
-            }
-        }
-
-        private void verifyUnsupportedQueryTargetException(Query query,
-                                                           IllegalArgumentException e) {
-            Throwable cause = e.getCause();
-            assertTrue(cause instanceof InvalidQueryException);
-
-            InvalidQueryException queryException = (InvalidQueryException) cause;
-            assertEquals(query, queryException.getRequest());
-
-            assertEquals(UNSUPPORTED_QUERY_TARGET.getNumber(),
-                         queryException.asError()
-                                       .getCode());
-        }
-
-        private void verifyInvalidQueryException(Query invalidQuery,
-                                                 IllegalArgumentException e) {
-            Throwable cause = e.getCause();
-            assertTrue(cause instanceof InvalidQueryException);
-
-            InvalidQueryException queryException = (InvalidQueryException) cause;
-            assertEquals(invalidQuery, queryException.getRequest());
+            InvalidQueryException exception =
+                    assertThrows(InvalidQueryException.class,
+                                 () -> stand.execute(invalidQuery, noOpObserver()));
+            assertEquals(invalidQuery, exception.getRequest());
 
             assertEquals(INVALID_QUERY.getNumber(),
-                         queryException.asError()
-                                       .getCode());
-
-            ValidationError validationError = queryException.asError()
-                                                            .getValidationError();
-            assertTrue(Validate.isNotDefault(validationError));
+                         exception.asError().getCode());
+            ValidationError validationError = exception.asError()
+                                                       .getValidationError();
+            assertTrue(isNotDefault(validationError));
         }
     }
 
@@ -927,14 +899,13 @@ class StandTest extends TenantAwareTest {
             // So create a topic for an unknown type.
             Topic allProjectsTopic = requestFactory.topic()
                                                    .allOf(Project.class);
+            InvalidTopicException exception =
+                    assertThrows(InvalidTopicException.class,
+                                 () -> stand.subscribe(allProjectsTopic, noOpObserver()));
+            assertEquals(allProjectsTopic, exception.getRequest());
 
-            try {
-                stand.subscribe(allProjectsTopic, noOpObserver());
-                fail("Expected IllegalArgumentException upon subscribing to a topic " +
-                             "with unknown target, but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyUnsupportedTopicException(allProjectsTopic, e);
-            }
+            assertEquals(UNSUPPORTED_TOPIC_TARGET.getNumber(),
+                         exception.asError().getCode());
         }
 
         @Test
@@ -942,42 +913,18 @@ class StandTest extends TenantAwareTest {
         void ifInvalidTopicMessagePassed() {
             Stand stand = createStand();
             Topic invalidTopic = Topic.getDefaultInstance();
-            try {
-                stand.subscribe(invalidTopic, noOpObserver());
-                fail("Expected IllegalArgumentException due to an invalid topic message, " +
-                             "but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyInvalidTopicException(invalidTopic, e);
-            }
-        }
-
-        private void verifyUnsupportedTopicException(Topic topic, IllegalArgumentException e) {
-            Throwable cause = e.getCause();
-            assertTrue(cause instanceof InvalidTopicException);
-
-            InvalidTopicException topicException = (InvalidTopicException) cause;
-            assertEquals(topic, topicException.getRequest());
-
-            assertEquals(UNSUPPORTED_TOPIC_TARGET.getNumber(),
-                         topicException.asError()
-                                       .getCode());
-        }
-
-        private void verifyInvalidTopicException(Topic invalidTopic,
-                                                 IllegalArgumentException e) {
-            Throwable cause = e.getCause();
-            assertTrue(cause instanceof InvalidTopicException);
-
-            InvalidTopicException topicException = (InvalidTopicException) cause;
-            assertEquals(invalidTopic, topicException.getRequest());
+            InvalidTopicException exception =
+                    assertThrows(InvalidTopicException.class,
+                                 () -> stand.subscribe(invalidTopic, noOpObserver()));
+            assertEquals(invalidTopic, exception.getRequest());
 
             assertEquals(INVALID_TOPIC.getNumber(),
-                         topicException.asError()
+                         exception.asError()
                                        .getCode());
 
-            ValidationError validationError = topicException.asError()
-                                                            .getValidationError();
-            assertTrue(Validate.isNotDefault(validationError));
+            ValidationError validationError = exception.asError()
+                                                       .getValidationError();
+            assertTrue(isNotDefault(validationError));
         }
     }
 
@@ -991,13 +938,12 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand();
             Subscription subscription = subscriptionWithUnknownTopic();
 
-            try {
-                stand.activate(subscription, emptyUpdateCallback(), noOpObserver());
-                fail("Expected IllegalArgumentException upon activating an unknown subscription, " +
-                             "but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyUnknownSubscriptionException(e, subscription);
-            }
+            InvalidSubscriptionException exception =
+                    assertThrows(InvalidSubscriptionException.class,
+                                 () -> stand.activate(subscription,
+                                                      emptyUpdateCallback(),
+                                                      noOpObserver()));
+            verifyUnknownSubscription(subscription, exception);
         }
 
         @Test
@@ -1006,13 +952,10 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand();
             Subscription subscription = subscriptionWithUnknownTopic();
 
-            try {
-                stand.cancel(subscription, noOpObserver());
-                fail("Expected IllegalArgumentException upon cancelling an unknown subscription, " +
-                             "but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyUnknownSubscriptionException(e, subscription);
-            }
+            InvalidSubscriptionException exception =
+                    assertThrows(InvalidSubscriptionException.class,
+                                 () -> stand.cancel(subscription, noOpObserver()));
+            verifyUnknownSubscription(subscription, exception);
         }
 
         @Test
@@ -1021,13 +964,13 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand();
             Subscription invalidSubscription = Subscription.getDefaultInstance();
 
-            try {
-                stand.activate(invalidSubscription, emptyUpdateCallback(), noOpObserver());
-                fail("Expected IllegalArgumentException due to an invalid subscription message " +
-                             "passed to `activate`, but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyInvalidSubscriptionException(invalidSubscription, e);
-            }
+            InvalidSubscriptionException exception =
+                    assertThrows(InvalidSubscriptionException.class,
+                                 () -> stand.activate(invalidSubscription,
+                                                      emptyUpdateCallback(),
+                                                      noOpObserver()));
+            verifyInvalidSubscription(invalidSubscription, exception);
+
         }
 
         @Test
@@ -1036,21 +979,14 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand();
             Subscription invalidSubscription = Subscription.getDefaultInstance();
 
-            try {
-                stand.cancel(invalidSubscription, noOpObserver());
-                fail("Expected IllegalArgumentException due to an invalid subscription message " +
-                             "passed to `cancel`, but got nothing");
-            } catch (IllegalArgumentException e) {
-                verifyInvalidSubscriptionException(invalidSubscription, e);
-            }
+            InvalidSubscriptionException exception =
+                    assertThrows(InvalidSubscriptionException.class,
+                                 () -> stand.cancel(invalidSubscription, noOpObserver()));
+            verifyInvalidSubscription(invalidSubscription, exception);
         }
 
-        private void verifyInvalidSubscriptionException(Subscription invalidSubscription,
-                                                        IllegalArgumentException e) {
-            Throwable cause = e.getCause();
-            assertTrue(cause instanceof InvalidSubscriptionException);
-
-            InvalidSubscriptionException exception = (InvalidSubscriptionException) cause;
+        private void verifyInvalidSubscription(Subscription invalidSubscription,
+                                               InvalidSubscriptionException exception) {
             assertEquals(invalidSubscription, exception.getRequest());
 
             assertEquals(SubscriptionValidationError.INVALID_SUBSCRIPTION.getNumber(),
@@ -1059,15 +995,11 @@ class StandTest extends TenantAwareTest {
 
             ValidationError validationError = exception.asError()
                                                        .getValidationError();
-            assertTrue(Validate.isNotDefault(validationError));
+            assertTrue(isNotDefault(validationError));
         }
 
-        private void verifyUnknownSubscriptionException(IllegalArgumentException e,
-                                                        Subscription subscription) {
-            Throwable cause = e.getCause();
-            assertTrue(cause instanceof InvalidSubscriptionException);
-
-            InvalidSubscriptionException exception = (InvalidSubscriptionException) cause;
+        private void verifyUnknownSubscription(Subscription subscription,
+                                               InvalidSubscriptionException exception) {
             assertEquals(subscription, exception.getRequest());
 
             assertEquals(SubscriptionValidationError.UNKNOWN_SUBSCRIPTION.getNumber(),

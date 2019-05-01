@@ -96,7 +96,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
+     * Reads a record which matches the specified {@linkplain RecordReadRequest request}.
      *
      * @param request
      *         the request to read the record
@@ -112,7 +112,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads a record, which matches the specified {@linkplain RecordReadRequest request}
+     * Reads a record which matches the specified {@linkplain RecordReadRequest request}
      * and applies a {@link FieldMask} to it.
      *
      * @param request
@@ -150,7 +150,7 @@ public abstract class RecordStorage<I>
      * @param id
      *         the ID for the record
      * @param record
-     *         a record to store
+     *         the record to store
      * @throws IllegalStateException
      *         if the storage is closed
      * @see #write(Object, EntityRecord)
@@ -176,7 +176,7 @@ public abstract class RecordStorage<I>
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
      * @param records
-     *         an ID to record map with the entries to store
+     *         the ID to record map with the entries to store
      * @throws IllegalStateException
      *         if the storage is closed
      */
@@ -205,7 +205,7 @@ public abstract class RecordStorage<I>
                                          .build();
             write(id, updated);
         } else {
-            // The AggregateStateId is a special case, which is not handled by the Identifier class.
+            // The AggregateStateId is a special case which is not handled by the Identifier class.
             String idStr = id instanceof AggregateStateId
                            ? id.toString()
                            : Identifier.toString(id);
@@ -231,7 +231,7 @@ public abstract class RecordStorage<I>
     }
 
     /**
-     * Reads multiple active items from the storage and apply {@link FieldMask} to the results.
+     * Reads multiple active items from the storage and applies {@link FieldMask} to the results.
      *
      * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
      * with nulls in place of missing or inactive entities.
@@ -295,7 +295,7 @@ public abstract class RecordStorage<I>
      * Reads all the records matching the given {@link EntityQuery} and applies the given
      * {@link FieldMask} to the resulting record states.
      *
-     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, but the entity
+     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags} but the entity
      * supports them, all the resulting records are active. Otherwise the records obey
      * the constraints provided by the query.
      *

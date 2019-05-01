@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.entity.EventFilter;
 import io.spine.server.route.EventRoute;
 
 /**
@@ -35,5 +36,10 @@ abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
     SystemRepository() {
         super();
         eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+    }
+
+    @Override
+    protected EventFilter eventFilter() {
+        return EventFilter.allowAll();
     }
 }

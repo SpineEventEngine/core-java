@@ -56,7 +56,7 @@ public class HandlerMethodFailedException extends RuntimeException {
     public HandlerMethodFailedException(Object  target,
                                         Message dispatchedMessage,
                                         Message messageContext,
-                                        Exception cause) {
+                                        Throwable cause) {
         super(checkNotNull(cause));
         this.target = target.toString();
         /**
@@ -73,7 +73,7 @@ public class HandlerMethodFailedException extends RuntimeException {
      * If the root cause of the exception was thrown by a handler method,
      * {@linkplain ThrowableMessage#initProducer(Any) sets the identity} of the object which thrown.
      */
-    private static void setProducer(Exception exception, Object target) {
+    private static void setProducer(Throwable exception, Object target) {
         Throwable rootCause = getRootCause(exception);
         if (rootCause instanceof ThrowableMessage) {
             ThrowableMessage thrownMessage = (ThrowableMessage) rootCause;

@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
-import io.spine.server.type.CommandClass;
 
 import java.util.Optional;
 
@@ -35,14 +34,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * for delivering a command to its handler.
  *
  * <p>A routing schema consists of a default route and custom routes per command class.
- * When finding a command target the {@code CommandRouting} would see if there is a custom route
+ * When finding a command target, the {@code CommandRouting} will see if there is a custom route
  * set for the type of the command. If not found, the {@linkplain DefaultCommandRoute default route}
  * will be {@linkplain CommandRoute#apply(Message, Message) applied}.
  *
  * @param <I> the type of the entity IDs of this repository
  */
-public final class CommandRouting<I>
-        extends MessageRouting<CommandMessage, CommandContext, CommandClass, I> {
+public final class CommandRouting<I> extends MessageRouting<CommandMessage, CommandContext, I> {
 
     private static final long serialVersionUID = 0L;
 
@@ -62,8 +60,8 @@ public final class CommandRouting<I>
     }
 
     @Override
-    public final CommandRoute<I, CommandMessage> getDefault() {
-        return (CommandRoute<I, CommandMessage>) super.getDefault();
+    public final CommandRoute<I, CommandMessage> defaultRoute() {
+        return (CommandRoute<I, CommandMessage>) super.defaultRoute();
     }
 
     /**
@@ -79,59 +77,67 @@ public final class CommandRouting<I>
     }
 
     /**
-     * Sets a custom route for the passed command class.
+     * Sets a custom route for the passed command type.
      *
-     * <p>Such a mapping may be required when...
+     * <p>Such mapping may be required for the following cases:
      * <ul>
-     * <li>The first field of the command message is not an ID of the entity which handles the
-     * command (as required by the {@linkplain DefaultCommandRoute default route}.
-     * <li>The command need to be dispatched to an entity which ID differs from the value set in the
-     * first command attribute.
+     *   <li>The first field of the command message is not an ID of the entity which handles the
+     *   command as required by the {@linkplain DefaultCommandRoute default route}.
+     *   <li>The command needs to be dispatched to an entity which ID differs from the value set
+     *   in the first command message field.
      * </ul>
      *
-     * @param commandClass the class of the command message
-     * @param via          the route to be used for this class of commands
-     * @param <M>          the type of the command message
+     * <p>The type of the command can be a class or an interface. If a routing schema needs to
+     * contain entries for specific classes and an interface that these classes implement, routes
+     * for interfaces should be defined <em>after</em> entries for the classes:
+     *
+     * <pre>{@code
+     * customRouting.route(MyCommandClass.class, (event, context) -> { ... })
+     *              .route(MyCommandInterface.class, (event, context) -> { ... });
+     * }</pre>
+     *
+     * Defining an entry for an interface and then for the class which implements the interface will
+     * result in {@code IllegalStateException}.
+     *
+     * @param commandType
+     *         the type of the command message
+     * @param via
+     *         the route to be used for this type of commands
+     * @param <M>
+     *         the type of the command message
      * @return {@code this} to allow chained calls when configuring the routing
-     * @throws IllegalStateException if the route for this command class is already set
+     * @throws IllegalStateException
+     *         if the route for this command class is already set either directly or
+     *         via a super-interface
      */
     @CanIgnoreReturnValue
-    public <M extends CommandMessage> CommandRouting<I> route(Class<M> commandClass,
-                                                              CommandRoute<I, M> via)
+    public <M extends CommandMessage>
+    CommandRouting<I> route(Class<M> commandType, CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         Route<CommandMessage, CommandContext, I> casted =
                 (Route<CommandMessage, CommandContext, I>) via;
-        doRoute(commandClass, casted);
+        addRoute(commandType, casted);
         return this;
     }
 
     /**
      * Obtains a route for the passed command class.
      *
-     * @param commandClass the class of the command messages
-     * @param <M>          the type of the command message
+     * @param commandClass
+     *         the class of the command messages
+     * @param <M>
+     *         the type of the command message
      * @return optionally available route
      */
     public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
-        Optional<? extends Route<CommandMessage, CommandContext, I>> optional = doGet(commandClass);
-        if (optional.isPresent()) {
-            Route<CommandMessage, CommandContext, I> route = optional.get();
+        Match match = routeFor(commandClass);
+        if (match.found()) {
             @SuppressWarnings({"unchecked", "RedundantSuppression"})
-                // The cast is safe as we deal only with CommandRoute's.
-            CommandRoute<I, M> commandRoute = (CommandRoute<I, M>) route;
-            return Optional.of(commandRoute);
+            // protected by generic params of this class
+            Optional<CommandRoute<I, M>> result = Optional.of((CommandRoute<I, M>) match.route());
+            return result;
         }
         return Optional.empty();
-    }
-
-    @Override
-    CommandClass toMessageClass(Class<? extends CommandMessage> classOfMessages) {
-        return CommandClass.from(classOfMessages);
-    }
-
-    @Override
-    CommandClass toMessageClass(Message outerOrMessage) {
-        return CommandClass.of(outerOrMessage);
     }
 }

@@ -30,8 +30,8 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 
 /**
- * A factory for creating storages used by repositories,
- * {@link EventStore EventStore},
+ * A factory for creating storages used by repositories
+ * {@link EventStore EventStore}
  * and {@link io.spine.server.stand.Stand Stand}.
  */
 public interface StorageFactory extends AutoCloseable {
@@ -39,7 +39,7 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Verifies if the storage factory is configured to serve a multi-tenant application.
      *
-     * @return {@code true} if the factory would produce multi-tenant storages,
+     * @return {@code true} if the factory produces multi-tenant storages,
      *         {@code false} otherwise
      */
     boolean isMultitenant();

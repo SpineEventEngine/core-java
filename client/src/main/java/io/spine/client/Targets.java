@@ -19,6 +19,7 @@
  */
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -31,9 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.checkSupported;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -132,9 +131,10 @@ public final class Targets {
     }
 
     private static IdFilter idFilter(List<Any> ids) {
-        return IdFilter.vBuilder()
-                       .addAllIds(ids)
-                       .build();
+        return IdFilter
+                .vBuilder()
+                .addAllIds(ids)
+                .build();
     }
 
     /**
@@ -165,10 +165,10 @@ public final class Targets {
      *
      * @return a new {@link List} instance
      */
-    private static <T> List<T> notNullList(@Nullable Iterable<T> input) {
+    private static <T> ImmutableList<T> notNullList(@Nullable Iterable<T> input) {
         if (input == null) {
-            return emptyList();
+            return ImmutableList.of();
         }
-        return newLinkedList(input);
+        return ImmutableList.copyOf(input);
     }
 }
