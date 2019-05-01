@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
@@ -62,8 +61,7 @@ import static java.lang.String.format;
  *
  * @see EntityColumn
  */
-@Internal
-public class Columns {
+final class Columns {
 
     /**
      * Prevents instantiation of this utility class.

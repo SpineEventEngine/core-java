@@ -58,7 +58,7 @@ import static java.util.stream.Stream.concat;
  * @see Columns
  * @see EntityColumn
  */
-class ColumnReader {
+final class ColumnReader {
 
     /**
      * A predicate to check if the given method or one of its predecessors are annotated with
