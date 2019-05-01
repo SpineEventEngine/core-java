@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Wrapping container for gRPC server.
  *
- * <p>Maintains and deploys several of gRPC services within a single server.
+ * <p>Maintains and deploys some of gRPC services within a single server.
  *
  * <p>Uses {@link ServerServiceDefinition}s of each service.
  */
@@ -120,14 +120,14 @@ public class GrpcContainer {
     /**
      * Check if the given gRPC service is scheduled for the deployment in this container.
      *
-     * <p>Note, that the given gRPC service will become available to the clients,
+     * <p>Note that the given gRPC service will become available to the clients,
      * once the gRPC container is started.
      *
-     * <p>To find out, whether the service is already available for calls,
+     * <p>To find out whether the service is already available for calls,
      * use {@link #isLive(BindableService)} method.
      *
      * @param service the gRPC service to check
-     * @return {@code true}, if the given gRPC service for deployment; {@code false} otherwise
+     * @return {@code true}, if the given gRPC service for deployment and {@code false} otherwise
      */
     public boolean isScheduledForDeployment(BindableService service) {
         String nameOfInterest = service.bindService()
@@ -151,7 +151,7 @@ public class GrpcContainer {
      * <p>  b. the container has been started.
      *
      * @param service the gRPC service
-     * @return {@code true}, if the service is available for interaction within this container;
+     * @return {@code true}, if the service is available for interaction within this container and
      *         {@code false} otherwise
      */
     public boolean isLive(BindableService service) {
