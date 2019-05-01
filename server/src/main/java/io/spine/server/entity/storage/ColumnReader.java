@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.entity.storage.Methods.IS_PREFIX;
-import static io.spine.server.entity.storage.Methods.getAnnotatedVersion;
+import static io.spine.server.entity.storage.Methods.annotatedVersion;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.stream.Stream.concat;
 
@@ -178,7 +178,7 @@ class ColumnReader {
     }
 
     private static Predicate<Method> hasAnnotatedVersion() {
-        return method -> getAnnotatedVersion(method).isPresent();
+        return method -> annotatedVersion(method).isPresent();
     }
 
     private static Predicate<Method> isBooleanWrapperProperty() {

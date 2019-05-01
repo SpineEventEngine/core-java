@@ -21,13 +21,12 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -36,6 +35,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.gson.internal.Primitives.wrap;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -73,7 +73,7 @@ final class Methods {
     }
 
     static Method retrieveAnnotatedVersion(Method getter) {
-        Optional<Method> optionalMethod = getAnnotatedVersion(getter);
+        Optional<Method> optionalMethod = annotatedVersion(getter);
         if (!optionalMethod.isPresent()) {
             throw newIllegalStateException("Method `%s` is not an entity column getter.", getter);
         }
@@ -130,7 +130,7 @@ final class Methods {
                               || boolean.class.isAssignableFrom(returnType)
                               || Boolean.class.isAssignableFrom(returnType),
                       "Getter with an `is` prefix should have `boolean` or `Boolean` return type.");
-        checkArgument(getAnnotatedVersion(method).isPresent(),
+        checkArgument(annotatedVersion(method).isPresent(),
                       "Entity column getter should be annotated with `%s`.",
                       Column.class.getName());
         int modifiers = method.getModifiers();
@@ -154,15 +154,15 @@ final class Methods {
      * @throws IllegalStateException if there is more than one annotated method is found
      *                               in the scanned classes
      */
-    static Optional<Method> getAnnotatedVersion(Method method) {
+    static Optional<Method> annotatedVersion(Method method) {
         Set<Method> annotatedVersions = newHashSet();
         if (method.isAnnotationPresent(Column.class)) {
             annotatedVersions.add(method);
         }
         Class<?> declaringClass = method.getDeclaringClass();
-        Iterable<Class<?>> ascendants = getSuperClassesAndInterfaces(declaringClass);
+        Iterable<Class<?>> ascendants = superTypesOf(declaringClass);
         for (Class<?> ascendant : ascendants) {
-            Optional<Method> optionalMethod = getMethodBySignature(ascendant, method);
+            Optional<Method> optionalMethod = findMethodBySignature(ascendant, method);
             if (optionalMethod.isPresent()) {
                 Method ascendantMethod = optionalMethod.get();
                 if (ascendantMethod.isAnnotationPresent(Column.class)) {
@@ -184,15 +184,14 @@ final class Methods {
         return Optional.of(annotatedVersion);
     }
 
-    private static Iterable<Class<?>> getSuperClassesAndInterfaces(Class<?> cls) {
-        Collection<Class<?>> interfaces = Arrays.asList(cls.getInterfaces());
-        Collection<Class<?>> result = newHashSet(interfaces);
-        Class<?> currentSuper = cls.getSuperclass();
-        while (currentSuper != null) {
-            result.add(currentSuper);
-            currentSuper = currentSuper.getSuperclass();
-        }
-        return result;
+    private static Iterable<Class<?>> superTypesOf(Class<?> cls) {
+        ImmutableSet<Class<?>> classes = TypeToken
+                .of(cls)
+                .getTypes()
+                .stream()
+                .map(TypeToken::getRawType)
+                .collect(toImmutableSet());
+        return classes;
     }
 
     /**
@@ -202,15 +201,17 @@ final class Methods {
      * @param method the method to get the signature
      * @return the method with the same signature obtained from the specified class
      */
-    private static Optional<Method> getMethodBySignature(Class<?> target, Method method) {
-        checkArgument(!method.getDeclaringClass()
-                             .equals(target));
-        try {
-            Method methodFromTarget = target.getMethod(method.getName(),
-                                                       method.getParameterTypes());
-            return Optional.of(methodFromTarget);
-        } catch (NoSuchMethodException ignored) {
-            return Optional.empty();
+    private static Optional<Method> findMethodBySignature(Class<?> target, Method method) {
+        if (method.getDeclaringClass().equals(target)) {
+            return Optional.of(method);
+        } else {
+            try {
+                Method methodFromTarget = target.getMethod(method.getName(),
+                                                           method.getParameterTypes());
+                return Optional.of(methodFromTarget);
+            } catch (NoSuchMethodException ignored) {
+                return Optional.empty();
+            }
         }
     }
 }
