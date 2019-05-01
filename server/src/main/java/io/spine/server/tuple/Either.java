@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * Abstract base for a values that can be one of the possible types.
+ * Abstract base for values that can be one of the possible types.
  */
 public abstract class Either implements Iterable<Message>, Serializable {
 
@@ -45,8 +45,8 @@ public abstract class Either implements Iterable<Message>, Serializable {
 
     protected Either(Message value, int index) {
         /* We need instances of GeneratedMessageV3 as they are Serializable.
-           The only known case of message class, which does not descend from
-           GeneratedMessageV3 is DynamicMessage, which Spine does not support. */
+           The only known case of message class which does not descend from
+           GeneratedMessageV3 is DynamicMessage, and  Spine does not support it. */
         this.value = (GeneratedMessageV3) checkNotNull(value);
         checkArgument(index >= 0, "Index must be greater or equal zero");
         this.index = index;
