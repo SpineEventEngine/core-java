@@ -34,7 +34,7 @@ import java.util.Optional;
 public abstract class TenantAwareOperation extends TenantAware implements Runnable {
 
     /**
-     * Creates an instance of an operation, which uses the {@code TenantId}
+     * Creates an instance of an operation which uses the {@code TenantId}
      * set in the execution context.
      *
      * @throws IllegalStateException if there is no current {@code TenantId} set
@@ -46,7 +46,7 @@ public abstract class TenantAwareOperation extends TenantAware implements Runnab
     /**
      * Creates an instance of an operation for the tenant specified by the passed ID.
      *
-     * <p>If a default instance of {@link TenantId} is passed (because the application works in
+     * <p>If a default instance of {@link TenantId} is passed because the application works in
      * a single-tenant mode, {@linkplain SingleTenantIndex#tenantId() singleTenant()} value will be
      * substituted.
      *
