@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -61,12 +62,6 @@ import static java.util.stream.Stream.concat;
 final class ColumnReader {
 
     /**
-     * A predicate to check if the given method or one of its predecessors are annotated with
-     * {@link Column}.
-     */
-    private static final Predicate<Method> hasAnnotatedVersion = hasAnnotatedVersion();
-
-    /**
      * A predicate to check whether the given method represents an entity property with the
      * {@code Boolean} return type and the name starting with {@code is-}.
      */
@@ -74,19 +69,19 @@ final class ColumnReader {
     static final Predicate<Method> isBooleanWrapperProperty = isBooleanWrapperProperty();
 
     private final BeanInfo entityDescriptor;
-    private final String className;
+    private final Class<? extends Entity<?, ?>> entityClass;
 
     /**
      * Creates a new {@code ColumnReader} instance.
      *
      * @param entityDescriptor
-     *         a descriptor of the entity as a Java Bean
-     * @param className
-     *         an entity class name for logging purposes
+     *         the descriptor of the entity as a Java Bean
+     * @param entityClass
+     *         the entity class
      */
-    private ColumnReader(BeanInfo entityDescriptor, String className) {
+    private ColumnReader(BeanInfo entityDescriptor, Class<? extends Entity<?, ?>> entityClass) {
         this.entityDescriptor = entityDescriptor;
-        this.className = className;
+        this.entityClass = entityClass;
     }
 
     /**
@@ -96,11 +91,11 @@ final class ColumnReader {
      *         the {@link Entity} class for which to create the instance
      * @return a new instance of {@code ColumnReader} for the specified class
      */
-    static ColumnReader forClass(Class<? extends Entity> entityClass) {
+    static ColumnReader forClass(Class<? extends Entity<?, ?>> entityClass) {
         checkNotNull(entityClass);
         try {
             BeanInfo entityDescriptor = Introspector.getBeanInfo(entityClass);
-            return new ColumnReader(entityDescriptor, entityClass.getName());
+            return new ColumnReader(entityDescriptor, entityClass);
         } catch (IntrospectionException e) {
             throw new IllegalStateException(e);
         }
@@ -144,10 +139,11 @@ final class ColumnReader {
                 .stream(methodDescriptors)
                 .map(MethodDescriptor::getMethod)
                 .filter(isBooleanWrapperProperty);
-
         Stream<Method> candidates = concat(propertyAccessors, booleanWrapperGetters);
         ImmutableSet<EntityColumn> columns = candidates
-                .filter(hasAnnotatedVersion)
+                .map(method -> annotatedVersion(entityClass, method))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(EntityColumn::from)
                 .collect(toImmutableSet());
         return columns;
@@ -170,15 +166,12 @@ final class ColumnReader {
             if (checkedNames.contains(columnName)) {
                 throw newIllegalStateException(
                         "The entity `%s` has columns with the same name for storing `%s`.",
-                        className,
-                        columnName);
+                        entityClass.getName(),
+                        columnName
+                );
             }
             checkedNames.add(columnName);
         }
-    }
-
-    private static Predicate<Method> hasAnnotatedVersion() {
-        return method -> annotatedVersion(method).isPresent();
     }
 
     private static Predicate<Method> isBooleanWrapperProperty() {

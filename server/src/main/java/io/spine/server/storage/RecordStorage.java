@@ -89,7 +89,7 @@ public abstract class RecordStorage<I>
     /**
      * Creates an instance of {@code RecordStorage} which supports the {@link EntityColumnCache}.
      */
-    protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
+    protected RecordStorage(boolean multitenant, Class<? extends Entity<?, ?>> entityClass) {
         super(multitenant);
         this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
     }
