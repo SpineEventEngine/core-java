@@ -76,7 +76,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
                                                                    FieldMask fieldMask) {
         TenantRecords<I> storage = getStorage();
 
-        // It is not possible to return an immutable collection,
+        // It is impossible to return an immutable collection,
         // since null may be present in it.
         Collection<EntityRecord> result = Lists.newLinkedList();
 
@@ -118,7 +118,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
      *
      * <p>If the {@code query} instance {@linkplain EntityQuery#isLifecycleAttributesSet() 
      * contains the lifecycle attributes}, then it is returned without any changes. 
-     * Otherwise, a new instance containing with active lifecycle attributes is returned.
+     * Otherwise, a new instance containing active lifecycle attributes is returned.
      *
      * @param query
      *         the source {@link EntityQuery} to take the parameters from

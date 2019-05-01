@@ -37,7 +37,7 @@ import static java.util.Optional.ofNullable;
  * A tuple of five elements.
  *
  * <p>The first element must be a non-default {@link Message}
- * (and not {@link com.google.protobuf.Empty Empty}).
+ * and not {@link com.google.protobuf.Empty Empty}.
  *
  * <p>Other four can be {@code Message}, {@link java.util.Optional Optional} or
  * {@link Either}.
