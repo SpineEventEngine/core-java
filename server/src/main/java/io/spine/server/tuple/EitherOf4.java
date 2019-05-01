@@ -29,7 +29,7 @@ import io.spine.server.tuple.Element.DValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value which can be of one of four possible types.
+ * A value which can be one of four possible types.
  *
  * @param <A> the type of the first alternative
  * @param <B> the type of the second alternative

@@ -49,7 +49,7 @@ public abstract class AbstractStorage<I, M extends Message, R extends ReadReques
     /**
      * Ensures the storage is not closed.
      *
-     * <p>If the storage is closed throws {@code IllegalStateException} with the passed message.
+     * <p>If the storage is closed, throws {@code IllegalStateException} with the passed message.
      *
      * @param message exception message
      * @throws IllegalStateException if the storage is closed
@@ -63,7 +63,7 @@ public abstract class AbstractStorage<I, M extends Message, R extends ReadReques
     /**
      * Ensures the storage is not closed.
      *
-     * <p>If the storage is closed throws {@code IllegalStateException}.
+     * <p>If the storage is closed, throws {@code IllegalStateException}.
      *
      * @throws IllegalStateException if the storage is closed
      */
