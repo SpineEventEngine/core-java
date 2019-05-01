@@ -233,6 +233,9 @@ public class EntityColumn implements Serializable {
     /**
      * Creates new instance of the {@code EntityColumn} from the given getter method.
      *
+     * <p>The given method must be annotated with the {@link Column} annotation.
+     * An {@code IllegalArgumentException} is thrown otherwise.
+     *
      * @param getter
      *         the getter of the EntityColumn
      * @return new instance of the {@code EntityColumn} reflecting the given property
