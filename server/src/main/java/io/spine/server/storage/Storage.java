@@ -65,7 +65,7 @@ public interface Storage<I, M extends Message, R extends ReadRequest<I>> extends
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
      * @param id     the ID for the record
-     * @param record a record to store
+     * @param record the record to store
      * @throws IllegalStateException if the storage is closed
      */
     void write(I id, M record);
