@@ -64,7 +64,7 @@ public final class LifecycleRules {
      * Configures the repository to archive its entities when certain events/rejections occur.
      *
      * <p>Subsequent calls to this method do not clear the previously added event classes,
-     * for example, in order not to override each other.
+     * i.e, in order not to override each other.
      *
      * @param messageClasses
      *         the event and rejection classes which will cause the entity to become archived
@@ -98,7 +98,7 @@ public final class LifecycleRules {
      * Configures the repository to delete its entities when certain events/rejections occur.
      *
      * <p>Subsequent calls to this method do not clear the previously added event classes
-     * for example, in order not to override each other.
+     * i.e, in order not to override each other.
      *
      * @param messageClasses
      *         the event and rejection classes which will cause the entity to become deleted
