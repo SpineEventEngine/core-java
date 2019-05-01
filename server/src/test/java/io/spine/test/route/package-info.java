@@ -18,29 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.noops;
+/**
+ * Test environment events for {@link io.spine.server.route.EventRoutingTest}.
+ */
 
-import io.spine.server.model.noops.given.ArchiverPm;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.test.route;
 
-import static io.spine.server.model.noops.given.NoOpMessageTestEnv.archiveSingleFile;
-import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-@DisplayName("When Nothing event is emitted")
-class NothingTest {
-
-    @Test
-    @DisplayName("the bus should not know")
-    void notPost() {
-        SingleTenantBlackBoxContext boundedContext = BlackBoxBoundedContext
-                .singleTenant()
-                .with(new ArchiverPm.Repository())
-                .receivesCommand(archiveSingleFile());
-        boundedContext.assertThat(emittedEvent(count(0)))
-                      .close();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

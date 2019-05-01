@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.EntityStateWithVersionVBuilder;
 import io.spine.client.Query;
@@ -33,6 +34,7 @@ import io.spine.code.proto.EntityStateOption;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
+import io.spine.server.entity.EntityVisibility;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityExtractedFromArchive;
@@ -60,7 +62,8 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * <p>An entity has a mirror if all of the following conditions are met:
  * <ul>
  *     <li>the entity repository is registered in a domain bounded context;
- *     <li>the entity state is marked as an {@link EntityOption.Kind#AGGREGATE AGGREGATE}.
+ *     <li>the entity state is marked as an {@link EntityOption.Kind#AGGREGATE AGGREGATE};
+ *     <li>the aggregate is visible for querying or subscribing.
  * </ul>
  *
  * <p>In other cases, an entity won't have a {@link Mirror}.
@@ -104,7 +107,8 @@ final class MirrorRepository
 
     private static boolean shouldMirror(TypeUrl type) {
         Kind kind = entityKind(type);
-        boolean aggregate = kind == AGGREGATE;
+        EntityVisibility visibility = entityVisibility(type);
+        boolean aggregate = kind == AGGREGATE && visibility.isNotNone();
         return aggregate;
     }
 
@@ -120,6 +124,13 @@ final class MirrorRepository
                      type);
         }
         return kind;
+    }
+
+    private static EntityVisibility entityVisibility(TypeUrl entityStateType) {
+        Class<Message> stateClass = entityStateType.toTypeName()
+                                                   .toMessageClass();
+        EntityVisibility visibility = EntityVisibility.of(stateClass);
+        return visibility;
     }
 
     private static MirrorId idFrom(EntityHistoryId historyId) {

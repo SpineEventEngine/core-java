@@ -18,32 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.noops.given;
+package io.spine.test.route;
 
-import io.spine.net.Url;
-import io.spine.test.model.contexts.archiver.ArchiveFile;
-import io.spine.testdata.Sample;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EventMessage;
 
-import static io.spine.server.model.noops.given.ArchiverPm.SINGLE_ID;
-
-public final class NoOpMessageTestEnv {
-
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private NoOpMessageTestEnv() {
-    }
-
-    public static ArchiveFile archiveSingleFile() {
-        ArchiveFile command = ArchiveFile
-                .newBuilder()
-                .setId(SINGLE_ID)
-                .setFileLocation(url())
-                .build();
-        return command;
-    }
-
-    private static Url url() {
-        return Sample.messageOfType(Url.class);
-    }
+@Immutable
+public interface UserEvent extends EventMessage {
+    long getId();
 }

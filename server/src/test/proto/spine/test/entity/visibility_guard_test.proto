@@ -19,8 +19,7 @@
  */
 syntax = "proto3";
 
-//Cannot use `.entity` package due to a confict with `(entity)` annotation.
-package spine.test.serverentity;
+package spine.test.visibility.guard;
 
 import "spine/options.proto";
 
@@ -31,24 +30,22 @@ option java_outer_classname = "VisibilityGuardShouldProto";
 
 
 message FullAccessAggregate {
-    option (entity).kind = AGGREGATE;
-    // Do not specify visibility, assuming FULL.
+    option (entity) = {kind: AGGREGATE visibility: FULL};
 
     uint64 id = 1;
     string name = 2;
 }
 
 message SubscribableAggregate {
-    option (entity).kind = AGGREGATE;
-    option (entity).visibility = SUBSCRIBE;
+    option (entity) = {kind: AGGREGATE visibility: SUBSCRIBE};
 
     uint64 id = 1;
     string description = 2;
 }
 
 message HiddenAggregate {
+    // Default visibility for aggregates is NONE.
     option (entity).kind = AGGREGATE;
-    option (entity).visibility = NONE;
 
     string uuid = 1;
     string secret = 2;

@@ -167,6 +167,6 @@ public class QueryFactoryTestEnv {
 
         // Order may differ but all the elements are the same
         assertThat(builderEntityIds).hasSize(factoryEntityIds.size());
-        assertThat(builderEntityIds).containsAllIn(factoryEntityIds);
+        assertThat(builderEntityIds).containsAtLeastElementsIn(factoryEntityIds);
     }
 }

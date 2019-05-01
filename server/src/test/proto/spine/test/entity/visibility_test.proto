@@ -19,36 +19,81 @@
  */
 syntax = "proto3";
 
-package spine.test.commandservice.customer;
+package spine.test.visibility;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.commandservice.customer";
+option java_package = "io.spine.test.entity";
 option java_multiple_files = true;
-option java_outer_classname = "CustomerProto";
+option java_outer_classname = "VisibilityTestProto";
 
-import "spine/people/person_name.proto";
+import "spine/core/user_id.proto";
+import "spine/net/url.proto";
 import "spine/time/time.proto";
 
-message CustomerId {
-    // The date the customer was registered.
-    time.LocalDate registration_date = 1;
+// A non-visible aggregate.
+//
+message Password {
+    option (entity).kind = AGGREGATE;
 
-    // A consecutive number generated within the registration date.
-    int32 number = 2;
+    core.UserId user_id = 1;
+
+    string password = 2;
+
+    sint64 hash = 3;
 }
 
-// A Customer is a person who is interested in our products or services.
-message Customer {
+// A visible for querying aggregate.
+//
+message AccountDetails {
+    option (entity) = {kind: AGGREGATE visibility: QUERY};
+
+    core.UserId user_id = 1;
+
+    string display_name = 2;
+
+    net.Url avatar_url = 3;
+}
+
+// A visible for subscription aggregate.
+//
+message UserActivity {
+    option (entity) = {kind: AGGREGATE visibility: SUBSCRIBE};
+
+    core.UserId user_id = 1;
+
+    repeated net.Url post_url = 2;
+}
+
+// A visible aggregate.
+//
+message LastSeen {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    // The ID of the customer.
-    CustomerId id = 1;
+    core.UserId user_id = 1;
 
-    // The name of the customer.
-    people.PersonName name = 2;
+    time.ZonedDateTime when = 2;
+}
 
-    // The list of customer's nicknames.
-    repeated people.PersonName nicknames = 3;
+// A non-visible procman.
+//
+message UserSignIn {
+    option (entity).kind = PROCESS_MANAGER;
+
+    core.UserId user_id = 1;
+
+    string password = 2;
+
+    uint32 attempts = 3;
+}
+
+// A visible projection.
+//
+message UserFeed {
+    option (entity).kind = PROJECTION;
+
+    core.UserId user_id = 1;
+
+    repeated net.Url post_url = 2;
 }

@@ -26,6 +26,7 @@ import io.spine.base.Identifier;
 import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
+import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
@@ -56,6 +57,8 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
+    private final EntityVisibility visibility;
+
     /** The default state of entities of this class. */
     @LazyInit
     private transient volatile @MonotonicNonNull Message defaultState;
@@ -70,6 +73,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         this.idClass = idClass(cls);
         this.stateClass = stateClassOf(cls);
         this.entityStateType = TypeUrl.of(stateClass);
+        this.visibility = EntityVisibility.of(stateClass);
     }
 
     /**
@@ -145,6 +149,10 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public final Class<? extends Message> stateClass() {
         return stateClass;
+    }
+
+    public final EntityVisibility visibility() {
+        return visibility;
     }
 
     /**

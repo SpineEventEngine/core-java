@@ -6,13 +6,31 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.test.route";
-option java_outer_classname = "EventsProto";
+option java_outer_classname = "UserEventsProto";
 option java_multiple_files = true;
+
+option (every_is).java_type = "UserEvent";
 
 message UserRegistered {
     uint64 id = 1;
 }
 
-message UsedLoggedIn {
+message UserLoggedIn {
+    option (is).java_type = "LoginEvent";
+    uint64 id = 1;
+}
+
+message UserLoggedOut {
+    option (is).java_type = "LoginEvent";
+    uint64 id = 1;
+}
+
+message AccountSuspended {
+    option (is).java_type = "UserAccountEvent";
+    uint64 id = 1;
+}
+
+message AccountResumed {
+    option (is).java_type = "UserAccountEvent";
     uint64 id = 1;
 }

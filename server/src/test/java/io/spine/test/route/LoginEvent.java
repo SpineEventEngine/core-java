@@ -18,15 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.test.route;
+
+import com.google.errorprone.annotations.Immutable;
+
 /**
- * Tests for the no-op messages, {@link io.spine.server.model.Nothing Nothing} event
- * and {@link io.spine.test.aggregate.number.DoNothing DoNothing} command.
+ * Common interface for login events.
  */
-
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.model.noops;
-
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+@Immutable
+public interface LoginEvent extends UserEvent {
+}
