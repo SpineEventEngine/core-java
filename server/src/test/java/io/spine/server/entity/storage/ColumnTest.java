@@ -28,9 +28,11 @@ import io.spine.server.entity.storage.given.column.BrokenTestEntity;
 import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring;
 import io.spine.server.entity.storage.given.column.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.column.EntityWithNotAnnotatedMethod;
 import io.spine.server.entity.storage.given.column.TestAggregate;
 import io.spine.server.entity.storage.given.column.TestEntity;
 import io.spine.testing.server.entity.given.Given;
+import org.checkerframework.dataflow.qual.TerminatesExecution;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -325,10 +327,10 @@ class ColumnTest {
     }
 
     @Test
-    @DisplayName("not allow to redefine column annotation")
-    void rejectRedefinedAnnotation() {
-        assertThrows(IllegalStateException.class,
-                     () -> forMethod("getCustomColumn", EntityRedefiningColumnAnnotation.class));
+    @DisplayName("not allow not annotated methods")
+    void checkMethodIsAnnotated() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> forMethod("getRandomNumber", EntityWithNotAnnotatedMethod.class));
     }
 
     @Test
