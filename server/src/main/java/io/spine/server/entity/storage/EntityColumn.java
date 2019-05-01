@@ -237,7 +237,8 @@ public class EntityColumn implements Serializable {
      *         the getter of the EntityColumn
      * @return new instance of the {@code EntityColumn} reflecting the given property
      */
-    static EntityColumn from(Method getter) {
+    @VisibleForTesting
+    public static EntityColumn from(Method getter) {
         checkAnnotatedGetter(getter);
         String nameForQuery = nameFromGetter(getter);
         String nameForStore = nameFromAnnotation(getter).orElse(nameForQuery);

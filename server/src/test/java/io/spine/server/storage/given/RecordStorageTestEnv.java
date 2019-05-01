@@ -56,7 +56,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EnumType.STRING;
-import static io.spine.server.entity.storage.TestColumnFactory.columnFrom;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -263,7 +262,7 @@ public class RecordStorageTestEnv {
         LifecycleColumns(String getterName) {
             try {
 
-                this.column = columnFrom(Entity.class.getDeclaredMethod(getterName));
+                this.column = EntityColumn.from(Entity.class.getDeclaredMethod(getterName));
             } catch (NoSuchMethodException e) {
                 throw illegalStateWithCauseOf(e);
             }
