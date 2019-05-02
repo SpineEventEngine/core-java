@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Wrapping container for gRPC server.
  *
- * <p>Maintains and deploys some of gRPC services within a single server.
+ * <p>Maintains and deploys several of gRPC services within a single server.
  *
  * <p>Uses {@link ServerServiceDefinition}s of each service.
  */
