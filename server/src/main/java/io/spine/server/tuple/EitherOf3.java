@@ -28,7 +28,7 @@ import io.spine.server.tuple.Element.CValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value which can be of one of three possible types.
+ * A value which can be one of three possible types.
  *
  * @param <A> the type of the first alternative
  * @param <B> the type of the second alternative
