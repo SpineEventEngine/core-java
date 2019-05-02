@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * The exception for reporting invalid events.
  *
- * <p>An event is invalid if it's supported (there's a handler for the event), but it's
+ * <p>An event is invalid if it's supported (there's a handler for the event), but its
  * attributes are not populated according to framework conventions or validation constraints.
  */
 public class InvalidEventException extends EventException implements MessageInvalid {
@@ -50,11 +50,11 @@ public class InvalidEventException extends EventException implements MessageInva
     }
 
     /**
-     * Creates an exception instance for a event message, which has fields that
+     * Creates an exception instance for a event message which has fields that
      * violate validation constraint(s).
      *
-     * @param eventMsg   an invalid event message
-     * @param violations constraint violations for the event message
+     * @param eventMsg   the invalid event message
+     * @param violations the constraint violations for the event message
      */
     public static
     InvalidEventException onConstraintViolations(EventMessage eventMsg,

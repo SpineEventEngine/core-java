@@ -55,17 +55,17 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
- * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
+ * Dispatches incoming events to subscribers and provides ways for registering those subscribers.
  *
  * <h1>Receiving Events</h1>
  *
- * <p>To receive event messages a subscriber object should:
+ * <p>To receive event messages, a subscriber object should:
  * <ol>
  *     <li>Expose a {@code public} method that accepts an event message as the first parameter
  *         and an {@link EventContext EventContext} as the second (optional) parameter.
  *     <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
  *     <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
- *         instance of {@code EventBus} directly, or rely on message delivery
+ *         instance of {@code EventBus} directly or rely on message delivery
  *         from an {@link EventDispatcher}. An example of such a dispatcher is
  *         {@link io.spine.server.projection.ProjectionRepository ProjectionRepository}.
  * </ol>
@@ -79,13 +79,13 @@ import static java.lang.String.format;
  * <p>Events are posted to an EventBus using {@link #post(Message, StreamObserver)} method.
  * Normally this is done by an
  * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository} in the process
- * of handling a command, or by a {@link io.spine.server.procman.ProcessManager ProcessManager}.
+ * of handling a command or by a {@link io.spine.server.procman.ProcessManager ProcessManager}.
  *
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
  *
- * <p>If there is no subscribers or dispatchers for the posted event, the fact is
- * logged as warning, with no further processing.
+ * <p>If there are no subscribers or dispatchers for the posted event, the fact is
+ * logged as warning with no further processing.
  *
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
@@ -93,13 +93,13 @@ import static java.lang.String.format;
 public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
-     * NOTE: Even though, the EventBus has a private constructor and
+     * NOTE: Even though the EventBus has a private constructor and
      * is not supposed to be derived, we do not make this class final
-     * in order to be able to spy() on it from Mockito (which cannot
-     * spy on final or anonymous classes).
+     * in order to be able to spy() on it from Mockito which cannot
+     * spy on final or anonymous classes.
      */
 
-    /** The {@code EventStore} to which put events before they get handled. */
+    /** The {@code EventStore} to store events before they get handled. */
     private final EventStore eventStore;
 
     /** The handler for dead events. */
@@ -109,7 +109,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     private final StreamObserver<Ack> streamObserver;
 
     /**
-     * The validator for events posted to the bus, lazily {@linkplain #validator() initialized}.
+     * The validator for events posted to the bus lazily {@linkplain #validator() initialized}.
      */
     @LazyInit
     private @MonotonicNonNull EventValidator eventValidator;
@@ -189,7 +189,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method},
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method}
      * but does not require any response observer.
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
@@ -325,7 +325,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         }
 
         /**
-         * Specifies {@code EventStore} to be used when creating new {@code EventBus}.
+         * Specifies {@code EventStore} to be used when creating a new {@code EventBus}.
          *
          * <p>This method can be called if neither {@link #setEventStoreStreamExecutor(Executor)}
          * nor {@link #setStorageFactory(StorageFactory)} were called before.
@@ -447,8 +447,8 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * Handles a dead event by saving it to the {@link EventStore} and producing an
      * {@link UnsupportedEventException}.
      *
-     * <p> We must store dead events, as they are still emitted by some entity and therefore are
-     * a part of the history for the current bounded context.
+     * <p> We must store dead events as they can still be emitted by some entities and therefore are
+     * a part of the history for the current Bounded Context.
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
