@@ -75,11 +75,11 @@ class EntityRecordWithColumnsTest {
     @DisplayName("be serializable")
     void beSerializable() {
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        Entity<?, ?> entity = new TestEntityBuilder().setResultClass(TestEntity.class)
-                                                     .withVersion(1)
-                                                     .build();
+        TestEntity entity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                   .withVersion(1)
+                                                   .build();
         String columnName = archived.name();
-        EntityColumn column = findColumn(Entity.class, columnName);
+        EntityColumn column = findColumn(entity.getClass(), columnName);
         MemoizedValue value = column.memoizeFor(entity);
 
         Map<String, MemoizedValue> columns = singletonMap(columnName, value);
@@ -180,7 +180,7 @@ class EntityRecordWithColumnsTest {
     @DisplayName("not have only lifecycle columns if the entity does not define custom")
     void supportEmptyColumns() {
         EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns("ID");
-        Class<? extends Entity> entityClass = entity.getClass();
+        Class<? extends Entity<?, ?>> entityClass = entity.getClass();
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
 

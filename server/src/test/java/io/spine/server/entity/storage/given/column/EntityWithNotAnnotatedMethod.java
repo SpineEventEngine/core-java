@@ -18,20 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given.column;
 
-import com.google.protobuf.Message;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.test.storage.Project;
 
-/**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
- * @see RecordBasedRepositoryTest
- */
-public interface TestEntityWithStringColumn<I, S extends Message> extends Entity<I, S> {
+import java.security.SecureRandom;
 
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+public class EntityWithNotAnnotatedMethod extends AbstractEntity<String, Project> {
+
+    @SuppressWarnings("unused") // Accessed via reflection.
+    public int getRandomNumber() {
+        return new SecureRandom().nextInt();
+    }
 }
