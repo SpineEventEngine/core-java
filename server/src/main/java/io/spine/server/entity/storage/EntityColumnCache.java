@@ -48,9 +48,9 @@ import static java.util.Collections.synchronizedMap;
  * @see Columns
  */
 @Internal
-public class EntityColumnCache {
+public final class EntityColumnCache {
 
-    private final Class<? extends Entity> entityClass;
+    private final Class<? extends Entity<?, ?>> entityClass;
     private boolean columnsCached = false;
 
     /**
@@ -66,9 +66,7 @@ public class EntityColumnCache {
     private final Map<String, EntityColumn> entityColumnData =
             synchronizedMap(new LinkedHashMap<>());
 
-    private EntityColumnCache(Class<? extends Entity> entityClass) {
-        checkNotNull(entityClass);
-
+    private EntityColumnCache(Class<? extends Entity<?, ?>> entityClass) {
         this.entityClass = entityClass;
     }
 
@@ -83,9 +81,8 @@ public class EntityColumnCache {
      *                    be obtained and cached
      * @return new instance
      */
-    public static EntityColumnCache initializeFor(Class<? extends Entity> entityClass) {
+    public static EntityColumnCache initializeFor(Class<? extends Entity<?, ?>> entityClass) {
         checkNotNull(entityClass);
-
         return new EntityColumnCache(entityClass);
     }
 

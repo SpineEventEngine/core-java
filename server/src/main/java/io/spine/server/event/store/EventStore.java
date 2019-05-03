@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * A store of all events in a bounded context.
+ * A store of all events in a Bounded Context.
  */
 public final class EventStore implements AutoCloseable {
 

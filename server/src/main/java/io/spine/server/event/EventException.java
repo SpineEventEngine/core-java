@@ -57,9 +57,9 @@ public abstract class EventException extends RuntimeException implements Message
     /**
      * Creates a new instance.
      *
-     * @param messageText  an error message text
-     * @param eventMessage a related event message
-     * @param error        an error occurred
+     * @param messageText  the error message text
+     * @param eventMessage the related event message
+     * @param error        the error occurred
      */
     protected EventException(String messageText, EventMessage eventMessage, Error error) {
         super(messageText);

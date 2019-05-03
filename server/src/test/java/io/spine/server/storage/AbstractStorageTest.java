@@ -100,7 +100,7 @@ public abstract class AbstractStorageTest<I,
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract S newStorage(Class<? extends Entity> cls);
+    protected abstract S newStorage(Class<? extends Entity<?, ?>> cls);
 
     /** Creates a new storage record. */
     protected abstract M newStorageRecord();
@@ -112,7 +112,7 @@ public abstract class AbstractStorageTest<I,
     protected abstract R newReadRequest(I id);
 
     /** Returns the class of the test entity. */
-    protected abstract Class<? extends Entity> getTestEntityClass();
+    protected abstract Class<? extends Entity<?, ?>> getTestEntityClass();
 
     /**
      * Closes the storage and propagates an exception if any occurs.
