@@ -31,7 +31,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.Column;
-import io.spine.server.entity.storage.Columns;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
@@ -90,7 +89,7 @@ public abstract class RecordStorage<I>
     /**
      * Creates an instance of {@code RecordStorage} which supports the {@link EntityColumnCache}.
      */
-    protected RecordStorage(boolean multitenant, Class<? extends Entity> entityClass) {
+    protected RecordStorage(boolean multitenant, Class<? extends Entity<?, ?>> entityClass) {
         super(multitenant);
         this.entityColumnCache = EntityColumnCache.initializeFor(entityClass);
     }
@@ -313,7 +312,6 @@ public abstract class RecordStorage<I>
      *
      * @return a {@code Collection} of managed {@link Entity} columns
      * @see EntityColumn
-     * @see Columns
      */
     @Internal
     public Collection<EntityColumn> entityColumns() {
@@ -330,7 +328,6 @@ public abstract class RecordStorage<I>
      *         if a lifecycle field is not present
      *         in the managed {@link Entity} class
      * @see EntityColumn
-     * @see Columns
      * @see LifecycleFlagField
      */
     @Internal

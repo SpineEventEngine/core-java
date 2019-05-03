@@ -17,32 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.stand;
 
-import io.spine.base.Error;
-import io.spine.client.Topic;
+package io.spine.server.entity.storage.given.column;
 
-/**
- * An exception thrown in case an invalid or unsupported {@link Topic}
- * has been submitted to {@linkplain Stand}.
- */
-public class InvalidTopicException extends InvalidRequestException {
+import io.spine.server.entity.AbstractEntity;
+import io.spine.test.storage.Project;
 
-    private static final long serialVersionUID = 0L;
+import java.security.SecureRandom;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param messageText the error message text
-     * @param topic       the related topic
-     * @param error       the error occurred
-     */
-    InvalidTopicException(String messageText, Topic topic, Error error) {
-        super(messageText, topic, error);
-    }
+public class EntityWithNotAnnotatedMethod extends AbstractEntity<String, Project> {
 
-    @Override
-    public Topic getRequest() {
-        return (Topic) super.getRequest();
+    @SuppressWarnings("unused") // Accessed via reflection.
+    public int getRandomNumber() {
+        return new SecureRandom().nextInt();
     }
 }

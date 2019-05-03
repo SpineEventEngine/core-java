@@ -61,7 +61,7 @@ import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager
         extends ProcessManager<ProjectId, Project, ProjectVBuilder>
-        implements TestEntityWithStringColumn {
+        implements TestEntityWithStringColumn<ProjectId, Project> {
 
     /** The event message we store for inspecting in delivery tests. */
     private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();

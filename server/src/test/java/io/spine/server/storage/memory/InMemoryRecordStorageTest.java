@@ -40,7 +40,7 @@ public class InMemoryRecordStorageTest
         extends RecordStorageTest<InMemoryRecordStorage<ProjectId>> {
 
     @Override
-    protected InMemoryRecordStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+    protected InMemoryRecordStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         StorageSpec<ProjectId> spec =
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(Project.class),

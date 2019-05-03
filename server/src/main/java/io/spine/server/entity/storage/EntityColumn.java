@@ -37,11 +37,10 @@ import java.util.Comparator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
-import static io.spine.server.entity.storage.Methods.checkGetter;
+import static io.spine.server.entity.storage.Methods.checkAnnotatedGetter;
 import static io.spine.server.entity.storage.Methods.mayReturnNull;
 import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
 import static io.spine.server.entity.storage.Methods.nameFromGetter;
-import static io.spine.server.entity.storage.Methods.retrieveAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -234,15 +233,18 @@ public class EntityColumn implements Serializable {
     /**
      * Creates a new instance of the {@code EntityColumn} from the given getter method.
      *
+     * <p>The given method must be annotated with the {@link Column} annotation.
+     * An {@code IllegalArgumentException} is thrown otherwise.
+     *
      * @param getter
      *         the getter of the EntityColumn
      * @return new instance of the {@code EntityColumn} reflecting the given property
      */
+    @VisibleForTesting
     public static EntityColumn from(Method getter) {
-        checkGetter(getter);
-        Method annotatedVersion = retrieveAnnotatedVersion(getter);
+        checkAnnotatedGetter(getter);
         String nameForQuery = nameFromGetter(getter);
-        String nameForStore = nameFromAnnotation(annotatedVersion).orElse(nameForQuery);
+        String nameForStore = nameFromAnnotation(getter).orElse(nameForQuery);
         boolean nullable = mayReturnNull(getter);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }

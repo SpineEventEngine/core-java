@@ -33,7 +33,7 @@ import org.junit.jupiter.api.DisplayName;
 class InMemoryAggregateStorageTest extends AggregateStorageTest {
 
     @Override
-    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         return InMemoryAggregateStorage.newInstance();
     }
 

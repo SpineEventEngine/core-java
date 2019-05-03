@@ -44,7 +44,7 @@ import java.util.Set;
 /** The projection stub used in tests. */
 public class TestProjection
         extends Projection<ProjectId, Project, ProjectVBuilder>
-        implements TestEntityWithStringColumn {
+        implements TestEntityWithStringColumn<ProjectId, Project> {
 
     /** The event message history we store for inspecting in delivery tests. */
     private static final Multimap<ProjectId, Message> eventMessagesDelivered =
