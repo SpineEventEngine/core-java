@@ -33,6 +33,7 @@ import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.StorageRecords;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
@@ -137,7 +138,7 @@ public abstract class AggregateStorageTest
     }
 
     @Override
-    protected Class<? extends TestAggregate> getTestEntityClass() {
+    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
         return TestAggregate.class;
     }
 

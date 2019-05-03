@@ -47,7 +47,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
  * implementations.
  */
-@SPI /* Available to SPI users, providing own {@code Storage} implementations. */
+@SPI /* Available to SPI users providing own {@code Storage} implementations. */
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -57,7 +57,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
     /**
      * A flag that shows if the current instance of {@code CompositeQueryParameter} has
-     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set of not.
+     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set or not.
      *
      * <p>This flag turns into {@code true} if at least one of the underlying
      * {@linkplain CompositeQueryParameter parameters}
@@ -92,7 +92,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      * flags to equal {@code false}. Such an entity is considered to be active.
      *
      * @param storage
-     *         a record storage persisting target entities
+     *         the record storage persisting target entities
      * @return new {@code QueryParameters} with {@linkplain io.spine.server.entity.LifecycleFlags
      *         lifecycle flags} filters
      */

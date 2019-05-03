@@ -18,20 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given;
 
-import com.google.protobuf.Message;
-import io.spine.server.entity.storage.Column;
+import io.spine.server.projection.Projection;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectVBuilder;
 
-/**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
- * @see RecordBasedRepositoryTest
- */
-public interface TestEntityWithStringColumn<I, S extends Message> extends Entity<I, S> {
-
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+public class TestProjection extends Projection<String, Project, ProjectVBuilder> {
 }

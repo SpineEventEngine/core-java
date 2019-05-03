@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A registry of type conversion strategies for the {@linkplain EntityColumn entity columns}.
  *
- * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
+ * <p>To register new {@link Class} to {@link ColumnType} mapping, do the following:
  * <pre>
  *     {@code
  *         final VarcharDateType varcharType = new VarcharDateType();
@@ -51,15 +51,15 @@ import static com.google.common.base.Preconditions.checkState;
  * </pre>
  *
  * <p>To retrieve the {@link ColumnType} instance (in case if you implement your own
- * {@linkplain io.spine.server.storage.Storage Storage}) call {@link #get(EntityColumn)}
+ * {@linkplain io.spine.server.storage.Storage Storage}), call {@link #get(EntityColumn)}
  * on the column which you'd like to retrieve the {@linkplain ColumnType type} for.
  *
- * <p>Note, that in the example above, if you try to get the {@linkplain ColumnType type} for
- * a {@link EntityColumn} of e.g. class {@code java.sql.Timestamp}, which {@code extends Date}
+ * <p>Note: in the example above, if you try to get the {@linkplain ColumnType type} for
+ * a {@link EntityColumn} of for example a class {@code java.sql.Timestamp} which {@code extends Date}
  * unless you specify a {@link ColumnType} for {@code java.sql.Timestamp} explicitly,
- * the same value as for the class {@code Date} will be returned. I.e. the {@link ColumnType}
+ * the same value as for the class {@code Date} will be returned. Thus, the {@link ColumnType}
  * of a parent class can be used for a derived class.
- * But be careful, the {@code interface}s are not supported within this feature.
+ * But be aware since the {@code interface}s are not supported within this feature.
  *
  * <p>If several {@linkplain ColumnType ColumnTypes} are written under a single {@linkplain Class}
  * object, the latest {@code put} overrides all the previous ones.
@@ -76,7 +76,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     }
 
     /**
-     * Retrieves the {@link ColumnType} for specified {@link EntityColumn}.
+     * Retrieves the {@link ColumnType} for the specified {@link EntityColumn}.
      *
      * <p>By default, this method returns the {@link ColumnType} for the
      * {@linkplain EntityColumn column's} {@linkplain EntityColumn#getPersistedType() type}.
@@ -139,7 +139,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
         }
 
         /**
-         * Create a mapping between the Java class and the database
+         * Creates a mapping between the Java class and the database
          * {@linkplain ColumnType column type}.
          *
          * @param javaType   the Java class to map the value from
