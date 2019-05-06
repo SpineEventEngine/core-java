@@ -26,16 +26,17 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A factory for in-memory storages.
@@ -67,19 +68,6 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public boolean isMultitenant() {
         return this.multitenant;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>In-memory implementation stores no values separately
-     * ({@link io.spine.server.entity.storage.EntityColumn entity columns}),
-     * therefore returns an empty {@code ColumnTypeRegistry}.
-     */
-    @Override
-    public ColumnTypeRegistry getTypeRegistry() {
-        return ColumnTypeRegistry.newBuilder()
-                                 .build();
     }
 
     /** NOTE: the parameter is unused. */
