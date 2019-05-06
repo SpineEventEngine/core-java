@@ -42,16 +42,25 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
-    private final BoundedContextName boundedContextName;
+    private final BoundedContextName context;
     private final boolean multitenant;
 
-    public static InMemoryStorageFactory newInstance(BoundedContextName boundedContextName,
-                                                     boolean multitenant) {
-        return new InMemoryStorageFactory(boundedContextName, multitenant);
+    /**
+     * Creates new instance of the factory which would serve the context with the passed name.
+     *
+     * @param context
+     *         the name of the context
+     * @param multitenant
+     *         if {@code true} the storage is multi-tenant and single-tenant otherwise
+     * @return new instance of the factory
+     */
+    public static
+    InMemoryStorageFactory newInstance(BoundedContextName context, boolean multitenant) {
+        return new InMemoryStorageFactory(context, multitenant);
     }
 
-    private InMemoryStorageFactory(BoundedContextName boundedContextName, boolean multitenant) {
-        this.boundedContextName = boundedContextName;
+    private InMemoryStorageFactory(BoundedContextName context, boolean multitenant) {
+        this.context = context;
         this.multitenant = multitenant;
     }
 
@@ -106,7 +115,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.idClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);
-        StorageSpec<I> result = StorageSpec.of(boundedContextName, stateUrl, idClass);
+        StorageSpec<I> result = StorageSpec.of(context, stateUrl, idClass);
         return result;
     }
 
@@ -120,7 +129,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return newInstance(boundedContextName, false);
+        return newInstance(context, false);
     }
 
     @Override
