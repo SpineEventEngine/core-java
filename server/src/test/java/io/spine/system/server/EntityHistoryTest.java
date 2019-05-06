@@ -83,7 +83,7 @@ class EntityHistoryTest {
         context = BoundedContext
                 .newBuilder()
                 .setName(contextName)
-                .setStorageFactorySupplier(() -> newInstance(contextName, false))
+                .setStorageFactorySupplier(() -> newInstance(contextName.getValue(), false))
                 .build();
         system = systemOf(context);
 
