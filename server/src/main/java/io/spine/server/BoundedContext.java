@@ -196,19 +196,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed repository with the {@code BoundedContext}.
+     * Registers the passed repository with this {@code BoundedContext}.
      *
      * <p>If the repository does not have a storage assigned, it will be initialized
-     * using the {@code StorageFactory} associated with this bounded context.
+     * using the {@code StorageFactory} associated with this {@code BoundedContext}.
      *
-     * <p>Checks whether there is a default state for entity type.
-     *
-     * <p>Re-registers the {@code Stand} as an event dispatcher to make sure it receives events
-     * produced by the repository.
-     *
-     * @param repository the repository to register
-     * @param <I>        the type of IDs used in the repository
-     * @param <E>        the type of entities or aggregates
+     * @param repository
+     *         the repository to register
+     * @param <I>
+     *         the type of IDs used in the repository
+     * @param <E>
+     *         the type of entities
      * @see Repository#initStorage(StorageFactory)
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
@@ -217,6 +215,23 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
+    }
+
+    /**
+     * Creates and registers the {@linkplain DefaultRepository default repository} for the passed
+     * class of entities.
+     *
+     * @param entityClass
+     *         the class of entities for which
+     * @param <I>
+     *         the type of entity identifiers
+     * @param <E>
+     *         the type of entities
+     * @see #register(Repository)
+     */
+    public <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        register(DefaultRepository.of(entityClass));
     }
 
     /**

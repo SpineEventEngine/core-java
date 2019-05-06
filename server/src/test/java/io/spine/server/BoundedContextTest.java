@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
@@ -39,7 +40,9 @@ import io.spine.server.bc.given.ProjectReport;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
@@ -63,6 +66,7 @@ import org.slf4j.helpers.SubstituteLogger;
 
 import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -168,6 +172,7 @@ class BoundedContextTest {
         @DisplayName("AggregateRepository")
         void aggregateRepository() {
             boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
+            assertRegisteredRepositoryOf(ProjectAggregate.class);
         }
 
         @Test
@@ -176,12 +181,27 @@ class BoundedContextTest {
             ModelTests.dropAllModels();
 
             boundedContext.register(DefaultRepository.of(ProjectProcessManager.class));
+            assertRegisteredRepositoryOf(ProjectProcessManager.class);
         }
 
         @Test
         @DisplayName("ProjectionRepository")
         void projectionRepository() {
             boundedContext.register(DefaultRepository.of(ProjectReport.class));
+            assertRegisteredRepositoryOf(ProjectReport.class);
+        }
+
+        @Test
+        @DisplayName("DefaultRepository via passed entity class")
+        void entityClass() {
+            boundedContext.register(ProjectAggregate.class);
+        }
+
+        void assertRegisteredRepositoryOf(Class<? extends Entity<?, ?>> entityClass) {
+            EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
+            Class<? extends Message> stateClass = cls.stateClass();
+            Optional<Repository> repository = boundedContext.findRepository(stateClass);
+            assertThat(repository).isNotNull();
         }
     }
 
