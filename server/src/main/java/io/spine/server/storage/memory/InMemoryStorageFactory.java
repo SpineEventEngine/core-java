@@ -57,6 +57,8 @@ public class InMemoryStorageFactory implements StorageFactory {
      */
     public static
     InMemoryStorageFactory newInstance(BoundedContextName context, boolean multitenant) {
+        checkNotNull(context);
+        checkArgument(isNotDefault(context), "A context name must be provided.");
         return new InMemoryStorageFactory(context, multitenant);
     }
 
