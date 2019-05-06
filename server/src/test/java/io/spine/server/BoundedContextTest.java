@@ -171,24 +171,24 @@ class BoundedContextTest {
         @Test
         @DisplayName("AggregateRepository")
         void aggregateRepository() {
-            boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
-            assertRegisteredRepositoryOf(ProjectAggregate.class);
+            registerAndAssertRepository(ProjectAggregate.class);
         }
 
         @Test
         @DisplayName("ProcessManagerRepository")
         void processManagerRepository() {
-            ModelTests.dropAllModels();
-
-            boundedContext.register(DefaultRepository.of(ProjectProcessManager.class));
-            assertRegisteredRepositoryOf(ProjectProcessManager.class);
+            registerAndAssertRepository(ProjectProcessManager.class);
         }
 
         @Test
         @DisplayName("ProjectionRepository")
         void projectionRepository() {
-            boundedContext.register(DefaultRepository.of(ProjectReport.class));
-            assertRegisteredRepositoryOf(ProjectReport.class);
+            registerAndAssertRepository(ProjectReport.class);
+        }
+
+        <I, E extends Entity<I, ?>> void registerAndAssertRepository(Class<E> cls) {
+            boundedContext.register(DefaultRepository.of(cls));
+            assertRegisteredRepositoryOf(cls);
         }
 
         @Test
