@@ -195,6 +195,7 @@ class BoundedContextTest {
         @DisplayName("DefaultRepository via passed entity class")
         void entityClass() {
             boundedContext.register(ProjectAggregate.class);
+            assertRegisteredRepositoryOf(ProjectAggregate.class);
         }
 
         void assertRegisteredRepositoryOf(Class<? extends Entity<?, ?>> entityClass) {
