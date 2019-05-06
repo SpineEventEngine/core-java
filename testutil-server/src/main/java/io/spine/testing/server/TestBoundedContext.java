@@ -78,13 +78,15 @@ public final class TestBoundedContext {
         Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
         StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
                                                                   factorySupplier);
-        CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                  .appendFilter(commandFilter);
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setName(NAME.getValue())
-                                                      .setStorageFactorySupplier(supplier)
-                                                      .setCommandBus(commandBus)
-                                                      .build();
+        CommandBus.Builder commandBus = CommandBus
+                .newBuilder()
+                .appendFilter(commandFilter);
+        BoundedContext boundedContext = BoundedContext
+                .newBuilder()
+                .setName(NAME.getValue())
+                .setStorageFactorySupplier(supplier)
+                .setCommandBus(commandBus)
+                .build();
         return boundedContext;
     }
 
