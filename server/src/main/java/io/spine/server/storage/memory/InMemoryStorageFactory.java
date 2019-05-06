@@ -32,11 +32,10 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.BoundedContextNames.checkValid;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
-import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A factory for in-memory storages.
@@ -57,9 +56,27 @@ public class InMemoryStorageFactory implements StorageFactory {
      */
     public static
     InMemoryStorageFactory newInstance(BoundedContextName context, boolean multitenant) {
-        checkNotNull(context);
-        checkArgument(isNotDefault(context), "A context name must be provided.");
+        checkValid(context);
         return new InMemoryStorageFactory(context, multitenant);
+    }
+
+    /**
+     * Creates new instance of the factory which would serve the context with the passed name.
+     *
+     * @param boundedContextName
+     *         the name of the context
+     * @param multitenant
+     *         if {@code true} the storage is multi-tenant and single-tenant otherwise
+     * @return new instance of the factory
+     */
+    public static
+    InMemoryStorageFactory newInstance(String boundedContextName, boolean multitenant) {
+        checkValid(boundedContextName);
+        BoundedContextName name = BoundedContextName
+                .vBuilder()
+                .setValue(boundedContextName)
+                .build();
+        return newInstance(name, multitenant);
     }
 
     private InMemoryStorageFactory(BoundedContextName context, boolean multitenant) {
