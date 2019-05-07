@@ -73,7 +73,6 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -199,22 +198,46 @@ class BoundedContextTest {
     }
 
     @Nested
-    @DisplayName("test presence repository by a class of an entity state")
-    class RepoByState {
+    @DisplayName("test presence of entities by")
+    class EntityTypePresence {
 
-        @Test
-        @DisplayName("confirming visible entities")
-        void visible() {
-            boundedContext.register(ProjectAggregate.class);
-            assertTrue(boundedContext.hasEntitiesWithState(Project.class));
+        @Nested
+        @DisplayName("entity state class for")
+        class EntityStateClass {
+
+            @Test
+            @DisplayName("visible entities")
+            void visible() {
+                boundedContext.register(ProjectAggregate.class);
+                assertTrue(boundedContext.hasEntitiesWithState(Project.class));
+            }
+
+            @Test
+            @DisplayName("invisible entities")
+            void invisible() {
+                boundedContext.register(new SecretProjectRepository());
+                assertTrue(boundedContext.hasEntitiesWithState(SecretProject.class));
+            }
         }
 
-        @Test
-        @DisplayName("denying for invisible entities")
-        void invisible() {
-            boundedContext.register(new SecretProjectRepository());
+        @Nested
+        @DisplayName("entity class for")
+        class EntityClass {
 
-            assertFalse(boundedContext.hasEntitiesWithState(SecretProject.class));
+            @Test
+            @DisplayName("visible entities")
+            void visible() {
+                boundedContext.register(ProjectAggregate.class);
+                assertTrue(boundedContext.hasEntitiesOfType(ProjectAggregate.class));
+            }
+
+            @Test
+            @DisplayName("invisible entities")
+            void invisible() {
+                // Process Managers are invisible by default.
+                boundedContext.register(ProjectProcessManager.class);
+                assertTrue(boundedContext.hasEntitiesOfType(ProjectProcessManager.class));
+            }
         }
     }
 
