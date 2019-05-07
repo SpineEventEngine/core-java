@@ -73,6 +73,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -186,16 +187,14 @@ class BoundedContextTest {
 
         <I, E extends Entity<I, ?>> void registerAndAssertRepository(Class<E> cls) {
             boundedContext.register(DefaultRepository.of(cls));
-            assertThat(boundedContext.hasEntitiesOfType(cls))
-                    .isTrue();
+            assertTrue(boundedContext.hasEntitiesOfType(cls));
         }
 
         @Test
         @DisplayName("DefaultRepository via passed entity class")
         void entityClass() {
             boundedContext.register(ProjectAggregate.class);
-            assertThat(boundedContext.hasEntitiesOfType(ProjectAggregate.class))
-                    .isTrue();
+            assertTrue(boundedContext.hasEntitiesOfType(ProjectAggregate.class));
         }
     }
 
@@ -207,8 +206,7 @@ class BoundedContextTest {
         @DisplayName("confirming visible entities")
         void visible() {
             boundedContext.register(ProjectAggregate.class);
-            assertThat(boundedContext.hasEntitiesWithState(Project.class))
-                    .isTrue();
+            assertTrue(boundedContext.hasEntitiesWithState(Project.class));
         }
 
         @Test
@@ -216,8 +214,7 @@ class BoundedContextTest {
         void invisible() {
             boundedContext.register(new SecretProjectRepository());
 
-            assertThat(boundedContext.hasEntitiesWithState(SecretProject.class))
-                    .isFalse();
+            assertFalse(boundedContext.hasEntitiesWithState(SecretProject.class));
         }
     }
 
@@ -230,7 +227,8 @@ class BoundedContextTest {
         assertTrue(stand.getExposedTypes().isEmpty());
         Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
         boundedContext.register(repo);
-        assertThat(stand.getExposedTypes()).containsExactly(repo.entityStateType());
+        assertThat(stand.getExposedTypes())
+                .containsExactly(repo.entityStateType());
     }
 
     @Test
