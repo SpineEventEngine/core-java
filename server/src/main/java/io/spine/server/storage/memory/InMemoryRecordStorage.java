@@ -46,7 +46,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
     InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant, 
-                          Class<? extends Entity> entityClass) {
+                          Class<? extends Entity<?, ?>> entityClass) {
         super(multitenant, entityClass);
         this.spec = spec;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {

@@ -19,6 +19,7 @@
  */
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
@@ -34,6 +35,7 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -196,19 +198,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed repository with the {@code BoundedContext}.
+     * Registers the passed repository with this {@code BoundedContext}.
      *
      * <p>If the repository does not have a storage assigned, it will be initialized
-     * using the {@code StorageFactory} associated with this bounded context.
+     * using the {@code StorageFactory} associated with this {@code BoundedContext}.
      *
-     * <p>Checks whether there is a default state for entity type.
-     *
-     * <p>Re-registers the {@code Stand} as an event dispatcher to make sure it receives events
-     * produced by the repository.
-     *
-     * @param repository the repository to register
-     * @param <I>        the type of IDs used in the repository
-     * @param <E>        the type of entities or aggregates
+     * @param repository
+     *         the repository to register
+     * @param <I>
+     *         the type of IDs used in the repository
+     * @param <E>
+     *         the type of entities
      * @see Repository#initStorage(StorageFactory)
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
@@ -217,6 +217,23 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
+    }
+
+    /**
+     * Creates and registers the {@linkplain DefaultRepository default repository} for the passed
+     * class of entities.
+     *
+     * @param entityClass
+     *         the class of entities for which
+     * @param <I>
+     *         the type of entity identifiers
+     * @param <E>
+     *         the type of entities
+     * @see #register(Repository)
+     */
+    public <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        register(DefaultRepository.of(entityClass));
     }
 
     /**
@@ -335,11 +352,38 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(entityStateClass)) {
-            throw newIllegalStateException("No repository found for the the entity state class %s",
+            throw newIllegalStateException("No repository found for the entity state class `%s`.",
                                            entityStateClass.getName());
         }
         Optional<Repository> repository = guard.repositoryFor(entityStateClass);
         return repository;
+    }
+
+    /**
+     * Verifies if this Bounded Context contains entities of the passed class.
+     *
+     * <p>This method does not take into account visibility of entity states.
+     *
+     * @see #findRepository(Class)
+     */
+    @VisibleForTesting
+    public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
+        EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
+        boolean result = guard.hasRepository(cls.stateClass());
+        return result;
+    }
+
+    /**
+     * Verifies if this Bounded Context has entities with the state of the passed class.
+     *
+     * <p>This method does not take into account visibility of entity states.
+     *
+     * @see #findRepository(Class)
+     */
+    @VisibleForTesting
+    public boolean hasEntitiesWithState(Class<? extends Message> stateClass) {
+        boolean result = guard.hasRepository(stateClass);
+        return result;
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */

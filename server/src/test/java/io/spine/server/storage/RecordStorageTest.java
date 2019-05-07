@@ -78,7 +78,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         extends AbstractRecordStorageTest<ProjectId, S> {
 
     @Override
-    protected Class<? extends TestCounterEntity> getTestEntityClass() {
+    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
         return TestCounterEntity.class;
     }
 

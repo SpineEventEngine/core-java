@@ -33,9 +33,9 @@ public class InvalidSubscriptionException extends InvalidRequestException {
     /**
      * Creates a new instance.
      *
-     * @param messageText  an error message text
-     * @param subscription a related subscription
-     * @param error        an error occurred
+     * @param messageText  the error message text
+     * @param subscription the related subscription
+     * @param error        the error occurred
      */
     protected InvalidSubscriptionException(String messageText,
                                            Subscription subscription,

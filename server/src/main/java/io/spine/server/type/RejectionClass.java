@@ -53,7 +53,7 @@ public final class RejectionClass extends MessageClass<RejectionMessage> {
     /**
      * Creates a new instance of the rejection class by passed rejection instance.
      *
-     * <p>If an instance of {@link Event} (which implements {@code Message}) is
+     * <p>If an instance of {@link Event} which implements {@code Message} is
      * passed to this method, enclosing rejection message will be un-wrapped to determine
      * the class of the rejection.
      *

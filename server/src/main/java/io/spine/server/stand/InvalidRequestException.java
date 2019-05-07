@@ -38,9 +38,9 @@ public class InvalidRequestException extends RuntimeException implements Message
     /**
      * Creates a new instance.
      *
-     * @param messageText an error message text
-     * @param request     a related actor request
-     * @param error       an error occurred
+     * @param messageText the error message text
+     * @param request     the related actor request
+     * @param error       the error occurred
      */
     InvalidRequestException(String messageText, GeneratedMessageV3 request, Error error) {
         super(messageText);
@@ -49,7 +49,7 @@ public class InvalidRequestException extends RuntimeException implements Message
     }
 
     /**
-     * Obtains an original request, which caused the {@code error}.
+     * Obtains an original request which caused the {@code error}.
      */
     public Message getRequest() {
         return request;
