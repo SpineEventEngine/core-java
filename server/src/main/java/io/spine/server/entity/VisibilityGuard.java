@@ -103,8 +103,8 @@ public final class VisibilityGuard {
         RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
             throw newIllegalArgumentException(
-                    "A repository for the state class (%s) was not registered in VisibilityGuard",
-                    stateClass.getName());
+                    "A repository for the state class (`%s`)" +
+                            " was not registered in `VisibilityGuard`.", stateClass.getName());
         }
         return repositoryAccess.get();
     }
