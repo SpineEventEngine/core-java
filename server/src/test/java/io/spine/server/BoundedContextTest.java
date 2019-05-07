@@ -67,7 +67,7 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -387,9 +387,9 @@ class BoundedContextTest {
             assertMultitenancyEqual(context::isMultitenant, context.stand()::isMultitenant);
         }
 
-        void assertMultitenancyEqual(Supplier<Boolean> s1, Supplier<Boolean> s2) {
-            assertThat(s1.get())
-                    .isEqualTo(s2.get());
+        private void assertMultitenancyEqual(BooleanSupplier s1, BooleanSupplier s2) {
+            assertThat(s1.getAsBoolean())
+                    .isEqualTo(s2.getAsBoolean());
         }
 
         private BoundedContext multiTenant() {
