@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A function, which is calculated in a tenant context.
+ * A function which is calculated in a tenant context.
  *
  * @param <F>
  *         the type of the input
