@@ -360,30 +360,28 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Verifies if there is a repository managing the passed entity class is registered
-     * with this Bounded Context.
+     * Verifies if this Bounded Context contains entities of the passed class.
      *
      * <p>This method does not take into account visibility of entity states.
      *
      * @see #findRepository(Class)
      */
     @VisibleForTesting
-    public boolean hasRepositoryOf(Class<? extends Entity<?, ?>> entityClass) {
+    public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
         EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
         boolean result = guard.hasRepository(cls.stateClass());
         return result;
     }
 
     /**
-     * Verifies if there a repository managing entities with the state of the passed class
-     * registered with this Bounded Context.
+     * Verifies if this Bounded Context has entities with the state of the passed class.
      *
      * <p>This method does not take into account visibility of entity states.
      *
      * @see #findRepository(Class)
      */
     @VisibleForTesting
-    public boolean hasRepositoryOfEntityWithState(Class<? extends Message> stateClass) {
+    public boolean hasEntitiesWithState(Class<? extends Message> stateClass) {
         boolean result = guard.hasRepository(stateClass);
         return result;
     }

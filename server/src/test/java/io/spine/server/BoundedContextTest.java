@@ -186,7 +186,7 @@ class BoundedContextTest {
 
         <I, E extends Entity<I, ?>> void registerAndAssertRepository(Class<E> cls) {
             boundedContext.register(DefaultRepository.of(cls));
-            assertThat(boundedContext.hasRepositoryOf(cls))
+            assertThat(boundedContext.hasEntitiesOfType(cls))
                     .isTrue();
         }
 
@@ -194,7 +194,7 @@ class BoundedContextTest {
         @DisplayName("DefaultRepository via passed entity class")
         void entityClass() {
             boundedContext.register(ProjectAggregate.class);
-            assertThat(boundedContext.hasRepositoryOf(ProjectAggregate.class))
+            assertThat(boundedContext.hasEntitiesOfType(ProjectAggregate.class))
                     .isTrue();
         }
     }
@@ -207,7 +207,7 @@ class BoundedContextTest {
         @DisplayName("confirming visible entities")
         void visible() {
             boundedContext.register(ProjectAggregate.class);
-            assertThat(boundedContext.hasRepositoryOfEntityWithState(Project.class))
+            assertThat(boundedContext.hasEntitiesWithState(Project.class))
                     .isTrue();
         }
 
@@ -216,7 +216,7 @@ class BoundedContextTest {
         void invisible() {
             boundedContext.register(new SecretProjectRepository());
 
-            assertThat(boundedContext.hasRepositoryOfEntityWithState(SecretProject.class))
+            assertThat(boundedContext.hasEntitiesWithState(SecretProject.class))
                     .isFalse();
         }
     }
