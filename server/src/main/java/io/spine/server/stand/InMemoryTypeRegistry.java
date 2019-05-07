@@ -77,20 +77,20 @@ final class InMemoryTypeRegistry implements TypeRegistry {
     }
 
     @Override
-    public Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type) {
+    public Optional<? extends RecordBasedRepository<?, ?, ?>> recordRepositoryOf(TypeUrl type) {
         RecordBasedRepository<?, ?, ?> repo = typeToRepositoryMap.get(type);
         Optional<? extends RecordBasedRepository<?, ?, ?>> result = ofNullable(repo);
         return result;
     }
 
     @Override
-    public ImmutableSet<TypeUrl> getAggregateTypes() {
+    public ImmutableSet<TypeUrl> aggregateTypes() {
         ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
         return result;
     }
 
     @Override
-    public ImmutableSet<TypeUrl> getTypes() {
+    public ImmutableSet<TypeUrl> allTypes() {
         ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
         Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
         resultBuilder.addAll(projectionTypes)

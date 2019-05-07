@@ -54,7 +54,7 @@ public final class TuAggregatePart
         TuAggregatePart result =
                 Given.aggregatePartOfClass(TuAggregatePart.class)
                      .withRoot(root)
-                     .withId(root.getId())
+                     .withId(root.id())
                      .withVersion(5)
                      .build();
         return result;

@@ -46,8 +46,9 @@ public class AggregateRoot<I> {
     private final I id;
 
     /** The cache of part repositories obtained from {@code boundedContext}. */
-    private final LoadingCache<Class<? extends Message>,
-            AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>>
+    private final
+    LoadingCache<Class<? extends Message>,
+                 AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>>
             cache = createCache();
 
     /**
@@ -66,7 +67,7 @@ public class AggregateRoot<I> {
     /**
      * Obtains the aggregate ID.
      */
-    public I getId() {
+    public I id() {
         return this.id;
     }
 
@@ -81,9 +82,9 @@ public class AggregateRoot<I> {
      *                               the ID type of this {@code AggregateRoot}
      */
     protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
-    S getPartState(Class<S> partStateClass) {
-        AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
-        AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
+    S partState(Class<S> partStateClass) {
+        AggregatePartRepository<I, A, ?> repo = repositoryOf(partStateClass);
+        AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
         S partState = aggregatePart.state();
         return partState;
     }
@@ -97,7 +98,7 @@ public class AggregateRoot<I> {
      */
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
-    AggregatePartRepository<I, A, ?> getRepository(Class<S> stateClass) {
+    AggregatePartRepository<I, A, ?> repositoryOf(Class<S> stateClass) {
 
         AggregatePartRepository<I, A, ?> result;
         try {
@@ -124,8 +125,8 @@ public class AggregateRoot<I> {
     /** Finds an aggregate part repository in the Bounded Context. */
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
-        @SuppressWarnings("unchecked") // The type is ensured by getId() result.
-        Class<I> idClass = (Class<I>) getId().getClass();
+        @SuppressWarnings("unchecked") // The type is ensured by id() result.
+        Class<I> idClass = (Class<I>) id().getClass();
         AggregatePartRepositoryLookup<I, S> lookup =
                 createLookup(boundedContext, idClass, stateClass);
         AggregatePartRepository<I, A, ?> result = lookup.find();
@@ -139,12 +140,11 @@ public class AggregateRoot<I> {
      * @see #createCache()
      * @see #newLoader()
      */
-    private static final
-    class PartRepositoryCacheLoader<I>
-            extends CacheLoader<
-                Class<? extends Message>,
-                AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
-            > {
+    private static final class PartRepositoryCacheLoader<I>
+            extends CacheLoader<Class<? extends Message>,
+                                AggregatePartRepository<I,
+                                                        ? extends AggregatePart<I, ?, ?, ?>,
+                                                        ?>> {
 
         private final AggregateRoot<I> root;
 

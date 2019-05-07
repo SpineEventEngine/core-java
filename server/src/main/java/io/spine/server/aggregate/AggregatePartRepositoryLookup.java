@@ -24,9 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.Repository;
 
-import java.util.Optional;
-
-import static java.lang.String.format;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A helper class for finding and checking {@code AggregatePartRepository}.
@@ -69,19 +67,17 @@ final class AggregatePartRepositoryLookup<I, S extends Message> {
      *                               IDs are not of the expected type
      */
     <A extends AggregatePart<I, S, ?, ?>> AggregatePartRepository<I, A, ?> find() {
-        Optional<Repository> optional = boundedContext.findRepository(stateClass);
-        if (!optional.isPresent()) {
-            String errMsg = format("Unable to find repository for the state class: %s",
-                                   stateClass);
-            throw new IllegalStateException(errMsg);
-        }
-        Repository repo = optional.get();
-
-        checkIsAggregatePartRepository(repo);
-
-        AggregatePartRepository<I, A, ?> result =
-                checkIdClass((AggregatePartRepository<?, ?, ?>) repo);
-        return result;
+        Repository genericRepo = boundedContext
+                .findRepository(stateClass)
+                .orElseThrow(() -> newIllegalStateException(
+                        "Unable to find a repository for aggregate part `%s`",
+                        stateClass.getName()
+                ));
+        checkIsAggregatePartRepository(genericRepo);
+        AggregatePartRepository<?, ?, ?> genericPartRepo =
+                (AggregatePartRepository<?, ?, ?>) genericRepo;
+        AggregatePartRepository<I, A, ?> repository = checkIdClass(genericPartRepo);
+        return repository;
     }
 
     /**
@@ -92,10 +88,9 @@ final class AggregatePartRepositoryLookup<I, S extends Message> {
      */
     private static void checkIsAggregatePartRepository(Repository repo) {
         if (!(repo instanceof AggregatePartRepository)) {
-            String errMsg = format("The repository `%s` is not an instance of `%s`",
-                                   repo,
-                                   AggregatePartRepository.class);
-            throw new IllegalStateException(errMsg);
+            throw newIllegalStateException("The repository `%s` is not an instance of `%s`",
+                                           repo,
+                                           AggregatePartRepository.class.getName());
         }
     }
 
@@ -106,11 +101,10 @@ final class AggregatePartRepositoryLookup<I, S extends Message> {
     AggregatePartRepository<I, A, ?> checkIdClass(AggregatePartRepository<?, ?, ?> repo) {
         Class<?> repoIdClass = repo.idClass();
         if (!idClass.equals(repoIdClass)) {
-            String errMsg = format("The ID class of the aggregate part repository (%s) " +
-                                   "does not match the ID class of the AggregateRoot (%s)",
-                                   repoIdClass,
-                                   idClass);
-            throw new IllegalStateException(errMsg);
+            throw newIllegalStateException("The ID class of the aggregate part repository (%s) " +
+                                           "does not match the ID class of the AggregateRoot (%s)",
+                                           repoIdClass.getName(),
+                                           idClass.getName());
         }
 
         @SuppressWarnings("unchecked") // we checked by previous check methods and the code above.
