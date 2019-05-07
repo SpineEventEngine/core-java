@@ -19,6 +19,7 @@
  */
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
@@ -34,6 +35,7 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -350,11 +352,32 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(entityStateClass)) {
-            throw newIllegalStateException("No repository found for the the entity state class %s",
+            throw newIllegalStateException("No repository found for the entity state class `%s`.",
                                            entityStateClass.getName());
         }
         Optional<Repository> repository = guard.repositoryFor(entityStateClass);
         return repository;
+    }
+
+    /**
+     * Verifies if there is a repository managing the passed entity class is registered
+     * with this Bounded Context.
+     */
+    @VisibleForTesting
+    public boolean hasRepositoryOf(Class<? extends Entity<?, ?>> entityClass) {
+        EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
+        Optional<Repository> repository = findRepository(cls.stateClass());
+        return repository.isPresent();
+    }
+
+    /**
+     * Verifies if there a repository managing entities with the state of the passed class
+     * registered with this Bounded Context.
+     */
+    @VisibleForTesting
+    public boolean hasRepositoryOfEntityWithState(Class<? extends Message> stateClass) {
+        Optional<Repository> repository = findRepository(stateClass);
+        return repository.isPresent();
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */
