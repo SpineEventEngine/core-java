@@ -405,7 +405,6 @@ class BoundedContextTest {
                     .setMultitenant(false)
                     .build();
         }
-
     }
 
     /**
