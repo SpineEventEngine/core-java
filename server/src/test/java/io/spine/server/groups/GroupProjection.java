@@ -20,7 +20,6 @@
 
 package io.spine.server.groups;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
@@ -29,11 +28,9 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
 
-public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
+import static io.spine.server.route.EventRoute.withId;
 
-    private GroupProjection(GroupId id) {
-        super(id);
-    }
+public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
 
     @Subscribe(external = true)
     void on(Organization organization, EventContext systemContext) {
@@ -52,10 +49,10 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
             super.onRegistered();
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
             routing.route(Organization.class, (org, eventContext) ->
-                    ImmutableSet.of(GroupId.newBuilder()
-                                           .setUuid(org.getHead()
-                                                       .getValue())
-                                           .build()));
+                    withId(GroupId.newBuilder()
+                                  .setUuid(org.getHead()
+                                              .getValue())
+                                  .build()));
             eventRouting().routeEntityStateUpdates(routing);
         }
     }
