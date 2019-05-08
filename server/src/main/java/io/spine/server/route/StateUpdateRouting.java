@@ -33,10 +33,11 @@ import static io.spine.server.route.EventRoute.noTargets;
 /**
  * A routing schema used to deliver entity state updates.
  *
- * <p>A routing schema consists of a default route and custom routes per event class.
- * When calculating a set of update targets, {@code StateUpdateRouting} would see if there is
- * a custom route set for the type of the event. If not found, the default route will be
- * {@linkplain EventRoute#apply(Message, Message) applied}.
+ * <p>A routing schema consists of a default route and custom routes per entity state class.
+ * When calculating targets to be notified on the updated state, {@code StateUpdateRouting} would
+ * see if there is a custom route set for the type of the entity state.
+ * If not found, the default route will be
+ * {@linkplain StateUpdateRouting#apply(Message, Message) applied}.
  *
  * @param <I>
  *         the type of the entity IDs to which the updates are routed
