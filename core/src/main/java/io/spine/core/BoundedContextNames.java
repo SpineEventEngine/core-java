@@ -75,7 +75,23 @@ public final class BoundedContextNames {
      */
     @Internal
     public static void checkValid(BoundedContextName name) throws IllegalArgumentException {
-        checkNotEmptyOrBlank(name.getValue(), "name");
+        checkNotNull(name);
+        String value = name.getValue();
+        checkValid(value);
+    }
+
+    /**
+     * Validates the given {@link BoundedContextName}.
+     *
+     * <p>The name must not be {@code null}, empty or blank in order to pass the validation.
+     */
+    @Internal
+    public static void checkValid(String boundedContextName) throws IllegalArgumentException {
+        checkNotNull(boundedContextName);
+        checkNotEmptyOrBlank(
+                boundedContextName,
+                "A Bounded Context name cannot be empty or blank."
+        );
     }
 
     /**

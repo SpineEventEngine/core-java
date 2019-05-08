@@ -44,12 +44,12 @@ class EntityColumnCacheTest {
 
     private static final String STRING_ID = "some-string-id-never-used";
 
-    private Class<? extends Entity> entityClass;
+    private Class<? extends Entity<?, ?>> entityClass;
     private EntityColumnCache entityColumnCache;
 
     @BeforeEach
     void setUp() {
-        Entity entity = new EntityWithManyGetters(STRING_ID);
+        EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         entityClass = entity.getClass();
         entityColumnCache = EntityColumnCache.initializeFor(entityClass);
     }

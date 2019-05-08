@@ -25,9 +25,9 @@ import com.google.protobuf.Any;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.given.column.BrokenTestEntity;
-import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring;
 import io.spine.server.entity.storage.given.column.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.column.EntityWithNotAnnotatedMethod;
 import io.spine.server.entity.storage.given.column.TestAggregate;
 import io.spine.server.entity.storage.given.column.TestEntity;
 import io.spine.testing.server.entity.given.Given;
@@ -325,10 +325,10 @@ class ColumnTest {
     }
 
     @Test
-    @DisplayName("not allow to redefine column annotation")
-    void rejectRedefinedAnnotation() {
-        assertThrows(IllegalStateException.class,
-                     () -> forMethod("getCustomColumn", EntityRedefiningColumnAnnotation.class));
+    @DisplayName("not allow not annotated methods")
+    void checkMethodIsAnnotated() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> forMethod("getRandomNumber", EntityWithNotAnnotatedMethod.class));
     }
 
     @Test

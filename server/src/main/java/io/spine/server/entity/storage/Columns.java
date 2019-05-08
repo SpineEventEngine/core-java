@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
@@ -62,8 +61,7 @@ import static java.lang.String.format;
  *
  * @see EntityColumn
  */
-@Internal
-public class Columns {
+final class Columns {
 
     /**
      * Prevents instantiation of this utility class.
@@ -82,7 +80,7 @@ public class Columns {
      * @return a {@code Collection} of {@link EntityColumn} corresponded to entity class
      * @throws IllegalStateException if entity column definitions are incorrect
      */
-    static Collection<EntityColumn> getAllColumns(Class<? extends Entity> entityClass) {
+    static Collection<EntityColumn> getAllColumns(Class<? extends Entity<?, ?>> entityClass) {
         checkNotNull(entityClass);
 
         ColumnReader columnReader = ColumnReader.forClass(entityClass);
@@ -100,7 +98,7 @@ public class Columns {
      * @return an instance of {@link EntityColumn} with the given name
      * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
-    static EntityColumn findColumn(Class<? extends Entity> entityClass, String columnName) {
+    static EntityColumn findColumn(Class<? extends Entity<?, ?>> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkColumnName(columnName);
 

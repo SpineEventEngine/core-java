@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
+import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.column.EntityWithASetterButNoGetter;
 import io.spine.server.entity.storage.given.column.EntityWithBooleanColumns;
 import io.spine.server.entity.storage.given.column.EntityWithColumnFromInterface;
@@ -68,6 +69,13 @@ class ColumnReaderTest {
     @DisplayName("throw ISE on invalid column definitions")
     void throwOnInvalidColumns() {
         ColumnReader columnReader = forClass(EntityWithRepeatedColumnNames.class);
+        assertThrows(IllegalStateException.class, columnReader::readColumns);
+    }
+
+    @Test
+    @DisplayName("throw if a column is redefined")
+    void throwOnRedefiningColumn() {
+        ColumnReader columnReader = forClass(EntityRedefiningColumnAnnotation.class);
         assertThrows(IllegalStateException.class, columnReader::readColumns);
     }
 
