@@ -156,7 +156,7 @@ message EntityArchived {
     // The instant when the entity was archived.
     google.protobuf.Timestamp when = 3;
 
-    // The version received by the entity upon archivation.
+    // The version received by the entity upon archiving.
     core.Version version = 4;
 }
 
@@ -177,7 +177,7 @@ message EntityDeleted {
 }
 
 // An entity was marked as NOT archived.
-message EntityExtractedFromArchive {
+message EntityUnarchived {
 
     // The ID of the entity.
     EntityHistoryId id = 1 [(required) = true];
