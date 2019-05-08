@@ -300,8 +300,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Sets the supplier of {@link AggregateRootDirectory}-s to use in the built context.
      *
-     * <p>By default, an in-mem implementation is used. Users should change this behaviour only if
-     * different parts of their contexts are deployed onto different server instances.
+     * <p>By default, an in-mem implementation is used.
      *
      * @param directory
      *         the supplier of aggregate root directories
