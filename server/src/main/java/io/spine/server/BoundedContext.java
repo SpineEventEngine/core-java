@@ -110,7 +110,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     private final TenantIndex tenantIndex;
 
-
     /**
      * Creates new instance.
      *
