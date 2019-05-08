@@ -20,43 +20,39 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
-import io.spine.type.TypeUrl;
+import io.spine.annotation.SPI;
 
 import java.util.Optional;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
+/**
+ * A mapping of the roots of complex aggregates to their parts.
+ *
+ * <p>A complex aggregate is a number of simpler aggregate instances which represent the same domain
+ * object from the different viewpoints. These aggregates are derived from the {@link AggregatePart}
+ * class and are united
+ */
+@SPI
+public interface AggregateRootDirectory {
 
-@Internal
-public final class AggregateRootDirectory {
+    /**
+     * Registers the given aggregate part repository as a part of its root.
+     */
+    void register(AggregatePartRepository<?, ?, ?> repository);
 
-    private final SetMultimap<Class<? extends AggregateRoot<?>>, AggregatePartRepository<?, ?, ?>>
-    repositories = synchronizedSetMultimap(HashMultimap.create());
-
-    public void register(AggregatePartRepository<?, ?, ?> repository) {
-        checkNotNull(repository);
-
-        Class<? extends AggregateRoot<?>> rootClass = repository.aggregatePartClass().rootClass();
-        repositories.put(rootClass, repository);
-    }
-
-    public Optional<? extends AggregatePartRepository<?, ?, ?>>
-    findPart(Class<? extends AggregateRoot<?>> rootClass, Class<? extends Message> partStateClass) {
-        Set<AggregatePartRepository<?, ?, ?>> parts = repositories.get(rootClass);
-        if (parts.isEmpty()) {
-            return Optional.empty();
-        } else {
-            TypeUrl targetType = TypeUrl.of(partStateClass);
-            Optional<AggregatePartRepository<?, ?, ?>> repository = parts
-                    .stream()
-                    .filter(repo -> repo.entityStateType().equals(targetType))
-                    .findAny();
-            return repository;
-        }
-    }
+    /**
+     * Looks up a repository for the given type of the aggregate root and the part state.
+     *
+     * <p>If a matching repository if registered, it is obtained by this method with no regard to
+     * the visibility of the aggregate.
+     *
+     * @param rootClass
+     *         the type of the aggregate root
+     * @param partStateClass
+     *         the type of the part state
+     * @return the {@link AggregatePartRepository} or {@code Optional.empty()} if such a repository
+     *         is not registered
+     */
+    Optional<? extends AggregatePartRepository<?, ?, ?>>
+    findPart(Class<? extends AggregateRoot<?>> rootClass, Class<? extends Message> partStateClass);
 }
