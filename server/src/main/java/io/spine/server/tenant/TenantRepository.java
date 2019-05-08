@@ -81,7 +81,7 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
      * Removes the passed value from the in-memory cache of known tenant IDs.
      *
      * <p>Implementations should call this method for removing the cached value
-     * for a tenant, which record was removed from the repository.
+     * for a tenant for which the record was removed from the repository.
      *
      * @param id the ID to remove from the cache
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise

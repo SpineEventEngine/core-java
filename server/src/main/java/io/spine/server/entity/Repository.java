@@ -100,7 +100,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Stores the passed object.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
+     * <p>Note: The storage must be assigned before calling this method.
      *
      * @param obj an instance to store
      */
@@ -171,7 +171,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains classes of the events produced by this {@code Repository}.
      *
-     * <p>For convenience, the default version returns empty collection. This method should be
+     * <p>For convenience purposes the default version returns empty collection. This method should be
      * overridden by repositories which actually produce events.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
@@ -228,7 +228,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Initializes the storage using the passed factory.
      *
-     * @param factory storage factory
+     * @param factory the storage factory
      * @throws IllegalStateException if the repository already has storage initialized
      */
     public void initStorage(StorageFactory factory) {
@@ -243,7 +243,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Returns the storage assigned to this repository.
      *
-     * <p>In order to verify if the storage is assigned use {@link #isStorageAssigned()}.
+     * <p>To verify if the storage is assigned, use {@link #isStorageAssigned()}.
      *
      * @throws IllegalStateException if the storage is not assigned
      */
@@ -294,7 +294,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Verifies if the repository open.
+     * Verifies if the repository is open.
      */
     public boolean isOpen() {
         return storage != null;
@@ -352,7 +352,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Creates an {@link EventFilter} for this repository.
      *
-     * <p>All the events posted by this repository, domain and system, are first passed through this
+     * <p>All the events posted by this repository, domain, and system are first passed through this
      * filter.
      *
      * <p>By default, the filter allows all the events to be posted. For entities which do not allow
