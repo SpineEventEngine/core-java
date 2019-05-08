@@ -106,7 +106,6 @@ final class AggregatePartRepositoryLookup<I, S extends Message> {
                                            repoIdClass.getName(),
                                            idClass.getName());
         }
-
         @SuppressWarnings("unchecked") // we checked by previous check methods and the code above.
         AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repo;
         return result;

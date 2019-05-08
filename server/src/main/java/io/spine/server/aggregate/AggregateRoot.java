@@ -26,11 +26,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A root object for a larger aggregate.
@@ -125,11 +126,18 @@ public class AggregateRoot<I> {
     /** Finds an aggregate part repository in the Bounded Context. */
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
-        @SuppressWarnings("unchecked") // The type is ensured by id() result.
-        Class<I> idClass = (Class<I>) id().getClass();
-        AggregatePartRepositoryLookup<I, S> lookup =
-                createLookup(boundedContext, idClass, stateClass);
-        AggregatePartRepository<I, A, ?> result = lookup.find();
+        @SuppressWarnings("unchecked")
+        Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
+        Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository =
+                boundedContext.aggregateRootDirectory()
+                              .findPart(thisType, stateClass);
+        AggregatePartRepository<?, ?, ?> repository = partRepository.orElseThrow(
+                () -> newIllegalStateException(
+                        "Could not find a repository for aggregate part part ",
+                        stateClass.getName())
+        );
+        @SuppressWarnings("unchecked")
+        AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repository;
         return result;
     }
 
