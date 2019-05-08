@@ -26,22 +26,25 @@ import io.spine.annotation.SPI;
 import java.util.Optional;
 
 /**
- * A mapping of the roots of complex aggregates to their parts.
+ * A mapping of aggregate roots to the associated parts.
  *
  * <p>A complex aggregate is a number of simpler aggregate instances which represent the same domain
  * object from the different viewpoints. These aggregates are derived from the {@link AggregatePart}
- * class and are united
+ * class and are united by a single root.
+ *
+ * <p>In the directory, the aggregate root is represented by its type and the parts - by their
+ * repositories.
  */
 @SPI
 public interface AggregateRootDirectory {
 
     /**
-     * Registers the given aggregate part repository as a part of its root.
+     * Associates the given aggregate part repository and the respective root type.
      */
     void register(AggregatePartRepository<?, ?, ?> repository);
 
     /**
-     * Looks up a repository for the given type of the aggregate root and the part state.
+     * Looks up an aggregate part repository by the type of the root and the type of the part state.
      *
      * <p>If a matching repository if registered, it is obtained by this method with no regard to
      * the visibility of the aggregate.

@@ -288,7 +288,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Obtains the {@link AggregateRootDirectory} to be used in the built context.
      *
-     * <p>If not specified, an in-mem implementation is used.
+     * <p>If no custom implementation is specified, an in-mem implementation is used.
      */
     AggregateRootDirectory aggregateRootDirectory() {
         if (rootDirectory == null) {
@@ -303,7 +303,8 @@ public final class BoundedContextBuilder implements Logging {
      * <p>By default, an in-mem implementation is used. Users should change this behaviour only if
      * different parts of their contexts are deployed onto different server instances.
      *
-     * @param directory the directory of aggregate roots
+     * @param directory
+     *         the supplier of aggregate root directories
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder

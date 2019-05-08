@@ -124,19 +124,17 @@ public class AggregateRoot<I> {
     }
 
     /** Finds an aggregate part repository in the Bounded Context. */
+    @SuppressWarnings("unchecked") // Logically checked.
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
-        @SuppressWarnings("unchecked")
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
-        Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository =
-                boundedContext.aggregateRootDirectory()
-                              .findPart(thisType, stateClass);
+        Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository = boundedContext
+                .aggregateRootDirectory()
+                .findPart(thisType, stateClass);
         AggregatePartRepository<?, ?, ?> repository = partRepository.orElseThrow(
-                () -> newIllegalStateException(
-                        "Could not find a repository for aggregate part part ",
-                        stateClass.getName())
+                () -> newIllegalStateException("Could not find a repository for aggregate part %s",
+                                               stateClass.getName())
         );
-        @SuppressWarnings("unchecked")
         AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repository;
         return result;
     }
