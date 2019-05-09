@@ -464,6 +464,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *         optional domain events to be dispatched to the Bounded Context in supplied order
      * @return current instance
      */
+    @CanIgnoreReturnValue
     public T receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
         List<Event> sentEvents = setup().postEvents(producerId, first, rest);
         postedEvents.addAll(sentEvents);
