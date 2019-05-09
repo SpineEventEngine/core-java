@@ -46,12 +46,9 @@ public abstract class Enricher<M extends Message, C extends EnrichableMessageCon
     /**
      * Enriches the passed message if it can be enriched. Otherwise, returns the passed instance.
      *
-     * <p>An message can be enriched if the following condition is met:
-     *
-     * <ol>
-     *     <li>The flag {@code do_not_enrich} is not set in the {@link io.spine.core.Enrichment
-     *     Enrichment} instance of the context of the outer object of the message.
-     * </ol>
+     * A message can be enriched if the flag {@code do_not_enrich} is not set in the
+     * {@link io.spine.core.Enrichment Enrichment} instance of the context of the outer object of
+     * the message.
      *
      * @param  source
      *         the envelope with the source message
