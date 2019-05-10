@@ -64,7 +64,11 @@ public final class LifecycleRules {
      * Configures the repository to archive its entities when certain events/rejections occur.
      *
      * <p>Subsequent calls to this method do not clear the previously added event classes,
-     * i.e, in order not to override each other.
+     * i.e, in order not to override each other. For example, if we make two subsequent calls:
+     * `lifecycle.archiveOn(Event1.class)`;
+     * `lifecycle.archiveOn(Event2.class)`;
+     * The repository will archive when either `Event1` or `Event2` occurs and  and not only when `Event2` occurs.
+     * Subsequent calls to the method do not "cancel" previous calls.
      *
      * @param messageClasses
      *         the event and rejection classes which will cause the entity to become archived
@@ -98,7 +102,11 @@ public final class LifecycleRules {
      * Configures the repository to delete its entities when certain events/rejections occur.
      *
      * <p>Subsequent calls to this method do not clear the previously added event classes
-     * i.e, in order not to override each other.
+     * i.e, in order not to override each other. For example, if we make two subsequent calls:
+     * `lifecycle.archiveOn(Event1.class)`;
+     * `lifecycle.archiveOn(Event2.class)`;
+     * The repository will archive when either `Event1` or `Event2` occurs, and not only when `Event2` occurs.
+     * Subsequent calls to the method do not "cancel" previous calls.
      *
      * @param messageClasses
      *         the event and rejection classes which will cause the entity to become deleted
