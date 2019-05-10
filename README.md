@@ -22,7 +22,7 @@ Please track our release announcement to be informed about the production versio
 
 There is a [template][server-quickstart] for a server application built in Spine.
 
-The introductory application examples are available [here][examples-java].
+The introductory application examples are available [here][spine-examples].
 
 For more advanced example including a Spine server, a console client, and a web application, see [ToDo List app][todo-list].   
 
@@ -50,6 +50,6 @@ If you need to use API with one of these annotations, please [contact us][email-
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 
 [getting-started]: https://github.com/SpineEventEngine/documentation/blob/master/getting-started/index.md
-[server-quickstart]: https://github.com/SpineEventEngine/server-quickstart/
-[examples-java]: https://github.com/SpineEventEngine/examples-java
-[todo-list]: https://github.com/SpineEventEngine/todo-list
+[server-quickstart]: https://github.com/spine-examples/server-quickstart
+[spine-examples]: https://github.com/spine-examples
+[todo-list]: https://github.com/spine-examples/todo-list

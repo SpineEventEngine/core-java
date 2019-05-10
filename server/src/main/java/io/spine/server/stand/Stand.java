@@ -115,7 +115,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private final SubscriptionRegistry subscriptionRegistry;
 
     /**
-     * Manages the entity {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
+     * Manages the entity {@linkplain TypeUrl types} exposed via this instance of {@code Stand}.
      */
     private final TypeRegistry typeRegistry;
 
@@ -162,7 +162,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
      * through the artificially created {@link EntityStateChanged} event. It
-     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" actions, applied
+     * doesn't do any proper lifecycle management ignoring "archived"/"deleted" actions, applied
      * messages IDs, etc.
      *
      * @param entity
@@ -284,7 +284,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param subscription
      *         the subscription to activate
      * @param notifyAction
-     *         an action which notifies the subscribers about an update
+     *         the action which notifies the subscribers about an update
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,
@@ -317,7 +317,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * related to the given {@code Subscription}.
      *
      * @param subscription
-     *         a subscription to cancel
+     *         the subscription to cancel
      */
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver)
             throws InvalidRequestException {
@@ -351,7 +351,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        return typeRegistry.getTypes();
+        return typeRegistry.allTypes();
     }
 
     /**
@@ -372,7 +372,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
-        return typeRegistry.getAggregateTypes();
+        return typeRegistry.aggregateTypes();
     }
 
     /**
@@ -385,9 +385,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * of {@link StreamObserver}&lt;{@link QueryResponse}&gt;.
      *
      * @param query
-     *         an instance of query
+     *         the instance of query
      * @param responseObserver
-     *         an observer to feed the query results to
+     *         the observer to feed the query results to
      */
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver)
             throws InvalidRequestException {
@@ -460,7 +460,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private QueryProcessor processorFor(TypeUrl type) {
         Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
-                typeRegistry.getRecordRepository(type);
+                typeRegistry.recordRepositoryOf(type);
         if (foundRepository.isPresent()) {
             RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
             return new EntityQueryProcessor(repository);

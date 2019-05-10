@@ -49,8 +49,7 @@ import static java.lang.String.format;
  * registered with {@code EventBus}.
  *
  * @see EventBus#register(MessageDispatcher)
- * @see io.spine.core.Subscribe {@code @Subscribe} annotation for declaring event subscriptions
- *                              in the derived classes
+ * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
         implements EventDispatcher<String>, EventSubscriber, Logging {

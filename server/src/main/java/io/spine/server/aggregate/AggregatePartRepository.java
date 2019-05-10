@@ -48,6 +48,13 @@ public abstract class AggregatePartRepository<I,
     }
 
     @Override
+    public void onRegistered() {
+        super.onRegistered();
+        boundedContext().aggregateRootDirectory()
+                        .register(this);
+    }
+
+    @Override
     public A create(I id) {
         AggregateRoot<I> root = createAggregateRoot(id);
         A result = createAggregatePart(root);
@@ -60,7 +67,7 @@ public abstract class AggregatePartRepository<I,
         return asAggregatePartClass(cls);
     }
 
-    private AggregatePartClass<A> aggregatePartClass() {
+    AggregatePartClass<A> aggregatePartClass() {
         return (AggregatePartClass<A>) entityModelClass();
     }
 

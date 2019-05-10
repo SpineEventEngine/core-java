@@ -20,17 +20,13 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A root object for a larger aggregate.
@@ -45,11 +41,6 @@ public class AggregateRoot<I> {
     /** The aggregate ID. */
     private final I id;
 
-    /** The cache of part repositories obtained from {@code boundedContext}. */
-    private final LoadingCache<Class<? extends Message>,
-            AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>>
-            cache = createCache();
-
     /**
      * Creates a new instance.
      *
@@ -57,16 +48,14 @@ public class AggregateRoot<I> {
      * @param id             the ID of the aggregate
      */
     protected AggregateRoot(BoundedContext boundedContext, I id) {
-        checkNotNull(boundedContext);
-        checkNotNull(id);
-        this.boundedContext = boundedContext;
-        this.id = id;
+        this.boundedContext = checkNotNull(boundedContext);
+        this.id = checkNotNull(id);
     }
 
     /**
      * Obtains the aggregate ID.
      */
-    public I getId() {
+    public I id() {
         return this.id;
     }
 
@@ -81,9 +70,9 @@ public class AggregateRoot<I> {
      *                               the ID type of this {@code AggregateRoot}
      */
     protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
-    S getPartState(Class<S> partStateClass) {
-        AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
-        AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
+    S partState(Class<S> partStateClass) {
+        AggregatePartRepository<I, A, ?> repo = repositoryOf(partStateClass);
+        AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
         S partState = aggregatePart.state();
         return partState;
     }
@@ -97,66 +86,16 @@ public class AggregateRoot<I> {
      */
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
-    AggregatePartRepository<I, A, ?> getRepository(Class<S> stateClass) {
-
-        AggregatePartRepository<I, A, ?> result;
-        try {
-            result = (AggregatePartRepository<I, A, ?>) cache.get(stateClass);
-        } catch (ExecutionException e) {
-            throw illegalStateWithCauseOf(e);
-        }
+    AggregatePartRepository<I, A, ?> repositoryOf(Class<S> stateClass) {
+        Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
+        Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository = boundedContext
+                .aggregateRootDirectory()
+                .findPart(thisType, stateClass);
+        AggregatePartRepository<?, ?, ?> repository = partRepository.orElseThrow(
+                () -> newIllegalStateException("Could not find a repository for aggregate part %s",
+                                               stateClass.getName())
+        );
+        AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repository;
         return result;
-    }
-
-    /** Creates a cache for remembering aggregate part repositories. */
-    private LoadingCache<Class<? extends Message>,
-            AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>> createCache() {
-        return CacheBuilder.newBuilder()
-                           .build(newLoader());
-    }
-
-    /** Creates a loader which calls {@link #lookup(Class)}. */
-    private CacheLoader<Class<? extends Message>,
-            AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>> newLoader() {
-        return new PartRepositoryCacheLoader<>(this);
-    }
-
-    /** Finds an aggregate part repository in the Bounded Context. */
-    private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
-    AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
-        @SuppressWarnings("unchecked") // The type is ensured by getId() result.
-        Class<I> idClass = (Class<I>) getId().getClass();
-        AggregatePartRepositoryLookup<I, S> lookup =
-                createLookup(boundedContext, idClass, stateClass);
-        AggregatePartRepository<I, A, ?> result = lookup.find();
-        return result;
-    }
-
-    /**
-     * The loader for the cache of aggregate part repositories.
-     *
-     * @param <I> the type of root identifier
-     * @see #createCache()
-     * @see #newLoader()
-     */
-    private static final
-    class PartRepositoryCacheLoader<I>
-            extends CacheLoader<
-                Class<? extends Message>,
-                AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
-            > {
-
-        private final AggregateRoot<I> root;
-
-        private PartRepositoryCacheLoader(AggregateRoot<I> root) {
-            super();
-            this.root = root;
-        }
-
-        @Override
-        public AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
-        load(Class<? extends Message> key) throws IllegalStateException {
-            return root.lookup(key);
-        }
     }
 }

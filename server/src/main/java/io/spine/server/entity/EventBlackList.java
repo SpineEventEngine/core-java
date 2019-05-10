@@ -43,7 +43,7 @@ public final class EventBlackList implements EventFilter {
      * Creates a new instance of {@code EventBlackList} discarding events of the given types.
      *
      * @param eventClasses
-     *         the not allowed event classes
+     *         the list of event classes which cannot be used
      * @return new instance of the black-list filter
      */
     @SafeVarargs

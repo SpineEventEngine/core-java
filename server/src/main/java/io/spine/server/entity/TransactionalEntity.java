@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A base for entities, perform transactions {@linkplain Event events}.
  *
- * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
+ * <p>Defines a transaction-based mechanism for state, version, and lifecycle flags update.
  *
  * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
@@ -47,7 +47,7 @@ public abstract class TransactionalEntity<I,
     private final RecentHistory recentHistory = new RecentHistory();
 
     /**
-     * The flag, which becomes {@code true}, if the state of the entity has been changed
+     * The flag which becomes {@code true} if the state of the entity has been changed
      * since it has been {@linkplain RecordBasedRepository#findOrCreate(Object) loaded or created}.
      */
     private volatile boolean stateChanged;
@@ -124,7 +124,7 @@ public abstract class TransactionalEntity<I,
     }
 
     /**
-     * Ensures that the entity has non-null and active transaction.
+     * Ensures that the entity has not null and active transaction.
      *
      * @throws IllegalStateException if the transaction is null or not active
      */
@@ -165,8 +165,8 @@ public abstract class TransactionalEntity<I,
         checkNotNull(tx);
 
         /*
-            In order to be sure we are not hijacked, we must be sure that the transaction
-            is injected to the very same object, wrapped into the transaction.
+            To ensure we are not hijacked, we must be sure that the transaction
+            is injected to the very same object and wrapped into the transaction.
         */
         checkState(tx.entity() == this,
                    "Transaction injected to this " + this

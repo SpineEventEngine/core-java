@@ -26,7 +26,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
@@ -34,6 +33,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.BoundedContextNames.checkValid;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
@@ -42,35 +42,51 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
-    private final BoundedContextName boundedContextName;
+    private final BoundedContextName context;
     private final boolean multitenant;
 
-    public static InMemoryStorageFactory newInstance(BoundedContextName boundedContextName,
-                                                     boolean multitenant) {
-        return new InMemoryStorageFactory(boundedContextName, multitenant);
+    /**
+     * Creates new instance of the factory which would serve the context with the passed name.
+     *
+     * @param context
+     *         the name of the context
+     * @param multitenant
+     *         if {@code true} the storage is multi-tenant and single-tenant otherwise
+     * @return new instance of the factory
+     */
+    public static
+    InMemoryStorageFactory newInstance(BoundedContextName context, boolean multitenant) {
+        checkValid(context);
+        return new InMemoryStorageFactory(context, multitenant);
     }
 
-    private InMemoryStorageFactory(BoundedContextName boundedContextName, boolean multitenant) {
-        this.boundedContextName = boundedContextName;
+    /**
+     * Creates new instance of the factory which would serve the context with the passed name.
+     *
+     * @param boundedContextName
+     *         the name of the context
+     * @param multitenant
+     *         if {@code true} the storage is multi-tenant and single-tenant otherwise
+     * @return new instance of the factory
+     */
+    public static
+    InMemoryStorageFactory newInstance(String boundedContextName, boolean multitenant) {
+        checkValid(boundedContextName);
+        BoundedContextName name = BoundedContextName
+                .vBuilder()
+                .setValue(boundedContextName)
+                .build();
+        return newInstance(name, multitenant);
+    }
+
+    private InMemoryStorageFactory(BoundedContextName context, boolean multitenant) {
+        this.context = context;
         this.multitenant = multitenant;
     }
 
     @Override
     public boolean isMultitenant() {
         return this.multitenant;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>In-memory implementation stores no values separately
-     * ({@link io.spine.server.entity.storage.EntityColumn entity columns}),
-     * therefore returns an empty {@code ColumnTypeRegistry}.
-     */
-    @Override
-    public ColumnTypeRegistry getTypeRegistry() {
-        return ColumnTypeRegistry.newBuilder()
-                                 .build();
     }
 
     /** NOTE: the parameter is unused. */
@@ -106,7 +122,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.idClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);
-        StorageSpec<I> result = StorageSpec.of(boundedContextName, stateUrl, idClass);
+        StorageSpec<I> result = StorageSpec.of(context, stateUrl, idClass);
         return result;
     }
 
@@ -120,7 +136,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return newInstance(boundedContextName, false);
+        return newInstance(context, false);
     }
 
     @Override
