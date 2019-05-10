@@ -33,10 +33,10 @@ public interface StateSubscribingClass {
     /**
      * Obtains domestic entity states to which the class is subscribed.
      */
-    Set<EntityStateClass> domesticStates();
+    Set<StateClass> domesticStates();
 
     /**
      * Obtains external entity states to which the class is subscribed.
      */
-    Set<EntityStateClass> externalStates();
+    Set<StateClass> externalStates();
 }

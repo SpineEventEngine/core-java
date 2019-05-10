@@ -30,19 +30,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A class of an {@linkplain Entity#state() entity state}.
  */
-public final class EntityStateClass extends MessageClass<Message> {
+public final class StateClass extends MessageClass<Message> {
 
     private static final long serialVersionUID = 0L;
     private static final EventClass UPDATE_EVENT = EventClass.from(EntityStateChanged.class);
 
-    private EntityStateClass(Class<? extends Message> value) {
+    private StateClass(Class<? extends Message> value) {
         super(value);
     }
 
     /**
      * Obtains the class of the state of the given entity.
      */
-    public static EntityStateClass of(Entity entity) {
+    public static StateClass of(Entity entity) {
         checkNotNull(entity);
         Message state = entity.state();
         return of(state);
@@ -51,7 +51,7 @@ public final class EntityStateClass extends MessageClass<Message> {
     /**
      * Creates an instance of {@code EntityStateClass} from the class of the given message.
      */
-    public static EntityStateClass of(Message entityState) {
+    public static StateClass of(Message entityState) {
         checkNotNull(entityState);
         return from(entityState.getClass());
     }
@@ -59,9 +59,9 @@ public final class EntityStateClass extends MessageClass<Message> {
     /**
      * Creates an instance of {@code EntityStateClass} from the given class.
      */
-    public static EntityStateClass from(Class<? extends Message> value) {
+    public static StateClass from(Class<? extends Message> value) {
         checkNotNull(value);
-        return new EntityStateClass(value);
+        return new StateClass(value);
     }
 
     /**

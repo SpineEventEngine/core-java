@@ -23,7 +23,7 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.entity.model.EntityStateClass;
+import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
@@ -58,8 +58,8 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     private final MessageHandlerMap<EventClass, P, M> handlers;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
-    private final ImmutableSet<EntityStateClass> domesticStates;
-    private final ImmutableSet<EntityStateClass> externalStates;
+    private final ImmutableSet<StateClass> domesticStates;
+    private final ImmutableSet<StateClass> externalStates;
 
     /**
      * Creates new instance for the passed raw class with methods obtained
@@ -95,14 +95,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains domestic entity states to which the delegating class is subscribed.
      */
-    public Set<EntityStateClass> domesticStates() {
+    public Set<StateClass> domesticStates() {
         return domesticStates;
     }
 
     /**
      * Obtains external entity states to which the delegating class is subscribed.
      */
-    public Set<EntityStateClass> externalStates() {
+    public Set<StateClass> externalStates() {
         return externalStates;
     }
 
@@ -134,19 +134,19 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains the classes of entity state messages from the passed handlers.
      */
-    private ImmutableSet<EntityStateClass> extractStates(boolean external) {
-        EventClass updateEvent = EntityStateClass.updateEvent();
+    private ImmutableSet<StateClass> extractStates(boolean external) {
+        EventClass updateEvent = StateClass.updateEvent();
         if (!handlers.containsClass(updateEvent)) {
             return ImmutableSet.of();
         }
         ImmutableCollection<M> stateHandlers = handlers.handlersOf(updateEvent);
-        ImmutableSet<EntityStateClass> result =
+        ImmutableSet<StateClass> result =
                 stateHandlers.stream()
                         .filter(h -> h instanceof EntitySubscriberMethod)
                         .map(h -> (EntitySubscriberMethod) h)
                         .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
                         .map(EntitySubscriberMethod::entityType)
-                        .map(EntityStateClass::from)
+                        .map(StateClass::from)
                         .collect(toImmutableSet());
         return result;
     }

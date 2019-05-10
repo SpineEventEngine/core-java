@@ -21,7 +21,7 @@
 package io.spine.server.projection.model;
 
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.model.EntityStateClass;
+import io.spine.server.entity.model.StateClass;
 import io.spine.server.entity.model.StateSubscribingClass;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
@@ -83,12 +83,12 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public Set<EntityStateClass> domesticStates() {
+    public Set<StateClass> domesticStates() {
         return delegate.domesticStates();
     }
 
     @Override
-    public Set<EntityStateClass> externalStates() {
+    public Set<StateClass> externalStates() {
         return delegate.externalStates();
     }
 }
