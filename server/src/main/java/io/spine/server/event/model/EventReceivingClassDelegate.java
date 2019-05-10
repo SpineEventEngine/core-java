@@ -20,18 +20,24 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.entity.model.EntityStateClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.declare.MethodSignature;
+import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
 import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * Helper object for storing information about methods and events of an
@@ -56,16 +62,21 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
+    private final ImmutableSet<EntityStateClass> domesticStates;
+
+    private final ImmutableSet<EntityStateClass> externalStates;
     /**
      * Creates new instance for the passed raw class with methods obtained
      * though the passed factory.
      */
-    public EventReceivingClassDelegate(Class<? extends T> rawClass,
+    public EventReceivingClassDelegate(Class<? extends T> delegatingClass,
                                        MethodSignature<M, ?> signature) {
-        super(rawClass);
-        this.events = MessageHandlerMap.create(rawClass, signature);
+        super(delegatingClass);
+        this.events = MessageHandlerMap.create(delegatingClass, signature);
         this.domesticEvents = events.messageClasses(HandlerMethod::isDomestic);
         this.externalEvents = events.messageClasses(HandlerMethod::isExternal);
+        this.domesticStates = extractStates(false);
+        this.externalStates = extractStates(true);
     }
 
     public boolean contains(EventClass eventClass) {
@@ -73,17 +84,31 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     }
 
     /**
-     * Obtains domestic event classes handled by the class.
+     * Obtains domestic event classes handled by the delegating class.
      */
     public Set<EventClass> domesticEvents() {
         return domesticEvents;
     }
 
     /**
-     * Obtains external event classes handled by the class.
+     * Obtains external event classes handled by the delegating class.
      */
     public Set<EventClass> externalEvents() {
         return externalEvents;
+    }
+
+    /**
+     * Obtains domestic entity states to which the delegating class is subscribed.
+     */
+    public ImmutableSet<EntityStateClass> domesticStates() {
+        return domesticStates;
+    }
+
+    /**
+     * Obtains external entity states to which the delegating class is subscribed.
+     */
+    public ImmutableSet<EntityStateClass> externalStates() {
+        return externalStates;
     }
 
     /**
@@ -109,5 +134,22 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      */
     public M handlerOf(EventClass eventClass, MessageClass originClass) {
         return events.handlerOf(eventClass, originClass);
+    }
+
+    /**
+     * Obtains the classes of entity state messages from the passed handlers.
+     */
+    private ImmutableSet<EntityStateClass> extractStates(boolean external) {
+        ImmutableCollection<M> handlers =
+                events.handlersOf(EventClass.from(EntityStateChanged.class), EmptyClass.instance());
+        ImmutableSet<EntityStateClass> result =
+                handlers.stream()
+                        .filter(h -> h instanceof EntitySubscriberMethod)
+                        .map(h -> (EntitySubscriberMethod) h)
+                        .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
+                        .map(EntitySubscriberMethod::entityType)
+                        .map(EntityStateClass::from)
+                        .collect(toImmutableSet());
+        return result;
     }
 }
