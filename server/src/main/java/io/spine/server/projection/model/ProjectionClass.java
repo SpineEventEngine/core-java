@@ -77,6 +77,6 @@ public final class ProjectionClass<P extends Projection>
     @Override
     public Collection<SubscriberMethod>
     subscribersOf(EventClass eventClass, MessageClass originClass) {
-        return delegate.getMethods(eventClass, originClass);
+        return delegate.handlersOf(eventClass, originClass);
     }
 }

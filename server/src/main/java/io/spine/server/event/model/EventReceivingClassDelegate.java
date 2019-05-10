@@ -98,7 +98,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public Collection<M> getMethods(EventClass eventClass, MessageClass originClass) {
+    public Collection<M> handlersOf(EventClass eventClass, MessageClass originClass) {
         return events.handlersOf(eventClass, originClass);
     }
 
@@ -107,7 +107,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public M getMethod(EventClass eventClass, MessageClass originClass) {
+    public M handlerOf(EventClass eventClass, MessageClass originClass) {
         return events.handlerOf(eventClass, originClass);
     }
 }
