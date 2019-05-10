@@ -45,17 +45,15 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EmptyClass, SubscriberMethod> eventSubscriptions;
-    private final ImmutableSet<EventClass> domesticSubscriptions;
-    private final ImmutableSet<EventClass> externalSubscriptions;
+    private final MessageHandlerMap<EventClass, EmptyClass, SubscriberMethod> subscriptions;
+    private final ImmutableSet<EventClass> domesticEvents;
+    private final ImmutableSet<EventClass> externalEvents;
 
     private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
-        this.eventSubscriptions = MessageHandlerMap.create(cls, new SubscriberSignature());
-        this.domesticSubscriptions =
-                    eventSubscriptions.messageClasses(HandlerMethod::isDomestic);
-        this.externalSubscriptions =
-                    eventSubscriptions.messageClasses(HandlerMethod::isExternal);
+        this.subscriptions = MessageHandlerMap.create(cls, new SubscriberSignature());
+        this.domesticEvents = subscriptions.messageClasses(HandlerMethod::isDomestic);
+        this.externalEvents = subscriptions.messageClasses(HandlerMethod::isExternal);
     }
 
     /**
@@ -71,17 +69,17 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     @Override
     public Set<EventClass> incomingEvents() {
-        return domesticSubscriptions;
+        return domesticEvents;
     }
 
     @Override
     public Set<EventClass> externalEvents() {
-        return externalSubscriptions;
+        return externalEvents;
     }
 
     @Override
-    public Collection<SubscriberMethod> subscribersOf(EventClass eventClass,
-                                                      MessageClass originClass) {
-        return eventSubscriptions.handlersOf(eventClass, originClass);
+    public
+    Collection<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
+        return subscriptions.handlersOf(eventClass, originClass);
     }
 }
