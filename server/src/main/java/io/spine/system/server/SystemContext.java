@@ -32,10 +32,9 @@ import io.spine.server.event.EventEnricher;
  * <p>Orchestrates the system entities that serve the goal of monitoring, auditing, and debugging
  * the domain-specific entities.
  *
- * <p>Each {@link BoundedContext} has an associated {@code SystemBoundedContext}.
- * The system entities describe the meta information about the domain entities of the associated
- * {@link BoundedContext}. A system bounded context does NOT have an associated bounded
- * context.
+ * <p>Each {@link BoundedContext} has an associated {@code SystemContext}. The system entities
+ * describe the meta information about the domain entities of the associated {@link BoundedContext}.
+ * A system bounded context does NOT have an associated bounded context.
  *
  * @apiNote The framework users should not access a System Bounded Context directly.
  * Programmers extending the framework should see {@link SystemClient} for the front-facing API

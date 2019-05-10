@@ -59,7 +59,7 @@ public final class DefaultRepository {
     @SuppressWarnings("unchecked") // Casts are ensured by class assignability checks.
     public static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
         /*
-         * We deliberately "save" on OOP here and detect the class by the chain of if's below
+         * We deliberately "save" on OOP here and detect the class by the chain of if-s below
          * (instead of implementing this using the methods in the `EntityClass` hierarchy).
          * This is done to provide more convenient syntax for our framework users.
          */

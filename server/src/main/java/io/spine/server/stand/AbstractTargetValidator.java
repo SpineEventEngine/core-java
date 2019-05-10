@@ -43,7 +43,7 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
 
     boolean typeRegistryContains(Target target) {
         TypeUrl typeUrl = getTypeOf(target);
-        boolean result = typeRegistry.getTypes()
+        boolean result = typeRegistry.allTypes()
                                      .contains(typeUrl);
         return result;
     }

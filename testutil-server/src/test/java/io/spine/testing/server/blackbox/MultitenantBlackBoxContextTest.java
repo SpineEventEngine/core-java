@@ -55,34 +55,36 @@ class MultitenantBlackBoxContextTest
         TenantId newUser = newUuid();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
-        boundedContext()
+        MultitenantBlackBoxContext context = boundedContext()
                 // Create a project for John.
                 .withTenant(john)
                 .receivesCommand(createJohnProject)
 
                 // Create a project for Carl.
                 .withTenant(carl)
-                .receivesCommand(createCarlProject)
+                .receivesCommand(createCarlProject);
 
-                // Verify project was created for John.
-                .withTenant(john)
-                .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
-                .assertThat(exactlyOne(createdProjectState(createJohnProject)))
+        // Verify project was created for John.
+        context.withTenant(john)
+               .assertThat(emittedEvent(BbProjectCreated.class, count(1)));
+        context.assertEntityWithState(BbProject.class, createJohnProject.getProjectId())
+               .hasStateThat()
+               .isEqualTo(createdProjectState(createJohnProject));
+        // Verify project was created for Carl.
+        context.withTenant(carl)
+               .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
+               .assertEntityWithState(BbProject.class, createCarlProject.getProjectId())
+               .hasStateThat()
+               .isEqualTo(createdProjectState(createCarlProject));
+        // Verify nothing happened for a new user.
+        context.withTenant(newUser)
+               .assertThat(emittedCommand(count(0)))
+               .assertThat(emittedEvent(count(0)))
 
-                // Verify project was created for Carl.
-                .withTenant(carl)
-                .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
-                .assertThat(exactlyOne(createdProjectState(createCarlProject)))
-
-                // Verify nothing happened for a new user.
-                .withTenant(newUser)
-                .assertThat(emittedCommand(count(0)))
-                .assertThat(emittedEvent(count(0)))
-
-                // Verify command acknowledgements.
-                // One command was posted for John and one for Carl,
-                // so totally 2 commands were acknowledged (aren't grouped by a tenant ID).
-                .assertThat(acked(count(2)));
+               // Verify command acknowledgements.
+               // One command was posted for John and one for Carl,
+               // so totally 2 commands were acknowledged (aren't grouped by a tenant ID).
+               .assertThat(acked(count(2)));
     }
 
     @Test

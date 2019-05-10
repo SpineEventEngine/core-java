@@ -26,6 +26,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
@@ -104,6 +105,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
+    private final AggregateRootDirectory aggregateRootDirectory;
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
@@ -134,6 +136,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.commandBus = buildCommandBus(builder, eventBus);
         this.integrationBus = buildIntegrationBus(builder, eventBus, name);
         this.importBus = buildImportBus(tenantIndex);
+        this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
     /**
@@ -456,6 +459,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     @Internal
     public abstract SystemClient systemClient();
+
+    @Internal
+    public AggregateRootDirectory aggregateRootDirectory() {
+        return aggregateRootDirectory;
+    }
 
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.

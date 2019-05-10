@@ -33,7 +33,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -100,13 +99,19 @@ public final class VisibilityGuard {
      */
     public Optional<Repository> repositoryFor(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
-        RepositoryAccess repositoryAccess = repositories.get(stateClass);
-        if (repositoryAccess == null) {
-            throw newIllegalArgumentException(
-                    "A repository for the state class (`%s`)" +
-                            " was not registered in `VisibilityGuard`.", stateClass.getName());
-        }
+        RepositoryAccess repositoryAccess = findOrThrow(stateClass);
         return repositoryAccess.get();
+    }
+
+    private RepositoryAccess findOrThrow(Class<? extends Message> stateClass) {
+        RepositoryAccess repository = repositories.get(stateClass);
+        if (repository == null) {
+            throw newIllegalStateException(
+                    "A repository for the state class `%s` is not registered.",
+                    stateClass.getName()
+            );
+        }
+        return repository;
     }
 
     /**
