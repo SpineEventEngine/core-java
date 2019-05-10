@@ -47,12 +47,13 @@ import static io.spine.protobuf.TypeConverter.toObject;
  *
  * @see io.spine.core.Subscribe
  */
-public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscriber,
-                                                                     EventMessage,
-                                                                     EventClass,
-                                                                     EventEnvelope,
-                                                                     EmptyClass,
-                                                                     MethodResult<Empty>> {
+public abstract class SubscriberMethod
+        extends AbstractHandlerMethod<EventSubscriber,
+                                      EventMessage,
+                                      EventClass,
+                                      EventEnvelope,
+                                      EmptyClass,
+                                      MethodResult<Empty>> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
