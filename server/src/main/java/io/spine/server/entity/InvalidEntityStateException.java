@@ -106,7 +106,7 @@ public final class InvalidEntityStateException extends RuntimeException {
     private static final class Factory
             extends ExceptionFactory<InvalidEntityStateException,
                                      Message,
-            StateClass,
+                                     StateClass,
                                      EntityStateValidationError> {
 
         /**
