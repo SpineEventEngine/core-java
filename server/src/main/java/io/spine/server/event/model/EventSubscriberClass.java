@@ -20,10 +20,7 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -45,15 +42,11 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EmptyClass, SubscriberMethod> subscriptions;
-    private final ImmutableSet<EventClass> domesticEvents;
-    private final ImmutableSet<EventClass> externalEvents;
+    private final EventReceivingClassDelegate<S, EmptyClass, SubscriberMethod> delegate;
 
-    private EventSubscriberClass(Class<? extends S> cls) {
+    private EventSubscriberClass(Class<S> cls) {
         super(cls);
-        this.subscriptions = MessageHandlerMap.create(cls, new SubscriberSignature());
-        this.domesticEvents = subscriptions.messageClasses(HandlerMethod::isDomestic);
-        this.externalEvents = subscriptions.messageClasses(HandlerMethod::isExternal);
+        this.delegate = new EventReceivingClassDelegate<>(cls, new SubscriberSignature());
     }
 
     /**
@@ -69,17 +62,17 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     @Override
     public Set<EventClass> domesticEvents() {
-        return domesticEvents;
+        return delegate.domesticEvents();
     }
 
     @Override
     public Set<EventClass> externalEvents() {
-        return externalEvents;
+        return delegate.externalEvents();
     }
 
     @Override
     public
     Collection<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
-        return subscriptions.handlersOf(eventClass, originClass);
+        return delegate.handlersOf(eventClass, originClass);
     }
 }

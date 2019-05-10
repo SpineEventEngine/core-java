@@ -48,6 +48,7 @@ import io.spine.server.entity.EntityRecordChangeVBuilder;
 import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.model.EntityStateClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
@@ -225,9 +226,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Override
     public Set<EventClass> messageClasses() {
-        EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
         Set<EventClass> result =
-                union(eventRegistry.eventClasses(), singleton(entityStateChanged));
+                union(eventRegistry.eventClasses(), singleton(EntityStateClass.updateEvent()));
         return result;
     }
 

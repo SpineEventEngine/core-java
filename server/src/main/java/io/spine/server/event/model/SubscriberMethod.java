@@ -40,10 +40,9 @@ import static io.spine.base.FieldPaths.getValue;
 import static io.spine.protobuf.TypeConverter.toObject;
 
 /**
- * An event handler method which may have side effects, but provides no visible output.
+ * A method annotated with the {@link io.spine.core.Subscribe @Subscribe} annotation.
  *
- * <p>A subscriber method must be annotated with the {@link io.spine.core.Subscribe @Subscribe}
- * annotation.
+ * <p>Such a method may have side effects, but provides no visible output.
  *
  * @see io.spine.core.Subscribe
  */

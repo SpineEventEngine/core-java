@@ -142,7 +142,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     private ImmutableCollection<H> handlersOf(HandlerTypeInfo handlerKey) {
         ImmutableCollection<H> handlers = map.get(handlerKey);
         checkState(!handlers.isEmpty(),
-                   "Unable to find handler with key %s", handlerKey);
+                   "Unable to find handler with the key: %s.", handlerKey);
         return handlers;
     }
 

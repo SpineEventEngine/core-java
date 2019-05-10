@@ -21,16 +21,19 @@ package io.spine.server.entity.model;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
+import io.spine.server.type.EventClass;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of an {@linkplain Entity#state() entity state}.
+ * A class of an {@linkplain Entity#state() entity state}.
  */
 public final class EntityStateClass extends MessageClass<Message> {
 
     private static final long serialVersionUID = 0L;
+    private static final EventClass UPDATE_EVENT = EventClass.from(EntityStateChanged.class);
 
     private EntityStateClass(Class<? extends Message> value) {
         super(value);
@@ -59,5 +62,12 @@ public final class EntityStateClass extends MessageClass<Message> {
     public static EntityStateClass from(Class<? extends Message> value) {
         checkNotNull(value);
         return new EntityStateClass(value);
+    }
+
+    /**
+     * Obtains the built-in class of events emitted when an entity state is updated.
+     */
+    public static EventClass updateEvent() {
+        return UPDATE_EVENT;
     }
 }

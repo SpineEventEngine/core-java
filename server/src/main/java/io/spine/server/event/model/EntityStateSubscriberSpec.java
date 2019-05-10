@@ -81,7 +81,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     public Object[] extractArguments(EventEnvelope event) {
         EventMessage eventMessage = event.message();
         checkArgument(eventMessage instanceof EntityStateChanged,
-                      "Must be an %s event.", EntityStateChanged.class.getSimpleName());
+                      "Must be an `%s` event.", EntityStateChanged.class.getSimpleName());
         EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
         Message entityState = unpack(systemEvent.getNewState());
         return arrangeArguments(entityState, event);

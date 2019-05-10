@@ -29,9 +29,7 @@ import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.declare.MethodSignature;
-import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
-import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -40,7 +38,7 @@ import java.util.Set;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
- * Helper object for storing information about methods and events of an
+ * Helper object for storing information about methods and handlers of an
  * {@linkplain EventReceiverClass event receiving class}.
  *
  * @param <T>
@@ -57,30 +55,27 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
-    
-    private final MessageHandlerMap<EventClass, P, M> events;
+    private final MessageHandlerMap<EventClass, P, M> handlers;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
-
     private final ImmutableSet<EntityStateClass> domesticStates;
-
     private final ImmutableSet<EntityStateClass> externalStates;
+
     /**
      * Creates new instance for the passed raw class with methods obtained
      * though the passed factory.
      */
-    public EventReceivingClassDelegate(Class<? extends T> delegatingClass,
-                                       MethodSignature<M, ?> signature) {
+    public EventReceivingClassDelegate(Class<T> delegatingClass, MethodSignature<M, ?> signature) {
         super(delegatingClass);
-        this.events = MessageHandlerMap.create(delegatingClass, signature);
-        this.domesticEvents = events.messageClasses(HandlerMethod::isDomestic);
-        this.externalEvents = events.messageClasses(HandlerMethod::isExternal);
+        this.handlers = MessageHandlerMap.create(delegatingClass, signature);
+        this.domesticEvents = handlers.messageClasses(HandlerMethod::isDomestic);
+        this.externalEvents = handlers.messageClasses(HandlerMethod::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
     }
 
     public boolean contains(EventClass eventClass) {
-        return events.containsClass(eventClass);
+        return handlers.containsClass(eventClass);
     }
 
     /**
@@ -100,14 +95,14 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains domestic entity states to which the delegating class is subscribed.
      */
-    public ImmutableSet<EntityStateClass> domesticStates() {
+    public Set<EntityStateClass> domesticStates() {
         return domesticStates;
     }
 
     /**
      * Obtains external entity states to which the delegating class is subscribed.
      */
-    public ImmutableSet<EntityStateClass> externalStates() {
+    public Set<EntityStateClass> externalStates() {
         return externalStates;
     }
 
@@ -115,7 +110,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Obtains the classes of messages produced by handler methods of this class.
      */
     public Set<P> producedTypes() {
-        return events.producedTypes();
+        return handlers.producedTypes();
     }
 
     /**
@@ -124,7 +119,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @throws IllegalStateException if there is such method in the class
      */
     public Collection<M> handlersOf(EventClass eventClass, MessageClass originClass) {
-        return events.handlersOf(eventClass, originClass);
+        return handlers.handlersOf(eventClass, originClass);
     }
 
     /**
@@ -133,17 +128,20 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @throws IllegalStateException if there is such method in the class
      */
     public M handlerOf(EventClass eventClass, MessageClass originClass) {
-        return events.handlerOf(eventClass, originClass);
+        return handlers.handlerOf(eventClass, originClass);
     }
 
     /**
      * Obtains the classes of entity state messages from the passed handlers.
      */
     private ImmutableSet<EntityStateClass> extractStates(boolean external) {
-        ImmutableCollection<M> handlers =
-                events.handlersOf(EventClass.from(EntityStateChanged.class), EmptyClass.instance());
+        EventClass updateEvent = EntityStateClass.updateEvent();
+        if (!handlers.containsClass(updateEvent)) {
+            return ImmutableSet.of();
+        }
+        ImmutableCollection<M> stateHandlers = handlers.handlersOf(updateEvent);
         ImmutableSet<EntityStateClass> result =
-                handlers.stream()
+                stateHandlers.stream()
                         .filter(h -> h instanceof EntitySubscriberMethod)
                         .map(h -> (EntitySubscriberMethod) h)
                         .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
