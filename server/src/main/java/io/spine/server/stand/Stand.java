@@ -351,7 +351,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        return typeRegistry.getTypes();
+        return typeRegistry.allTypes();
     }
 
     /**
@@ -372,7 +372,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
-        return typeRegistry.getAggregateTypes();
+        return typeRegistry.aggregateTypes();
     }
 
     /**
@@ -460,7 +460,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private QueryProcessor processorFor(TypeUrl type) {
         Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
-                typeRegistry.getRecordRepository(type);
+                typeRegistry.recordRepositoryOf(type);
         if (foundRepository.isPresent()) {
             RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
             return new EntityQueryProcessor(repository);

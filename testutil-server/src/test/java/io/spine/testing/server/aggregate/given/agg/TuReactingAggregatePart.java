@@ -48,7 +48,7 @@ public final class TuReactingAggregatePart
         TuReactingAggregatePart result =
                 Given.aggregatePartOfClass(TuReactingAggregatePart.class)
                      .withRoot(root)
-                     .withId(root.getId())
+                     .withId(root.id())
                      .withVersion(5)
                      .build();
         return result;
