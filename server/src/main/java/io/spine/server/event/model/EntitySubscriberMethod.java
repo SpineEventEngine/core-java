@@ -52,22 +52,25 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("id.type_url");
 
     private final BoundedContextName contextOfSubscriber;
+    private final Class<? extends Message> entityType;
     private final Any typeUrlAsAny;
 
     EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+        super(checkNotFiltered(method), parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
-        checkNotFiltered(method);
+        this.entityType = firstParamType(rawMethod());
         checkExternal();
-        TypeUrl targetType = TypeUrl.of(entityType());
+        TypeUrl targetType = TypeUrl.of(this.entityType);
         this.typeUrlAsAny = toAny(targetType.value());
     }
 
-    private static void checkNotFiltered(Method method) {
+    private static Method checkNotFiltered(Method method) {
         Subscribe subscribe = method.getAnnotation(Subscribe.class);
         ByField filter = subscribe.filter();
         checkState(filter.path().isEmpty() && filter.value().isEmpty(),
-                   "Entity state subscriber cannot declare filters but method `%s` does.", method);
+                   "Entity state subscriber cannot declare filters but the method `%s` does.",
+                   method);
+        return method;
     }
 
     private void checkExternal() {
@@ -76,8 +79,11 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
         ensureExternalMatch(external);
     }
 
-    private Class<? extends Message> entityType() {
-        return getFirstParamType(rawMethod());
+    /**
+     * Obtains the type of the entity to which the method is subscribed.
+     */
+    public Class<? extends Message> entityType() {
+        return entityType;
     }
 
     @Override
@@ -89,6 +95,9 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
                 .build();
     }
 
+    /**
+     * Always returns {@link EntityStateChanged}{@code .class}.
+     */
     @Override
     protected Class<? extends EventMessage> rawMessageClass() {
         return EntityStateChanged.class;

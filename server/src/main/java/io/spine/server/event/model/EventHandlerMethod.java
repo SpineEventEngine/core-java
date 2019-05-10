@@ -61,14 +61,14 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
     }
 
     @Override
-    protected EventAcceptingMethodParams getParameterSpec() {
-        return (EventAcceptingMethodParams) super.getParameterSpec();
+    protected EventAcceptingMethodParams parameterSpec() {
+        return (EventAcceptingMethodParams) super.parameterSpec();
     }
 
     @Override
     public HandlerId id() {
         EventClass eventClass = getMessageClass();
-        if (!getParameterSpec().isAwareOfCommandType()) {
+        if (!parameterSpec().isAwareOfCommandType()) {
             return createId(eventClass);
         } else {
             Class<?>[] parameters = rawMethod().getParameterTypes();
