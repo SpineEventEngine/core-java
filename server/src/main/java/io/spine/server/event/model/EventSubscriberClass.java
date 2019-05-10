@@ -53,9 +53,9 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
         super(cls);
         this.eventSubscriptions = MessageHandlerMap.create(cls, new SubscriberSignature());
         this.domesticSubscriptions =
-                    eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
+                    eventSubscriptions.messageClasses(HandlerMethod::isDomestic);
         this.externalSubscriptions =
-                    eventSubscriptions.getMessageClasses(HandlerMethod::isExternal);
+                    eventSubscriptions.messageClasses(HandlerMethod::isExternal);
     }
 
     /**
@@ -82,6 +82,6 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     @Override
     public Collection<SubscriberMethod> subscribersOf(EventClass eventClass,
                                                       MessageClass originClass) {
-        return eventSubscriptions.getMethods(eventClass, originClass);
+        return eventSubscriptions.handlersOf(eventClass, originClass);
     }
 }

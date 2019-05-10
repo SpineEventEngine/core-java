@@ -64,8 +64,8 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
                                        MethodSignature<M, ?> signature) {
         super(rawClass);
         this.events = MessageHandlerMap.create(rawClass, signature);
-        this.domesticEvents = events.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalEvents = events.getMessageClasses(HandlerMethod::isExternal);
+        this.domesticEvents = events.messageClasses(HandlerMethod::isDomestic);
+        this.externalEvents = events.messageClasses(HandlerMethod::isExternal);
     }
 
     public boolean contains(EventClass eventClass) {
@@ -90,7 +90,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Obtains the classes of messages produced by handler methods of this class.
      */
     public Set<P> producedTypes() {
-        return events.getProducedTypes();
+        return events.producedTypes();
     }
 
     /**
@@ -99,7 +99,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @throws IllegalStateException if there is such method in the class
      */
     public Collection<M> getMethods(EventClass eventClass, MessageClass originClass) {
-        return events.getMethods(eventClass, originClass);
+        return events.handlersOf(eventClass, originClass);
     }
 
     /**
@@ -108,6 +108,6 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @throws IllegalStateException if there is such method in the class
      */
     public M getMethod(EventClass eventClass, MessageClass originClass) {
-        return events.getSingleMethod(eventClass, originClass);
+        return events.handlerOf(eventClass, originClass);
     }
 }
