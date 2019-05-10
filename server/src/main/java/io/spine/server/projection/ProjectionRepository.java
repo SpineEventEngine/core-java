@@ -233,7 +233,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @OverridingMethodsMustInvokeSuper
     @Override
     public boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(event);
+        Optional<SubscriberMethod> subscriber = projectionClass().subscriberOf(event);
         return subscriber.isPresent();
     }
 

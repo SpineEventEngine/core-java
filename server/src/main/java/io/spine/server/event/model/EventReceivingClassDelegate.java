@@ -89,7 +89,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains the classes of messages produced by handler methods of this class.
      */
-    public Set<P> getProducedTypes() {
+    public Set<P> producedTypes() {
         return events.getProducedTypes();
     }
 

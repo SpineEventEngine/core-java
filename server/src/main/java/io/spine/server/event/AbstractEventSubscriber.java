@@ -89,7 +89,7 @@ public abstract class AbstractEventSubscriber
      * subscriber} method of the entity.
      */
     protected void handle(EventEnvelope event) {
-        thisClass.getSubscriber(event)
+        thisClass.subscriberOf(event)
                  .ifPresent(method -> method.invoke(this, event));
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractEventSubscriber
 
     @Override
     public boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(event);
+        Optional<SubscriberMethod> subscriber = thisClass.subscriberOf(event);
         return subscriber.isPresent();
     }
 

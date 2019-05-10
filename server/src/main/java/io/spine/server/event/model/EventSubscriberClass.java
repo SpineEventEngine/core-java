@@ -80,8 +80,8 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public Collection<SubscriberMethod> getSubscribers(EventClass eventClass,
-                                                       MessageClass originClass) {
+    public Collection<SubscriberMethod> subscribersOf(EventClass eventClass,
+                                                      MessageClass originClass) {
         return eventSubscriptions.getMethods(eventClass, originClass);
     }
 }
