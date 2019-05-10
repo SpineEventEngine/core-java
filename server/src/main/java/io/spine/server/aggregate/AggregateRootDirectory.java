@@ -26,11 +26,7 @@ import io.spine.annotation.SPI;
 import java.util.Optional;
 
 /**
- * A mapping of aggregate roots to the associated parts.
- *
- * <p>A complex aggregate is a number of simpler aggregate instances which represent the same domain
- * object from the different viewpoints. These aggregates are derived from the {@link AggregatePart}
- * class and are united by a single root.
+ * A mapping of aggregate roots to the associated {@linkplain AggregatePart parts}.
  *
  * <p>In the directory, the aggregate root is represented by its type and the parts - by their
  * repositories.

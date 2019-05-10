@@ -20,17 +20,12 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -46,12 +41,6 @@ public class AggregateRoot<I> {
     /** The aggregate ID. */
     private final I id;
 
-    /** The cache of part repositories obtained from {@code boundedContext}. */
-    private final
-    LoadingCache<Class<? extends Message>,
-                 AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>>
-            cache = createCache();
-
     /**
      * Creates a new instance.
      *
@@ -59,10 +48,8 @@ public class AggregateRoot<I> {
      * @param id             the ID of the aggregate
      */
     protected AggregateRoot(BoundedContext boundedContext, I id) {
-        checkNotNull(boundedContext);
-        checkNotNull(id);
-        this.boundedContext = boundedContext;
-        this.id = id;
+        this.boundedContext = checkNotNull(boundedContext);
+        this.id = checkNotNull(id);
     }
 
     /**
@@ -100,33 +87,6 @@ public class AggregateRoot<I> {
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> repositoryOf(Class<S> stateClass) {
-
-        AggregatePartRepository<I, A, ?> result;
-        try {
-            result = (AggregatePartRepository<I, A, ?>) cache.get(stateClass);
-        } catch (ExecutionException e) {
-            throw illegalStateWithCauseOf(e);
-        }
-        return result;
-    }
-
-    /** Creates a cache for remembering aggregate part repositories. */
-    private LoadingCache<Class<? extends Message>,
-            AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>> createCache() {
-        return CacheBuilder.newBuilder()
-                           .build(newLoader());
-    }
-
-    /** Creates a loader which calls {@link #lookup(Class)}. */
-    private CacheLoader<Class<? extends Message>,
-            AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>> newLoader() {
-        return new PartRepositoryCacheLoader<>(this);
-    }
-
-    /** Finds an aggregate part repository in the Bounded Context. */
-    @SuppressWarnings("unchecked") // Logically checked.
-    private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
-    AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
         Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
         Optional<? extends AggregatePartRepository<?, ?, ?>> partRepository = boundedContext
                 .aggregateRootDirectory()
@@ -137,32 +97,5 @@ public class AggregateRoot<I> {
         );
         AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repository;
         return result;
-    }
-
-    /**
-     * The loader for the cache of aggregate part repositories.
-     *
-     * @param <I> the type of root identifier
-     * @see #createCache()
-     * @see #newLoader()
-     */
-    private static final class PartRepositoryCacheLoader<I>
-            extends CacheLoader<Class<? extends Message>,
-                                AggregatePartRepository<I,
-                                                        ? extends AggregatePart<I, ?, ?, ?>,
-                                                        ?>> {
-
-        private final AggregateRoot<I> root;
-
-        private PartRepositoryCacheLoader(AggregateRoot<I> root) {
-            super();
-            this.root = root;
-        }
-
-        @Override
-        public AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
-        load(Class<? extends Message> key) throws IllegalStateException {
-            return root.lookup(key);
-        }
     }
 }
