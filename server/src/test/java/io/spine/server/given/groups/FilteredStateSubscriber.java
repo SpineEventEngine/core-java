@@ -18,37 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.groups;
 
+import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import io.spine.server.given.organizations.Organization;
 
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * A test entity state subscriber.
- */
-public final class TestSubscriber extends AbstractEventSubscriber {
+public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
-    private Group domestic;
-    private Organization external;
-
-    @Subscribe
-    void domestic(Group group) {
-        this.domestic = group;
-    }
-
-    @Subscribe(external = true)
-    void external(Organization organization) {
-        this.external = organization;
-    }
-
-    public Optional<Group> domestic() {
-        return Optional.ofNullable(domestic);
-    }
-
-    public Optional<Organization> external() {
-        return Optional.ofNullable(external);
+    @Subscribe(
+            filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
+    )
+    void on(Organization organization) {
+        fail(FilteredStateSubscriber.class.getSimpleName() +
+                     " should not be able to receive any updates.");
     }
 }

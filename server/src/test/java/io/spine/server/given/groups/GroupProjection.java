@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.groups;
 
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.server.organizations.Organization;
+import io.spine.server.given.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;

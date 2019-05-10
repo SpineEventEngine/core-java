@@ -18,27 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.organizations;
 
-import io.spine.core.Subscribe;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
+/**
+ * A bounded context for testing entity state updates.
+ *
+ * <p>This package hosts a number of Protobuf definitions marked an {@code (entity)}-s and event
+ * subscribers which receive updates of those entities.
+ */
 
-public final class OrganizationProjection
-        extends Projection<OrganizationId, Organization, OrganizationVBuilder> {
+@BoundedContext("Groups")
 
-    private OrganizationProjection(OrganizationId id) {
-        super(id);
-    }
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.given.groups;
 
-    @Subscribe
-    void on(OrganizationEstablished event) {
-        builder().setId(event.getId())
-                 .setName(event.getName())
-                 .setHead(event.getHead());
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.annotation.BoundedContext;
 
-    public static final class Repository
-            extends ProjectionRepository<OrganizationId, OrganizationProjection, Organization> {
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
