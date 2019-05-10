@@ -203,7 +203,7 @@ class BoundedContextTest {
 
         @Nested
         @DisplayName("entity state class for")
-        class EntityStateClass {
+        class ByEntityStateClass {
 
             @Test
             @DisplayName("visible entities")
@@ -222,7 +222,7 @@ class BoundedContextTest {
 
         @Nested
         @DisplayName("entity class for")
-        class EntityClass {
+        class ByEntityClass {
 
             @Test
             @DisplayName("visible entities")
