@@ -32,7 +32,7 @@ import static io.spine.server.route.EventRoute.withId;
 
 public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
 
-    @Subscribe(external = true)
+    @Subscribe(external = true) // `Organization` belongs to another Context called `Organizations`.
     void on(Organization organization, EventContext systemContext) {
         Timestamp updateTime = systemContext.getTimestamp();
         builder().setId(id())
