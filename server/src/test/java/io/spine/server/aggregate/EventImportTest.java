@@ -70,7 +70,7 @@ class EventImportTest {
     @Test
     @DisplayName("Obtain importable event classes")
     void importableEventClasses() {
-        Set<EventClass> importableEventClasses = repository.importableEventClasses();
+        Set<EventClass> importableEventClasses = repository.importableEvents();
         Set<EventClass> exposedByAggregateClass = repository.aggregateClass()
                                                             .importableEvents();
         assertThat(importableEventClasses).isEqualTo(exposedByAggregateClass);

@@ -68,7 +68,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public Set<EventClass> incomingEvents() {
+    public Set<EventClass> domesticEvents() {
         return domesticEvents;
     }
 

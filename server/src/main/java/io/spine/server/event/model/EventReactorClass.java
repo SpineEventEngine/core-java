@@ -74,7 +74,7 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public Set<EventClass> incomingEvents() {
+    public Set<EventClass> domesticEvents() {
         return domesticEvents;
     }
 

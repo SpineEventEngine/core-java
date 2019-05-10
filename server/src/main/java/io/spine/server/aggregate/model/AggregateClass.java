@@ -73,8 +73,8 @@ public class AggregateClass<A extends Aggregate>
      * Obtains the set of event classes on which this aggregate class reacts.
      */
     @Override
-    public final Set<EventClass> incomingEvents() {
-        return delegate.incomingEvents();
+    public final Set<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
     }
 
     /**

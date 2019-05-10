@@ -242,19 +242,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public Set<EventClass> eventClasses() {
-        return aggregateClass().incomingEvents();
+    public Set<EventClass> domesticEvents() {
+        return aggregateClass().domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEventClasses() {
+    public Set<EventClass> externalEvents() {
         return aggregateClass().externalEvents();
     }
 
     /**
      * Obtains classes of events that can be imported by aggregates of this repository.
      */
-    public Set<EventClass> importableEventClasses() {
+    public Set<EventClass> importableEvents() {
         return aggregateClass().importableEvents();
     }
 
@@ -270,7 +270,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
         SetView<EventClass> eventClasses =
-                union(aggregateClass().outgoingEvents(), importableEventClasses());
+                union(aggregateClass().outgoingEvents(), importableEvents());
         return ImmutableSet.copyOf(eventClasses);
     }
 
@@ -340,7 +340,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         );
         I id = ids.stream()
                   .findFirst()
-                  .get();
+                  .orElseThrow(() -> newIllegalStateException(
+                          "Unable to route import event: `%s`.", event)
+                  );
         return id;
     }
 
@@ -348,7 +350,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onError(EventEnvelope event, RuntimeException exception) {
         checkNotNull(event);
         checkNotNull(exception);
-        logError("Error reacting on event (class: `%s` id: `%s`) in aggregate with state `%s.`",
+        logError("Error reacting on event (class: `%s` id: `%s`) in aggregate with the state `%s`.",
                  event, exception);
     }
 
