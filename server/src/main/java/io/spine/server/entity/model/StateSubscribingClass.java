@@ -42,7 +42,7 @@ public interface StateSubscribingClass {
 
     /**
      * Verifies if this class is {@linkplain io.spine.core.Subscribe subscribed} to updates of
-     * entity states either domestic or external.
+     * entity states, either domestic or external.
      */
     default boolean subscribesToStates() {
         boolean dispatchesDomestic = !domesticStates().isEmpty();
