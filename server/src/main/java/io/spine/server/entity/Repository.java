@@ -423,7 +423,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
                 String idStr = Identifier.toString(id);
-                throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
+                throw newIllegalStateException("Unable to load entity with ID: `%s`.", idStr);
             }
 
             E entity = loaded.get();
