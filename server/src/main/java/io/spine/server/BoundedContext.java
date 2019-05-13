@@ -33,6 +33,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.entity.DispatchingRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
@@ -165,10 +166,12 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Creates a new instance of {@link IntegrationBus} with the given parameters.
      *
-     * @param builder    the {@link BoundedContextBuilder} to obtain
-     *                   the {@link IntegrationBus.Builder} from
-     * @param eventBus   the initialized {@link EventBus}
-     * @param name       the name of the constructed Bounded Context
+     * @param builder
+     *         the {@link BoundedContextBuilder} to obtain the {@link IntegrationBus.Builder} from
+     * @param eventBus
+     *         the initialized {@link EventBus}
+     * @param name
+     *         the name of the constructed Bounded Context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
@@ -219,6 +222,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
+        if (repository instanceof DispatchingRepository) {
+            DispatchingRepository dr = (DispatchingRepository) repository;
+            dr.validateRouting();
+        }
         registerEventDispatcher(stand());
     }
 
@@ -270,10 +277,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the {@code EventBus} of
-     * this {@code BoundedContext}, if it dispatches domestic events.
+     * Registers the passed event dispatcher with the buses of this {@code BoundedContext}.
+     *
+     * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
      * the {@code IntegrationBus}.
+     *
+     * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
@@ -288,10 +298,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the {@code EventBus} of
-     * this {@code BoundedContext}, if it dispatchers domestic events.
-     * If the passed instance dispatches external events, registers it with
-     * the {@code IntegrationBus}.
+     * Registers the passed delegate of an {@link EventDispatcher} with the buses of this
+     * {@code BoundedContext}.
+     *
+     * @see #registerEventDispatcher(EventDispatcher)
      */
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
@@ -305,7 +315,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     private static
     Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
-        return () -> newIllegalStateException("No external dispatcher provided by %s", dispatcher);
+        return () -> newIllegalStateException(
+                "No external dispatcher provided by `%s`.", dispatcher);
     }
 
     /**

@@ -43,7 +43,7 @@ public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractEntity<I, S>,
                                                  S extends Message>
         extends DefaultRecordBasedRepository<I, E, S>
-        implements EventDispatcher<I> {
+        implements DispatchingRepository, EventDispatcher<I> {
 
     private final EventRouting<I> eventRouting;
 
@@ -63,6 +63,11 @@ public abstract class EventDispatchingRepository<I,
      */
     protected final EventRouting<I> eventRouting() {
         return eventRouting;
+    }
+
+    @Override
+    public final void validateRouting() throws IllegalStateException {
+        //TODO:2019-05-13:alexander.yevsyukov: Implement
     }
 
     /**
