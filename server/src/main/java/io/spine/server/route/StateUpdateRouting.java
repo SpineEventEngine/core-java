@@ -48,7 +48,7 @@ public class StateUpdateRouting<I>
     private static final long serialVersionUID = 0L;
 
     private StateUpdateRouting() {
-        super((message, context) -> noTargets());
+        super(defaultStateRouting());
     }
 
     /**
@@ -103,5 +103,9 @@ public class StateUpdateRouting<I>
             Message state = AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
+    }
+
+    private static <I> Route<Message, EventContext, Set<I>> defaultStateRouting() {
+        return (message, context) -> noTargets();
     }
 }

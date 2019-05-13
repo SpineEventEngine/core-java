@@ -33,7 +33,6 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
-import io.spine.server.entity.DispatchingRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
@@ -46,6 +45,7 @@ import io.spine.server.event.store.EventStore;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -222,9 +222,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
-        if (repository instanceof DispatchingRepository) {
-            DispatchingRepository dr = (DispatchingRepository) repository;
-            dr.validateRouting();
+        if (repository instanceof ProjectionRepository) {
+            ProjectionRepository pr = (ProjectionRepository) repository;
+            pr.validateStateRouting();
         }
         registerEventDispatcher(stand());
     }

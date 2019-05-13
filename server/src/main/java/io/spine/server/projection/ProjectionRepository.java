@@ -139,6 +139,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         systemSubscriber.registerIn(boundedContext());
     }
 
+    /**
+     * Validates routing schema for types of state messages (if any) that this repository dispatches
+     * to its entities.
+     *
+     * @throws IllegalStateException
+     *          if a message type cannot be dispatched
+     */
+    public final void validateStateRouting() throws IllegalStateException {
+        if (!projectionClass().subscribesToStates()) {
+            return;
+        }
+        //TODO:2019-05-13:alexander.yevsyukov: Implement
+    }
+
     @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {

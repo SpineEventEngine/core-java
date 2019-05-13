@@ -52,15 +52,15 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("id.type_url");
 
     private final BoundedContextName contextOfSubscriber;
-    private final Class<? extends Message> entityType;
+    private final Class<? extends Message> stateType;
     private final Any typeUrlAsAny;
 
     StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(checkNotFiltered(method), parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
-        this.entityType = firstParamType(rawMethod());
+        this.stateType = firstParamType(rawMethod());
         checkExternal();
-        TypeUrl targetType = TypeUrl.of(this.entityType);
+        TypeUrl targetType = TypeUrl.of(this.stateType);
         this.typeUrlAsAny = toAny(targetType.value());
     }
 
@@ -74,16 +74,16 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     private void checkExternal() {
-        BoundedContextName originContext = contextOf(entityType());
+        BoundedContextName originContext = contextOf(stateType());
         boolean external = !originContext.equals(contextOfSubscriber);
         ensureExternalMatch(external);
     }
 
     /**
-     * Obtains the type of the entity to which the method is subscribed.
+     * Obtains the type of the entity state to which the method is subscribed.
      */
-    public Class<? extends Message> entityType() {
-        return entityType;
+    public Class<? extends Message> stateType() {
+        return stateType;
     }
 
     @Override
