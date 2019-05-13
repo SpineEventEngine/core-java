@@ -176,7 +176,7 @@ public abstract class ProcessManagerRepository<I,
      * Obtains classes of external events to which the process managers managed by this repository
      * react.
      *
-     * @return a set of event classes or an empty set if process managers do not react on
+     * @return a set of event classes or an empty set if process managers do not react to
      *         external events
      */
     @Override
