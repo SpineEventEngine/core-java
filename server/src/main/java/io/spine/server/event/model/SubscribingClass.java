@@ -42,9 +42,9 @@ public interface SubscribingClass extends Logging {
      * @param event
      *         the event to obtain a method for
      */
-    default Optional<SubscriberMethod> getSubscriber(EventEnvelope event) {
+    default Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
         Collection<SubscriberMethod> subscribers =
-                getSubscribers(event.messageClass(), event.originClass());
+                subscribersOf(event.messageClass(), event.originClass());
         Comparator<SubscriberMethod> methodOrder = comparing(
                 (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
         ).reversed();
@@ -56,7 +56,7 @@ public interface SubscribingClass extends Logging {
         if (foundSubscriber.isPresent()) {
             return foundSubscriber;
         } else {
-            _debug("None of the subscriber methods could handle %s event." +
+            _debug("None of the subscriber methods could handle the `%s` event." +
                            "%n  Methods: %s" +
                            "%n  Event message: %s.",
                    event.messageClass(), subscribers, event.message());
@@ -64,5 +64,18 @@ public interface SubscribingClass extends Logging {
         }
     }
 
-    Collection<SubscriberMethod> getSubscribers(EventClass eventClass, MessageClass originClass);
+    /**
+     * Obtains all subscriber methods that handle the passed event class.
+     *
+     * <p>There can be more than one method, if the subscriptions used
+     * the {@linkplain io.spine.core.Subscribe#filter() field filtering}.
+     *
+     * @param eventClass
+     *          the class of the events
+     * @param originClass
+     *          the class of the messages that resulted in the event, or
+     *          {@link io.spine.server.type.EmptyClass EmptyClass} for all origins
+     * @return methods handling the requested class of the events
+     */
+    Collection<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass);
 }

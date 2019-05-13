@@ -237,8 +237,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting
-    Set<TypeName> allEntityStateTypes() {
-        return boundedContext.entityStateTypes();
+    Set<TypeName> allStateTypes() {
+        return boundedContext.stateTypes();
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */

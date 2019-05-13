@@ -18,18 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+/**
+ * This package contains test environment classes and interfaces which are used for integration
+ * testing of server-side sub-systems.
+ */
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.given;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-public class HiddenEntitySubscriber extends AbstractEventSubscriber {
-
-    @Subscribe
-    void on(HiddenParticipant organization) {
-        fail(HiddenEntitySubscriber.class.getSimpleName() +
-                     " should not be able to receive updates from hidden entities.");
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -55,12 +55,12 @@ import io.spine.system.server.event.EntityCreated;
 import io.spine.system.server.event.EntityCreatedVBuilder;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityDeletedVBuilder;
-import io.spine.system.server.event.EntityExtractedFromArchive;
-import io.spine.system.server.event.EntityExtractedFromArchiveVBuilder;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityRestoredVBuilder;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EntityStateChangedVBuilder;
+import io.spine.system.server.event.EntityUnarchived;
+import io.spine.system.server.event.EntityUnarchivedVBuilder;
 import io.spine.system.server.event.EventImported;
 import io.spine.system.server.event.EventImportedVBuilder;
 import io.spine.type.TypeUrl;
@@ -350,7 +350,7 @@ public class EntityLifecycle {
         if (!newValue && oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
-            EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
+            EntityUnarchived event = EntityUnarchivedVBuilder
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))

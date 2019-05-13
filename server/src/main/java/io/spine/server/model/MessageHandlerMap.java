@@ -94,7 +94,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     /**
      * Obtains classes of messages for which handlers are stored in this map.
      */
-    public Set<M> getMessageClasses() {
+    public Set<M> messageClasses() {
         return messageClasses;
     }
 
@@ -112,7 +112,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @param predicate
      *         a predicate for handler methods to filter the corresponding message classes
      */
-    public ImmutableSet<M> getMessageClasses(Predicate<? super H> predicate) {
+    public ImmutableSet<M> messageClasses(Predicate<? super H> predicate) {
         Multimap<HandlerTypeInfo, H> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
@@ -120,7 +120,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     /**
      * Obtains the classes of messages produced by the handler methods in this map.
      */
-    public ImmutableSet<P> getProducedTypes() {
+    public ImmutableSet<P> producedTypes() {
         ImmutableSet<P> result = map
                 .values()
                 .stream()
@@ -139,10 +139,10 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    private ImmutableCollection<H> getMethods(HandlerTypeInfo handlerKey) {
+    private ImmutableCollection<H> handlersOf(HandlerTypeInfo handlerKey) {
         ImmutableCollection<H> handlers = map.get(handlerKey);
         checkState(!handlers.isEmpty(),
-                   "Unable to find handler with key %s", handlerKey);
+                   "Unable to find handler with the key: %s.", handlerKey);
         return handlers;
     }
 
@@ -160,7 +160,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    public ImmutableCollection<H> getMethods(M messageClass, MessageClass originClass) {
+    public ImmutableCollection<H> handlersOf(M messageClass, MessageClass originClass) {
         HandlerTypeInfo keyWithOrigin = HandlerTypeInfo
                 .newBuilder()
                 .setMessageType(typeUrl(messageClass).value())
@@ -171,7 +171,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
                                      : keyWithOrigin.toVBuilder()
                                                     .clearOriginType()
                                                     .build();
-        return getMethods(presentKey);
+        return handlersOf(presentKey);
     }
 
     /**
@@ -189,8 +189,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no such method or several such methods found in the map
      */
-    public H getSingleMethod(M messageClass, MessageClass originClass) {
-        ImmutableCollection<H> methods = getMethods(messageClass, originClass);
+    public H handlerOf(M messageClass, MessageClass originClass) {
+        ImmutableCollection<H> methods = handlersOf(messageClass, originClass);
         return checkSingle(methods, messageClass);
     }
 
@@ -203,8 +203,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    public ImmutableCollection<H> getMethods(M messageClass) {
-        return getMethods(messageClass, EmptyClass.instance());
+    public ImmutableCollection<H> handlersOf(M messageClass) {
+        return handlersOf(messageClass, EmptyClass.instance());
     }
 
     /**
@@ -219,8 +219,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no such method or several such methods found in the map
      */
-    public H getSingleMethod(M messageClass) {
-        ImmutableCollection<H> methods = getMethods(messageClass);
+    public H handlerOf(M messageClass) {
+        ImmutableCollection<H> methods = handlersOf(messageClass);
         return checkSingle(methods, messageClass);
     }
 

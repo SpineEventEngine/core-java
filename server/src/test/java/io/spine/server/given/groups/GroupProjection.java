@@ -18,24 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.groups;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.server.organizations.Organization;
+import io.spine.server.given.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.StateUpdateRouting;
 
+import static io.spine.server.route.EventRoute.withId;
+
 public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
 
-    private GroupProjection(GroupId id) {
-        super(id);
-    }
-
-    @Subscribe(external = true)
+    @Subscribe(external = true) // `Organization` belongs to another Context called `Organizations`.
     void on(Organization organization, EventContext systemContext) {
         Timestamp updateTime = systemContext.getTimestamp();
         builder().setId(id())
@@ -52,10 +49,10 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
             super.onRegistered();
             StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
             routing.route(Organization.class, (org, eventContext) ->
-                    ImmutableSet.of(GroupId.newBuilder()
-                                           .setUuid(org.getHead()
-                                                       .getValue())
-                                           .build()));
+                    withId(GroupId.newBuilder()
+                                  .setUuid(org.getHead()
+                                              .getValue())
+                                  .build()));
             eventRouting().routeEntityStateUpdates(routing);
         }
     }

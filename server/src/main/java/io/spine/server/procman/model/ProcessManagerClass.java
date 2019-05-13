@@ -79,9 +79,9 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<EventClass> incomingEvents() {
+    public Set<EventClass> domesticEvents() {
         SetView<EventClass> result =
-                union(reactorDelegate.incomingEvents(), commanderDelegate.incomingEvents());
+                union(reactorDelegate.domesticEvents(), commanderDelegate.domesticEvents());
         return result;
     }
 

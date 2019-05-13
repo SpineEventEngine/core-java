@@ -18,44 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.organizations;
 
 import io.spine.core.Subscribe;
-import io.spine.server.organizations.Organization;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.StateUpdateRouting;
 
-import static io.spine.server.route.EventRoute.withId;
+public final class OrganizationProjection
+        extends Projection<OrganizationId, Organization, OrganizationVBuilder> {
 
-public final class GroupNameProjection
-        extends Projection<GroupId, GroupName, GroupNameVBuilder> {
-
-    private GroupNameProjection(GroupId id) {
+    private OrganizationProjection(OrganizationId id) {
         super(id);
     }
 
-    @Subscribe(external = true)
-    void onUpdate(Organization organization) {
-        builder()
-                .setId(id())
-                .setName(organization.getName());
+    @Subscribe
+    void on(OrganizationEstablished event) {
+        builder().setId(event.getId())
+                 .setName(event.getName())
+                 .setHead(event.getHead());
     }
 
     public static final class Repository
-            extends ProjectionRepository<GroupId, GroupNameProjection, GroupName> {
-
-        @Override
-        public void onRegistered() {
-            super.onRegistered();
-
-            StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
-            routing.route(Organization.class, (org, ctx) -> withId(
-                    GroupId.newBuilder()
-                           .setUuid(org.getId()
-                                       .getUuid())
-                           .build()));
-            eventRouting().routeEntityStateUpdates(routing);
-        }
+            extends ProjectionRepository<OrganizationId, OrganizationProjection, Organization> {
     }
 }

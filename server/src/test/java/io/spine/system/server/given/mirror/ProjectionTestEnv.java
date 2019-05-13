@@ -29,9 +29,9 @@ import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.MirrorId;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityExtractedFromArchive;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityUnarchived;
 import io.spine.test.system.server.Video;
 import io.spine.type.TypeUrl;
 
@@ -97,8 +97,8 @@ public final class ProjectionTestEnv {
         return event;
     }
 
-    public static EntityExtractedFromArchive entityExtracted() {
-        EntityExtractedFromArchive event = EntityExtractedFromArchive
+    public static EntityUnarchived entityExtracted() {
+        EntityUnarchived event = EntityUnarchived
                 .newBuilder()
                 .setId(historyId(RAW_ID))
                 .setWhen(currentTime())

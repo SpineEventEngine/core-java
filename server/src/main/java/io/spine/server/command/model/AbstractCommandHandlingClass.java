@@ -57,18 +57,18 @@ public abstract class AbstractCommandHandlingClass<C,
 
     @Override
     public Set<CommandClass> commands() {
-        return commands.getMessageClasses();
+        return commands.messageClasses();
     }
 
     @Override
     public Set<P> commandOutput() {
-        return commands.getProducedTypes();
+        return commands.producedTypes();
     }
 
     /** Obtains the handler method for the passed command class. */
     @Override
     public H handlerOf(CommandClass commandClass) {
-        return commands.getSingleMethod(commandClass);
+        return commands.handlerOf(commandClass);
     }
 
     boolean contains(CommandClass commandClass) {

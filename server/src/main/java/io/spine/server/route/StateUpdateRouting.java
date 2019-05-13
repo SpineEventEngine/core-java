@@ -20,7 +20,6 @@
 
 package io.spine.server.route;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
@@ -29,13 +28,16 @@ import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
 
+import static io.spine.server.route.EventRoute.noTargets;
+
 /**
  * A routing schema used to deliver entity state updates.
  *
- * <p>A routing schema consists of a default route and custom routes per event class.
- * When calculating a set of update targets, {@code StateUpdateRouting} would see if there is
- * a custom route set for the type of the event. If not found, the default route will be
- * {@linkplain EventRoute#apply(Message, Message) applied}.
+ * <p>A routing schema consists of a default route and custom routes per entity state class.
+ * When calculating targets to be notified on the updated state, {@code StateUpdateRouting} would
+ * see if there is a custom route set for the type of the entity state.
+ * If not found, the default route will be
+ * {@linkplain StateUpdateRouting#apply(Message, Message) applied}.
  *
  * @param <I>
  *         the type of the entity IDs to which the updates are routed
@@ -46,7 +48,7 @@ public class StateUpdateRouting<I>
     private static final long serialVersionUID = 0L;
 
     private StateUpdateRouting() {
-        super((message, context) -> ImmutableSet.of());
+        super((message, context) -> noTargets());
     }
 
     /**
@@ -80,8 +82,8 @@ public class StateUpdateRouting<I>
      *         if the route for this class is already set
      */
     @CanIgnoreReturnValue
-    public <S extends Message> StateUpdateRouting<I> route(Class<S> stateClass,
-                                                           StateUpdateRoute<I, S> via)
+    public <S extends Message>
+    StateUpdateRouting<I> route(Class<S> stateClass, StateUpdateRoute<I, S> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
         Route<Message, EventContext, Set<I>> route = (Route<Message, EventContext, Set<I>>) via;
@@ -97,8 +99,8 @@ public class StateUpdateRouting<I>
      * @return event route for {@link EntityStateChanged} events
      */
     EventRoute<I, EntityStateChanged> eventRoute() {
-        return (message, context) -> {
-            Message state = AnyPacker.unpack(message.getNewState());
+        return (event, context) -> {
+            Message state = AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
     }

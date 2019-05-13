@@ -18,37 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
-
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+package io.spine.server.entity.model;
 
 import java.util.Set;
 
 /**
- * The helper class for holding messaging information on behalf of another model class.
+ * A class which can {@linkplain io.spine.core.Subscribe subscribe} to updates of entity states.
  *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
+ * <p>A class can declare methods to receive updated states of entities from the same Bounded
+ * Context (“domestic” states), or states originated in another Bounded Context (“external” states).
  */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+public interface StateSubscribingClass {
 
-    private static final long serialVersionUID = 0L;
+    /**
+     * Obtains domestic entity states to which the class is subscribed.
+     */
+    Set<StateClass> domesticStates();
 
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
-    }
-
-    @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass originClass) {
-        return handlerOf(eventClass, originClass);
-    }
-
-    @Override
-    public Set<EventClass> reactionOutput() {
-        return producedTypes();
-    }
+    /**
+     * Obtains external entity states to which the class is subscribed.
+     */
+    Set<StateClass> externalStates();
 }

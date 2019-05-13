@@ -22,11 +22,11 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -46,9 +46,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected TypeUrl extractType(EventEnvelope event) {
-        EntityStateChanged eventMessage = getEventMessage(event);
-        String type = eventMessage.getId()
-                                  .getTypeUrl();
+        String type = toHistoryId(event).getTypeUrl();
         TypeUrl result = TypeUrl.parse(type);
         return result;
     }
@@ -60,9 +58,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Any extractId(EventEnvelope event) {
-        EntityStateChanged eventMessage = getEventMessage(event);
-        EntityId entityId = eventMessage.getId()
-                                        .getEntityId();
+        EntityId entityId = toHistoryId(event).getEntityId();
         Any result = entityId.getId();
         return result;
     }
@@ -74,15 +70,17 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Message extractMessage(EventEnvelope event) {
-        EntityStateChanged eventMessage = getEventMessage(event);
+        EntityStateChanged eventMessage = toMessage(event);
         Any newState = eventMessage.getNewState();
         Message result = AnyPacker.unpack(newState);
         return result;
     }
 
-    private static EntityStateChanged getEventMessage(EventEnvelope event) {
-        EventMessage message = event.message();
-        EntityStateChanged result = (EntityStateChanged) message;
-        return result;
+    private static EntityHistoryId toHistoryId(EventEnvelope event) {
+        return toMessage(event).getId();
+    }
+
+    private static EntityStateChanged toMessage(EventEnvelope event) {
+        return (EntityStateChanged) event.message();
     }
 }

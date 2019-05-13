@@ -210,7 +210,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     protected final BoundedContext boundedContext() {
         checkState(boundedContext != null,
-                   "The repository (class: %s) is not registered with a BoundedContext.",
+                   "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
         return boundedContext;
     }

@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.model.EntityStateClass;
+import io.spine.server.entity.model.StateClass;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ExceptionFactory;
@@ -106,7 +106,7 @@ public final class InvalidEntityStateException extends RuntimeException {
     private static final class Factory
             extends ExceptionFactory<InvalidEntityStateException,
                                      Message,
-                                     EntityStateClass,
+                                     StateClass,
                                      EntityStateValidationError> {
 
         /**
@@ -117,17 +117,17 @@ public final class InvalidEntityStateException extends RuntimeException {
          */
         private static final String ATTR_ENTITY_STATE_TYPE_NAME = "entityStateType";
 
-        private final EntityStateClass entityStateClass;
+        private final StateClass stateClass;
 
         private Factory(Message entityState,
                         Iterable<ConstraintViolation> violations) {
             super(entityState, violations);
-            this.entityStateClass = EntityStateClass.of(entityState);
+            this.stateClass = StateClass.of(entityState);
         }
 
         @Override
-        protected EntityStateClass getMessageClass() {
-            return entityStateClass;
+        protected StateClass getMessageClass() {
+            return stateClass;
         }
 
         @Override

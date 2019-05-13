@@ -28,7 +28,7 @@ import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
-import io.spine.system.server.rejection.HistoryRejections;
+import io.spine.system.server.rejection.HistoryRejections.CannotDispatchEventTwice;
 
 /**
  * An {@link io.spine.server.event.AbstractEventSubscriber EventSubscriber} for system events
@@ -54,7 +54,7 @@ final class ProjectionSystemEventWatcher<I> extends SystemEventWatcher<I> {
     }
 
     @Subscribe
-    void on(HistoryRejections.CannotDispatchEventTwice event) {
+    void on(CannotDispatchEventTwice event) {
         onError(event.getPayload());
     }
 

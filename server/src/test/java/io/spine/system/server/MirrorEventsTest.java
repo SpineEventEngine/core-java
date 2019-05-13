@@ -25,9 +25,9 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityExtractedFromArchive;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityUnarchived;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -134,7 +134,7 @@ class MirrorEventsTest {
 
     @Nested
     @DisplayName("EntityExtractedFromArchive event")
-    class Extracted extends MirrorProjectionTest<EntityExtractedFromArchive> {
+    class Extracted extends MirrorProjectionTest<EntityUnarchived> {
 
         private MirrorProjection projection;
 

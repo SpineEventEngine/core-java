@@ -203,7 +203,7 @@ class BoundedContextTest {
 
         @Nested
         @DisplayName("entity state class for")
-        class EntityStateClass {
+        class ByEntityStateClass {
 
             @Test
             @DisplayName("visible entities")
@@ -222,7 +222,7 @@ class BoundedContextTest {
 
         @Nested
         @DisplayName("entity class for")
-        class EntityClass {
+        class ByEntityClass {
 
             @Test
             @DisplayName("visible entities")
@@ -438,12 +438,12 @@ class BoundedContextTest {
     @Test
     @DisplayName("obtain entity types by visibility")
     void getEntityTypesByVisibility() {
-        assertThat(boundedContext.entityStateTypes(EntityOption.Visibility.FULL))
+        assertThat(boundedContext.stateTypes(EntityOption.Visibility.FULL))
                 .isEmpty();
 
         registerAll();
 
-        assertThat(boundedContext.entityStateTypes(EntityOption.Visibility.FULL))
+        assertThat(boundedContext.stateTypes(EntityOption.Visibility.FULL))
                 .isNotEmpty();
     }
 

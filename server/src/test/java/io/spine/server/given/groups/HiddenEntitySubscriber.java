@@ -18,19 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.groups;
 
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class WronglyDomesticSubscriber extends AbstractEventSubscriber {
+public class HiddenEntitySubscriber extends AbstractEventSubscriber {
 
-    @Subscribe // <-- Error here. Should be external.
-    void on(Organization organization) {
-        fail(WronglyDomesticSubscriber.class.getSimpleName() +
-                     " should not be able to receive external updates.");
+    @Subscribe
+    void on(HiddenParticipant organization) {
+        fail(HiddenEntitySubscriber.class.getSimpleName() +
+                     " should not be able to receive updates from hidden entities.");
     }
 }

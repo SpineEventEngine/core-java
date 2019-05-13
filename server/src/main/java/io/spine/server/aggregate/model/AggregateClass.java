@@ -55,7 +55,7 @@ public class AggregateClass<A extends Aggregate>
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
         this.stateEvents = MessageHandlerMap.create(cls, new EventApplierSignature());
-        this.importableEvents = stateEvents.getMessageClasses(EventApplier::allowsImport);
+        this.importableEvents = stateEvents.messageClasses(EventApplier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }
 
@@ -73,8 +73,8 @@ public class AggregateClass<A extends Aggregate>
      * Obtains the set of event classes on which this aggregate class reacts.
      */
     @Override
-    public final Set<EventClass> incomingEvents() {
-        return delegate.incomingEvents();
+    public final Set<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
     }
 
     /**
@@ -99,7 +99,7 @@ public class AggregateClass<A extends Aggregate>
      * @see #importableEvents()
      */
     public final Set<EventClass> stateEvents() {
-        return stateEvents.getMessageClasses();
+        return stateEvents.messageClasses();
     }
 
     /**
@@ -136,6 +136,6 @@ public class AggregateClass<A extends Aggregate>
      * Obtains event applier method for the passed class of events.
      */
     public final EventApplier applierOf(EventClass eventClass) {
-        return stateEvents.getSingleMethod(eventClass);
+        return stateEvents.handlerOf(eventClass);
     }
 }
