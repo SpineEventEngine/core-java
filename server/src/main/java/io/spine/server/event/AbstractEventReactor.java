@@ -79,7 +79,7 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
 
     @Override
     public Set<EventClass> messageClasses() {
-        return thisClass.incomingEvents();
+        return thisClass.domesticEvents();
     }
 
     @CanIgnoreReturnValue

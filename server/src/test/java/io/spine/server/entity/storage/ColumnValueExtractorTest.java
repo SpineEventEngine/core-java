@@ -101,7 +101,6 @@ class ColumnValueExtractorTest {
                                  .getValue());
     }
 
-    @SuppressWarnings("unchecked") // Okay for test.
     @Test
     @DisplayName("extract standard fields if no custom fields defined")
     void handleNoneDefined() {
@@ -117,7 +116,10 @@ class ColumnValueExtractorTest {
 
     private static <E extends Entity<?, ?>>
     Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
-        Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
+        @SuppressWarnings("unchecked") // Only erasure type is available from `getClass()`.
+        Class<? extends Entity<?, ?>> entityClass =
+                (Class<? extends Entity<?, ?>>) entity.getClass();
+        Collection<EntityColumn> entityColumns = getAllColumns(entityClass);
         ColumnValueExtractor columnValueExtractor =
                 ColumnValueExtractor.create(entity, entityColumns);
         return columnValueExtractor.extractColumnValues();

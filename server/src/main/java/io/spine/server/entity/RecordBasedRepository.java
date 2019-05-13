@@ -138,7 +138,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Stores {@linkplain Entity Entities} in bulk.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
+     * <p>Note: The storage must be assigned before calling this method.
      *
      * @param entities the {@linkplain Entity Entities} to store
      */
@@ -225,10 +225,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>The order of objects in the result is not guaranteed to be the same
      * as the order of IDs passed as argument.
      *
-     * <p>In case IDs contain duplicates, the result may also contain duplicates,
-     * depending on particular implementation.
+     * <p>If the IDs contain duplicates, the result may also contain duplicates
+     * depending on a particular implementation.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
+     * <p>Note: The storage must be assigned before calling this method.
      *
      * @param ids
      *         entity IDs to search for
@@ -242,12 +242,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Loads all the entities in this repository by their IDs and
      * applies the {@link FieldMask} to each of them.
      *
-     * <p>Acts in the same way as {@link #loadAll(Iterable)}, with
+     * <p>Acts in the same way as {@link #loadAll(Iterable)} with
      * the {@code FieldMask} applied to the results.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
+     * <p>Note: The storage must be assigned before calling this method.
      *
      * @param ids
      *         entity IDs to search for
@@ -268,7 +268,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Loads all the entities in this repository.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
+     * <p>Note: The storage must be assigned before calling this method.
      *
      * @return all the entities in this repository
      * @see #loadAll(Iterable)
@@ -304,16 +304,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>The filtering process is delegated to the underlying {@link RecordStorage}.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
+     * <p>Note: The storage must be assigned before calling this method.
      *
      * @param filters
-     *         entity filters
+     *         the entity filters
      * @param orderBy
      *         an orderBy to sort the filtered results before pagination
      * @param pagination
-     *         a pagination to apply to the sorted result set
+     *         the pagination to apply to the sorted result set
      * @param fieldMask
-     *         a mask to apply to the entities
+     *         the mask to apply to the entities
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
@@ -336,12 +336,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @param filters
      *         entity filters
      * @param orderBy
-     *         an orderBy to sort the filtered results before pagination
+     *         the orderBy to sort the filtered results before pagination
      * @param pagination
-     *         a pagination to apply to the sorted result set
+     *         the pagination to apply to the sorted result set
      * @param fieldMask
-     *         a mask to apply to the entities
-     * @return an iterator over the matching records
+     *         the mask to apply to the entities
+     * @return the iterator over the matching records
      */
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, OrderBy orderBy,
@@ -398,7 +398,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>If {@link Column} definitions are incorrect, the {@link IllegalStateException} is thrown.
      *
      * @throws IllegalStateException
-     *         in case entity column definitions are incorrect
+     *         if the entity column definitions are incorrect
      */
     private void cacheEntityColumns() {
         columnCache().ensureColumnsCached();

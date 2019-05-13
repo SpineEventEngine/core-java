@@ -18,19 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * A bounded context for testing entity state updates.
- *
- * <p>This package hosts a number of Protobuf definitions marked an {@code (entity)}-s.
- */
+package io.spine.server.given.groups;
 
-@BoundedContext("Organizations")
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.organizations;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
+public class HiddenEntitySubscriber extends AbstractEventSubscriber {
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Subscribe
+    void on(HiddenParticipant organization) {
+        fail(HiddenEntitySubscriber.class.getSimpleName() +
+                     " should not be able to receive updates from hidden entities.");
+    }
+}

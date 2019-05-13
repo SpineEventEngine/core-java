@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 
 Spine Event Engine is a Java framework for building Event Sourcing and CQRS applications that are accessed by
-clients built with JavaScript, Java Nano (Android), Objective-C, and Java.
+clients built with JavaScript, Java Nano (Android), C++, and Java.
 
 Requires Java 8 or higher.
 
@@ -22,17 +22,17 @@ Please track our release announcement to be informed about the production versio
 
 There is a [template][server-quickstart] for a server application built in Spine.
 
-The introductory application examples are available [here][examples-java].
+The introductory application examples are available [here][spine-examples].
 
-For more advanced example including a Spine server, a console client and a web application see [ToDo List app][todo-list].   
+For more advanced example including a Spine server, a console client, and a web application, see [ToDo List app][todo-list].   
 
 ## Links
-* [Getting Started Guide][getting-started]
+* [Getting Started with Spine in Java](https://spine.io/docs/quickstart/java.html)
 * [The framework site][spine-site]
 
 If you plan to contribute to the project please visit these pages:
-* [Java Code Style][java-code-style]
 * [Wiki home][wiki-home]
+* [Java Code Style][java-code-style]
 
 ## Important Warnings
 * The code annotated with `@Internal` are not parts of public API of the framework, therefore should
@@ -50,6 +50,6 @@ If you need to use API with one of these annotations, please [contact us][email-
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 
 [getting-started]: https://github.com/SpineEventEngine/documentation/blob/master/getting-started/index.md
-[server-quickstart]: https://github.com/SpineEventEngine/server-quickstart/
-[examples-java]: https://github.com/SpineEventEngine/examples-java
-[todo-list]: https://github.com/SpineEventEngine/todo-list
+[server-quickstart]: https://github.com/spine-examples/server-quickstart
+[spine-examples]: https://github.com/spine-examples
+[todo-list]: https://github.com/spine-examples/todo-list

@@ -50,8 +50,8 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     private EventReactorClass(Class<? extends S> cls) {
         super(cls);
         this.reactors = MessageHandlerMap.create(cls, new EventReactorSignature());
-        this.domesticEvents = reactors.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalEvents = reactors.getMessageClasses(HandlerMethod::isExternal);
+        this.domesticEvents = reactors.messageClasses(HandlerMethod::isDomestic);
+        this.externalEvents = reactors.messageClasses(HandlerMethod::isExternal);
     }
 
     /** Creates new instance for the given raw class. */
@@ -65,16 +65,16 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
 
     @Override
     public EventReactorMethod reactorOf(EventClass eventClass, MessageClass commandClass) {
-        return reactors.getSingleMethod(eventClass, commandClass);
+        return reactors.handlerOf(eventClass, commandClass);
     }
 
     @Override
     public Set<EventClass> reactionOutput() {
-        return reactors.getProducedTypes();
+        return reactors.producedTypes();
     }
 
     @Override
-    public Set<EventClass> incomingEvents() {
+    public Set<EventClass> domesticEvents() {
         return domesticEvents;
     }
 

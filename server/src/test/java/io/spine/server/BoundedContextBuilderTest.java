@@ -20,6 +20,8 @@
 
 package io.spine.server;
 
+import com.google.common.testing.NullPointerTester;
+import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
@@ -33,8 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,29 +56,11 @@ class BoundedContextBuilderTest {
                                 .setMultitenant(true);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored") // Methods are called to throw exception.
-    @Nested
-    @DisplayName("not accept null")
-    class NotAcceptNull {
-
-        @Test
-        @DisplayName("CommandBus")
-        void commandBus() {
-            assertThrows(NullPointerException.class, () -> builder.setCommandBus(Tests.nullRef()));
-        }
-
-        @Test
-        @DisplayName("EventBus")
-        void eventBus() {
-            assertThrows(NullPointerException.class, () -> builder.setEventBus(Tests.nullRef()));
-        }
-
-        @Test
-        @DisplayName("TransportFactory")
-        void transportFactory() {
-            assertThrows(NullPointerException.class,
-                         () -> builder.setTransportFactory(Tests.nullRef()));
-        }
+    @Test
+    @DisplayName("not allow nulls")
+    void notAcceptNulls() {
+        new NullPointerTester()
+                .testAllPublicInstanceMethods(builder);
     }
 
     @Nested
@@ -117,11 +99,10 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("StorageFactory supplier if it was set")
         void storageFactorySupplier() {
-            @SuppressWarnings("unchecked") // OK for this mock.
-                    Supplier<StorageFactory> mock = mock(Supplier.class);
-
-            assertEquals(mock, builder.setStorageFactorySupplier(mock)
+            StorageFactory mock = mock(StorageFactory.class);
+            assertEquals(mock, builder.setStorageFactorySupplier(() -> mock)
                                       .storageFactorySupplier()
+                                      .get()
                                       .get());
         }
 
@@ -133,6 +114,14 @@ class BoundedContextBuilderTest {
             assertEquals(factory, builder.setTransportFactory(factory)
                                          .transportFactory()
                                          .get());
+        }
+
+        @Test
+        @DisplayName("AggregateRootDirectory if it was set")
+        void aggregateRootDirectory() {
+            AggregateRootDirectory directory = mock(AggregateRootDirectory.class);
+            builder.setAggregateRootDirectory(() -> directory);
+            assertEquals(directory, builder.aggregateRootDirectory());
         }
     }
 
@@ -182,6 +171,13 @@ class BoundedContextBuilderTest {
             BoundedContext boundedContext = builder.build();
             assertNotNull(boundedContext.commandBus());
             assertNotNull(boundedContext.eventBus());
+        }
+
+        @Test
+        @DisplayName("AggregateRootDirectory")
+        void aggregateRootDirectory() {
+            BoundedContext boundedContext = builder.build();
+            assertNotNull(boundedContext.aggregateRootDirectory());
         }
     }
 

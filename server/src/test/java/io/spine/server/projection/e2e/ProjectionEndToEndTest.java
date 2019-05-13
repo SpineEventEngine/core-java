@@ -30,15 +30,15 @@ import io.spine.core.EventContext;
 import io.spine.core.Events;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.groups.Group;
-import io.spine.server.groups.GroupId;
-import io.spine.server.groups.GroupName;
-import io.spine.server.groups.GroupNameProjection;
-import io.spine.server.groups.GroupProjection;
-import io.spine.server.organizations.Organization;
-import io.spine.server.organizations.OrganizationEstablished;
-import io.spine.server.organizations.OrganizationId;
-import io.spine.server.organizations.OrganizationProjection;
+import io.spine.server.given.groups.Group;
+import io.spine.server.given.groups.GroupId;
+import io.spine.server.given.groups.GroupName;
+import io.spine.server.given.groups.GroupNameProjection;
+import io.spine.server.given.groups.GroupProjection;
+import io.spine.server.given.organizations.Organization;
+import io.spine.server.given.organizations.OrganizationEstablished;
+import io.spine.server.given.organizations.OrganizationId;
+import io.spine.server.given.organizations.OrganizationProjection;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.TestProjection;
@@ -63,7 +63,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
-import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -86,23 +85,19 @@ class ProjectionEndToEndTest {
                                           created,
                                           firstTaskAdded,
                                           secondTaskAdded)
-                .assertThat(exactlyOne(
-                        ProjectTaskNames
-                                .newBuilder()
-                                .setProjectId(producerId)
-                                .setProjectName(created.getName())
-                                .addTaskName(firstTaskAdded.getTask()
-                                                           .getTitle())
-                                .addTaskName(secondTaskAdded.getTask()
-                                                            .getTitle())
-                                .build()
-                ));
+                .assertEntityWithState(ProjectTaskNames.class, producerId)
+                .hasStateThat()
+                .isEqualTo(ProjectTaskNames
+                                   .newBuilder()
+                                   .setProjectId(producerId)
+                                   .setProjectName(created.getName())
+                                   .addTaskName(firstTaskAdded.getTask().getTitle())
+                                   .addTaskName(secondTaskAdded.getTask().getTitle())
+                                   .build());
     }
 
     @Test
     @DisplayName("receive entity state updates of entities of other context")
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-        // Black box context is used in a non-fluent fashion.
     void receiveExternal() {
         OrganizationEstablished established = GivenEventMessage.organizationEstablished();
         SingleTenantBlackBoxContext sender = BlackBoxBoundedContext
@@ -113,14 +108,16 @@ class ProjectionEndToEndTest {
                 .with(new GroupNameProjection.Repository());
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId, established);
-        receiver.assertThat(exactlyOne(
-                GroupName.newBuilder()
-                         .setId(GroupId.newBuilder()
-                                       .setUuid(producerId.getUuid())
-                                       .build())
-                         .setName(established.getName())
-                         .build()
-        ));
+        GroupId groupId = GroupId
+                .vBuilder()
+                .setUuid(producerId.getUuid())
+                .build();
+        receiver.assertEntityWithState(GroupName.class, groupId)
+                .hasStateThat()
+                .isEqualTo(GroupName.newBuilder()
+                                    .setId(groupId)
+                                    .setName(established.getName())
+                                    .build());
     }
 
     @Test

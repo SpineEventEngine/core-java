@@ -76,7 +76,7 @@ public class InMemoryTransportFactory implements TransportFactory {
      * <p>The descendants may override this method to customize the implementation of subscribers
      * to use within this {@code TransportFactory} instance.
      *
-     * @param channelId a channel ID to create a subscriber for
+     * @param channelId the channel ID to create a subscriber for
      * @return an instance of subscriber
      */
     protected Subscriber newSubscriber(ChannelId channelId) {
@@ -84,7 +84,7 @@ public class InMemoryTransportFactory implements TransportFactory {
     }
 
     /**
-     * Wraps currently registered in-memory subscribers into a function, that returns a subset
+     * Wraps currently registered in-memory subscribers into a function that returns a subset
      * of subscribers per channel ID.
      *
      * @param subscribers currently registered subscribers and their channel identifiers

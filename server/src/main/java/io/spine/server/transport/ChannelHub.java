@@ -32,9 +32,9 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.synchronizedMap;
 
 /**
- * The hub of channels, grouped in some logical way.
+ * The hub of channels grouped in some logical way.
  *
- * <p>Serves for channel creation and storage-per-ID, which in a way makes the hub similar to
+ * <p>Serves for channel creation and storage-per-ID which in a way makes the hub similar to
  * an entity repository.
  */
 @SPI
@@ -57,7 +57,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
     protected abstract C newChannel(ChannelId channelId);
 
     /**
-     * Returns a set of channel identifiers, that are already served by this hub.
+     * Returns a set of channel identifiers that are already served by this hub.
      *
      * @return a set of channel IDs served by this instance of channel hub
      */

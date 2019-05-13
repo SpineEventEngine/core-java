@@ -29,7 +29,7 @@ def final SPINE_VERSION = '1.0.0-pre7'
 
 ext {
     // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+    versionToPublish = '1.0.0-SNAPSHOT'
 
     // Depend on `base` for the general definitions and a model compiler.
     spineBaseVersion = SPINE_VERSION

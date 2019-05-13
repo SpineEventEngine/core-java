@@ -26,6 +26,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
+import io.spine.server.aggregate.AggregateRootDirectory;
+import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -60,7 +62,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>An application can have more than one Bounded Context. To distinguish
  * them, use {@link #setName(String)}. If no ID is given the default, an ID will be assigned.
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
 
     @SuppressWarnings("TestOnlyProblems")
@@ -75,7 +77,7 @@ public final class BoundedContextBuilder implements Logging {
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
     private TransportFactory transportFactory;
-
+    private Supplier<AggregateRootDirectory> rootDirectory;
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final List<Repository<?, ?>> repositories = new ArrayList<>();
@@ -281,6 +283,33 @@ public final class BoundedContextBuilder implements Logging {
      */
     public ImmutableList<Repository<?, ?>> repositories() {
         return ImmutableList.copyOf(repositories);
+    }
+
+    /**
+     * Obtains the {@link AggregateRootDirectory} to be used in the built context.
+     *
+     * <p>If no custom implementation is specified, an in-mem implementation is used.
+     */
+    AggregateRootDirectory aggregateRootDirectory() {
+        if (rootDirectory == null) {
+            rootDirectory = InMemoryRootDirectory::new;
+        }
+        return rootDirectory.get();
+    }
+
+    /**
+     * Sets the supplier of {@link AggregateRootDirectory}-s to use in the built context.
+     *
+     * <p>By default, an in-mem implementation is used.
+     *
+     * @param directory
+     *         the supplier of aggregate root directories
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder
+    setAggregateRootDirectory(Supplier<AggregateRootDirectory> directory) {
+        this.rootDirectory = checkNotNull(directory);
+        return this;
     }
 
     /**

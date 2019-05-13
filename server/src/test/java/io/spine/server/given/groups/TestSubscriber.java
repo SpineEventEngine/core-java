@@ -18,27 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.organizations;
+package io.spine.server.given.groups;
 
 import io.spine.core.Subscribe;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.given.organizations.Organization;
 
-public final class OrganizationProjection
-        extends Projection<OrganizationId, Organization, OrganizationVBuilder> {
+import java.util.Optional;
 
-    private OrganizationProjection(OrganizationId id) {
-        super(id);
-    }
+/**
+ * A test entity state subscriber.
+ */
+public final class TestSubscriber extends AbstractEventSubscriber {
+
+    private Group domestic;
+    private Organization external;
 
     @Subscribe
-    void on(OrganizationEstablished event) {
-        builder().setId(event.getId())
-                 .setName(event.getName())
-                 .setHead(event.getHead());
+    void domestic(Group group) {
+        this.domestic = group;
     }
 
-    public static final class Repository
-            extends ProjectionRepository<OrganizationId, OrganizationProjection, Organization> {
+    @Subscribe(external = true)
+    void external(Organization organization) {
+        this.external = organization;
+    }
+
+    public Optional<Group> domestic() {
+        return Optional.ofNullable(domestic);
+    }
+
+    public Optional<Organization> external() {
+        return Optional.ofNullable(external);
     }
 }

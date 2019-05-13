@@ -37,9 +37,9 @@ import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityExtractedFromArchive;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityUnarchived;
 import io.spine.type.TypeUrl;
 import org.slf4j.Logger;
 
@@ -91,7 +91,7 @@ final class MirrorRepository
                        (message, context) -> targetsFrom(message.getId()))
                 .route(EntityDeleted.class,
                        (message, context) -> targetsFrom(message.getId()))
-                .route(EntityExtractedFromArchive.class,
+                .route(EntityUnarchived.class,
                        (message, context) -> targetsFrom(message.getId()))
                 .route(EntityRestored.class,
                        (message, context) -> targetsFrom(message.getId()));

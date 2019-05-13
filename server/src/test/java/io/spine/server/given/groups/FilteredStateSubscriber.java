@@ -18,21 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.given.groups;
 
-/**
- * A bounded context for testing entity state updates.
- *
- * <p>This package hosts a number of Protobuf definitions marked an {@code (entity)}-s and event
- * subscribers which receive updates of those entities.
- */
+import io.spine.core.ByField;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.given.organizations.Organization;
 
-@BoundedContext("Groups")
+import static org.junit.jupiter.api.Assertions.fail;
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.groups;
+public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Subscribe(
+            filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
+    )
+    void on(Organization organization) {
+        fail(FilteredStateSubscriber.class.getSimpleName() +
+                     " should not be able to receive any updates.");
+    }
+}

@@ -18,22 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.entity.storage.given;
 
-import io.spine.core.ByField;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import io.spine.server.projection.Projection;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectVBuilder;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-public class FilteredStateSubscriber extends AbstractEventSubscriber {
-
-    @Subscribe(
-            filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
-    )
-    void on(Organization organization) {
-        fail(FilteredStateSubscriber.class.getSimpleName() +
-                     " should not be able to receive any updates.");
-    }
+public class TestProjection extends Projection<String, Project, ProjectVBuilder> {
 }

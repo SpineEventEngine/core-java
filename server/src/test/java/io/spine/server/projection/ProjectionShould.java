@@ -28,6 +28,8 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.entity.storage.EntityColumn;
+import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.model.DuplicateHandlerMethodError;
 import io.spine.server.model.HandlerFieldFilterClashError;
 import io.spine.server.projection.given.EntitySubscriberProjection;
@@ -37,6 +39,7 @@ import io.spine.server.projection.given.ProjectionTestEnv.MalformedProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.server.projection.given.SavedString;
+import io.spine.server.storage.StorageField;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.string.StringifierRegistry;
@@ -70,6 +73,9 @@ import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjec
 import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
 import static io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection.ACCEPTED_VALUE;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.VersionField.version;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.TestValues.random;
@@ -196,7 +202,7 @@ class ProjectionShould {
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
         Set<EventClass> classes =
-                asProjectionClass(TestProjection.class).incomingEvents();
+                asProjectionClass(TestProjection.class).domesticEvents();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.from(StringImported.class)));
@@ -296,6 +302,28 @@ class ProjectionShould {
                 DuplicateHandlerMethodError.class,
                 () -> new DuplicateFilterProjection.Repository().entityClass()
         );
+    }
+
+    @Test
+    @DisplayName("have `version` column")
+    void haveVersionColumn() {
+        assertHasColumn(TestProjection.class, version, Version.class);
+    }
+
+    @Test
+    @DisplayName("have `archived` and `deleted` columns")
+    void haveLifecycleColumn() {
+        assertHasColumn(TestProjection.class, archived, boolean.class);
+        assertHasColumn(TestProjection.class, deleted, boolean.class);
+    }
+
+    private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
+                                        StorageField columnName,
+                                        Class<?> columnType) {
+        EntityColumnCache cache = EntityColumnCache.initializeFor(projectionType);
+        EntityColumn column = cache.findColumn(columnName.toString());
+        assertThat(column).isNotNull();
+        assertThat(column.getType()).isEqualTo(columnType);
     }
 
     private static ProjectId newId() {

@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.server.BoundedContext;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.StorageConverter;
 import io.spine.server.event.EventFilter;
@@ -117,21 +116,26 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public void onRegistered() {
         super.onRegistered();
+        ensureDispatchesEvents();
+        subscribeToSystemEvents();
+    }
 
+    private void ensureDispatchesEvents() {
         boolean noEventSubscriptions = !dispatchesEvents();
         if (noEventSubscriptions) {
             boolean noExternalSubscriptions = !dispatchesExternalEvents();
             if (noExternalSubscriptions) {
                 throw newIllegalStateException(
-                        "Projections of the repository %s have neither domestic nor external " +
+                        "Projections of the repository `%s` have neither domestic nor external " +
                                 "event subscriptions.", this);
             }
         }
+    }
 
+    private void subscribeToSystemEvents() {
         ProjectionSystemEventWatcher<I> systemSubscriber =
                 new ProjectionSystemEventWatcher<>(this);
-        BoundedContext boundedContext = this.boundedContext();
-        systemSubscriber.registerIn(boundedContext);
+        systemSubscriber.registerIn(boundedContext());
     }
 
     @Override
@@ -218,7 +222,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> messageClasses() {
-        return projectionClass().incomingEvents();
+        return projectionClass().domesticEvents();
     }
 
     @Override
@@ -229,7 +233,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @OverridingMethodsMustInvokeSuper
     @Override
     public boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(event);
+        Optional<SubscriberMethod> subscriber = projectionClass().subscriberOf(event);
         return subscriber.isPresent();
     }
 

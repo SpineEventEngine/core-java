@@ -145,8 +145,8 @@ public final class EventRouting<I>
      * Sets a custom routing schema for entity state updates.
      *
      * <p>Setting a routing for state updates is equivalent to setting a route for events of type
-     * {@link EntityStateChanged io.spine.system.server.event.EntityStateChanged}. It is illegal to do
-     * both things simultaneously.
+     * {@link EntityStateChanged io.spine.system.server.event.EntityStateChanged}.
+     * It is illegal to do both things simultaneously.
      *
      * @param routing
      *         the routing schema for entity state updates
