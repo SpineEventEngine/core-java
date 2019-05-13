@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -71,6 +72,7 @@ public abstract class EventDispatchingRepository<I,
      * Registers} itself with the {@code EventBus} of the parent {@code BoundedContext}.
      */
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
         boundedContext().registerEventDispatcher(this);

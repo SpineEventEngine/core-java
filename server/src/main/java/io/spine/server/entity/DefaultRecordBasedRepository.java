@@ -70,8 +70,8 @@ public abstract class DefaultRecordBasedRepository<I,
      *
      * <p>Performs validation of the entity class and initializes the storage converter.
      */
-    @OverridingMethodsMustInvokeSuper
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
         storageConverter();

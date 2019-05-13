@@ -23,6 +23,7 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
@@ -135,6 +136,7 @@ public abstract class ProcessManagerRepository<I,
      * <p>Throws an {@code IllegalStateException} otherwise.
      */
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
 

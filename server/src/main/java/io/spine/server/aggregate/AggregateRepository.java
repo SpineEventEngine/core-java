@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
@@ -117,6 +118,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * </ul>
      */
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         checkNotVoid();
 

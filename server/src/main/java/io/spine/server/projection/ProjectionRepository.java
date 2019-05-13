@@ -114,6 +114,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * by the class of the projection. Throws an {@code IllegalStateException} otherwise.
      */
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
         ensureDispatchesEvents();

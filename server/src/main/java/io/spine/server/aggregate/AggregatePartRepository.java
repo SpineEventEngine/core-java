@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
@@ -48,6 +49,7 @@ public abstract class AggregatePartRepository<I,
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
         boundedContext().aggregateRootDirectory()
@@ -71,7 +73,6 @@ public abstract class AggregatePartRepository<I,
         return (AggregatePartClass<A>) entityModelClass();
     }
 
-    //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
         AggregateRoot<I> result = aggregatePartClass().createRoot(boundedContext(), id);
         return result;
