@@ -60,7 +60,7 @@ public final class EntitySubscriberProjection
         @Override
         public void onRegistered() {
             super.onRegistered();
-            eventRouting().routeEntityStateUpdates(
+            eventRouting().routeStateUpdates(
                     StateUpdateRouting
                             .<ProjectId>newInstance()
                             .route(Project.class, (state, context) -> withId(state.getId()))

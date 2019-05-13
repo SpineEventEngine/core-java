@@ -55,7 +55,7 @@ public final class GroupNameProjection
                            .setUuid(org.getId()
                                        .getUuid())
                            .build()));
-            eventRouting().routeEntityStateUpdates(routing);
+            eventRouting().routeStateUpdates(routing);
         }
     }
 }

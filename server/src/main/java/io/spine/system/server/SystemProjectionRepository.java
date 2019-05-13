@@ -27,12 +27,13 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.EventEnvelope;
 
 /**
- * A repository for projections in a system bounded context.
+ * A repository for projections in a System Context.
  *
  * <p>Unlike an arbitrary {@link ProjectionRepository}, a {@code SystemProjectionRepository}
  * dispatches the events directly to the target projections.
  */
-public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
+public
+abstract class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends ProjectionRepository<I, P, S> {
 
     /**

@@ -124,7 +124,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         super.onRegistered();
 
-        BoundedContext boundedContext = boundedContext();
+        BoundedContext boundedContext = context();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
@@ -400,7 +400,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = boundedContext().eventBus();
+        EventBus bus = context().eventBus();
         bus.post(filteredEvents);
     }
 

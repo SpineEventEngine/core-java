@@ -37,6 +37,7 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
+import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -52,7 +53,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.server.route.EventRoute.byProducerId;
-import static io.spine.server.route.EventRoute.ignoreEntityUpdates;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -72,7 +72,54 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(ignoreEntityUpdates(byProducerId()));
+        super(byProducerId());
+    }
+
+    /**
+     * Initializes the repository during its registration.
+     *
+     * <p>If projections of this repository are {@linkplain io.spine.core.Subscribe subscribed} to
+     * entity state updates, a routing for these updates is {@linkplain #createStateRouting()
+     * created}. If one of the states of entities cannot be routed during the created schema,
+     * {@code IllegalStateException} will be thrown.
+     *
+     * @throws IllegalStateException
+     *          if the state routing does not cover one of the entity state types to which
+     *          the entities are subscribed
+     */
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void init() throws IllegalStateException{
+        super.init();
+        if (projectionClass().subscribesToStates()) {
+            eventRouting().routeStateUpdates(createStateRouting());
+            validateStateRouting();
+        }
+    }
+
+    /**
+     * Creates {@code StateUpdateRouting} used by the repository.
+     *
+     * <p>Default implementation provides {@linkplain StateUpdateRouting#newInstance()
+     * default instance} of the {@code StateUpdateRouting}. Overriding repository classes
+     * may customize the routing if the default schema does not satisfy the routing needs.
+     */
+    protected StateUpdateRouting<I> createStateRouting() {
+        return StateUpdateRouting.newInstance();
+    }
+
+    /**
+     * Validates routing schema for types of state messages (if any) that this repository dispatches
+     * to its entities.
+     *
+     * @throws IllegalStateException
+     *          if a message type cannot be dispatched
+     */
+    private void validateStateRouting() throws IllegalStateException {
+        if (!projectionClass().subscribesToStates()) {
+            return;
+        }
+        //TODO:2019-05-13:alexander.yevsyukov: Implement
     }
 
     @VisibleForTesting
@@ -84,7 +131,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
     EventStore eventStore() {
-        return boundedContext()
+        return context()
                 .eventBus()
                 .eventStore();
     }
@@ -136,21 +183,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private void subscribeToSystemEvents() {
         ProjectionSystemEventWatcher<I> systemSubscriber =
                 new ProjectionSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(boundedContext());
-    }
-
-    /**
-     * Validates routing schema for types of state messages (if any) that this repository dispatches
-     * to its entities.
-     *
-     * @throws IllegalStateException
-     *          if a message type cannot be dispatched
-     */
-    public final void validateStateRouting() throws IllegalStateException {
-        if (!projectionClass().subscribesToStates()) {
-            return;
-        }
-        //TODO:2019-05-13:alexander.yevsyukov: Implement
+        systemSubscriber.registerIn(context());
     }
 
     @Override
@@ -181,7 +214,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand stand() {
-        return boundedContext().stand();
+        return context().stand();
     }
 
     /**

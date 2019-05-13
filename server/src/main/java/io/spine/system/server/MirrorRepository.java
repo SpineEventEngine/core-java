@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -71,15 +72,15 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    private static final FieldMask AGGREGATE_STATE_WITH_VERSION =
-            fromFieldNumbers(Mirror.class,
-                             ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER);
-
     private static final Logger log = Logging.get(MirrorRepository.class);
+    private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
+            Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER
+    );
 
     @Override
-    public void onRegistered() {
-        super.onRegistered();
+    @OverridingMethodsMustInvokeSuper
+    protected void init() {
+        super.init();
         prepareRouting();
     }
 

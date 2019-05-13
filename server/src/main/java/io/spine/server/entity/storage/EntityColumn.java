@@ -222,6 +222,8 @@ public class EntityColumn implements Serializable {
                          String storedName,
                          boolean nullable) {
         this.getter = getter;
+        // To allow calling on non-public classes.
+        this.getter.setAccessible(true);
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
@@ -295,16 +297,16 @@ public class EntityColumn implements Serializable {
         try {
             Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
-                checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
+                checkNotNull(result, format("Not null getter `%s` returned null.", getter.getName()));
             }
             Serializable value = toPersistedValue(result);
             return value;
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(
-                    format("Could not invoke getter of property %s from object %s",
-                           getName(),
-                           source),
-                    e);
+            throw newIllegalStateException(
+                    e, "Could not invoke getter of property `%s` from object `%s`.",
+                    getName(),
+                    source
+            );
         }
     }
 

@@ -50,11 +50,11 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Creates new repository instance.
      *
-     * @param defaultFunction the default function for getting target entity IDs
+     * @param defaultRoute the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultFunction) {
+    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultRoute) {
         super();
-        this.eventRouting = EventRouting.withDefault(defaultFunction);
+        this.eventRouting = EventRouting.withDefault(defaultRoute);
     }
 
     /**
@@ -75,7 +75,7 @@ public abstract class EventDispatchingRepository<I,
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
-        boundedContext().registerEventDispatcher(this);
+        context().registerEventDispatcher(this);
     }
 
     /**

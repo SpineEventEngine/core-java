@@ -191,6 +191,22 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         if (!isStorageAssigned()) {
             initStorage(boundedContext.storageFactory());
         }
+        init();
+    }
+
+    /**
+     * A callback for performing additional initialization of the repository during its
+     * {@linkplain BoundedContext#register(Repository) registration} with a {@code BoundedContext}.
+     *
+     * <p>When this method is called, the repository already has {@link #context() BoundedContext}
+     * and the {@link #storage() Storage} {@linkplain #initStorage(StorageFactory) assigned}.
+     *
+     * <p>Default implementation does nothing.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc.
+    @OverridingMethodsMustInvokeSuper
+    protected void init() {
+        // Do nothing.
     }
 
     /**
@@ -201,14 +217,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Obtains {@code BoundedContext} to which this repository belongs.
+     * Obtains the {@code BoundedContext} to which this repository belongs.
      *
      * @return parent {@code BoundedContext}
      * @throws IllegalStateException
      *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
      *         registered} yet
      */
-    protected final BoundedContext boundedContext() {
+    protected final BoundedContext context() {
         checkState(boundedContext != null,
                    "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
@@ -221,8 +237,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        boundedContext().stand()
-                        .registerTypeSupplier(this);
+        context().stand()
+                 .registerTypeSupplier(this);
     }
 
     /**
@@ -336,8 +352,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         TypeUrl stateType = entityStateType();
-        SystemWriteSide writeSide = boundedContext().systemClient()
-                                                    .writeSide();
+        SystemWriteSide writeSide = context().systemClient()
+                                             .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()

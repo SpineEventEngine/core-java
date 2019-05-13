@@ -53,7 +53,7 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
                                   .setUuid(org.getHead()
                                               .getValue())
                                   .build()));
-            eventRouting().routeEntityStateUpdates(routing);
+            eventRouting().routeStateUpdates(routing);
         }
     }
 }

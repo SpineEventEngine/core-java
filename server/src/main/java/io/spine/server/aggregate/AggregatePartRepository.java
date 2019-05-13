@@ -52,8 +52,8 @@ public abstract class AggregatePartRepository<I,
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
         super.onRegistered();
-        boundedContext().aggregateRootDirectory()
-                        .register(this);
+        context().aggregateRootDirectory()
+                 .register(this);
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class AggregatePartRepository<I,
     }
 
     private AggregateRoot<I> createAggregateRoot(I id) {
-        AggregateRoot<I> result = aggregatePartClass().createRoot(boundedContext(), id);
+        AggregateRoot<I> result = aggregatePartClass().createRoot(context(), id);
         return result;
     }
 

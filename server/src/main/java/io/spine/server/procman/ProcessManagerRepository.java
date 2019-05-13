@@ -140,7 +140,7 @@ public abstract class ProcessManagerRepository<I,
     public void onRegistered() {
         super.onRegistered();
 
-        BoundedContext boundedContext = boundedContext();
+        BoundedContext boundedContext = context();
         boundedContext.registerCommandDispatcher(this);
 
         checkNotDeaf();
@@ -311,7 +311,7 @@ public abstract class ProcessManagerRepository<I,
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = boundedContext().eventBus();
+        EventBus bus = context().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -339,7 +339,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected P findOrCreate(I id) {
         P result = super.findOrCreate(id);
-        CommandBus commandBus = boundedContext().commandBus();
+        CommandBus commandBus = context().commandBus();
         result.setCommandBus(commandBus);
         return result;
     }
