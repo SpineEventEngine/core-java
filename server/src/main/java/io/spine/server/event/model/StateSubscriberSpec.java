@@ -39,7 +39,7 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
  * A {@link ParameterSpec} of an entity state subscriber method.
  */
 @Immutable
-enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
+enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     MESSAGE(ImmutableList.of(Message.class)) {
         @Override
@@ -57,7 +57,7 @@ enum EntityStateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     private final ImmutableList<Class<?>> parameters;
 
-    EntityStateSubscriberSpec(ImmutableList<Class<?>> parameters) {
+    StateSubscriberSpec(ImmutableList<Class<?>> parameters) {
         this.parameters = parameters;
     }
 

@@ -47,7 +47,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
 /**
  * A handler method which receives an entity state and produces no output.
  */
-public final class EntitySubscriberMethod extends SubscriberMethod implements Logging {
+public final class StateSubscriberMethod extends SubscriberMethod implements Logging {
 
     private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("id.type_url");
 
@@ -55,7 +55,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
     private final Class<? extends Message> entityType;
     private final Any typeUrlAsAny;
 
-    EntitySubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(checkNotFiltered(method), parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         this.entityType = firstParamType(rawMethod());
@@ -68,7 +68,7 @@ public final class EntitySubscriberMethod extends SubscriberMethod implements Lo
         Subscribe subscribe = method.getAnnotation(Subscribe.class);
         ByField filter = subscribe.filter();
         checkState(filter.path().isEmpty() && filter.value().isEmpty(),
-                   "Entity state subscriber cannot declare filters but the method `%s` does.",
+                   "A state subscriber method cannot declare filters but the method `%s` does.",
                    method);
         return method;
     }

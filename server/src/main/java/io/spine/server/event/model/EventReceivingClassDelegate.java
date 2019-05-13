@@ -142,10 +142,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         ImmutableCollection<M> stateHandlers = handlers.handlersOf(updateEvent);
         ImmutableSet<StateClass> result =
                 stateHandlers.stream()
-                        .filter(h -> h instanceof EntitySubscriberMethod)
-                        .map(h -> (EntitySubscriberMethod) h)
+                        .filter(h -> h instanceof StateSubscriberMethod)
+                        .map(h -> (StateSubscriberMethod) h)
                         .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                        .map(EntitySubscriberMethod::entityType)
+                        .map(StateSubscriberMethod::entityType)
                         .map(StateClass::from)
                         .collect(toImmutableSet());
         return result;
