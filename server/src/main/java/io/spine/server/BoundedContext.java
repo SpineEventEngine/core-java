@@ -320,7 +320,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> entityStateTypes(Visibility visibility) {
+    public Set<TypeName> stateTypes(Visibility visibility) {
         Set<TypeName> result = guard.entityStateTypes(visibility);
         return result;
     }
@@ -328,7 +328,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains the set of all entity type names.
      */
-    public Set<TypeName> entityStateTypes() {
+    public Set<TypeName> stateTypes() {
         Set<TypeName> result = guard.allEntityTypes();
         return result;
     }
