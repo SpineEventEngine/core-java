@@ -44,10 +44,11 @@ public final class EntitySubscriberProjection
 
     @Subscribe
     void onUpdate(Project aggregateState) {
-        List<String> taskNames = aggregateState.getTaskList()
-                                               .stream()
-                                               .map(Task::getTitle)
-                                               .collect(toList());
+        List<String> taskNames =
+                aggregateState.getTaskList()
+                              .stream()
+                              .map(Task::getTitle)
+                              .collect(toList());
         builder().setProjectId(aggregateState.getId())
                  .setProjectName(aggregateState.getName())
                  .clearTaskName()
@@ -58,13 +59,9 @@ public final class EntitySubscriberProjection
             extends ProjectionRepository<ProjectId, EntitySubscriberProjection, ProjectTaskNames> {
 
         @Override
-        public void onRegistered() {
-            super.onRegistered();
-            eventRouting().routeStateUpdates(
-                    StateUpdateRouting
-                            .<ProjectId>newInstance()
-                            .route(Project.class, (state, context) -> withId(state.getId()))
-            );
+        protected StateUpdateRouting<ProjectId> createStateRouting() {
+            return super.createStateRouting()
+                        .route(Project.class, (state, context) -> withId(state.getId()));
         }
     }
 }

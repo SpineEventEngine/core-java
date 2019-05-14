@@ -46,16 +46,13 @@ public final class GroupNameProjection
             extends ProjectionRepository<GroupId, GroupNameProjection, GroupName> {
 
         @Override
-        public void onRegistered() {
-            super.onRegistered();
-
-            StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
-            routing.route(Organization.class, (org, ctx) -> withId(
-                    GroupId.newBuilder()
-                           .setUuid(org.getId()
-                                       .getUuid())
-                           .build()));
-            eventRouting().routeStateUpdates(routing);
+        protected StateUpdateRouting<GroupId> createStateRouting() {
+            return super.createStateRouting()
+                        .route(Organization.class, (org, ctx) -> withId(
+                                GroupId.newBuilder()
+                                       .setUuid(org.getId()
+                                                   .getUuid())
+                                       .build()));
         }
     }
 }
