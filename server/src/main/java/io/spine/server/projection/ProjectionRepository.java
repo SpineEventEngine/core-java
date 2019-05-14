@@ -174,8 +174,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             boolean noExternalSubscriptions = !dispatchesExternalEvents();
             if (noExternalSubscriptions) {
                 throw newIllegalStateException(
-                        "Projections of the repository `%s` have neither domestic nor external " +
-                                "event subscriptions.", this);
+                        "Projections of the repository `%s` have neither domestic nor external" +
+                                " event subscriptions.", this);
             }
         }
     }
