@@ -48,7 +48,7 @@ public class StateUpdateRouting<I>
     private static final long serialVersionUID = 0L;
 
     private StateUpdateRouting() {
-        super(defaultStateRouting());
+        super(defaultStateRoute());
     }
 
     /**
@@ -105,7 +105,7 @@ public class StateUpdateRouting<I>
         };
     }
 
-    private static <I> Route<Message, EventContext, Set<I>> defaultStateRouting() {
+    private static <I> Route<Message, EventContext, Set<I>> defaultStateRoute() {
         return (message, context) -> noTargets();
     }
 }
