@@ -48,7 +48,7 @@ class EventProducersTest {
     @Test
     @DisplayName("create function for getting ID from first message field")
     void getIdFromFirstMsgField() {
-        EventRoute<?, EventMessage> fn = EventRoute.byFirstMessageField();
+        EventRoute<?, EventMessage> fn = EventRoute.byFirstMessageField(Object.class);
         assertFunction(fn);
     }
 

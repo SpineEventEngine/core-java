@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate.given.importado;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
 
@@ -35,7 +36,10 @@ public final class DotSpace extends AggregateRepository<ObjectId, Dot> {
      * is to take producer ID from an {@code EventContext}. We redefine this to avoid the need
      * of creating {@code Event} instances. Real imports would need to create those.
      */
-    public DotSpace() {
-        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void init() {
+        super.init();
+        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 }

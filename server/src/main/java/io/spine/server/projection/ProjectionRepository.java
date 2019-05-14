@@ -52,7 +52,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
-import static io.spine.server.route.EventRoute.byProducerId;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -67,13 +66,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
-
-    /**
-     * Creates a new {@code ProjectionRepository}.
-     */
-    protected ProjectionRepository() {
-        super(byProducerId());
-    }
 
     /**
      * Initializes the repository during its registration.

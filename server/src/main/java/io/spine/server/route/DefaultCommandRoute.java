@@ -20,12 +20,9 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.protobuf.MessageFieldException;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,15 +35,10 @@ public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMess
 
     private static final long serialVersionUID = 0L;
 
-    /**
-     * ID of the target entity is the first field of the command message.
-     */
-    private static final int ID_FIELD_INDEX = 0;
-
-    private final Class<I> idClass;
+    private final FirstField<I, CommandMessage, CommandContext> field;
 
     private DefaultCommandRoute(Class<I> cls) {
-        this.idClass = cls;
+        this.field = new FirstField<>(cls);
     }
 
     /**
@@ -63,40 +55,8 @@ public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMess
     @Override
     public I apply(CommandMessage message, CommandContext ignored) throws MessageFieldException {
         checkNotNull(message);
-        FieldDescriptor field = targetFieldFrom(message);
-        I result = targetFrom(field, message);
+        I result = field.apply(message, ignored);
         return result;
-    }
-
-    private I targetFrom(FieldDescriptor field, CommandMessage message) {
-        Object value = message.getField(field);
-        Class<?> valueClass = value.getClass();
-        if (!idClass.isAssignableFrom(valueClass)) {
-            throw new MessageFieldException(
-                    message, "The field `%s` has the type `%s` which is not assignable" +
-                    " from the expected ID type `%s`.",
-                    field.getName(),
-                    valueClass.getName(),
-                    idClass.getName()
-
-            );
-        }
-        I casted = idClass.cast(value);
-        return casted;
-    }
-
-    /**
-     * Obtains the descriptor of the command target field from the passed message.
-     */
-    private static FieldDescriptor targetFieldFrom(CommandMessage message) {
-        List<FieldDescriptor> fields = message.getDescriptorForType()
-                                              .getFields();
-        if (fields.size() <= ID_FIELD_INDEX) {
-            throw new MessageFieldException(
-                    message, "There's no field with the index %d.", ID_FIELD_INDEX
-            );
-        }
-        return fields.get(ID_FIELD_INDEX);
     }
 
     /**
@@ -104,9 +64,9 @@ public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMess
      */
     public static boolean exists(CommandMessage commandMessage) {
         boolean hasAtLeastOneField =
-                commandMessage.getDescriptorForType()
-                              .getFields()
-                              .size() > ID_FIELD_INDEX;
+                !commandMessage.getDescriptorForType()
+                               .getFields()
+                               .isEmpty();
         return hasAtLeastOneField;
     }
 }

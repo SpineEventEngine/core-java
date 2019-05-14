@@ -100,12 +100,21 @@ public abstract class ProcessManagerRepository<I,
      */
     private final LifecycleRules lifecycleRules = new LifecycleRules();
 
-    /**
-     * Creates a new instance with the event routing by the first message field.
-     */
     protected ProcessManagerRepository() {
-        super(EventRoute.byFirstMessageField());
+        super();
         this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Customizes event routing to use first message field.
+     */
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void init() {
+        super.init();
+        eventRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 
     /**

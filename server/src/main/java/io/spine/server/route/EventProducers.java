@@ -50,7 +50,7 @@ final class EventProducers {
 
         @Override
         public String toString() {
-            return "EventProducers.fromContext()";
+            return getClass().getName();
         }
     }
 
@@ -61,38 +61,21 @@ final class EventProducers {
 
         private static final long serialVersionUID = 0L;
 
-        private final FromEventMessage<I> func = FromEventMessage.fieldAt(0);
+        private final FirstField<I, EventMessage, EventContext> field;
+
+        FromFirstMessageField(Class<I> idClass) {
+            this.field = new FirstField<>(idClass);
+        }
 
         @Override
         public Set<I> apply(EventMessage message, EventContext context) {
-            I id = func.apply(message, context);
-            return ImmutableSet.of(id);
+            I id = field.apply(message, context);
+            return EventRoute.withId(id);
         }
 
         @Override
         public String toString() {
-            return "EventProducers.fromFirstMessageField()";
-        }
-    }
-
-    /**
-     * Obtains an event producer ID from a field of an event message.
-     */
-    static final class FromEventMessage<I> extends FieldAtIndex<I, EventMessage, EventContext> {
-
-        private static final long serialVersionUID = 0L;
-
-        private FromEventMessage(int idIndex) {
-            super(idIndex);
-        }
-
-        /**
-         * Creates a new instance.
-         *
-         * @param index a zero-based index of an ID field in this type of messages
-         */
-        static<I> FromEventMessage<I> fieldAt(int index) {
-            return new FromEventMessage<>(index);
+            return getClass().getName();
         }
     }
 }

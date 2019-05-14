@@ -22,18 +22,17 @@ package io.spine.server.entity;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.route.EventRoute.byProducerId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
@@ -47,14 +46,9 @@ public abstract class EventDispatchingRepository<I,
 
     private final EventRouting<I> eventRouting;
 
-    /**
-     * Creates new repository instance.
-     *
-     * @param defaultRoute the default function for getting target entity IDs
-     */
-    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultRoute) {
+    protected EventDispatchingRepository() {
         super();
-        this.eventRouting = EventRouting.withDefault(defaultRoute);
+        this.eventRouting = EventRouting.withDefault(byProducerId());
     }
 
     /**
