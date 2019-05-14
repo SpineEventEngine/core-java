@@ -26,6 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.MessageInvalid;
 import io.spine.core.TenantId;
@@ -57,6 +58,10 @@ import static io.spine.validate.Validate.isDefault;
  * </ol>
  */
 final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
+
+    /** Default route for validating command message fields. */
+    private static final DefaultCommandRoute<Object> defaultRoute =
+            DefaultCommandRoute.newInstance(Object.class);
 
     private final CommandBus commandBus;
 
@@ -181,12 +186,13 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
 
         private void validateTargetId() {
             CommandMessage message = command.message();
-            Optional<?> targetId = DefaultCommandRoute.asOptional(message);
-            if (targetId.isPresent()) {
-                Object target = targetId.get();
-                if (Identifier.isEmpty(target)) {
-                    addViolation("Command target entity ID cannot be empty.");
-                }
+            if (!DefaultCommandRoute.exists(message)) {
+                addViolation("The command message does not have a field with a command target ID.");
+            }
+
+            Object target = defaultRoute.apply(message, CommandContext.getDefaultInstance());
+            if (Identifier.isEmpty(target)) {
+                addViolation("Command target ID cannot be empty.");
             }
         }
 

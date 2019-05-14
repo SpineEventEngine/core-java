@@ -81,7 +81,7 @@ class CommandRoutingTest {
 
     @BeforeEach
     void setUp() {
-        commandRouting = CommandRouting.newInstance();
+        commandRouting = CommandRouting.newInstance(Long.class);
     }
 
     @Test

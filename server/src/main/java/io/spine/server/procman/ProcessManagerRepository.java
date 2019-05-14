@@ -52,8 +52,10 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -62,9 +64,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * The abstract base for Process Managers repositories.
  *
- * @param <I> the type of IDs of process managers
- * @param <P> the type of process managers
- * @param <S> the type of process manager state messages
+ * @param <I>
+ *         the type of IDs of process managers
+ * @param <P>
+ *         the type of process managers
+ * @param <S>
+ *         the type of process manager state messages
  * @see ProcessManager
  */
 public abstract class ProcessManagerRepository<I,
@@ -74,7 +79,7 @@ public abstract class ProcessManagerRepository<I,
                 implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
-    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
+    private final Supplier<CommandRouting<I>> commandRouting;
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -100,6 +105,7 @@ public abstract class ProcessManagerRepository<I,
      */
     protected ProcessManagerRepository() {
         super(EventRoute.byFirstMessageField());
+        this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
     }
 
     /**
@@ -201,7 +207,7 @@ public abstract class ProcessManagerRepository<I,
      * Obtains command routing schema used by this repository.
      */
     protected final CommandRouting<I> commandRouting() {
-        return commandRouting;
+        return commandRouting.get();
     }
 
     /**

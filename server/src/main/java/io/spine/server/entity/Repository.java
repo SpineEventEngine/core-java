@@ -171,8 +171,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains classes of the events produced by this {@code Repository}.
      *
-     * <p>For convenience purposes the default version returns empty collection. This method should be
-     * overridden by repositories which actually produce events.
+     * <p>For convenience purposes the default version returns an empty set.
+     * This method should be overridden by repositories which actually produce events.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
         return ImmutableSet.of();
@@ -186,10 +186,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * associated with the passed {@code BoundedContext}.
      */
     @Internal
-    public final void setBoundedContext(BoundedContext boundedContext) {
-        this.boundedContext = boundedContext;
+    public final void setBoundedContext(BoundedContext context) {
+        this.boundedContext = context;
         if (!isStorageAssigned()) {
-            initStorage(boundedContext.storageFactory());
+            initStorage(context.storageFactory());
         }
         init();
     }
@@ -312,7 +312,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Verifies if the repository is open.
      */
-    public boolean isOpen() {
+    public final boolean isOpen() {
         return storage != null;
     }
 

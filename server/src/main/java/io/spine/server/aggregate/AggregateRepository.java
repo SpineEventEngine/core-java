@@ -47,10 +47,12 @@ import io.spine.server.type.EventEnvelope;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -65,6 +67,7 @@ import static java.lang.Math.max;
  *         the type of the aggregate IDs
  * @param <A>
  *         the type of the aggregates managed by this repository
+ * @see Aggregate
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
@@ -76,7 +79,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
     /** The routing schema for commands handled by the aggregates. */
-    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
+    private final Supplier<CommandRouting<I>> commandRouting;
 
     /** The routing schema for events to which aggregates react. */
     private final EventRouting<I> eventRouting =
@@ -103,6 +106,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** Creates a new instance. */
     protected AggregateRepository() {
         super();
+        this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
     }
 
     /**
@@ -360,7 +364,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Obtains command routing instance used by this repository.
      */
     protected final CommandRouting<I> commandRouting() {
-        return commandRouting;
+        return commandRouting.get();
     }
 
     /**

@@ -20,15 +20,14 @@
 
 package io.spine.server.entity;
 
+import io.spine.core.CommandContext;
 import io.spine.server.route.DefaultCommandRoute;
 import io.spine.test.entity.command.EntCreateProject;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DefaultCommandRoute should")
@@ -39,9 +38,11 @@ class DefaultCommandRouteTest {
     void getIdFromCommand() {
         EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
 
-        Optional<?> id = DefaultCommandRoute.asOptional(msg);
+        assertTrue(DefaultCommandRoute.exists(msg));
 
-        assertTrue(id.isPresent());
-        assertEquals(msg.getProjectId(), id.get());
+        assertThat(DefaultCommandRoute
+                           .newInstance(io.spine.test.entity.ProjectId.class)
+                           .apply(msg, CommandContext.getDefaultInstance()))
+                .isEqualTo(msg.getProjectId());
     }
 }

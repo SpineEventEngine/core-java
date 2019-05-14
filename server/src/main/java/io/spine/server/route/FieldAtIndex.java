@@ -24,6 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.protobuf.MessageField;
 import io.spine.protobuf.MessageFieldException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Obtains an entity ID based on an event/command message.
  *
@@ -56,6 +58,9 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
      */
     @Override
     public I apply(M message, C ignored) throws MessageFieldException {
+        checkNotNull(message);
+
+
         @SuppressWarnings("unchecked") // we expect that the field is of this type
         I id = (I) idField.getValue(message);
         return id;
@@ -71,13 +76,13 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
         }
 
         @Override
-        protected MessageFieldException createUnavailableFieldException(Message message) {
-            return new MessageFieldException(message, "There's no field with index %d", getIndex());
+        protected MessageFieldException createUnavailableFieldException(Message msg) {
+            return new MessageFieldException(msg, "There's no field with index %d.", getIndex());
         }
 
         @Override
-        protected boolean isFieldAvailable(Message message) {
-            boolean result = MessageField.getFieldCount(message) > getIndex();
+        protected boolean isFieldAvailable(Message msg) {
+            boolean result = MessageField.getFieldCount(msg) > getIndex();
             return result;
         }
     }

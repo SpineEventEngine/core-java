@@ -20,48 +20,93 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.protobuf.MessageFieldException;
 
-import java.util.Optional;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Obtains an ID of a command target entity from the first field of the command message.
  *
  * @param <I> the type of target entity IDs
  */
-public class DefaultCommandRoute<I> extends FieldAtIndex<I, CommandMessage, CommandContext>
-        implements CommandRoute<I, CommandMessage> {
+public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMessage> {
 
     private static final long serialVersionUID = 0L;
+
+    /**
+     * ID of the target entity is the first field of the command message.
+     */
     private static final int ID_FIELD_INDEX = 0;
 
-    private DefaultCommandRoute() {
-        super(ID_FIELD_INDEX);
-    }
+    private final Class<I> idClass;
 
-    /** Creates a new instance. */
-    public static <I> DefaultCommandRoute<I> newInstance() {
-        return new DefaultCommandRoute<>();
+    private DefaultCommandRoute(Class<I> cls) {
+        this.idClass = cls;
     }
 
     /**
-     * Tries to obtain a target ID from the passed command message.
+     * Creates a new instance.
      *
-     * @param commandMessage the message to get ID from
-     * @return an {@link Optional} of the ID or {@code Optional.empty()}
-     * if {@link DefaultCommandRoute#apply(Message, Message)} throws an exception
-     * if the command is not for an entity
+     * @param idClass
+     *         the class of identifiers used for the routing
      */
-    public static <I> Optional<I> asOptional(CommandMessage commandMessage) {
-        try {
-            DefaultCommandRoute<I> function = newInstance();
-            I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
-            return Optional.of(id);
-        } catch (MessageFieldException | ClassCastException ignored) {
-            return Optional.empty();
+    public static <I> DefaultCommandRoute<I> newInstance(Class<I> idClass) {
+        checkNotNull(idClass);
+        return new DefaultCommandRoute<>(idClass);
+    }
+
+    @Override
+    public I apply(CommandMessage message, CommandContext ignored) throws MessageFieldException {
+        checkNotNull(message);
+        FieldDescriptor field = targetFieldFrom(message);
+        I result = targetFrom(field, message);
+        return result;
+    }
+
+    private I targetFrom(FieldDescriptor field, CommandMessage message) {
+        Object value = message.getField(field);
+        Class<?> valueClass = value.getClass();
+        if (!idClass.isAssignableFrom(valueClass)) {
+            throw new MessageFieldException(
+                    message, "The field `%s` has the type `%s` which is not assignable" +
+                    " from the expected ID type `%s`.",
+                    field.getName(),
+                    valueClass.getName(),
+                    idClass.getName()
+
+            );
         }
+        I casted = idClass.cast(value);
+        return casted;
+    }
+
+    /**
+     * Obtains the descriptor of the command target field from the passed message.
+     */
+    private static FieldDescriptor targetFieldFrom(CommandMessage message) {
+        List<FieldDescriptor> fields = message.getDescriptorForType()
+                                              .getFields();
+        if (fields.size() <= ID_FIELD_INDEX) {
+            throw new MessageFieldException(
+                    message, "There's no field with the index %d.", ID_FIELD_INDEX
+            );
+        }
+        return fields.get(ID_FIELD_INDEX);
+    }
+
+    /**
+     * Verifies of the passed command message potentially has a field with an entity ID.
+     */
+    public static boolean exists(CommandMessage commandMessage) {
+        boolean hasAtLeastOneField =
+                commandMessage.getDescriptorForType()
+                              .getFields()
+                              .size() > ID_FIELD_INDEX;
+        return hasAtLeastOneField;
     }
 }
