@@ -184,9 +184,30 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>If the repository does not have a storage assigned prior to this call, the storage
      * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
      * associated with the passed {@code BoundedContext}.
+     *
+     * <p>A context for a repository can be set only once. Passing the same second time will have
+     * no effect.
+     *
+     * @throws IllegalStateException
+     *          if the repository has a context value already assigned, and the passed value is
+     *          not equal to the assigned one
      */
     @Internal
     public final void setBoundedContext(BoundedContext context) {
+        checkNotNull(context);
+        boolean sameValue = context.equals(this.boundedContext);
+        if (this.boundedContext != null && !sameValue) {
+            throw newIllegalStateException(
+                    "The repository `%s` already has assigned BoundedContext (`%s`)." +
+                            "This operation can be performed only once" +
+                            " Attempted to set the context `%s`.",
+                    this.boundedContext, this, context);
+        }
+
+        if (sameValue) {
+            return;
+        }
+
         this.boundedContext = context;
         if (!isStorageAssigned()) {
             initStorage(context.storageFactory());

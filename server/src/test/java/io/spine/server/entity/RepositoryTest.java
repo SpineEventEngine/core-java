@@ -34,11 +34,13 @@ import io.spine.test.entity.ProjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
 import static com.google.common.collect.Iterators.size;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -127,6 +129,44 @@ class RepositoryTest {
         EventFilter filter = repository.eventFilter();
         assertNotNull(filter);
     }
+
+    @Nested
+    @DisplayName("prohibit overwriting already set context")
+    class OverwritingContext {
+
+        private BoundedContext ctx1;
+        private BoundedContext ctx2;
+
+        @BeforeEach
+        void createContexts() {
+            ctx1 = BoundedContext
+                    .newBuilder()
+                    .setName("Context-1")
+                    .build();
+            ctx2 = BoundedContext
+                    .newBuilder()
+                    .setName("Context-2")
+                    .build();
+        }
+
+        @Test
+        @DisplayName("throwing ISE")
+        void prohibit() {
+            repository.setBoundedContext(ctx1);
+            assertThrows(IllegalStateException.class, () ->
+                    repository.setBoundedContext(ctx2));
+        }
+
+        @Test
+        @DisplayName("allowing passing the same value twice")
+        void idempotency() {
+            repository.setBoundedContext(ctx1);
+            repository.setBoundedContext(ctx1);
+            assertThat(repository.context())
+                    .isEqualTo(ctx1);
+        }
+    }
+
 
     @Test
     @DisplayName("close storage on close")

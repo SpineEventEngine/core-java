@@ -72,6 +72,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
+import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -507,5 +508,17 @@ class BoundedContextTest {
         SubstituteLoggingEvent systemLogEvent = log.poll();
         assertThat(systemLogEvent.getMessage()).contains(systemContextName.getValue());
         assertThat(systemLogEvent.getLevel()).isAtLeast(DEBUG);
+    }
+
+    @Test
+    @DisplayName("return its name in `toString()`")
+    void stringForm() {
+        String name = randomString();
+
+        assertThat(BoundedContext.newBuilder()
+                                 .setName(name)
+                                 .build()
+                                 .toString())
+                .isEqualTo(name);
     }
 }

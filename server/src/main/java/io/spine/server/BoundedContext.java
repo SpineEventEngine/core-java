@@ -524,4 +524,12 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
             tenantIndex.close();
         }
     }
+
+    /**
+     * Returns the name of this Bounded Context.
+     */
+    @Override
+    public String toString() {
+        return name.getValue();
+    }
 }
