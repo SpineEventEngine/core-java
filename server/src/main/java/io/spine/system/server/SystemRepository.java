@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.EventFilter;
@@ -36,8 +37,8 @@ abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
+    protected void init(BoundedContext context) {
+        super.init(context);
         eventImportRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 

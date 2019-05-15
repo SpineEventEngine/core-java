@@ -35,6 +35,7 @@ import io.spine.code.proto.EntityStateOption;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
+import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -79,8 +80,8 @@ final class MirrorRepository
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
+    protected void init(BoundedContext context) {
+        super.init(context);
         prepareRouting();
     }
 

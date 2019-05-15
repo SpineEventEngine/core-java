@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.given.aggregate;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.BoundedContext;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggTaskStarted;
@@ -36,11 +37,11 @@ public class IgTestAggregateRepository
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void init() {
-        super.init();
+    public void init(BoundedContext context) {
+        super.init(context);
         eventRouting().route(AggTaskStarted.class,
-                             (message, context) -> withId(message.getProjectId()))
+                             (message, ctx) -> withId(message.getProjectId()))
                       .route(AggProjectPaused.class,
-                             (message, context) -> withId(message.getProjectId()));
+                             (message, ctx) -> withId(message.getProjectId()));
     }
 }

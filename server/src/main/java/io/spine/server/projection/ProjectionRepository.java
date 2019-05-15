@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.server.BoundedContext;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.StorageConverter;
 import io.spine.server.event.EventFilter;
@@ -83,11 +84,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @throws IllegalStateException
      *          if the state routing does not cover one of the entity state types to which
      *          the entities are subscribed
+     * @param context
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() throws IllegalStateException{
-        super.init();
+    protected void init(BoundedContext context) throws IllegalStateException{
+        super.init(context);
         ensureDispatchesEvents();
         subscribeToSystemEvents();
         if (projectionClass().subscribesToStates()) {

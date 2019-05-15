@@ -22,6 +22,7 @@ package io.spine.server.route.given.switchman;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.Time;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
@@ -85,9 +86,9 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
         }
 
         @Override
-        public void init() {
-            super.init();
-            eventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
+        public void init(BoundedContext context) {
+            super.init(context);
+            eventRouting().replaceDefault((event, ctx) -> SINGLETON_ID_SET);
         }
     }
 }

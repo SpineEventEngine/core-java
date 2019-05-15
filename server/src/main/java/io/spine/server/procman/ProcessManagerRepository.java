@@ -139,14 +139,18 @@ public abstract class ProcessManagerRepository<I,
      * </ul>
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
+     * @param context
+     *         the Bounded Context of this repository
+     * @throws IllegalStateException
+     *          if the Process Manager class of this repository does not declare message
+     *          handling methods
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
+    protected void init(BoundedContext context) {
+        super.init(context);
         eventRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
 
-        BoundedContext context = context();
         context.registerCommandDispatcher(this);
 
         checkNotDeaf();

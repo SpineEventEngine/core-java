@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.given.importado;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
 
@@ -32,14 +33,16 @@ public final class DotSpace extends AggregateRepository<ObjectId, Dot> {
     /**
      * Replaces event import routing to take first message field.
      *
+     * @param context
+     *         the {@code BoundedContext} of this repository
      * @implNote Default behaviour defined in {@link AggregateRepository#eventImportRoute}
-     * is to take producer ID from an {@code EventContext}. We redefine this to avoid the need
-     * of creating {@code Event} instances. Real imports would need to create those.
+     *         is to take producer ID from an {@code EventContext}. We redefine this to avoid the
+     *         need of creating {@code Event} instances. Real imports would need to create those.
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
+    protected void init(BoundedContext context) {
+        super.init(context);
         eventImportRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 }

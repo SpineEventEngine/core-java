@@ -120,17 +120,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@link io.spine.server.aggregate.ImportBus ImportBus} of the parent {@code BoundedContext}
      * for dispatching messages to its aggregates.
      *
+     * @param context
+     *         the {@code BoundedContext} of this repository
      * @throws IllegalStateException
-     *          if the aggregate class does not handle any messages
+     *         if the aggregate class does not handle any messages
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
+    protected void init(BoundedContext context) {
         checkNotVoid();
 
-        super.init();
+        super.init(context);
 
-        BoundedContext context = context();
         context.registerCommandDispatcher(this);
         context.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {

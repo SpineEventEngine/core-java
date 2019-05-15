@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -61,11 +62,14 @@ public abstract class EventDispatchingRepository<I,
 
     /**
      * Registers itself as an event dispatcher with the parent {@code BoundedContext}.
+     *
+     * @param context
+     *         the {@code BoundedContext} of this repository
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
+    protected void init(BoundedContext context) {
+        super.init(context);
         context().registerEventDispatcher(this);
     }
 

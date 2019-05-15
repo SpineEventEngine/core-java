@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
@@ -51,13 +52,16 @@ public abstract class AggregatePartRepository<I,
     /**
      * Registers itself with the {@link io.spine.server.BoundedContext#aggregateRootDirectory()
      * AggregateRootDirectory} of the parent {@code BoundedContext}.
+     *
+     * @param context
+     *         the Bounded Context of this repository
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
-        context().aggregateRootDirectory()
-                 .register(this);
+    protected void init(BoundedContext context) {
+        super.init(context);
+        context.aggregateRootDirectory()
+               .register(this);
     }
 
     @Override

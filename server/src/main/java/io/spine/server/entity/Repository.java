@@ -64,9 +64,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * The {@link BoundedContext} to which the repository belongs.
      *
      * <p>This field is null when a repository is not {@linkplain
-     * BoundedContext#register(Repository) registered} yet.
+     * BoundedContext#register(Repository) registered} yet and
+     * after the repository is {@linkplain #close() closed}.
      */
-    private @MonotonicNonNull BoundedContext boundedContext;
+    private @Nullable BoundedContext boundedContext;
 
     /**
      * Model class of entities managed by this repository.
@@ -198,10 +199,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         boolean sameValue = context.equals(this.boundedContext);
         if (this.boundedContext != null && !sameValue) {
             throw newIllegalStateException(
-                    "The repository `%s` already has assigned BoundedContext (`%s`)." +
-                            "This operation can be performed only once" +
-                            " Attempted to set the context `%s`.",
-                    this.boundedContext, this, context);
+                    "The repository `%s` has the Bounded Context (`%s`) assigned." +
+                            " This operation can be performed only once." +
+                            " Attempted to set: `%s`.",
+                    this, this.boundedContext, context);
         }
 
         if (sameValue) {
@@ -212,7 +213,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         if (!isStorageAssigned()) {
             initStorage(context.storageFactory());
         }
-        init();
+        init(context);
     }
 
     /**
@@ -224,11 +225,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
      * of the parent {@code BoundedContext}.
+     *
+     * @param context
+     *          the {@code BoundedContext} of this repository
      */
     @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        context().stand()
-                 .registerTypeSupplier(this);
+    protected void init(BoundedContext context) {
+        context.stand()
+               .registerTypeSupplier(this);
     }
 
     /**
@@ -329,6 +333,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             this.storage.close();
             this.storage = null;
         }
+        this.boundedContext = null;
     }
 
     /**
