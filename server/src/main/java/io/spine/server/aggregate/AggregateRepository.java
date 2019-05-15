@@ -110,16 +110,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes the repository during its registration with a {@code BoundedContext}.
      *
-     * <p>{@code AggregateRepository} also registers itself with:
+     * <p>Verifies that the class of aggregates of this repository subscribes to at least one
+     * type of messages.
      *
-     * <ul>
-     *     <li>{@link io.spine.server.commandbus.CommandBus CommandBus},
-     *     <li>{@link io.spine.server.event.EventBus EventBus},
-     *     <li>{@link io.spine.server.aggregate.ImportBus ImportBus} of
-     *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
-     * </ul>
+     * <p>Registers itself with {@link io.spine.server.commandbus.CommandBus CommandBus},
+     * {@link io.spine.server.event.EventBus EventBus}, and
+     * {@link io.spine.server.aggregate.ImportBus ImportBus} of the parent {@code BoundedContext}
+     * for dispatching messages to its aggregates.
+     *
+     * @throws IllegalStateException
+     *          if the aggregate class does not handle any messages
      */
     @Override
     @OverridingMethodsMustInvokeSuper
@@ -147,7 +149,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         if (!handlesCommands && !reactsOnEvents) {
             throw newIllegalStateException(
-                    "Aggregates of the repository %s neither handle commands" +
+                    "Aggregates of the repository `%s` neither handle commands" +
                             " nor react on events.", this);
         }
     }

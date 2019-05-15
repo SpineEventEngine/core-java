@@ -49,9 +49,7 @@ public abstract class AggregatePartRepository<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Registers itself with the {@link io.spine.server.BoundedContext#aggregateRootDirectory()
+     * Registers itself with the {@link io.spine.server.BoundedContext#aggregateRootDirectory()
      * AggregateRootDirectory} of the parent {@code BoundedContext}.
      */
     @Override
