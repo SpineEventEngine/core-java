@@ -27,7 +27,9 @@ import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.CommandRoute;
+import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeInt;
@@ -38,7 +40,7 @@ import java.util.Set;
 /**
  * The repository of {@link io.spine.server.aggregate.given.repo.FailingAggregate}s.
  */
-public class FailingAggregateRepository
+public final class FailingAggregateRepository
         extends AggregateRepository<Long, FailingAggregate> {
 
     private boolean errorLogged;
@@ -46,9 +48,10 @@ public class FailingAggregateRepository
     private @Nullable RuntimeException lastException;
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    public FailingAggregateRepository() {
-        super();
-        commandRouting().replaceDefault(
+    @Override
+    protected void setupCommandRouting(CommandRouting<Long> routing) {
+        super.setupCommandRouting(routing);
+        routing.replaceDefault(
                 // Simplistic routing function that takes absolute value as ID.
                 new CommandRoute<Long, CommandMessage>() {
                     private static final long serialVersionUID = 0L;
@@ -61,10 +64,14 @@ public class FailingAggregateRepository
                         }
                         return 0L;
                     }
-                }
-        );
+                });
+    }
 
-        eventRouting().replaceDefault(
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    @Override
+    protected void setupEventRouting(EventRouting<Long> routing) {
+        super.setupEventRouting(routing);
+        routing.replaceDefault(
                 new EventRoute<Long, EventMessage>() {
                     private static final long serialVersionUID = 0L;
 

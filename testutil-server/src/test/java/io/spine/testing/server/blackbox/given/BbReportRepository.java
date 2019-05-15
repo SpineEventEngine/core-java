@@ -23,6 +23,7 @@ package io.spine.testing.server.blackbox.given;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
@@ -41,8 +42,10 @@ public final class BbReportRepository extends AggregateRepository<BbReportId, Bb
 
     private final List<BbReportAggregate> aggregates = newArrayList();
 
-    public BbReportRepository() {
-        eventRouting().route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
+    @Override
+    protected void setupEventRouting(EventRouting<BbReportId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
                 (event, context) -> getReportsContainingProject(event.getProjectId()));
     }
 

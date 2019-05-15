@@ -20,8 +20,7 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.server.BoundedContext;
+import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggTaskStarted;
@@ -32,16 +31,15 @@ import static io.spine.server.route.EventRoute.withId;
  * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
  * IdempotencyGuard tests}.
  */
-public class IgTestAggregateRepository
+public final class IgTestAggregateRepository
         extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
 
-    @OverridingMethodsMustInvokeSuper
     @Override
-    public void init(BoundedContext context) {
-        super.init(context);
-        eventRouting().route(AggTaskStarted.class,
-                             (message, ctx) -> withId(message.getProjectId()))
-                      .route(AggProjectPaused.class,
-                             (message, ctx) -> withId(message.getProjectId()));
+    protected void setupEventRouting(EventRouting<ProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(AggTaskStarted.class,
+                      (message, ctx) -> withId(message.getProjectId()))
+               .route(AggProjectPaused.class,
+                      (message, ctx) -> withId(message.getProjectId()));
     }
 }

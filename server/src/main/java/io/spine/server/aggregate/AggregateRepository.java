@@ -89,7 +89,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * The routing for event import, which by default obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
-    private final EventRouting<I> eventImportRoute =
+    private final EventRouting<I> eventImportRouting =
             EventRouting.withDefault(EventRoute.byProducerId());
 
     /**
@@ -132,6 +132,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         super.init(context);
 
+        setupCommandRouting(commandRouting.get());
+        setupEventRouting(eventRouting);
+
         context.registerCommandDispatcher(this);
         context.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
@@ -139,6 +142,35 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .register(EventImportDispatcher.of(this));
         }
         this.commandErrorHandler = context.createCommandErrorHandler();
+    }
+
+    /**
+     * A callback for derived repository classes to customize routing schema for commands.
+     *
+     * <p>Default routing returns the value of the first field of a command message.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // See Javadoc
+    protected void setupCommandRouting(CommandRouting<I> routing) {
+        // Do nothing.
+    }
+
+    /**
+     * A callback for derived repository classes to customize routing schema for events.
+     *
+     * <p>Default routing returns the ID of the entity which
+     * {@linkplain io.spine.core.EventContext#getProducerId() produced} the event.
+     * This allows to “link” different kinds of entities by having the same class of IDs.
+     * More complex scenarios (e.g. one-to-many relationships) may require custom routing schemas.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupEventRouting(EventRouting<I> routing) {
+        // Do nothing.
     }
 
     /**
@@ -366,14 +398,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Obtains command routing instance used by this repository.
      */
-    protected final CommandRouting<I> commandRouting() {
+    private CommandRouting<I> commandRouting() {
         return commandRouting.get();
     }
 
     /**
      * Obtains event routing instance used by this repository.
      */
-    protected final EventRouting<I> eventRouting() {
+    private EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
@@ -399,7 +431,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Consider adding this code to the constructor of your {@code AggregateRepository} class.
      */
     protected final EventRouting<I> eventImportRouting() {
-        return eventImportRoute;
+        return eventImportRouting;
     }
 
     /**

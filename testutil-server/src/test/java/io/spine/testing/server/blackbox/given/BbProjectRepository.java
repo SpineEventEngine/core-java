@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.route.EventRouting;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
 
@@ -29,8 +30,10 @@ import java.util.HashSet;
 public final class BbProjectRepository
         extends AggregateRepository<BbProjectId, BbProjectAggregate> {
 
-    public BbProjectRepository() {
-        eventRouting().route(BbUserDeleted.class,
-                             (event, context) -> new HashSet<>(event.getProjectList()));
+    @Override
+    protected void setupEventRouting(EventRouting<BbProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(BbUserDeleted.class,
+                      (event, context) -> new HashSet<>(event.getProjectList()));
     }
 }
