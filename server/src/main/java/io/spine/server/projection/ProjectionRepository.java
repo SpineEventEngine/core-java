@@ -81,10 +81,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * If one of the states of entities cannot be routed during the created schema,
      * {@code IllegalStateException} will be thrown.
      *
-     * @throws IllegalStateException
-     *          if the state routing does not cover one of the entity state types to which
-     *          the entities are subscribed
      * @param context
+     *         the {@code BoundedContext} of this repository
+     * @throws IllegalStateException
+     *         if the state routing does not cover one of the entity state types to which
+     *         the entities are subscribed
      */
     @Override
     @OverridingMethodsMustInvokeSuper
