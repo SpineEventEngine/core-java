@@ -21,12 +21,15 @@
 package io.spine.server.procman.given.repo;
 
 import io.spine.server.entity.EventFilter;
+import io.spine.server.entity.rejection.StandardRejection;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static io.spine.server.route.EventRoute.withId;
 
 public class TestProcessManagerRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
@@ -35,6 +38,9 @@ public class TestProcessManagerRepository
 
     public TestProcessManagerRepository() {
         super();
+        eventRouting()
+                .route(StandardRejection.class,
+                             (event, context) -> withId((ProjectId) event.entityId()));
     }
 
     @Override
