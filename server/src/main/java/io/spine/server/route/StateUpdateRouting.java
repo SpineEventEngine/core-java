@@ -20,14 +20,17 @@
 
 package io.spine.server.route;
 
+import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.model.StateClass;
 import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.route.EventRoute.noTargets;
 
 /**
@@ -107,5 +110,16 @@ public class StateUpdateRouting<I>
 
     private static <I> Route<Message, EventContext, Set<I>> defaultStateRoute() {
         return (message, context) -> noTargets();
+    }
+
+    /**
+     * Validates routing schema for types of state messages.
+     *
+     * @throws IllegalStateException
+     *          if one of the state type cannot be dispatched by the current schema configuration
+     */
+    public void validate(Sets.SetView<StateClass> stateClasses) throws IllegalStateException {
+        checkNotNull(stateClasses);
+        //TODO:2019-05-15:alexander.yevsyukov: Implement
     }
 }

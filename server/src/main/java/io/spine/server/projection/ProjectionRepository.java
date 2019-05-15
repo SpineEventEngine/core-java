@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -71,8 +72,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Initializes the repository during its registration.
      *
      * <p>If projections of this repository are {@linkplain io.spine.core.Subscribe subscribed} to
-     * entity state updates, a routing for these updates is {@linkplain #createStateRouting()
-     * created}. If one of the states of entities cannot be routed during the created schema,
+     * entity state updates, a routing for state updates is created and
+     * {@linkplain #setupStateRouting(StateUpdateRouting) configured}.
+     * If one of the states of entities cannot be routed during the created schema,
      * {@code IllegalStateException} will be thrown.
      *
      * @throws IllegalStateException
@@ -84,34 +86,33 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected void init() throws IllegalStateException{
         super.init();
         if (projectionClass().subscribesToStates()) {
-            eventRouting().routeStateUpdates(createStateRouting());
-            validateStateRouting();
+            StateUpdateRouting<I> routing = createStateRouting();
+            eventRouting().routeStateUpdates(routing);
         }
     }
 
     /**
-     * Creates {@code StateUpdateRouting} used by the repository.
-     *
-     * <p>Default implementation provides {@linkplain StateUpdateRouting#newInstance()
-     * default instance} of the {@code StateUpdateRouting}. Overriding repository classes
-     * may customize the routing if the default schema does not satisfy the routing needs.
+     * Creates and configures the {@code StateUpdateRouting} used by this repository.
      */
-    protected StateUpdateRouting<I> createStateRouting() {
-        return StateUpdateRouting.newInstance();
+    private StateUpdateRouting<I> createStateRouting() {
+        ProjectionClass<P> cls = projectionClass();
+        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance();
+        setupStateRouting(routing);
+        routing.validate(union(cls.domesticStates(), cls.externalStates()));
+        return routing;
     }
 
     /**
-     * Validates routing schema for types of state messages (if any) that this repository dispatches
-     * to its entities.
+     * A callback for derived repository classes to customize routing schema for delivering
+     * updated state to subscribed entities, if the default schema does not satisfy
+     * the routing needs.
      *
-     * @throws IllegalStateException
-     *          if a message type cannot be dispatched
+     * @param routing
+     *         the routing to customize
      */
-    private void validateStateRouting() throws IllegalStateException {
-        if (!projectionClass().subscribesToStates()) {
-            return;
-        }
-        //TODO:2019-05-13:alexander.yevsyukov: Implement
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupStateRouting(StateUpdateRouting<I> routing) {
+        // Do nothing by default.
     }
 
     @VisibleForTesting

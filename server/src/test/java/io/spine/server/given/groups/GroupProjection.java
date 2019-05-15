@@ -45,13 +45,12 @@ public final class GroupProjection extends Projection<GroupId, Group, GroupVBuil
             extends ProjectionRepository<GroupId, GroupProjection, Group> {
 
         @Override
-        protected StateUpdateRouting<GroupId> createStateRouting() {
-            return super.createStateRouting()
-                        .route(Organization.class, (org, eventContext) ->
-                                withId(GroupId.newBuilder()
-                                              .setUuid(org.getHead()
-                                                          .getValue())
-                                              .build()));
+        protected void setupStateRouting(StateUpdateRouting<GroupId> routing) {
+            routing.route(Organization.class, (org, eventContext) ->
+                    withId(GroupId.newBuilder()
+                                  .setUuid(org.getHead()
+                                              .getValue())
+                                  .build()));
         }
     }
 }

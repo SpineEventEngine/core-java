@@ -59,9 +59,8 @@ public final class EntitySubscriberProjection
             extends ProjectionRepository<ProjectId, EntitySubscriberProjection, ProjectTaskNames> {
 
         @Override
-        protected StateUpdateRouting<ProjectId> createStateRouting() {
-            return super.createStateRouting()
-                        .route(Project.class, (state, context) -> withId(state.getId()));
+        protected void setupStateRouting(StateUpdateRouting<ProjectId> routing) {
+            routing.route(Project.class, (state, context) -> withId(state.getId()));
         }
     }
 }
