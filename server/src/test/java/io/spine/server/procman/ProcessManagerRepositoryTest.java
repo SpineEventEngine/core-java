@@ -315,7 +315,7 @@ class ProcessManagerRepositoryTest
             assertTrue(TestProcessManager.processed(event.enclosedMessage()));
 
             dispatchEvent(event);
-            RuntimeException exception = repository().getLatestException();
+            RuntimeException exception = repository().latestException();
             assertNotNull(exception);
             assertThat(exception, instanceOf(DuplicateEventException.class));
         }
@@ -329,7 +329,7 @@ class ProcessManagerRepositoryTest
             assertTrue(TestProcessManager.processed(command.enclosedMessage()));
 
             dispatchCommand(command);
-            RuntimeException exception = repository().getLatestException();
+            RuntimeException exception = repository().latestException();
             assertNotNull(exception);
             assertThat(exception, instanceOf(DuplicateCommandException.class));
         }

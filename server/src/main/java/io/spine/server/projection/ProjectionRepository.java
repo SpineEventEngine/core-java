@@ -38,6 +38,7 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
+import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
@@ -89,13 +90,19 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) throws IllegalStateException{
+    protected void init(BoundedContext context) throws IllegalStateException {
         super.init(context);
         ensureDispatchesEvents();
         subscribeToSystemEvents();
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void setupEventRouting(EventRouting<I> routing) {
+        super.setupEventRouting(routing);
         if (projectionClass().subscribesToStates()) {
-            StateUpdateRouting<I> routing = createStateRouting();
-            eventRouting().routeStateUpdates(routing);
+            StateUpdateRouting<I> stateRouting = createStateRouting();
+            routing.routeStateUpdates(stateRouting);
         }
     }
 

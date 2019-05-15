@@ -27,6 +27,7 @@ import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
@@ -43,7 +44,7 @@ public class Given {
     private Given() {
     }
 
-    public static class StandTestProjectionRepository
+    public static final class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
         private static final EventRoute<ProjectId, PrjProjectCreated> EVENT_TARGETS_FN =
@@ -58,9 +59,10 @@ public class Given {
                     }
                 };
 
-        public StandTestProjectionRepository() {
-            super();
-            eventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
+        @Override
+        protected void setupEventRouting(EventRouting<ProjectId> routing) {
+            super.setupEventRouting(routing);
+            routing.route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
 
         @Override
@@ -69,7 +71,7 @@ public class Given {
         }
     }
 
-    public static class StandTestProjection
+    public static final class StandTestProjection
             extends Projection<ProjectId, Project, ProjectVBuilder> {
 
         public StandTestProjection(ProjectId id) {

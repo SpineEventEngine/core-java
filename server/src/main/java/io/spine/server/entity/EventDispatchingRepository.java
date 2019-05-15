@@ -56,7 +56,7 @@ public abstract class EventDispatchingRepository<I,
      * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected final EventRouting<I> eventRouting() {
+    private EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
