@@ -151,9 +151,10 @@ public abstract class ProcessManagerRepository<I,
     protected void init(BoundedContext context) {
         super.init(context);
 
-        context.registerCommandDispatcher(this);
-
+        setupCommandRouting(commandRouting());
         checkNotDeaf();
+
+        context.registerCommandDispatcher(this);
 
         this.commandErrorHandler = context.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
@@ -172,6 +173,19 @@ public abstract class ProcessManagerRepository<I,
     protected void setupEventRouting(EventRouting<I> routing) {
         super.setupEventRouting(routing);
         routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
+    }
+
+    /**
+     * A callback for derived classes to customize routing schema for commands.
+     *
+     * <p>Default routing returns the value of the first field of a command message.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // See Javadoc
+    protected void setupCommandRouting(CommandRouting<I> routing) {
+        // Do nothing.
     }
 
     /**
@@ -224,7 +238,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Obtains command routing schema used by this repository.
      */
-    protected final CommandRouting<I> commandRouting() {
+    private CommandRouting<I> commandRouting() {
         return commandRouting.get();
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.common.truth.Truth;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -40,6 +41,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
+import io.spine.server.procman.given.repo.ProjectCompletion;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
@@ -260,6 +262,14 @@ class ProcessManagerRepositoryTest
         repository().dispatch(EventEnvelope.of(event));
     }
 
+    @Test
+    @DisplayName("allow customizing command routing")
+    void setupOfCommandRouting() {
+        ProjectCompletion.Repository repo = new ProjectCompletion.Repository();
+        boundedContext.register(repo);
+        assertTrue(repo.callbackCalled());
+    }
+
     @Nested
     @DisplayName("dispatch")
     class Dispatch {
@@ -452,7 +462,8 @@ class ProcessManagerRepositoryTest
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
                                            () -> repo.dispatchNowTo(id, request));
-        assertThat(getRootCause(exception), instanceOf(IllegalStateException.class));
+        Truth.assertThat(getRootCause(exception))
+             .isInstanceOf(IllegalStateException.class);
     }
 
     @Nested
@@ -526,8 +537,8 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        assertTrue(filter.filter(arbitraryEvent)
-                         .isPresent());
+        Truth8.assertThat(filter.filter(arbitraryEvent))
+              .isPresent();
 
         Any newState = pack(currentTime());
         EntityHistoryId historyId = EntityHistoryId
@@ -540,7 +551,8 @@ class ProcessManagerRepositoryTest
                 .setId(historyId)
                 .setNewState(newState)
                 .build();
-        assertFalse(filter.filter(discardedEvent).isPresent());
+        Truth8.assertThat(filter.filter(discardedEvent))
+              .isEmpty();
     }
 
     @Test

@@ -19,68 +19,18 @@
  */
 syntax = "proto3";
 
-package spine.test.procman.command;
+package spine.test.procman;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.procman.command";
-option java_outer_classname = "ProcmanCommandsProto";
+option java_package="io.spine.test.procman";
 option java_multiple_files = true;
 
-import "spine/test/procman/project.proto";
-
-message PmCreateProject {
-    ProjectId project_id = 1;
+message ProcessId {
+    string uuid = 1;
 }
 
-message PmAddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
-message PmStartProject {
-    ProjectId project_id = 1;
-}
-
-message PmReviewBacklog {
-    ProjectId project_id = 1;
-}
-
-// A command, which does not modify a process manager state.
-message PmDoNothing {
-    ProjectId project_id = 1;
-}
-
-// A command, which always causes StandardRejections.EntityAlreadyArchived to be thrown.
-message PmThrowEntityAlreadyArchived {
-    ProjectId project_id = 1;
-}
-
-message PmArchiveProject {
-    ProjectId project_id = 1;
-}
-
-message PmDeleteProject {
-    ProjectId project_id = 1;
-}
-
-message PmStartIteration {
-    ProjectId project_id = 1;
-}
-
-message PmCancelIteration {
-    ProjectId project_id = 1;
-}
-
-message PmScheduleRetrospective {
-    ProjectId project_id = 1;
-}
-
-message PmPlanIteration {
-    ProjectId project_id = 1;
-}
-
-message PmCompleteProject {
-    ProjectId project_id = 1;
+message ProcessState {
+    ProcessId id = 1 [(required) = false];
 }
