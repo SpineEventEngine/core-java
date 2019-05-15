@@ -44,7 +44,7 @@ public class Given {
     private Given() {
     }
 
-    public static final class StandTestProjectionRepository
+    public static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
         private static final EventRoute<ProjectId, PrjProjectCreated> EVENT_TARGETS_FN =
