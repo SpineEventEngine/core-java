@@ -97,15 +97,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Caches {@link Column} definitions of the {@link Entity} class managed by this repository.
+     * Initializes the repository by caching {@link Column} definitions of
+     * the {@link Entity} class managed by this repository.
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
-        super.onRegistered();
-
+    protected void init() {
+        super.init();
         cacheEntityColumns();
     }
 

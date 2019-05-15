@@ -60,15 +60,12 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>{@linkplain io.spine.server.event.EventBus#register(io.spine.server.bus.MessageDispatcher)
-     * Registers} itself with the {@code EventBus} of the parent {@code BoundedContext}.
+     * Registers itself as an event dispatcher with the parent {@code BoundedContext}.
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
-        super.onRegistered();
+    protected void init() {
+        super.init();
         context().registerEventDispatcher(this);
     }
 

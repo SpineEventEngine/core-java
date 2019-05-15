@@ -139,10 +139,11 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setId(id)
                 .build();
-        TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
-                                         .withId(id)
-                                         .withState(state)
-                                         .build();
+        TestProcessManager result =
+                Given.processManagerOfClass(TestProcessManager.class)
+                     .withId(id)
+                     .withState(state)
+                     .build();
         return result;
     }
 
@@ -501,18 +502,20 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
+    @DisplayName("check that its `ProcessManager` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setMultitenant(false)
-                                                      .build();
-        repo.setBoundedContext(boundedContext);
-        assertThrows(IllegalStateException.class, repo::onRegistered);
+        BoundedContext context = BoundedContext
+                .newBuilder()
+                .setMultitenant(false)
+                .build();
+        
+        assertThrows(IllegalStateException.class, () ->
+                repo.setBoundedContext(context));
     }
 
     @Test
-    @DisplayName("provide EventFilter which discards EntityStateChanged events")
+    @DisplayName("provide `EventFilter` which discards `EntityStateChanged` events")
     void discardEntityStateChangedEvents() {
         EventFilter filter = repository().eventFilter();
         ProjectId projectId = ProjectId
@@ -541,7 +544,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("post all domain events through an EventFilter")
+    @DisplayName("post all domain events through an `EventFilter`")
     void postEventsThroughFilter() {
         ProjectId projectId = ProjectId
                 .newBuilder()

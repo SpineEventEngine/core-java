@@ -69,7 +69,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private RecordStorage<I> recordStorage;
 
     /**
-     * Initializes the repository during its registration.
+     * Initializes the repository.
+     *
+     * <p>Ensures there is at least one event subscriber method (external or domestic) declared
+     * by the class of the projection. Throws an {@code IllegalStateException} otherwise.
      *
      * <p>If projections of this repository are {@linkplain io.spine.core.Subscribe subscribed} to
      * entity state updates, a routing for state updates is created and
@@ -85,9 +88,23 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @OverridingMethodsMustInvokeSuper
     protected void init() throws IllegalStateException{
         super.init();
+        ensureDispatchesEvents();
+        subscribeToSystemEvents();
         if (projectionClass().subscribesToStates()) {
             StateUpdateRouting<I> routing = createStateRouting();
             eventRouting().routeStateUpdates(routing);
+        }
+    }
+
+    private void ensureDispatchesEvents() {
+        boolean noEventSubscriptions = !dispatchesEvents();
+        if (noEventSubscriptions) {
+            boolean noExternalSubscriptions = !dispatchesExternalEvents();
+            if (noExternalSubscriptions) {
+                throw newIllegalStateException(
+                        "Projections of the repository `%s` have neither domestic nor external" +
+                                " event subscriptions.", this);
+            }
         }
     }
 
@@ -145,32 +162,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         P projection = super.create(id);
         lifecycleOf(id).onEntityCreated(PROJECTION);
         return projection;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Ensures there is at least one event subscriber method (external or domestic) declared
-     * by the class of the projection. Throws an {@code IllegalStateException} otherwise.
-     */
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
-        super.onRegistered();
-        ensureDispatchesEvents();
-        subscribeToSystemEvents();
-    }
-
-    private void ensureDispatchesEvents() {
-        boolean noEventSubscriptions = !dispatchesEvents();
-        if (noEventSubscriptions) {
-            boolean noExternalSubscriptions = !dispatchesExternalEvents();
-            if (noExternalSubscriptions) {
-                throw newIllegalStateException(
-                        "Projections of the repository `%s` have neither domestic nor external" +
-                                " event subscriptions.", this);
-            }
-        }
     }
 
     private void subscribeToSystemEvents() {

@@ -123,19 +123,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
+    protected void init() {
         checkNotVoid();
 
-        super.onRegistered();
+        super.init();
 
-        BoundedContext boundedContext = context();
-        boundedContext.registerCommandDispatcher(this);
-        boundedContext.registerEventDispatcher(this);
+        BoundedContext context = context();
+        context.registerCommandDispatcher(this);
+        context.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
-            boundedContext.importBus()
-                          .register(EventImportDispatcher.of(this));
+            context.importBus()
+                   .register(EventImportDispatcher.of(this));
         }
-        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        this.commandErrorHandler = context.createCommandErrorHandler();
     }
 
     /**

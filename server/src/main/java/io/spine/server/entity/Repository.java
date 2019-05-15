@@ -195,18 +195,19 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * A callback for performing additional initialization of the repository during its
-     * {@linkplain BoundedContext#register(Repository) registration} with a {@code BoundedContext}.
+     * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
+     * registration} with a {@code BoundedContext}.
      *
      * <p>When this method is called, the repository already has {@link #context() BoundedContext}
      * and the {@link #storage() Storage} {@linkplain #initStorage(StorageFactory) assigned}.
      *
-     * <p>Default implementation does nothing.
+     * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
+     * of the parent {@code BoundedContext}.
      */
-    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc.
     @OverridingMethodsMustInvokeSuper
     protected void init() {
-        // Do nothing.
+        context().stand()
+                 .registerTypeSupplier(this);
     }
 
     /**
@@ -235,10 +236,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * The callback called by a {@link BoundedContext} during the {@linkplain
      * BoundedContext#register(Repository) registration} of the repository.
      */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        context().stand()
-                 .registerTypeSupplier(this);
+        // Do nothing by default.
     }
 
     /**

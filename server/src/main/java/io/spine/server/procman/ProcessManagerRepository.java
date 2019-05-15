@@ -106,18 +106,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Customizes event routing to use first message field.
-     */
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    protected void init() {
-        super.init();
-        eventRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
-    }
-
-    /**
      * Obtains class information of process managers managed by this repository.
      */
     private ProcessManagerClass<P> processManagerClass() {
@@ -132,6 +120,8 @@ public abstract class ProcessManagerRepository<I,
 
     /**
      * {@inheritDoc}
+     *
+     * <p>Customizes event routing to use first message field.
      *
      * <p>Registers with the {@code CommandBus} for dispatching commands
      * (via {@linkplain DelegatingCommandDispatcher delegating dispatcher}).
@@ -152,17 +142,18 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
-        super.onRegistered();
+    protected void init() {
+        super.init();
+        eventRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
 
-        BoundedContext boundedContext = context();
-        boundedContext.registerCommandDispatcher(this);
+        BoundedContext context = context();
+        context.registerCommandDispatcher(this);
 
         checkNotDeaf();
 
-        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        this.commandErrorHandler = context.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(boundedContext);
+        systemSubscriber.registerIn(context);
     }
 
     /**
