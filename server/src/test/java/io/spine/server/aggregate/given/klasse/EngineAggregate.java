@@ -115,8 +115,8 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      *
      * Since this class reacts on own rejections (which are derived from
      * ThrowableMessage and have the same names as corresponding rejection
-     * message classes), we cannot import the outer class in which they
-     * are declared.
+     * message classes), we cannot import the nested classes because of
+     * the name clash.
      *********************************************************************/
 
     @React

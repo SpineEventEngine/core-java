@@ -22,11 +22,8 @@ package io.spine.server.aggregate;
 
 import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
-import io.spine.server.aggregate.given.klasse.event.EngineStopped;
-import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
-import io.spine.server.type.EventClass;
+import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.type.EventEnvelope;
-import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.AfterEach;
@@ -38,13 +35,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithErrors;
 
-/**
- * Test support of event import in {@link AggregateRepository}.
- */
 @DisplayName("For event import AggregateRepository should")
-class EventImportTest extends EventImportTestBase {
+class EventImportRoutingTest extends EventImportTestBase {
 
     private SingleTenantBlackBoxContext context;
     private EngineRepository repository;
@@ -62,68 +55,47 @@ class EventImportTest extends EventImportTestBase {
         context.close();
     }
 
-    @Test
-    @DisplayName("Obtain importable event classes")
-    void importableEventClasses() {
-        Set<EventClass> importableEventClasses = repository.importableEvents();
-        Set<EventClass> exposedByAggregateClass = repository.aggregateClass()
-                                                            .importableEvents();
-        assertThat(importableEventClasses)
-                .isEqualTo(exposedByAggregateClass);
-    }
-
     @Nested
-    @DisplayName("dispatch imported events")
-    class Dispatching {
+    @DisplayName("route imported events")
+    class Routing {
 
-        private final EngineId engineId = engineId("AEL");
-        private final EngineStopped eventMessage = EngineStopped
+        private final EngineId engineId = engineId("AFB");
+        private final SettingsAdjusted eventMessage = SettingsAdjusted
                 .newBuilder()
                 .setId(engineId)
                 .build();
 
-
         @Test
-        @DisplayName("by producer ID")
-        void producerId() {
-            // Create event with producer ID, which is the target aggregate ID.
+        @DisplayName("route imported events by Producer ID by default")
+        void routeById() {
+            // Create event with the producer ID of the target aggregate.
             EventEnvelope event = createEvent(eventMessage, engineId);
 
-            assertImports(event);
+            // Apply routing to the generated event.
+            assertRouted(event);
         }
 
         @Test
-        @DisplayName("by first message field")
-        void firstMessageField() {
+        @DisplayName("route imported event by first message field, if configured")
+        void routeByFirstMessageField() {
             repository.routeImportByFirstMessageField();
 
-            // Create event with producer ID, which is NOT the target aggregate ID.
+            // Create event with the producer ID, which is NOT the target aggregate ID.
             EventEnvelope event = createEvent(eventMessage, null);
 
-            assertImports(event);
+            assertRouted(event);
         }
 
-        private void assertImports(EventEnvelope event) {
-            EventSubject assertEvents =
-                    context.importsEvent(event.outerObject())
-                           .assertEvents()
-                           .withType(EngineStopped.class);
+        /**
+         * Asserts that the import routing resulted in {@link #engineId}.
+         */
+        private void assertRouted(EventEnvelope event) {
+            Set<EngineId> targets =
+                    repository.eventImportRouting()
+                              .apply(event.message(), event.context());
 
-            assertEvents.hasSize(1);
+            assertThat(targets).hasSize(1);
+            assertThat(targets).containsExactly(engineId);
         }
-    }
-
-    @Test
-    @DisplayName("fail with exception when importing unsupported event")
-    void importUnsupported() {
-        EngineId id = engineId("AGR");
-        UnsupportedEngineEvent eventMessage = UnsupportedEngineEvent
-                .newBuilder()
-                .setId(id)
-                .build();
-        EventEnvelope unsupported = createEvent(eventMessage, id);
-
-        context.importsEvent(unsupported.outerObject())
-               .assertThat(ackedWithErrors());
     }
 }
