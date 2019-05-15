@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
@@ -134,6 +135,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         setupCommandRouting(commandRouting.get());
         setupEventRouting(eventRouting);
+        setupImportRouting(eventImportRouting);
 
         context.registerCommandDispatcher(this);
         context.registerEventDispatcher(this);
@@ -145,7 +147,21 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * A callback for derived repository classes to customize routing schema for commands.
+     * Ensures that this repository dispatches at least one kind of messages.
+     */
+    private void checkNotVoid() {
+        boolean handlesCommands = dispatchesCommands();
+        boolean reactsOnEvents = dispatchesEvents() || dispatchesExternalEvents();
+
+        if (!handlesCommands && !reactsOnEvents) {
+            throw newIllegalStateException(
+                    "Aggregates of the repository `%s` neither handle commands" +
+                            " nor react on events.", this);
+        }
+    }
+
+    /**
+     * A callback for derived classes to customize routing schema for commands.
      *
      * <p>Default routing returns the value of the first field of a command message.
      *
@@ -158,7 +174,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * A callback for derived repository classes to customize routing schema for events.
+     * A callback for derived classes to customize routing schema for events.
      *
      * <p>Default routing returns the ID of the entity which
      * {@linkplain io.spine.core.EventContext#getProducerId() produced} the event.
@@ -174,17 +190,39 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Ensures that this repository dispatches at least one kind of messages.
+     * A callback for derived classes to customize routing schema for importable events.
+     *
+     * <p>The default routing uses {@linkplain io.spine.core.EventContext#getProducerId()
+     * producer ID} of the event as the ID of the target aggregate.
+     *
+     * <p>This default routing requires that {@link Event Event} instances
+     * {@linkplain ImportBus#post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) posted}
+     * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
+     * target aggregate. Not providing a valid aggregate ID would result in
+     * {@code RuntimeException}.
+     *
+     * <p>Some aggregates may produce events with the aggregate ID as the first field of an event
+     * message. To set the default routing for repositories of such aggregates, please use the
+     * code below:
+     *
+     * <pre>{@code
+     * routing.replaceDefault(EventRoute.fromFirstMessageField());
+     * }</pre>
+     *
+     * @param routing
+     *         the routing schema to customize.
      */
-    private void checkNotVoid() {
-        boolean handlesCommands = dispatchesCommands();
-        boolean reactsOnEvents = dispatchesEvents() || dispatchesExternalEvents();
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupImportRouting(EventRouting<I> routing) {
+        // Do nothing.
+    }
 
-        if (!handlesCommands && !reactsOnEvents) {
-            throw newIllegalStateException(
-                    "Aggregates of the repository `%s` neither handle commands" +
-                            " nor react on events.", this);
-        }
+    /**
+     * Obtains the event import routing used by this repository.
+     */
+    @VisibleForTesting
+    protected final EventRouting<I> eventImportRouting() {
+        return eventImportRouting;
     }
 
     @Override
@@ -407,31 +445,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private EventRouting<I> eventRouting() {
         return eventRouting;
-    }
-
-    /**
-     * Obtains the event import routing, which by default uses
-     * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event
-     * as the target aggregate ID.
-     *
-     * <p>This default routing requires that {@link Event Event} instances
-     * {@linkplain ImportBus#post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) posted}
-     * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
-     * target aggregate. Not providing a valid aggregate ID would result in
-     * {@code RuntimeException}.
-     *
-     * <p>Some aggregates may produce events with the aggregate ID as the first field of an event
-     * message. To set the default routing for repositories of such aggregates, please use the
-     * code below:
-     *
-     * <pre>{@code
-     * eventImportRouting().replaceDefault(EventRoute.fromFirstMessageField());
-     * }</pre>
-     *
-     * Consider adding this code to the constructor of your {@code AggregateRepository} class.
-     */
-    protected final EventRouting<I> eventImportRouting() {
-        return eventImportRouting;
     }
 
     /**

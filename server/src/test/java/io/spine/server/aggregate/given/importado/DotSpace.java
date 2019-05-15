@@ -20,10 +20,9 @@
 
 package io.spine.server.aggregate.given.importado;
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 
 /**
  * A repository for {@link Dot} objects.
@@ -40,9 +39,8 @@ public final class DotSpace extends AggregateRepository<ObjectId, Dot> {
      *         need of creating {@code Event} instances. Real imports would need to create those.
      */
     @Override
-    @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
-        super.init(context);
-        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
+    protected void setupImportRouting(EventRouting<ObjectId> routing) {
+        super.setupImportRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 }
