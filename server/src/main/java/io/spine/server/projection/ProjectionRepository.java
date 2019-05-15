@@ -113,6 +113,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /**
      * Creates and configures the {@code StateUpdateRouting} used by this repository.
+     *
+     * <p>This method {@linkplain StateUpdateRouting#validate(Set) validates} the created state
+     * routing for serving all the state classes to which projections subscribe.
+     *
+     * @throws IllegalStateException
+     *          if one of the subscribed state classes cannot be served by the created state routing
      */
     private StateUpdateRouting<I> createStateRouting() {
         ProjectionClass<P> cls = projectionClass();
