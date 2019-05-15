@@ -43,6 +43,7 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -149,7 +150,6 @@ public abstract class ProcessManagerRepository<I,
     @OverridingMethodsMustInvokeSuper
     protected void init(BoundedContext context) {
         super.init(context);
-        eventRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
 
         context.registerCommandDispatcher(this);
 
@@ -158,6 +158,20 @@ public abstract class ProcessManagerRepository<I,
         this.commandErrorHandler = context.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
         systemSubscriber.registerIn(context);
+    }
+
+    /**
+     * Replaces default routing with the one which takes the target ID from the first field
+     * of an event message.
+     *
+     * @param routing
+     *          the routing to customize
+     */
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void setupEventRouting(EventRouting<I> routing) {
+        super.setupEventRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 
     /**

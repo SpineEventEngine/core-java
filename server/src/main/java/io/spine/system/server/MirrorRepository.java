@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -35,8 +34,8 @@ import io.spine.code.proto.EntityStateOption;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
-import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityRestored;
@@ -79,24 +78,18 @@ final class MirrorRepository
     );
 
     @Override
-    @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
-        super.init(context);
-        prepareRouting();
-    }
-
-    private void prepareRouting() {
-        eventRouting()
-                .route(EntityStateChanged.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityArchived.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityDeleted.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityUnarchived.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityRestored.class,
-                       (message, context) -> targetsFrom(message.getId()));
+    protected void setupEventRouting(EventRouting<MirrorId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(EntityStateChanged.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityArchived.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityDeleted.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityUnarchived.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityRestored.class,
+                      (message, context) -> targetsFrom(message.getId()));
     }
 
     private static Set<MirrorId> targetsFrom(EntityHistoryId historyId) {
