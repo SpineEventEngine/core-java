@@ -84,7 +84,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setArchived(true)
                 .build();
         builder.setId(id())
@@ -98,7 +98,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setDeleted(true)
                 .build();
         builder.setId(id())
@@ -112,7 +112,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setArchived(false)
                 .build();
         builder.setId(id())
@@ -126,7 +126,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setDeleted(false)
                 .build();
         builder.setId(id())
@@ -148,7 +148,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder
         TargetFilters filters = target.getFilters();
         CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
         TargetFilters appendedFilters = filters
-                .toVBuilder()
+                .toBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(typeFilter)
                 .build();
