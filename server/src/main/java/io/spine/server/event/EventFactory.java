@@ -161,7 +161,7 @@ public class EventFactory {
         checkNotNull(context);
         Any packed = pack(message);
         Event result = Event
-                .vBuilder()
+                .newBuilder()
                 .setId(id)
                 .setMessage(packed)
                 .setContext(context)

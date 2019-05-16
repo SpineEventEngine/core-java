@@ -22,10 +22,8 @@ package io.spine.server.event.store;
 
 import com.google.protobuf.Timestamp;
 import io.spine.client.CompositeFilter;
-import io.spine.client.CompositeFilterVBuilder;
 import io.spine.client.Filter;
 import io.spine.client.TargetFilters;
-import io.spine.client.TargetFiltersVBuilder;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
@@ -45,7 +43,7 @@ import static io.spine.client.Filters.lt;
 final class QueryToFilters {
 
     private final EventStreamQuery query;
-    private final TargetFiltersVBuilder builder;
+    private final TargetFilters.Builder builder;
 
     /**
      * Creates an instance of {@link TargetFilters} from the given {@link EventStreamQuery}.
@@ -65,7 +63,7 @@ final class QueryToFilters {
 
     private QueryToFilters(EventStreamQuery query) {
         this.query = query;
-        this.builder = TargetFilters.vBuilder();
+        this.builder = TargetFilters.newBuilder();
     }
 
     private TargetFilters convert() {
@@ -76,8 +74,8 @@ final class QueryToFilters {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void addTimeFilter() {
-        CompositeFilterVBuilder timeFilter = CompositeFilter
-                .vBuilder()
+        CompositeFilter.Builder timeFilter = CompositeFilter
+                .newBuilder()
                 .setOperator(ALL);
         String createdColumn = ColumnName.created.name();
         if (query.hasAfter()) {
@@ -95,8 +93,8 @@ final class QueryToFilters {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void addTypeFilter() {
-        CompositeFilterVBuilder typeFilter = CompositeFilter
-                .vBuilder()
+        CompositeFilter.Builder typeFilter = CompositeFilter
+                .newBuilder()
                 .setOperator(EITHER);
         String typeColumn = ColumnName.type.name();
         for (EventFilter eventFilter : query.getFilterList()) {
@@ -111,8 +109,8 @@ final class QueryToFilters {
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private void add(CompositeFilterVBuilder filter) {
-        boolean filterIsEmpty = filter.getFilter()
+    private void add(CompositeFilter.Builder filter) {
+        boolean filterIsEmpty = filter.getFilterList()
                                       .isEmpty();
         if (!filterIsEmpty) {
             builder.addFilter(filter.build());

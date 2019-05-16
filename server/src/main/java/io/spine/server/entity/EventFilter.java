@@ -88,7 +88,7 @@ public interface EventFilter {
                 .map(event -> {
                     EventMessage eventMessage = event.enclosedMessage();
                     Optional<? extends EventMessage> filtered = filter(eventMessage);
-                    Optional<Event> result = filtered.map(message -> event.toVBuilder()
+                    Optional<Event> result = filtered.map(message -> event.toBuilder()
                                                                           .setMessage(pack(message))
                                                                           .build());
                     return result;
