@@ -20,17 +20,22 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.base.EventMessage;
+import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.klasse.EngineId;
 import io.spine.server.aggregate.given.klasse.EngineRepository;
 import io.spine.server.aggregate.given.klasse.event.EngineStopped;
+import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
+import io.spine.testing.server.entity.EntitySubject;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,14 +49,13 @@ import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithE
  * Test support of event import in {@link AggregateRepository}.
  */
 @DisplayName("For event import AggregateRepository should")
-class EventImportTest extends EventImportTestBase {
+class EventImportTest {
 
-    private SingleTenantBlackBoxContext context;
     private EngineRepository repository;
+    private SingleTenantBlackBoxContext context;
 
-    @BeforeEach
-    void setUp() {
-        repository = new EngineRepository();
+    void createRepository(boolean routeByFirstMessageField) {
+        repository = new EngineRepository(routeByFirstMessageField);
         context = BlackBoxBoundedContext
                 .singleTenant()
                 .with(repository);
@@ -62,12 +66,48 @@ class EventImportTest extends EventImportTestBase {
         context.close();
     }
 
+    static EngineId engineId(String value) {
+        return EngineId
+                .newBuilder()
+                .setValue(value)
+                .build();
+    }
+
+    protected final EngineRepository repository() {
+        return this.repository;
+    }
+
+    protected final SingleTenantBlackBoxContext context() {
+        return this.context;
+    }
+
+    /**
+     * Creates a new event for the passed message.
+     *
+     * @param eventMessage
+     *        the event message
+     * @param producerId
+     *        the producer for the event. If {@code null}, a test class name will be the ID
+     *        of the producer.
+     * @return generated event wrapped into the envelope
+     */
+    EventEnvelope createEvent(EventMessage eventMessage, @Nullable EngineId producerId) {
+        TestEventFactory eventFactory = producerId == null
+                                        ? TestEventFactory.newInstance(getClass())
+                                        : TestEventFactory.newInstance(producerId, getClass());
+        EventEnvelope result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
+        return result;
+    }
+    
     @Test
     @DisplayName("Obtain importable event classes")
     void importableEventClasses() {
-        Set<EventClass> importableEventClasses = repository.importableEvents();
-        Set<EventClass> exposedByAggregateClass = repository.aggregateClass()
-                                                            .importableEvents();
+        createRepository(false);
+        Set<EventClass> importableEventClasses =
+                repository().importableEvents();
+        Set<EventClass> exposedByAggregateClass =
+                repository().aggregateClass()
+                            .importableEvents();
         assertThat(importableEventClasses)
                 .isEqualTo(exposedByAggregateClass);
     }
@@ -86,6 +126,8 @@ class EventImportTest extends EventImportTestBase {
         @Test
         @DisplayName("by producer ID")
         void producerId() {
+            createRepository(false);
+
             // Create event with producer ID, which is the target aggregate ID.
             EventEnvelope event = createEvent(eventMessage, engineId);
 
@@ -95,7 +137,7 @@ class EventImportTest extends EventImportTestBase {
         @Test
         @DisplayName("by first message field")
         void firstMessageField() {
-            repository.routeImportByFirstMessageField();
+            createRepository(true);
 
             // Create event with producer ID, which is NOT the target aggregate ID.
             EventEnvelope event = createEvent(eventMessage, null);
@@ -105,17 +147,63 @@ class EventImportTest extends EventImportTestBase {
 
         private void assertImports(EventEnvelope event) {
             EventSubject assertEvents =
-                    context.importsEvent(event.outerObject())
-                           .assertEvents()
-                           .withType(EngineStopped.class);
+                    context().importsEvent(event.outerObject())
+                             .assertEvents()
+                             .withType(EngineStopped.class);
 
             assertEvents.hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("route imported events by")
+    class Routing {
+        private final EngineId engineId = engineId("AFB");
+        private final SettingsAdjusted eventMessage = SettingsAdjusted
+                .newBuilder()
+                .setId(engineId)
+                .build();
+
+        @Test
+        @DisplayName("Producer ID by default")
+        void routeById() {
+            createRepository(false);
+
+            // Create event with the producer ID of the target aggregate.
+            EventEnvelope event = createEvent(eventMessage, engineId);
+
+            // Apply routing to the generated event.
+            assertRouted(event);
+        }
+
+        @Test
+        @DisplayName("first message field, if configured")
+        void routeByFirstMessageField() {
+            createRepository(true);
+
+            // Create event with the producer ID, which is NOT the target aggregate ID.
+            EventEnvelope event = createEvent(eventMessage, null);
+
+            assertRouted(event);
+        }
+
+        /**
+         * Asserts that the import routing resulted in {@link #engineId}.
+         */
+        private void assertRouted(EventEnvelope event) {
+            EntitySubject assertEntity =
+                    context().importsEvent(event.outerObject())
+                             .assertEntity(EngineAggregate.class, engineId);
+
+            assertEntity.exists();
         }
     }
 
     @Test
     @DisplayName("fail with exception when importing unsupported event")
     void importUnsupported() {
+        createRepository(false);
+
         EngineId id = engineId("AGR");
         UnsupportedEngineEvent eventMessage = UnsupportedEngineEvent
                 .newBuilder()
@@ -123,7 +211,7 @@ class EventImportTest extends EventImportTestBase {
                 .build();
         EventEnvelope unsupported = createEvent(eventMessage, id);
 
-        context.importsEvent(unsupported.outerObject())
-               .assertThat(ackedWithErrors());
+        context().importsEvent(unsupported.outerObject())
+                 .assertThat(ackedWithErrors());
     }
 }

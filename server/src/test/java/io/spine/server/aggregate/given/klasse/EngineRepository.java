@@ -22,6 +22,7 @@ package io.spine.server.aggregate.given.klasse;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 
 /**
  * Test environment aggregate repository which can switch default routing of importable events.
@@ -30,7 +31,17 @@ import io.spine.server.route.EventRoute;
  */
 public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate> {
 
-    public void routeImportByFirstMessageField() {
-        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField(idClass()));
+    private final boolean routeByFirstField;
+
+    public EngineRepository(boolean routeByFirstField) {
+        this.routeByFirstField = routeByFirstField;
+    }
+
+    @Override
+    protected void setupImportRouting(EventRouting<EngineId> routing) {
+        super.setupImportRouting(routing);
+        if (routeByFirstField) {
+            routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
+        }
     }
 }

@@ -84,7 +84,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      */
     @Apply(allowImport = true)
     private void on(SettingsAdjusted event) {
-        // Do nothing for now.
+        builder().setStatus(STOPPED);
     }
 
     /*

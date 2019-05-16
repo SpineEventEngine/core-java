@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
@@ -217,14 +216,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         // Do nothing.
     }
 
-    /**
-     * Obtains the event import routing used by this repository.
-     */
-    @VisibleForTesting
-    protected final EventRouting<I> eventImportRouting() {
-        return eventImportRouting;
-    }
-
     @Override
     public A create(I id) {
         A aggregate = aggregateClass().create(id);
@@ -387,7 +378,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Imports the passed event into one of the aggregates.
      */
-    I importEvent(EventEnvelope event) {
+    final I importEvent(EventEnvelope event) {
         checkNotNull(event);
         I target = with(event.tenantId()).evaluate(() -> doImport(event));
         return target;
@@ -401,7 +392,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private I routeImport(EventEnvelope event) {
-        Set<I> ids = eventImportRouting().apply(event.message(), event.context());
+        Set<I> ids = eventImportRouting.apply(event.message(), event.context());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
@@ -450,7 +441,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Posts passed events to {@link EventBus}.
      */
-    void postEvents(Collection<Event> events) {
+    final void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
         EventBus bus = context().eventBus();
         bus.post(filteredEvents);
@@ -496,7 +487,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param  id the ID of the aggregate
      * @return loaded or created aggregate instance
      */
-    A loadOrCreate(I id) {
+    final A loadOrCreate(I id) {
         A result = load(id).orElseGet(() -> createNew(id));
         return result;
     }
@@ -600,7 +591,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return super.lifecycleOf(id);
     }
 
-    void onDispatchEvent(I id, Event event) {
+    final void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
@@ -608,7 +599,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
-    void onEventImported(I id, Event event) {
+    final void onEventImported(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
     }
 }
