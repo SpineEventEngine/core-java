@@ -19,6 +19,7 @@
  */
 package io.spine.server.projection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -27,7 +28,6 @@ import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.projection.given.ProjectionTransactionTestEnv.PatchedProjectBuilder;
 import io.spine.server.projection.given.ProjectionTransactionTestEnv.TestProjection;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
@@ -35,12 +35,12 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
+import io.spine.test.validation.FakeOptionFactory;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -52,9 +52,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("ProjectionTransaction should")
 class ProjectionTransactionTest
         extends TransactionTest<ProjectId,
-                                Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                Projection<ProjectId, Project, Project.Builder>,
                                 Project,
-                                PatchedProjectBuilder> {
+                                Project.Builder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("projection-transaction-should-project")
@@ -62,19 +62,19 @@ class ProjectionTransactionTest
 
     @Override
     protected Transaction<ProjectId,
-                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                          Projection<ProjectId, Project, Project.Builder>,
                           Project,
-                          PatchedProjectBuilder>
-    createTx(Projection<ProjectId, Project, PatchedProjectBuilder> entity) {
+                          Project.Builder>
+    createTx(Projection<ProjectId, Project, Project.Builder> entity) {
         return new ProjectionTransaction<>(entity);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                          Projection<ProjectId, Project, Project.Builder>,
                           Project,
-                          PatchedProjectBuilder>
-    createTxWithState(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
+                          Project.Builder>
+    createTxWithState(Projection<ProjectId, Project, Project.Builder> entity,
                       Project state,
                       Version version) {
         return new ProjectionTransaction<>(entity, state, version);
@@ -82,28 +82,28 @@ class ProjectionTransactionTest
 
     @Override
     protected Transaction<ProjectId,
-                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                          Projection<ProjectId, Project, Project.Builder>,
                           Project,
-                          PatchedProjectBuilder>
-    createTxWithListener(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
+                          Project.Builder>
+    createTxWithListener(Projection<ProjectId, Project, Project.Builder> entity,
                          TransactionListener<ProjectId,
-                                             Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                             Projection<ProjectId, Project, Project.Builder>,
                                              Project,
-                                             PatchedProjectBuilder> listener) {
-        ProjectionTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
+                                             Project.Builder> listener) {
+        ProjectionTransaction<ProjectId, Project, Project.Builder> transaction =
                 new ProjectionTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected Projection<ProjectId, Project, PatchedProjectBuilder> createEntity() {
+    protected Projection<ProjectId, Project, Project.Builder> createEntity() {
         return new TestProjection(ID);
     }
 
     @Override
-    protected Projection<ProjectId, Project, PatchedProjectBuilder>
-    createEntity(List<ConstraintViolation> violations) {
+    protected Projection<ProjectId, Project, Project.Builder>
+    createEntity(ImmutableList<ConstraintViolation> violations) {
         return new TestProjection(ID, violations);
     }
 
@@ -116,7 +116,7 @@ class ProjectionTransactionTest
     }
 
     @Override
-    protected void checkEventReceived(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
+    protected void checkEventReceived(Projection<ProjectId, Project, Project.Builder> entity,
                                       Event event) {
 
         TestProjection aggregate = (TestProjection) entity;
@@ -146,14 +146,6 @@ class ProjectionTransactionTest
         cast.play(envelope);
     }
 
-    @Override
-    protected void breakEntityValidation(
-            Projection<ProjectId, Project, PatchedProjectBuilder> entity,
-            RuntimeException toThrow) {
-        entity.builder()
-              .shouldThrow(toThrow);
-    }
-
     /**
      * Tests the version advancement strategy for the {@link Projection}s.
      *
@@ -167,7 +159,7 @@ class ProjectionTransactionTest
     @Test
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {
-        Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
+        Projection<ProjectId, Project, Project.Builder> entity = createEntity();
         Version oldVersion = entity.version();
         Event event = GivenEvent.withMessage(createEventMessage());
         Projection.playOn(entity, Collections.singleton(event));

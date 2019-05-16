@@ -58,7 +58,10 @@ public interface TransactionListener<I,
      * @param version        a version to set to the entity during the commit
      * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
      */
-    void onBeforeCommit(E entity, S state, Version version, LifecycleFlags lifecycleFlags);
+    void onBeforeCommit(E entity,
+                        @NotValidated S state,
+                        Version version,
+                        LifecycleFlags lifecycleFlags);
 
     /**
      * A callback invoked if the commit has failed.

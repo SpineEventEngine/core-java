@@ -226,7 +226,7 @@ public abstract class Transaction<I,
     /**
      * Propagates a phase and performs a rollback in case of an exception.
      *
-     * <p>The transaction {@linkplain #getListener() listener} is called for both failed and
+     * <p>The transaction {@linkplain #listener() listener} is called for both failed and
      * successful phases.
      *
      * @param phase
@@ -244,7 +244,7 @@ public abstract class Transaction<I,
             throw illegalStateWithCauseOf(t);
         } finally {
             phases.add(phase);
-            getListener().onAfterPhase(phase);
+            listener().onAfterPhase(phase);
         }
     }
 
@@ -259,7 +259,7 @@ public abstract class Transaction<I,
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = builder();
 
-        S newState = builder.vBuild();
+        S newState = builder.buildPartial();
         if (initialState.equals(newState)) {
             commitUnchangedState();
         } else {
@@ -276,7 +276,7 @@ public abstract class Transaction<I,
      * @param newState
      *         the new state of the entity
      */
-    private void commitChangedState(S newState) {
+    private void commitChangedState(@NotValidated S newState) {
         try {
             markStateChanged();
             Version pendingVersion = version();
@@ -343,7 +343,7 @@ public abstract class Transaction<I,
     void rollback(Throwable cause) {
         beforeRollback(cause);
         @NotValidated S currentState = currentBuilderState();
-        TransactionListener<I, E, S, B> listener = getListener();
+        TransactionListener<I, E, S, B> listener = listener();
         listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
@@ -471,7 +471,7 @@ public abstract class Transaction<I,
      *
      * <p>By default, the returned listener {@linkplain SilentWitness does nothing}.
      */
-    private TransactionListener<I, E, S, B> getListener() {
+    private TransactionListener<I, E, S, B> listener() {
         return transactionListener;
     }
 

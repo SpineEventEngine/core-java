@@ -19,6 +19,7 @@
  */
 package io.spine.server.procman;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -26,25 +27,23 @@ import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.procman.given.tx.PatchedProjectBuilder;
 import io.spine.server.procman.given.tx.TestProcessManager;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.validation.FakeOptionFactory;
 import io.spine.validate.ConstraintViolation;
-
-import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PmTransactionTest
         extends TransactionTest<ProjectId,
-                                ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                                ProcessManager<ProjectId, Project, Project.Builder>,
                                 Project,
-                                PatchedProjectBuilder> {
+                                Project.Builder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("procman-transaction-should-project")
@@ -53,22 +52,22 @@ class PmTransactionTest
     @Override
     protected Transaction<
             ProjectId,
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+            ProcessManager<ProjectId, Project, Project.Builder>,
             Project,
-            PatchedProjectBuilder
+            Project.Builder
             >
-    createTx(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity) {
+    createTx(ProcessManager<ProjectId, Project, Project.Builder> entity) {
         return new PmTransaction<>(entity);
     }
 
     @Override
     protected Transaction<
             ProjectId,
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+            ProcessManager<ProjectId, Project, Project.Builder>,
             Project,
-            PatchedProjectBuilder
+            Project.Builder
             >
-    createTxWithState(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+    createTxWithState(ProcessManager<ProjectId, Project, Project.Builder> entity,
                       Project state,
                       Version version) {
         return new PmTransaction<>(entity, state, version);
@@ -77,32 +76,32 @@ class PmTransactionTest
     @Override
     protected Transaction<
             ProjectId,
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+            ProcessManager<ProjectId, Project, Project.Builder>,
             Project,
-            PatchedProjectBuilder
+            Project.Builder
             >
     createTxWithListener(
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+            ProcessManager<ProjectId, Project, Project.Builder> entity,
             TransactionListener<
                     ProjectId,
-                    ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                    ProcessManager<ProjectId, Project, Project.Builder>,
                     Project,
-                    PatchedProjectBuilder
+                    Project.Builder
                     > listener) {
-        PmTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
+        PmTransaction<ProjectId, Project, Project.Builder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected ProcessManager<ProjectId, Project, PatchedProjectBuilder> createEntity() {
+    protected ProcessManager<ProjectId, Project, Project.Builder> createEntity() {
         return new TestProcessManager(ID);
     }
 
     @Override
-    protected ProcessManager<ProjectId, Project, PatchedProjectBuilder> createEntity(
-            List<ConstraintViolation> violations) {
+    protected ProcessManager<ProjectId, Project, Project.Builder> createEntity(
+            ImmutableList<ConstraintViolation> violations) {
         return new TestProcessManager(ID, violations);
     }
 
@@ -116,7 +115,7 @@ class PmTransactionTest
 
     @Override
     protected void checkEventReceived(
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+            ProcessManager<ProjectId, Project, Project.Builder> entity,
             Event event) {
 
         TestProcessManager aggregate = (TestProcessManager) entity;
@@ -146,13 +145,5 @@ class PmTransactionTest
         PmTransaction cast = (PmTransaction) tx;
         EventEnvelope envelope = EventEnvelope.of(event);
         cast.dispatchEvent(envelope);
-    }
-
-    @Override
-    protected void breakEntityValidation(
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
-            RuntimeException toThrow) {
-        entity.builder()
-              .shouldThrow(toThrow);
     }
 }

@@ -27,7 +27,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
@@ -37,6 +36,7 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.validation.FakeOptionFactory;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
@@ -54,9 +54,9 @@ class AggregateTransactionTest
         extends TransactionTest<ProjectId,
                                 Aggregate<ProjectId,
                                           Project,
-                                          AggregateTransactionTest.PatchedProjectBuilder>,
+                                          Project.Builder>,
                                 Project,
-                                AggregateTransactionTest.PatchedProjectBuilder> {
+                                Project.Builder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("aggregate-transaction-should-project")
@@ -64,47 +64,47 @@ class AggregateTransactionTest
 
     @Override
     protected Transaction<ProjectId,
-            Aggregate<ProjectId, Project, PatchedProjectBuilder>,
+            Aggregate<ProjectId, Project, Project.Builder>,
             Project,
-            PatchedProjectBuilder>
-    createTx(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity) {
+            Project.Builder>
+    createTx(Aggregate<ProjectId, Project, Project.Builder> entity) {
         return new AggregateTransaction<>(entity);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
+                          Aggregate<ProjectId, Project, Project.Builder>,
                           Project,
-                          PatchedProjectBuilder> createTxWithState(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
+                          Project.Builder> createTxWithState(
+            Aggregate<ProjectId, Project, Project.Builder> entity, Project state,
             Version version) {
         return new AggregateTransaction<>(entity, state, version);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
+                          Aggregate<ProjectId, Project, Project.Builder>,
                           Project,
-                          PatchedProjectBuilder>
-    createTxWithListener(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+                          Project.Builder>
+    createTxWithListener(Aggregate<ProjectId, Project, Project.Builder> entity,
                          TransactionListener<ProjectId,
-                                             Aggregate<ProjectId, Project, PatchedProjectBuilder>,
+                                             Aggregate<ProjectId, Project, Project.Builder>,
                                              Project,
-                                             PatchedProjectBuilder> listener) {
-        AggregateTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
+                                             Project.Builder> listener) {
+        AggregateTransaction<ProjectId, Project, Project.Builder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity() {
+    protected Aggregate<ProjectId, Project, Project.Builder> createEntity() {
         return new TestAggregate(ID);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity(
-            List<ConstraintViolation> violations) {
+    protected Aggregate<ProjectId, Project, Project.Builder> createEntity(
+            ImmutableList<ConstraintViolation> violations) {
         return new TestAggregate(ID, violations);
     }
 
@@ -118,7 +118,7 @@ class AggregateTransactionTest
 
     @Override
     protected void checkEventReceived(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            Aggregate<ProjectId, Project, Project.Builder> entity,
             Event event) {
 
         TestAggregate aggregate = (TestAggregate) entity;
@@ -144,14 +144,6 @@ class AggregateTransactionTest
         cast.play(envelope);
     }
 
-    @Override
-    protected void breakEntityValidation(Aggregate<ProjectId,
-                                                   Project,
-                                                   PatchedProjectBuilder> entity,
-                                         RuntimeException toThrow) {
-        entity.builder().shouldThrow(toThrow);
-    }
-
     @Test
     @DisplayName("advance version from event")
     void eventFromVersion() {
@@ -160,7 +152,7 @@ class AggregateTransactionTest
 
     @SuppressWarnings("unused")  // Methods accessed via reflection.
     static class TestAggregate
-            extends Aggregate<ProjectId, Project, PatchedProjectBuilder> {
+            extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private final List<Message> receivedEvents = newArrayList();
         private final List<ConstraintViolation> violations;
@@ -205,25 +197,6 @@ class AggregateTransactionTest
 
         private List<Message> getReceivedEvents() {
             return ImmutableList.copyOf(receivedEvents);
-        }
-    }
-
-    /**
-     * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
-     * during the state building.
-     *
-     * <p>Must be declared {@code public} to allow accessing from the
-     * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
-     */
-    public static class PatchedProjectBuilder
-            extends ThrowingValidatingBuilder<Project, PatchedProjectBuilder> {
-
-        public PatchedProjectBuilder() {
-            super(Project.newBuilder());
-        }
-
-        public static PatchedProjectBuilder newBuilder() {
-            return new PatchedProjectBuilder();
         }
     }
 }
