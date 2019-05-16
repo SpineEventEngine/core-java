@@ -39,6 +39,7 @@ import org.mockito.ArgumentMatcher;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
