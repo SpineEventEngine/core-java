@@ -23,7 +23,6 @@ package io.spine.server.bc.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectVBuilder;
 
-public final class AnotherProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+public final class AnotherProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 }

@@ -25,8 +25,8 @@ import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.event.CommandSplit;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.event.CommandSplit;
 
 import static com.google.common.base.Preconditions.checkState;
 

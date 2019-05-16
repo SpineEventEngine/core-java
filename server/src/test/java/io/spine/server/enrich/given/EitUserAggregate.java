@@ -26,13 +26,12 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.enrich.given.command.EitRegisterUser;
 import io.spine.server.enrich.given.event.EitUserAccountCreated;
-import io.spine.server.enrich.given.event.EitUserAccountCreatedVBuilder;
 
-class EitUserAggregate extends Aggregate<UserId, EitUserAccount, EitUserAccountVBuilder> {
+class EitUserAggregate extends Aggregate<UserId, EitUserAccount, EitUserAccount.Builder> {
 
     @Assign
     EitUserAccountCreated handle(EitRegisterUser cmd) {
-        return EitUserAccountCreatedVBuilder
+        return EitUserAccountCreated
                 .newBuilder()
                 .setUser(cmd.getUser())
                 .setGivenName(cmd.getGivenName())

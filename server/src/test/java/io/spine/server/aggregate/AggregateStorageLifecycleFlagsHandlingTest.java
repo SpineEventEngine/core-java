@@ -24,7 +24,6 @@ import io.spine.base.Identifier;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -101,7 +100,7 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
     }
 
     private static class TestAggregate
-            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+            extends Aggregate<ProjectId, Project, Project.Builder> {
 
         protected TestAggregate(ProjectId id) {
             super(id);

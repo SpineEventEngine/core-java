@@ -21,7 +21,6 @@ package io.spine.server.stand;
 
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
-import io.spine.client.SubscriptionVBuilder;
 import io.spine.client.Subscriptions;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
@@ -127,7 +126,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         @Override
         public synchronized Subscription add(Topic topic) {
             SubscriptionId subscriptionId = Subscriptions.generateId();
-            Subscription subscription = SubscriptionVBuilder
+            Subscription subscription = Subscription
                     .newBuilder()
                     .setId(subscriptionId)
                     .setTopic(topic)

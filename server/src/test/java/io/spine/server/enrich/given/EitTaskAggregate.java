@@ -26,15 +26,13 @@ import io.spine.server.command.Assign;
 import io.spine.server.enrich.given.command.EitAssignTask;
 import io.spine.server.enrich.given.command.EitCreateTask;
 import io.spine.server.enrich.given.event.EitTaskAssigned;
-import io.spine.server.enrich.given.event.EitTaskAssignedVBuilder;
 import io.spine.server.enrich.given.event.EitTaskCreated;
-import io.spine.server.enrich.given.event.EitTaskCreatedVBuilder;
 
-final class EitTaskAggregate extends Aggregate<EitTaskId, EitTask, EitTaskVBuilder> {
+final class EitTaskAggregate extends Aggregate<EitTaskId, EitTask, EitTask.Builder> {
 
     @Assign
     EitTaskCreated handle(EitCreateTask cmd) {
-        return EitTaskCreatedVBuilder
+        return EitTaskCreated
                 .newBuilder()
                 .setTask(cmd.getTask())
                 .setName(cmd.getName())
@@ -51,7 +49,7 @@ final class EitTaskAggregate extends Aggregate<EitTaskId, EitTask, EitTaskVBuild
 
     @Assign
     EitTaskAssigned handle(EitAssignTask cmd) {
-        return EitTaskAssignedVBuilder
+        return EitTaskAssigned
                 .newBuilder()
                 .setTask(cmd.getTask())
                 .setAssignee(cmd.getAssignee())

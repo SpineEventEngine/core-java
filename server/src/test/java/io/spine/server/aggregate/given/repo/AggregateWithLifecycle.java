@@ -24,7 +24,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
 
@@ -38,7 +37,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  * in the tests. Real aggregates should use generated messages.
  */
 public class AggregateWithLifecycle
-        extends Aggregate<Long, StringAggregate, StringAggregateVBuilder> {
+        extends Aggregate<Long, StringAggregate, StringAggregate.Builder> {
 
     @Assign
     Evaluated handle(Evaluate commandMessage) {

@@ -26,7 +26,6 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityStateWithVersion;
-import io.spine.client.EntityStateWithVersionVBuilder;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
@@ -176,7 +175,7 @@ final class MirrorRepository
 
     private static EntityStateWithVersion
     toAggregateState(MirrorProjection mirror, FieldMask requiredFields) {
-        EntityStateWithVersion result = EntityStateWithVersionVBuilder
+        EntityStateWithVersion result = EntityStateWithVersion
                 .newBuilder()
                 .setState(mirror.aggregateState(requiredFields))
                 .setVersion(mirror.aggregateVersion())

@@ -23,11 +23,8 @@ package io.spine.server.entity.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.entity.FullAccessAggregate;
-import io.spine.test.entity.FullAccessAggregateVBuilder;
 import io.spine.test.entity.HiddenAggregate;
-import io.spine.test.entity.HiddenAggregateVBuilder;
 import io.spine.test.entity.SubscribableAggregate;
-import io.spine.test.entity.SubscribableAggregateVBuilder;
 
 public class VisibilityGuardTestEnv {
 
@@ -36,7 +33,7 @@ public class VisibilityGuardTestEnv {
     }
 
     static class Exposed
-            extends Aggregate<Long, FullAccessAggregate, FullAccessAggregateVBuilder> {
+            extends Aggregate<Long, FullAccessAggregate, FullAccessAggregate.Builder> {
     }
 
     public static class ExposedRepository extends AggregateRepository<Long, Exposed> {
@@ -46,7 +43,7 @@ public class VisibilityGuardTestEnv {
     }
 
     static class Subscribable
-            extends Aggregate<Long, SubscribableAggregate, SubscribableAggregateVBuilder> {
+            extends Aggregate<Long, SubscribableAggregate, SubscribableAggregate.Builder> {
     }
 
     public static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
@@ -55,7 +52,7 @@ public class VisibilityGuardTestEnv {
         }
     }
 
-    static class Hidden extends Aggregate<String, HiddenAggregate, HiddenAggregateVBuilder> {
+    static class Hidden extends Aggregate<String, HiddenAggregate, HiddenAggregate.Builder> {
     }
 
     public static class HiddenRepository extends AggregateRepository<String, Hidden> {

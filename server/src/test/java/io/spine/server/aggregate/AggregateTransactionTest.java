@@ -145,16 +145,17 @@ class AggregateTransactionTest
     }
 
     @Override
-    protected void breakEntityValidation(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
-            RuntimeException toThrow) {
-        entity.builder().setShouldThrow(toThrow);
+    protected void breakEntityValidation(Aggregate<ProjectId,
+                                                   Project,
+                                                   PatchedProjectBuilder> entity,
+                                         RuntimeException toThrow) {
+        entity.builder().shouldThrow(toThrow);
     }
 
     @Test
     @DisplayName("advance version from event")
     void eventFromVersion() {
-       advanceVersionFromEvent();
+        advanceVersionFromEvent();
     }
 
     @SuppressWarnings("unused")  // Methods accessed via reflection.
@@ -215,7 +216,11 @@ class AggregateTransactionTest
      * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
      */
     public static class PatchedProjectBuilder
-            extends ThrowingValidatingBuilder<Project, Project.Builder> {
+            extends ThrowingValidatingBuilder<Project, PatchedProjectBuilder> {
+
+        public PatchedProjectBuilder() {
+            super(Project.newBuilder());
+        }
 
         public static PatchedProjectBuilder newBuilder() {
             return new PatchedProjectBuilder();

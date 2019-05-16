@@ -26,13 +26,12 @@ import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
-import io.spine.server.test.shared.EmptyProcessVBuilder;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.command.BcCreateProject;
 import io.spine.test.bc.event.BcProjectCreated;
 
 public class ProjectProcessManager
-        extends ProcessManager<ProjectId, EmptyProcess, EmptyProcessVBuilder> {
+        extends ProcessManager<ProjectId, EmptyProcess, EmptyProcess.Builder> {
 
     public ProjectProcessManager(ProjectId id) {
         super(id);

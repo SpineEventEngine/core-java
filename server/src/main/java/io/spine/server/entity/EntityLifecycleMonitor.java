@@ -27,7 +27,8 @@ import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
-import io.spine.validate.ValidatingBuilder;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.validate.NotValidated;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -63,7 +64,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 public final class EntityLifecycleMonitor<I,
                                           E extends TransactionalEntity<I, S, B>,
                                           S extends Message,
-                                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                          B extends ValidatingBuilder<S>>
         implements TransactionListener<I, E, S, B> {
 
     private final Repository<I, ?> repository;
@@ -85,7 +86,7 @@ public final class EntityLifecycleMonitor<I,
     <I,
      E extends TransactionalEntity<I, S, B>,
      S extends Message,
-     B extends ValidatingBuilder<S, ? extends Message.Builder>>
+     B extends ValidatingBuilder<S>>
     TransactionListener<I, E, S, B> newInstance(Repository<I, ?> repository) {
         checkNotNull(repository);
         return new EntityLifecycleMonitor<>(repository);
@@ -125,7 +126,10 @@ public final class EntityLifecycleMonitor<I,
     }
 
     @Override
-    public void onTransactionFailed(Throwable t, E entity, S state, Version version,
+    public void onTransactionFailed(Throwable t,
+                                    E entity,
+                                    @NotValidated S state,
+                                    Version version,
                                     LifecycleFlags lifecycleFlags) {
         // NOP.
     }

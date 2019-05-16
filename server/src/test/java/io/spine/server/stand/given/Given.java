@@ -29,7 +29,6 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
 
 import java.util.Set;
@@ -70,7 +69,7 @@ public class Given {
     }
 
     public static class StandTestProjection
-            extends Projection<ProjectId, Project, ProjectVBuilder> {
+            extends Projection<ProjectId, Project, Project.Builder> {
 
         public StandTestProjection(ProjectId id) {
             super(id);

@@ -22,12 +22,11 @@ package io.spine.server.aggregate.given.aggregate;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectVBuilder;
 
 /**
  * An aggregate with {@code Integer} ID.
  */
-public class IntAggregate extends Aggregate<Integer, Project, ProjectVBuilder> {
+public class IntAggregate extends Aggregate<Integer, Project, Project.Builder> {
     public IntAggregate(Integer id) {
         super(id);
     }

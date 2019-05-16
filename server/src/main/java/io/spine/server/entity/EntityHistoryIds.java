@@ -24,9 +24,7 @@ import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
-import io.spine.client.EntityIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityHistoryIdVBuilder;
 import io.spine.type.TypeUrl;
 
 import static io.spine.base.Identifier.pack;
@@ -54,11 +52,11 @@ public final class EntityHistoryIds {
      * @return the {@link EntityHistoryId}
      */
     public static <T> EntityHistoryId wrap(T id, TypeUrl entityType) {
-        EntityId entityId = EntityIdVBuilder
+        EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(id))
                 .build();
-        EntityHistoryId historyId = EntityHistoryIdVBuilder
+        EntityHistoryId historyId = EntityHistoryId
                 .newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(entityType.value())

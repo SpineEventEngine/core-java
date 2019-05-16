@@ -30,7 +30,6 @@ import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
 import io.spine.server.model.declare.MatchCriterion;
 import io.spine.server.model.declare.SignatureMismatch;
 import io.spine.server.test.shared.EmptyAggregate;
-import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
@@ -246,7 +245,7 @@ class EventApplierTest {
     }
 
     private abstract static class TestEventApplier
-            extends Aggregate<Long, EmptyAggregate, EmptyAggregateVBuilder> {
+            extends Aggregate<Long, EmptyAggregate, EmptyAggregate.Builder> {
 
         private static final String APPLIER_METHOD_NAME = "apply";
 

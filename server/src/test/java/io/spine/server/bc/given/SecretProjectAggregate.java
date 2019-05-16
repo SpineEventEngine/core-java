@@ -25,14 +25,13 @@ import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 import io.spine.test.bc.SecretProject;
-import io.spine.test.bc.SecretProjectVBuilder;
 import io.spine.test.bc.command.BcStartProject;
 import io.spine.test.bc.event.BcProjectStarted;
 
 import java.util.List;
 
 class SecretProjectAggregate
-        extends Aggregate<String, SecretProject, SecretProjectVBuilder> {
+        extends Aggregate<String, SecretProject, SecretProject.Builder> {
     private SecretProjectAggregate(String id) {
         super(id);
     }

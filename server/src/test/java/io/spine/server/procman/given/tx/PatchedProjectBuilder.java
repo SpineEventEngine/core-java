@@ -31,7 +31,11 @@ import io.spine.test.procman.Project;
  * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
  */
 public class PatchedProjectBuilder
-        extends ThrowingValidatingBuilder<Project, Project.Builder> {
+        extends ThrowingValidatingBuilder<Project, PatchedProjectBuilder> {
+
+    public PatchedProjectBuilder() {
+        super(Project.newBuilder());
+    }
 
     public static PatchedProjectBuilder newBuilder() {
         return new PatchedProjectBuilder();

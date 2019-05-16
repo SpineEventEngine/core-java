@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
-import io.spine.core.CommandContextVBuilder;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
@@ -59,12 +58,12 @@ public final class GivenCommandContext {
      */
     public static CommandContext withActorAndTime(UserId actor, Timestamp when) {
         TenantId tenantId = GivenTenantId.newUuid();
-        ActorContext actorContext = ActorContext.vBuilder()
+        ActorContext actorContext = ActorContext.newBuilder()
                                                 .setActor(actor)
                                                 .setTimestamp(when)
                                                 .setTenantId(tenantId)
                                                 .build();
-        CommandContext result = CommandContext.vBuilder()
+        CommandContext result = CommandContext.newBuilder()
                                               .setActorContext(actorContext)
                                               .build();
         return result;
@@ -78,7 +77,7 @@ public final class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     public static CommandContext withScheduledDelayOf(Duration delay) {
-        Schedule schedule = Schedule.vBuilder()
+        Schedule schedule = Schedule.newBuilder()
                                     .setDelay(delay)
                                     .build();
         return withSchedule(schedule);
@@ -92,7 +91,7 @@ public final class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     private static CommandContext withSchedule(Schedule schedule) {
-        CommandContextVBuilder builder = withRandomActor().toVBuilder()
+        CommandContext.Builder builder = withRandomActor().toBuilder()
                                                           .setSchedule(schedule);
         return builder.build();
     }

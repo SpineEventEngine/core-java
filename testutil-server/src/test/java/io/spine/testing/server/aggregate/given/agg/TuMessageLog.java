@@ -27,12 +27,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
 import io.spine.testing.server.given.entity.TuString;
-import io.spine.testing.server.given.entity.TuStringVBuilder;
 import io.spine.testing.server.log.FloatLogged;
 import io.spine.testing.server.log.LogInteger;
 import io.spine.testing.server.log.ValueLogged;
 
-public class TuMessageLog extends Aggregate<Long, TuString, TuStringVBuilder> {
+public class TuMessageLog extends Aggregate<Long, TuString, TuString.Builder> {
 
     public TuMessageLog(Long id) {
         super(id);

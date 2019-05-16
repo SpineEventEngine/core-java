@@ -104,7 +104,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         Filter filter = Filters.gt(archived.name(), 42);
         CompositeFilter compositeFilter = Filters.all(filter);
         TargetFilters filters = TargetFilters
-                .vBuilder()
+                .newBuilder()
                 .addFilter(compositeFilter)
                 .build();
 
@@ -118,7 +118,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         Filter filter = Filters.eq("nonExistingColumn", 42);
         CompositeFilter compositeFilter = Filters.all(filter);
         TargetFilters filters = TargetFilters
-                .vBuilder()
+                .newBuilder()
                 .addFilter(compositeFilter)
                 .build();
 
@@ -148,7 +148,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         Message someGenericId = Sample.messageOfType(ProjectId.class);
         Any entityId = AnyPacker.pack(someGenericId);
         IdFilter idFilter = IdFilter
-                .vBuilder()
+                .newBuilder()
                 .addIds(entityId)
                 .build();
         BoolValue archived = BoolValue
@@ -158,12 +158,12 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         Filter archivedFilter = Filters
                 .eq(LifecycleFlagField.archived.name(), archived);
         CompositeFilter aggregatingFilter = CompositeFilter
-                .vBuilder()
+                .newBuilder()
                 .addFilter(archivedFilter)
                 .setOperator(EITHER)
                 .build();
         TargetFilters filters = TargetFilters
-                .vBuilder()
+                .newBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
                 .build();

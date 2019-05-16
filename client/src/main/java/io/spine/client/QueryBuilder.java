@@ -139,7 +139,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         if (limit == 0) {
             return Optional.empty();
         }
-        Pagination result = Pagination.vBuilder()
+        Pagination result = Pagination.newBuilder()
                                       .setPageSize(limit)
                                       .build();
         return Optional.of(result);
@@ -149,7 +149,7 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
         if (orderingColumn == null) {
             return Optional.empty();
         }
-        OrderBy result = OrderBy.vBuilder()
+        OrderBy result = OrderBy.newBuilder()
                                 .setColumn(orderingColumn)
                                 .setDirection(direction)
                                 .build();

@@ -27,7 +27,6 @@ import io.spine.server.route.StateUpdateRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.Task;
 
 import java.util.List;
@@ -36,7 +35,7 @@ import static io.spine.server.route.EventRoute.withId;
 import static java.util.stream.Collectors.toList;
 
 public final class EntitySubscriberProjection
-        extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
+        extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNames.Builder> {
 
     public EntitySubscriberProjection(ProjectId id) {
         super(id);

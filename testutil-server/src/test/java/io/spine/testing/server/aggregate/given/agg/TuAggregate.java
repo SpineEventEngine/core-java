@@ -26,7 +26,6 @@ import io.spine.server.command.Assign;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
-import io.spine.testing.server.given.entity.TuProjectVBuilder;
 import io.spine.testing.server.given.entity.command.TuAssignProject;
 import io.spine.testing.server.given.entity.command.TuCreateProject;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
@@ -40,7 +39,7 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
  * A sample aggregate that handles two command messages.
  */
 public final class TuAggregate
-        extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
+        extends Aggregate<TuProjectId, TuProject, TuProject.Builder> {
 
     public static final TuProjectId ID =
             TuProjectId.newBuilder()

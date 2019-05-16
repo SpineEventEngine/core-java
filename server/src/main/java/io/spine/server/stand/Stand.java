@@ -44,8 +44,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.EntityRecordChangeVBuilder;
-import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.StateClass;
@@ -177,12 +175,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     public void post(Entity entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
-        EntityRecord record = EntityRecordVBuilder
+        EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(id)
                 .setState(state)
                 .build();
-        EntityRecordChange change = EntityRecordChangeVBuilder
+        EntityRecordChange change = EntityRecordChange
                 .newBuilder()
                 .setNewValue(record)
                 .build();

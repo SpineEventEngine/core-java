@@ -38,7 +38,6 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandbus.Project;
 import io.spine.test.commandbus.ProjectId;
-import io.spine.test.commandbus.ProjectVBuilder;
 import io.spine.test.commandbus.Task;
 import io.spine.test.commandbus.command.CmdBusAddTask;
 import io.spine.test.commandbus.command.CmdBusCreateProject;
@@ -60,7 +59,7 @@ public class CommandDispatcherRegistryTestEnv {
      ***************************/
 
     public static class NoCommandsProcessManager
-            extends ProcessManager<ProjectId, Project, ProjectVBuilder>
+            extends ProcessManager<ProjectId, Project, Project.Builder>
             implements TestEntityWithStringColumn<ProjectId, Project> {
 
         /** The event message we store for inspecting in delivery tests. */

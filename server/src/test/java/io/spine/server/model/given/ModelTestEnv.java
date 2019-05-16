@@ -27,9 +27,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
-import io.spine.server.test.shared.EmptyProcessVBuilder;
 import io.spine.test.reflect.Project;
-import io.spine.test.reflect.ProjectVBuilder;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -44,7 +42,7 @@ public class ModelTestEnv {
     private ModelTestEnv() {
     }
 
-    public static class MAggregate extends Aggregate<Long, Project, ProjectVBuilder> {
+    public static class MAggregate extends Aggregate<Long, Project, Project.Builder> {
 
         private MAggregate(Long id) {
             super(id);
@@ -84,7 +82,7 @@ public class ModelTestEnv {
     }
 
     public static class MProcessManager
-            extends ProcessManager<Long, EmptyProcess, EmptyProcessVBuilder> {
+            extends ProcessManager<Long, EmptyProcess, EmptyProcess.Builder> {
 
         private MProcessManager(Long id) {
             super(id);

@@ -22,10 +22,9 @@ package io.spine.server.aggregate.given.repo;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.test.shared.EmptyAggregate;
-import io.spine.server.test.shared.EmptyAggregateVBuilder;
 
 /**
  * An aggregate class which neither handles commands nor reacts on events or rejections.
  */
-class AnemicAggregate extends Aggregate<Integer, EmptyAggregate, EmptyAggregateVBuilder> {
+class AnemicAggregate extends Aggregate<Integer, EmptyAggregate, EmptyAggregate.Builder> {
 }

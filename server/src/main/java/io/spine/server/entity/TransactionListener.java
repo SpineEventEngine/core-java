@@ -22,7 +22,8 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
-import io.spine.validate.ValidatingBuilder;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.validate.NotValidated;
 
 /**
  * A common contract for the {@linkplain Transaction transaction} listeners.
@@ -38,7 +39,7 @@ import io.spine.validate.ValidatingBuilder;
 public interface TransactionListener<I,
                                      E extends TransactionalEntity<I, S, B>,
                                      S extends Message,
-                                     B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+                                     B extends ValidatingBuilder<S>> {
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
@@ -64,11 +65,11 @@ public interface TransactionListener<I,
      *
      * @param t              a {@code Throwable} caused the commit failure
      * @param entity         an entity modified within the transaction
-     * @param state          a state to set to the entity during the commit
+     * @param state          a state of the entity at the moment when the transaction failed
      * @param version        a version to set to the entity during the commit
      * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
      */
-    void onTransactionFailed(Throwable t, E entity, S state,
+    void onTransactionFailed(Throwable t, E entity, @NotValidated S state,
                              Version version, LifecycleFlags lifecycleFlags);
 
     /**
@@ -85,7 +86,7 @@ public interface TransactionListener<I,
     class SilentWitness<I,
                         E extends TransactionalEntity<I, S, B>,
                         S extends Message,
-                        B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                        B extends ValidatingBuilder<S>>
             implements TransactionListener<I, E, S, B> {
 
         @Override

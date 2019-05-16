@@ -33,14 +33,13 @@ import io.spine.system.server.PersonExposed;
 import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonRenamed;
-import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.RenamePerson;
 import io.spine.type.TypeUrl;
 
 /**
  * Test aggregate on which to track history.
  */
-public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder> {
+public class PersonAggregate extends Aggregate<PersonId, Person, Person.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(Person.class);
 
@@ -51,7 +50,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonCreated handle(CreatePerson command) {
         return PersonCreated
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .setName(command.getName())
                 .build();
@@ -60,7 +59,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonHidden handle(HidePerson command) {
         return PersonHidden
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }
@@ -68,7 +67,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonExposed handle(ExposePerson command) {
         return PersonExposed
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }
@@ -76,7 +75,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonRenamed handle(RenamePerson command) {
         return PersonRenamed
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .setNewFirstName(command.getNewFirstName())
                 .build();
@@ -100,7 +99,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Apply
     private void on(PersonRenamed event) {
-        PersonVBuilder builder = builder();
+        Person.Builder builder = builder();
         PersonName newName = builder
                 .getName()
                 .toBuilder()

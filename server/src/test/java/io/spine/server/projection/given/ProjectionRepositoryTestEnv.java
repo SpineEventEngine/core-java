@@ -33,8 +33,6 @@ import io.spine.system.server.DispatchedMessageId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
-import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.Task;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
@@ -75,7 +73,7 @@ public class ProjectionRepositoryTestEnv {
      * to an invalid entry created in the storage.
      */
     public static class NoOpTaskNamesProjection
-            extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
+            extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNames.Builder> {
 
         public NoOpTaskNamesProjection(ProjectId id) {
             super(id);
@@ -195,7 +193,7 @@ public class ProjectionRepositoryTestEnv {
      * <p>It should not be able to register repositories for such classes.
      */
     public static class SensoryDeprivedProjection
-            extends Projection<ProjectId, Project, ProjectVBuilder> {
+            extends Projection<ProjectId, Project, Project.Builder> {
 
         protected SensoryDeprivedProjection(ProjectId id) {
             super(id);

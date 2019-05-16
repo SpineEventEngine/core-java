@@ -224,7 +224,7 @@ public final class Filters {
     private static Filter createFilter(String fieldPath, Object value, Operator operator) {
         FieldPath path = FieldPaths.parse(fieldPath);
         Any wrappedValue = toAny(value);
-        Filter filter = FilterVBuilder
+        Filter filter = Filter
                 .newBuilder()
                 .setFieldPath(path)
                 .setValue(wrappedValue)

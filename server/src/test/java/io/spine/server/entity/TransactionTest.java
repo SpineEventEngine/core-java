@@ -25,11 +25,11 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.event.EventFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,6 @@ import org.mockito.ArgumentMatcher;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
@@ -61,9 +60,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  */
 @SuppressWarnings({"unused" /* JUnit nested classes. */, "ClassWithTooManyMethods"})
 public abstract class TransactionTest<I,
-        E extends TransactionalEntity<I, S, B>,
-        S extends Message,
-        B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+                                      E extends TransactionalEntity<I, S, B>,
+                                      S extends Message,
+                                      B extends ValidatingBuilder<S>> {
 
     private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionTest.class);
 

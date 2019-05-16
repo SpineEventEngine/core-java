@@ -72,7 +72,7 @@ public final class EventFieldFilter implements EventFilter {
     private Event maskEvent(Event event) {
         EventMessage message = event.enclosedMessage();
         EventMessage masked = mask(message);
-        return event.toVBuilder()
+        return event.toBuilder()
                     .setMessage(pack(masked))
                     .build();
     }

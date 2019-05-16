@@ -29,7 +29,7 @@ import io.spine.server.route.StateUpdateRouting;
 import static io.spine.server.route.EventRoute.withId;
 
 public final class GroupNameProjection
-        extends Projection<GroupId, GroupName, GroupNameVBuilder> {
+        extends Projection<GroupId, GroupName, GroupName.Builder> {
 
     private GroupNameProjection(GroupId id) {
         super(id);

@@ -28,7 +28,6 @@ import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.PersonCreation;
 import io.spine.system.server.PersonCreationCompleted;
 import io.spine.system.server.PersonCreationStarted;
-import io.spine.system.server.PersonCreationVBuilder;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonNameCreated;
 import io.spine.system.server.StartPersonCreation;
@@ -38,7 +37,7 @@ import io.spine.type.TypeUrl;
  * A process manager which handles person creation.
  */
 public final class PersonProcman
-        extends ProcessManager<PersonId, PersonCreation, PersonCreationVBuilder> {
+        extends ProcessManager<PersonId, PersonCreation, PersonCreation.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(PersonCreation.class);
 
@@ -50,7 +49,7 @@ public final class PersonProcman
     PersonCreationStarted handle(StartPersonCreation command) {
         builder().setId(command.getId());
         return PersonCreationStarted
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }
@@ -60,7 +59,7 @@ public final class PersonProcman
         builder().setId(command.getId())
                  .setCreated(true);
         return PersonCreationCompleted
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }

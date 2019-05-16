@@ -21,9 +21,9 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;
 import io.spine.server.test.shared.EmptyEntity;
-import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -187,7 +187,7 @@ class TransactionalEntityTest {
         TransactionalEntity entity = entityWithInactiveTx();
         LifecycleFlags originalFlags = entity.lifecycleFlags();
 
-        LifecycleFlags modifiedFlags = originalFlags.toVBuilder()
+        LifecycleFlags modifiedFlags = originalFlags.toBuilder()
                                                     .setDeleted(true)
                                                     .build();
 
@@ -220,7 +220,7 @@ class TransactionalEntityTest {
             Message originalState = entity.builderFromState()
                                           .build();
 
-            EmptyEntity newState = EmptyEntity.vBuilder()
+            EmptyEntity newState = EmptyEntity.newBuilder()
                                               .setId(newUuidValue().getValue())
                                               .build();
             assertNotEquals(originalState, newState);

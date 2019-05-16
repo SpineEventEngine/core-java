@@ -32,7 +32,6 @@ import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -57,7 +56,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
  */
 @SuppressWarnings("PublicField") /* For inspection in tests. */
 public class TestAggregate
-        extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+        extends Aggregate<ProjectId, Project, Project.Builder> {
 
     @VisibleForTesting
     public boolean isCreateProjectCommandHandled = false;
@@ -92,7 +91,7 @@ public class TestAggregate
     AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
         isAddTaskCommandHandled = true;
         AggTaskAdded event = taskAdded(cmd.getProjectId());
-        return event.toVBuilder()
+        return event.toBuilder()
                     .setTask(cmd.getTask())
                     .build();
     }

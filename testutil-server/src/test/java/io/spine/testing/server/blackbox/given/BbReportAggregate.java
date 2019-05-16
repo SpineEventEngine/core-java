@@ -26,13 +26,12 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.React;
 import io.spine.testing.server.blackbox.BbReport;
 import io.spine.testing.server.blackbox.BbReportId;
-import io.spine.testing.server.blackbox.BbReportVBuilder;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 
-final class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReportVBuilder> {
+final class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReport.Builder> {
 
     @Assign
     BbReportCreated handle(BbCreateReport command) {

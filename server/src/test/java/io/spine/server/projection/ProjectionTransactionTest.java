@@ -151,7 +151,7 @@ class ProjectionTransactionTest
             Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
         entity.builder()
-              .setShouldThrow(toThrow);
+              .shouldThrow(toThrow);
     }
 
     /**

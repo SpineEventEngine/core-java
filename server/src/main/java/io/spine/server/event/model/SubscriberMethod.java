@@ -70,7 +70,7 @@ public abstract class SubscriberMethod
         FieldPath fieldPath = filter.getField();
         return fieldPath.getFieldNameList().isEmpty()
                ? typeBasedToken
-               : typeBasedToken.toVBuilder()
+               : typeBasedToken.toBuilder()
                                .setFilter(filter)
                                .build();
     }

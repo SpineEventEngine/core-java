@@ -28,13 +28,11 @@ import io.spine.protobuf.Durations2;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.CustomerNotified;
 import io.spine.server.event.CustomerNotified.NotificationMethod;
-import io.spine.server.event.CustomerNotifiedVBuilder;
 import io.spine.server.event.DeliveryServiceNotified;
 import io.spine.server.event.DonationMade;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.OrderPaidFor;
 import io.spine.server.event.OrderReadyToBeServed;
-import io.spine.server.event.OrderReadyToBeServedVBuilder;
 import io.spine.server.event.OrderServed;
 import io.spine.server.event.OrderServedLate;
 import io.spine.server.event.React;
@@ -237,7 +235,7 @@ public class AbstractReactorTestEnv {
         }
 
         private CustomerNotified notifyCustomer(Order order) {
-            CustomerNotified result = CustomerNotifiedVBuilder
+            CustomerNotified result = CustomerNotified
                     .newBuilder()
                     .setOrder(order)
                     .setNotificationMethod(notificationMethod)
@@ -263,7 +261,7 @@ public class AbstractReactorTestEnv {
      * {@linkplain AbstractEventReactor#onError(EventEnvelope, RuntimeException)}.
      */
     public static OrderReadyToBeServed someOrderReady() {
-        OrderReadyToBeServed result = OrderReadyToBeServedVBuilder
+        OrderReadyToBeServed result = OrderReadyToBeServed
                 .newBuilder()
                 .setOrder(someOrder())
                 .build();

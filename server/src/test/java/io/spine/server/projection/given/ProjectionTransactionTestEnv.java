@@ -92,7 +92,11 @@ public class ProjectionTransactionTestEnv {
      * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
      */
     public static class PatchedProjectBuilder
-            extends ThrowingValidatingBuilder<Project, Project.Builder> {
+            extends ThrowingValidatingBuilder<Project, PatchedProjectBuilder> {
+
+        private PatchedProjectBuilder() {
+            super(Project.newBuilder());
+        }
 
         public static PatchedProjectBuilder newBuilder() {
             return new PatchedProjectBuilder();

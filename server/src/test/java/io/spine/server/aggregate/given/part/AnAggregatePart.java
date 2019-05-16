@@ -22,7 +22,6 @@ package io.spine.server.aggregate.given.part;
 
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
 import io.spine.test.aggregate.ProjectId;
 
 /**
@@ -31,7 +30,7 @@ import io.spine.test.aggregate.ProjectId;
 public class AnAggregatePart
         extends AggregatePart<ProjectId,
                               StringAggregate,
-                              StringAggregateVBuilder,
+                              StringAggregate.Builder,
                               AnAggregateRoot> {
 
     public AnAggregatePart(AnAggregateRoot root) {

@@ -30,7 +30,7 @@ import io.spine.server.route.StateUpdateRouting;
 
 import static io.spine.server.route.EventRoute.withId;
 
-public final class GroupProjection extends Projection<GroupId, Group, GroupVBuilder> {
+public final class GroupProjection extends Projection<GroupId, Group, Group.Builder> {
 
     @Subscribe(external = true) // `Organization` belongs to another Context called `Organizations`.
     void on(Organization organization, EventContext systemContext) {

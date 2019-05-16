@@ -89,7 +89,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     @Override
     public MessageFilter filter() {
         return MessageFilter
-                .vBuilder()
+                .newBuilder()
                 .setField(TYPE_URL_PATH)
                 .setValue(typeUrlAsAny)
                 .build();

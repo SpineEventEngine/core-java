@@ -37,7 +37,6 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmArchiveProject;
@@ -60,7 +59,7 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, ProjectVBuilder>
+        extends ProcessManager<ProjectId, Project, Project.Builder>
         implements TestEntityWithStringColumn<ProjectId, Project> {
 
     /** The event message we store for inspecting in delivery tests. */
@@ -85,7 +84,7 @@ public class TestProcessManager
     }
 
     private void handleProjectCreated(ProjectId projectId) {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .setId(projectId)
                                   .setStatus(Project.Status.CREATED)
                                   .build();
@@ -93,14 +92,14 @@ public class TestProcessManager
     }
 
     private void handleTaskAdded(Task task) {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .addTask(task)
                                   .build();
         builder().mergeFrom(newState);
     }
 
     private void handleProjectStarted() {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .setStatus(Project.Status.STARTED)
                                   .build();
         builder().mergeFrom(newState);
@@ -170,7 +169,7 @@ public class TestProcessManager
     PmNothingDone handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
         return PmNothingDone
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }

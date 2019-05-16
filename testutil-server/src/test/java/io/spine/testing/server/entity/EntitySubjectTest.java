@@ -51,7 +51,7 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
     void setUp() {
         BbProjectId id = BbProjectId.generate();
         BbProjectView state = BbProjectView
-                .vBuilder()
+                .newBuilder()
                 .setId(id)
                 .build();
         entity = Given.projectionOfClass(ProjectView.class)

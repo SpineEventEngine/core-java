@@ -166,13 +166,13 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     private static Command withTimestamp(Command command, Timestamp timestamp) {
         CommandContext origin = command.context();
         ActorContext withTime = origin.getActorContext()
-                                      .toVBuilder()
+                                      .toBuilder()
                                       .setTimestamp(timestamp)
                                       .build();
-        CommandContext resultContext = origin.toVBuilder()
+        CommandContext resultContext = origin.toBuilder()
                                              .setActorContext(withTime)
                                              .build();
-        Command result = command.toVBuilder()
+        Command result = command.toBuilder()
                                 .setContext(resultContext)
                                 .build();
         return result;
@@ -191,7 +191,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         @SuppressWarnings("MagicNumber")
         String randomSuffix = String.format("%04d", TestValues.random(10_000));
         TestCommandMessage msg = TestCommandMessage
-                .vBuilder()
+                .newBuilder()
                 .setId("random-number-" + randomSuffix)
                 .build();
         return createCommand(msg);

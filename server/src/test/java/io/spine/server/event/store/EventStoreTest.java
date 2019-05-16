@@ -269,7 +269,7 @@ public class EventStoreTest {
             CommandContext commandContext = event.context()
                                                  .getCommandContext();
             EventContext originContext =
-                    EventContext.vBuilder()
+                    EventContext.newBuilder()
                                 .setEnrichment(withOneAttribute())
                                 .setCommandContext(commandContext)
                                 .setTimestamp(event.context()
