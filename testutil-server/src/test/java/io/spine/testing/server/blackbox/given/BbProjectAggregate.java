@@ -55,7 +55,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
     @Assign
     BbProjectCreated handle(BbCreateProject command) {
         return BbProjectCreated
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -70,7 +70,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
                     .build();
         }
         return BbProjectStarted
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(projectId)
                 .build();
     }
@@ -87,7 +87,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
                     .build();
         }
         return BbTaskAdded
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(projectId)
                 .setTask(task)
                 .build();
@@ -96,7 +96,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
     @Assign
     BbAssigneeAdded handle(BbAssignProject command) {
         return BbAssigneeAdded
-                .vBuilder()
+                .newBuilder()
                 .setId(id())
                 .setUserId(command.getUserId())
                 .build();
@@ -114,7 +114,7 @@ final class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProje
 
     private BbAssigneeRemoved userUnassigned(UserId user) {
         return BbAssigneeRemoved
-                .vBuilder()
+                .newBuilder()
                 .setId(id())
                 .setUserId(user)
                 .build();

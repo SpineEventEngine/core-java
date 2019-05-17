@@ -180,11 +180,11 @@ public class CommandHandlerTestEnv {
 
         private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {
             ProjectId id = ProjectId
-                    .vBuilder()
+                    .newBuilder()
                     .setId(getId())
                     .build();
             CmdBusProjectStarted startedEvent = CmdBusProjectStarted
-                    .vBuilder()
+                    .newBuilder()
                     .setProjectId(id)
                     .build();
             CmdBusProjectStarted defaultEvent = CmdBusProjectStarted.getDefaultInstance();
@@ -195,12 +195,12 @@ public class CommandHandlerTestEnv {
         createEventsOnCreateTaskCmd(CmdBusCreateTask msg) {
             TaskId taskId = msg.getTaskId();
             CmdBusTaskAssigned cmdTaskAssigned = CmdBusTaskAssigned
-                    .vBuilder()
+                    .newBuilder()
                     .setTaskId(taskId)
                     .build();
             CmdBusTaskStarted cmdTaskStarted = msg.getStart()
                                                ? CmdBusTaskStarted
-                                                       .vBuilder()
+                                                       .newBuilder()
                                                        .setTaskId(taskId)
                                                        .build()
                                                : null;

@@ -51,14 +51,14 @@ public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbI
     Pair<BbAssignTeam, Optional<BbAssignScrumMaster>> on(BbInitProject cmd) {
         builder().setId(cmd.getProjectId());
         BbAssignTeam assignTeam = BbAssignTeam
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(cmd.getProjectId())
                 .addAllMember(cmd.getMemberList())
                 .build();
         @Nullable BbAssignScrumMaster assignScrumMaster =
                 cmd.hasScrumMaster()
                 ? BbAssignScrumMaster
-                        .vBuilder()
+                        .newBuilder()
                         .setProjectId(cmd.getProjectId())
                         .setScrumMaster(cmd.getScrumMaster())
                         .build()
@@ -74,12 +74,12 @@ public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbI
         setDeleted(true);
         return Pair.of(
                 BbTeamAssigned
-                        .vBuilder()
+                        .newBuilder()
                         .setProjectId(cmd.getProjectId())
                         .addAllMember(cmd.getMemberList())
                         .build(),
                 BbProjectInitialized
-                        .vBuilder()
+                        .newBuilder()
                         .setProjectId(cmd.getProjectId())
                         .build()
         );
@@ -88,7 +88,7 @@ public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbI
     @Assign
     BbScrumMasterAssigned on(BbAssignScrumMaster cmd) {
         return BbScrumMasterAssigned
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(cmd.getProjectId())
                 .setScrumMaster(cmd.getScrumMaster())
                 .build();

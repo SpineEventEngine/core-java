@@ -50,7 +50,7 @@ public final class PersonProcman
     PersonCreationStarted handle(StartPersonCreation command) {
         builder().setId(command.getId());
         return PersonCreationStarted
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }
@@ -60,7 +60,7 @@ public final class PersonProcman
         builder().setId(command.getId())
                  .setCreated(true);
         return PersonCreationCompleted
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }

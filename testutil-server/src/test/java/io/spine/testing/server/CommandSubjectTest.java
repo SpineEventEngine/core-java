@@ -54,7 +54,7 @@ class CommandSubjectTest
     Command createMessage() {
         return newCommand(
                 TuAddComment
-                        .vBuilder()
+                        .newBuilder()
                         .setId(generateTaskId())
                         .build()
         );
@@ -64,7 +64,7 @@ class CommandSubjectTest
     Command createAnotherMessage() {
         return newCommand(
                 TuCreateTask
-                        .vBuilder()
+                        .newBuilder()
                         .setId(generateTaskId())
                         .build()
         );
@@ -76,7 +76,7 @@ class CommandSubjectTest
 
     private static TuTaskId generateTaskId() {
         return TuTaskId
-                .vBuilder()
+                .newBuilder()
                 .setValue(newUuid())
                 .build();
     }

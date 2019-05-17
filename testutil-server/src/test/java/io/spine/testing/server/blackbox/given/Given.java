@@ -57,7 +57,7 @@ public class Given {
 
     public static BbAddTask addTask(BbProjectId projectId) {
         return BbAddTask
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(projectId)
                 .setTask(newTask())
                 .build();
@@ -65,7 +65,7 @@ public class Given {
 
     public static BbTaskAdded taskAdded(BbProjectId projectId) {
         return BbTaskAdded
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(projectId)
                 .setTask(newTask())
                 .build();
@@ -73,14 +73,14 @@ public class Given {
 
     private static BbTask newTask() {
         return BbTask
-                .vBuilder()
+                .newBuilder()
                 .setTitle(newUuid())
                 .build();
     }
 
     public static BbCreateReport createReport(BbProjectId projectId) {
         return BbCreateReport
-                .vBuilder()
+                .newBuilder()
                 .setReportId(newReportId())
                 .addProjectId(projectId)
                 .build();
@@ -88,7 +88,7 @@ public class Given {
 
     private static BbReportId newReportId() {
         return BbReportId
-                .vBuilder()
+                .newBuilder()
                 .setId(newUuid())
                 .build();
     }
@@ -96,7 +96,7 @@ public class Given {
     public static BbRegisterCommandDispatcher
     registerCommandDispatcher(Class<? extends CommandDispatcher> dispatcherName) {
         return BbRegisterCommandDispatcher
-                .vBuilder()
+                .newBuilder()
                 .setDispatcherName(dispatcherName.getName())
                 .build();
     }
@@ -105,7 +105,7 @@ public class Given {
     eventDispatcherRegistered(Class<? extends EventDispatcher> dispatcherClass) {
         String name = dispatcherClass.getName();
         BbEventDispatcherRegistered result = BbEventDispatcherRegistered
-                .vBuilder()
+                .newBuilder()
                 .setDispatcherName(name)
                 .build();
         return result;
@@ -116,21 +116,21 @@ public class Given {
     }
 
     private static UserId generateUserId() {
-        return UserId.vBuilder()
+        return UserId.newBuilder()
                      .setValue(TestValues.randomString())
                      .build();
     }
 
     public static BbCreateProject createProject(BbProjectId id) {
         return BbCreateProject
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(id)
                 .build();
     }
 
     public static BbInitProject initProject(BbProjectId id, boolean scrum) {
         BbInitProjectVBuilder builder = BbInitProject
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(id);
         // Generate a random team.
         IntStream.range(0, TestValues.random(1, 10))
@@ -143,14 +143,14 @@ public class Given {
 
     public static BbStartProject startProject(BbProjectId id) {
         return BbStartProject
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(id)
                 .build();
     }
 
     public static BbProject createdProjectState(BbCreateProject createProject) {
         return BbProject
-                .vBuilder()
+                .newBuilder()
                 .setId(createProject.getProjectId())
                 .setStatus(BbProject.Status.CREATED)
                 .build();
@@ -158,7 +158,7 @@ public class Given {
 
     public static BbAssignProject addProjectAssignee(BbProjectId projectId, UserId id) {
         return BbAssignProject
-                .vBuilder()
+                .newBuilder()
                 .setId(projectId)
                 .setUserId(id)
                 .build();
@@ -166,7 +166,7 @@ public class Given {
 
     public static BbUserDeleted userDeleted(UserId id, BbProjectId... projectIds) {
         return BbUserDeleted
-                .vBuilder()
+                .newBuilder()
                 .setId(id)
                 .addAllProject(newArrayList(projectIds))
                 .build();

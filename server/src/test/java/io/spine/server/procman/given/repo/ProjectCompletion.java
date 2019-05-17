@@ -67,7 +67,7 @@ public class ProjectCompletion
 
         private static ProcessId toProcessId(ProjectId projectId) {
             return ProcessId
-                    .vBuilder()
+                    .newBuilder()
                     .setUuid(projectId.getId())
                     .build();
         }

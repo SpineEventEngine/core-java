@@ -72,7 +72,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
 
         if (questionIsClosed(questionId)) {
             PmQuestionAlreadySolved event = PmQuestionAlreadySolved
-                    .vBuilder()
+                    .newBuilder()
                     .setQuizId(examId)
                     .setQuestionId(questionId)
                     .build();
@@ -83,7 +83,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
         if (answerIsCorrect) {
             PmQuestionSolved reaction =
                     PmQuestionSolved
-                            .vBuilder()
+                            .newBuilder()
                             .setQuizId(examId)
                             .setQuestionId(questionId)
                             .build();
@@ -91,7 +91,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
         } else {
             PmQuestionFailed reaction =
                     PmQuestionFailed
-                            .vBuilder()
+                            .newBuilder()
                             .setQuizId(examId)
                             .setQuestionId(questionId)
                             .build();
