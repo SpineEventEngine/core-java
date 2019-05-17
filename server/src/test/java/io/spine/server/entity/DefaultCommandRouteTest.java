@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Descriptors;
@@ -71,6 +72,7 @@ class DefaultCommandRouteTest {
     /**
      * Stub class which simulates empty command message.
      */
+    @Immutable
     private static final class StubCommand implements CommandMessage {
 
         private static final long serialVersionUID = 0L;
