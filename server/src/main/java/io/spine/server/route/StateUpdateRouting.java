@@ -121,6 +121,6 @@ public class StateUpdateRouting<I>
      */
     public void validate(Set<StateClass> stateClasses) throws IllegalStateException {
         checkNotNull(stateClasses);
-        //TODO:2019-05-15:alexander.yevsyukov: Implement
+        //TODO:2019-05-15:alexander.yevsyukov: See https://github.com/SpineEventEngine/core-java/issues/1067
     }
 }
