@@ -188,6 +188,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             CommandMessage message = command.message();
             if (!DefaultCommandRoute.exists(message)) {
                 addViolation("The command message does not have a field with a command target ID.");
+                return;
             }
 
             Object target = defaultRoute.apply(message, CommandContext.getDefaultInstance());
