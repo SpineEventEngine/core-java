@@ -73,6 +73,16 @@ public final class EventRouting<I>
     }
 
     /**
+     * Creates a new event routing with the default one by event producer ID.
+     *
+     * @see #withDefault(EventRoute)
+     * @see EventRoute#byProducerId()
+     */
+    public static <I> EventRouting<I> withDefaultByProducerId() {
+        return withDefault(EventRoute.byProducerId());
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Overrides for return type covariance.

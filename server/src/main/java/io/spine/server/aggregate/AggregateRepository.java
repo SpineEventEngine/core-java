@@ -35,7 +35,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -72,8 +71,7 @@ import static java.lang.Math.max;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher<I>,
-                   EventDispatcherDelegate<I> {
+        implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -82,15 +80,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final Supplier<CommandRouting<I>> commandRouting;
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting =
-            EventRouting.withDefault(EventRoute.byProducerId());
+    private final EventRouting<I> eventRouting = EventRouting.withDefaultByProducerId();
 
     /**
      * The routing for event import, which by default obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
-    private final EventRouting<I> eventImportRouting =
-            EventRouting.withDefault(EventRoute.byProducerId());
+    private final EventRouting<I> eventImportRouting = EventRouting.withDefaultByProducerId();
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.

@@ -33,7 +33,6 @@ import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbCreateReport;
 import io.spine.testing.server.blackbox.command.BbInitProject;
-import io.spine.testing.server.blackbox.command.BbInitProjectVBuilder;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.command.BbStartProject;
 import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
@@ -129,7 +128,7 @@ public class Given {
     }
 
     public static BbInitProject initProject(BbProjectId id, boolean scrum) {
-        BbInitProjectVBuilder builder = BbInitProject
+        BbInitProject.Builder builder = BbInitProject
                 .newBuilder()
                 .setProjectId(id);
         // Generate a random team.

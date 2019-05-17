@@ -33,7 +33,6 @@ import io.spine.server.type.EventEnvelope;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.route.EventRoute.byProducerId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
@@ -49,7 +48,7 @@ public abstract class EventDispatchingRepository<I,
 
     protected EventDispatchingRepository() {
         super();
-        this.eventRouting = EventRouting.withDefault(byProducerId());
+        this.eventRouting = EventRouting.withDefaultByProducerId();
     }
 
     /**
