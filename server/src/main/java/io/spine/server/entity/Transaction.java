@@ -486,13 +486,13 @@ public abstract class Transaction<I,
     }
 
     public void setArchived(boolean archived) {
-        lifecycleFlags = lifecycleFlags.toVBuilder()
+        lifecycleFlags = lifecycleFlags.toBuilder()
                                        .setArchived(archived)
                                        .build();
     }
 
     public void setDeleted(boolean deleted) {
-        lifecycleFlags = lifecycleFlags.toVBuilder()
+        lifecycleFlags = lifecycleFlags.toBuilder()
                                        .setDeleted(deleted)
                                        .build();
     }
