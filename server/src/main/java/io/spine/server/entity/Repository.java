@@ -67,7 +67,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * BoundedContext#register(Repository) registered} yet and
      * after the repository is {@linkplain #close() closed}.
      */
-    private @Nullable BoundedContext boundedContext;
+    private @Nullable BoundedContext context;
 
     /**
      * Model class of entities managed by this repository.
@@ -194,22 +194,22 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *          not equal to the assigned one
      */
     @Internal
-    public final void setBoundedContext(BoundedContext context) {
+    public final void setContext(BoundedContext context) {
         checkNotNull(context);
-        boolean sameValue = context.equals(this.boundedContext);
-        if (this.boundedContext != null && !sameValue) {
+        boolean sameValue = context.equals(this.context);
+        if (this.context != null && !sameValue) {
             throw newIllegalStateException(
                     "The repository `%s` has the Bounded Context (`%s`) assigned." +
                             " This operation can be performed only once." +
                             " Attempted to set: `%s`.",
-                    this, this.boundedContext, context);
+                    this, this.context, context);
         }
 
         if (sameValue) {
             return;
         }
 
-        this.boundedContext = context;
+        this.context = context;
         if (!isStorageAssigned()) {
             initStorage(context.storageFactory());
         }
@@ -239,7 +239,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
     protected final boolean isRegistered() {
-        return boundedContext != null;
+        return context != null;
     }
 
     /**
@@ -251,10 +251,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *         registered} yet
      */
     protected final BoundedContext context() {
-        checkState(boundedContext != null,
+        checkState(context != null,
                    "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
-        return boundedContext;
+        return context;
     }
 
     /**
@@ -333,7 +333,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             this.storage.close();
             this.storage = null;
         }
-        this.boundedContext = null;
+        this.context = null;
     }
 
     /**

@@ -218,7 +218,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        repository.setBoundedContext(this);
+        repository.setContext(this);
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());

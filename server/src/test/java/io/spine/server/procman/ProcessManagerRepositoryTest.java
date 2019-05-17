@@ -522,7 +522,7 @@ class ProcessManagerRepositoryTest
                 .build();
         
         assertThrows(IllegalStateException.class, () ->
-                repo.setBoundedContext(context));
+                repo.setContext(context));
     }
 
     @Test
