@@ -43,7 +43,7 @@ public final class TestCommandScheduler extends CommandScheduler {
     public void assertScheduled(Command command) {
         // System properties are modified by the framework.
         boolean found = scheduledCommands.stream()
-                                         .map(cmd -> cmd.toVBuilder()
+                                         .map(cmd -> cmd.toBuilder()
                                                         .clearSystemProperties()
                                                         .build())
                                          .anyMatch(command::equals);

@@ -73,6 +73,16 @@ public final class EventRouting<I>
     }
 
     /**
+     * Creates a new event routing with the default one by event producer ID.
+     *
+     * @see #withDefault(EventRoute)
+     * @see EventRoute#byProducerId()
+     */
+    public static <I> EventRouting<I> withDefaultByProducerId() {
+        return withDefault(EventRoute.byProducerId());
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Overrides for return type covariance.
@@ -144,10 +154,6 @@ public final class EventRouting<I>
     /**
      * Sets a custom routing schema for entity state updates.
      *
-     * <p>Setting a routing for state updates is equivalent to setting a route for events of type
-     * {@link EntityStateChanged io.spine.system.server.event.EntityStateChanged}.
-     * It is illegal to do both things simultaneously.
-     *
      * @param routing
      *         the routing schema for entity state updates
      * @return {@code this} to allow chained calls when configuring the routing
@@ -155,7 +161,7 @@ public final class EventRouting<I>
      *         if a route for {@link EntityStateChanged} is already set
      */
     @CanIgnoreReturnValue
-    public EventRouting<I> routeEntityStateUpdates(StateUpdateRouting<I> routing) {
+    public EventRouting<I> routeStateUpdates(StateUpdateRouting<I> routing) {
         checkNotNull(routing);
         return route(EntityStateChanged.class, routing.eventRoute());
     }

@@ -60,8 +60,8 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * </ol>
  *
  * <p>{@linkplain Apply#allowImport() Marking} events and ensuring proper
- * {@linkplain AggregateRepository#eventImportRouting() routing} allows to store aggregate
- * events without having intermediate messages.
+ * {@linkplain AggregateRepository#setupImportRouting(io.spine.server.route.EventRouting) routing}
+ * allows to store aggregate events without having intermediate messages.
  *
  * <h1>Temporal Logic</h1>
  *

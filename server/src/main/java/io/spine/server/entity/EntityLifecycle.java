@@ -35,7 +35,6 @@ import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.command.AssignTargetToCommand;
@@ -402,7 +401,7 @@ public class EntityLifecycle {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
         checkNotNull(messageId);
-        DispatchedMessageIdVBuilder builder = DispatchedMessageId.vBuilder();
+        DispatchedMessageId.Builder builder = DispatchedMessageId.newBuilder();
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
             return builder.setEventId(eventId)

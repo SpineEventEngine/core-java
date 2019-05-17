@@ -546,15 +546,15 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
+    @DisplayName("check that its `Projection` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
-        BoundedContext boundedContext = BoundedContext
+        BoundedContext context = BoundedContext
                 .newBuilder()
                 .setMultitenant(false)
                 .build();
-        repo.setBoundedContext(boundedContext);
 
-        assertThrows(IllegalStateException.class, repo::onRegistered);
+        assertThrows(IllegalStateException.class, () ->
+                repo.setContext(context));
     }
 }

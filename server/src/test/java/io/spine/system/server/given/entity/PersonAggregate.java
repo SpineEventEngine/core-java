@@ -51,7 +51,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonCreated handle(CreatePerson command) {
         return PersonCreated
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .setName(command.getName())
                 .build();
@@ -60,7 +60,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonHidden handle(HidePerson command) {
         return PersonHidden
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }
@@ -68,7 +68,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonExposed handle(ExposePerson command) {
         return PersonExposed
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .build();
     }
@@ -76,7 +76,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
     @Assign
     PersonRenamed handle(RenamePerson command) {
         return PersonRenamed
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .setNewFirstName(command.getNewFirstName())
                 .build();

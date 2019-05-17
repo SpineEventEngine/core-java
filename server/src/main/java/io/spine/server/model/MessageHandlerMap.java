@@ -168,7 +168,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
                 .build();
         HandlerTypeInfo presentKey = map.containsKey(keyWithOrigin)
                                      ? keyWithOrigin
-                                     : keyWithOrigin.toVBuilder()
+                                     : keyWithOrigin.toBuilder()
                                                     .clearOriginType()
                                                     .build();
         return handlersOf(presentKey);

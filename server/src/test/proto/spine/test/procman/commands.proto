@@ -80,3 +80,7 @@ message PmScheduleRetrospective {
 message PmPlanIteration {
     ProjectId project_id = 1;
 }
+
+message PmCompleteProject {
+    ProjectId project_id = 1;
+}

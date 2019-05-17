@@ -21,20 +21,27 @@
 package io.spine.server.procman.given.repo;
 
 import io.spine.server.entity.EventFilter;
+import io.spine.server.entity.rejection.StandardRejection;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TestProcessManagerRepository
+import static io.spine.server.route.EventRoute.withId;
+
+public final class TestProcessManagerRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
     private @Nullable RuntimeException latestException;
 
-    public TestProcessManagerRepository() {
-        super();
+    @Override
+    protected void setupEventRouting(EventRouting<ProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(StandardRejection.class,
+                      (event, context) -> withId((ProjectId) event.entityId()));
     }
 
     @Override
@@ -49,7 +56,7 @@ public class TestProcessManagerRepository
         super.onError(cmd, exception);
     }
 
-    public @Nullable RuntimeException getLatestException() {
+    public @Nullable RuntimeException latestException() {
         return latestException;
     }
 

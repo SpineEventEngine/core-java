@@ -35,6 +35,7 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityRestored;
@@ -71,30 +72,24 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 final class MirrorRepository
         extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    private static final FieldMask AGGREGATE_STATE_WITH_VERSION =
-            fromFieldNumbers(Mirror.class,
-                             ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER);
-
     private static final Logger log = Logging.get(MirrorRepository.class);
+    private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
+            Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER
+    );
 
     @Override
-    public void onRegistered() {
-        super.onRegistered();
-        prepareRouting();
-    }
-
-    private void prepareRouting() {
-        eventRouting()
-                .route(EntityStateChanged.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityArchived.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityDeleted.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityUnarchived.class,
-                       (message, context) -> targetsFrom(message.getId()))
-                .route(EntityRestored.class,
-                       (message, context) -> targetsFrom(message.getId()));
+    protected void setupEventRouting(EventRouting<MirrorId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(EntityStateChanged.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityArchived.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityDeleted.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityUnarchived.class,
+                      (message, context) -> targetsFrom(message.getId()))
+               .route(EntityRestored.class,
+                      (message, context) -> targetsFrom(message.getId()));
     }
 
     private static Set<MirrorId> targetsFrom(EntityHistoryId historyId) {

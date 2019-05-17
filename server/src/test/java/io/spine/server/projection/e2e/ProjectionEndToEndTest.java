@@ -109,7 +109,7 @@ class ProjectionEndToEndTest {
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId, established);
         GroupId groupId = GroupId
-                .vBuilder()
+                .newBuilder()
                 .setUuid(producerId.getUuid())
                 .build();
         receiver.assertEntityWithState(GroupName.class, groupId)

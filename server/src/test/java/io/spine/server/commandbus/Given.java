@@ -76,7 +76,7 @@ public class Given {
         private static Command create(io.spine.base.CommandMessage command, UserId userId,
                                       Timestamp when) {
             TenantId generatedTenantId = TenantId
-                    .vBuilder()
+                    .newBuilder()
                     .setValue(newUuid())
                     .build();
             TestActorRequestFactory factory =
@@ -176,7 +176,7 @@ public class Given {
                     .setAssignee(userId)
                     .build();
             return CmdBusCreateTask
-                    .vBuilder()
+                    .newBuilder()
                     .setTaskId(taskId)
                     .setTask(task)
                     .setStart(startTask)
@@ -207,34 +207,34 @@ public class Given {
 
         static CmdBusCreateProject createProjectMessage(ProjectId id) {
             return CmdBusCreateProject
-                    .vBuilder()
+                    .newBuilder()
                     .setProjectId(id)
                     .build();
         }
 
         static CmdBusCreateProject createProjectMessage(String projectId) {
-            return createProjectMessage(ProjectId.vBuilder()
+            return createProjectMessage(ProjectId.newBuilder()
                                                  .setId(projectId)
                                                  .build());
         }
 
         static CmdBusStartProject startProject(ProjectId id) {
             return CmdBusStartProject
-                    .vBuilder()
+                    .newBuilder()
                     .setProjectId(id)
                     .build();
         }
 
         static FirstCmdBusCreateProject firstCreateProject(ProjectId projectId) {
             return FirstCmdBusCreateProject
-                    .vBuilder()
+                    .newBuilder()
                     .setId(projectId)
                     .build();
         }
 
         static SecondCmdBusStartProject secondStartProject(ProjectId projectId) {
             return SecondCmdBusStartProject
-                    .vBuilder()
+                    .newBuilder()
                     .setId(projectId)
                     .build();
         }

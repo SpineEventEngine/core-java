@@ -103,7 +103,7 @@ public class SingleTenantCommandBusTestEnv {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
             return CmdBusProjectCreated
-                    .vBuilder()
+                    .newBuilder()
                     .setProjectId(command.getId())
                     .build();
         }
@@ -112,7 +112,7 @@ public class SingleTenantCommandBusTestEnv {
         CmdBusProjectStarted handle(SecondCmdBusStartProject command) {
             handledCommands.add(command);
             return CmdBusProjectStarted
-                    .vBuilder()
+                    .newBuilder()
                     .setProjectId(command.getId())
                     .build();
         }

@@ -37,25 +37,20 @@ public final class GroupNameProjection
 
     @Subscribe(external = true)
     void onUpdate(Organization organization) {
-        builder()
-                .setId(id())
-                .setName(organization.getName());
+        builder().setId(id())
+                 .setName(organization.getName());
     }
 
     public static final class Repository
             extends ProjectionRepository<GroupId, GroupNameProjection, GroupName> {
 
         @Override
-        public void onRegistered() {
-            super.onRegistered();
-
-            StateUpdateRouting<GroupId> routing = StateUpdateRouting.newInstance();
+        protected void setupStateRouting(StateUpdateRouting<GroupId> routing) {
             routing.route(Organization.class, (org, ctx) -> withId(
                     GroupId.newBuilder()
                            .setUuid(org.getId()
                                        .getUuid())
                            .build()));
-            eventRouting().routeEntityStateUpdates(routing);
         }
     }
 }

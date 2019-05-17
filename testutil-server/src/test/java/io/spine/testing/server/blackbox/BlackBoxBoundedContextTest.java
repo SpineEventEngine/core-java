@@ -494,7 +494,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             @DisplayName("state subject")
             void stateSubject() {
                 BbInit expectedState = BbInit
-                        .vBuilder()
+                        .newBuilder()
                         .setId(id)
                         .setInitialized(true)
                         .build();

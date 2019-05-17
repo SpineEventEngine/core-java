@@ -84,7 +84,7 @@ class AbstractCommanderTest {
     @DisplayName("create a command in response to a command")
     void commandOnCommand() {
         CmdCreateProject commandMessage = CmdCreateProject
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(newProjectId())
                 .build();
         createCommandAndPost(commandMessage);
@@ -96,9 +96,9 @@ class AbstractCommanderTest {
     @DisplayName("create a command on an event")
     void commandOnEvent() {
         CmdTaskAdded eventMessage = CmdTaskAdded
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(newProjectId())
-                .setTask(Task.vBuilder()
+                .setTask(Task.newBuilder()
                              .setTaskId(newTaskId())
                              .build())
                 .build();
@@ -133,21 +133,21 @@ class AbstractCommanderTest {
 
     private static ProjectId newProjectId() {
         return ProjectId
-                .vBuilder()
+                .newBuilder()
                 .setId(newUuid())
                 .build();
     }
 
     private static TaskId newTaskId() {
         return TaskId
-                .vBuilder()
+                .newBuilder()
                 .setId(random(1, 100))
                 .build();
     }
 
     private static UserId newUserId() {
         return UserId
-                .vBuilder()
+                .newBuilder()
                 .setValue(newUuid())
                 .build();
 
@@ -169,12 +169,12 @@ class AbstractCommanderTest {
         TaskId taskId = newTaskId();
         UserId userId = newUserId();
         Task task = Task
-                .vBuilder()
+                .newBuilder()
                 .setTaskId(taskId)
                 .setAssignee(userId)
                 .build();
         CmdCreateTask commandMessage = CmdCreateTask
-                .vBuilder()
+                .newBuilder()
                 .setTaskId(taskId)
                 .setTask(task)
                 .setStart(startTask)
@@ -194,7 +194,7 @@ class AbstractCommanderTest {
         @Command
         FirstCmdCreateProject on(CmdCreateProject command) {
             return FirstCmdCreateProject
-                    .vBuilder()
+                    .newBuilder()
                     .setId(command.getProjectId())
                     .build();
         }
@@ -202,7 +202,7 @@ class AbstractCommanderTest {
         @Command
         CmdSetTaskDescription on(CmdTaskAdded event) {
             return CmdSetTaskDescription
-                    .vBuilder()
+                    .newBuilder()
                     .setTaskId(event.getTask()
                                     .getTaskId())
                     .setDescription("Testing command creation on event")
@@ -215,13 +215,13 @@ class AbstractCommanderTest {
             UserId assignee = command.getTask()
                                      .getAssignee();
             CmdAssignTask cmdAssignTask = CmdAssignTask
-                    .vBuilder()
+                    .newBuilder()
                     .setTaskId(taskId)
                     .setAssignee(assignee)
                     .build();
             CmdStartTask cmdStartTask = command.getStart()
                                         ? CmdStartTask
-                                                .vBuilder()
+                                                .newBuilder()
                                                 .setTaskId(taskId)
                                                 .build()
                                         : null;

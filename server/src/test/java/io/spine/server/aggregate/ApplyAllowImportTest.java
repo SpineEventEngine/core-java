@@ -47,18 +47,18 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 @DisplayName("Aggregate which supports event import should")
 class ApplyAllowImportTest {
 
-    private SingleTenantBlackBoxContext boundedContext;
+    private SingleTenantBlackBoxContext context;
 
     @BeforeEach
     void setUp() {
-        boundedContext = BlackBoxBoundedContext
+        context = BlackBoxBoundedContext
                 .singleTenant()
                 .with(new DotSpace());
     }
 
     @AfterEach
     void tearDown() {
-        boundedContext.close();
+        context.close();
     }
 
     /**
@@ -67,24 +67,24 @@ class ApplyAllowImportTest {
     @Test
     @DisplayName("use event appliers in a traditional way")
     void normalApply() {
-        ObjectId id = ObjectId.newBuilder()
-                              .setValue("Луноход-1")
-                              .build();
+        ObjectId id = ObjectId
+                .newBuilder()
+                .setValue("Луноход-1")
+                .build();
 
-        boundedContext
-                .receivesCommands(move(id, NORTH), move(id, EAST))
-                .assertThat(emittedEvent(Moved.class, twice()));
+        context.receivesCommands(move(id, NORTH), move(id, EAST))
+               .assertThat(emittedEvent(Moved.class, twice()));
     }
 
     @Test
     @DisplayName("use event appliers for import")
     void importingApply() {
-        ObjectId id = ObjectId.newBuilder()
-                              .setValue("LRV")
-                              .build();
+        ObjectId id = ObjectId
+                .newBuilder()
+                .setValue("LRV")
+                .build();
 
-        boundedContext
-                .importsEvents(moved(id, SOUTH), moved(id, WEST), moved(id, WEST))
-                .assertThat(emittedEvent(Moved.class, thrice()));
+        context.importsEvents(moved(id, SOUTH), moved(id, WEST), moved(id, WEST))
+               .assertThat(emittedEvent(Moved.class, thrice()));
     }
 }

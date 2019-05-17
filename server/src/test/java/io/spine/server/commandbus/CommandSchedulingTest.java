@@ -142,11 +142,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
         private Command createCommand() {
             ProjectId id = ProjectId
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newUuid())
                     .build();
             CmdBusStartProject command = CmdBusStartProject
-                    .vBuilder()
+                    .newBuilder()
                     .setProjectId(id)
                     .build();
             CommandMessage commandMessage = toMessage(command, CommandMessage.class);

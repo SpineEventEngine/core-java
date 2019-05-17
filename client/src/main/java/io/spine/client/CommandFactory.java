@@ -170,11 +170,11 @@ public final class CommandFactory {
     private static CommandContext withCurrentTime(CommandContext value) {
         ActorContext withCurrentTime =
                 value.getActorContext()
-                     .toVBuilder()
+                     .toBuilder()
                      .setTimestamp(currentTime())
                      .build();
         CommandContext result =
-                value.toVBuilder()
+                value.toBuilder()
                      .setActorContext(withCurrentTime)
                      .build();
         return result;
