@@ -30,8 +30,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Obtains the first field from multiple messages expecting each field
- * being the identifier of the same type.
+ * Routes messages to a single target, which ID is the same as the first field of
+ * the routed message.
+ *
+ * <p>It is expected that the types of the first field and the identifier are the same.
  *
  * @param <I>
  *          the type of the identifiers
