@@ -112,11 +112,11 @@ class CommandValidatorViolationCheckTest {
         List<ConstraintViolation> violations = inspectCommand(emptyCommand);
 
         boolean hasViolationOnCommandTargetId =
-                !(violations.stream()
-                            .filter(v -> v.getMsgFormat()
+                !violations.stream()
+                           .filter(v -> v.getMsgFormat()
                                           .contains("command target ID"))
-                            .collect(toList())
-                            .isEmpty());
+                           .collect(toList())
+                           .isEmpty();
 
         assertThat(hasViolationOnCommandTargetId)
                 .isTrue();
