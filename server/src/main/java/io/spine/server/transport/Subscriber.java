@@ -39,7 +39,7 @@ import static com.google.common.collect.Sets.newConcurrentHashSet;
 public abstract class Subscriber extends AbstractChannel {
 
     /**
-     * Observers, that actually are informed about the messages arriving through this channel.
+     * Observers which are actually informed about the messages arriving through this channel.
      */
     private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
@@ -48,7 +48,7 @@ public abstract class Subscriber extends AbstractChannel {
     }
 
     /**
-     * Obtains current observers registered in this instance of {@code Subscriber},
+     * Obtains current observers registered in this instance of {@code Subscriber}
      * which receive the subscription updates.
      *
      * @return observers for this subscriber
@@ -58,9 +58,9 @@ public abstract class Subscriber extends AbstractChannel {
     }
 
     /**
-     * Adds an observer, which will be receiving the subscription updates.
+     * Adds an observer to receive the subscription updates.
      *
-     * @param observer an observer to register
+     * @param observer the observer to register
      */
     public void addObserver(StreamObserver<ExternalMessage> observer) {
         checkNotNull(observer);
@@ -70,9 +70,9 @@ public abstract class Subscriber extends AbstractChannel {
     /**
      * Removes an existing observer and disconnects it from this subscription channel.
      *
-     * <p>In case the given observer is not registered at the moment, does nothing.
+     * <p>If the given observer is not registered at the moment, does nothing.
      *
-     * @param observer an observer to remove
+     * @param observer the observer to remove
      */
     public void removeObserver(StreamObserver<ExternalMessage> observer) {
         checkNotNull(observer);

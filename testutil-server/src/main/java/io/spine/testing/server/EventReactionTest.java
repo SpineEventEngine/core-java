@@ -79,10 +79,10 @@ public abstract class EventReactionTest<I,
     protected final Event createEvent(M message) {
         Event event = eventFactory.createEvent(message);
         EventContext context = event.context()
-                                    .toVBuilder()
+                                    .toBuilder()
                                     .setExternal(externalMessage())
                                     .build();
-        return event.toVBuilder()
+        return event.toBuilder()
                     .setContext(context)
                     .build();
     }

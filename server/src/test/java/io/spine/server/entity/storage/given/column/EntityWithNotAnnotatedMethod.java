@@ -18,22 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.entity.storage.given.column;
 
-import io.spine.core.ByField;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.test.storage.Project;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import java.security.SecureRandom;
 
-public class FilteredStateSubscriber extends AbstractEventSubscriber {
+public class EntityWithNotAnnotatedMethod extends AbstractEntity<String, Project> {
 
-    @Subscribe(
-            filter = @ByField(path = "head.value", value = "42") // <-- Error here. Shouldn't have a filter.
-    )
-    void on(Organization organization) {
-        fail(FilteredStateSubscriber.class.getSimpleName() +
-                     " should not be able to receive any updates.");
+    @SuppressWarnings("unused") // Accessed via reflection.
+    public int getRandomNumber() {
+        return new SecureRandom().nextInt();
     }
 }

@@ -23,7 +23,6 @@ package io.spine.server.route;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
-import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
 
@@ -46,36 +45,21 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
      * @return new route instance
      */
     static <I> EventRoute<I, EventMessage> byProducerId() {
-        return new EventProducers.FromContext<>();
+        return new ByContext<>();
     }
 
     /**
      * Creates an event route that obtains event producer ID from an {@code EventContext} and
      * returns it as a sole element of the the immutable set.
      *
-     * @param <I> the type of the IDs for which the event would be routed
-     * @return new route instance
-     */
-    static <I> EventRoute<I, EventMessage> byFirstMessageField() {
-        return new EventProducers.FromFirstMessageField<>();
-    }
-
-    /**
-     * Creates an event route that ignores {@link EntityStateChanged} events and delegates all
-     * the other event routing to the given instance.
-     *
-     * @param forOthers
-     *         the route for all the other events
      * @param <I>
-     *         the type of the event target IDs
+     *         the type of the IDs of entities to which the event would be routed
+     * @param idClass
+     *         the class of identifiers
      * @return new route instance
      */
-    static <I> EventRoute<I, EventMessage>
-    ignoreEntityUpdates(EventRoute<I, EventMessage> forOthers) {
-        checkNotNull(forOthers);
-        return (message, context) -> message instanceof EntityStateChanged
-                                     ? noTargets()
-                                     : forOthers.apply(message, context);
+    static <I> EventRoute<I, EventMessage> byFirstMessageField(Class<I> idClass) {
+        return new ByFirstMessageField<>(idClass);
     }
 
     /**

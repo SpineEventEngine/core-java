@@ -38,9 +38,9 @@ import io.spine.string.Stringifiers;
  * then it’s regarded to be inactive.
  *
  * @param <I>
- *         the type of entity identifier
+ *         the type of the entity identifier
  * @param <S>
- *         the type of entity state
+ *         the type of the entity state
  */
 public interface Entity<I, S extends Message> extends WithLifecycle {
 

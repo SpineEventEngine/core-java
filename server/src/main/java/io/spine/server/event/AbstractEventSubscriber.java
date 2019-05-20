@@ -49,8 +49,7 @@ import static java.lang.String.format;
  * registered with {@code EventBus}.
  *
  * @see EventBus#register(MessageDispatcher)
- * @see io.spine.core.Subscribe {@code @Subscribe} annotation for declaring event subscriptions
- *                              in the derived classes
+ * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
         implements EventDispatcher<String>, EventSubscriber, Logging {
@@ -90,7 +89,7 @@ public abstract class AbstractEventSubscriber
      * subscriber} method of the entity.
      */
     protected void handle(EventEnvelope event) {
-        thisClass.getSubscriber(event)
+        thisClass.subscriberOf(event)
                  .ifPresent(method -> method.invoke(this, event));
     }
 
@@ -116,14 +115,14 @@ public abstract class AbstractEventSubscriber
 
     @Override
     public boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = thisClass.getSubscriber(event);
+        Optional<SubscriberMethod> subscriber = thisClass.subscriberOf(event);
         return subscriber.isPresent();
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> messageClasses() {
-        return thisClass.incomingEvents();
+        return thisClass.domesticEvents();
     }
 
     @Override

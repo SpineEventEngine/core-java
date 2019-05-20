@@ -32,11 +32,10 @@ import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
-import io.spine.client.TargetFiltersVBuilder;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
-import io.spine.server.projection.Projection;
+import io.spine.server.entity.storage.given.TestEntity;
+import io.spine.server.entity.storage.given.TestProjection;
 import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
@@ -81,7 +80,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     }
 
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
-                                                    Class<? extends Entity> entityClass) {
+                                                    Class<? extends Entity<?, ?>> entityClass) {
         return createEntityQuery(filters, OrderBy.getDefaultInstance(),
                                  Pagination.getDefaultInstance(), entityClass);
     }
@@ -93,7 +92,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     OrderBy orderBy,
                                                     Pagination pagination,
-                                                    Class<? extends Entity> entityClass) {
+                                                    Class<? extends Entity<?, ?>> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
         return EntityQueries.from(filters, orderBy, pagination, entityColumns);
     }
@@ -104,13 +103,13 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         // Boolean EntityColumn queried for for an Integer value
         Filter filter = Filters.gt(archived.name(), 42);
         CompositeFilter compositeFilter = Filters.all(filter);
-        TargetFilters filters = TargetFiltersVBuilder
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(compositeFilter)
                 .build();
 
         assertThrows(IllegalArgumentException.class,
-                     () -> createEntityQuery(filters, AbstractEntity.class));
+                     () -> createEntityQuery(filters, TestEntity.class));
     }
 
     @Test
@@ -118,20 +117,20 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     void notCreateForNonExisting() {
         Filter filter = Filters.eq("nonExistingColumn", 42);
         CompositeFilter compositeFilter = Filters.all(filter);
-        TargetFilters filters = TargetFiltersVBuilder
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(compositeFilter)
                 .build();
 
         assertThrows(IllegalArgumentException.class,
-                     () -> createEntityQuery(filters, AbstractEntity.class));
+                     () -> createEntityQuery(filters, TestEntity.class));
     }
 
     @Test
     @DisplayName("construct empty queries")
     void constructEmptyQueries() {
         TargetFilters filters = TargetFilters.getDefaultInstance();
-        EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
+        EntityQuery<?> query = createEntityQuery(filters, TestEntity.class);
         assertNotNull(query);
 
         assertTrue(query.getIds()
@@ -163,12 +162,12 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
                 .addFilter(archivedFilter)
                 .setOperator(EITHER)
                 .build();
-        TargetFilters filters = TargetFiltersVBuilder
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(aggregatingFilter)
                 .build();
-        EntityQuery<?> query = createEntityQuery(filters, Projection.class);
+        EntityQuery<?> query = createEntityQuery(filters, TestProjection.class);
         assertNotNull(query);
 
         Collection<?> ids = query.getIds();
@@ -203,7 +202,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         EntityQuery<?> query = createEntityQuery(TargetFilters.getDefaultInstance(),
                                                  order(expectedColumn, expectedDirection),
                                                  pagination(expectedLimit),
-                                                 AbstractEntity.class);
+                                                 TestEntity.class);
         assertNotNull(query);
 
         QueryParameters parameters = query.getParameters();

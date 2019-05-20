@@ -20,7 +20,9 @@
 
 package io.spine.server.aggregate;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregatePartClass;
 
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
@@ -47,6 +49,21 @@ public abstract class AggregatePartRepository<I,
         super();
     }
 
+    /**
+     * Registers itself with the {@link io.spine.server.BoundedContext#aggregateRootDirectory()
+     * AggregateRootDirectory} of the parent {@code BoundedContext}.
+     *
+     * @param context
+     *         the Bounded Context of this repository
+     */
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void init(BoundedContext context) {
+        super.init(context);
+        context.aggregateRootDirectory()
+               .register(this);
+    }
+
     @Override
     public A create(I id) {
         AggregateRoot<I> root = createAggregateRoot(id);
@@ -60,13 +77,12 @@ public abstract class AggregatePartRepository<I,
         return asAggregatePartClass(cls);
     }
 
-    private AggregatePartClass<A> aggregatePartClass() {
+    AggregatePartClass<A> aggregatePartClass() {
         return (AggregatePartClass<A>) entityModelClass();
     }
 
-    //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
-        AggregateRoot<I> result = aggregatePartClass().createRoot(boundedContext(), id);
+        AggregateRoot<I> result = aggregatePartClass().createRoot(context(), id);
         return result;
     }
 

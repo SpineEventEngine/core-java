@@ -29,13 +29,16 @@ import java.util.Set;
 /**
  * A dispatcher of a message.
  *
- * @param <C> the type of class of the dispatched messages
- * @param <E> the type of the message envelopes
- * @param <R> the type of the result of the {@linkplain #dispatch(MessageEnvelope) dispatching
- *            function}. For {@linkplain UnicastDispatcher unicast dispatching} is the type of
- *            the IDs of entity that receives a dispatched message.
- *            For {@linkplain MulticastDispatcher multicast dispatching} is the type of the set
- *            of entity IDs.
+ * @param <C>
+ *         the type of class of the dispatched messages
+ * @param <E>
+ *         the type of the message envelopes
+ * @param <R>
+ *         the type of the result of the {@linkplain #dispatch(MessageEnvelope) dispatching
+ *         function}. For {@linkplain UnicastDispatcher unicast dispatching} is the type of
+ *         the IDs of entity that receives a dispatched message.
+ *         For {@linkplain MulticastDispatcher multicast dispatching} is the type of the set
+ *         of entity IDs.
  */
 public interface MessageDispatcher<C extends MessageClass, E extends MessageEnvelope, R> {
 

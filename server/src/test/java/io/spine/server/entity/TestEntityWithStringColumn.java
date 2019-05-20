@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.protobuf.Message;
 import io.spine.server.entity.storage.Column;
 
 /**
@@ -28,7 +29,7 @@ import io.spine.server.entity.storage.Column;
  *
  * @see RecordBasedRepositoryTest
  */
-public interface TestEntityWithStringColumn {
+public interface TestEntityWithStringColumn<I, S extends Message> extends Entity<I, S> {
 
     @SuppressWarnings("unused") // Reflective access
     @Column

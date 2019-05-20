@@ -25,6 +25,7 @@ import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
@@ -50,27 +51,27 @@ public class ProjectAggregateRepository
                                                          .build();
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    public ProjectAggregateRepository() {
-        super();
-        eventRouting()
-                .route(AggProjectArchived.class,
-                       new EventRoute<ProjectId, AggProjectArchived>() {
-                           private static final long serialVersionUID = 0L;
+    @Override
+    protected void setupEventRouting(EventRouting<ProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(AggProjectArchived.class,
+                      new EventRoute<ProjectId, AggProjectArchived>() {
+                          private static final long serialVersionUID = 0L;
 
-                           @Override
-                           public Set<ProjectId> apply(AggProjectArchived msg, EventContext ctx) {
-                               return ImmutableSet.copyOf(msg.getChildProjectIdList());
-                           }
-                       })
-                .route(AggProjectDeleted.class,
-                       new EventRoute<ProjectId, AggProjectDeleted>() {
-                           private static final long serialVersionUID = 0L;
+                          @Override
+                          public Set<ProjectId> apply(AggProjectArchived msg, EventContext ctx) {
+                              return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                          }
+                      })
+               .route(AggProjectDeleted.class,
+                      new EventRoute<ProjectId, AggProjectDeleted>() {
+                          private static final long serialVersionUID = 0L;
 
-                           @Override
-                           public Set<ProjectId> apply(AggProjectDeleted msg, EventContext ctx) {
-                               return ImmutableSet.copyOf(msg.getChildProjectIdList());
-                           }
-                       });
+                          @Override
+                          public Set<ProjectId> apply(AggProjectDeleted msg, EventContext ctx) {
+                              return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                          }
+                      });
     }
 
     @Override

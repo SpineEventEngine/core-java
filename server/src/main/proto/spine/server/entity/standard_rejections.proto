@@ -30,6 +30,8 @@ option java_package = "io.spine.server.entity.rejection";
 
 import "google/protobuf/any.proto";
 
+option (every_is).java_type = "StandardRejection";
+
 // The rejection thrown when a request for modification of an entity cannot be satisfied
 // because the entity is marked as `archived`.
 message CannotModifyArchivedEntity {

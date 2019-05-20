@@ -18,18 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.entity.storage.given;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.projection.Projection;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectVBuilder;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-public class WronglyExternalSubscriber extends AbstractEventSubscriber {
-
-    @Subscribe(external = true) // <-- Error here. Should be domestic.
-    void on(Group group) {
-        fail(WronglyExternalSubscriber.class.getSimpleName() +
-                     " should not be able to receive domestic updates.");
-    }
+public class TestProjection extends Projection<String, Project, ProjectVBuilder> {
 }

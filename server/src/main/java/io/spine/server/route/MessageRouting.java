@@ -36,9 +36,12 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>A routing schema consists of a default route and custom routes per message class.
  *
- * @param <M> the type of the message to route
- * @param <C> the type of message context objects
- * @param <R> the type returned by the {@linkplain Route#apply(Message, Message) routing function}
+ * @param <M>
+ *         the type of the message to route
+ * @param <C>
+ *         the type of message context objects
+ * @param <R>
+ *         the type returned by the {@linkplain Route#apply(Message, Message) routing function}
  */
 abstract class MessageRouting<M extends Message, C extends Message, R> implements Route<M, C, R> {
 
@@ -172,8 +175,8 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
         checkNotNull(messageClass);
         if (!routes.containsKey(messageClass)) {
             throw newIllegalStateException(
-                    "Cannot remove the route for the message class (`%s`): " +
-                            "a custom route was not previously set.",
+                    "Cannot remove the route for the message class (`%s`):" +
+                            " a custom route was not previously set.",
                     messageClass.getName());
         }
         routes.remove(messageClass);

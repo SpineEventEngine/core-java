@@ -38,6 +38,8 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
+import io.spine.server.route.EventRouting;
+import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -50,10 +52,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
-import static io.spine.server.route.EventRoute.byProducerId;
-import static io.spine.server.route.EventRoute.ignoreEntityUpdates;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -70,10 +71,81 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private RecordStorage<I> recordStorage;
 
     /**
-     * Creates a new {@code ProjectionRepository}.
+     * Initializes the repository.
+     *
+     * <p>Ensures there is at least one event subscriber method (external or domestic) declared
+     * by the class of the projection. Throws an {@code IllegalStateException} otherwise.
+     *
+     * <p>If projections of this repository are {@linkplain io.spine.core.Subscribe subscribed} to
+     * entity state updates, a routing for state updates is created and
+     * {@linkplain #setupStateRouting(StateUpdateRouting) configured}.
+     * If one of the states of entities cannot be routed during the created schema,
+     * {@code IllegalStateException} will be thrown.
+     *
+     * @param context
+     *         the {@code BoundedContext} of this repository
+     * @throws IllegalStateException
+     *         if the state routing does not cover one of the entity state types to which
+     *         the entities are subscribed
      */
-    protected ProjectionRepository() {
-        super(ignoreEntityUpdates(byProducerId()));
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void init(BoundedContext context) throws IllegalStateException {
+        super.init(context);
+        ensureDispatchesEvents();
+        subscribeToSystemEvents();
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void setupEventRouting(EventRouting<I> routing) {
+        super.setupEventRouting(routing);
+        if (projectionClass().subscribesToStates()) {
+            StateUpdateRouting<I> stateRouting = createStateRouting();
+            routing.routeStateUpdates(stateRouting);
+        }
+    }
+
+    private void ensureDispatchesEvents() {
+        boolean noEventSubscriptions = !dispatchesEvents();
+        if (noEventSubscriptions) {
+            boolean noExternalSubscriptions = !dispatchesExternalEvents();
+            if (noExternalSubscriptions) {
+                throw newIllegalStateException(
+                        "Projections of the repository `%s` have neither domestic nor external" +
+                                " event subscriptions.", this);
+            }
+        }
+    }
+
+    /**
+     * Creates and configures the {@code StateUpdateRouting} used by this repository.
+     *
+     * <p>This method {@linkplain StateUpdateRouting#validate(Set) validates} the created state
+     * routing for serving all the state classes to which projections subscribe.
+     *
+     * @throws IllegalStateException
+     *          if one of the subscribed state classes cannot be served by the created state routing
+     */
+    private StateUpdateRouting<I> createStateRouting() {
+        ProjectionClass<P> cls = projectionClass();
+        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance();
+        setupStateRouting(routing);
+        routing.validate(union(cls.domesticStates(), cls.externalStates()));
+        return routing;
+    }
+
+    /**
+     * A callback for derived repository classes to customize routing schema for delivering
+     * updated state to subscribed entities, if the default schema does not satisfy
+     * the routing needs.
+     *
+     * @param routing
+     *         the routing to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupStateRouting(StateUpdateRouting<I> routing) {
+        // Do nothing by default.
     }
 
     @VisibleForTesting
@@ -85,7 +157,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /** Obtains {@link EventStore} from which to get events during catch-up. */
     EventStore eventStore() {
-        return boundedContext()
+        return context()
                 .eventBus()
                 .eventStore();
     }
@@ -108,30 +180,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projection;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Ensures there is at least one event subscriber method (external or domestic) declared
-     * by the class of the projection. Throws an {@code IllegalStateException} otherwise.
-     */
-    @Override
-    public void onRegistered() {
-        super.onRegistered();
-
-        boolean noEventSubscriptions = !dispatchesEvents();
-        if (noEventSubscriptions) {
-            boolean noExternalSubscriptions = !dispatchesExternalEvents();
-            if (noExternalSubscriptions) {
-                throw newIllegalStateException(
-                        "Projections of the repository %s have neither domestic nor external " +
-                                "event subscriptions.", this);
-            }
-        }
-
+    private void subscribeToSystemEvents() {
         ProjectionSystemEventWatcher<I> systemSubscriber =
                 new ProjectionSystemEventWatcher<>(this);
-        BoundedContext boundedContext = this.boundedContext();
-        systemSubscriber.registerIn(boundedContext);
+        systemSubscriber.registerIn(context());
     }
 
     @Override
@@ -162,7 +214,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
      */
     protected final Stand stand() {
-        return boundedContext().stand();
+        return context().stand();
     }
 
     /**
@@ -218,7 +270,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> messageClasses() {
-        return projectionClass().incomingEvents();
+        return projectionClass().domesticEvents();
     }
 
     @Override
@@ -229,7 +281,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @OverridingMethodsMustInvokeSuper
     @Override
     public boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = projectionClass().getSubscriber(event);
+        Optional<SubscriberMethod> subscriber = projectionClass().subscriberOf(event);
         return subscriber.isPresent();
     }
 

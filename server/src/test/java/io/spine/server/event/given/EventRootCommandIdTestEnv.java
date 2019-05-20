@@ -21,6 +21,7 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -38,6 +39,7 @@ import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvMember;
 import io.spine.test.event.EvMemberInvitation;
@@ -184,21 +186,23 @@ public class EventRootCommandIdTestEnv {
      * This is done for the purposes of the
      * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#aggregate()} test.
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
             extends AggregateRepository<EvTeamId, TeamAggregate> {
 
-        public TeamAggregateRepository() {
-            eventRouting()
-                    .route(ProjectCreated.class,
-                           new EventRoute<EvTeamId, ProjectCreated>() {
-                               private static final long serialVersionUID = 0L;
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+        @Override
+        protected void setupEventRouting(EventRouting<EvTeamId> routing) {
+            super.setupEventRouting(routing);
+            routing.route(ProjectCreated.class,
+                          new EventRoute<EvTeamId, ProjectCreated>() {
+                              private static final long serialVersionUID = 0L;
 
-                               @Override
-                               public Set<EvTeamId> apply(ProjectCreated msg, EventContext ctx) {
-                                   return singleton(msg.getTeamId());
-                               }
-                           });
+                              @Override
+                              public Set<EvTeamId> apply(ProjectCreated msg, EventContext ctx) {
+                                  return singleton(msg.getTeamId());
+                              }
+                          });
+
         }
     }
 
@@ -207,23 +211,25 @@ public class EventRootCommandIdTestEnv {
      * created the invitation. This is done for the purposes of the
      * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#processManager()} test.
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    public static class TeamCreationRepository
+    public static final class TeamCreationRepository
             extends ProcessManagerRepository<EvTeamId, TeamCreationProcessManager, EvTeamCreation> {
 
-        public TeamCreationRepository() {
-            eventRouting()
-                    .route(EvInvitationAccepted.class,
-                           new EventRoute<EvTeamId, EvInvitationAccepted>() {
-                               private static final long serialVersionUID = 0L;
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+        @OverridingMethodsMustInvokeSuper
+        @Override
+        protected void setupEventRouting(EventRouting<EvTeamId> routing) {
+            super.setupEventRouting(routing);
+            routing.route(EvInvitationAccepted.class,
+                          new EventRoute<EvTeamId, EvInvitationAccepted>() {
+                              private static final long serialVersionUID = 0L;
 
-                               @Override
-                               public Set<EvTeamId> apply(EvInvitationAccepted msg,
-                                                          EventContext ctx) {
-                                   return singleton(msg.getInvitation()
-                                                       .getTeamId());
-                               }
-                           });
+                              @Override
+                              public Set<EvTeamId> apply(EvInvitationAccepted msg,
+                                                         EventContext ctx) {
+                                  return singleton(msg.getInvitation()
+                                                      .getTeamId());
+                              }
+                          });
         }
     }
 

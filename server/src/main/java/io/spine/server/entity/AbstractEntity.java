@@ -333,7 +333,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        setLifecycleFlags(lifecycleFlags().toVBuilder()
+        setLifecycleFlags(lifecycleFlags().toBuilder()
                                           .setArchived(archived)
                                           .build());
     }
@@ -352,7 +352,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        setLifecycleFlags(lifecycleFlags().toVBuilder()
+        setLifecycleFlags(lifecycleFlags().toBuilder()
                                           .setDeleted(deleted)
                                           .build());
     }

@@ -20,48 +20,53 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.protobuf.MessageFieldException;
 
-import java.util.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Obtains an ID of a command target entity from the first field of the command message.
  *
  * @param <I> the type of target entity IDs
  */
-public class DefaultCommandRoute<I> extends FieldAtIndex<I, CommandMessage, CommandContext>
-        implements CommandRoute<I, CommandMessage> {
+public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMessage> {
 
     private static final long serialVersionUID = 0L;
-    private static final int ID_FIELD_INDEX = 0;
 
-    private DefaultCommandRoute() {
-        super(ID_FIELD_INDEX);
-    }
+    private final FirstField<I, CommandMessage, CommandContext> field;
 
-    /** Creates a new instance. */
-    public static <I> DefaultCommandRoute<I> newInstance() {
-        return new DefaultCommandRoute<>();
+    private DefaultCommandRoute(Class<I> cls) {
+        this.field = new FirstField<>(cls);
     }
 
     /**
-     * Tries to obtain a target ID from the passed command message.
+     * Creates a new instance.
      *
-     * @param commandMessage the message to get ID from
-     * @return an {@link Optional} of the ID or {@code Optional.empty()}
-     * if {@link DefaultCommandRoute#apply(Message, Message)} throws an exception
-     * if the command is not for an entity
+     * @param idClass
+     *         the class of identifiers used for the routing
      */
-    public static <I> Optional<I> asOptional(CommandMessage commandMessage) {
-        try {
-            DefaultCommandRoute<I> function = newInstance();
-            I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
-            return Optional.of(id);
-        } catch (MessageFieldException | ClassCastException ignored) {
-            return Optional.empty();
-        }
+    public static <I> DefaultCommandRoute<I> newInstance(Class<I> idClass) {
+        checkNotNull(idClass);
+        return new DefaultCommandRoute<>(idClass);
+    }
+
+    @Override
+    public I apply(CommandMessage message, CommandContext ignored) throws MessageFieldException {
+        checkNotNull(message);
+        I result = field.apply(message, ignored);
+        return result;
+    }
+
+    /**
+     * Verifies of the passed command message potentially has a field with an entity ID.
+     */
+    public static boolean exists(CommandMessage commandMessage) {
+        boolean hasAtLeastOneField =
+                !commandMessage.getDescriptorForType()
+                               .getFields()
+                               .isEmpty();
+        return hasAtLeastOneField;
     }
 }

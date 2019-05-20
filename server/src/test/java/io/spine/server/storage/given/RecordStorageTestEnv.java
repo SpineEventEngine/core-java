@@ -261,6 +261,7 @@ public class RecordStorageTestEnv {
 
         LifecycleColumns(String getterName) {
             try {
+
                 this.column = EntityColumn.from(Entity.class.getDeclaredMethod(getterName));
             } catch (NoSuchMethodException e) {
                 throw illegalStateWithCauseOf(e);

@@ -65,12 +65,12 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
 
     @Override
     public Set<EventClass> messageClasses() {
-        return delegate.eventClasses();
+        return delegate.domesticEvents();
     }
 
     @Override
     public Set<EventClass> externalEventClasses() {
-        return delegate.externalEventClasses();
+        return delegate.externalEvents();
     }
 
     @Override
@@ -125,7 +125,7 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
 
         @Override
         public Set<ExternalMessageClass> messageClasses() {
-            Set<EventClass> eventClasses = delegate.externalEventClasses();
+            Set<EventClass> eventClasses = delegate.externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

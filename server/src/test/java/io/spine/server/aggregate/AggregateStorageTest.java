@@ -33,6 +33,7 @@ import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.StorageRecords;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
@@ -137,7 +138,7 @@ public abstract class AggregateStorageTest
     }
 
     @Override
-    protected Class<? extends TestAggregate> getTestEntityClass() {
+    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
         return TestAggregate.class;
     }
 
@@ -545,14 +546,14 @@ public abstract class AggregateStorageTest
         @DisplayName("for EventContext")
         void forEventContext() {
             EventContext enrichedContext = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             Event event = Event
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newEventId())
                     .setContext(enrichedContext)
                     .setMessage(AnyPacker.pack(TestValues.newUuidValue()))
@@ -569,20 +570,20 @@ public abstract class AggregateStorageTest
         @DisplayName("for origin of EventContext type")
         void forEventContextOrigin() {
             EventContext origin = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             EventContext context = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEventContext(origin)
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .build();
             Event event = Event
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newEventId())
                     .setContext(context)
                     .setMessage(AnyPacker.pack(TestValues.newUuidValue()))

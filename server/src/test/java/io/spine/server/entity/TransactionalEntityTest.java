@@ -187,7 +187,7 @@ class TransactionalEntityTest {
         TransactionalEntity entity = entityWithInactiveTx();
         LifecycleFlags originalFlags = entity.lifecycleFlags();
 
-        LifecycleFlags modifiedFlags = originalFlags.toVBuilder()
+        LifecycleFlags modifiedFlags = originalFlags.toBuilder()
                                                     .setDeleted(true)
                                                     .build();
 
@@ -220,7 +220,7 @@ class TransactionalEntityTest {
             Message originalState = entity.builderFromState()
                                           .build();
 
-            EmptyEntity newState = EmptyEntity.vBuilder()
+            EmptyEntity newState = EmptyEntity.newBuilder()
                                               .setId(newUuidValue().getValue())
                                               .build();
             assertNotEquals(originalState, newState);

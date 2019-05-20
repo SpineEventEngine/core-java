@@ -19,12 +19,14 @@
  */
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
@@ -34,6 +36,7 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -102,6 +105,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
+    private final AggregateRootDirectory aggregateRootDirectory;
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
@@ -132,6 +136,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.commandBus = buildCommandBus(builder, eventBus);
         this.integrationBus = buildIntegrationBus(builder, eventBus, name);
         this.importBus = buildImportBus(tenantIndex);
+        this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
     /**
@@ -160,10 +165,12 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Creates a new instance of {@link IntegrationBus} with the given parameters.
      *
-     * @param builder    the {@link BoundedContextBuilder} to obtain
-     *                   the {@link IntegrationBus.Builder} from
-     * @param eventBus   the initialized {@link EventBus}
-     * @param name       the name of the constructed Bounded Context
+     * @param builder
+     *         the {@link BoundedContextBuilder} to obtain the {@link IntegrationBus.Builder} from
+     * @param eventBus
+     *         the initialized {@link EventBus}
+     * @param name
+     *         the name of the constructed Bounded Context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
@@ -196,27 +203,42 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed repository with the {@code BoundedContext}.
+     * Registers the passed repository with this {@code BoundedContext}.
      *
      * <p>If the repository does not have a storage assigned, it will be initialized
-     * using the {@code StorageFactory} associated with this bounded context.
+     * using the {@code StorageFactory} associated with this {@code BoundedContext}.
      *
-     * <p>Checks whether there is a default state for entity type.
-     *
-     * <p>Re-registers the {@code Stand} as an event dispatcher to make sure it receives events
-     * produced by the repository.
-     *
-     * @param repository the repository to register
-     * @param <I>        the type of IDs used in the repository
-     * @param <E>        the type of entities or aggregates
+     * @param repository
+     *         the repository to register
+     * @param <I>
+     *         the type of IDs used in the repository
+     * @param <E>
+     *         the type of entities
      * @see Repository#initStorage(StorageFactory)
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        repository.setBoundedContext(this);
+        repository.setContext(this);
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
+    }
+
+    /**
+     * Creates and registers the {@linkplain DefaultRepository default repository} for the passed
+     * class of entities.
+     *
+     * @param entityClass
+     *         the class of entities for which
+     * @param <I>
+     *         the type of entity identifiers
+     * @param <E>
+     *         the type of entities
+     * @see #register(Repository)
+     */
+    public <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        register(DefaultRepository.of(entityClass));
     }
 
     /**
@@ -250,10 +272,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the {@code EventBus} of
-     * this {@code BoundedContext}, if it dispatches domestic events.
+     * Registers the passed event dispatcher with the buses of this {@code BoundedContext}.
+     *
+     * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
      * the {@code IntegrationBus}.
+     *
+     * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
@@ -268,10 +293,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the {@code EventBus} of
-     * this {@code BoundedContext}, if it dispatchers domestic events.
-     * If the passed instance dispatches external events, registers it with
-     * the {@code IntegrationBus}.
+     * Registers the passed delegate of an {@link EventDispatcher} with the buses of this
+     * {@code BoundedContext}.
+     *
+     * @see #registerEventDispatcher(EventDispatcher)
      */
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
@@ -285,7 +310,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     private static
     Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
-        return () -> newIllegalStateException("No external dispatcher provided by %s", dispatcher);
+        return () -> newIllegalStateException(
+                "No external dispatcher provided by `%s`.", dispatcher);
     }
 
     /**
@@ -300,7 +326,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> entityStateTypes(Visibility visibility) {
+    public Set<TypeName> stateTypes(Visibility visibility) {
         Set<TypeName> result = guard.entityStateTypes(visibility);
         return result;
     }
@@ -308,7 +334,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains the set of all entity type names.
      */
-    public Set<TypeName> entityStateTypes() {
+    public Set<TypeName> stateTypes() {
         Set<TypeName> result = guard.allEntityTypes();
         return result;
     }
@@ -335,11 +361,38 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(entityStateClass)) {
-            throw newIllegalStateException("No repository found for the the entity state class %s",
+            throw newIllegalStateException("No repository found for the entity state class `%s`.",
                                            entityStateClass.getName());
         }
         Optional<Repository> repository = guard.repositoryFor(entityStateClass);
         return repository;
+    }
+
+    /**
+     * Verifies if this Bounded Context contains entities of the passed class.
+     *
+     * <p>This method does not take into account visibility of entity states.
+     *
+     * @see #findRepository(Class)
+     */
+    @VisibleForTesting
+    public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
+        EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
+        boolean result = guard.hasRepository(cls.stateClass());
+        return result;
+    }
+
+    /**
+     * Verifies if this Bounded Context has entities with the state of the passed class.
+     *
+     * <p>This method does not take into account visibility of entity states.
+     *
+     * @see #findRepository(Class)
+     */
+    @VisibleForTesting
+    public boolean hasEntitiesWithState(Class<? extends Message> stateClass) {
+        boolean result = guard.hasRepository(stateClass);
+        return result;
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */
@@ -413,6 +466,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     @Internal
     public abstract SystemClient systemClient();
 
+    @Internal
+    public AggregateRootDirectory aggregateRootDirectory() {
+        return aggregateRootDirectory;
+    }
+
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.
      *
@@ -465,5 +523,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         if (tenantIndex != null) {
             tenantIndex.close();
         }
+    }
+
+    /**
+     * Returns the name of this Bounded Context.
+     */
+    @Override
+    public String toString() {
+        return name.getValue();
     }
 }

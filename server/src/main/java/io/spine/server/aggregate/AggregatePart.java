@@ -72,7 +72,7 @@ public abstract class AggregatePart<I,
      * @param root a root of the aggregate to which this part belongs
      */
     protected AggregatePart(R root) {
-        super(root.getId());
+        super(root.id());
         this.root = root;
     }
 
@@ -100,8 +100,8 @@ public abstract class AggregatePart<I,
      *                               or the ID type of the part state does not match
      *                               the ID type of the {@code root}
      */
-    protected <P extends Message> P getPartState(Class<P> partStateClass) {
-        P partState = root.getPartState(partStateClass);
+    protected <P extends Message> P partState(Class<P> partStateClass) {
+        P partState = root.partState(partStateClass);
         return partState;
     }
 
