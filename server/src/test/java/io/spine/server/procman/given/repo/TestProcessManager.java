@@ -191,7 +191,6 @@ public class TestProcessManager
 
     @React
     Nothing on(StandardRejections.EntityAlreadyDeleted rejection) {
-        keep(rejection);
         return nothing();
     }
 

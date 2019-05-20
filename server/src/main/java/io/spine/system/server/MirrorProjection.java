@@ -63,7 +63,7 @@ import static java.util.stream.Collectors.toList;
  *         subscriber method is an event used by the framework to bind the method to the event type.
  *         The content of the event, in those cases, is irrelevant.
  */
-public final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder> {
+final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder> {
 
     private static final String TYPE_COLUMN_NAME = "aggregate_type";
     private static final String TYPE_COLUMN_QUERY_NAME = "aggregateType";

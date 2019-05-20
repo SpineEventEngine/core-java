@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
@@ -34,7 +35,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -46,10 +46,12 @@ import io.spine.server.type.EventEnvelope;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -64,29 +66,27 @@ import static java.lang.Math.max;
  *         the type of the aggregate IDs
  * @param <A>
  *         the type of the aggregates managed by this repository
+ * @see Aggregate
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher<I>,
-                   EventDispatcherDelegate<I> {
+        implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
     /** The routing schema for commands handled by the aggregates. */
-    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
+    private final Supplier<CommandRouting<I>> commandRouting;
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting =
-            EventRouting.withDefault(EventRoute.byProducerId());
+    private final EventRouting<I> eventRouting = EventRouting.withDefaultByProducerId();
 
     /**
      * The routing for event import, which by default obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
-    private final EventRouting<I> eventImportRoute =
-            EventRouting.withDefault(EventRoute.byProducerId());
+    private final EventRouting<I> eventImportRouting = EventRouting.withDefaultByProducerId();
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -102,34 +102,43 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** Creates a new instance. */
     protected AggregateRepository() {
         super();
+        this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes the repository during its registration with a {@code BoundedContext}.
      *
-     * <p>{@code AggregateRepository} also registers itself with:
+     * <p>Verifies that the class of aggregates of this repository subscribes to at least one
+     * type of messages.
      *
-     * <ul>
-     *     <li>{@link io.spine.server.commandbus.CommandBus CommandBus},
-     *     <li>{@link io.spine.server.event.EventBus EventBus},
-     *     <li>{@link io.spine.server.aggregate.ImportBus ImportBus} of
-     *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
-     * </ul>
+     * <p>Registers itself with {@link io.spine.server.commandbus.CommandBus CommandBus},
+     * {@link io.spine.server.event.EventBus EventBus}, and
+     * {@link io.spine.server.aggregate.ImportBus ImportBus} of the parent {@code BoundedContext}
+     * for dispatching messages to its aggregates.
+     *
+     * @param context
+     *         the {@code BoundedContext} of this repository
+     * @throws IllegalStateException
+     *         if the aggregate class does not handle any messages
      */
     @Override
-    public void onRegistered() {
+    @OverridingMethodsMustInvokeSuper
+    protected void init(BoundedContext context) {
         checkNotVoid();
 
-        super.onRegistered();
+        super.init(context);
 
-        BoundedContext boundedContext = boundedContext();
-        boundedContext.registerCommandDispatcher(this);
-        boundedContext.registerEventDispatcher(this);
+        setupCommandRouting(commandRouting.get());
+        setupEventRouting(eventRouting);
+        setupImportRouting(eventImportRouting);
+
+        context.registerCommandDispatcher(this);
+        context.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
-            boundedContext.importBus()
-                          .register(EventImportDispatcher.of(this));
+            context.importBus()
+                   .register(EventImportDispatcher.of(this));
         }
-        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        this.commandErrorHandler = context.createCommandErrorHandler();
     }
 
     /**
@@ -141,9 +150,66 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         if (!handlesCommands && !reactsOnEvents) {
             throw newIllegalStateException(
-                    "Aggregates of the repository %s neither handle commands" +
+                    "Aggregates of the repository `%s` neither handle commands" +
                             " nor react on events.", this);
         }
+    }
+
+    /**
+     * A callback for derived classes to customize routing schema for commands.
+     *
+     * <p>Default routing returns the value of the first field of a command message.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // See Javadoc
+    protected void setupCommandRouting(CommandRouting<I> routing) {
+        // Do nothing.
+    }
+
+    /**
+     * A callback for derived classes to customize routing schema for events.
+     *
+     * <p>Default routing returns the ID of the entity which
+     * {@linkplain io.spine.core.EventContext#getProducerId() produced} the event.
+     * This allows to “link” different kinds of entities by having the same class of IDs.
+     * More complex scenarios (e.g. one-to-many relationships) may require custom routing schemas.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupEventRouting(EventRouting<I> routing) {
+        // Do nothing.
+    }
+
+    /**
+     * A callback for derived classes to customize routing schema for importable events.
+     *
+     * <p>The default routing uses {@linkplain io.spine.core.EventContext#getProducerId()
+     * producer ID} of the event as the ID of the target aggregate.
+     *
+     * <p>This default routing requires that {@link Event Event} instances
+     * {@linkplain ImportBus#post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) posted}
+     * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
+     * target aggregate. Not providing a valid aggregate ID would result in
+     * {@code RuntimeException}.
+     *
+     * <p>Some aggregates may produce events with the aggregate ID as the first field of an event
+     * message. To set the default routing for repositories of such aggregates, please use the
+     * code below:
+     *
+     * <pre>{@code
+     * routing.replaceDefault(EventRoute.fromFirstMessageField());
+     * }</pre>
+     *
+     * @param routing
+     *         the routing schema to customize.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupImportRouting(EventRouting<I> routing) {
+        // Do nothing.
     }
 
     @Override
@@ -308,7 +374,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Imports the passed event into one of the aggregates.
      */
-    I importEvent(EventEnvelope event) {
+    final I importEvent(EventEnvelope event) {
         checkNotNull(event);
         I target = with(event.tenantId()).evaluate(() -> doImport(event));
         return target;
@@ -322,7 +388,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private I routeImport(EventEnvelope event) {
-        Set<I> ids = eventImportRouting().apply(event.message(), event.context());
+        Set<I> ids = eventImportRouting.apply(event.message(), event.context());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
@@ -357,48 +423,23 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Obtains command routing instance used by this repository.
      */
-    protected final CommandRouting<I> commandRouting() {
-        return commandRouting;
+    private CommandRouting<I> commandRouting() {
+        return commandRouting.get();
     }
 
     /**
      * Obtains event routing instance used by this repository.
      */
-    protected final EventRouting<I> eventRouting() {
+    private EventRouting<I> eventRouting() {
         return eventRouting;
-    }
-
-    /**
-     * Obtains the event import routing, which by default uses
-     * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event
-     * as the target aggregate ID.
-     *
-     * <p>This default routing requires that {@link Event Event} instances
-     * {@linkplain ImportBus#post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) posted}
-     * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
-     * target aggregate. Not providing a valid aggregate ID would result in
-     * {@code RuntimeException}.
-     *
-     * <p>Some aggregates may produce events with the aggregate ID as the first field of an event
-     * message. To set the default routing for repositories of such aggregates, please use the
-     * code below:
-     *
-     * <pre>{@code
-     * eventImportRouting().replaceDefault(EventRoute.fromFirstMessageField());
-     * }</pre>
-     *
-     * Consider adding this code to the constructor of your {@code AggregateRepository} class.
-     */
-    protected final EventRouting<I> eventImportRouting() {
-        return eventImportRoute;
     }
 
     /**
      * Posts passed events to {@link EventBus}.
      */
-    void postEvents(Collection<Event> events) {
+    final void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = boundedContext().eventBus();
+        EventBus bus = context().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -442,7 +483,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param  id the ID of the aggregate
      * @return loaded or created aggregate instance
      */
-    A loadOrCreate(I id) {
+    final A loadOrCreate(I id) {
         A result = load(id).orElseGet(() -> createNew(id));
         return result;
     }
@@ -546,7 +587,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return super.lifecycleOf(id);
     }
 
-    void onDispatchEvent(I id, Event event) {
+    final void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
@@ -554,7 +595,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
-    void onEventImported(I id, Event event) {
+    final void onEventImported(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
     }
 }

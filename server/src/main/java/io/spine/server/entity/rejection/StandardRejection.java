@@ -18,28 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.entity.rejection;
 
-import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.AggProjectPaused;
-import io.spine.test.aggregate.event.AggTaskStarted;
-
-import static io.spine.server.route.EventRoute.withId;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Any;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.base.RejectionMessage;
+import io.spine.protobuf.AnyPacker;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
+ * Interface common for standard rejections which is used during routing.
  */
-public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+@Immutable
+@GeneratedMixin
+public interface StandardRejection extends RejectionMessage {
 
-    @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(AggTaskStarted.class,
-                      (message, ctx) -> withId(message.getProjectId()))
-               .route(AggProjectPaused.class,
-                      (message, ctx) -> withId(message.getProjectId()));
+    /**
+     * Obtains the packed version of ID of the entity which caused the rejection.
+     */
+    Any getEntityId();
+
+    /**
+     * Obtains the ID of the entity from the {@linkplain #getEntityId() packed form}.
+     */
+    default Object entityId() {
+        Object result = AnyPacker.unpack(getEntityId());
+        return result;
     }
 }

@@ -18,28 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.route;
 
-import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.AggProjectPaused;
-import io.spine.test.aggregate.event.AggTaskStarted;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 
-import static io.spine.server.route.EventRoute.withId;
+import java.util.Set;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
+ * The route that obtains a producer ID from the first field of the event message.
  */
-public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+final class ByFirstMessageField<I> implements EventRoute<I, EventMessage> {
+
+    private static final long serialVersionUID = 0L;
+
+    private final FirstField<I, EventMessage, EventContext> field;
+
+    ByFirstMessageField(Class<I> idClass) {
+        this.field = new FirstField<>(idClass);
+    }
 
     @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(AggTaskStarted.class,
-                      (message, ctx) -> withId(message.getProjectId()))
-               .route(AggProjectPaused.class,
-                      (message, ctx) -> withId(message.getProjectId()));
+    public Set<I> apply(EventMessage message, EventContext context) {
+        I id = field.apply(message, context);
+        return EventRoute.withId(id);
     }
 }

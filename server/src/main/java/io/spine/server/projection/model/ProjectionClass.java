@@ -67,28 +67,28 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
+    public final Set<EventClass> domesticEvents() {
         return delegate.domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
-        return delegate.externalEvents();
-    }
-
-    @Override
-    public Collection<SubscriberMethod>
-    subscribersOf(EventClass eventClass, MessageClass originClass) {
-        return delegate.handlersOf(eventClass, originClass);
-    }
-
-    @Override
-    public Set<StateClass> domesticStates() {
+    public final Set<StateClass> domesticStates() {
         return delegate.domesticStates();
     }
 
     @Override
-    public Set<StateClass> externalStates() {
+    public final Set<EventClass> externalEvents() {
+        return delegate.externalEvents();
+    }
+
+    @Override
+    public final Set<StateClass> externalStates() {
         return delegate.externalStates();
+    }
+
+    @Override
+    public final Collection<SubscriberMethod>
+    subscribersOf(EventClass eventClass, MessageClass originClass) {
+        return delegate.handlersOf(eventClass, originClass);
     }
 }

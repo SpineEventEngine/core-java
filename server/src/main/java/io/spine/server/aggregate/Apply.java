@@ -56,7 +56,7 @@ public @interface Apply {
      * defined as the first parameter of the annotated method.
      *
      * @see ImportBus
-     * @see AggregateRepository#eventImportRouting()
+     * @see AggregateRepository#setupImportRouting(io.spine.server.route.EventRouting)
      */
     boolean allowImport() default false;
 }

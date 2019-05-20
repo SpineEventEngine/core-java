@@ -91,8 +91,9 @@ public final class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     private static CommandContext withSchedule(Schedule schedule) {
-        CommandContext.Builder builder = withRandomActor().toBuilder()
-                                                          .setSchedule(schedule);
+        CommandContext.Builder builder =
+                withRandomActor().toBuilder()
+                                 .setSchedule(schedule);
         return builder.build();
     }
 }

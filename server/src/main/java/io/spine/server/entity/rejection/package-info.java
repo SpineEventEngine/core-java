@@ -18,28 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
-
-import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.AggProjectPaused;
-import io.spine.test.aggregate.event.AggTaskStarted;
-
-import static io.spine.server.route.EventRoute.withId;
-
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
+ * This package contains classes and interfaces for rejections related to lifecycle of entities.
  */
-public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
 
-    @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(AggTaskStarted.class,
-                      (message, ctx) -> withId(message.getProjectId()))
-               .route(AggProjectPaused.class,
-                      (message, ctx) -> withId(message.getProjectId()));
-    }
-}
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.entity.rejection;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

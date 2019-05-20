@@ -36,7 +36,7 @@ import io.spine.server.type.EventEnvelope;
  * current version of an {@code Aggregate} is the version of the last applied event.
  */
 @Internal
-public class IncrementFromEvent extends VersionIncrement {
+public final class IncrementFromEvent extends VersionIncrement {
 
     private final EventEnvelope event;
 

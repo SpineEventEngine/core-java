@@ -18,28 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.route;
 
-import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.AggProjectPaused;
-import io.spine.test.aggregate.event.AggTaskStarted;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 
-import static io.spine.server.route.EventRoute.withId;
+import java.util.Set;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
+ * Obtains an event producer ID from the context of the event.
  */
-public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+final class ByContext<I> implements EventRoute<I, EventMessage> {
+
+    private static final long serialVersionUID = 0L;
 
     @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(AggTaskStarted.class,
-                      (message, ctx) -> withId(message.getProjectId()))
-               .route(AggProjectPaused.class,
-                      (message, ctx) -> withId(message.getProjectId()));
+    public Set<I> apply(EventMessage message, EventContext context) {
+        @SuppressWarnings("unchecked") I id = (I) context.producer();
+        return EventRoute.withId(id);
     }
 }

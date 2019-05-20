@@ -26,6 +26,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
+import io.spine.server.route.EventRouting;
 import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
 import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
@@ -85,9 +86,9 @@ public final class Log extends Aggregate<Long, LogState, LogState.Builder> {
         }
 
         @Override
-        public void onRegistered() {
-            super.onRegistered();
-            eventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
+        protected void setupEventRouting(EventRouting<Long> routing) {
+            super.setupEventRouting(routing);
+            routing.replaceDefault((event, ctx) -> SINGLETON_ID_SET);
         }
     }
 }

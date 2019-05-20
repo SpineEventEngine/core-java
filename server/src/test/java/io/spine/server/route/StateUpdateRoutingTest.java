@@ -38,11 +38,13 @@ import static io.spine.base.Time.currentTime;
 @DisplayName("StateUpdateRouting should")
 class StateUpdateRoutingTest {
 
+    private static final EventContext emptyContext = EventContext.getDefaultInstance();
+
     @Test
     @DisplayName("not accept nulls")
     void notAcceptNulls() {
         new NullPointerTester()
-                .setDefault(EventContext.class, EventContext.getDefaultInstance())
+                .setDefault(EventContext.class, emptyContext)
                 .testAllPublicInstanceMethods(StateUpdateRouting.newInstance());
     }
 
@@ -50,12 +52,10 @@ class StateUpdateRoutingTest {
     @DisplayName("skip all messages be default")
     void routeNothingByDefault() {
         StateUpdateRouting<?> routing = StateUpdateRouting.newInstance();
-        Set<?> emptyTargets = routing.apply(Empty.getDefaultInstance(),
-                                       EventContext.getDefaultInstance());
+        Set<?> emptyTargets = routing.apply(Empty.getDefaultInstance(), emptyContext);
         assertThat(emptyTargets).isEmpty();
 
-        Set<?> logTargets = routing.apply(LogState.getDefaultInstance(),
-                                       EventContext.getDefaultInstance());
+        Set<?> logTargets = routing.apply(LogState.getDefaultInstance(), emptyContext);
         assertThat(logTargets).isEmpty();
     }
 
@@ -72,7 +72,7 @@ class StateUpdateRoutingTest {
                 .newBuilder()
                 .putCounters(counterKey, counter)
                 .build();
-        Set<Integer> targets = routing.apply(log, EventContext.getDefaultInstance());
+        Set<Integer> targets = routing.apply(log, emptyContext);
         assertThat(targets).containsExactly(counter);
     }
 
@@ -95,7 +95,7 @@ class StateUpdateRoutingTest {
                 .setWhen(currentTime())
                 .build();
         EventRoute<Integer, EntityStateChanged> eventRoute = routing.eventRoute();
-        Set<Integer> targets = eventRoute.apply(event, EventContext.getDefaultInstance());
+        Set<Integer> targets = eventRoute.apply(event, emptyContext);
         assertThat(targets).containsExactly(counter);
     }
 }

@@ -54,19 +54,19 @@ final class SystemEventFactory extends EventFactory {
      * @return new instance of {@code SystemEventFactory}
      */
     static SystemEventFactory forMessage(EventMessage message, boolean multitenant) {
-        Message aggregateId = getAggregateId(message);
+        Message aggregateId = aggregateIdFrom(message);
         return new SystemEventFactory(aggregateId, multitenant);
     }
 
-    private static Message getAggregateId(EventMessage systemEvent) {
+    private static Message aggregateIdFrom(EventMessage systemEvent) {
         Set<Object> routingOut =
-                EventRoute.byFirstMessageField()
+                EventRoute.byFirstMessageField(Object.class)
                           .apply(systemEvent, EventContext.getDefaultInstance());
         checkArgument(routingOut.size() == 1,
                       "System event message must have aggregate ID in the first field.");
         Object id = routingOut.iterator()
                               .next();
-        checkArgument(id instanceof Message, "System aggregate ID must be a Message");
+        checkArgument(id instanceof Message, "System aggregate ID must be a `Message`.");
         return (Message) id;
     }
 

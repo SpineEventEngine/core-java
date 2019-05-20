@@ -17,29 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.aggregate.given.aggregate;
+package spine.test.procman;
 
-import io.spine.server.route.EventRouting;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.event.AggProjectPaused;
-import io.spine.test.aggregate.event.AggTaskStarted;
+import "spine/options.proto";
 
-import static io.spine.server.route.EventRoute.withId;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.procman";
+option java_multiple_files = true;
 
-/**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
- */
-public final class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+message ProcessId {
+    string uuid = 1;
+}
 
-    @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(AggTaskStarted.class,
-                      (message, ctx) -> withId(message.getProjectId()))
-               .route(AggProjectPaused.class,
-                      (message, ctx) -> withId(message.getProjectId()));
-    }
+message ProcessState {
+    ProcessId id = 1 [(required) = false];
 }

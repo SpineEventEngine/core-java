@@ -36,9 +36,9 @@ import static io.spine.server.route.EventRoute.withId;
 final class ScheduledCommandRepository
         extends SystemProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
 
-    ScheduledCommandRepository() {
-        super();
-        EventRouting<CommandId> routing = eventRouting();
+    @Override
+    protected void setupEventRouting(EventRouting<CommandId> routing) {
+        super.setupEventRouting(routing);
         routing.route(CommandDispatched.class,
                       (message, context) -> routeToExisting(message));
     }

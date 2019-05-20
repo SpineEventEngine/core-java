@@ -145,7 +145,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
                         .filter(h -> h instanceof StateSubscriberMethod)
                         .map(h -> (StateSubscriberMethod) h)
                         .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                        .map(StateSubscriberMethod::entityType)
+                        .map(StateSubscriberMethod::stateType)
                         .map(StateClass::from)
                         .collect(toImmutableSet());
         return result;

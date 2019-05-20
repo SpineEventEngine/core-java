@@ -51,11 +51,14 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
     /**
      * Creates a new command routing.
      *
-     * @param <I> the type of entity identifiers returned by new routing
+     * @param <I>
+     *         the type of entity identifiers returned by new routing
+     * @param idClass
+     *         the class of target entity identifiers
      * @return new routing instance
      */
-    public static <I> CommandRouting<I> newInstance() {
-        CommandRoute<I, CommandMessage> defaultRoute = DefaultCommandRoute.newInstance();
+    public static <I> CommandRouting<I> newInstance(Class<I> idClass) {
+        CommandRoute<I, CommandMessage> defaultRoute = DefaultCommandRoute.newInstance(idClass);
         return new CommandRouting<>(defaultRoute);
     }
 

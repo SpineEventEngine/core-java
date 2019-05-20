@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.common.truth.Truth;
+import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
@@ -40,6 +41,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
+import io.spine.server.procman.given.repo.ProjectCompletion;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
@@ -137,10 +139,11 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setId(id)
                 .build();
-        TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
-                                         .withId(id)
-                                         .withState(state)
-                                         .build();
+        TestProcessManager result =
+                Given.processManagerOfClass(TestProcessManager.class)
+                     .withId(id)
+                     .withState(state)
+                     .build();
         return result;
     }
 
@@ -257,6 +260,14 @@ class ProcessManagerRepositoryTest
         repository().dispatch(EventEnvelope.of(event));
     }
 
+    @Test
+    @DisplayName("allow customizing command routing")
+    void setupOfCommandRouting() {
+        ProjectCompletion.Repository repo = new ProjectCompletion.Repository();
+        boundedContext.register(repo);
+        assertTrue(repo.callbackCalled());
+    }
+
     @Nested
     @DisplayName("dispatch")
     class Dispatch {
@@ -302,7 +313,7 @@ class ProcessManagerRepositoryTest
             assertTrue(TestProcessManager.processed(event.enclosedMessage()));
 
             dispatchEvent(event);
-            RuntimeException exception = repository().getLatestException();
+            RuntimeException exception = repository().latestException();
             assertNotNull(exception);
             assertThat(exception, instanceOf(DuplicateEventException.class));
         }
@@ -316,7 +327,7 @@ class ProcessManagerRepositoryTest
             assertTrue(TestProcessManager.processed(command.enclosedMessage()));
 
             dispatchCommand(command);
-            RuntimeException exception = repository().getLatestException();
+            RuntimeException exception = repository().latestException();
             assertNotNull(exception);
             assertThat(exception, instanceOf(DuplicateCommandException.class));
         }
@@ -449,7 +460,8 @@ class ProcessManagerRepositoryTest
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
                                            () -> repo.dispatchNowTo(id, request));
-        assertThat(getRootCause(exception), instanceOf(IllegalStateException.class));
+        Truth.assertThat(getRootCause(exception))
+             .isInstanceOf(IllegalStateException.class);
     }
 
     @Nested
@@ -499,18 +511,20 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
+    @DisplayName("check that its `ProcessManager` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setMultitenant(false)
-                                                      .build();
-        repo.setBoundedContext(boundedContext);
-        assertThrows(IllegalStateException.class, repo::onRegistered);
+        BoundedContext context = BoundedContext
+                .newBuilder()
+                .setMultitenant(false)
+                .build();
+        
+        assertThrows(IllegalStateException.class, () ->
+                repo.setContext(context));
     }
 
     @Test
-    @DisplayName("provide EventFilter which discards EntityStateChanged events")
+    @DisplayName("provide `EventFilter` which discards `EntityStateChanged` events")
     void discardEntityStateChangedEvents() {
         EventFilter filter = repository().eventFilter();
         ProjectId projectId = ProjectId
@@ -521,8 +535,8 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        assertTrue(filter.filter(arbitraryEvent)
-                         .isPresent());
+        Truth8.assertThat(filter.filter(arbitraryEvent))
+              .isPresent();
 
         Any newState = pack(currentTime());
         EntityHistoryId historyId = EntityHistoryId
@@ -535,11 +549,12 @@ class ProcessManagerRepositoryTest
                 .setId(historyId)
                 .setNewState(newState)
                 .build();
-        assertFalse(filter.filter(discardedEvent).isPresent());
+        Truth8.assertThat(filter.filter(discardedEvent))
+              .isEmpty();
     }
 
     @Test
-    @DisplayName("post all domain events through an EventFilter")
+    @DisplayName("post all domain events through an `EventFilter`")
     void postEventsThroughFilter() {
         ProjectId projectId = ProjectId
                 .newBuilder()

@@ -24,18 +24,19 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 
 import java.util.Set;
 
-public class RejectionReactingRepository
+public final class RejectionReactingRepository
         extends AggregateRepository<ProjectId, RejectionReactingAggregate> {
 
-    public RejectionReactingRepository() {
-        super();
-        eventRouting()
-                .route(AggCannotStartArchivedProject.class, routeRejection());
+    @Override
+    protected void setupEventRouting(EventRouting<ProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(AggCannotStartArchivedProject.class, routeRejection());
     }
 
     private static EventRoute<ProjectId, AggCannotStartArchivedProject> routeRejection() {
