@@ -155,9 +155,9 @@ class ProcessManagerRepositoryTest
     @Override
     protected List<TestProcessManager> createNamed(int count, Supplier<String> nameSupplier) {
         return createEntitiesWithState(count, id -> Project.newBuilder()
-                                                                   .setId(id)
-                                                                   .setName(nameSupplier.get())
-                                                                   .build());
+                                                           .setId(id)
+                                                           .setName(nameSupplier.get())
+                                                           .build());
     }
 
     private List<TestProcessManager>
@@ -518,7 +518,7 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setMultitenant(false)
                 .build();
-        
+
         assertThrows(IllegalStateException.class, () ->
                 repo.setContext(context));
     }
