@@ -33,7 +33,7 @@ import io.spine.system.server.event.CommandScheduled;
  * Information about a scheduled command.
  */
 final class ScheduledCommand
-        extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecordVBuilder> {
+        extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecord.Builder> {
 
     private ScheduledCommand(CommandId id) {
         super(id);

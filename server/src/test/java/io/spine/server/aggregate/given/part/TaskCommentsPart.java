@@ -26,19 +26,16 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.command.AggAddComment;
 import io.spine.test.aggregate.event.AggCommentAdded;
-import io.spine.test.aggregate.event.AggCommentAddedVBuilder;
 import io.spine.test.aggregate.task.AggTaskComments;
-import io.spine.test.aggregate.task.AggTaskCommentsVBuilder;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.test.aggregate.task.Comment;
-import io.spine.test.aggregate.task.CommentVBuilder;
 
 /**
  * An aggregate part with {@link StringValue} state, which belongs to an aggregate
  * represented by {@link AnAggregateRoot}.
  */
 public class TaskCommentsPart
-        extends AggregatePart<AggTaskId, AggTaskComments, AggTaskCommentsVBuilder, TaskRoot> {
+        extends AggregatePart<AggTaskId, AggTaskComments, AggTaskComments.Builder, TaskRoot> {
 
     public TaskCommentsPart(TaskRoot root) {
         super(root);
@@ -46,7 +43,7 @@ public class TaskCommentsPart
 
     @Assign
     AggCommentAdded handle(AggAddComment command) {
-        AggCommentAdded event = AggCommentAddedVBuilder
+        AggCommentAdded event = AggCommentAdded
                 .newBuilder()
                 .setTaskId(command.getTaskId())
                 .setAuthor(command.getAuthor())
@@ -57,7 +54,7 @@ public class TaskCommentsPart
 
     @Apply
     private void apply(AggCommentAdded event) {
-        Comment comment = CommentVBuilder
+        Comment comment = Comment
                 .newBuilder()
                 .setAuthor(event.getAuthor())
                 .setText(event.getText())

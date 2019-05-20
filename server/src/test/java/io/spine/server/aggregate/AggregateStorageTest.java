@@ -38,7 +38,6 @@ import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.TestValues;
@@ -666,7 +665,7 @@ public abstract class AggregateStorageTest
         return storage.historyBackward(readRequest);
     }
 
-    public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    public static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         protected TestAggregate(ProjectId id) {
             super(id);
@@ -674,7 +673,7 @@ public abstract class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdString
-            extends Aggregate<String, Project, ProjectVBuilder> {
+            extends Aggregate<String, Project, Project.Builder> {
 
         private TestAggregateWithIdString(String id) {
             super(id);
@@ -682,7 +681,7 @@ public abstract class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdInteger
-            extends Aggregate<Integer, Project, ProjectVBuilder> {
+            extends Aggregate<Integer, Project, Project.Builder> {
 
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
@@ -690,7 +689,7 @@ public abstract class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdLong
-            extends Aggregate<Long, Project, ProjectVBuilder> {
+            extends Aggregate<Long, Project, Project.Builder> {
 
         private TestAggregateWithIdLong(Long id) {
             super(id);

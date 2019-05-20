@@ -23,7 +23,6 @@ package io.spine.testing.server.projection.given.prj;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.given.entity.TuEventLog;
-import io.spine.testing.server.given.entity.TuEventLogVBuilder;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
@@ -34,7 +33,7 @@ import static io.spine.protobuf.AnyPacker.pack;
  * A sample projection for being used as the subject of tests under tests.
  */
 public class TuEventLoggingView
-        extends Projection<TuProjectId, TuEventLog, TuEventLogVBuilder> {
+        extends Projection<TuProjectId, TuEventLog, TuEventLog.Builder> {
 
     public TuEventLoggingView(TuProjectId id) {
         super(id);

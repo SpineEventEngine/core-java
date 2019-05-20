@@ -46,7 +46,7 @@ class AcksTest extends UtilityClassTest<Acks> {
      ************************/
 
     static Ack newAck(MessageId messageId) {
-        return AckVBuilder
+        return Ack
                 .newBuilder()
                 .setMessageId(AnyPacker.pack(messageId))
                 .setStatus(newOkStatus())
@@ -54,7 +54,7 @@ class AcksTest extends UtilityClassTest<Acks> {
     }
 
     private static Status newOkStatus() {
-        return StatusVBuilder
+        return Status
                 .newBuilder()
                 .setOk(Empty.getDefaultInstance())
                 .build();

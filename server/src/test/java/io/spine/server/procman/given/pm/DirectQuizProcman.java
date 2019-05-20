@@ -29,7 +29,6 @@ import io.spine.test.procman.quiz.PmAnswer;
 import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
 import io.spine.test.procman.quiz.PmQuizId;
-import io.spine.test.procman.quiz.PmQuizVBuilder;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAlreadySolved;
@@ -48,7 +47,7 @@ import java.util.List;
  * {@link PmQuestionAnswered Question Answered event} and emits 
  * either of three when handling a command.
  */
-class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
+class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     protected DirectQuizProcman(PmQuizId id) {
         super(id);
@@ -100,7 +99,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     private boolean questionIsClosed(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = builder().getOpenQuestion();
+        List<PmQuestionId> openQuestions = builder().getOpenQuestionList();
         boolean containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
@@ -128,8 +127,8 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        PmQuizVBuilder builder = builder();
-        List<PmQuestionId> openQuestions = builder.getOpenQuestion();
+        PmQuiz.Builder builder = builder();
+        List<PmQuestionId> openQuestions = builder.getOpenQuestionList();
         int index = openQuestions.indexOf(questionId);
         builder.removeOpenQuestion(index);
     }

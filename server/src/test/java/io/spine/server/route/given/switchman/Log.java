@@ -37,7 +37,7 @@ import io.spine.server.route.given.switchman.rejection.Rejections;
  *
  * <p>There's only one log per system.
  */
-public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
+public final class Log extends Aggregate<Long, LogState, LogState.Builder> {
 
     /** The ID of the singleton log. */
     public static final long ID = 42L;

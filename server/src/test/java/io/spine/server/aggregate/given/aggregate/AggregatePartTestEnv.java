@@ -22,7 +22,6 @@ package io.spine.server.aggregate.given.aggregate;
 
 import io.spine.core.UserId;
 import io.spine.test.aggregate.command.AggAddComment;
-import io.spine.test.aggregate.command.AggAddCommentVBuilder;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.task.AggTaskId;
 
@@ -61,7 +60,7 @@ public final class AggregatePartTestEnv {
     }
 
     public static AggAddComment commentTask() {
-        AggAddComment command = AggAddCommentVBuilder
+        AggAddComment command = AggAddComment
                 .newBuilder()
                 .setTaskId(ID)
                 .setAuthor(COMMENT_AUTHOR)

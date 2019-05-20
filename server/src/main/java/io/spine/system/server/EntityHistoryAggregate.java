@@ -68,7 +68,7 @@ import static com.google.protobuf.util.Timestamps.compare;
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
 final class EntityHistoryAggregate
-        extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
+        extends Aggregate<EntityHistoryId, EntityHistory, EntityHistory.Builder> {
 
     @Assign
     EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
@@ -209,7 +209,7 @@ final class EntityHistoryAggregate
     }
 
     private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistory.Builder> mutation) {
-        EntityHistoryVBuilder builder = builder();
+        EntityHistory.Builder builder = builder();
         LifecycleHistory.Builder history =
                 builder.getLifecycle()
                        .toBuilder();
@@ -236,7 +236,7 @@ final class EntityHistoryAggregate
     }
 
     private void updateDispatchingHistory(UnaryOperator<DispatchingHistory.Builder> mutation) {
-        EntityHistoryVBuilder builder = builder();
+        EntityHistory.Builder builder = builder();
         DispatchingHistory.Builder history =
                 builder.getDispatching()
                        .toBuilder();

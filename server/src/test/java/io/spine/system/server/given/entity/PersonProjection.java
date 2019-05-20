@@ -24,7 +24,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.system.server.PersonCreated;
 import io.spine.system.server.PersonDetails;
-import io.spine.system.server.PersonDetailsVBuilder;
 import io.spine.system.server.PersonExposed;
 import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonId;
@@ -35,7 +34,7 @@ import io.spine.type.TypeUrl;
  * and changes its lifecycle flags as the “linked” aggregate state changes.
  */
 public final class PersonProjection
-        extends Projection<PersonId, PersonDetails, PersonDetailsVBuilder> {
+        extends Projection<PersonId, PersonDetails, PersonDetails.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(PersonDetails.class);
 

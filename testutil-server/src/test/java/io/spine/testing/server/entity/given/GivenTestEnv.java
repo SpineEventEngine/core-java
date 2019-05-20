@@ -27,14 +27,10 @@ import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.given.entity.TuComments;
-import io.spine.testing.server.given.entity.TuCommentsVBuilder;
 import io.spine.testing.server.given.entity.TuPmState;
-import io.spine.testing.server.given.entity.TuPmStateVBuilder;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.TuProjectPart;
-import io.spine.testing.server.given.entity.TuProjectPartVBuilder;
-import io.spine.testing.server.given.entity.TuProjectVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 
 class GivenTestEnv {
@@ -44,22 +40,22 @@ class GivenTestEnv {
     }
 
     static class AnAggregate
-            extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
+            extends Aggregate<TuProjectId, TuProject, TuProject.Builder> {
     }
 
     static class AnAggregatePart
-            extends AggregatePart<TuProjectId, TuProjectPart, TuProjectPartVBuilder, ARoot> {
+            extends AggregatePart<TuProjectId, TuProjectPart, TuProjectPart.Builder, ARoot> {
         protected AnAggregatePart(ARoot root) {
             super(root);
         }
     }
 
     static class AProjection
-            extends Projection<TuTaskId, TuComments, TuCommentsVBuilder> {
+            extends Projection<TuTaskId, TuComments, TuComments.Builder> {
     }
 
     static class AProcessManager
-            extends ProcessManager<TuProjectId, TuPmState, TuPmStateVBuilder> {
+            extends ProcessManager<TuProjectId, TuPmState, TuPmState.Builder> {
     }
 
     private static class ARoot extends AggregateRoot<TuProjectId> {

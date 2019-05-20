@@ -24,12 +24,11 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.test.shared.EmptyProjection;
-import io.spine.server.test.shared.EmptyProjectionVBuilder;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.event.BcProjectCreated;
 
 public class ProjectReport
-        extends Projection<ProjectId, EmptyProjection, EmptyProjectionVBuilder> {
+        extends Projection<ProjectId, EmptyProjection, EmptyProjection.Builder> {
 
     public ProjectReport(ProjectId id) {
         super(id);

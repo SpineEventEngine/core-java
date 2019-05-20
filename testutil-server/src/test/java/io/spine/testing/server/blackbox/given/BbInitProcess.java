@@ -25,7 +25,6 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.testing.server.blackbox.BbInit;
-import io.spine.testing.server.blackbox.BbInitVBuilder;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.command.BbAssignScrumMaster;
 import io.spine.testing.server.blackbox.command.BbAssignTeam;
@@ -41,7 +40,7 @@ import java.util.Optional;
  * Test environment process manager for testing
  * {@link io.spine.testing.server.entity.EntitySubject}.
  */
-public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbInitVBuilder> {
+public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbInit.Builder> {
 
     BbInitProcess(BbProjectId id) {
         super(id);

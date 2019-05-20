@@ -28,9 +28,9 @@ import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
 import io.spine.core.Event;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -43,7 +43,7 @@ import java.util.List;
 public abstract
 class CommandHandlingEntity<I,
                             S extends Message,
-                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                            B extends ValidatingBuilder<S>>
         extends TransactionalEntity<I, S, B>
         implements CommandHandler {
 

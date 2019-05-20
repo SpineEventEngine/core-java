@@ -25,7 +25,6 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.SubProjectList;
-import io.spine.test.aggregate.SubProjectListVBuilder;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
 import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -38,7 +37,7 @@ import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
  * in rejecting subsequent commands.
  */
 class RejectingAggregate
-        extends Aggregate<ProjectId, SubProjectList, SubProjectListVBuilder> {
+        extends Aggregate<ProjectId, SubProjectList, SubProjectList.Builder> {
 
     private RejectingAggregate(ProjectId id) {
         super(id);

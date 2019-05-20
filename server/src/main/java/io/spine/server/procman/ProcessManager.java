@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
@@ -42,7 +43,6 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -80,7 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProcessManager<I,
                                      S extends Message,
-                                     B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                     B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, Commander, HasVersionColumn<I, S> {
 

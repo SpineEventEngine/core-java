@@ -23,11 +23,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.AutoIncrement;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public class ProjectionTransaction<I,
                                    M extends Message,
-                                   B extends ValidatingBuilder<M, ? extends Message.Builder>>
+                                   B extends ValidatingBuilder<M>>
         extends EventPlayingTransaction<I, Projection<I, M, B>, M, B> {
 
     @VisibleForTesting
@@ -73,7 +73,7 @@ public class ProjectionTransaction<I,
      */
     protected static <I,
                       M extends Message,
-                      B extends ValidatingBuilder<M, ? extends Message.Builder>>
+                      B extends ValidatingBuilder<M>>
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
         checkNotNull(projection);
 

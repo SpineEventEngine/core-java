@@ -185,6 +185,10 @@ subprojects {
         }
     }
 
+    modelCompiler {
+        generateValidatingBuilders = false
+    }
+
     test {
         useJUnitPlatform {
             includeEngines 'junit-jupiter'

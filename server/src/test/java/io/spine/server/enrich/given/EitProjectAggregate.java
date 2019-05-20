@@ -25,13 +25,12 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.enrich.given.command.EitCreateProject;
 import io.spine.server.enrich.given.event.EitProjectCreated;
-import io.spine.server.enrich.given.event.EitProjectCreatedVBuilder;
 
-final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitProjectVBuilder> {
+final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitProject.Builder> {
 
     @Assign
     EitProjectCreated handle(EitCreateProject cmd) {
-        return EitProjectCreatedVBuilder
+        return EitProjectCreated
                 .newBuilder()
                 .setProject(cmd.getProject())
                 .build();

@@ -30,14 +30,13 @@ import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggTaskCreated;
 import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
-import io.spine.test.aggregate.task.AggTaskVBuilder;
 
 /**
  * An aggregate part with {@link Task} state, which belongs to the aggregate
  * represented by {@link AnAggregateRoot}.
  */
 public class TaskPart
-        extends AggregatePart<AggTaskId, AggTask, AggTaskVBuilder, TaskRoot> {
+        extends AggregatePart<AggTaskId, AggTask, AggTask.Builder, TaskRoot> {
 
     public TaskPart(TaskRoot root) {
         super(root);

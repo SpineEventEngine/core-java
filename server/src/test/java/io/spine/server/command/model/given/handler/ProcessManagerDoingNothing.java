@@ -25,7 +25,6 @@ import io.spine.server.command.Assign;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
-import io.spine.server.test.shared.EmptyProcessVBuilder;
 import io.spine.test.reflect.command.RefCreateProject;
 
 /**
@@ -34,7 +33,7 @@ import io.spine.test.reflect.command.RefCreateProject;
  * <p>The process manager does not modify its state when “handling” the passed command.
  */
 public class ProcessManagerDoingNothing
-        extends ProcessManager<String, EmptyProcess, EmptyProcessVBuilder> {
+        extends ProcessManager<String, EmptyProcess, EmptyProcess.Builder> {
 
     public ProcessManagerDoingNothing(String id) {
         super(id);

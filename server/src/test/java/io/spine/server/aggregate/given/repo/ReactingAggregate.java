@@ -24,7 +24,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
@@ -35,7 +34,7 @@ import java.util.Optional;
  * An aggregate class that reacts only on events and does not handle commands.
  */
 public class ReactingAggregate
-        extends Aggregate<ProjectId, StringAggregate, StringAggregateVBuilder> {
+        extends Aggregate<ProjectId, StringAggregate, StringAggregate.Builder> {
 
     public static final String PROJECT_ARCHIVED = "PROJECT_ARCHIVED";
     public static final String PROJECT_DELETED = "PROJECT_DELETED";

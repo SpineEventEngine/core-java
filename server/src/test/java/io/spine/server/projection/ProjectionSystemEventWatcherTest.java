@@ -31,7 +31,6 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
-import io.spine.system.server.event.EventDispatchedToSubscriberVBuilder;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +136,7 @@ class ProjectionSystemEventWatcherTest {
         @DisplayName("on event dispatching")
         void eventDispatched() {
             Event payload = GivenEvent.arbitrary();
-            EventDispatchedToSubscriber systemEvent = EventDispatchedToSubscriberVBuilder
+            EventDispatchedToSubscriber systemEvent = EventDispatchedToSubscriber
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())

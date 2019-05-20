@@ -22,9 +22,9 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.aggregate.model.AggregatePartClass;
-import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 
@@ -60,7 +60,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  */
 public abstract class AggregatePart<I,
                                     S extends Message,
-                                    B extends ValidatingBuilder<S, ? extends Message.Builder>,
+                                    B extends ValidatingBuilder<S>,
                                     R extends AggregateRoot<I>>
                       extends Aggregate<I, S, B> {
 

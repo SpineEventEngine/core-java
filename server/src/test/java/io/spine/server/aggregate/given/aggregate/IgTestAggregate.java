@@ -26,7 +26,6 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.React;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -46,7 +45,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
  * io.spine.server.aggregate.IdempotencyGuardTest IdempotencyGuard tests}.
  */
 public class IgTestAggregate
-        extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+        extends Aggregate<ProjectId, Project, Project.Builder> {
 
     public IgTestAggregate(ProjectId id) {
         super(id);

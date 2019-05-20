@@ -24,10 +24,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateTransaction;
 import io.spine.testing.server.entity.EntityBuilder;
-import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building aggregates for tests.
@@ -67,7 +67,7 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
      * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
      */
     private final class
-    TestAggregateTransaction<B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    TestAggregateTransaction<B extends ValidatingBuilder<S>>
             extends AggregateTransaction<I, S, B> {
 
         private TestAggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {

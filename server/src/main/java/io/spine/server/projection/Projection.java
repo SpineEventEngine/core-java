@@ -23,13 +23,13 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
@@ -50,7 +50,7 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  */
 public abstract class Projection<I,
                                  M extends Message,
-                                 B extends ValidatingBuilder<M, ? extends Message.Builder>>
+                                 B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
         implements EventPlayer, EventSubscriber, HasVersionColumn<I, M> {
 

@@ -26,7 +26,6 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuPmState;
-import io.spine.testing.server.given.entity.TuPmStateVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAssignTask;
 import io.spine.testing.server.given.entity.command.TuCreateTask;
@@ -39,7 +38,7 @@ import static com.google.protobuf.util.Timestamps.fromNanos;
  * command.
  */
 public class CommandHandlingPm
-        extends ProcessManager<TuTaskId, TuPmState, TuPmStateVBuilder> {
+        extends ProcessManager<TuTaskId, TuPmState, TuPmState.Builder> {
 
     public static final TuTaskId ID = TuTaskId
             .newBuilder()
