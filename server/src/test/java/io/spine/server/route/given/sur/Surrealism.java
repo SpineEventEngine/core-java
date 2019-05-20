@@ -22,7 +22,6 @@ package io.spine.server.route.given.sur;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.route.given.sur.command.ArtistName;
 
 import java.util.Optional;
 import java.util.Set;

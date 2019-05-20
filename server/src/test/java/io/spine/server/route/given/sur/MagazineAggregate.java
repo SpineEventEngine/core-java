@@ -26,10 +26,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.route.given.sur.command.ArtistName;
-import io.spine.server.route.given.sur.command.Magazine;
-import io.spine.server.route.given.sur.command.MagazineVBuilder;
-import io.spine.server.route.given.sur.command.Manifesto;
 import io.spine.server.route.given.sur.command.PublishArticle;
 import io.spine.server.route.given.sur.event.ArticlePublished;
 

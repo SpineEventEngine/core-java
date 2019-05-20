@@ -25,8 +25,6 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
-import io.spine.server.route.given.sur.command.ArtistMood;
-import io.spine.server.route.given.sur.command.ArtistName;
 import io.spine.server.route.given.sur.event.ArticlePublished;
 
 import java.util.Optional;

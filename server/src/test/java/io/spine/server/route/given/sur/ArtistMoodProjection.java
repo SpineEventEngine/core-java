@@ -22,9 +22,6 @@ package io.spine.server.route.given.sur;
 
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.server.route.given.sur.command.ArtistMood;
-import io.spine.server.route.given.sur.command.ArtistMoodVBuilder;
-import io.spine.server.route.given.sur.command.ArtistName;
 import io.spine.server.route.given.sur.event.ArticlePublished;
 
 import java.util.Optional;
