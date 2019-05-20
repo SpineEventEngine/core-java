@@ -20,6 +20,7 @@
 
 package io.spine.test.validation;
 
+import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
@@ -28,25 +29,41 @@ import io.spine.validate.FieldValidatingOption;
 import io.spine.validate.ValidatingOptionFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.google.auto.service.AutoService;
-
 import java.util.Set;
 
+/**
+ * A test-only implementation of {@link ValidatingOptionFactory}.
+ *
+ * <p>If a message validation should fail for the testing purposes, specify the expected exception
+ * via {@link #shouldFailWith(RuntimeException)}. When the test is over, call
+ * {@link #shouldNotFail()} in order to fix validation.
+ */
 @AutoService(ValidatingOptionFactory.class)
 @SuppressWarnings("Immutable")
 public final class FakeOptionFactory implements ValidatingOptionFactory {
 
     private static @Nullable RuntimeException exception = null;
 
+    /**
+     * Sets the exception to throw at any message validation.
+     */
     public static void shouldFailWith(RuntimeException e) {
         exception = e;
     }
 
-    public static void shouldNowFail() {
+    /**
+     * Resets the message validation.
+     *
+     * @see #shouldFailWith(RuntimeException)
+     */
+    public static void shouldNotFail() {
         exception = null;
     }
 
-    public static @Nullable RuntimeException plannedException() {
+    /**
+     * Obtains the exception to throw on validation.
+     */
+    static @Nullable RuntimeException plannedException() {
         return exception;
     }
 

@@ -123,7 +123,7 @@ public abstract class TransactionTest<I,
 
     @AfterEach
     void tearDown() {
-        FakeOptionFactory.shouldNowFail();
+        FakeOptionFactory.shouldNotFail();
     }
 
     @Nested

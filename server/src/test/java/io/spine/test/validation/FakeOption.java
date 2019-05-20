@@ -29,6 +29,16 @@ import io.spine.validate.Constraint;
 import io.spine.validate.FieldValidatingOption;
 import io.spine.validate.FieldValue;
 
+/**
+ * A test-only implementation of a validating option.
+ *
+ * <p>This option is applied to any given field. Although the {@link #extension()} method returns
+ * the {@code beta} extension, the option is not bound to any real Protobuf option.
+ *
+ * <p>If the {@link FakeOptionFactory#plannedException()} is non-null, the planned exception is
+ * thrown by the constraint produced by this option. Otherwise, the constraint never discovers any
+ * violations.
+ */
 public final class FakeOption extends FieldValidatingOption<Void, Object> {
 
     FakeOption() {
