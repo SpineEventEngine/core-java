@@ -32,6 +32,9 @@ import io.spine.validate.FieldValue;
 /**
  * A test-only implementation of a validating option.
  *
+ * <p>It is sometimes required for tests that a call to validation fails with a predictable
+ * exception. In such cases, the test authors may set up the fake option to fail validation.
+ *
  * <p>This option is applied to any given field. Although the {@link #extension()} method returns
  * the {@code beta} extension, the option is not bound to any real Protobuf option.
  *
