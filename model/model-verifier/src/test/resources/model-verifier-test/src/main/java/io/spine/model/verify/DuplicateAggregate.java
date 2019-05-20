@@ -32,8 +32,8 @@ public class DuplicateAggregate extends Aggregate<String, CallState, CallState.B
     @Assign
     public MessageSent handle(SendMessage command) {
         return MessageSent.newBuilder()
-                                  .setMessage(command.getMessage())
-                                  .build();
+                          .setMessage(command.getMessage())
+                          .build();
     }
 
     @Assign
