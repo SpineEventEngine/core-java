@@ -33,14 +33,13 @@ import io.spine.system.server.PersonExposed;
 import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonRenamed;
-import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.RenamePerson;
 import io.spine.type.TypeUrl;
 
 /**
  * Test aggregate on which to track history.
  */
-public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder> {
+public class PersonAggregate extends Aggregate<PersonId, Person, Person.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(Person.class);
 
@@ -100,7 +99,7 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Apply
     private void on(PersonRenamed event) {
-        PersonVBuilder builder = builder();
+        Person.Builder builder = builder();
         PersonName newName = builder
                 .getName()
                 .toBuilder()

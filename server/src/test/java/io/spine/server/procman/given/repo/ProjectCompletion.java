@@ -27,7 +27,6 @@ import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.CommandRouting;
 import io.spine.test.procman.ProcessId;
 import io.spine.test.procman.ProcessState;
-import io.spine.test.procman.ProcessStateVBuilder;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCompleteProject;
 import io.spine.test.procman.command.PmCreateProject;
@@ -43,10 +42,10 @@ import static io.spine.testdata.Sample.builderForType;
  * @see Repository#setupCommandRouting(CommandRouting)
  */
 public class ProjectCompletion
-        extends ProcessManager<ProcessId, ProcessState, ProcessStateVBuilder> {
+        extends ProcessManager<ProcessId, ProcessState, ProcessState.Builder> {
 
     @Assign
-    PmProjectCreated handle(PmCompleteProject command, CommandContext ignored) {
+    PmProjectCreated handle(PmCompleteProject command) {
         PmProjectCreated.Builder event = builderForType(PmProjectCreated.class);
         return event.setProjectId(command.getProjectId())
                     .build();

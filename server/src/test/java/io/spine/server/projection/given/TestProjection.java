@@ -32,7 +32,6 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
@@ -43,7 +42,7 @@ import java.util.Set;
 
 /** The projection stub used in tests. */
 public class TestProjection
-        extends Projection<ProjectId, Project, ProjectVBuilder>
+        extends Projection<ProjectId, Project, Project.Builder>
         implements TestEntityWithStringColumn<ProjectId, Project> {
 
     /** The event message history we store for inspecting in delivery tests. */

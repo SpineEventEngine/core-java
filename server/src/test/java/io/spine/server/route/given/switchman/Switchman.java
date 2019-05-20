@@ -29,7 +29,7 @@ import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 /**
  * The aggregate that handles commands send to a switchman.
  */
-public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLogVBuilder> {
+public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLog.Builder> {
 
     Switchman(String id) {
         super(id);

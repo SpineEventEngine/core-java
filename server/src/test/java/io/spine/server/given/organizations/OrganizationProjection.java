@@ -25,7 +25,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 
 public final class OrganizationProjection
-        extends Projection<OrganizationId, Organization, OrganizationVBuilder> {
+        extends Projection<OrganizationId, Organization, Organization.Builder> {
 
     private OrganizationProjection(OrganizationId id) {
         super(id);

@@ -29,7 +29,6 @@ import io.spine.test.procman.quiz.PmAnswer;
 import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
 import io.spine.test.procman.quiz.PmQuizId;
-import io.spine.test.procman.quiz.PmQuizVBuilder;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
@@ -43,7 +42,7 @@ import java.util.List;
  * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
  * the question are answered using {@link PmAnswerQuestion Answer Question commands}.
  */
-class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
+class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     protected QuizProcman(PmQuizId id) {
         super(id);
@@ -103,7 +102,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     private boolean questionIsClosed(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = builder().getOpenQuestion();
+        List<PmQuestionId> openQuestions = builder().getOpenQuestionList();
         boolean containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
@@ -125,7 +124,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = builder().getOpenQuestion();
+        List<PmQuestionId> openQuestions = builder().getOpenQuestionList();
         int index = openQuestions.indexOf(questionId);
         builder().removeOpenQuestion(index);
     }

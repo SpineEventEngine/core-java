@@ -24,11 +24,10 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.event.command.ProceedToProjectRemoval;
 import io.spine.test.event.command.RemoveProject;
 
-public class ProjectRemovalProcman extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+public class ProjectRemovalProcman extends ProcessManager<ProjectId, Project, Project.Builder> {
 
     protected ProjectRemovalProcman(ProjectId id) {
         super(id);

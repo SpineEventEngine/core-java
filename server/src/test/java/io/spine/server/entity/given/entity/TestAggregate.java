@@ -22,7 +22,6 @@ package io.spine.server.entity.given.entity;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.test.shared.EmptyAggregate;
-import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import io.spine.testing.server.entity.given.Given;
 
 import static io.spine.base.Identifier.newUuid;
@@ -30,7 +29,7 @@ import static io.spine.base.Identifier.newUuid;
 // TODO:2018-07-25:vladyslav.lubenskyi: https://github.com/SpineEventEngine/core-java/issues/788
 // Figure out a way not to use Aggregate here.
 public class TestAggregate
-        extends Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder> {
+        extends Aggregate<String, EmptyAggregate, EmptyAggregate.Builder> {
 
     protected TestAggregate(String id) {
         super(id);

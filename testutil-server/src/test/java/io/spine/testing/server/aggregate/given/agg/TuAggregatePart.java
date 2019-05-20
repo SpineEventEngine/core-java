@@ -25,7 +25,6 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuComments;
-import io.spine.testing.server.given.entity.TuCommentsVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
 import io.spine.testing.server.given.entity.command.TuRemoveComment;
@@ -40,7 +39,7 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
  * A sample aggregate part that handles commands.
  */
 public final class TuAggregatePart
-        extends AggregatePart<TuTaskId, TuComments, TuCommentsVBuilder, TuAggregateRoot> {
+        extends AggregatePart<TuTaskId, TuComments, TuComments.Builder, TuAggregateRoot> {
 
     public static final TuTaskId ID = TuTaskId.newBuilder()
                                               .setValue("agg-part-id")

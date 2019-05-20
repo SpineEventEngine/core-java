@@ -40,7 +40,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
-import static java.util.stream.Collectors.toList;
 
 @DisplayName("CommandValidator violation check should")
 class CommandValidatorViolationCheckTest {
@@ -107,16 +106,12 @@ class CommandValidatorViolationCheckTest {
     @DisplayName("return violation for an empty command message")
     void emptyMessage() {
         TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
-        Command emptyCommand = factory.createCommand(CmdEmpty.newBuilder().build());
-
+        Command emptyCommand = factory.createCommand(CmdEmpty.getDefaultInstance());
         List<ConstraintViolation> violations = inspectCommand(emptyCommand);
 
-        boolean hasViolationOnCommandTargetId =
-                !(violations.stream()
-                            .filter(v -> v.getMsgFormat()
-                                          .contains("command target ID"))
-                            .collect(toList())
-                            .isEmpty());
+        boolean hasViolationOnCommandTargetId = violations
+                .stream()
+                .anyMatch(violation -> violation.getMsgFormat().contains("command target ID"));
 
         assertThat(hasViolationOnCommandTargetId)
                 .isTrue();

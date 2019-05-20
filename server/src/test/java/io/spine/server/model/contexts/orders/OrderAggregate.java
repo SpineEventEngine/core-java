@@ -25,13 +25,12 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.model.contexts.orders.Order;
 import io.spine.test.model.contexts.orders.OrderId;
-import io.spine.test.model.contexts.orders.OrderVBuilder;
 import io.spine.test.model.contexts.orders.command.AddItem;
 import io.spine.test.model.contexts.orders.command.CreateOrder;
 import io.spine.test.model.contexts.orders.event.ItemAdded;
 import io.spine.test.model.contexts.orders.event.OrderCreated;
 
-class OrderAggregate extends Aggregate<OrderId, Order, OrderVBuilder> {
+class OrderAggregate extends Aggregate<OrderId, Order, Order.Builder> {
 
     private OrderAggregate(OrderId id) {
         super(id);

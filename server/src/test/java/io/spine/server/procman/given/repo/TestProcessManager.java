@@ -37,7 +37,6 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmArchiveProject;
@@ -60,7 +59,7 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, ProjectVBuilder>
+        extends ProcessManager<ProjectId, Project, Project.Builder>
         implements TestEntityWithStringColumn<ProjectId, Project> {
 
     /** The event message we store for inspecting in delivery tests. */

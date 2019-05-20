@@ -18,22 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.tx;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.test.validation;
 
-import io.spine.server.entity.ThrowingValidatingBuilder;
-import io.spine.test.procman.Project;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-/**
- * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
- * during the state building.
- *
- * <p>Must be declared {@code public} to allow accessing from the
- * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
- */
-public class PatchedProjectBuilder
-        extends ThrowingValidatingBuilder<Project, Project.Builder> {
-
-    public static PatchedProjectBuilder newBuilder() {
-        return new PatchedProjectBuilder();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -22,9 +22,7 @@ package io.spine.client.given;
 
 import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
-import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
-import io.spine.client.PaginationVBuilder;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
 
@@ -42,15 +40,15 @@ public class QueryBuilderTestEnv {
     }
 
     public static Pagination pagination(int pageSize) {
-        return PaginationVBuilder.newBuilder()
-                                 .setPageSize(pageSize)
-                                 .build();
+        return Pagination.newBuilder()
+                         .setPageSize(pageSize)
+                         .build();
     }
 
     public static OrderBy orderBy(String column, OrderBy.Direction direction) {
-        return OrderByVBuilder.newBuilder()
-                              .setColumn(column)
-                              .setDirection(direction)
-                              .build();
+        return OrderBy.newBuilder()
+                      .setColumn(column)
+                      .setDirection(direction)
+                      .build();
     }
 }

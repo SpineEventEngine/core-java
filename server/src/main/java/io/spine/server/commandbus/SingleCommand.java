@@ -28,8 +28,8 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EventId;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EventCausedCommand;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.event.EventCausedCommand;
 
 import static com.google.common.base.Preconditions.checkState;
 

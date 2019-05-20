@@ -24,12 +24,9 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
-import io.spine.client.EntityStateUpdateVBuilder;
 import io.spine.client.EntityUpdates;
-import io.spine.client.EntityUpdatesVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.client.SubscriptionUpdateVBuilder;
 import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
@@ -51,7 +48,7 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
         EntityStateChanged theEvent = (EntityStateChanged) event.message();
         EntityUpdates updates = extractEntityUpdates(theEvent);
-        SubscriptionUpdate result = SubscriptionUpdateVBuilder
+        SubscriptionUpdate result = SubscriptionUpdate
                 .newBuilder()
                 .setSubscription(subscription())
                 .setResponse(Responses.ok())
@@ -65,12 +62,12 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
                                  .getEntityId();
         Any packedEntityId = Identifier.pack(entityId);
         Any packedEntityState = event.getNewState();
-        EntityStateUpdate stateUpdate = EntityStateUpdateVBuilder
+        EntityStateUpdate stateUpdate = EntityStateUpdate
                 .newBuilder()
                 .setId(packedEntityId)
                 .setState(packedEntityState)
                 .build();
-        EntityUpdates result = EntityUpdatesVBuilder
+        EntityUpdates result = EntityUpdates
                 .newBuilder()
                 .addUpdates(stateUpdate)
                 .build();

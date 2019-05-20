@@ -23,10 +23,10 @@ package io.spine.testing.server.projection;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionTransaction;
 import io.spine.testing.server.entity.EntityBuilder;
-import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test {@code Projection}s.
@@ -38,7 +38,7 @@ import io.spine.validate.ValidatingBuilder;
 public class ProjectionBuilder<P extends Projection<I, S, B>,
                                I,
                                S extends Message,
-                               B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                               B extends ValidatingBuilder<S>>
         extends EntityBuilder<P, I, S> {
 
     /** Creates new instance. */

@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import io.spine.core.Event;
 import io.spine.server.test.shared.StringEntity;
-import io.spine.server.test.shared.StringEntityVBuilder;
 import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -79,7 +78,7 @@ class TransactionalEventPlayerTest {
     }
 
     private static class TxPlayingEntity
-            extends TransactionalEntity<Long, StringEntity, StringEntityVBuilder>
+            extends TransactionalEntity<Long, StringEntity, StringEntity.Builder>
             implements EventPlayer {
 
         private TxPlayingEntity() {

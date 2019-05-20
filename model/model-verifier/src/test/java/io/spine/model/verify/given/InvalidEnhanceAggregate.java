@@ -24,14 +24,13 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
 import io.spine.test.model.verify.command.EnhancePhoto;
 import io.spine.test.model.verify.given.EditState;
-import io.spine.test.model.verify.given.EditStateVBuilder;
 
 /**
  * This aggregate declares a command handling method that breaks the contract imposed by
  * {@link Assign}, by having a return value that cannot be derived from
  * {@link io.spine.base.EventMessage}.
  */
-public class InvalidEnhanceAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
+public class InvalidEnhanceAggregate extends Aggregate<String, EditState, EditState.Builder> {
 
     @Assign
     String handle(EnhancePhoto delete) {

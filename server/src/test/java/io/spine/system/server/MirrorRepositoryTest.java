@@ -32,7 +32,6 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.system.server.event.EntityStateChangedVBuilder;
 import io.spine.test.system.server.IncompleteAudio;
 import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;
@@ -267,7 +266,7 @@ class MirrorRepositoryTest {
                     .setEntityId(entityId)
                     .setTypeUrl(type.value())
                     .build();
-            EntityStateChanged event = EntityStateChangedVBuilder
+            EntityStateChanged event = EntityStateChanged
                     .newBuilder()
                     .setId(historyId)
                     .setWhen(currentTime())

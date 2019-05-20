@@ -27,7 +27,6 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.bc.command.BcAddTask;
 import io.spine.test.bc.command.BcCreateProject;
 import io.spine.test.bc.command.BcStartProject;
@@ -38,7 +37,7 @@ import io.spine.test.bc.event.BcTaskAdded;
 import java.util.List;
 
 public class ProjectAggregate
-        extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+        extends Aggregate<ProjectId, Project, Project.Builder> {
 
     private ProjectAggregate(ProjectId id) {
         super(id);

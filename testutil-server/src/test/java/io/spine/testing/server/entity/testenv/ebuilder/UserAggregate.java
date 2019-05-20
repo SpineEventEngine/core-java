@@ -22,12 +22,11 @@ package io.spine.testing.server.entity.testenv.ebuilder;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.testing.server.User;
-import io.spine.testing.server.UserVBuilder;
 
 /**
  * The test environment aggregate for testing validation during aggregate state transition.
  */
-public class UserAggregate extends Aggregate<String, User, UserVBuilder> {
+public class UserAggregate extends Aggregate<String, User, User.Builder> {
     private UserAggregate(String id) {
         super(id);
     }
