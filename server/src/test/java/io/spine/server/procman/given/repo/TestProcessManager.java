@@ -85,7 +85,7 @@ public class TestProcessManager
     }
 
     private void handleProjectCreated(ProjectId projectId) {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .setId(projectId)
                                   .setStatus(Project.Status.CREATED)
                                   .build();
@@ -93,14 +93,14 @@ public class TestProcessManager
     }
 
     private void handleTaskAdded(Task task) {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .addTask(task)
                                   .build();
         builder().mergeFrom(newState);
     }
 
     private void handleProjectStarted() {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .setStatus(Project.Status.STARTED)
                                   .build();
         builder().mergeFrom(newState);
@@ -170,7 +170,7 @@ public class TestProcessManager
     PmNothingDone handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
         return PmNothingDone
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -192,7 +192,6 @@ public class TestProcessManager
 
     @React
     Nothing on(StandardRejections.EntityAlreadyDeleted rejection) {
-        keep(rejection);
         return nothing();
     }
 

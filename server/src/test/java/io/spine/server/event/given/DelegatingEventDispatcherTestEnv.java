@@ -43,12 +43,12 @@ public class DelegatingEventDispatcherTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Override
-        public Set<EventClass> eventClasses() {
+        public Set<EventClass> domesticEvents() {
             return ImmutableSet.of();
         }
 
         @Override
-        public Set<EventClass> externalEventClasses() {
+        public Set<EventClass> externalEvents() {
             // Return at least one event class so that we can create external delegate.
             return EventClass.setOf(EvTeamCreated.class);
         }

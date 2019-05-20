@@ -18,21 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /**
- * A bounded context for testing entity state updates.
- *
- * <p>This package hosts a number of Protobuf definitions marked an {@code (entity)}-s and event
- * subscribers which receive updates of those entities.
+ * This package contains test environment classes and interfaces which are used for integration
+ * testing of server-side sub-systems.
  */
-
-@BoundedContext("Groups")
 
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.groups;
+package io.spine.server.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -20,11 +20,11 @@ final class EEntityTest {
         Event event = GivenEvent.arbitrary();
         EventContext contextWithEnrichment = event
                 .getContext()
-                .toVBuilder()
+                .toBuilder()
                 .setEnrichment(enrichment)
                 .build();
         Event eventWithEnrichment = event
-                .toVBuilder()
+                .toBuilder()
                 .setContext(contextWithEnrichment)
                 .build();
         EEntity entity = EEntity.create(eventWithEnrichment);

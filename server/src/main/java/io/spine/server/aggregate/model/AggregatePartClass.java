@@ -44,7 +44,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
 
     /** The model class of the aggregate root to which the aggregate part belongs. */
     @LazyInit
-    private transient volatile @MonotonicNonNull Class<? extends AggregateRoot> rootClass;
+    private transient volatile @MonotonicNonNull Class<? extends AggregateRoot<?>> rootClass;
 
     /** Creates new instance. */
     private AggregatePartClass(Class<A> cls) {
@@ -66,9 +66,9 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      * Obtains the aggregate root class of this part class.
      */
     @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
-    private Class<? extends AggregateRoot> rootClass() {
+    public Class<? extends AggregateRoot<?>> rootClass() {
         if (rootClass == null) {
-            rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.argumentIn(value());
+            rootClass = (Class<? extends AggregateRoot<?>>) AGGREGATE_ROOT.argumentIn(value());
         }
         return rootClass;
     }

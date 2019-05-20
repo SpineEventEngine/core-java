@@ -40,7 +40,7 @@ public interface EventReceiverClass {
      *
      * <p>For external events, please see {@link #externalEvents()}.
      */
-    Set<EventClass> incomingEvents();
+    Set<EventClass> domesticEvents();
 
     /**
      * Obtains a set of external events which this class receives.
@@ -48,7 +48,7 @@ public interface EventReceiverClass {
      * <p>External events are those that are delivered to the {@code BoundedContext}
      * to which this class belongs from outside.
      *
-     * <p>For domestic events, please see {@link #incomingEvents()}.
+     * <p>For domestic events, please see {@link #domesticEvents()}.
      */
     Set<EventClass> externalEvents();
 }

@@ -17,19 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.groups;
+package spine.test.procman;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
+import "spine/options.proto";
 
-import static org.junit.jupiter.api.Assertions.fail;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.procman";
+option java_multiple_files = true;
 
-public class HiddenEntitySubscriber extends AbstractEventSubscriber {
+message ProcessId {
+    string uuid = 1;
+}
 
-    @Subscribe
-    void on(HiddenParticipant organization) {
-        fail(HiddenEntitySubscriber.class.getSimpleName() +
-                     " should not be able to receive updates from hidden entities.");
-    }
+message ProcessState {
+    ProcessId id = 1 [(required) = false];
 }

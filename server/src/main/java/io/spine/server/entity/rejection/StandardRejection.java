@@ -18,18 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.entity.rejection;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Any;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.base.RejectionMessage;
+import io.spine.protobuf.AnyPacker;
 
-import static org.junit.jupiter.api.Assertions.fail;
+/**
+ * Interface common for standard rejections which is used during routing.
+ */
+@Immutable
+@GeneratedMixin
+public interface StandardRejection extends RejectionMessage {
 
-public class WronglyExternalSubscriber extends AbstractEventSubscriber {
+    /**
+     * Obtains the packed version of ID of the entity which caused the rejection.
+     */
+    Any getEntityId();
 
-    @Subscribe(external = true) // <-- Error here. Should be domestic.
-    void on(Group group) {
-        fail(WronglyExternalSubscriber.class.getSimpleName() +
-                     " should not be able to receive domestic updates.");
+    /**
+     * Obtains the ID of the entity from the {@linkplain #getEntityId() packed form}.
+     */
+    default Object entityId() {
+        Object result = AnyPacker.unpack(getEntityId());
+        return result;
     }
 }

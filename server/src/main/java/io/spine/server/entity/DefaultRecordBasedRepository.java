@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
+import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -66,14 +67,16 @@ public abstract class DefaultRecordBasedRepository<I,
     }
 
     /**
-     * @inheritDoc
+     * Initializes the repository by performing the validation of the entity class and
+     * creating the storage converter.
      *
-     * <p>Performs validation of the entity class and initializes the storage converter.
+     * @param context
+     *         the Bounded Context of this repository
      */
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void onRegistered() {
-        super.onRegistered();
+    protected void init(BoundedContext context) {
+        super.init(context);
         storageConverter();
     }
 }

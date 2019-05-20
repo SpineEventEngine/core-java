@@ -24,6 +24,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 
 /**
  * Abstract base for system aggregate repositories.
@@ -33,9 +34,10 @@ import io.spine.server.route.EventRoute;
 abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
         extends AggregateRepository<I, A> {
 
-    SystemRepository() {
-        super();
-        eventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
+    @Override
+    protected void setupImportRouting(EventRouting<I> routing) {
+        super.setupImportRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 
     @Override

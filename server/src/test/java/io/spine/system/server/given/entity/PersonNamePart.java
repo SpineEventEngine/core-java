@@ -53,7 +53,7 @@ public class PersonNamePart
     @Assign
     PersonNameCreated handle(CreatePersonName command) {
         return PersonNameCreated
-                .vBuilder()
+                .newBuilder()
                 .setId(command.getId())
                 .setFirstName(command.getFirstName())
                 .build();

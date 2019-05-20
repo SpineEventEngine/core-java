@@ -58,7 +58,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
         Object expectedValue = fromString(byFieldFilter.value(), fieldType);
         Any packedValue = toAny(expectedValue);
         MessageFilter messageFilter = MessageFilter
-                .vBuilder()
+                .newBuilder()
                 .setField(fieldPath)
                 .setValue(packedValue)
                 .build();

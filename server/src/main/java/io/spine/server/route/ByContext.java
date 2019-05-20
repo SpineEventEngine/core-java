@@ -18,19 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.route;
 
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import io.spine.base.EventMessage;
+import io.spine.core.EventContext;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.Set;
 
-public class WronglyDomesticSubscriber extends AbstractEventSubscriber {
+/**
+ * Obtains an event producer ID from the context of the event.
+ */
+final class ByContext<I> implements EventRoute<I, EventMessage> {
 
-    @Subscribe // <-- Error here. Should be external.
-    void on(Organization organization) {
-        fail(WronglyDomesticSubscriber.class.getSimpleName() +
-                     " should not be able to receive external updates.");
+    private static final long serialVersionUID = 0L;
+
+    @Override
+    public Set<I> apply(EventMessage message, EventContext context) {
+        @SuppressWarnings("unchecked") I id = (I) context.producer();
+        return EventRoute.withId(id);
     }
 }

@@ -60,11 +60,11 @@ public abstract class ProjectionTest<I,
         Event sourceEvent = createEvent();
         EventContext context =
                 sourceEvent.context()
-                           .toVBuilder()
+                           .toBuilder()
                            .setEnrichment(enrichment())
                            .build();
         Event enrichedEvent =
-                sourceEvent.toVBuilder()
+                sourceEvent.toBuilder()
                            .setContext(context)
                            .build();
         dispatch(entity, enrichedEvent);

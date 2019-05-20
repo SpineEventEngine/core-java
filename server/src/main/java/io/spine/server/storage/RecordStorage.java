@@ -199,7 +199,7 @@ public abstract class RecordStorage<I>
         Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
             EntityRecord record = optional.get();
-            EntityRecord updated = record.toVBuilder()
+            EntityRecord updated = record.toBuilder()
                                          .setLifecycleFlags(flags)
                                          .build();
             write(id, updated);

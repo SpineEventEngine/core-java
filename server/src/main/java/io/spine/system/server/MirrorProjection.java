@@ -34,9 +34,9 @@ import io.spine.server.entity.storage.Column;
 import io.spine.server.projection.Projection;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityExtractedFromArchive;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityUnarchived;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -63,7 +63,7 @@ import static java.util.stream.Collectors.toList;
  *         subscriber method is an event used by the framework to bind the method to the event type.
  *         The content of the event, in those cases, is irrelevant.
  */
-public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
+final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorVBuilder> {
 
     private static final String TYPE_COLUMN_NAME = "aggregate_type";
     private static final String TYPE_COLUMN_QUERY_NAME = "aggregateType";
@@ -84,7 +84,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setArchived(true)
                 .build();
         builder.setId(id())
@@ -98,7 +98,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setDeleted(true)
                 .build();
         builder.setId(id())
@@ -108,11 +108,11 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
     }
 
     @Subscribe
-    void on(EntityExtractedFromArchive event) {
+    void on(EntityUnarchived event) {
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setArchived(false)
                 .build();
         builder.setId(id())
@@ -126,7 +126,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         MirrorVBuilder builder = builder();
         LifecycleFlags flags = builder
                 .getLifecycle()
-                .toVBuilder()
+                .toBuilder()
                 .setDeleted(false)
                 .build();
         builder.setId(id())
@@ -148,7 +148,7 @@ public final class MirrorProjection extends Projection<MirrorId, Mirror, MirrorV
         TargetFilters filters = target.getFilters();
         CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
         TargetFilters appendedFilters = filters
-                .toVBuilder()
+                .toBuilder()
                 .setIdFilter(idFilter)
                 .addFilter(typeFilter)
                 .build();

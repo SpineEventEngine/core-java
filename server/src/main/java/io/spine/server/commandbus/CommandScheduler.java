@@ -212,18 +212,18 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
         CommandContext context = command.getContext();
         CommandContext.Schedule scheduleUpdated = context.getSchedule()
-                                                         .toVBuilder()
+                                                         .toBuilder()
                                                          .setDelay(delay)
                                                          .build();
-        CommandContext contextUpdated = context.toVBuilder()
+        CommandContext contextUpdated = context.toBuilder()
                                                .setSchedule(scheduleUpdated)
                                                .build();
 
         Command.SystemProperties sysProps = command.getSystemProperties()
-                                                   .toVBuilder()
+                                                   .toBuilder()
                                                    .setSchedulingTime(schedulingTime)
                                                    .build();
-        Command result = command.toVBuilder()
+        Command result = command.toBuilder()
                                 .setContext(contextUpdated)
                                 .setSystemProperties(sysProps)
                                 .build();

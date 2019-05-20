@@ -18,37 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.groups;
 
 import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import io.spine.server.given.organizations.Organization;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.StateUpdateRouting;
 
-import java.util.Optional;
+import static io.spine.server.route.EventRoute.withId;
 
-/**
- * A test entity state subscriber.
- */
-public final class TestSubscriber extends AbstractEventSubscriber {
+public final class GroupNameProjection
+        extends Projection<GroupId, GroupName, GroupNameVBuilder> {
 
-    private Group domestic;
-    private Organization external;
-
-    @Subscribe
-    void domestic(Group group) {
-        this.domestic = group;
+    private GroupNameProjection(GroupId id) {
+        super(id);
     }
 
     @Subscribe(external = true)
-    void external(Organization organization) {
-        this.external = organization;
+    void onUpdate(Organization organization) {
+        builder().setId(id())
+                 .setName(organization.getName());
     }
 
-    public Optional<Group> domestic() {
-        return Optional.ofNullable(domestic);
-    }
+    public static final class Repository
+            extends ProjectionRepository<GroupId, GroupNameProjection, GroupName> {
 
-    public Optional<Organization> external() {
-        return Optional.ofNullable(external);
+        @Override
+        protected void setupStateRouting(StateUpdateRouting<GroupId> routing) {
+            routing.route(Organization.class, (org, ctx) -> withId(
+                    GroupId.newBuilder()
+                           .setUuid(org.getId()
+                                       .getUuid())
+                           .build()));
+        }
     }
 }

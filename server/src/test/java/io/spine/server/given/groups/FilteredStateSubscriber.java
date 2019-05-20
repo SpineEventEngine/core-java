@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.groups;
+package io.spine.server.given.groups;
 
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.organizations.Organization;
+import io.spine.server.given.organizations.Organization;
 
 import static org.junit.jupiter.api.Assertions.fail;
 

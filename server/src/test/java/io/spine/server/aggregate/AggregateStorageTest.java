@@ -546,14 +546,14 @@ public abstract class AggregateStorageTest
         @DisplayName("for EventContext")
         void forEventContext() {
             EventContext enrichedContext = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             Event event = Event
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newEventId())
                     .setContext(enrichedContext)
                     .setMessage(AnyPacker.pack(TestValues.newUuidValue()))
@@ -570,20 +570,20 @@ public abstract class AggregateStorageTest
         @DisplayName("for origin of EventContext type")
         void forEventContextOrigin() {
             EventContext origin = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             EventContext context = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEventContext(origin)
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .build();
             Event event = Event
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newEventId())
                     .setContext(context)
                     .setMessage(AnyPacker.pack(TestValues.newUuidValue()))

@@ -30,6 +30,7 @@ import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
+import io.spine.server.BoundedContext;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
@@ -97,15 +98,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes the repository by caching {@link Column} definitions of
+     * the {@link Entity} class managed by this repository.
      *
-     * <p>Caches {@link Column} definitions of the {@link Entity} class managed by this repository.
+     * @param context
+     *         the Bounded Context of this repository
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void onRegistered() {
-        super.onRegistered();
-
+    protected void init(BoundedContext context) {
+        super.init(context);
         cacheEntityColumns();
     }
 

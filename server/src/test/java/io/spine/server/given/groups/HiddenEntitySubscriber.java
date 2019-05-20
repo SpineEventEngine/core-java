@@ -18,27 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.organizations;
+package io.spine.server.given.groups;
 
 import io.spine.core.Subscribe;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.event.AbstractEventSubscriber;
 
-public final class OrganizationProjection
-        extends Projection<OrganizationId, Organization, OrganizationVBuilder> {
+import static org.junit.jupiter.api.Assertions.fail;
 
-    private OrganizationProjection(OrganizationId id) {
-        super(id);
-    }
+public class HiddenEntitySubscriber extends AbstractEventSubscriber {
 
     @Subscribe
-    void on(OrganizationEstablished event) {
-        builder().setId(event.getId())
-                 .setName(event.getName())
-                 .setHead(event.getHead());
-    }
-
-    public static final class Repository
-            extends ProjectionRepository<OrganizationId, OrganizationProjection, Organization> {
+    void on(HiddenParticipant organization) {
+        fail(HiddenEntitySubscriber.class.getSimpleName() +
+                     " should not be able to receive updates from hidden entities.");
     }
 }
