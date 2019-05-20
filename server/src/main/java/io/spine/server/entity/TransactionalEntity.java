@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.protobuf.Messages;
 import io.spine.protobuf.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -193,8 +192,8 @@ public abstract class TransactionalEntity<I,
     }
 
     B builderFromState() {
-        B builder = newBuilderInstance();
-        builder.mergeFrom(state());
+        @SuppressWarnings("unchecked") // Logically checked.
+        B builder = (B) state().toBuilder();
         return builder;
     }
 
@@ -241,12 +240,5 @@ public abstract class TransactionalEntity<I,
     @Override
     protected void setDeleted(boolean deleted) {
         tx().setDeleted(deleted);
-    }
-
-    private B newBuilderInstance() {
-        Class<? extends Message> stateClass = modelClass().stateClass();
-        @SuppressWarnings("unchecked")
-        B builder = (B) Messages.builderFor(stateClass);
-        return builder;
     }
 }
