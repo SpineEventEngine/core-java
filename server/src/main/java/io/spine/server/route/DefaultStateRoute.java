@@ -108,17 +108,14 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, Message> {
             return fieldToSet(field, state);
         }
 
-        Optional<FieldDescriptor> idField = findField(idClass, state.getDescriptorForType());
-        if (idField.isPresent()) {
-            FieldDescriptor fd = idField.get();
-            fields.put(messageClass, fd);
-            return fieldToSet(fd, state);
-        }
-
-        throw newIllegalStateException(
-                "Unable to find a field matching the type `%s` in the message of the type `%s`.",
-                idClass, messageClass.getCanonicalName()
-        );
+        FieldDescriptor fd = findField(idClass, state.getDescriptorForType())
+                .orElseThrow(() -> newIllegalStateException(
+                        "Unable to find a field matching the type `%s`" +
+                                " in the message of the type `%s`.",
+                        idClass, messageClass.getCanonicalName()));
+        fields.put(messageClass, fd);
+        Set<I> result = fieldToSet(fd, state);
+        return result;
     }
 
     private Set<I> fieldToSet(FieldDescriptor field, Message message) {
