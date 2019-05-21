@@ -20,8 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.truth.Truth;
-import com.google.common.truth.Truth8;
 import io.spine.base.Identifier;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
@@ -32,6 +30,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -62,8 +62,8 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
                                               .build();
         storage.writeLifecycleFlags(id, status);
         Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
-        Truth8.assertThat(readStatus)
-              .hasValue(status);
+        assertThat(readStatus)
+                .hasValue(status);
     }
 
     @Test
@@ -92,13 +92,13 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
     private static void assertStatus(Optional<LifecycleFlags> entityStatus,
                                      boolean archived,
                                      boolean deleted) {
-        Truth8.assertThat(entityStatus)
-              .isPresent();
+        assertThat(entityStatus)
+                .isPresent();
         LifecycleFlags status = entityStatus.get();
 
-        Truth.assertThat(status.getArchived())
-             .isEqualTo(archived);
-        Truth.assertThat(status.getDeleted())
+        assertThat(status.getArchived())
+                .isEqualTo(archived);
+        assertThat(status.getDeleted())
                 .isEqualTo(deleted);
     }
 
