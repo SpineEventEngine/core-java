@@ -33,5 +33,4 @@ public final class WorksProjection extends Projection<ArtistName, Works, Works.B
         builder().setArtist(pa.getArtist())
                  .addWork(pa.getContent());
     }
-
 }
