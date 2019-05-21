@@ -27,9 +27,8 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.test.model.verify.command.ChangeTitle;
 import io.spine.test.model.verify.event.TitleChanged;
 import io.spine.test.model.verify.given.RenameState;
-import io.spine.test.model.verify.given.RenameStateVBuilder;
 
-public class RenameProcMan extends ProcessManager<String, RenameState, RenameStateVBuilder> {
+public class RenameProcMan extends ProcessManager<String, RenameState, RenameState.Builder> {
 
     protected RenameProcMan(String id) {
         super(id);

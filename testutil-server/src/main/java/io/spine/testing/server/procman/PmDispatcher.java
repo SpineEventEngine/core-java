@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.TransactionListener;
@@ -37,7 +38,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
-import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -176,7 +176,7 @@ public final class PmDispatcher {
      * A test-only implementation of a {@link PmTransaction} that can set the given
      * {@code state} and {@code version} as a starting point for the transaction.
      */
-    static final class TestPmTransaction<I, S extends Message, B extends ValidatingBuilder<S, ?>>
+    static final class TestPmTransaction<I, S extends Message, B extends ValidatingBuilder<S>>
             extends PmTransaction<I, S, B> {
 
         TestPmTransaction(ProcessManager<I, S, B> processManager) {

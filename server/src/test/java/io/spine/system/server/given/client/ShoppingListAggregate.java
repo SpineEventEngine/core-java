@@ -31,9 +31,8 @@ import io.spine.system.server.ListItemAdded;
 import io.spine.system.server.ShoppingListCreated;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
-import io.spine.test.system.server.ShoppingListVBuilder;
 
-public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, ShoppingListVBuilder> {
+public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, ShoppingList.Builder> {
 
     private ShoppingListAggregate(ListId id) {
         super(id);
@@ -74,7 +73,7 @@ public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, Shopp
 
     @Apply(allowImport = true)
     private void on(HardCopyLost event) {
-        ShoppingListVBuilder builder = builder();
+        ShoppingList.Builder builder = builder();
         int newCount = builder.getHardCopiesCount() - 1;
         if (newCount >= 0) {
             builder.setHardCopiesCount(newCount);

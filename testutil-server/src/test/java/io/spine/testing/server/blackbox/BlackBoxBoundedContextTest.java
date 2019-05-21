@@ -240,7 +240,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
-            return BbProjectViewVBuilder.newBuilder()
+            return BbProjectView.newBuilder()
                                         .setId(createProject.getProjectId())
                                         .build();
         }

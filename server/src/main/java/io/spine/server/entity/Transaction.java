@@ -27,9 +27,9 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
-import io.spine.validate.AbstractValidatingBuilder;
-import io.spine.validate.ValidatingBuilder;
+import io.spine.validate.NotValidated;
 import io.spine.validate.ValidationException;
 
 import java.util.List;
@@ -71,14 +71,19 @@ import static java.lang.String.format;
 @SuppressWarnings("ClassWithTooManyMethods")
 @Internal
 public abstract class Transaction<I,
-        E extends TransactionalEntity<I, S, B>,
-        S extends Message,
-        B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+                                  E extends TransactionalEntity<I, S, B>,
+                                  S extends Message,
+                                  B extends ValidatingBuilder<S>> {
 
     /**
      * The entity, which state and attributes are modified in this transaction.
      */
     private final E entity;
+
+    /**
+     * The state of the entity before the beginning of the transaction.
+     */
+    private final S initialState;
 
     /**
      * The builder for the entity state.
@@ -157,6 +162,7 @@ public abstract class Transaction<I,
         checkNotNull(entity);
 
         this.entity = entity;
+        this.initialState = entity.state();
         this.builder = entity.builderFromState();
         this.version = entity.version();
         this.lifecycleFlags = entity.lifecycleFlags();
@@ -220,7 +226,7 @@ public abstract class Transaction<I,
     /**
      * Propagates a phase and performs a rollback in case of an exception.
      *
-     * <p>The transaction {@linkplain #getListener() listener} is called for both failed and
+     * <p>The transaction {@linkplain #listener() listener} is called for both failed and
      * successful phases.
      *
      * @param phase
@@ -238,7 +244,7 @@ public abstract class Transaction<I,
             throw illegalStateWithCauseOf(t);
         } finally {
             phases.add(phase);
-            getListener().onAfterPhase(phase);
+            listener().onAfterPhase(phase);
         }
     }
 
@@ -253,10 +259,11 @@ public abstract class Transaction<I,
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = builder();
 
-        if (builder.isDirty()) {
-            commitChangedState(builder);
-        } else {
+        S newState = builder.buildPartial();
+        if (initialState.equals(newState)) {
             commitUnchangedState();
+        } else {
+            commitChangedState(newState);
         }
     }
 
@@ -266,12 +273,11 @@ public abstract class Transaction<I,
      * <p>In case if the commit is failed, the transaction is rolled back and the entity keeps
      * the current state.
      *
-     * @param builder
-     *         the {@link ValidatingBuilder} with the new state of the entity
+     * @param newState
+     *         the new state of the entity
      */
-    private void commitChangedState(B builder) {
+    private void commitChangedState(@NotValidated S newState) {
         try {
-            S newState = builder.build();
             markStateChanged();
             Version pendingVersion = version();
             beforeCommit(newState, pendingVersion);
@@ -286,8 +292,7 @@ public abstract class Transaction<I,
             rollback(invalidStateException);
 
             throw invalidStateException;
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") // Catch all unexpected exceptions.
-                RuntimeException genericException) {
+        } catch (RuntimeException genericException) {
             rollback(genericException);
             throw illegalStateWithCauseOf(genericException);
         } finally {
@@ -337,8 +342,8 @@ public abstract class Transaction<I,
      */
     void rollback(Throwable cause) {
         beforeRollback(cause);
-        S currentState = currentBuilderState();
-        TransactionListener<I, E, S, B> listener = getListener();
+        @NotValidated S currentState = currentBuilderState();
+        TransactionListener<I, E, S, B> listener = listener();
         listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
@@ -374,14 +379,12 @@ public abstract class Transaction<I,
     }
 
     private InvalidEntityStateException of(ValidationException exception) {
-        Message invalidState = currentBuilderState();
+        @NotValidated Message invalidState = currentBuilderState();
         return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
-    private S currentBuilderState() {
-        @SuppressWarnings("unchecked")  // OK, as `AbstractValidatingBuilder` is the only subclass.
-        AbstractValidatingBuilder<S, ?> abstractBuilder = (AbstractValidatingBuilder<S, ?>) builder;
-        return abstractBuilder.internalBuild();
+    private @NotValidated S currentBuilderState() {
+        return builder.buildPartial();
     }
 
     private void releaseTx() {
@@ -468,7 +471,7 @@ public abstract class Transaction<I,
      *
      * <p>By default, the returned listener {@linkplain SilentWitness does nothing}.
      */
-    private TransactionListener<I, E, S, B> getListener() {
+    private TransactionListener<I, E, S, B> listener() {
         return transactionListener;
     }
 

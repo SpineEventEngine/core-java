@@ -53,7 +53,7 @@ import static io.spine.base.Time.currentTime;
  */
 @SuppressWarnings("OverlyCoupledClass") // because of the handled commands
 final class CommandLifecycleAggregate
-        extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
+        extends Aggregate<CommandId, CommandLifecycle, CommandLifecycle.Builder> {
 
     @Assign
     CommandScheduled handle(ScheduleCommand command) {
@@ -137,7 +137,7 @@ final class CommandLifecycleAggregate
     private void on(TargetAssignedToCommand event) {
         ensureId();
         CommandTarget target = event.getTarget();
-        CommandLifecycleVBuilder builder = builder();
+        CommandLifecycle.Builder builder = builder();
         CommandTimeline status =
                 builder.getStatus()
                        .toBuilder()

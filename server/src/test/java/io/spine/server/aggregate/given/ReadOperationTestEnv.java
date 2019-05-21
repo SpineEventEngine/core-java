@@ -27,7 +27,6 @@ import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Snapshot;
 import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectVBuilder;
 import io.spine.test.storage.event.StgProjectCreated;
 
 import java.util.List;
@@ -38,7 +37,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
-import static io.spine.protobuf.AnyPacker.pack;
 
 public final class ReadOperationTestEnv {
 
@@ -84,7 +82,7 @@ public final class ReadOperationTestEnv {
                 .build();
     }
 
-    public static final class TestAggregate extends Aggregate<String, Project, ProjectVBuilder> {
+    public static final class TestAggregate extends Aggregate<String, Project, Project.Builder> {
         private TestAggregate(String id) {
             super(id);
         }

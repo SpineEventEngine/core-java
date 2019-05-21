@@ -21,10 +21,8 @@
 package io.spine.server.stand;
 
 import io.spine.client.EventUpdates;
-import io.spine.client.EventUpdatesVBuilder;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.client.SubscriptionUpdateVBuilder;
 import io.spine.core.Event;
 import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
@@ -44,7 +42,7 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
     @Override
     protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
         EventUpdates updates = extractEventUpdates(event);
-        SubscriptionUpdate result = SubscriptionUpdateVBuilder
+        SubscriptionUpdate result = SubscriptionUpdate
                 .newBuilder()
                 .setSubscription(subscription())
                 .setResponse(Responses.ok())
@@ -55,7 +53,7 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
 
     private static EventUpdates extractEventUpdates(EventEnvelope event) {
         Event eventObject = event.outerObject();
-        EventUpdates result = EventUpdatesVBuilder
+        EventUpdates result = EventUpdates
                 .newBuilder()
                 .addEvents(eventObject)
                 .build();

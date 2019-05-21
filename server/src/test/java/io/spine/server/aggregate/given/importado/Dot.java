@@ -26,12 +26,10 @@ import io.spine.server.aggregate.given.importado.command.Move;
 import io.spine.server.aggregate.given.importado.event.Moved;
 import io.spine.server.command.Assign;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-
 /**
  * An object moving in a 2-D space.
  */
-final class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
+final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
 
     @Assign
     Moved on(Move command) {
@@ -50,7 +48,7 @@ final class Dot extends Aggregate<ObjectId, Point, PointVBuilder> {
     }
 
     private static Point move(Point p, Direction direction) {
-        PointVBuilder result = PointVBuilder
+        Point.Builder result = Point
                 .newBuilder()
                 .setX(p.getX())
                 .setY(p.getY());

@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.protobuf.Any;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 
@@ -31,7 +30,7 @@ import static java.util.Collections.singletonList;
 /**
  * A ProcessManager with a valid command handler method.
  */
-public class ValidProcMan extends ProcessManager<String, ValidProcess, ValidProcessVBuilder> {
+public class ValidProcMan extends ProcessManager<String, ValidProcess, ValidProcess.Builder> {
 
     protected ValidProcMan(String id) {
         super(id);

@@ -56,11 +56,9 @@ import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmCreateProjectVBuilder;
 import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
@@ -137,7 +135,7 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected TestProcessManager createEntity(ProjectId id) {
-        Project state = ProjectVBuilder
+        Project state = Project
                 .newBuilder()
                 .setId(id)
                 .build();
@@ -156,10 +154,10 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected List<TestProcessManager> createNamed(int count, Supplier<String> nameSupplier) {
-        return createEntitiesWithState(count, id -> ProjectVBuilder.newBuilder()
-                                                                   .setId(id)
-                                                                   .setName(nameSupplier.get())
-                                                                   .build());
+        return createEntitiesWithState(count, id -> Project.newBuilder()
+                                                           .setId(id)
+                                                           .setName(nameSupplier.get())
+                                                           .build());
     }
 
     private List<TestProcessManager>
@@ -520,9 +518,9 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setMultitenant(false)
                 .build();
-        
+
         assertThrows(IllegalStateException.class, () ->
-                repo.setBoundedContext(context));
+                repo.setContext(context));
     }
 
     @Test
@@ -562,7 +560,7 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setId(newUuid())
                 .build();
-        PmCreateProject command = PmCreateProjectVBuilder
+        PmCreateProject command = PmCreateProject
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();

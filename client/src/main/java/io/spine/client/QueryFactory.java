@@ -187,14 +187,14 @@ public final class QueryFactory {
                        @Nullable Set<CompositeFilter> filters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-        QueryVBuilder builder = queryBuilderFor(entityClass, ids, filters, fieldMask);
+        Query.Builder builder = queryBuilderFor(entityClass, ids, filters, fieldMask);
         Query query = newQuery(builder);
         return query;
     }
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        QueryVBuilder builder = queryBuilderFor(target, fieldMask);
+        Query.Builder builder = queryBuilderFor(target, fieldMask);
         Query query = newQuery(builder);
         return query;
     }
@@ -204,7 +204,7 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        QueryVBuilder builder =
+        Query.Builder builder =
                 queryBuilderFor(target, fieldMask)
                         .setOrderBy(orderBy);
         Query query = newQuery(builder);
@@ -218,7 +218,7 @@ public final class QueryFactory {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
         checkNotNull(pagination);
-        QueryVBuilder builder =
+        Query.Builder builder =
                 queryBuilderFor(target, fieldMask)
                         .setOrderBy(orderBy)
                         .setPagination(pagination);
@@ -230,9 +230,9 @@ public final class QueryFactory {
         checkNotNull(target, "Target must be specified to compose a Query");
     }
 
-    private Query newQuery(QueryVBuilder builder) {
+    private Query newQuery(Query.Builder builder) {
         return builder.setId(newQueryId())
                       .setContext(actorContext)
-                      .build();
+                      .vBuild();
     }
 }

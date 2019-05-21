@@ -54,7 +54,6 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
@@ -109,7 +108,6 @@ import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.given.Given.StandTestProjection;
 import static io.spine.server.stand.given.StandTestEnv.newStand;
@@ -126,7 +124,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -394,7 +391,7 @@ class StandTest extends TenantAwareTest {
                     for (EntityStateWithVersion stateWithVersion : messages) {
                         Any state = stateWithVersion.getState();
                         Project project = unpack(state, Project.class);
-                        assertNotEquals(project, null);
+                        assertThat(project).isNotNull();
                         assertMatchesMask(project, fieldMask);
 
                         Version version = stateWithVersion.getVersion();
@@ -1132,8 +1129,8 @@ class StandTest extends TenantAwareTest {
                 input -> {
                     checkNotNull(input);
                     StandTestProjection projection = new StandTestProjection(input);
-                    Any id = AnyPacker.pack(projection.id());
-                    Any state = AnyPacker.pack(projection.state());
+                    Any id = pack(projection.id());
+                    Any state = pack(projection.state());
                     EntityRecord record = EntityRecord
                             .newBuilder()
                             .setEntityId(id)

@@ -28,13 +28,12 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
-import io.spine.system.server.SystemWriteSide;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A {@link StreamObserver} for {@link io.spine.core.Command Command}

@@ -23,9 +23,7 @@ package io.spine.server.entity.given;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
-import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
-import io.spine.client.PaginationVBuilder;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.AbstractEntity;
 
@@ -50,7 +48,7 @@ public final class RecordBasedRepositoryTestEnv {
     }
 
     public static Pagination pagination(int pageSize) {
-        return PaginationVBuilder.newBuilder()
+        return Pagination.newBuilder()
                                  .setPageSize(pageSize)
                                  .build();
     }
@@ -63,7 +61,7 @@ public final class RecordBasedRepositoryTestEnv {
      * An order by {@linkplain #ENTITY_NAME_COLUMN entity name column}.
      */
     public static OrderBy orderByName(OrderBy.Direction direction) {
-        return OrderByVBuilder.newBuilder()
+        return OrderBy.newBuilder()
                               .setColumn(ENTITY_NAME_COLUMN)
                               .setDirection(direction)
                               .build();

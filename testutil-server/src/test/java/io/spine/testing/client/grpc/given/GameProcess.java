@@ -24,7 +24,6 @@ import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.client.grpc.Table;
 import io.spine.testing.client.grpc.TableSide;
-import io.spine.testing.client.grpc.TableVBuilder;
 import io.spine.testing.client.grpc.command.Ping;
 import io.spine.testing.client.grpc.event.Pong;
 
@@ -37,7 +36,7 @@ import static io.spine.testing.client.grpc.TableSide.SIDE_UNDEFINED;
  * Process manager that handles the {@link io.spine.testing.client.grpc.command.Ping Ping}
  * command generating the {@link io.spine.testing.client.grpc.event.Pong Pong} event.
  */
-final class GameProcess extends ProcessManager<Integer, Table, TableVBuilder> {
+final class GameProcess extends ProcessManager<Integer, Table, Table.Builder> {
 
     private GameProcess(Integer id) {
         super(id);

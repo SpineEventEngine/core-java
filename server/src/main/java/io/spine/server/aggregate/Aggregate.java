@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.command.CommandHandlingEntity;
@@ -40,7 +41,6 @@ import io.spine.server.model.EventsResult;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 
 import java.util.Iterator;
 import java.util.List;
@@ -114,7 +114,7 @@ import static io.spine.validate.Validate.isNotDefault;
 @SuppressWarnings("OverlyCoupledClass")
 public abstract class Aggregate<I,
                                 S extends Message,
-                                B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventPlayer, EventReactor {
 

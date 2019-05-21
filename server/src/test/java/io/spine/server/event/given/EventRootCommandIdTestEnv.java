@@ -45,18 +45,14 @@ import io.spine.test.event.EvMember;
 import io.spine.test.event.EvMemberInvitation;
 import io.spine.test.event.EvTeam;
 import io.spine.test.event.EvTeamCreation;
-import io.spine.test.event.EvTeamCreationVBuilder;
 import io.spine.test.event.EvTeamId;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamMemberInvited;
 import io.spine.test.event.EvTeamProjectAdded;
-import io.spine.test.event.EvTeamVBuilder;
 import io.spine.test.event.EvUserSignUp;
-import io.spine.test.event.EvUserSignUpVBuilder;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.command.CreateProject;
@@ -237,7 +233,7 @@ public class EventRootCommandIdTestEnv {
             extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> {
     }
 
-    static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -289,7 +285,7 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class TeamAggregate extends Aggregate<EvTeamId, EvTeam, EvTeamVBuilder> {
+    static class TeamAggregate extends Aggregate<EvTeamId, EvTeam, EvTeam.Builder> {
 
         private TeamAggregate(EvTeamId id) {
             super(id);
@@ -316,7 +312,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     static class TeamCreationProcessManager
-            extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
+            extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreation.Builder> {
 
         private TeamCreationProcessManager(EvTeamId id) {
             super(id);
@@ -387,7 +383,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     static class UserSignUpProcessManager
-            extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
+            extends ProcessManager<UserId, EvUserSignUp, EvUserSignUp.Builder> {
 
         private UserSignUpProcessManager(UserId id) {
             super(id);

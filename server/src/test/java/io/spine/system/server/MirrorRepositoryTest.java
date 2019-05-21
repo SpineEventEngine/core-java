@@ -32,7 +32,6 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.system.server.event.EntityStateChangedVBuilder;
 import io.spine.test.system.server.IncompleteAudio;
 import io.spine.test.system.server.LocalizedVideo;
 import io.spine.test.system.server.Photo;
@@ -52,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.client.Filters.eq;
@@ -267,7 +265,7 @@ class MirrorRepositoryTest {
                     .setEntityId(entityId)
                     .setTypeUrl(type.value())
                     .build();
-            EntityStateChanged event = EntityStateChangedVBuilder
+            EntityStateChanged event = EntityStateChanged
                     .newBuilder()
                     .setId(historyId)
                     .setWhen(currentTime())

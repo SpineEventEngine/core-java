@@ -21,9 +21,9 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;
 import io.spine.server.test.shared.EmptyEntity;
-import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

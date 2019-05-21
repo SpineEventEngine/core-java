@@ -24,11 +24,10 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuString;
-import io.spine.testing.server.given.entity.TuStringVBuilder;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
 public final class TuProjection
-        extends Projection<Long, TuString, TuStringVBuilder> {
+        extends Projection<Long, TuString, TuString.Builder> {
 
     public static final long ID = 1L;
 

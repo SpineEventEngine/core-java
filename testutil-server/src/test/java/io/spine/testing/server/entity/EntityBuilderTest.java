@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.entity;
 
+import com.google.common.base.Throwables;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -41,7 +42,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("EntityBuilder should")
 class EntityBuilderTest {
@@ -124,19 +124,20 @@ class EntityBuilderTest {
                         .setFirstName("|")
                         .setLastName("|")
                         .build();
-        try {
-            aggregateOfClass(UserAggregate.class).withId(getClass().getName())
-                                                 .withVersion(1)
-                                                 .withState(user)
-                                                 .build();
-            fail("Should have thrown InvalidEntityStateException.");
-        } catch (InvalidEntityStateException e) {
-            List<ConstraintViolation> violations = e.getError()
-                                                    .getValidationError()
-                                                    .getConstraintViolationList();
-            assertThat(violations).hasSize(user.getAllFields()
-                                               .size());
-        }
+        EntityBuilder<UserAggregate, String, User> entityBuilder =
+                aggregateOfClass(UserAggregate.class).withId(getClass().getName())
+                                                     .withVersion(1)
+                                                     .withState(user);
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                                                  entityBuilder::build);
+        Throwable cause = Throwables.getRootCause(exception);
+        assertThat(cause).isInstanceOf(InvalidEntityStateException.class);
+        InvalidEntityStateException iese = (InvalidEntityStateException) cause;
+        List<ConstraintViolation> violations = iese.getError()
+                                                   .getValidationError()
+                                                   .getConstraintViolationList();
+        assertThat(violations).hasSize(user.getAllFields()
+                                           .size());
     }
 
     @Test

@@ -27,12 +27,15 @@ import io.spine.base.RejectionMessage;
 import io.spine.protobuf.AnyPacker;
 
 /**
- * Interface common for {@link StandardRejections}.
+ * Interface common for standard rejections which is used during routing.
  */
 @Immutable
 @GeneratedMixin
 public interface StandardRejection extends RejectionMessage {
 
+    /**
+     * Obtains the packed version of ID of the entity which caused the rejection.
+     */
     Any getEntityId();
 
     /**

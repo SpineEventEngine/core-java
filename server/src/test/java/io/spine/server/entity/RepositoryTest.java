@@ -152,16 +152,16 @@ class RepositoryTest {
         @Test
         @DisplayName("throwing ISE")
         void prohibit() {
-            repository.setBoundedContext(ctx1);
+            repository.setContext(ctx1);
             assertThrows(IllegalStateException.class, () ->
-                    repository.setBoundedContext(ctx2));
+                    repository.setContext(ctx2));
         }
 
         @Test
         @DisplayName("allowing passing the same value twice")
         void idempotency() {
-            repository.setBoundedContext(ctx1);
-            repository.setBoundedContext(ctx1);
+            repository.setContext(ctx1);
+            repository.setContext(ctx1);
             assertThat(repository.context())
                     .isEqualTo(ctx1);
         }

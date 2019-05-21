@@ -27,13 +27,13 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-public class DuplicateAggregate extends Aggregate<String, CallState, CallStateVBuilder> {
+public class DuplicateAggregate extends Aggregate<String, CallState, CallState.Builder> {
 
     @Assign
     public MessageSent handle(SendMessage command) {
-        return MessageSentVBuilder.newBuilder()
-                                  .setMessage(command.getMessage())
-                                  .build();
+        return MessageSent.newBuilder()
+                          .setMessage(command.getMessage())
+                          .build();
     }
 
     @Assign

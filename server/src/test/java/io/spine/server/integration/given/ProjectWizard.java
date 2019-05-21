@@ -25,7 +25,6 @@ import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.integration.Project;
 import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.ProjectVBuilder;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.rejection.IntegrationRejections;
 
@@ -34,7 +33,7 @@ import java.util.List;
 
 @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
 public class ProjectWizard
-        extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+        extends ProcessManager<ProjectId, Project, Project.Builder> {
 
     protected ProjectWizard(ProjectId id) {
         super(id);

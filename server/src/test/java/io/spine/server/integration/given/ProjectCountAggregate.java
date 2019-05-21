@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.Int32Aggregate;
-import io.spine.server.test.shared.Int32AggregateVBuilder;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 
@@ -33,7 +32,7 @@ import java.util.List;
 
 @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
 public class ProjectCountAggregate
-        extends Aggregate<ProjectId, Int32Aggregate, Int32AggregateVBuilder> {
+        extends Aggregate<ProjectId, Int32Aggregate, Int32Aggregate.Builder> {
 
     private static ItgProjectCreated externalEvent = null;
 

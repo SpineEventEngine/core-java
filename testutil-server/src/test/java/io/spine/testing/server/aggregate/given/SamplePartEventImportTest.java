@@ -30,7 +30,6 @@ import io.spine.testing.server.expected.EventApplierExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentReceivedByEmail;
-import io.spine.testing.server.given.entity.event.TuCommentReceivedByEmailVBuilder;
 
 /**
  * The test class for checking an import of an event into an aggregate part.
@@ -44,7 +43,7 @@ public class SamplePartEventImportTest
                                          TuAggregatePart> {
 
     public static final TuCommentReceivedByEmail TEST_EVENT =
-            TuCommentReceivedByEmailVBuilder.newBuilder()
+            TuCommentReceivedByEmail.newBuilder()
                                             .setId(TuAggregatePart.ID)
                                             .build();
 

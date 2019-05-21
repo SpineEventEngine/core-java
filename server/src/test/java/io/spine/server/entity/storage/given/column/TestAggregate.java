@@ -22,9 +22,8 @@ package io.spine.server.entity.storage.given.column;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
 
-public class TestAggregate extends Aggregate<Long, StringAggregate, StringAggregateVBuilder> {
+public class TestAggregate extends Aggregate<Long, StringAggregate, StringAggregate.Builder> {
 
     protected TestAggregate(Long id) {
         super(id);

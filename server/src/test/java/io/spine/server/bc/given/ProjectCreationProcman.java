@@ -24,11 +24,10 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.event.command.CreateProject;
 import io.spine.test.event.command.StartProject;
 
-public class ProjectCreationProcman extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+public class ProjectCreationProcman extends ProcessManager<ProjectId, Project, Project.Builder> {
 
     protected ProjectCreationProcman(ProjectId id) {
         super(id);
