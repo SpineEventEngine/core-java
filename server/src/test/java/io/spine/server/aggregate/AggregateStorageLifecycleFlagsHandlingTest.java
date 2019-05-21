@@ -20,6 +20,8 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.truth.Truth;
+import com.google.common.truth.Truth8;
 import io.spine.base.Identifier;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
@@ -32,7 +34,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link LifecycleFlags}.
@@ -53,7 +54,6 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
         storage = getAggregateStorage(TestAggregate.class);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
     @DisplayName("write entity status of aggregate")
     void writeEntityStatusOfAggregate() {
@@ -62,8 +62,8 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
                                               .build();
         storage.writeLifecycleFlags(id, status);
         Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
-        assertTrue(readStatus.isPresent());
-        assertEquals(status, readStatus.get());
+        Truth8.assertThat(readStatus)
+              .hasValue(status);
     }
 
     @Test
@@ -92,10 +92,14 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
     private static void assertStatus(Optional<LifecycleFlags> entityStatus,
                                      boolean archived,
                                      boolean deleted) {
-        assertTrue(entityStatus.isPresent());
+        Truth8.assertThat(entityStatus)
+              .isPresent();
         LifecycleFlags status = entityStatus.get();
-        assertEquals(archived, status.getArchived());
-        assertEquals(deleted, status.getDeleted());
+
+        Truth.assertThat(status.getArchived())
+             .isEqualTo(archived);
+        Truth.assertThat(status.getDeleted())
+                .isEqualTo(deleted);
     }
 
     private static class TestAggregate

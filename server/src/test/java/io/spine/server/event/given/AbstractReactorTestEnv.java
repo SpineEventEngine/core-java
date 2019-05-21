@@ -50,6 +50,7 @@ import java.util.Random;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.Durations2.isGreaterThan;
 import static io.spine.server.event.CustomerNotified.NotificationMethod.SMS;
+import static java.lang.String.format;
 
 /** Environment for abstract event reactor testing. */
 public class AbstractReactorTestEnv {

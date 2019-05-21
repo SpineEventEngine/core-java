@@ -28,6 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -186,11 +187,13 @@ class TransactionalEntityTest {
         TransactionalEntity entity = entityWithInactiveTx();
         LifecycleFlags originalFlags = entity.lifecycleFlags();
 
-        LifecycleFlags modifiedFlags = originalFlags.toBuilder()
-                                                    .setDeleted(true)
-                                                    .build();
+        LifecycleFlags modifiedFlags =
+                originalFlags.toBuilder()
+                             .setDeleted(true)
+                             .build();
 
-        assertNotEquals(originalFlags, modifiedFlags);
+        assertThat(modifiedFlags)
+                .isNotEqualTo(originalFlags);
 
         Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
@@ -222,7 +225,8 @@ class TransactionalEntityTest {
             EmptyEntity newState = EmptyEntity.newBuilder()
                                               .setId(newUuidValue().getValue())
                                               .build();
-            assertNotEquals(originalState, newState);
+            assertThat(newState)
+                    .isNotEqualTo(originalState);
 
             TestTransaction.injectState(entity, newState, Version.getDefaultInstance());
             Message modifiedState = entity.builderFromState()

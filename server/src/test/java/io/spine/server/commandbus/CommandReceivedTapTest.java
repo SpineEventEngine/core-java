@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -82,7 +83,8 @@ class CommandReceivedTapTest {
 
         TenantId actualTenant = writeSide.lastSeenEvent()
                                          .tenant();
-        assertEquals(expectedTenant, actualTenant);
+        assertThat(actualTenant)
+                .isEqualTo(expectedTenant);
     }
 
     private void postAndCheck(Command command) {
@@ -93,7 +95,8 @@ class CommandReceivedTapTest {
 
         CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()
                                                                  .message();
-        assertEquals(envelope.id(), systemEvent.getId());
+        assertThat(systemEvent.getId())
+                .isEqualTo(envelope.id());
     }
 
     private static TenantId tenantId() {

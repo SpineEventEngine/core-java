@@ -23,6 +23,9 @@ package io.spine.server.route.given.sur;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 
+/**
+ * Collects all works by an artist.
+ */
 public final class WorksProjection extends Projection<ArtistName, Works, Works.Builder> {
 
     @Subscribe
