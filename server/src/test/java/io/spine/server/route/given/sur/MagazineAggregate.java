@@ -60,6 +60,5 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
                                       .getActor()
                                       .getValue())
                          .vBuild();
-
     }
 }
