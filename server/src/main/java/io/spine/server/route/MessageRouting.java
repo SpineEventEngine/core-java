@@ -77,7 +77,7 @@ abstract class MessageRouting<M extends Message, C extends Message, R> implement
     /**
      * Verifies if the passed message type is supported by this instance of routing.
      */
-    public boolean isSupported(Class<? extends M> messageType) {
+    public boolean supports(Class<? extends M> messageType) {
         checkNotNull(messageType);
         Match match = routeFor(messageType);
         boolean result = match.found();

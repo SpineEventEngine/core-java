@@ -43,7 +43,7 @@ public final class Surrealism {
     private Surrealism() {
     }
 
-    static ArtistName name(String value) {
+    public static ArtistName name(String value) {
         return ArtistName
                 .newBuilder()
                 .setValue(value)

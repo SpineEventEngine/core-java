@@ -20,14 +20,25 @@
 
 package io.spine.server.projection;
 
+import com.google.common.truth.extensions.proto.ProtoSubject;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.route.given.sur.ArtistMood;
 import io.spine.server.route.given.sur.ArtistMoodRepo;
+import io.spine.server.route.given.sur.ArtistName;
+import io.spine.server.route.given.sur.Gallery;
 import io.spine.server.route.given.sur.MagazineAggregate;
 import io.spine.server.route.given.sur.Manifesto;
+import io.spine.server.route.given.sur.Surrealism;
+import io.spine.server.route.given.sur.Works;
+import io.spine.server.route.given.sur.WorksProjection;
 import io.spine.server.route.given.sur.command.PublishArticle;
+import io.spine.server.route.given.sur.event.PieceOfArtCreated;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,5 +81,33 @@ class StateRoutingTest {
                .isEqualTo(ArtistMood.newBuilder()
                                     .setMood(ArtistMood.Mood.ANGER)
                                     .build());
+    }
+
+    @Test
+    @DisplayName("route state by the first field matching the ID type")
+    void implicit() {
+        context.with(new Gallery(),
+                     DefaultRepository.of(WorksProjection.class));
+
+        ArtistName artist = Surrealism.name("André Masson");
+        Any automaticDrawing = AnyPacker.pack(StringValue.of("Automatic Drawing"));
+        context.receivesEvent(
+                PieceOfArtCreated
+                        .newBuilder()
+                        .setUuid(Identifier.newUuid())
+                        .setArtist(artist)
+                        .setContent(automaticDrawing)
+                        .build()
+        );
+
+        ProtoSubject<?, Message> assertWorks =
+                context.assertEntity(WorksProjection.class, artist)
+                       .hasStateThat();
+        Works expectedWork =
+                Works.newBuilder()
+                     .addWork(automaticDrawing)
+                     .build();
+        assertWorks.comparingExpectedFieldsOnly()
+                   .isEqualTo(expectedWork);
     }
 }

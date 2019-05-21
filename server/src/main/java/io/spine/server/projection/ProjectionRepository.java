@@ -131,7 +131,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      *          if one of the subscribed state classes cannot be served by the created state routing
      */
     private StateUpdateRouting<I> createStateRouting() {
-        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance();
+        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance(idClass());
         setupStateRouting(routing);
         validate(routing);
         return routing;
@@ -142,7 +142,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         Set<StateClass> stateClasses = union(cls.domesticStates(), cls.externalStates());
         ImmutableList<StateClass> unsupported =
                 stateClasses.stream()
-                            .filter(c -> !routing.isSupported(c.value()))
+                            .filter(c -> !routing.supports(c.value()))
                             .collect(toImmutableList());
         if (!unsupported.isEmpty()) {
             boolean moreThanOne = unsupported.size() > 1;

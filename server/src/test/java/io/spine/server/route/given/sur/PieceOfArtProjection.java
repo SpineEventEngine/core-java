@@ -17,28 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.route.sur;
+package io.spine.server.route.given.sur;
 
-import "spine/options.proto";
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.server.route.given.sur.event.PieceOfArtCreated;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.route.given.sur.event";
-option java_outer_classname = "EventsProto";
-option java_multiple_files = true;
+public class PieceOfArtProjection extends Projection<String, PieceOfArt, PieceOfArtVBuilder> {
 
-import "google/protobuf/any.proto";
-import "spine/test/route/state/surrealism.proto";
+    @Subscribe
+    void on(PieceOfArtCreated event) {
+        builder().setUuid(event.getUuid())
+                 .setArtist(event.getArtist())
+                 .setContent(event.getContent());
+    }
 
-message ArticlePublished {
-    string magazine_name = 1 [(required) = true];
-    ArtistName author = 2 [(required) = true];
-    google.protobuf.Any article = 3 [(required) = true];
-}
-
-message PieceOfArtCreated {
-    string uuid = 1 [(required) = true];
-    ArtistName artist = 2 [(required) = true];
-    google.protobuf.Any content = 3 [(required) = true];
 }

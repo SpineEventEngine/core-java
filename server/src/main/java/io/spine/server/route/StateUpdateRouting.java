@@ -28,8 +28,6 @@ import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
 
-import static io.spine.server.route.EventRoute.noTargets;
-
 /**
  * A routing schema used to deliver entity state updates.
  *
@@ -42,14 +40,10 @@ import static io.spine.server.route.EventRoute.noTargets;
  * @param <I>
  *         the type of the entity IDs to which the updates are routed
  */
-public class StateUpdateRouting<I>
+public final class StateUpdateRouting<I>
         extends MessageRouting<Message, EventContext, Set<I>> {
 
     private static final long serialVersionUID = 0L;
-
-    private StateUpdateRouting() {
-        super(defaultStateRoute());
-    }
 
     /**
      * Creates a new {@code StateUpdateRouting}.
@@ -59,10 +53,27 @@ public class StateUpdateRouting<I>
      *
      * @param <I>
      *         the type of the entity IDs to which the updates are routed
+     * @param idClass
+     *         the class of identifiers served by this routing
      * @return new {@code StateUpdateRouting}
      */
-    public static <I> StateUpdateRouting<I> newInstance() {
-        return new StateUpdateRouting<>();
+    public static <I> StateUpdateRouting<I> newInstance(Class<I> idClass) {
+        return new StateUpdateRouting<>(idClass);
+    }
+
+    private StateUpdateRouting(Class<I> idClass) {
+        super(DefaultStateRoute.newInstance(idClass));
+    }
+
+    /**
+     * Verifies if the passed state type can be routed by a custom route, or
+     * the message has a field matching the type of identifiers served by this routing.
+     */
+    @Override
+    public boolean supports(Class<? extends Message> stateType) {
+        boolean customRouteSet = super.supports(stateType);
+        boolean defaultRouteAvailable = ((DefaultStateRoute) defaultRoute()).supports(stateType);
+        return customRouteSet || defaultRouteAvailable;
     }
 
     /**
@@ -103,9 +114,5 @@ public class StateUpdateRouting<I>
             Message state = AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
-    }
-
-    private static <I> Route<Message, EventContext, Set<I>> defaultStateRoute() {
-        return (message, context) -> noTargets();
     }
 }
