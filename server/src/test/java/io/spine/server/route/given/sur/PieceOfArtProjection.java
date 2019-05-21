@@ -32,5 +32,4 @@ final class PieceOfArtProjection extends Projection<String, PieceOfArt, PieceOfA
                  .setArtist(event.getArtist())
                  .setContent(event.getContent());
     }
-
 }
