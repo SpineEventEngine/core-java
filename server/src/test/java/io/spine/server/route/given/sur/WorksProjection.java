@@ -29,8 +29,8 @@ import io.spine.server.projection.Projection;
 public final class WorksProjection extends Projection<ArtistName, Works, Works.Builder> {
 
     @Subscribe
-    void on(PieceOfArt pa) {
-        builder().setArtist(pa.getArtist())
-                 .addWork(pa.getContent());
+    void on(PieceOfArt piece) {
+        builder().setArtist(piece.getArtist())
+                 .addWork(piece.getContent());
     }
 }
