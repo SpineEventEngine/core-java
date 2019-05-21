@@ -23,7 +23,7 @@ package io.spine.server.route.given.sur;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 
-public final class WorksProjection extends Projection<ArtistName, Works, WorksVBuilder> {
+public final class WorksProjection extends Projection<ArtistName, Works, Works.Builder> {
 
     @Subscribe
     void on(PieceOfArt pa) {

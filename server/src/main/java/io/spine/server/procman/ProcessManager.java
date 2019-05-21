@@ -49,6 +49,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine

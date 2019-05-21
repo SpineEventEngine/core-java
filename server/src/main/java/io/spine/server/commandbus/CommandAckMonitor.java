@@ -34,6 +34,7 @@ import io.spine.system.server.event.CommandErrored;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A {@link StreamObserver} for {@link io.spine.core.Command Command}

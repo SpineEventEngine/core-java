@@ -31,7 +31,7 @@ import static io.spine.server.route.given.sur.ArtistMood.Mood.CREATIVE;
 import static io.spine.server.route.given.sur.Surrealism.opponentOf;
 
 final class ArtistMoodProjection
-        extends Projection<ArtistName, ArtistMood, ArtistMoodVBuilder> {
+        extends Projection<ArtistName, ArtistMood, ArtistMood.Builder> {
 
     /**
      * Changes the mood of the artist depending from the author of the published article.

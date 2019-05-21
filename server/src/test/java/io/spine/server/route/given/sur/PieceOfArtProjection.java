@@ -24,7 +24,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.route.given.sur.event.PieceOfArtCreated;
 
-public class PieceOfArtProjection extends Projection<String, PieceOfArt, PieceOfArtVBuilder> {
+final class PieceOfArtProjection extends Projection<String, PieceOfArt, PieceOfArt.Builder> {
 
     @Subscribe
     void on(PieceOfArtCreated event) {

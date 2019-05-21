@@ -72,7 +72,9 @@ public final class StateUpdateRouting<I>
     @Override
     public boolean supports(Class<? extends Message> stateType) {
         boolean customRouteSet = super.supports(stateType);
-        boolean defaultRouteAvailable = ((DefaultStateRoute) defaultRoute()).supports(stateType);
+        @SuppressWarnings({"unchecked", "RedundantSuppression"}) // cast to the type used in ctor.
+        DefaultStateRoute<I> defaultRoute = (DefaultStateRoute<I>) defaultRoute();
+        boolean defaultRouteAvailable = defaultRoute.supports(stateType);
         return customRouteSet || defaultRouteAvailable;
     }
 

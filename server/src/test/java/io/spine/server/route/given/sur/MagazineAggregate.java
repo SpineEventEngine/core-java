@@ -29,7 +29,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.route.given.sur.command.PublishArticle;
 import io.spine.server.route.given.sur.event.ArticlePublished;
 
-public final class MagazineAggregate extends Aggregate<String, Magazine, MagazineVBuilder> {
+public final class MagazineAggregate extends Aggregate<String, Magazine, Magazine.Builder> {
 
     @Assign
     ArticlePublished handle(PublishArticle cmd, CommandContext ctx) {
@@ -39,7 +39,7 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
                 .setMagazineName(id())
                 .setAuthor(author(cmd, ctx))
                 .setArticle(cmd.getArticle())
-                .build();
+                .vBuild();
     }
 
     @Apply
@@ -59,7 +59,7 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
                          .setValue(ctx.getActorContext()
                                       .getActor()
                                       .getValue())
-                         .build();
+                         .vBuild();
 
     }
 }
