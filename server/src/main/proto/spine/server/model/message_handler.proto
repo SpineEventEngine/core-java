@@ -22,10 +22,10 @@ import "spine/base/field_path.proto";
 message HandlerId {
 
     // The information about the handled message type.
-    HandlerTypeInfo type = 1 [(valid) = true];
+    HandlerTypeInfo type = 1 [(validate) = true];
 
     // The filter which the handled messages must match.
-    MessageFilter filter = 2 [(required) = false, (valid) = true];
+    MessageFilter filter = 2 [(required) = false, (validate) = true];
 }
 
 // A message handler type information.
@@ -44,8 +44,8 @@ message HandlerTypeInfo {
 message MessageFilter {
 
     // The path to the field.
-    base.FieldPath field = 1 [(valid) = true];
+    base.FieldPath field = 1 [(validate) = true];
 
     // The expected value of the field.
-    google.protobuf.Any value = 2 [(valid) = true];
+    google.protobuf.Any value = 2 [(validate) = true];
 }

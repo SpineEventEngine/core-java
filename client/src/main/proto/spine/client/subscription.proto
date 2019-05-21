@@ -59,7 +59,7 @@ message Topic {
     // Defines the target of interest, e.g. event/entity type URL and a set of subscription
     // criteria.
     Target target = 2 [(required) = true,
-                       (valid) = true,
+                       (validate) = true,
                        (if_invalid).msg_format = "Invalid topic target"];
 
     // Field mask to be applied to the subscription updates.
@@ -67,7 +67,7 @@ message Topic {
 
     // Service information about the environment in which the topic was created.
     core.ActorContext context = 4 [(required) = true,
-                                   (valid) = true,
+                                   (validate) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
 
     // Reserved for utility fields.
@@ -115,7 +115,7 @@ message SubscriptionUpdate {
 message EntityUpdates {
 
     // The entity state update list.
-    repeated EntityStateUpdate updates = 1 [(valid) = true];
+    repeated EntityStateUpdate updates = 1 [(validate) = true];
 }
 
 // The pair of the entity ID and the entity state both packed as Any.
@@ -135,7 +135,7 @@ message EntityStateUpdate {
 message EventUpdates {
 
     // The event list.
-    repeated core.Event events = 1 [(valid) = true];
+    repeated core.Event events = 1 [(validate) = true];
 }
 
 // Subscription identifier.
@@ -162,7 +162,7 @@ message Subscription {
     SubscriptionId id = 1 [(required) = true];
 
     // Represents the original topic for this subscription.
-    Topic topic = 2 [(required) = true, (valid) = true, (if_invalid).msg_format = "Invalid topic"];
+    Topic topic = 2 [(required) = true, (validate) = true, (if_invalid).msg_format = "Invalid topic"];
 
     // Reserved for subscription attributes.
     reserved 3 to 10;

@@ -29,7 +29,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
-import io.spine.validate.NotValidated;
+import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationException;
 
 import java.util.List;
@@ -276,7 +276,7 @@ public abstract class Transaction<I,
      * @param newState
      *         the new state of the entity
      */
-    private void commitChangedState(@NotValidated S newState) {
+    private void commitChangedState(@NonValidated S newState) {
         try {
             markStateChanged();
             Version pendingVersion = version();
@@ -342,7 +342,7 @@ public abstract class Transaction<I,
      */
     void rollback(Throwable cause) {
         beforeRollback(cause);
-        @NotValidated S currentState = currentBuilderState();
+        @NonValidated S currentState = currentBuilderState();
         TransactionListener<I, E, S, B> listener = listener();
         listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
         this.active = false;
@@ -379,11 +379,11 @@ public abstract class Transaction<I,
     }
 
     private InvalidEntityStateException of(ValidationException exception) {
-        @NotValidated Message invalidState = currentBuilderState();
+        @NonValidated Message invalidState = currentBuilderState();
         return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
-    private @NotValidated S currentBuilderState() {
+    private @NonValidated S currentBuilderState() {
         return builder.buildPartial();
     }
 

@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import io.spine.validate.FieldValidatingOption;
-import io.spine.validate.ValidatingOptionFactory;
+import io.spine.validate.option.FieldValidatingOption;
+import io.spine.validate.option.ValidatingOptionFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
