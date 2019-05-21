@@ -52,5 +52,4 @@ public class ArtistMoodRepo
                            .orElseGet(EventRoute::noTargets);
         });
     }
-
 }
