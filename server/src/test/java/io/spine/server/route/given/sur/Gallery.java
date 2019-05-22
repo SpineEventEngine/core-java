@@ -18,31 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity;
+package io.spine.server.route.given.sur;
 
-import io.spine.server.entity.HasVersionColumn;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.projection.Projection;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 
-import java.util.stream.Stream;
+public class Gallery extends ProjectionRepository<String, PieceOfArtProjection, PieceOfArt> {
 
-import static com.google.common.truth.Truth.assertThat;
-
-@DisplayName("HasVersionColumn should")
-public class HasVersionColumnTest {
-
-    @ParameterizedTest(name = "\"{0}\"")
-    @MethodSource("entityClasses")
-    @DisplayName("be implemented by")
-    void beImplementedBy(Class<?> cls) {
-        assertThat(cls).isAssignableTo(HasVersionColumn.class);
-    }
-
-    private static Stream<Arguments> entityClasses() {
-        return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    protected void setupEventRouting(EventRouting<String> routing) {
+        super.setupEventRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
     }
 }

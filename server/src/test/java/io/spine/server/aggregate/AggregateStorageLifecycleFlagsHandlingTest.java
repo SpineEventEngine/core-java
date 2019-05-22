@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link LifecycleFlags}.
@@ -54,7 +54,6 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
         storage = getAggregateStorage(TestAggregate.class);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
     @DisplayName("write entity status of aggregate")
     void writeEntityStatusOfAggregate() {
@@ -63,8 +62,8 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
                                               .build();
         storage.writeLifecycleFlags(id, status);
         Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
-        assertTrue(readStatus.isPresent());
-        assertEquals(status, readStatus.get());
+        assertThat(readStatus)
+                .hasValue(status);
     }
 
     @Test
@@ -93,10 +92,14 @@ public abstract class AggregateStorageLifecycleFlagsHandlingTest {
     private static void assertStatus(Optional<LifecycleFlags> entityStatus,
                                      boolean archived,
                                      boolean deleted) {
-        assertTrue(entityStatus.isPresent());
+        assertThat(entityStatus)
+                .isPresent();
         LifecycleFlags status = entityStatus.get();
-        assertEquals(archived, status.getArchived());
-        assertEquals(deleted, status.getDeleted());
+
+        assertThat(status.getArchived())
+                .isEqualTo(archived);
+        assertThat(status.getDeleted())
+                .isEqualTo(deleted);
     }
 
     private static class TestAggregate

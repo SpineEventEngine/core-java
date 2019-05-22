@@ -24,13 +24,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.entity.model.StateClass;
 import io.spine.system.server.event.EntityStateChanged;
 
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.route.EventRoute.noTargets;
 
 /**
  * A routing schema used to deliver entity state updates.
@@ -44,14 +40,10 @@ import static io.spine.server.route.EventRoute.noTargets;
  * @param <I>
  *         the type of the entity IDs to which the updates are routed
  */
-public class StateUpdateRouting<I>
+public final class StateUpdateRouting<I>
         extends MessageRouting<Message, EventContext, Set<I>> {
 
     private static final long serialVersionUID = 0L;
-
-    private StateUpdateRouting() {
-        super(defaultStateRoute());
-    }
 
     /**
      * Creates a new {@code StateUpdateRouting}.
@@ -61,10 +53,29 @@ public class StateUpdateRouting<I>
      *
      * @param <I>
      *         the type of the entity IDs to which the updates are routed
+     * @param idClass
+     *         the class of identifiers served by this routing
      * @return new {@code StateUpdateRouting}
      */
-    public static <I> StateUpdateRouting<I> newInstance() {
-        return new StateUpdateRouting<>();
+    public static <I> StateUpdateRouting<I> newInstance(Class<I> idClass) {
+        return new StateUpdateRouting<>(idClass);
+    }
+
+    private StateUpdateRouting(Class<I> idClass) {
+        super(DefaultStateRoute.newInstance(idClass));
+    }
+
+    /**
+     * Verifies if the passed state type can be routed by a custom route, or
+     * the message has a field matching the type of identifiers served by this routing.
+     */
+    @Override
+    public boolean supports(Class<? extends Message> stateType) {
+        boolean customRouteSet = super.supports(stateType);
+        @SuppressWarnings({"unchecked", "RedundantSuppression"}) // cast to the type used in ctor.
+        DefaultStateRoute<I> defaultRoute = (DefaultStateRoute<I>) defaultRoute();
+        boolean defaultRouteAvailable = defaultRoute.supports(stateType);
+        return customRouteSet || defaultRouteAvailable;
     }
 
     /**
@@ -105,22 +116,5 @@ public class StateUpdateRouting<I>
             Message state = AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
-    }
-
-    private static <I> Route<Message, EventContext, Set<I>> defaultStateRoute() {
-        return (message, context) -> noTargets();
-    }
-
-    /**
-     * Validates routing schema for types of state messages.
-     *
-     * @param stateClasses
-     *         the set of classes that this routing is expected to serve
-     * @throws IllegalStateException
-     *         if one of the state type cannot be dispatched by the current schema configuration
-     */
-    public void validate(Set<StateClass> stateClasses) throws IllegalStateException {
-        checkNotNull(stateClasses);
-        //TODO:2019-05-15:alexander.yevsyukov: See https://github.com/SpineEventEngine/core-java/issues/1067
     }
 }

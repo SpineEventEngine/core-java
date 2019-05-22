@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -30,6 +31,7 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.StorageConverter;
+import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
@@ -52,6 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
@@ -121,18 +124,36 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * Creates and configures the {@code StateUpdateRouting} used by this repository.
      *
-     * <p>This method {@linkplain StateUpdateRouting#validate(Set) validates} the created state
-     * routing for serving all the state classes to which projections subscribe.
+     * <p>This method verifies that the created state routing serves all the state classes to
+     * which projections of this repository are subscribed.
      *
      * @throws IllegalStateException
      *          if one of the subscribed state classes cannot be served by the created state routing
      */
     private StateUpdateRouting<I> createStateRouting() {
-        ProjectionClass<P> cls = projectionClass();
-        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance();
+        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance(idClass());
         setupStateRouting(routing);
-        routing.validate(union(cls.domesticStates(), cls.externalStates()));
+        validate(routing);
         return routing;
+    }
+
+    private void validate(StateUpdateRouting<I> routing) throws IllegalStateException {
+        ProjectionClass<P> cls = projectionClass();
+        Set<StateClass> stateClasses = union(cls.domesticStates(), cls.externalStates());
+        ImmutableList<StateClass> unsupported =
+                stateClasses.stream()
+                            .filter(c -> !routing.supports(c.value()))
+                            .collect(toImmutableList());
+        if (!unsupported.isEmpty()) {
+            boolean moreThanOne = unsupported.size() > 1;
+            String fmt =
+                    "The repository `%s` does not provide routing for updates of the state " +
+                            (moreThanOne ? "classes" : "class") +
+                            " `%s` to which the class `%s` is subscribed.";
+            throw newIllegalStateException(
+                    fmt, this, (moreThanOne ? unsupported : unsupported.get(0)), cls
+            );
+        }
     }
 
     /**

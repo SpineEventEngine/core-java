@@ -64,7 +64,7 @@ class AggregateBuilderTest {
     }
 
     @Test
-    @DisplayName("class")
+    @DisplayName("Aggregate class")
     void requestedClass() {
         assertEquals(TestAggregate.class, aggregate.getClass());
     }
