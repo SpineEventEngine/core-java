@@ -104,11 +104,6 @@ public final class ImportBus
     }
 
     @Override
-    protected Registry createRegistry() {
-        return new Registry();
-    }
-
-    @Override
     protected EventEnvelope toEnvelope(Event wrapper) {
         return EventEnvelope.of(wrapper);
     }
@@ -172,11 +167,20 @@ public final class ImportBus
     /**
      * The builder for {@link ImportBus}.
      */
-    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
+    public static class Builder extends BusBuilder<Builder,
+                                                   Event,
+                                                   EventEnvelope,
+                                                   EventClass,
+                                                   EventImportDispatcher<?>> {
 
         /** Prevents direct instantiation. */
         private Builder() {
             super();
+        }
+
+        @Override
+        protected Registry newRegistry() {
+            return new Registry();
         }
 
         @Override

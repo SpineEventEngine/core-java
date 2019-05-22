@@ -36,16 +36,16 @@ final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E>
 
     private final ImmutableSet<Consumer<E>> listeners;
 
-    Listeners(BusBuilder<E, ?, ?> builder) {
+    Listeners(BusBuilder<?, ?, E, ?, ?> builder) {
         checkNotNull(builder);
         this.listeners = ImmutableSet.copyOf(builder.listeners());
     }
 
     @Override
     public void accept(E envelope) {
-        listeners.forEach(l -> {
+        listeners.forEach(listener -> {
             try {
-                l.accept(envelope);
+                listener.accept(envelope);
             } catch (RuntimeException ignored) {
                 // Do nothing.
             }
