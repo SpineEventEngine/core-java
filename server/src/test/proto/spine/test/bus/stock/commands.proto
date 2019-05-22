@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package spine.test.bus.stock;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.bus";
+option java_outer_classname = "StockCommandsProto";
+option java_multiple_files = true;
+
+import "spine/test/bus/stock/share.proto";
+
+message Sell {
+
+    stock.ShareId share = 1;
+
+    uint32 amount = 2;
+}
+
+message Buy {
+
+    stock.ShareId share = 1;
+
+    uint32 amount = 2;
+}

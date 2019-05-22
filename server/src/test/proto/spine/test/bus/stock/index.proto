@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package spine.test.bus.stock;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.bus";
+option java_outer_classname = "IndexProto";
+option java_multiple_files = true;
+
+message IndexName {
+    string name = 1;
+}
+
+message JowDons {
+    option (entity).kind = PROJECTION;
+
+    IndexName name = 1;
+
+    int64 points = 2;
+}
