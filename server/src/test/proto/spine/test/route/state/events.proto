@@ -17,32 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.testing.server.entity;
+package spine.test.route.sur;
 
-import io.spine.server.entity.HasVersionColumn;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.projection.Projection;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import "spine/options.proto";
 
-import java.util.stream.Stream;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.route.given.sur.event";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
 
-import static com.google.common.truth.Truth.assertThat;
+import "google/protobuf/any.proto";
+import "spine/test/route/state/surrealism.proto";
 
-@DisplayName("HasVersionColumn should")
-public class HasVersionColumnTest {
+message ArticlePublished {
+    string magazine_name = 1 [(required) = true];
+    ArtistName author = 2 [(required) = true];
+    google.protobuf.Any article = 3 [(required) = true];
+}
 
-    @ParameterizedTest(name = "\"{0}\"")
-    @MethodSource("entityClasses")
-    @DisplayName("be implemented by")
-    void beImplementedBy(Class<?> cls) {
-        assertThat(cls).isAssignableTo(HasVersionColumn.class);
-    }
-
-    private static Stream<Arguments> entityClasses() {
-        return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
-    }
+message PieceOfArtCreated {
+    string uuid = 1 [(required) = true];
+    ArtistName artist = 2 [(required) = true];
+    google.protobuf.Any content = 3 [(required) = true];
 }

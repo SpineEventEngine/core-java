@@ -36,7 +36,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.test.validation.FakeOptionFactory;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;

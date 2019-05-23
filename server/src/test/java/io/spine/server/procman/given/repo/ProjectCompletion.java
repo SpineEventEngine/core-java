@@ -20,7 +20,6 @@
 
 package io.spine.server.procman.given.repo;
 
-import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;

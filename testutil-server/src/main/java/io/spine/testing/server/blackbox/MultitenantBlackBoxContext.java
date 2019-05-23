@@ -57,7 +57,7 @@ public final class MultitenantBlackBoxContext
      *         new tenant ID
      * @return current instance
      */
-    MultitenantBlackBoxContext withTenant(TenantId tenant) {
+    public MultitenantBlackBoxContext withTenant(TenantId tenant) {
         this.tenantId = tenant;
         return this;
     }

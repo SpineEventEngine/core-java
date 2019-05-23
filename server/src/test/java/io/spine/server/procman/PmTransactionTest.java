@@ -33,7 +33,6 @@ import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.test.validation.FakeOptionFactory;
 import io.spine.validate.ConstraintViolation;
 
 import static io.spine.protobuf.AnyPacker.unpack;

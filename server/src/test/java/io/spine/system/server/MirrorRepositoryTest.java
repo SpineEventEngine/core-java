@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
@@ -51,7 +52,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Streams.stream;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.client.Filters.eq;
@@ -298,10 +298,11 @@ class MirrorRepositoryTest {
 
     private List<? extends Message> execute(Query query) {
         Iterator<EntityStateWithVersion> result = repository.execute(query);
-        List<? extends Message> readMessages = stream(result)
-                .map(EntityStateWithVersion::getState)
-                .map(unpackFunc())
-                .collect(toList());
+        List<? extends Message> readMessages =
+                Streams.stream(result)
+                       .map(EntityStateWithVersion::getState)
+                       .map(unpackFunc())
+                       .collect(toList());
         return readMessages;
     }
 }

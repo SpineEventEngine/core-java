@@ -22,7 +22,6 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.route.given.switchman.LogState;
@@ -45,26 +44,15 @@ class StateUpdateRoutingTest {
     void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(EventContext.class, emptyContext)
-                .testAllPublicInstanceMethods(StateUpdateRouting.newInstance());
+                .testAllPublicInstanceMethods(StateUpdateRouting.newInstance(Long.class));
     }
-
-    @Test
-    @DisplayName("skip all messages be default")
-    void routeNothingByDefault() {
-        StateUpdateRouting<?> routing = StateUpdateRouting.newInstance();
-        Set<?> emptyTargets = routing.apply(Empty.getDefaultInstance(), emptyContext);
-        assertThat(emptyTargets).isEmpty();
-
-        Set<?> logTargets = routing.apply(LogState.getDefaultInstance(), emptyContext);
-        assertThat(logTargets).isEmpty();
-    }
-
+    
     @Test
     @DisplayName("route messages with defined routes")
     void routeMessagesByRoutes() {
         String counterKey = "sample_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
-                .<Integer>newInstance()
+                .newInstance(Integer.class)
                 .route(LogState.class, (log, context) ->
                         ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
@@ -81,7 +69,7 @@ class StateUpdateRoutingTest {
     void createEventRoute() {
         String counterKey = "test_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
-                .<Integer>newInstance()
+                .newInstance(Integer.class)
                 .route(LogState.class,
                        (log, context) -> ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
