@@ -21,8 +21,10 @@
 package io.spine.test.validation;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.DescriptorProtos;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import io.spine.option.OptionsProto;
 import io.spine.validate.FieldValue;
@@ -42,20 +44,21 @@ import io.spine.validate.option.FieldValidatingOption;
  * thrown by the constraint produced by this option. Otherwise, the constraint never discovers any
  * violations.
  */
-public final class FakeOption extends FieldValidatingOption<Void, Object> {
+@Immutable
+public final class FakeOption extends FieldValidatingOption<Void, Empty> {
 
     FakeOption() {
         super(createExtension());
     }
 
     @SuppressWarnings("unchecked") // OK for tests.
-    private static GeneratedExtension<DescriptorProtos.FieldOptions, Void> createExtension() {
-        GeneratedExtension<DescriptorProtos.FieldOptions, ?> beta = OptionsProto.beta;
-        return (GeneratedExtension<DescriptorProtos.FieldOptions, Void>) beta;
+    private static GeneratedExtension<FieldOptions, Void> createExtension() {
+        GeneratedExtension<FieldOptions, ?> beta = OptionsProto.beta;
+        return (GeneratedExtension<FieldOptions, Void>) beta;
     }
 
     @Override
-    public Constraint<FieldValue<Object>> constraintFor(FieldValue<Object> value) {
+    public Constraint<FieldValue<Empty>> constraintFor(FieldValue<Empty> value) {
         RuntimeException exception = FakeOptionFactory.plannedException();
         if (exception != null) {
             return v -> { throw exception; };

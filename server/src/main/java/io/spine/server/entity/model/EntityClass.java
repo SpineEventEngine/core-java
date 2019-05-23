@@ -57,6 +57,10 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
+    /** The helper for working with ID field of the entity state. */
+    private final IdField idField;
+
+    /** Provides info on operations that can see entities of this class. */
     private final EntityVisibility visibility;
 
     /** The default state of entities of this class. */
@@ -67,13 +71,16 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull EntityFactory<E> factory;
 
+
     /** Creates new instance of the model class for the passed class of entities. */
+    @SuppressWarnings("ThisEscapedInObjectConstruction")
     protected EntityClass(Class<E> cls) {
         super(cls);
         this.idClass = idClass(cls);
         this.stateClass = stateClassOf(cls);
         this.entityStateType = TypeUrl.of(stateClass);
         this.visibility = EntityVisibility.of(stateClass);
+        this.idField = new IdField(this);
     }
 
     /**
@@ -153,6 +160,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     public final EntityVisibility visibility() {
         return visibility;
+    }
+
+    /**
+     * Obtains information about the ID field of the entity state.
+     */
+    public final IdField idField() {
+        return idField;
     }
 
     /**

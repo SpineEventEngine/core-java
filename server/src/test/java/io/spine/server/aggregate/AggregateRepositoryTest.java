@@ -22,12 +22,15 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.truth.OptionalSubject;
+import com.google.common.truth.Truth8;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.repo.FailingAggregateRepository;
@@ -74,6 +77,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
@@ -458,9 +462,10 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("on rejections")
         void onRejections() {
-            boundedContext().register(new RejectingRepository());
+            BoundedContext context = boundedContext();
+            context.register(new RejectingRepository());
             RejectionReactingRepository repository = new RejectionReactingRepository();
-            boundedContext().register(repository);
+            context.register(repository);
 
             ProjectId parentId = givenAggregateId("rejectingParent");
             ProjectId childId1 = givenAggregateId("acceptingChild-1");
@@ -468,7 +473,7 @@ public class AggregateRepositoryTest {
             ProjectId childId3 = givenAggregateId("acceptingChild-3");
 
             StreamObserver<Ack> observer = StreamObservers.noOpObserver();
-            CommandBus commandBus = boundedContext().commandBus();
+            CommandBus commandBus = context.commandBus();
 
             // Create the parent project.
             ImmutableSet<ProjectId> childProjects = ImmutableSet.of(childId1, childId2, childId3);
@@ -490,16 +495,20 @@ public class AggregateRepositoryTest {
 
             for (ProjectId childProject : childProjects) {
                 Optional<RejectionReactingAggregate> optional = repository.find(childProject);
-                assertTrue(optional.isPresent());
+
+                OptionalSubject assertAggregate = Truth8.assertThat(optional);
+                assertAggregate.isPresent();
 
                 // Check that all the aggregates:
                 // 1. got Rejections.AggCannotStartArchivedProject;
                 // 2. produced the state the event;
                 // 3. applied the event.
+                @SuppressWarnings("OptionalGetWithoutIsPresent") // checked above.
                 String value = optional.get()
                                        .state()
                                        .getValue();
-                assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
+                assertThat(value)
+                        .isEqualTo(RejectionReactingAggregate.PARENT_ARCHIVED);
             }
         }
     }
