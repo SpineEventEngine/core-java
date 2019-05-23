@@ -53,7 +53,7 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
                 .setSubscription(subscription())
                 .setResponse(Responses.ok())
                 .setEntityUpdates(updates)
-                .build();
+                .vBuild();
         return result;
     }
 
@@ -66,11 +66,11 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
                 .newBuilder()
                 .setId(packedEntityId)
                 .setState(packedEntityState)
-                .build();
+                .vBuild();
         EntityUpdates result = EntityUpdates
                 .newBuilder()
                 .addUpdates(stateUpdate)
-                .build();
+                .vBuild();
         return result;
     }
 }
