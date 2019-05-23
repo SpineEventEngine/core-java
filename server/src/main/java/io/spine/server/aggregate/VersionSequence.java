@@ -77,11 +77,11 @@ final class VersionSequence {
     private static Event substituteVersion(Event event, Version newVersion) {
         EventContext newContext =
                 event.context()
-                     .toVBuilder()
+                     .toBuilder()
                      .setVersion(newVersion)
                      .build();
         Event result =
-                event.toVBuilder()
+                event.toBuilder()
                      .setContext(newContext)
                      .build();
         return result;

@@ -200,11 +200,11 @@ public final class EventEnvelope
     private EventEnvelope withEnrichment(Enrichment enrichment) {
         EventContext context =
                 this.context()
-                    .toVBuilder()
+                    .toBuilder()
                     .setEnrichment(enrichment)
                     .build();
         Event enrichedCopy =
-                outerObject().toVBuilder()
+                outerObject().toBuilder()
                              .setContext(context)
                              .build();
         return of(enrichedCopy);

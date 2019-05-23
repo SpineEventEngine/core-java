@@ -25,6 +25,7 @@ import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.CommandRoute;
+import io.spine.server.route.CommandRouting;
 import io.spine.test.aggregate.cli.Evaluate;
 import io.spine.test.aggregate.cli.Evaluated;
 
@@ -55,9 +56,10 @@ public class RepoOfAggregateWithLifecycle
                 }
             };
 
-    public RepoOfAggregateWithLifecycle() {
-        super();
-        commandRouting().replaceDefault(parsingRoute);
+    @Override
+    protected void setupCommandRouting(CommandRouting<Long> routing) {
+        super.setupCommandRouting(routing);
+        routing.replaceDefault(parsingRoute);
     }
 
     /**

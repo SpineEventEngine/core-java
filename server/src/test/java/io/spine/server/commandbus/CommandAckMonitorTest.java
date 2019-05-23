@@ -255,11 +255,11 @@ class CommandAckMonitorTest {
 
     private static Ack rejectionAck(CommandId commandId) {
         ProjectId projectId = ProjectId
-                .vBuilder()
+                .newBuilder()
                 .setId(commandId.getUuid())
                 .build();
         CommandMessage commandMessage = CmdBusStartProject
-                .vBuilder()
+                .newBuilder()
                 .setProjectId(projectId)
                 .build();
         Command command = Command

@@ -39,8 +39,7 @@ import "spine/core/event.proto";
 import "spine/core/version.proto";
 import "spine/system/server/entity_history.proto";
 
-// An event emitted when an entity is created.
-//
+// An entity was created.
 message EntityCreated {
 
     // The ID of the entity.
@@ -50,7 +49,7 @@ message EntityCreated {
     EntityOption.Kind kind = 2 [(required) = true];
 }
 
-// An event emitted when an event is dispatched to a subscriber.
+// An event is dispatched to a subscriber.
 //
 // This event is relevant only to histories of Projections.
 //
@@ -60,7 +59,7 @@ message EventDispatchedToSubscriber {
     EntityHistoryId receiver = 1 [(required) = true];
 
     // The dispatched event.
-    core.Event payload = 2 [(valid) = true];
+    core.Event payload = 2 [(validate) = true];
 
     // The time when the event was dispatched.
     //
@@ -70,7 +69,7 @@ message EventDispatchedToSubscriber {
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
-// An event emitted when an event is dispatched to a reactor.
+// An event was dispatched to a reactor.
 //
 // This event is relevant to histories of Aggregates and ProcessManagers.
 //
@@ -80,7 +79,7 @@ message EventDispatchedToReactor {
     EntityHistoryId receiver = 1 [(required) = true];
 
     // The dispatched event.
-    core.Event payload = 2 [(valid) = true];
+    core.Event payload = 2 [(validate) = true];
 
     // The time when the event was dispatched.
     //
@@ -90,7 +89,7 @@ message EventDispatchedToReactor {
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
-// An event emitted when a command is dispatched to a command handler.
+// A command was dispatched to a command handler.
 //
 // This event is relevant only to histories of Aggregates and ProcessManagers.
 //
@@ -100,7 +99,7 @@ message CommandDispatchedToHandler {
     EntityHistoryId receiver = 1 [(required) = true];
 
     // The dispatched command.
-    core.Command payload = 2 [(valid) = true];
+    core.Command payload = 2 [(validate) = true];
 
     // The time when the command was dispatched.
     //
@@ -110,20 +109,20 @@ message CommandDispatchedToHandler {
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 }
 
-// An event emitted when an event was imported into an aggregate.
+// An event was imported into an aggregate.
 message EventImported {
 
     // The ID of the aggregate, which imported the event.
     EntityHistoryId receiver = 1 [(required) = true];
 
     // The info about the event.
-    core.EventId event_id = 2 [(required) = true, (valid) = true];
+    core.EventId event_id = 2 [(required) = true, (validate) = true];
 
     // The time when the event was imported.
-    google.protobuf.Timestamp when_imported = 3 [(required) = true, (valid) = true];
+    google.protobuf.Timestamp when_imported = 3 [(required) = true, (validate) = true];
 }
 
-// An event emitted when an entity state is changed.
+// A state of an entity changed.
 //
 // The event contains the new state of the entity.
 //
@@ -136,7 +135,7 @@ message EntityStateChanged {
     google.protobuf.Any new_state = 2 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 3 [(required) = true, (valid) = true];
+    repeated DispatchedMessageId message_id = 3 [(required) = true, (validate) = true];
 
     // The instant when the entity was changed.
     google.protobuf.Timestamp when = 4;
@@ -145,32 +144,30 @@ message EntityStateChanged {
     core.Version new_version = 5;
 }
 
-// An event emitted when an entity is marked as archived.
-//
+// An entity was marked as archived.
 message EntityArchived {
 
     // The ID of the entity.
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
 
     // The instant when the entity was archived.
     google.protobuf.Timestamp when = 3;
 
-    // The version received by the entity upon archivation.
+    // The version received by the entity upon archiving.
     core.Version version = 4;
 }
 
-// An event emitted when an entity is marked as deleted.
-//
+// An entity was marked as deleted.
 message EntityDeleted {
 
     // The ID of the entity.
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
 
     // The instant when the entity was deleted.
     google.protobuf.Timestamp when = 3;
@@ -179,15 +176,14 @@ message EntityDeleted {
     core.Version version = 4;
 }
 
-// An event emitted when an entity is marked as NOT archived.
-//
-message EntityExtractedFromArchive {
+// An entity was marked as NOT archived.
+message EntityUnarchived {
 
     // The ID of the entity.
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
 
     // The instant when the entity was extracted.
     google.protobuf.Timestamp when = 3;
@@ -196,15 +192,14 @@ message EntityExtractedFromArchive {
     core.Version version = 4;
 }
 
-// An event emitted when an entity is marked as NOT deleted.
-//
+// An entity was marked as NOT deleted.
 message EntityRestored {
 
     // The ID of the entity.
     EntityHistoryId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
-    repeated DispatchedMessageId message_id = 2 [(required) = true, (valid) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
 
     // The instant when the entity was restored.
     google.protobuf.Timestamp when = 3;

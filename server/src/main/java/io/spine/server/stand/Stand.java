@@ -44,10 +44,9 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.EntityRecordChangeVBuilder;
-import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
@@ -176,12 +175,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     public void post(Entity entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
-        EntityRecord record = EntityRecordVBuilder
+        EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(id)
                 .setState(state)
                 .build();
-        EntityRecordChange change = EntityRecordChangeVBuilder
+        EntityRecordChange change = EntityRecordChange
                 .newBuilder()
                 .setNewValue(record)
                 .build();
@@ -225,9 +224,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Override
     public Set<EventClass> messageClasses() {
-        EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
         Set<EventClass> result =
-                union(eventRegistry.eventClasses(), singleton(entityStateChanged));
+                union(eventRegistry.eventClasses(), singleton(StateClass.updateEvent()));
         return result;
     }
 
@@ -351,7 +349,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        return typeRegistry.getTypes();
+        return typeRegistry.allTypes();
     }
 
     /**
@@ -372,7 +370,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
-        return typeRegistry.getAggregateTypes();
+        return typeRegistry.aggregateTypes();
     }
 
     /**
@@ -460,7 +458,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private QueryProcessor processorFor(TypeUrl type) {
         Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
-                typeRegistry.getRecordRepository(type);
+                typeRegistry.recordRepositoryOf(type);
         if (foundRepository.isPresent()) {
             RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
             return new EntityQueryProcessor(repository);

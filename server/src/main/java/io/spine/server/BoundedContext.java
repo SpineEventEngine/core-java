@@ -26,6 +26,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
@@ -104,6 +105,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
+    private final AggregateRootDirectory aggregateRootDirectory;
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
@@ -134,6 +136,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.commandBus = buildCommandBus(builder, eventBus);
         this.integrationBus = buildIntegrationBus(builder, eventBus, name);
         this.importBus = buildImportBus(tenantIndex);
+        this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
     /**
@@ -162,10 +165,12 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Creates a new instance of {@link IntegrationBus} with the given parameters.
      *
-     * @param builder    the {@link BoundedContextBuilder} to obtain
-     *                   the {@link IntegrationBus.Builder} from
-     * @param eventBus   the initialized {@link EventBus}
-     * @param name       the name of the constructed Bounded Context
+     * @param builder
+     *         the {@link BoundedContextBuilder} to obtain the {@link IntegrationBus.Builder} from
+     * @param eventBus
+     *         the initialized {@link EventBus}
+     * @param name
+     *         the name of the constructed Bounded Context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
@@ -213,7 +218,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        repository.setBoundedContext(this);
+        repository.setContext(this);
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
@@ -267,10 +272,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the {@code EventBus} of
-     * this {@code BoundedContext}, if it dispatches domestic events.
+     * Registers the passed event dispatcher with the buses of this {@code BoundedContext}.
+     *
+     * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
      * the {@code IntegrationBus}.
+     *
+     * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
@@ -285,10 +293,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the {@code EventBus} of
-     * this {@code BoundedContext}, if it dispatchers domestic events.
-     * If the passed instance dispatches external events, registers it with
-     * the {@code IntegrationBus}.
+     * Registers the passed delegate of an {@link EventDispatcher} with the buses of this
+     * {@code BoundedContext}.
+     *
+     * @see #registerEventDispatcher(EventDispatcher)
      */
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
@@ -302,7 +310,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     private static
     Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
-        return () -> newIllegalStateException("No external dispatcher provided by %s", dispatcher);
+        return () -> newIllegalStateException(
+                "No external dispatcher provided by `%s`.", dispatcher);
     }
 
     /**
@@ -317,7 +326,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> entityStateTypes(Visibility visibility) {
+    public Set<TypeName> stateTypes(Visibility visibility) {
         Set<TypeName> result = guard.entityStateTypes(visibility);
         return result;
     }
@@ -325,7 +334,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Obtains the set of all entity type names.
      */
-    public Set<TypeName> entityStateTypes() {
+    public Set<TypeName> stateTypes() {
         Set<TypeName> result = guard.allEntityTypes();
         return result;
     }
@@ -457,6 +466,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     @Internal
     public abstract SystemClient systemClient();
 
+    @Internal
+    public AggregateRootDirectory aggregateRootDirectory() {
+        return aggregateRootDirectory;
+    }
+
     /**
      * Closes the {@code BoundedContext} performing all necessary clean-ups.
      *
@@ -509,5 +523,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         if (tenantIndex != null) {
             tenantIndex.close();
         }
+    }
+
+    /**
+     * Returns the name of this Bounded Context.
+     */
+    @Override
+    public String toString() {
+        return name.getValue();
     }
 }

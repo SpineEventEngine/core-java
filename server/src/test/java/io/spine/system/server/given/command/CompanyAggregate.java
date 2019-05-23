@@ -27,14 +27,13 @@ import io.spine.system.server.Company;
 import io.spine.system.server.CompanyEstablished;
 import io.spine.system.server.CompanyId;
 import io.spine.system.server.CompanyNameAlreadyTaken;
-import io.spine.system.server.CompanyVBuilder;
 import io.spine.system.server.EstablishCompany;
 import io.spine.type.TypeUrl;
 
 /**
  * An aggregate handling company-related commands.
  */
-public class CompanyAggregate extends Aggregate<CompanyId, Company, CompanyVBuilder> {
+public class CompanyAggregate extends Aggregate<CompanyId, Company, Company.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(Company.class);
     public static final String TAKEN_NAME = "NameIsTaken!";

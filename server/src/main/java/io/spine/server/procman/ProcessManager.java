@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
@@ -42,7 +43,6 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -80,7 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProcessManager<I,
                                      S extends Message,
-                                     B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                     B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, Commander, HasVersionColumn<I, S> {
 
@@ -129,7 +129,7 @@ public abstract class ProcessManager<I,
      * @throws IllegalStateException
      *         if the method is called from outside an event/rejection reactor or a command handler
      * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
-     *         It does not affect the visibility for inheritors, which stays {@code protected}
+     *         It does not affect the visibility for inheritors which stays {@code protected}
      *         {@linkplain io.spine.server.entity.TransactionalEntity#builder() as originally
      *         defined in parents}.
      *         See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
@@ -196,11 +196,11 @@ public abstract class ProcessManager<I,
      *         the envelope with the event
      * @return one of the following:
      *         <ul>
-     *             <li>a list of produced events, if the process manager chooses to react
+     *             <li>a list of produced events if the process manager chooses to react
      *                 on the event;
-     *             <li>an empty list, if the process manager chooses <em>NOT</em> to react
+     *             <li>an empty list if the process manager chooses <em>NOT</em> to react
      *                 on the event;
-     *             <li>an empty list, if the process manager generates one or more commands
+     *             <li>an empty list if the process manager generates one or more commands
      *                 in response to the event.
      *         </ul>
      */

@@ -22,7 +22,6 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Empty;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.route.given.switchman.LogState;
@@ -38,33 +37,22 @@ import static io.spine.base.Time.currentTime;
 @DisplayName("StateUpdateRouting should")
 class StateUpdateRoutingTest {
 
+    private static final EventContext emptyContext = EventContext.getDefaultInstance();
+
     @Test
     @DisplayName("not accept nulls")
     void notAcceptNulls() {
         new NullPointerTester()
-                .setDefault(EventContext.class, EventContext.getDefaultInstance())
-                .testAllPublicInstanceMethods(StateUpdateRouting.newInstance());
+                .setDefault(EventContext.class, emptyContext)
+                .testAllPublicInstanceMethods(StateUpdateRouting.newInstance(Long.class));
     }
-
-    @Test
-    @DisplayName("skip all messages be default")
-    void routeNothingByDefault() {
-        StateUpdateRouting<?> routing = StateUpdateRouting.newInstance();
-        Set<?> emptyTargets = routing.apply(Empty.getDefaultInstance(),
-                                       EventContext.getDefaultInstance());
-        assertThat(emptyTargets).isEmpty();
-
-        Set<?> logTargets = routing.apply(LogState.getDefaultInstance(),
-                                       EventContext.getDefaultInstance());
-        assertThat(logTargets).isEmpty();
-    }
-
+    
     @Test
     @DisplayName("route messages with defined routes")
     void routeMessagesByRoutes() {
         String counterKey = "sample_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
-                .<Integer>newInstance()
+                .newInstance(Integer.class)
                 .route(LogState.class, (log, context) ->
                         ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
@@ -72,7 +60,7 @@ class StateUpdateRoutingTest {
                 .newBuilder()
                 .putCounters(counterKey, counter)
                 .build();
-        Set<Integer> targets = routing.apply(log, EventContext.getDefaultInstance());
+        Set<Integer> targets = routing.apply(log, emptyContext);
         assertThat(targets).containsExactly(counter);
     }
 
@@ -81,7 +69,7 @@ class StateUpdateRoutingTest {
     void createEventRoute() {
         String counterKey = "test_key";
         StateUpdateRouting<Integer> routing = StateUpdateRouting
-                .<Integer>newInstance()
+                .newInstance(Integer.class)
                 .route(LogState.class,
                        (log, context) -> ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
@@ -95,7 +83,7 @@ class StateUpdateRoutingTest {
                 .setWhen(currentTime())
                 .build();
         EventRoute<Integer, EntityStateChanged> eventRoute = routing.eventRoute();
-        Set<Integer> targets = eventRoute.apply(event, EventContext.getDefaultInstance());
+        Set<Integer> targets = eventRoute.apply(event, emptyContext);
         assertThat(targets).containsExactly(counter);
     }
 }

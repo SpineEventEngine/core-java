@@ -26,7 +26,6 @@ import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
-import io.spine.testing.server.given.entity.TuProjectVBuilder;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +64,7 @@ class AggregateBuilderTest {
     }
 
     @Test
-    @DisplayName("class")
+    @DisplayName("Aggregate class")
     void requestedClass() {
         assertEquals(TestAggregate.class, aggregate.getClass());
     }
@@ -105,7 +104,7 @@ class AggregateBuilderTest {
     }
 
     private static class TestAggregate
-            extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
+            extends Aggregate<TuProjectId, TuProject, TuProject.Builder> {
         protected TestAggregate(TuProjectId id) {
             super(id);
         }

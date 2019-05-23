@@ -64,9 +64,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * The {@link BoundedContext} to which the repository belongs.
      *
      * <p>This field is null when a repository is not {@linkplain
-     * BoundedContext#register(Repository) registered} yet.
+     * BoundedContext#register(Repository) registered} yet and
+     * after the repository is {@linkplain #close() closed}.
      */
-    private @MonotonicNonNull BoundedContext boundedContext;
+    private @Nullable BoundedContext context;
 
     /**
      * Model class of entities managed by this repository.
@@ -171,8 +172,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains classes of the events produced by this {@code Repository}.
      *
-     * <p>For convenience purposes the default version returns empty collection. This method should be
-     * overridden by repositories which actually produce events.
+     * <p>For convenience purposes the default version returns an empty set.
+     * This method should be overridden by repositories which actually produce events.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
         return ImmutableSet.of();
@@ -184,45 +185,86 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>If the repository does not have a storage assigned prior to this call, the storage
      * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
      * associated with the passed {@code BoundedContext}.
+     *
+     * <p>A context for a repository can be set only once. Passing the same second time will have
+     * no effect.
+     *
+     * @throws IllegalStateException
+     *          if the repository has a context value already assigned, and the passed value is
+     *          not equal to the assigned one
      */
     @Internal
-    public final void setBoundedContext(BoundedContext boundedContext) {
-        this.boundedContext = boundedContext;
-        if (!isStorageAssigned()) {
-            initStorage(boundedContext.storageFactory());
+    public final void setContext(BoundedContext context) {
+        checkNotNull(context);
+        boolean sameValue = context.equals(this.context);
+        if (this.context != null && !sameValue) {
+            throw newIllegalStateException(
+                    "The repository `%s` has the Bounded Context (`%s`) assigned." +
+                            " This operation can be performed only once." +
+                            " Attempted to set: `%s`.",
+                    this, this.context, context);
         }
+
+        if (sameValue) {
+            return;
+        }
+
+        this.context = context;
+        if (!isStorageAssigned()) {
+            initStorage(context.storageFactory());
+        }
+        init(context);
+    }
+
+    /**
+     * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
+     * registration} with a {@code BoundedContext}.
+     *
+     * <p>When this method is called, the repository already has {@link #context() BoundedContext}
+     * and the {@link #storage() Storage} {@linkplain #initStorage(StorageFactory) assigned}.
+     *
+     * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
+     * of the parent {@code BoundedContext}.
+     *
+     * @param context
+     *          the {@code BoundedContext} of this repository
+     */
+    @OverridingMethodsMustInvokeSuper
+    protected void init(BoundedContext context) {
+        context.stand()
+               .registerTypeSupplier(this);
     }
 
     /**
      * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
     protected final boolean isRegistered() {
-        return boundedContext != null;
+        return context != null;
     }
 
     /**
-     * Obtains {@code BoundedContext} to which this repository belongs.
+     * Obtains the {@code BoundedContext} to which this repository belongs.
      *
      * @return parent {@code BoundedContext}
      * @throws IllegalStateException
      *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
      *         registered} yet
      */
-    protected final BoundedContext boundedContext() {
-        checkState(boundedContext != null,
-                   "The repository (class: %s) is not registered with a BoundedContext.",
+    protected final BoundedContext context() {
+        checkState(context != null,
+                   "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
-        return boundedContext;
+        return context;
     }
 
     /**
      * The callback called by a {@link BoundedContext} during the {@linkplain
      * BoundedContext#register(Repository) registration} of the repository.
      */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
     @OverridingMethodsMustInvokeSuper
     public void onRegistered() {
-        boundedContext().stand()
-                        .registerTypeSupplier(this);
+        // Do nothing by default.
     }
 
     /**
@@ -291,12 +333,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             this.storage.close();
             this.storage = null;
         }
+        this.context = null;
     }
 
     /**
      * Verifies if the repository is open.
      */
-    public boolean isOpen() {
+    public final boolean isOpen() {
         return storage != null;
     }
 
@@ -336,8 +379,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         TypeUrl stateType = entityStateType();
-        SystemWriteSide writeSide = boundedContext().systemClient()
-                                                    .writeSide();
+        SystemWriteSide writeSide = context().systemClient()
+                                             .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
@@ -423,7 +466,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
                 String idStr = Identifier.toString(id);
-                throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
+                throw newIllegalStateException("Unable to load entity with ID: `%s`.", idStr);
             }
 
             E entity = loaded.get();

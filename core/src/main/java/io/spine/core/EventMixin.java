@@ -95,16 +95,16 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     default Event clearEnrichments() {
         EventContext context = context();
         EventContext.OriginCase originCase = context.getOriginCase();
-        EventContextVBuilder resultContext = context.toVBuilder()
+        EventContext.Builder resultContext = context.toBuilder()
                                                     .clearEnrichment();
         if (originCase == EVENT_CONTEXT) {
             resultContext.setEventContext(context.getEventContext()
-                                                 .toVBuilder()
+                                                 .toBuilder()
                                                  .clearEnrichment()
                                                  .build());
         }
         Event thisEvent = (Event) this;
-        Event result = thisEvent.toVBuilder()
+        Event result = thisEvent.toBuilder()
                                 .setContext(resultContext.build())
                                 .build();
         return result;

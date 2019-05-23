@@ -29,14 +29,13 @@ import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectId;
-import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBCreateProject;
 
 import java.util.List;
 
-class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
     private ProjectAggregate(ProjectId id) {
         super(id);

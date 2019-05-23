@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.test.shared.EmptyAggregate;
-import io.spine.server.test.shared.EmptyAggregateVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +36,7 @@ class WriteTest {
     void nonNull() {
         new NullPointerTester()
                 .setDefault(Aggregate.class,
-                            new Aggregate<String, EmptyAggregate, EmptyAggregateVBuilder>("") {})
+                            new Aggregate<String, EmptyAggregate, EmptyAggregate.Builder>("") {})
                 .setDefault(AggregateRepository.class, new AggregateRepository() {})
                 .testStaticMethods(Write.class, PACKAGE);
     }

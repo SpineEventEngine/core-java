@@ -40,7 +40,7 @@ import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
+import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
 import static io.spine.server.model.given.method.StubHandler.getMethodWithCheckedException;
 import static io.spine.server.model.given.method.StubHandler.getMethodWithRuntimeException;
 import static io.spine.testing.Tests.nullRef;
@@ -103,7 +103,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(ModProjectStarted.class, getFirstParamType(oneParamMethod.rawMethod()));
+        assertEquals(ModProjectStarted.class, firstParamType(oneParamMethod.rawMethod()));
     }
 
     @Nested

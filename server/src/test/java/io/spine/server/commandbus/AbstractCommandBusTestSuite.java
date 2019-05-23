@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
+import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -39,7 +40,6 @@ import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.test.commandbus.command.CmdBusCreateProject;
@@ -54,8 +54,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
@@ -69,7 +71,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -213,20 +214,16 @@ abstract class AbstractCommandBusTestSuite {
         CommandBus spy = spy(commandBus);
         spy.post(commands, memoizingObserver());
 
-        @SuppressWarnings("unchecked") ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
         verify(spy).store(storingCaptor.capture());
         Iterable<Command> storingArgs = storingCaptor.getValue();
         IterableSubject assertStoringArgs = assertThat(storingArgs);
         assertStoringArgs.hasSize(commands.size());
-        assertStoringArgs.containsExactly(first, second);
+        assertStoringArgs.containsExactlyElementsIn(commands);
 
-        ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
-        verify(spy, times(2)).dispatch(postingCaptor.capture());
-        List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
-        assertThat(postingArgs).hasSize(commands.size());
-        assertEquals(commands.get(0), postingArgs.get(0).command());
-        assertEquals(commands.get(1), postingArgs.get(1).command());
-
+        assertTrue(createProjectHandler.received(first.enclosedMessage()));
+        assertTrue(createProjectHandler.received(second.enclosedMessage()));
         commandBus.unregister(createProjectHandler);
     }
 
@@ -248,6 +245,7 @@ abstract class AbstractCommandBusTestSuite {
     class CreateProjectHandler extends AbstractCommandHandler {
 
         private boolean handlerInvoked = false;
+        private final Set<CommandMessage> receivedCommands = newHashSet();
 
         CreateProjectHandler() {
             super(eventBus);
@@ -256,7 +254,12 @@ abstract class AbstractCommandBusTestSuite {
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
+            receivedCommands.add(command);
             return CmdBusProjectCreated.getDefaultInstance();
+        }
+
+        boolean received(CommandMessage command) {
+            return receivedCommands.contains(command);
         }
 
         boolean wasHandlerInvoked() {

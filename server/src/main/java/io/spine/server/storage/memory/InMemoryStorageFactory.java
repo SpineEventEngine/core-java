@@ -73,7 +73,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     InMemoryStorageFactory newInstance(String boundedContextName, boolean multitenant) {
         checkValid(boundedContextName);
         BoundedContextName name = BoundedContextName
-                .vBuilder()
+                .newBuilder()
                 .setValue(boundedContextName)
                 .build();
         return newInstance(name, multitenant);

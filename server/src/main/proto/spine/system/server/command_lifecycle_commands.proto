@@ -46,7 +46,7 @@ message ScheduleCommand {
     core.CommandId id = 1;
 
     // The schedule to execute the command.
-    core.CommandContext.Schedule schedule = 2 [(valid) = true];
+    core.CommandContext.Schedule schedule = 2 [(validate) = true];
 }
 
 // Assigns a target to a command.
@@ -60,5 +60,5 @@ message AssignTargetToCommand {
     core.CommandId id = 1;
 
     // The command target.
-    CommandTarget target = 2 [(valid) = true];
+    CommandTarget target = 2 [(validate) = true];
 }

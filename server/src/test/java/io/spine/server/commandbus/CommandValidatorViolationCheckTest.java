@@ -27,6 +27,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.test.command.CmdEmpty;
 import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
@@ -35,10 +36,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("CommandValidator violation check should")
 class CommandValidatorViolationCheckTest {
@@ -48,9 +49,10 @@ class CommandValidatorViolationCheckTest {
     void returnNothingForValidCmd() {
         Command cmd = Given.ACommand.createProject();
 
-        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));
+        List<ConstraintViolation> violations = inspectCommand(cmd);
 
-        assertEquals(0, violations.size());
+        assertThat(violations)
+                .isEmpty();
     }
 
     @Test
@@ -61,9 +63,10 @@ class CommandValidatorViolationCheckTest {
                 .toBuilder()
                 .setId(CommandId.getDefaultInstance())
                 .build();
-        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(unidentifiableCommand));
+        List<ConstraintViolation> violations = inspectCommand(unidentifiableCommand);
 
-        assertEquals(1, violations.size());
+        assertThat(violations)
+                .hasSize(1);
     }
 
     @Test
@@ -77,9 +80,10 @@ class CommandValidatorViolationCheckTest {
                 .setContext(withRandomActor())
                 .build();
 
-        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithEmptyMessage));
+        List<ConstraintViolation> violations = inspectCommand(commandWithEmptyMessage);
 
-        assertEquals(3, violations.size());
+        assertThat(violations)
+                .hasSize(3);
     }
 
     @Test
@@ -92,8 +96,28 @@ class CommandValidatorViolationCheckTest {
                 .setContext(CommandContext.getDefaultInstance())
                 .build();
 
-        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithoutContext));
+        List<ConstraintViolation> violations = inspectCommand(commandWithoutContext);
 
-        assertEquals(1, violations.size());
+        assertThat(violations)
+                .hasSize(1);
+    }
+
+    @Test
+    @DisplayName("return violation for an empty command message")
+    void emptyMessage() {
+        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
+        Command emptyCommand = factory.createCommand(CmdEmpty.getDefaultInstance());
+        List<ConstraintViolation> violations = inspectCommand(emptyCommand);
+
+        boolean hasViolationOnCommandTargetId = violations
+                .stream()
+                .anyMatch(violation -> violation.getMsgFormat().contains("command target ID"));
+
+        assertThat(hasViolationOnCommandTargetId)
+                .isTrue();
+    }
+
+    private static List<ConstraintViolation> inspectCommand(Command command) {
+        return inspect(CommandEnvelope.of(command));
     }
 }

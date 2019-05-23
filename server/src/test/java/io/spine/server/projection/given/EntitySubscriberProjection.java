@@ -27,7 +27,6 @@ import io.spine.server.route.StateUpdateRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.Task;
 
 import java.util.List;
@@ -36,7 +35,7 @@ import static io.spine.server.route.EventRoute.withId;
 import static java.util.stream.Collectors.toList;
 
 public final class EntitySubscriberProjection
-        extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNamesVBuilder> {
+        extends Projection<ProjectId, ProjectTaskNames, ProjectTaskNames.Builder> {
 
     public EntitySubscriberProjection(ProjectId id) {
         super(id);
@@ -44,10 +43,11 @@ public final class EntitySubscriberProjection
 
     @Subscribe
     void onUpdate(Project aggregateState) {
-        List<String> taskNames = aggregateState.getTaskList()
-                                               .stream()
-                                               .map(Task::getTitle)
-                                               .collect(toList());
+        List<String> taskNames =
+                aggregateState.getTaskList()
+                              .stream()
+                              .map(Task::getTitle)
+                              .collect(toList());
         builder().setProjectId(aggregateState.getId())
                  .setProjectName(aggregateState.getName())
                  .clearTaskName()
@@ -58,13 +58,8 @@ public final class EntitySubscriberProjection
             extends ProjectionRepository<ProjectId, EntitySubscriberProjection, ProjectTaskNames> {
 
         @Override
-        public void onRegistered() {
-            super.onRegistered();
-            eventRouting().routeEntityStateUpdates(
-                    StateUpdateRouting
-                            .<ProjectId>newInstance()
-                            .route(Project.class, (state, context) -> withId(state.getId()))
-            );
+        protected void setupStateRouting(StateUpdateRouting<ProjectId> routing) {
+            routing.route(Project.class, (state, context) -> withId(state.getId()));
         }
     }
 }

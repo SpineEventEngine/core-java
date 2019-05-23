@@ -26,7 +26,6 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.system.server.CompanyEstablishing;
 import io.spine.system.server.CompanyEstablishingStarted;
-import io.spine.system.server.CompanyEstablishingVBuilder;
 import io.spine.system.server.CompanyId;
 import io.spine.system.server.CompanyNameRethought;
 import io.spine.system.server.EstablishCompany;
@@ -41,7 +40,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * A process manager handling company name resolution.
  */
 public class CompanyNameProcman
-        extends ProcessManager<CompanyId, CompanyEstablishing, CompanyEstablishingVBuilder> {
+        extends ProcessManager<CompanyId, CompanyEstablishing, CompanyEstablishing.Builder> {
 
     private CompanyNameProcman(CompanyId id) {
         super(id);

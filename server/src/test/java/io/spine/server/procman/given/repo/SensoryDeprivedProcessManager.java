@@ -23,7 +23,6 @@ package io.spine.server.procman.given.repo;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectVBuilder;
 
 /**
  * A process manager, that handles no messages.
@@ -31,7 +30,7 @@ import io.spine.test.procman.ProjectVBuilder;
  * <p>It should not be able to register repositories for such classes.
  */
 public class SensoryDeprivedProcessManager
-        extends ProcessManager<ProjectId, Project, ProjectVBuilder> {
+        extends ProcessManager<ProjectId, Project, Project.Builder> {
 
     protected SensoryDeprivedProcessManager(ProjectId id) {
         super(id);

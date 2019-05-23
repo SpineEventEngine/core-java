@@ -21,9 +21,7 @@
 package io.spine.server.entity.storage.given;
 
 import io.spine.client.OrderBy;
-import io.spine.client.OrderByVBuilder;
 import io.spine.client.Pagination;
-import io.spine.client.PaginationVBuilder;
 
 public class EntityQueriesTestEnv {
 
@@ -32,13 +30,13 @@ public class EntityQueriesTestEnv {
     }
 
     public static Pagination pagination(int size) {
-        return PaginationVBuilder.newBuilder()
+        return Pagination.newBuilder()
                                  .setPageSize(size)
                                  .build();
     }
 
     public static OrderBy order(String column, OrderBy.Direction direction) {
-        return OrderByVBuilder.newBuilder()
+        return OrderBy.newBuilder()
                               .setColumn(column)
                               .setDirection(direction)
                               .build();

@@ -25,13 +25,12 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.model.contexts.tasks.Task;
 import io.spine.test.model.contexts.tasks.TaskId;
-import io.spine.test.model.contexts.tasks.TaskVBuilder;
 import io.spine.test.model.contexts.tasks.commands.CreateTask;
 import io.spine.test.model.contexts.tasks.commands.RenameTask;
 import io.spine.test.model.contexts.tasks.commands.TaskCreated;
 import io.spine.test.model.contexts.tasks.commands.TaskRenamed;
 
-final class TaskAggregate extends Aggregate<TaskId, Task, TaskVBuilder> {
+final class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
 
     TaskAggregate(TaskId id) {
         super(id);

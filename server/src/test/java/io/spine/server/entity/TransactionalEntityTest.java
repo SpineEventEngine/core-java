@@ -21,17 +21,17 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;
 import io.spine.server.test.shared.EmptyEntity;
-import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -187,11 +187,13 @@ class TransactionalEntityTest {
         TransactionalEntity entity = entityWithInactiveTx();
         LifecycleFlags originalFlags = entity.lifecycleFlags();
 
-        LifecycleFlags modifiedFlags = originalFlags.toVBuilder()
-                                                    .setDeleted(true)
-                                                    .build();
+        LifecycleFlags modifiedFlags =
+                originalFlags.toBuilder()
+                             .setDeleted(true)
+                             .build();
 
-        assertNotEquals(originalFlags, modifiedFlags);
+        assertThat(modifiedFlags)
+                .isNotEqualTo(originalFlags);
 
         Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
@@ -220,10 +222,11 @@ class TransactionalEntityTest {
             Message originalState = entity.builderFromState()
                                           .build();
 
-            EmptyEntity newState = EmptyEntity.vBuilder()
+            EmptyEntity newState = EmptyEntity.newBuilder()
                                               .setId(newUuidValue().getValue())
                                               .build();
-            assertNotEquals(originalState, newState);
+            assertThat(newState)
+                    .isNotEqualTo(originalState);
 
             TestTransaction.injectState(entity, newState, Version.getDefaultInstance());
             Message modifiedState = entity.builderFromState()

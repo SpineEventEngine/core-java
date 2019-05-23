@@ -36,13 +36,13 @@ import static com.google.common.truth.Truth.assertThat;
 public class HasVersionColumnTest {
 
     @ParameterizedTest(name = "\"{0}\"")
-    @MethodSource("classes")
+    @MethodSource("entityClasses")
     @DisplayName("be implemented by")
     void beImplementedBy(Class<?> cls) {
         assertThat(cls).isAssignableTo(HasVersionColumn.class);
     }
 
-    private static Stream<Arguments> classes() {
+    private static Stream<Arguments> entityClasses() {
         return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
     }
 }

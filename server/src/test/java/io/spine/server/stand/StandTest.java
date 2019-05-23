@@ -54,7 +54,6 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
@@ -126,12 +125,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -395,7 +392,7 @@ class StandTest extends TenantAwareTest {
                     for (EntityStateWithVersion stateWithVersion : messages) {
                         Any state = stateWithVersion.getState();
                         Project project = unpack(state, Project.class);
-                        assertNotEquals(project, null);
+                        assertThat(project).isNotNull();
                         assertMatchesMask(project, fieldMask);
 
                         Version version = stateWithVersion.getVersion();
@@ -1133,8 +1130,8 @@ class StandTest extends TenantAwareTest {
                 input -> {
                     checkNotNull(input);
                     StandTestProjection projection = new StandTestProjection(input);
-                    Any id = AnyPacker.pack(projection.id());
-                    Any state = AnyPacker.pack(projection.state());
+                    Any id = pack(projection.id());
+                    Any state = pack(projection.state());
                     EntityRecord record = EntityRecord
                             .newBuilder()
                             .setEntityId(id)

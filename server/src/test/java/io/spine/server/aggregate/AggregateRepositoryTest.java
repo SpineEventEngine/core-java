@@ -145,7 +145,7 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("event classes on which aggregate reacts")
         void aggregateEventClasses() {
-            Set<EventClass> eventClasses = repository().eventClasses();
+            Set<EventClass> eventClasses = repository().domesticEvents();
             assertTrue(eventClasses.contains(EventClass.from(AggProjectArchived.class)));
             assertTrue(eventClasses.contains(EventClass.from(AggProjectDeleted.class)));
         }
@@ -509,6 +509,20 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
+        private AggregateRepository<?, ?> repository;
+
+        /**
+         * Create a fresh instance of the repository since this nested class uses
+         * {@code BlackBoxBoundedContext}. We cannot use the instance of the repository created by
+         * {@link AggregateRepositoryTest#setUp()} because this method registers it with another
+         * {@code BoundedContext}.
+         */
+        @BeforeEach
+        void createAnotherRepository() {
+            resetRepository();
+            repository = repository();
+        }
+
         @Test
         @DisplayName("after command dispatching")
         void afterCommand() {
@@ -532,11 +546,12 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(id)
                     .build();
-            BlackBoxBoundedContext.singleTenant()
-                                  .with(repository())
-                                  .receivesCommands(create, addTask, start)
-                                  .assertThat(emittedEventsHadVersions(1, 2, 3))
-                                  .close();
+            BlackBoxBoundedContext
+                    .singleTenant()
+                    .with(repository)
+                    .receivesCommands(create, addTask, start)
+                    .assertThat(emittedEventsHadVersions(1, 2, 3))
+                    .close();
         }
 
         @Test
@@ -558,15 +573,16 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext.singleTenant()
-                                  .with(repository())
-                                  .receivesCommands(create, start)
-                                  .receivesEvent(archived)
-                                  .assertThat(emittedEventsHadVersions(
-                                          1, 2, // Product creation
-                                          3     // Event produced in response to `archived` event
-                                  ))
-                                  .close();
+            BlackBoxBoundedContext
+                    .singleTenant()
+                    .with(repository)
+                    .receivesCommands(create, start)
+                    .receivesEvent(archived)
+                    .assertThat(emittedEventsHadVersions(
+                            1, 2, // Product creation
+                            3     // Event produced in response to `archived` event
+                    ))
+                    .close();
         }
 
         @Test
@@ -588,13 +604,14 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext.singleTenant()
-                                  .with(new EventDiscardingAggregateRepository())
-                                  .receivesCommands(create, start)
-                                  .receivesEvent(archived)
-                                  .assertThat(emittedEvent(none()))
-                                  .assertThat(acked(thrice()).withoutErrorsOrRejections())
-                                  .close();
+            BlackBoxBoundedContext
+                    .singleTenant()
+                    .with(new EventDiscardingAggregateRepository())
+                    .receivesCommands(create, start)
+                    .receivesEvent(archived)
+                    .assertThat(emittedEvent(none()))
+                    .assertThat(acked(thrice()).withoutErrorsOrRejections())
+                    .close();
         }
     }
 

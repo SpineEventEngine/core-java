@@ -47,12 +47,12 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
 
     @Override
     public Set<CommandClass> commands() {
-        return commands.getMessageClasses();
+        return commands.messageClasses();
     }
 
     @Override
     public Set<EventClass> commandOutput() {
-        return commands.getProducedTypes();
+        return commands.producedTypes();
     }
 
     public boolean handlesCommand(CommandClass commandClass) {
@@ -61,6 +61,6 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
 
     @Override
     public CommandHandlerMethod handlerOf(CommandClass commandClass) {
-        return commands.getSingleMethod(commandClass);
+        return commands.handlerOf(commandClass);
     }
 }

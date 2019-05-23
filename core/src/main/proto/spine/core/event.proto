@@ -78,7 +78,7 @@ message Event {
     EventId id = 1 [(required) = true];
 
     // The message of the event wrapped into `Any`.
-    google.protobuf.Any message = 2 [(required) = true, (valid) = true];
+    google.protobuf.Any message = 2 [(required) = true, (validate) = true];
 
     // The context of the event.
     EventContext context = 3 [(required) = true];
@@ -94,13 +94,13 @@ message EventContext {
 
     oneof origin {
         // The context of the command which generated this event.
-        CommandContext command_context = 2 [(valid) = true];
+        CommandContext command_context = 2 [(validate) = true];
 
         // The context of the event which generated this event.
-        EventContext event_context = 6 [(valid) = true];
+        EventContext event_context = 6 [(validate) = true];
 
         // The event was imported using this `ActorContext`.
-        ActorContext import_context = 11 [(valid) = true];
+        ActorContext import_context = 11 [(validate) = true];
     }
 
     // An ID of the root command, which lead to this event.
@@ -120,7 +120,7 @@ message EventContext {
     google.protobuf.Any producer_id = 3 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 4 [(valid) = true];
+    Version version = 4 [(validate) = true];
 
     // Optional enrichment of the event.
     Enrichment enrichment = 5;

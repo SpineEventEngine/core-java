@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.core.Acks.toCommandId;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -46,7 +46,7 @@ class AcksTest extends UtilityClassTest<Acks> {
      ************************/
 
     static Ack newAck(MessageId messageId) {
-        return AckVBuilder
+        return Ack
                 .newBuilder()
                 .setMessageId(AnyPacker.pack(messageId))
                 .setStatus(newOkStatus())
@@ -54,7 +54,7 @@ class AcksTest extends UtilityClassTest<Acks> {
     }
 
     private static Status newOkStatus() {
-        return StatusVBuilder
+        return Status
                 .newBuilder()
                 .setOk(Empty.getDefaultInstance())
                 .build();

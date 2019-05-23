@@ -25,7 +25,6 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.test.shared.EmptyEntity;
-import io.spine.server.test.shared.EmptyEntityVBuilder;
 import io.spine.server.type.CommandEnvelope;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class CommandHandlingEntityTestEnv {
     }
 
     public static class HandlingEntity
-            extends CommandHandlingEntity<String, EmptyEntity, EmptyEntityVBuilder> {
+            extends CommandHandlingEntity<String, EmptyEntity, EmptyEntity.Builder> {
         public HandlingEntity(String id) {
             super(id);
         }

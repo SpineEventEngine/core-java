@@ -26,7 +26,6 @@ import io.spine.server.event.React;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
-import io.spine.testing.server.given.entity.TuProjectVBuilder;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
@@ -37,7 +36,7 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
  * {@code TUProjectAssigned} event as a result.
  */
 public final class TuReactingAggregate
-        extends Aggregate<TuProjectId, TuProject, TuProjectVBuilder> {
+        extends Aggregate<TuProjectId, TuProject, TuProject.Builder> {
 
     public static final TuProjectId ID = TuProjectId.newBuilder()
                                                      .setValue("test id")

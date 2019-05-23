@@ -141,6 +141,6 @@ class VisibilityGuardTest {
     @Test
     @DisplayName("reject unregistered state class")
     void rejectUnregisteredStateClass() {
-        assertThrows(IllegalArgumentException.class, () -> guard.repositoryFor(Empty.class));
+        assertThrows(IllegalStateException.class, () -> guard.repositoryFor(Empty.class));
     }
 }

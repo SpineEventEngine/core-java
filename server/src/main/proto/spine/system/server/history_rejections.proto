@@ -41,10 +41,10 @@ import "spine/system/server/entity_history.proto";
 message CannotDispatchEventTwice {
 
     // The receiver of the event.
-    EntityHistoryId receiver = 1 [(valid) = true];
+    EntityHistoryId receiver = 1 [(validate) = true];
 
     // The duplicate event.
-    core.Event payload = 2 [(valid) = true];
+    core.Event payload = 2 [(validate) = true];
 
     // The time when the event was dispatched.
     //
@@ -59,10 +59,10 @@ message CannotDispatchEventTwice {
 message CannotDispatchCommandTwice {
 
     // The receiver of the command.
-    EntityHistoryId receiver = 1 [(valid) = true];
+    EntityHistoryId receiver = 1 [(validate) = true];
 
     // The duplicate command.
-    core.Command payload = 2 [(valid) = true];
+    core.Command payload = 2 [(validate) = true];
 
     // The time when the event was dispatched.
     //

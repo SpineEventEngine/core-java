@@ -35,9 +35,7 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.CommandDispatchedToHandler;
-import io.spine.system.server.event.CommandDispatchedToHandlerVBuilder;
 import io.spine.system.server.event.EventDispatchedToReactor;
-import io.spine.system.server.event.EventDispatchedToReactorVBuilder;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,7 +105,7 @@ class PmSystemEventWatcherTest {
         @DisplayName("event")
         void event() {
             Event payload = GivenMessage.projectStarted();
-            EventDispatchedToReactor systemEvent = EventDispatchedToReactorVBuilder
+            EventDispatchedToReactor systemEvent = EventDispatchedToReactor
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
@@ -122,7 +120,7 @@ class PmSystemEventWatcherTest {
         @DisplayName("command")
         void command() {
             Command payload = GivenMessage.createProject();
-            CommandDispatchedToHandler systemEvent = CommandDispatchedToHandlerVBuilder
+            CommandDispatchedToHandler systemEvent = CommandDispatchedToHandler
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(historyId())
@@ -189,7 +187,7 @@ class PmSystemEventWatcherTest {
         @DisplayName("on event dispatching")
         void eventDispatched() {
             Event payload = GivenMessage.projectStarted();
-            EventDispatchedToReactor systemEvent = EventDispatchedToReactorVBuilder
+            EventDispatchedToReactor systemEvent = EventDispatchedToReactor
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())
@@ -202,7 +200,7 @@ class PmSystemEventWatcherTest {
         @DisplayName("on command dispatching")
         void commandDispatched() {
             Command payload = GivenMessage.createProject();
-            CommandDispatchedToHandler systemEvent = CommandDispatchedToHandlerVBuilder
+            CommandDispatchedToHandler systemEvent = CommandDispatchedToHandler
                     .newBuilder()
                     .setPayload(payload)
                     .setReceiver(wrongHistoryId())

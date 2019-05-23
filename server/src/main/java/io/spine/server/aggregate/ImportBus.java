@@ -60,8 +60,8 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * </ol>
  *
  * <p>{@linkplain Apply#allowImport() Marking} events and ensuring proper
- * {@linkplain AggregateRepository#eventImportRouting() routing} allows to store aggregate
- * events without having intermediate messages.
+ * {@linkplain AggregateRepository#setupImportRouting(io.spine.server.route.EventRouting) routing}
+ * allows to store aggregate events without having intermediate messages.
  *
  * <h1>Temporal Logic</h1>
  *
@@ -101,11 +101,6 @@ public final class ImportBus
     @Override
     protected EnvelopeValidator<EventEnvelope> validator() {
         return validator;
-    }
-
-    @Override
-    protected Registry createRegistry() {
-        return new Registry();
     }
 
     @Override
@@ -172,11 +167,20 @@ public final class ImportBus
     /**
      * The builder for {@link ImportBus}.
      */
-    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
+    public static class Builder extends BusBuilder<Builder,
+                                                   Event,
+                                                   EventEnvelope,
+                                                   EventClass,
+                                                   EventImportDispatcher<?>> {
 
         /** Prevents direct instantiation. */
         private Builder() {
             super();
+        }
+
+        @Override
+        protected Registry newRegistry() {
+            return new Registry();
         }
 
         @Override

@@ -24,13 +24,12 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectView;
-import io.spine.testing.server.blackbox.BbProjectViewVBuilder;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 
 import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
 
 public final class ProjectView
-        extends Projection<BbProjectId, BbProjectView, BbProjectViewVBuilder> {
+        extends Projection<BbProjectId, BbProjectView, BbProjectView.Builder> {
 
     @Subscribe
     void on(BbProjectCreated event) {

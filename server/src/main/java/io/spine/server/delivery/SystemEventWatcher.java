@@ -88,7 +88,8 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
                        .findAny();
         if (invalidEventTypeName.isPresent()) {
             throw newIllegalStateException(
-                    "A %s should only subscribe to system events. %s is not a system event type.",
+                    "A `%s` should only subscribe to system events." +
+                            " `%s` is not a system event type.",
                     SystemEventWatcher.class, invalidEventTypeName.get()
             );
         }
@@ -99,7 +100,7 @@ public abstract class SystemEventWatcher<I> extends AbstractEventSubscriber {
     public final Set<EventClass> externalEventClasses() {
         Set<EventClass> classes = super.externalEventClasses();
         checkState(classes.isEmpty(),
-                   "A %s subclass cannot subscribe to external events.",
+                   "A `%s` subclass cannot subscribe to external events.",
                    SystemEventWatcher.class.getSimpleName());
         return emptySet();
     }

@@ -20,13 +20,13 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.type.EventEnvelope;
 
@@ -46,34 +46,47 @@ public abstract class EventDispatchingRepository<I,
 
     private final EventRouting<I> eventRouting;
 
-    /**
-     * Creates new repository instance.
-     *
-     * @param defaultFunction the default function for getting target entity IDs
-     */
-    protected EventDispatchingRepository(EventRoute<I, EventMessage> defaultFunction) {
+    protected EventDispatchingRepository() {
         super();
-        this.eventRouting = EventRouting.withDefault(defaultFunction);
+        this.eventRouting = EventRouting.withDefaultByProducerId();
     }
 
     /**
      * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
      * of event targets.
      */
-    protected final EventRouting<I> eventRouting() {
+    private EventRouting<I> eventRouting() {
         return eventRouting;
     }
 
     /**
-     * {@inheritDoc}
+     * Registers itself as an event dispatcher with the parent {@code BoundedContext}.
      *
-     * <p>{@linkplain io.spine.server.event.EventBus#register(io.spine.server.bus.MessageDispatcher)
-     * Registers} itself with the {@code EventBus} of the parent {@code BoundedContext}.
+     * @param context
+     *         the {@code BoundedContext} of this repository
      */
     @Override
-    public void onRegistered() {
-        super.onRegistered();
-        boundedContext().registerEventDispatcher(this);
+    @OverridingMethodsMustInvokeSuper
+    protected void init(BoundedContext context) {
+        super.init(context);
+        context.registerEventDispatcher(this);
+        setupEventRouting(eventRouting());
+    }
+
+    /**
+     * A callback for derived repository classes to customize routing schema for events.
+     *
+     * <p>Default routing returns the ID of the entity which
+     * {@linkplain io.spine.core.EventContext#getProducerId() produced} the event.
+     * This allows to “link” different kinds of entities by having the same class of IDs.
+     * More complex scenarios (e.g. one-to-many relationships) may require custom routing schemas.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    protected void setupEventRouting(EventRouting<I> routing) {
+        // Do nothing.
     }
 
     /**

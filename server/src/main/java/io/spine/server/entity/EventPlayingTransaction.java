@@ -24,10 +24,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.event.EventDispatch;
 import io.spine.server.model.Nothing;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 
 /**
  * A transaction that supports event {@linkplain EventPlayer playing}.
@@ -46,7 +46,7 @@ public abstract
 class EventPlayingTransaction<I,
                               E extends TransactionalEntity<I, S, B>,
                               S extends Message,
-                              B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                              B extends ValidatingBuilder<S>>
         extends Transaction<I, E, S, B> {
 
     protected EventPlayingTransaction(E entity) {

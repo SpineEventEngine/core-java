@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 
@@ -32,22 +33,22 @@ import java.util.Set;
 /**
  * The repository of {@link io.spine.server.aggregate.given.repo.ReactingAggregate}.
  */
-@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 public class ReactingRepository
         extends AggregateRepository<ProjectId, ReactingAggregate> {
 
-    public ReactingRepository() {
-        super();
-        eventRouting()
-                .route(AggProjectArchived.class,
-                       new EventRoute<ProjectId, AggProjectArchived>() {
-                           private static final long serialVersionUID = 0L;
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    @Override
+    protected void setupEventRouting(EventRouting<ProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(AggProjectArchived.class,
+                      new EventRoute<ProjectId, AggProjectArchived>() {
+                          private static final long serialVersionUID = 0L;
 
-                           @Override
-                           public Set<ProjectId> apply(AggProjectArchived message,
-                                                       EventContext context) {
-                               return ImmutableSet.copyOf(message.getChildProjectIdList());
-                           }
-                       });
+                          @Override
+                          public Set<ProjectId> apply(AggProjectArchived message,
+                                                      EventContext context) {
+                              return ImmutableSet.copyOf(message.getChildProjectIdList());
+                          }
+                      });
     }
 }

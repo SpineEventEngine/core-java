@@ -24,10 +24,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.entity.EntityBuilder;
 import io.spine.testing.server.procman.PmDispatcher.TestPmTransaction;
-import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test instances of {@code ProcessManager}.
@@ -40,13 +40,13 @@ import io.spine.validate.ValidatingBuilder;
 public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
                                    I,
                                    S extends Message,
-                                   B extends ValidatingBuilder<S, ?>>
+                                   B extends ValidatingBuilder<S>>
         extends EntityBuilder<P, I, S> {
 
     public static <P extends ProcessManager<I, S, B>,
                    I,
                    S extends Message,
-                   B extends ValidatingBuilder<S, ?>>
+                   B extends ValidatingBuilder<S>>
     ProcessManagerBuilder<P, I, S, B> newInstance() {
         return new ProcessManagerBuilder<>();
     }
