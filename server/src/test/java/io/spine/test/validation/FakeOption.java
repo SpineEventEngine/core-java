@@ -25,9 +25,9 @@ import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import io.spine.option.OptionsProto;
-import io.spine.validate.Constraint;
-import io.spine.validate.FieldValidatingOption;
 import io.spine.validate.FieldValue;
+import io.spine.validate.option.Constraint;
+import io.spine.validate.option.FieldValidatingOption;
 
 /**
  * A test-only implementation of a validating option.
@@ -65,7 +65,7 @@ public final class FakeOption extends FieldValidatingOption<Void, Object> {
     }
 
     @Override
-    protected boolean shouldValidate(FieldDescriptor field) {
+    public boolean shouldValidate(FieldDescriptor field) {
         return true;
     }
 }

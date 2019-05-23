@@ -47,7 +47,7 @@ message DispatchEventToSubscriber {
     EntityHistoryId receiver = 1;
 
     // The event to dispatch.
-    core.Event event = 2 [(valid) = true];
+    core.Event event = 2 [(validate) = true];
 }
 
 // A command to dispatch an event to a reactor.
@@ -60,7 +60,7 @@ message DispatchEventToReactor {
     EntityHistoryId receiver = 1;
 
     // The event to dispatch.
-    core.Event event = 2 [(valid) = true];
+    core.Event event = 2 [(validate) = true];
 }
 
 // A command to dispatch a command to a command handler.
@@ -73,5 +73,5 @@ message DispatchCommandToHandler {
     EntityHistoryId receiver = 1;
 
     // The command to dispatch.
-    core.Command command = 2 [(valid) = true];
+    core.Command command = 2 [(validate) = true];
 }

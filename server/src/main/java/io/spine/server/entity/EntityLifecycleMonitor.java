@@ -28,7 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.validate.NotValidated;
+import io.spine.validate.NonValidated;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -128,7 +128,7 @@ public final class EntityLifecycleMonitor<I,
     @Override
     public void onTransactionFailed(Throwable t,
                                     E entity,
-                                    @NotValidated S state,
+                                    @NonValidated S state,
                                     Version version,
                                     LifecycleFlags lifecycleFlags) {
         // NOP.

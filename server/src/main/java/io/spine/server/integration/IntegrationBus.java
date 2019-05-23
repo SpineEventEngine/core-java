@@ -105,7 +105,6 @@ import static java.lang.String.format;
  * external message. The event will be dispatched to the external event handler of
  * {@code ProjectListView} projection.
  */
-@SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageEnvelope,
                                                  ExternalMessageClass,
@@ -165,11 +164,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     /** Creates a new builder for this bus. */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @Override
-    protected DomesticDispatcherRegistry createRegistry() {
-        return new DomesticDispatcherRegistry();
     }
 
     @Override
@@ -368,8 +362,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
     @CanIgnoreReturnValue
-    public static class Builder
-            extends BusBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
+    public static class Builder extends BusBuilder<Builder,
+                                                   ExternalMessage,
+                                                   ExternalMessageEnvelope,
+                                                   ExternalMessageClass,
+                                                   ExternalMessageDispatcher<?>> {
 
         /**
          * Buses that act inside the bounded context, for example {@code EventBus}, which allow
@@ -414,6 +411,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         public Optional<TransportFactory> getTransportFactory() {
             return Optional.ofNullable(transportFactory);
+        }
+
+        @Override
+        protected DomesticDispatcherRegistry newRegistry() {
+            return new DomesticDispatcherRegistry();
         }
 
         @Override

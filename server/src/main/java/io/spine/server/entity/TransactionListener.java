@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.validate.NotValidated;
+import io.spine.validate.NonValidated;
 
 /**
  * A common contract for the {@linkplain Transaction transaction} listeners.
@@ -59,7 +59,7 @@ public interface TransactionListener<I,
      * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
      */
     void onBeforeCommit(E entity,
-                        @NotValidated S state,
+                        @NonValidated S state,
                         Version version,
                         LifecycleFlags lifecycleFlags);
 
@@ -72,7 +72,7 @@ public interface TransactionListener<I,
      * @param version        a version to set to the entity during the commit
      * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
      */
-    void onTransactionFailed(Throwable t, E entity, @NotValidated S state,
+    void onTransactionFailed(Throwable t, E entity, @NonValidated S state,
                              Version version, LifecycleFlags lifecycleFlags);
 
     /**

@@ -63,7 +63,7 @@ message CommandScheduled {
     core.CommandId id = 1;
 
     // The schedule to execute the command.
-    core.CommandContext.Schedule schedule = 2 [(valid) = true];
+    core.CommandContext.Schedule schedule = 2 [(validate) = true];
 }
 
 // An event emitted when a command is passed to a dispatcher after being acknowledged.
@@ -84,7 +84,7 @@ message TargetAssignedToCommand {
     core.CommandId id = 1;
 
     // The target of the command.
-    CommandTarget target = 2 [(valid) = true];
+    CommandTarget target = 2 [(validate) = true];
 }
 
 // An event emitted when a command is successfully handled.
@@ -103,7 +103,7 @@ message CommandErrored {
     core.CommandId id = 1;
 
     // The runtime error.
-    base.Error error = 2 [(valid) = true];
+    base.Error error = 2 [(validate) = true];
 }
 
 // An event emitted if the handler rejects the command.
@@ -114,7 +114,7 @@ message CommandRejected {
     core.CommandId id = 1;
 
     // The command rejection event.
-    core.Event rejection_event = 2 [(valid) = true];
+    core.Event rejection_event = 2 [(validate) = true];
 }
 
 // An event emitted when another command was generated in response to a received command.

@@ -76,7 +76,7 @@ message TaskId {
 message Task {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    ProjectId id = 1 [(required) = false, (valid) = false];
+    ProjectId id = 1 [(required) = false, (validate) = false];
     TaskId task_id = 2;
     string title = 3;
     string description = 4;

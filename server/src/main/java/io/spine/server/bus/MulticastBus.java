@@ -39,7 +39,7 @@ public abstract class MulticastBus<M extends Message,
                                    D extends MessageDispatcher<C, E, ?>>
         extends Bus<M, E, C, D> {
 
-    protected MulticastBus(BusBuilder<E, M, ?> builder) {
+    protected MulticastBus(BusBuilder<?, M, E, C, D> builder) {
         super(builder);
     }
 

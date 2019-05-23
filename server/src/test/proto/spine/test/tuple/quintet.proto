@@ -62,7 +62,7 @@ message Violin {
 
     // A violin has alwas a number in both cello and viola quintets.
     // Cannot be zero.
-    InstrumentNumber number = 1 [(valid) = true];
+    InstrumentNumber number = 1 [(validate) = true];
 }
 
 message ViolinCello {

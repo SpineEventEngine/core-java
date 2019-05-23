@@ -134,11 +134,6 @@ public class CommandBus extends UnicastBus<Command,
         return scheduler;
     }
 
-    @Override
-    protected CommandDispatcherRegistry createRegistry() {
-        return new CommandDispatcherRegistry();
-    }
-
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
     protected Collection<BusFilter<CommandEnvelope>> filterChainTail() {
@@ -262,7 +257,11 @@ public class CommandBus extends UnicastBus<Command,
      * The {@code Builder} for {@code CommandBus}.
      */
     @CanIgnoreReturnValue
-    public static class Builder extends BusBuilder<CommandEnvelope, Command, Builder> {
+    public static class Builder extends BusBuilder<Builder,
+                                                   Command,
+                                                   CommandEnvelope,
+                                                   CommandClass,
+                                                   CommandDispatcher<?>> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
@@ -288,6 +287,11 @@ public class CommandBus extends UnicastBus<Command,
         /** Prevents direct instantiation. */
         private Builder() {
             super();
+        }
+
+        @Override
+        protected CommandDispatcherRegistry newRegistry() {
+            return new CommandDispatcherRegistry();
         }
 
         @Internal

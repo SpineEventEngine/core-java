@@ -26,9 +26,9 @@ message Photo {
 
     PhotoId id = 1;
 
-    spine.net.Url full_size_url = 2 [(valid) = true];
+    spine.net.Url full_size_url = 2 [(validate) = true];
 
-    spine.net.Url thumbnail_url = 3 [(valid) = true, (required) = false];
+    spine.net.Url thumbnail_url = 3 [(validate) = true, (required) = false];
 
     string alt_text = 4;
 }
@@ -38,13 +38,13 @@ message Video {
 
     VideoId id = 1;
 
-    PhotoId title_shot = 2 [(valid) = true];
+    PhotoId title_shot = 2 [(validate) = true];
 
-    spine.net.Url file_url = 3 [(valid) = true];
+    spine.net.Url file_url = 3 [(validate) = true];
 
-    map<string, spine.net.Url> soundtrack_url = 4 [(valid) = true, (required) = false];
+    map<string, spine.net.Url> soundtrack_url = 4 [(validate) = true, (required) = false];
 
-    map<string, spine.net.Url> subtitles_url = 5 [(valid) = true, (required) = false];
+    map<string, spine.net.Url> subtitles_url = 5 [(validate) = true, (required) = false];
 }
 
 message LocalizedVideo {
@@ -52,13 +52,13 @@ message LocalizedVideo {
 
     VideoId id = 1;
 
-    PhotoId title_shot = 2 [(valid) = true];
+    PhotoId title_shot = 2 [(validate) = true];
 
-    spine.net.Url file_url = 3 [(valid) = true];
+    spine.net.Url file_url = 3 [(validate) = true];
 
-    spine.net.Url sound_track_url = 4 [(valid) = true, (required) = false];
+    spine.net.Url sound_track_url = 4 [(validate) = true, (required) = false];
 
-    spine.net.Url subtitles_url = 5 [(valid) = true, (required) = false];
+    spine.net.Url subtitles_url = 5 [(validate) = true, (required) = false];
 }
 
 // This aggregate design is not complete and the aggregate is not production-ready, so

@@ -18,37 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
-
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.type.MessageEnvelope;
-
-import java.util.function.Consumer;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * Manages consumption of a message posted to the bus by its listeners.
- *
- * @param <E> the type of the {@link MessageEnvelope} posted by the bus
+ * Contains the test domain of a stock market.
  */
-final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E> {
 
-    private final ImmutableSet<Consumer<E>> listeners;
 
-    Listeners(BusBuilder<?, ?, E, ?, ?> builder) {
-        checkNotNull(builder);
-        this.listeners = ImmutableSet.copyOf(builder.listeners());
-    }
+@BoundedContext("Stock")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.bus.given.stock;
 
-    @Override
-    public void accept(E envelope) {
-        listeners.forEach(listener -> {
-            try {
-                listener.accept(envelope);
-            } catch (RuntimeException ignored) {
-                // Do nothing.
-            }
-        });
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.server.annotation.BoundedContext;
+
+import javax.annotation.ParametersAreNonnullByDefault;

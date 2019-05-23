@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package spine.test.bus.stock;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.bus";
+option java_outer_classname = "StockProto";
+option java_multiple_files = true;
+
+message ShareId {
+    string value = 1;
+}
+
+message Share {
+    option (entity).kind = AGGREGATE;
+
+    ShareId id = 1;
+
+    Price price = 2;
+}
+
+message Price {
+
+    float usd = 2 [(digits).fraction_max = 2];
+}

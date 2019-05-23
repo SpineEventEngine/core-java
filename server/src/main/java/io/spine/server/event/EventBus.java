@@ -36,6 +36,7 @@ import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.enrich.Enricher;
@@ -157,11 +158,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @Override
-    protected EventDispatcherRegistry createRegistry() {
-        return new EventDispatcherRegistry();
-    }
-
-    @Override
     protected EventEnvelope toEnvelope(Event message) {
         return EventEnvelope.of(message);
     }
@@ -248,7 +244,8 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
 
     /** The {@code Builder} for {@code EventBus}. */
     @CanIgnoreReturnValue
-    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
+    public static class Builder
+            extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 
@@ -299,6 +296,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         /** Prevents direct instantiation. */
         private Builder() {
             super();
+        }
+
+        @Override
+        protected DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> newRegistry() {
+            return new EventDispatcherRegistry();
         }
 
         /**
