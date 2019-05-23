@@ -18,31 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
-
-import io.spine.server.sharding.ShardedStorage;
-
-import java.util.Iterator;
-import java.util.Optional;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
+package io.spine.server.sharding;
 
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * @author Alex Tymchenko
  */
-public abstract class InboxStorage
-        extends ShardedStorage<InboxId, InboxMessage, InboxReadRequest> {
+public class NodeRegistry {
 
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
-    }
-
-    protected abstract void write(InboxMessage message);
-
-    protected abstract Iterator<InboxMessage> readAll(InboxId id);
-
-    @Override
-    public Optional<InboxMessage> read(InboxReadRequest request) {
-       throw newIllegalStateException("Reading the inbox messages by request is not supported.");
-    }
 }

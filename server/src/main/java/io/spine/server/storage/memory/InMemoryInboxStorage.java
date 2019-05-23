@@ -45,9 +45,9 @@ public class InMemoryInboxStorage extends InboxStorage {
     }
 
     @Override
-    protected void write(InboxId id, InboxMessage message) {
+    protected void write(InboxMessage message) {
         multitenantStorage.getStorage()
-                          .put(id, message);
+                          .put(message.getInboxId(), message);
     }
 
     @Override
@@ -61,5 +61,19 @@ public class InMemoryInboxStorage extends InboxStorage {
     public Iterator<InboxId> index() {
         return multitenantStorage.getStorage()
                                  .index();
+    }
+
+    @Override
+    public void write(InboxId id, InboxMessage record) {
+        multitenantStorage.getStorage()
+                          .put(id, record);
+    }
+
+    @Override
+    public void removeAll(Iterable<InboxMessage> messages) {
+        TenantInboxRecords storage = multitenantStorage.getStorage();
+        for (InboxMessage message : messages) {
+            storage.remove(message);
+        }
     }
 }

@@ -18,31 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.sharding;
 
-import io.spine.server.sharding.ShardedStorage;
-
-import java.util.Iterator;
-import java.util.Optional;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
+import com.google.protobuf.Timestamp;
 
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * The session of processing the messages, which belong to a shard.
+ *
+ * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex) picking up} the shard to process.
+ *
+ * @author Alex Tymchenko
  */
-public abstract class InboxStorage
-        extends ShardedStorage<InboxId, InboxMessage, InboxReadRequest> {
+public class ShardProcessingSession {
 
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
+    private final ShardIndex index;
+    private final Timestamp whenLastMessageProcessed;
+
+    public ShardProcessingSession(ShardIndex index, Timestamp processed) {
+
+        this.index = index;
+        whenLastMessageProcessed = processed;
     }
 
-    protected abstract void write(InboxMessage message);
-
-    protected abstract Iterator<InboxMessage> readAll(InboxId id);
-
-    @Override
-    public Optional<InboxMessage> read(InboxReadRequest request) {
-       throw newIllegalStateException("Reading the inbox messages by request is not supported.");
+    public ShardIndex shardIndex() {
+        return index;
     }
+
+    public Timestamp whenLastMessageProcessed() {
+        return whenLastMessageProcessed;
+    }
+
+    void updateLastProcessed(Timestamp timestamp) {};
+
+    void complete() {}
 }

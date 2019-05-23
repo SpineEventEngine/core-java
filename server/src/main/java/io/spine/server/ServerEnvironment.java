@@ -21,8 +21,8 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.sharding.Sharding;
 import io.spine.server.sharding.ShardingStrategy;
-import io.spine.server.sharding.UniformAcrossAllShards;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -58,9 +58,11 @@ public final class ServerEnvironment {
 
     private ShardingStrategy shardingStrategy;
 
+    private Sharding sharding;
+
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        shardingStrategy = UniformAcrossAllShards.singleShard();
+        sharding = Sharding.newBuilder().build();
     }
 
     /**
@@ -103,6 +105,15 @@ public final class ServerEnvironment {
     public void setShardingStrategy(ShardingStrategy shardingStrategy) {
         checkNotNull(shardingStrategy);
         this.shardingStrategy = shardingStrategy;
+    }
+
+    public void setSharding(Sharding sharding) {
+        checkNotNull(sharding);
+        this.sharding = sharding;
+    }
+
+    public Sharding sharding() {
+        return sharding;
     }
 
     /**

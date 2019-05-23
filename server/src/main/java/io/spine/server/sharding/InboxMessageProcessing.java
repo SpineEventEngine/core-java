@@ -18,31 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.sharding;
 
-import io.spine.server.sharding.ShardedStorage;
+import io.spine.server.inbox.InboxMessage;
+import io.spine.server.inbox.InboxMessage.PayloadCase;
 
-import java.util.Iterator;
-import java.util.Optional;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * @author Alex Tymchenko
  */
-public abstract class InboxStorage
-        extends ShardedStorage<InboxId, InboxMessage, InboxReadRequest> {
-
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
-    }
-
-    protected abstract void write(InboxMessage message);
-
-    protected abstract Iterator<InboxMessage> readAll(InboxId id);
+public class InboxMessageProcessing extends ProcessingBehavior<InboxMessage> {
 
     @Override
-    public Optional<InboxMessage> read(InboxReadRequest request) {
-       throw newIllegalStateException("Reading the inbox messages by request is not supported.");
+    void process(List<InboxMessage> messages, List<InboxMessage> deduplicationSource) {
+
+        Map<PayloadCase, List<InboxMessage>> byType = groupByType(messages);
+        Map<PayloadCase, List<InboxMessage>> dedupSourceByType = groupByType(deduplicationSource);
+
+
+
+    }
+
+    private static Map<PayloadCase, List<InboxMessage>> groupByType(List<InboxMessage> messages) {
+        return messages.stream()
+                       .collect(Collectors.groupingBy(InboxMessage::getPayloadCase));
     }
 }

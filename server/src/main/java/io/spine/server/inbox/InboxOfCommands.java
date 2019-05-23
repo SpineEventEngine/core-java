@@ -35,7 +35,7 @@ import java.util.Optional;
 class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
     InboxOfCommands(CommandEnvelope envelope, Inbox.Builder<I> builder, I entityId) {
-        super(envelope, builder, builder.getCommandEndpoints(), entityId);
+        super(entityId, envelope, builder, builder.getCommandEndpoints());
     }
 
     @Override
@@ -59,5 +59,13 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
             return Optional.of(exception);
         }
         return Optional.empty();
+    }
+
+    @Override
+    protected InboxMessageId inboxMsgIdFrom(CommandEnvelope envelope) {
+        String rawValue = envelope.id()
+                                  .getUuid();
+        InboxMessageId result = InboxMessageId.of(rawValue);
+        return result;
     }
 }

@@ -89,36 +89,25 @@ message InboxMessageId {
 //
 message InboxMessage {
 
+    option (is).java_type = "io.spine.server.sharding.ShardedRecord";
+
+    InboxMessageId id = 1;
+
+    // The identifier of the `Inbox` in which this message is stored.
+    InboxId inbox_id = 2 [(required) = true];
+
+    spine.server.sharding.ShardIndex shard_index = 3;
+
     // What the message is.
     oneof payload {
 
-        core.Event event = 1;
+        core.Event event = 4;
 
-        core.Command command = 2;
+        core.Command command = 5;
     }
 
-    InboxLabel label = 3 [(required) = true];
+    InboxLabel label = 6 [(required) = true];
 
     // A point in time when the message was received by the `Inbox` instance.
-    google.protobuf.Timestamp when_received = 4 [(required) = true];
-
-    spine.server.sharding.ShardIndex shard_index = 5;
-}
-
-// An `InboxMessage` stored in the `InboxStorage`.
-//
-message InboxMessageRecord {
-
-    // The identifier of the `Inbox` in which this message is stored.
-    InboxId inbox_id = 1 [(required) = true];
-
-    InboxMessage message = 2;
-}
-
-// A record used to transfer the inbox contents to the storage.
-//
-message InboxContentRecord {
-
-    // The contents of inbox.
-    repeated InboxMessage message = 1;
+    google.protobuf.Timestamp when_received = 7 [(required) = true];
 }

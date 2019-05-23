@@ -18,31 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.sharding;
 
-import io.spine.server.sharding.ShardedStorage;
-
-import java.util.Iterator;
-import java.util.Optional;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * A Protobuf {@link com.google.protobuf.Message Message} used for storage in a sharded environment.
+ *
+ * @author Alex Tymchenko
  */
-public abstract class InboxStorage
-        extends ShardedStorage<InboxId, InboxMessage, InboxReadRequest> {
+public interface ShardedRecord extends Message {
 
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
-    }
+    /**
+     * Returns the index of the shard in which this record resides.
+     */
+    ShardIndex getShardIndex();
 
-    protected abstract void write(InboxMessage message);
-
-    protected abstract Iterator<InboxMessage> readAll(InboxId id);
-
-    @Override
-    public Optional<InboxMessage> read(InboxReadRequest request) {
-       throw newIllegalStateException("Reading the inbox messages by request is not supported.");
-    }
+    /**
+     * Returns the moment of time, when the message was originally received to be sharded.
+     *
+     * <p>This is not the time of storing the record, but the time of the message originating in
+     * the subsystem, which stores data splitting it into shards.
+     */
+    Timestamp getWhenReceived();
 }

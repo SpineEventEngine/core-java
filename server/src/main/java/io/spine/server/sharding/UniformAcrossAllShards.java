@@ -53,6 +53,9 @@ public final class UniformAcrossAllShards implements ShardingStrategy, Serializa
 
     @Override
     public ShardIndex getIndexFor(Object entityId) {
+        if(1 == numberOfShards) {
+            return newIndex(0, 1);
+        }
         int hashValue = entityId.hashCode();
         int totalShards = getShardCount();
         int indexValue = abs(hashValue % totalShards);

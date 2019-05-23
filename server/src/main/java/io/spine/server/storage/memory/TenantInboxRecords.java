@@ -39,7 +39,7 @@ import java.util.Optional;
 import static io.spine.util.Exceptions.unsupported;
 
 /**
- * The memory-based storage for {@link io.spine.server.inbox.InboxContentRecord InboxContentRecord}
+ * The memory-based storage for {@link io.spine.server.inbox.InboxMessage InboxMessage}s
  * that represents all storage operations available for inbox data of a single tenant.
  */
 class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
@@ -77,6 +77,12 @@ class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
     @Override
     public void put(InboxId id, InboxMessage record) {
         records.put(id, record);
+    }
+
+    public void remove(InboxMessage message) {
+        for (InboxId key : records.keys()) {
+            records.get(key).remove(message);
+        }
     }
 
     @Override

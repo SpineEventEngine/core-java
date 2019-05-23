@@ -35,7 +35,7 @@ import java.util.Optional;
 class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     InboxOfEvents(EventEnvelope envelope, Inbox.Builder<I> builder, I entityId) {
-        super(envelope, builder, builder.getEventEndpoints(), entityId);
+        super(entityId, envelope, builder, builder.getEventEndpoints());
     }
 
     @Override
@@ -58,5 +58,13 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
             return Optional.of(exception);
         }
         return Optional.empty();
+    }
+
+    @Override
+    protected InboxMessageId inboxMsgIdFrom(EventEnvelope envelope) {
+        String rawValue = envelope.id()
+                                  .getValue();
+        InboxMessageId result = InboxMessageId.of(rawValue);
+        return result;
     }
 }

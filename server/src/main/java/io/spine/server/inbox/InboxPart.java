@@ -23,6 +23,8 @@ package io.spine.server.inbox;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.sharding.ShardIndex;
+import io.spine.server.sharding.Sharding;
 import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.Optional;
@@ -42,19 +44,19 @@ import java.util.Optional;
  */
 abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
+    private final I entityId;
     private final M envelope;
     private final LabelledEndpoints<I, M> endpoints;
     private final InboxStorage storage;
     private final InboxId inboxId;
-    private final I entityId;
 
-    InboxPart(M envelope, Inbox.Builder<I> builder,
-              LabelledEndpoints<I, M> endpoints, I entityId) {
-        this.endpoints = endpoints;
+    InboxPart(I entityId, M envelope, Inbox.Builder<I> builder,
+              LabelledEndpoints<I, M> endpoints) {
+        this.entityId = entityId;
         this.envelope = envelope;
+        this.endpoints = endpoints;
         this.storage = builder.getStorage();
         this.inboxId = builder.getInboxId();
-        this.entityId = entityId;
     }
 
     /**
@@ -72,40 +74,30 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     protected abstract Optional<? extends RuntimeException>
     checkDuplicates(InboxContentRecord contents);
 
+    protected abstract InboxMessageId inboxMsgIdFrom(M envelope);
+
     void storeOrDeliver(InboxLabel label) {
         MessageEndpoint<I, M> endpoint =
                 endpoints.get(label, envelope)
                          .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
-
-        //TODO:2019-01-22:alex.tymchenko: read requests by label.
-        Optional<InboxContentRecord> contents = storage.read(new InboxReadRequest(inboxId));
-        if (contents.isPresent()) {
-            InboxContentRecord contentRecord = contents.get();
-            Optional<? extends RuntimeException> duplicateFound = checkDuplicates(contentRecord);
-            if(duplicateFound.isPresent()) {
-                endpoint.onError(envelope, duplicateFound.get());
-                return;
-            }
-        }
-
-        //TODO:2019-01-09:alex.tymchenko: store if windowing is enabled.
-        // Deliver right away for now.
-        if (ServerEnvironment.getInstance()
-                             .getShardingStrategy()
-                             .getShardCount() == 1) {
+        Sharding sharding = ServerEnvironment.getInstance()
+                                             .sharding();
+        if (!sharding.enabled()) {
             endpoint.dispatchTo(entityId);
+        } else {
+            ShardIndex shardIndex = sharding.whichShardFor(entityId);
+            InboxMessageVBuilder builder = InboxMessageVBuilder
+                    .newBuilder()
+                    .setId(inboxMsgIdFrom(envelope))
+                    .setInboxId(inboxId)
+                    .setShardIndex(shardIndex)
+                    .setLabel(label)
+                    .setWhenReceived(Time.currentTime());
+            setRecordPayload(envelope, builder);
+            InboxMessage message = builder.build();
+
+            storage.write(message);
         }
-        //TODO:2019-01-24:alex.tymchenko: set the sharding index!
-
-        InboxMessageVBuilder builder = InboxMessageVBuilder
-                .newBuilder()
-                .setLabel(label)
-                .setWhenReceived(Time.currentTime());
-        setRecordPayload(envelope, builder);
-        InboxMessage message = builder
-                .build();
-
-        storage.write(inboxId, message);
     }
 
     protected M getEnvelope() {
