@@ -174,7 +174,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = state;
                 if (result == null) {
-                    state = initStateIdField(defaultState());
+                    state = defaultState(); //initStateIdField(defaultState());
                     result = state;
                 }
             }

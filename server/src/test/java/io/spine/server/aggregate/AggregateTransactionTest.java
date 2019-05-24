@@ -190,6 +190,7 @@ class AggregateTransactionTest
         }
 
         @Apply
+        @SuppressWarnings("MethodMayBeStatic")
         private void event(AggTaskAdded event) {
             throw new RuntimeException("that tests the tx behaviour");
         }
