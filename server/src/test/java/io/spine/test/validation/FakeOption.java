@@ -21,7 +21,7 @@
 package io.spine.test.validation;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import io.spine.option.OptionsProto;
@@ -42,6 +42,7 @@ import io.spine.validate.option.FieldValidatingOption;
  * thrown by the constraint produced by this option. Otherwise, the constraint never discovers any
  * violations.
  */
+@SuppressWarnings("Immutable") // effectively the 2nd type argument is an immutable Object.
 public final class FakeOption extends FieldValidatingOption<Void, Object> {
 
     FakeOption() {
@@ -49,9 +50,9 @@ public final class FakeOption extends FieldValidatingOption<Void, Object> {
     }
 
     @SuppressWarnings("unchecked") // OK for tests.
-    private static GeneratedExtension<DescriptorProtos.FieldOptions, Void> createExtension() {
-        GeneratedExtension<DescriptorProtos.FieldOptions, ?> beta = OptionsProto.beta;
-        return (GeneratedExtension<DescriptorProtos.FieldOptions, Void>) beta;
+    private static GeneratedExtension<FieldOptions, Void> createExtension() {
+        GeneratedExtension<FieldOptions, ?> beta = OptionsProto.beta;
+        return (GeneratedExtension<FieldOptions, Void>) beta;
     }
 
     @Override
