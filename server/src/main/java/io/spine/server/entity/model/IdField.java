@@ -31,7 +31,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Helps to initialize ID field of an entity state, if such a field is declared.
@@ -92,7 +91,9 @@ public final class IdField implements Serializable {
     public <I, S extends Message> S init(S state, I id) {
         checkNotNull(state);
         checkNotNull(id);
-        checkState(declared());
+        if (!declared()) {
+            return state;
+        }
         FieldDescriptor idField = declaration.descriptor();
         Object currentValue = state.getField(idField);
         if (declaration.isDefault(currentValue)) {

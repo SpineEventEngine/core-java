@@ -31,7 +31,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.entity.model.IdField;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.string.Stringifiers;
@@ -127,6 +126,19 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
+     * Assigns the ID to the entity.
+     */
+    final void setId(I id) {
+        checkNotNull(id);
+        if (this.id != null) {
+            checkState(id.equals(this.id),
+                       "Entity ID already assigned to `%s`." +
+                               " Attempted to reassign to `%s`.", this.id, id);
+        }
+        this.id = id;
+    }
+
+    /**
      * Creates a new instance with the passed ID and default entity state obtained
      * from the passed function.
      *
@@ -139,19 +151,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         this(id);
         checkNotNull(defaultState);
         setState(defaultState.apply(id));
-    }
-
-    /**
-     * Assigns the ID to the entity.
-     */
-    final void setId(I id) {
-        checkNotNull(id);
-        if (this.id != null) {
-            checkState(id.equals(this.id),
-                       "Entity ID already assigned to `%s`." +
-                               " Attempted to reassign to `%s`.", this.id, id);
-        }
-        this.id = id;
     }
 
     @Override
@@ -174,7 +173,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = state;
                 if (result == null) {
-                    state = defaultState(); //initStateIdField(defaultState());
+                    state = initStateIdField(defaultState());
                     result = state;
                 }
             }
@@ -190,12 +189,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         initialization is often forgotten in handling methods.
      */
     private S initStateIdField(S state) {
-        IdField idField = modelClass().idField();
-        if (!idField.declared()) {
-            return state;
-        }
-        S updatedState = idField.init(state, id());
-        return updatedState;
+        return state;
+        //TODO:2019-05-24:alexander.yevsyukov: Restore when test of transactions are updated.
+//        S updatedState = modelClass().idField()
+//                                     .init(state, id());
+//        return updatedState;
     }
 
     /**
