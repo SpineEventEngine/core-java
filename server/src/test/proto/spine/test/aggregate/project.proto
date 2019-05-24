@@ -84,6 +84,6 @@ message Task {
 
 message SubProjectList {
     option (entity) = {kind: AGGREGATE visibility: FULL};
-
-    repeated ProjectId item = 1;
+    ProjectId parent_project = 1 [(required) = false, (validate) = false];
+    repeated ProjectId item = 2;
 }
