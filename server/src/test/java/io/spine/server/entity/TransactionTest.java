@@ -40,11 +40,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -141,17 +141,18 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
             assertNotNull(tx);
 
-            assertEquals(entity, tx.entity());
+            assertThat(tx.entity())
+                    .isEqualTo(entity);
             // Not possible to compare `Message.Builder` instances via `equals`, so trigger `build()`.
-            assertEquals(expectedBuilder.build(), tx.builder()
-                                                    .build());
-            assertEquals(expectedVersion, tx.version());
-            assertEquals(expectedLifecycleFlags, tx.lifecycleFlags());
-
+            assertThat(tx.builder().build())
+                    .isEqualTo(expectedBuilder.build());
+            assertThat(tx.version())
+                    .isEqualTo(expectedVersion);
+            assertThat(tx.lifecycleFlags())
+                    .isEqualTo(expectedLifecycleFlags);
             assertTrue(tx.isActive());
-
-            assertTrue(tx.phases()
-                         .isEmpty());
+            assertThat(tx.phases())
+                    .isEmpty();
         }
 
         @Test
@@ -161,21 +162,29 @@ public abstract class TransactionTest<I,
             S newState = createNewState();
             Version newVersion = someVersion();
 
-            assertNotEquals(entity.state(), newState);
-            assertNotEquals(entity.version(), newVersion);
+            assertThat(newState)
+                    .isNotEqualTo(entity.state());
+            assertThat(newVersion)
+                    .isNotEqualTo(entity.version());
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, newVersion);
 
-            assertEquals(newState, tx.builder()
-                                     .build());
-            assertEquals(newVersion, tx.version());
-            assertNotEquals(entity.state(), newState);
-            assertNotEquals(entity.version(), newVersion);
+            assertThat(tx.builder().build())
+                    .isEqualTo(newState);
+            assertThat(tx.version())
+                    .isEqualTo(newVersion);
+            assertThat(newState)
+                    .isNotEqualTo(entity.state());
+            assertThat(newVersion)
+                    .isNotEqualTo(entity.version());
 
             tx.commit();
 
-            assertEquals(entity.state(), newState);
-            assertEquals(entity.version(), newVersion);
+            // Now test that the state and the version of the entity changed to that from the tx.
+            assertThat(entity.state())
+                    .isEqualTo(newState);
+            assertThat(entity.version())
+                    .isEqualTo(newVersion);
         }
     }
 
@@ -200,8 +209,9 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
-        assertEquals(1, tx.phases()
-                          .size());
+        assertThat(tx.phases())
+                .hasSize(1);
+
         Phase<I, ?> phase = tx.phases()
                               .get(0);
         assertTrue(checkPhase(event, phase));
@@ -222,8 +232,11 @@ public abstract class TransactionTest<I,
 
         S modifiedState = entity.state();
         Version modifiedVersion = entity.version();
-        assertNotEquals(stateBeforeCommit, modifiedState);
-        assertNotEquals(versionBeforeCommit, modifiedVersion);
+
+        assertThat(modifiedState)
+                .isNotEqualTo(stateBeforeCommit);
+        assertThat(modifiedVersion)
+                .isNotEqualTo(versionBeforeCommit);
     }
 
     @Test
@@ -241,8 +254,11 @@ public abstract class TransactionTest<I,
 
         S stateAfterRollback = entity.state();
         Version versionAfterRollback = entity.version();
-        assertEquals(stateBeforeRollback, stateAfterRollback);
-        assertEquals(versionBeforeRollback, versionAfterRollback);
+
+        assertThat(stateAfterRollback)
+                .isEqualTo(stateBeforeRollback);
+        assertThat(versionAfterRollback)
+                .isEqualTo(versionBeforeRollback);
     }
 
     @Test
@@ -255,11 +271,13 @@ public abstract class TransactionTest<I,
 
         Version ctxVersion = event.context()
                                   .getVersion();
-        assertNotEquals(tx.version(), ctxVersion);
+        assertThat(ctxVersion)
+                .isNotEqualTo(tx.version());
 
         applyEvent(tx, event);
         Version modifiedVersion = tx.version();
-        assertEquals(modifiedVersion, tx.version());
+        assertThat(tx.version())
+                .isEqualTo(modifiedVersion);
     }
 
     @SuppressWarnings("unchecked")  // OK for a test method.
@@ -318,8 +336,8 @@ public abstract class TransactionTest<I,
                 tx.commit();
                 fail("Expected an exception due to a failed commit.");
             } catch (IllegalStateException e) {
-                assertEquals(InvalidEntityStateException.class, e.getCause()
-                                                                 .getClass());
+                assertThat(e.getCause())
+                        .isInstanceOf(InvalidEntityStateException.class);
             }
         }
     }
@@ -367,8 +385,10 @@ public abstract class TransactionTest<I,
 
         private void checkRollback(E entity, S originalState, Version originalVersion) {
             assertNull(entity.getTransaction());
-            assertEquals(originalState, entity.state());
-            assertEquals(originalVersion, entity.version());
+            assertThat(entity.state())
+                    .isEqualTo(originalState);
+            assertThat(entity.version())
+                    .isEqualTo(originalVersion);
         }
     }
 
@@ -402,9 +422,11 @@ public abstract class TransactionTest<I,
         applyEvent(tx, event);
         Version versionFromEvent = event.context()
                                         .getVersion();
-        assertEquals(versionFromEvent, tx.version());
+        assertThat(tx.version())
+                .isEqualTo(versionFromEvent);
         tx.commit();
-        assertEquals(versionFromEvent, entity.version());
+        assertThat(entity.version())
+                .isEqualTo(versionFromEvent);
     }
 
     private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {
