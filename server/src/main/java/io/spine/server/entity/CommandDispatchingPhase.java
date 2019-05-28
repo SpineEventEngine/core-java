@@ -24,6 +24,8 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.system.server.MessageDiagInfo;
 
 import java.util.List;
 
@@ -55,14 +57,27 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     }
 
     @Override
-    public I getEntityId() {
+    public I entityId() {
         return dispatch.entity()
                        .id();
     }
 
     @Override
-    public MessageId getMessageId() {
+    public MessageId messageId() {
         return dispatch.command()
                        .id();
+    }
+
+    @Override
+    protected MessageDiagInfo diagnostics() {
+        CommandEnvelope command = dispatch.command();
+        String typeUrl = command.messageTypeName()
+                                .toUrl()
+                                .value();
+        return MessageDiagInfo
+                .newBuilder()
+                .setCommandId(command.id())
+                .setTypeUrl(typeUrl)
+                .vBuild();
     }
 }

@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
+import io.spine.system.server.MessageDiagInfo;
 
 /**
  * An atomic entity state change which advances the entity version.
@@ -82,10 +83,12 @@ public abstract class Phase<I, R> {
     /**
      * Returns the ID of the entity to which the {@code Message} is dispatched.
      */
-    protected abstract I getEntityId();
+    protected abstract I entityId();
 
     /**
      * Returns the dispatched {@code Message} ID.
      */
-    protected abstract MessageId getMessageId();
+    protected abstract MessageId messageId();
+
+    protected abstract MessageDiagInfo diagnostics();
 }

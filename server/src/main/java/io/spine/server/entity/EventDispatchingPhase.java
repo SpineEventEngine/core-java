@@ -23,6 +23,8 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
 import io.spine.server.event.EventDispatch;
+import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.MessageDiagInfo;
 
 /**
  * A phase that dispatches an event to the entity in transaction.
@@ -53,14 +55,27 @@ public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
     }
 
     @Override
-    public I getEntityId() {
+    public I entityId() {
         return dispatch.entity()
                        .id();
     }
 
     @Override
-    public MessageId getMessageId() {
+    public MessageId messageId() {
         return dispatch.event()
                        .id();
+    }
+
+    @Override
+    protected MessageDiagInfo diagnostics() {
+        EventEnvelope event = dispatch.event();
+        String typeUrl = event.messageTypeName()
+                              .toUrl()
+                              .value();
+        return MessageDiagInfo
+                .newBuilder()
+                .setEventId(event.id())
+                .setTypeUrl(typeUrl)
+                .vBuild();
     }
 }

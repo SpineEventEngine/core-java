@@ -30,10 +30,14 @@ import io.spine.validate.NonValidated;
  *
  * <p>Provides an ability to add callbacks to the transaction execution stages.
  *
- * @param <I> ID type of the entity under transaction
- * @param <E> type of entity under transaction
- * @param <S> state type of the entity under transaction
- * @param <B> type of {@link ValidatingBuilder} of {@code S}
+ * @param <I>
+ *         ID type of the entity under transaction
+ * @param <E>
+ *         type of entity under transaction
+ * @param <S>
+ *         state type of the entity under transaction
+ * @param <B>
+ *         type of {@code Builder} of {@code S}
  */
 @Internal
 public interface TransactionListener<I,
@@ -46,17 +50,22 @@ public interface TransactionListener<I,
      *
      * <p>This callback is invoked for both successfully applied and failed phases.
      *
-     * @param phase the phase which was applied before this callback is invoked
+     * @param phase
+     *         the phase which was applied before this callback is invoked
      */
     void onAfterPhase(Phase<I, ?> phase);
 
     /**
      * A callback invoked before committing the transaction.
      *
-     * @param entity         an entity modified within the transaction
-     * @param state          a state to set to the entity during the commit
-     * @param version        a version to set to the entity during the commit
-     * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
+     * @param entity
+     *         an entity modified within the transaction
+     * @param state
+     *         a state to set to the entity during the commit
+     * @param version
+     *         a version to set to the entity during the commit
+     * @param lifecycleFlags
+     *         a lifecycle flags to set to the entity during the commit
      */
     void onBeforeCommit(E entity,
                         @NonValidated S state,
@@ -66,11 +75,18 @@ public interface TransactionListener<I,
     /**
      * A callback invoked if the commit has failed.
      *
-     * @param t              a {@code Throwable} caused the commit failure
-     * @param entity         an entity modified within the transaction
-     * @param state          a state of the entity at the moment when the transaction failed
-     * @param version        a version to set to the entity during the commit
-     * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
+     * @param t
+     *         the {@code Throwable} which caused the commit failure
+     * @param entity
+     *         the entity modified within the transaction
+     * @param state
+     *         the state of the entity at the moment when the transaction failed
+     * @param version
+     *         the version updated during the transaction; after the rollback, the version may
+     *         be different
+     * @param lifecycleFlags
+     *         the lifecycle flags updated during the transaction; after the rollback, the flags may
+     *         be different
      */
     void onTransactionFailed(Throwable t, E entity, @NonValidated S state,
                              Version version, LifecycleFlags lifecycleFlags);
@@ -78,7 +94,8 @@ public interface TransactionListener<I,
     /**
      * A callback invoked after a successful commit.
      *
-     * @param change the change of the entity under transaction
+     * @param change
+     *         the change of the entity under transaction
      */
     void onAfterCommit(EntityRecordChange change);
 
