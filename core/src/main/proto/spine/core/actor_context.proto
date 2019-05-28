@@ -60,7 +60,7 @@ message ActorContext {
     // The ID of the time-zone from which the request is made.
     //
     // Even though this field is not `required` (due to historical reasons),
-    // client applications are strongly encouraged to populate this field to preseve information
+    // client applications are strongly encouraged to populate this field to preserve information
     // for possible time calculations related to the request.
     //
     time.ZoneId zone_id = 6;
