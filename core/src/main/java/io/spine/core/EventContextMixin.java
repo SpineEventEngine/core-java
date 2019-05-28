@@ -61,6 +61,10 @@ public interface EventContextMixin extends EnrichableMessageContext {
                 case EVENT_CONTEXT:
                     ctx = ctx.getEventContext();
                     break;
+                case PAST_MESSAGE:
+                    actorContext = ctx.getPastMessage()
+                                      .getActorContext();
+                    break;
                 case IMPORT_CONTEXT:
                     actorContext = ctx.getImportContext();
                     break;

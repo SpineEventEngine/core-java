@@ -26,10 +26,13 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.EventContext;
+import io.spine.core.MessageQualifier;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The holder of a {@code Command} which provides convenient access to its properties.
@@ -102,23 +105,32 @@ public final class CommandEnvelope
     }
 
     /**
-     * Sets the origin fields of the event context being built using the data of the enclosed 
+     * Sets the origin fields of the event context being built using the data of the enclosed
      * command.
      *
-     * <p>In particular: 
+     * <p>In particular:
      * <ul>
      *     <li>the command identifier is set as the root command identifier;</li>
      *     <li>the context of the enclosed command is set as the origin.</li>
      * </ul>
      *
-     * @param builder event context builder into which the origin related fields are set
+     * @param builder
+     *         event context builder into which the origin related fields are set
      */
-    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        builder.setCommandContext(context())
-               .setRootCommandId(id())
-               .setCommandId(id());
+        MessageQualifier commandQualifier = MessageQualifier
+                .newBuilder()
+                .setMessageId(pack(id()))
+                .setMessageTypeUrl(outerObject().typeUrl().value())
+                .buildPartial();
+        Origin origin = Origin
+                .newBuilder()
+                .setActorContext(context().getActorContext())
+                .setQualifier(commandQualifier)
+                .setGrandOrigin(context().getOrigin())
+                .vBuild();
+        builder.setPastMessage(origin);
     }
 
     /**

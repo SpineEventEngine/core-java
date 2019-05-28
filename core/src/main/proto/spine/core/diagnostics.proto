@@ -11,6 +11,8 @@ option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
 
+import "spine/core/actor_context.proto";
+
 // An identifier of a message dispatched to an entity.
 //
 // May represent either an event or a command.
@@ -36,4 +38,6 @@ message Origin {
     MessageQualifier qualifier = 1 [(required) = true, (validate) = true];
 
     Origin grand_origin = 2 [(required) = false, (validate) = true];
+
+    ActorContext actor_context = 3 [(validate) = true];
 }
