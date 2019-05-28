@@ -103,6 +103,22 @@ message EventContext {
         ActorContext import_context = 11 [(validate) = true];
     }
 
+    // An ID of the origin message.
+    //
+    // The case of this `oneof` is always the same as the case of `origin` (except for
+    // the `import_context`, which does not have a corresponding field in `origin_id`).
+    //
+    // The `origin` and `origin_id` groups are not merged for the reasons of binary compatibility.
+    //
+    oneof origin_id {
+
+        // The ID of the origin command.
+        CommandId command_id = 12;
+
+        // The ID of the origin event.
+        EventId event_id = 13;
+    }
+
     // An ID of the root command, which lead to this event.
     //
     // If the event is a reaction to another event, then this attribute holds the identifier 
@@ -134,22 +150,6 @@ message EventContext {
     // If the associated event is a rejection event, this field is present.
     //
     RejectionEventContext rejection = 10;
-
-    // An ID of the origin message.
-    //
-    // The case of this `oneof` is always the same as the case of `origin` (except for
-    // the `import_context`, which does not have a corresponding field in `origin_id`).
-    //
-    // The `origin` and `origin_id` groups are not merged for the reasons of binary compatibility.
-    //
-    oneof origin_id {
-
-        // The ID of the origin command.
-        CommandId command_id = 12;
-
-        // The ID of the origin event.
-        EventId event_id = 13;
-    }
 
     // Deleted fields.
     reserved 7;
