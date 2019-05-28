@@ -57,7 +57,9 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      * @return the root command ID
      */
     default CommandId rootCommandId() {
-        return context().getRootCommandId();
+        return context().getPastMessage()
+                        .root()
+                        .asCommandId();
     }
 
     /**

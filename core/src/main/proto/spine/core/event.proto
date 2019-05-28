@@ -34,8 +34,9 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/core/actor_context.proto";
 import "spine/core/command.proto";
-import "spine/core/version.proto";
+import "spine/core/diagnostics.proto";
 import "spine/core/enrichment.proto";
+import "spine/core/version.proto";
 
 // Event identifier.
 message EventId {
@@ -87,17 +88,18 @@ message Event {
 // Meta-information for an event.
 message EventContext {
     option (is).java_type = "io.spine.core.EventContextMixin";
-    option (required_field) = "command_context | event_context | import_context";
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
     oneof origin {
         // The context of the command which generated this event.
-        CommandContext command_context = 2 [(validate) = true];
+        CommandContext command_context = 2 [(validate) = true, deprecated = true];
 
         // The context of the event which generated this event.
-        EventContext event_context = 6 [(validate) = true];
+        EventContext event_context = 6 [(validate) = true, deprecated = true];
+
+        Origin past_message = 14 [(validate) = true];
 
         // The event was imported using this `ActorContext`.
         ActorContext import_context = 11 [(validate) = true];
@@ -113,10 +115,10 @@ message EventContext {
     oneof origin_id {
 
         // The ID of the origin command.
-        CommandId command_id = 12;
+        CommandId command_id = 12 [deprecated = true];
 
         // The ID of the origin event.
-        EventId event_id = 13;
+        EventId event_id = 13 [deprecated = true];
     }
 
     // An ID of the root command, which lead to this event.
@@ -126,12 +128,11 @@ message EventContext {
     //
     // This field is not populated if the event was imported.
     //
-    CommandId root_command_id = 9;
+    CommandId root_command_id = 9 [deprecated = true];
 
     // The ID of the entity which generated the event.
     //
-    // Examples of event producers are: aggregates, process managers (which generate
-    // `CommandRouted`).
+    // Examples of event producers are: aggregates, process managers.
     //
     google.protobuf.Any producer_id = 3 [(required) = true];
 
