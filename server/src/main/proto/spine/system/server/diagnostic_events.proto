@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "DiagnosticEventsProto";
+option java_multiple_files = true;
+
+import "spine/system/server/diagnostics.proto";
+import "spine/validate/validation_error.proto";
+
+message ConstraintViolated {
+
+    EntityDiagInfo entity = 1 [(required) = false];
+
+    MessageDiagInfo last_message = 2 [(required) = false];
+
+    MessageDiagInfo root_message = 3 [(required) = false];
+
+    repeated validate.ConstraintViolation violation = 4 [(required) = false];
+}
