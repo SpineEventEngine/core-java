@@ -63,6 +63,7 @@ public interface MessageWithContext<I extends MessageId,
     /**
      * Obtains the context of the enclosed message.
      */
+    @SuppressWarnings("override") // Overridden in generated code.
     C getContext();
 
     /**
