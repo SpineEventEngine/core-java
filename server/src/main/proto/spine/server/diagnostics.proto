@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package spine.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server";
+option java_outer_classname = "DiagnosticsProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/core/command.proto";
+import "spine/core/event.proto";
+
+// An identifier of a message dispatched to an entity.
+//
+// May represent either an event or a command.
+//
+message MessageQualifier {
+    option (required_field) = "command_id | event_id";
+
+    oneof id {
+
+        spine.core.CommandId command_id = 1;
+
+        spine.core.EventId event_id = 2;
+    }
+
+    string message_type_url = 3 [(required) = true];
+}
+
+message EntityQualifier {
+
+    google.protobuf.Any id = 1 [(required) = true, (validate) = true];
+
+    string type_url = 2 [(required) = true];
+}
+
+message Origin {
+
+    MessageQualifier origin = 1 [(required) = true, (validate) = true];
+
+    Origin grand_origin = 2 [(required) = false, (validate) = true];
+}
