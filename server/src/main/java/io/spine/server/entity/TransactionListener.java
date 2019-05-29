@@ -19,9 +19,7 @@
  */
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.validate.NonValidated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -32,18 +30,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * @param <I>
  *         ID type of the entity under transaction
- * @param <E>
- *         type of entity under transaction
- * @param <S>
- *         state type of the entity under transaction
- * @param <B>
- *         type of {@code Builder} of {@code S}
  */
 @Internal
-public interface TransactionListener<I,
-                                     E extends TransactionalEntity<I, S, B>,
-                                     S extends Message,
-                                     B extends ValidatingBuilder<S>> {
+public interface TransactionListener<I> {
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
@@ -58,14 +47,8 @@ public interface TransactionListener<I,
     /**
      * A callback invoked before committing the transaction.
      *
-     * @param entity
-     *         an entity modified within the transaction
-     * @param state
-     *         a state to set to the entity during the commit
-     * @param version
-     *         a version to set to the entity during the commit
-     * @param lifecycleFlags
-     *         a lifecycle flags to set to the entity during the commit
+     * @param entityRecord
+     *         the entity modified within the transaction
      */
     void onBeforeCommit(@NonValidated EntityRecord entityRecord);
 
@@ -74,16 +57,11 @@ public interface TransactionListener<I,
      *
      * @param t
      *         the {@code Throwable} which caused the commit failure
-     * @param entity
+     * @param entityRecord
      *         the entity modified within the transaction
-     * @param state
-     *         the state of the entity at the moment when the transaction failed
-     * @param version
-     *         the version updated during the transaction; after the rollback, the version may
-     *         be different
-     * @param lifecycleFlags
-     *         the lifecycle flags updated during the transaction; after the rollback, the flags may
-     *         be different
+     * @param phase
+     *         the failed phase or {@code null} if the transaction failed at commit instead of at
+     *         a phase
      */
     void onTransactionFailed(Throwable t,
                              @NonValidated EntityRecord entityRecord,
@@ -101,11 +79,7 @@ public interface TransactionListener<I,
      * An implementation of a {@code TransactionListener} which does not set any behavior for its
      * callbacks.
      */
-    class SilentWitness<I,
-                        E extends TransactionalEntity<I, S, B>,
-                        S extends Message,
-                        B extends ValidatingBuilder<S>>
-            implements TransactionListener<I, E, S, B> {
+    class SilentWitness<I> implements TransactionListener<I> {
 
         @Override
         public void onAfterPhase(Phase<I, ?> phase) {

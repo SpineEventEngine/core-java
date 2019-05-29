@@ -21,12 +21,10 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
 import io.spine.core.MessageQualifier;
 import io.spine.core.MessageWithContext;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,19 +51,10 @@ import static com.google.common.collect.Lists.newLinkedList;
  *
  * @param <I>
  *         ID type of the entity under transaction
- * @param <E>
- *         type of entity under transaction
- * @param <S>
- *         state type of the entity under transaction
- * @param <B>
- *         type of {@link ValidatingBuilder} of {@code S}
  */
 @Internal
-public final class EntityLifecycleMonitor<I,
-                                          E extends TransactionalEntity<I, S, B>,
-                                          S extends Message,
-                                          B extends ValidatingBuilder<S>>
-        implements TransactionListener<I, E, S, B> {
+public final class EntityLifecycleMonitor<I>
+        implements TransactionListener<I> {
 
     private static final MessageQualifier UNKNOWN_MESSAGE = MessageQualifier.getDefaultInstance();
 
@@ -84,12 +73,7 @@ public final class EntityLifecycleMonitor<I,
      *
      * @param repository the repository of the entity under transaction
      */
-    public static
-    <I,
-     E extends TransactionalEntity<I, S, B>,
-     S extends Message,
-     B extends ValidatingBuilder<S>>
-    TransactionListener<I, E, S, B> newInstance(Repository<I, ?> repository, I id) {
+    public static <I> TransactionListener<I> newInstance(Repository<I, ?> repository, I id) {
         checkNotNull(repository);
         checkNotNull(id);
         return new EntityLifecycleMonitor<>(repository, id);
