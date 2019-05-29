@@ -31,11 +31,14 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
+import io.spine.core.MessageQualifier;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
+import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityQualifier;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.command.AssignTargetToCommand;
 import io.spine.system.server.command.DispatchCommandToHandler;
@@ -51,6 +54,7 @@ import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EntityUnarchived;
 import io.spine.system.server.event.EventImported;
 import io.spine.type.TypeUrl;
+import io.spine.validate.ValidationError;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -262,6 +266,26 @@ public class EntityLifecycle {
         postIfDeleted(change, dispatchedMessageIds);
         postIfExtracted(change, dispatchedMessageIds);
         postIfRestored(change, dispatchedMessageIds);
+    }
+
+    public final void onInvalidEntity(MessageQualifier cause,
+                                      MessageQualifier root,
+                                      ValidationError error,
+                                      Version version) {
+        EntityQualifier qualifier = EntityQualifier
+                .newBuilder()
+                .setId(historyId.getEntityId())
+                .setTypeUrl(historyId.getTypeUrl())
+                .setVersion(version)
+                .buildPartial();
+        ConstraintViolated event = ConstraintViolated
+                .newBuilder()
+                .setEntity(qualifier)
+                .setLastMessage(cause)
+                .setRootMessage(root)
+                .addAllViolation(error.getConstraintViolationList())
+                .vBuild();
+        postEvent(event);
     }
 
     private void postIfChanged(EntityRecordChange change,

@@ -237,7 +237,7 @@ public abstract class TransactionTest<I,
         applyEvent(tx, event);
         S stateBeforeRollback = entity.state();
         Version versionBeforeRollback = entity.version();
-        tx.rollback(new RuntimeException("that triggers rollback"));
+        tx.rollback(new RuntimeException("that triggers rollback"), null);
 
         S stateAfterRollback = entity.state();
         Version versionAfterRollback = entity.version();

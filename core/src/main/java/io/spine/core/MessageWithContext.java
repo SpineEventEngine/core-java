@@ -31,6 +31,7 @@ import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * Base interfaces for outer objects of messages with contexts, such as commands or events.
@@ -157,4 +158,14 @@ public interface MessageWithContext<I extends MessageId,
         TimestampTemporal end = TimestampTemporal.from(periodEnd);
         return timeTemporal.isBetween(start, end);
     }
+
+    default MessageQualifier qualifier() {
+        return MessageQualifier
+                .newBuilder()
+                .setMessageId(pack(id()))
+                .setMessageTypeUrl(typeUrl().value())
+                .vBuild();
+    }
+
+    MessageQualifier rootMessage();
 }

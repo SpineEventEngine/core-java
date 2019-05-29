@@ -26,6 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
+import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -46,6 +47,14 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     @Override
     default Timestamp time() {
         return context().getTimestamp();
+    }
+
+    @Override
+    default MessageQualifier rootMessage() {
+        EventContext.OriginCase origin = context().getOriginCase();
+        return origin == PAST_MESSAGE
+               ? context().getPastMessage().root()
+               : qualifier();
     }
 
     /**

@@ -10,23 +10,9 @@ option java_outer_classname = "DiagnosticsProto";
 option java_multiple_files = true;
 
 import "spine/client/entities.proto";
-import "spine/core/command.proto";
-import "spine/core/event.proto";
 import "spine/core/version.proto";
 
-message MessageDiagInfo {
-
-    oneof id {
-
-        core.CommandId command_id = 1;
-
-        core.EventId event_id = 2;
-    }
-
-    string type_url = 3;
-}
-
-message EntityDiagInfo {
+message EntityQualifier {
 
     client.EntityId id = 1;
 

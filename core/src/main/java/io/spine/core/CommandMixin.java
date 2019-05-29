@@ -50,18 +50,24 @@ public interface CommandMixin
                         .getTimestamp();
     }
 
+    @Override
+    default MessageQualifier rootMessage() {
+        return context().getOrigin()
+                        .root();
+    }
+
     /**
      * Checks if the command is scheduled to be delivered later.
      *
      * @return {@code true} if the command context has a scheduling option set,
-     * {@code false} otherwise
+     *         {@code false} otherwise
      */
     default boolean isScheduled() {
         CommandContext.Schedule schedule = context().getSchedule();
         Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkState(delay.getSeconds() > 0,
-                          "Command delay seconds must be a positive value.");
+                       "Command delay seconds must be a positive value.");
             return true;
         }
         return false;

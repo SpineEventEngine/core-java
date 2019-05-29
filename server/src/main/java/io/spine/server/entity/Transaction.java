@@ -31,6 +31,7 @@ import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -171,7 +172,7 @@ public abstract class Transaction<I,
         this.transactionListener = new SilentWitness<>();
 
         injectTo(entity);
-        this.entityBeforeTransaction = createRecord();
+        this.entityBeforeTransaction = entityRecord();
     }
 
     /**
@@ -240,7 +241,7 @@ public abstract class Transaction<I,
         try {
             return phase.propagate();
         } catch (Throwable t) {
-            rollback(t);
+            rollback(t, phase);
             throw illegalStateWithCauseOf(t);
         } finally {
             phases.add(phase);
@@ -283,17 +284,17 @@ public abstract class Transaction<I,
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
-            EntityRecord newRecord = createRecord();
-            afterCommit(entityBeforeTransaction, newRecord);
+            EntityRecord newRecord = entityRecord();
+            afterCommit(newRecord);
         } catch (ValidationException exception) {  /* Could only happen if the state
                                                       has been injected not using
                                                       the builder setters. */
             InvalidEntityStateException invalidStateException = of(exception);
-            rollback(invalidStateException);
+            rollback(invalidStateException, null);
 
             throw invalidStateException;
         } catch (RuntimeException genericException) {
-            rollback(genericException);
+            rollback(genericException, null);
             throw illegalStateWithCauseOf(genericException);
         } finally {
             releaseTx();
@@ -314,20 +315,26 @@ public abstract class Transaction<I,
         }
         commitAttributeChanges();
         releaseTx();
-        EntityRecord newRecord = createRecord();
-        afterCommit(entityBeforeTransaction, newRecord);
+        EntityRecord newRecord = entityRecord();
+        afterCommit(newRecord);
     }
 
     private void beforeCommit(S newState, Version newVersion) {
-        E entity = entity();
         LifecycleFlags newFlags = lifecycleFlags();
-        transactionListener.onBeforeCommit(entity, newState, newVersion, newFlags);
+        @NonValidated EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(entity.id()))
+                .setState(pack(newState))
+                .setLifecycleFlags(newFlags)
+                .setVersion(newVersion)
+                .buildPartial();
+        transactionListener.onBeforeCommit(record);
     }
 
-    private void afterCommit(EntityRecord oldEntity, EntityRecord newEntity) {
+    private void afterCommit(EntityRecord newEntity) {
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()
-                .setPreviousValue(oldEntity)
+                .setPreviousValue(entityBeforeTransaction)
                 .setNewValue(newEntity)
                 .build();
         transactionListener.onAfterCommit(change);
@@ -340,11 +347,17 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    void rollback(Throwable cause) {
+    void rollback(Throwable cause, @Nullable Phase<I, ?> atPhase) {
         beforeRollback(cause);
-        @NonValidated S currentState = currentBuilderState();
         TransactionListener<I, E, S, B> listener = listener();
-        listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
+        @NonValidated EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(entity.id()))
+                .setState(pack(currentBuilderState()))
+                .setVersion(version)
+                .setLifecycleFlags(lifecycleFlags())
+                .buildPartial();
+        listener.onTransactionFailed(cause, record, atPhase);
         this.active = false;
         entity.releaseTransaction();
     }
@@ -363,7 +376,7 @@ public abstract class Transaction<I,
      *
      * @return new {@link EntityRecord}
      */
-    private EntityRecord createRecord() {
+    private EntityRecord entityRecord() {
         E entity = entity();
         Any entityId = Identifier.pack(entity.id());
         Version version = entity.version();

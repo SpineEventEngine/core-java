@@ -21,15 +21,16 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.core.MessageId;
-import io.spine.core.Version;
+import io.spine.core.MessageQualifier;
+import io.spine.core.MessageWithContext;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.validate.NonValidated;
+import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -66,6 +67,8 @@ public final class EntityLifecycleMonitor<I,
                                           S extends Message,
                                           B extends ValidatingBuilder<S>>
         implements TransactionListener<I, E, S, B> {
+
+    private static final MessageQualifier UNKNOWN_MESSAGE = MessageQualifier.getDefaultInstance();
 
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessageIds;
@@ -106,7 +109,7 @@ public final class EntityLifecycleMonitor<I,
     }
 
     @Override
-    public void onBeforeCommit(E entity, S state, Version version, LifecycleFlags lifecycleFlags) {
+    public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
         // NOP.
     }
 
@@ -118,20 +121,33 @@ public final class EntityLifecycleMonitor<I,
     @Override
     public void onAfterCommit(EntityRecordChange change) {
         Set<MessageId> messageIds = ImmutableSet.copyOf(acknowledgedMessageIds);
-        Any newEntityId = change.getPreviousValue()
-                                .getEntityId();
-        I id = Identifier.unpack(newEntityId, repository.idClass());
-        repository.lifecycleOf(id)
+        repository.lifecycleOf(entityId)
                   .onStateChanged(change, messageIds);
     }
 
     @Override
     public void onTransactionFailed(Throwable t,
-                                    E entity,
-                                    @NonValidated S state,
-                                    Version version,
-                                    LifecycleFlags lifecycleFlags) {
-        // NOP.
+                                    EntityRecord entityRecord,
+                                    @Nullable Phase<I, ?> phase) {
+        if (t instanceof InvalidEntityStateException) {
+            ValidationError error = ((InvalidEntityStateException) t).getError()
+                                                                     .getValidationError();
+            MessageQualifier causeMessage;
+            MessageQualifier rootMessage;
+            if (phase != null) {
+                MessageWithContext<?, ?, ?> message = phase.message();
+                causeMessage = message.qualifier();
+                rootMessage = message.rootMessage();
+            } else {
+                causeMessage = UNKNOWN_MESSAGE;
+                rootMessage = UNKNOWN_MESSAGE;
+            }
+            repository.lifecycleOf(entityId)
+                      .onInvalidEntity(causeMessage,
+                                       rootMessage,
+                                       error,
+                                       entityRecord.getVersion());
+        }
     }
 
     /**

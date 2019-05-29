@@ -21,9 +21,9 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.validate.NonValidated;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A common contract for the {@linkplain Transaction transaction} listeners.
@@ -67,10 +67,7 @@ public interface TransactionListener<I,
      * @param lifecycleFlags
      *         a lifecycle flags to set to the entity during the commit
      */
-    void onBeforeCommit(E entity,
-                        @NonValidated S state,
-                        Version version,
-                        LifecycleFlags lifecycleFlags);
+    void onBeforeCommit(@NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked if the commit has failed.
@@ -88,8 +85,9 @@ public interface TransactionListener<I,
      *         the lifecycle flags updated during the transaction; after the rollback, the flags may
      *         be different
      */
-    void onTransactionFailed(Throwable t, E entity, @NonValidated S state,
-                             Version version, LifecycleFlags lifecycleFlags);
+    void onTransactionFailed(Throwable t,
+                             @NonValidated EntityRecord entityRecord,
+                             @Nullable Phase<I, ?> phase);
 
     /**
      * A callback invoked after a successful commit.
@@ -115,14 +113,14 @@ public interface TransactionListener<I,
         }
 
         @Override
-        public void onBeforeCommit(E entity, S state, Version version,
-                                   LifecycleFlags lifecycleFlags) {
+        public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
             // Do nothing.
         }
 
         @Override
-        public void onTransactionFailed(Throwable t, E entity, S state,
-                                        Version version, LifecycleFlags lifecycleFlags) {
+        public void onTransactionFailed(Throwable t,
+                                        EntityRecord record,
+                                        @Nullable Phase<I, ?> phase) {
             // Do nothing.
         }
 

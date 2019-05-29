@@ -23,9 +23,8 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
+import io.spine.core.MessageWithContext;
 import io.spine.server.command.DispatchCommand;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.MessageDiagInfo;
 
 import java.util.List;
 
@@ -33,8 +32,7 @@ import java.util.List;
  * A phase that dispatched a command to the entity in transaction.
  *
  * <p>The result of such dispatch is always a {@link List} of
- * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand(io.spine.server.type.CommandEnvelope)
- * events}.
+ * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand events}.
  *
  * @param <I>
  *         the type of entity ID
@@ -69,15 +67,8 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     }
 
     @Override
-    protected MessageDiagInfo diagnostics() {
-        CommandEnvelope command = dispatch.command();
-        String typeUrl = command.messageTypeName()
-                                .toUrl()
-                                .value();
-        return MessageDiagInfo
-                .newBuilder()
-                .setCommandId(command.id())
-                .setTypeUrl(typeUrl)
-                .vBuild();
+    protected MessageWithContext<?, ?, ?> message() {
+        return dispatch.command()
+                       .outerObject();
     }
 }
