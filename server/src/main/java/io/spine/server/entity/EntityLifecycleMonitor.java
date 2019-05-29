@@ -29,7 +29,6 @@ import io.spine.core.MessageWithContext;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -72,12 +71,12 @@ public final class EntityLifecycleMonitor<I,
 
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessageIds;
+    private final I entityId;
 
-    private @MonotonicNonNull I entityId;
-
-    private EntityLifecycleMonitor(Repository<I, ?> repository) {
+    private EntityLifecycleMonitor(Repository<I, ?> repository, I id) {
         this.repository = repository;
         this.acknowledgedMessageIds = newLinkedList();
+        this.entityId = id;
     }
 
     /**
@@ -90,9 +89,10 @@ public final class EntityLifecycleMonitor<I,
      E extends TransactionalEntity<I, S, B>,
      S extends Message,
      B extends ValidatingBuilder<S>>
-    TransactionListener<I, E, S, B> newInstance(Repository<I, ?> repository) {
+    TransactionListener<I, E, S, B> newInstance(Repository<I, ?> repository, I id) {
         checkNotNull(repository);
-        return new EntityLifecycleMonitor<>(repository);
+        checkNotNull(id);
+        return new EntityLifecycleMonitor<>(repository, id);
     }
 
     /**
@@ -162,12 +162,8 @@ public final class EntityLifecycleMonitor<I,
      * @throws IllegalStateException if the check fails
      */
     private void checkSameEntity(I entityId) throws IllegalStateException {
-        if (this.entityId == null) {
-            this.entityId = entityId;
-        } else {
-            checkState(this.entityId.equals(entityId),
-                       "Tried to reuse an instance of %s for multiple transactions.",
-                       EntityLifecycleMonitor.class.getSimpleName());
-        }
+        checkState(this.entityId.equals(entityId),
+                   "Tried to reuse an instance of %s for multiple transactions.",
+                   EntityLifecycleMonitor.class.getSimpleName());
     }
 }

@@ -99,7 +99,7 @@ class EventContextTest {
         @DisplayName("actor")
         void actor() {
             assertThat(context.actor())
-                    .isEqualTo(context.getCommandContext()
+                    .isEqualTo(context.getPastMessage()
                                       .getActorContext()
                                       .getActor());
         }

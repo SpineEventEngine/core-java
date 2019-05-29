@@ -161,7 +161,7 @@ public final class PmDispatcher {
         @Override
         protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
             PmTransaction<?, ?, ?> tx = new TestPmTransaction(manager);
-            TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
+            TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
             tx.setListener(listener);
             return tx;
         }
