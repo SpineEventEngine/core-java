@@ -146,7 +146,7 @@ public abstract class Transaction<I,
      */
     private final List<Phase<I, ?>> phases = newLinkedList();
 
-    private TransactionListener<I, E, S, B> transactionListener;
+    private TransactionListener<I> transactionListener;
 
     /**
      * Creates a new instance of {@code Transaction} and
@@ -349,7 +349,7 @@ public abstract class Transaction<I,
      */
     void rollback(Throwable cause, @Nullable Phase<I, ?> atPhase) {
         beforeRollback(cause);
-        TransactionListener<I, E, S, B> listener = listener();
+        TransactionListener<I> listener = listener();
         @NonValidated EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(Identifier.pack(entity.id()))
@@ -484,7 +484,7 @@ public abstract class Transaction<I,
      *
      * <p>By default, the returned listener {@linkplain SilentWitness does nothing}.
      */
-    private TransactionListener<I, E, S, B> listener() {
+    private TransactionListener<I> listener() {
         return transactionListener;
     }
 
@@ -496,7 +496,7 @@ public abstract class Transaction<I,
      * @param listener
      *         the listener to use in this transaction
      */
-    public void setListener(TransactionListener<I, E, S, B> listener) {
+    public void setListener(TransactionListener<I> listener) {
         checkNotNull(listener);
         this.transactionListener = listener;
     }

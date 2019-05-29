@@ -133,7 +133,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setId(historyId)
                 .setKind(entityKind)
-                .build();
+                .vBuild();
         postEvent(event);
     }
 
@@ -149,12 +149,12 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setEntityId(historyId.getEntityId())
                 .setTypeUrl(historyId.getTypeUrl())
-                .build();
+                .vBuild();
         AssignTargetToCommand command = AssignTargetToCommand
                 .newBuilder()
                 .setId(commandId)
                 .setTarget(target)
-                .build();
+                .vBuild();
         postCommand(command);
     }
 
@@ -169,7 +169,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setCommand(command)
-                .build();
+                .vBuild();
         postCommand(systemCommand);
     }
 
@@ -183,7 +183,7 @@ public class EntityLifecycle {
         CommandHandled systemEvent = CommandHandled
                 .newBuilder()
                 .setId(command.getId())
-                .build();
+                .vBuild();
         postEvent(systemEvent);
     }
 
@@ -200,7 +200,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
-                .build();
+                .vBuild();
         postEvent(systemEvent);
     }
 
@@ -215,7 +215,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEvent(event)
-                .build();
+                .vBuild();
         postCommand(systemCommand);
     }
 
@@ -225,7 +225,7 @@ public class EntityLifecycle {
                 .setReceiver(historyId)
                 .setEventId(event.getId())
                 .setWhenImported(currentTime())
-                .build();
+                .vBuild();
         postEvent(systemEvent);
     }
 
@@ -240,7 +240,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEvent(event)
-                .build();
+                .vBuild();
         postCommand(systemCommand);
     }
 
@@ -303,7 +303,7 @@ public class EntityLifecycle {
                     .setNewState(newState)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .setNewVersion(newVersion)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
@@ -324,7 +324,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
@@ -345,7 +345,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
@@ -366,7 +366,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
@@ -387,7 +387,7 @@ public class EntityLifecycle {
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
@@ -417,11 +417,11 @@ public class EntityLifecycle {
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
             return builder.setEventId(eventId)
-                          .build();
+                          .vBuild();
         } else if (messageId instanceof CommandId) {
             CommandId commandId = (CommandId) messageId;
             return builder.setCommandId(commandId)
-                          .build();
+                          .vBuild();
         } else {
             throw newIllegalArgumentException(
                     "Unexpected message ID of type %s. Expected EventId or CommandId.",

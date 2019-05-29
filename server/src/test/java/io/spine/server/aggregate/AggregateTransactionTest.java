@@ -86,10 +86,7 @@ class AggregateTransactionTest
                           Project,
                           Project.Builder>
     createTxWithListener(Aggregate<ProjectId, Project, Project.Builder> entity,
-                         TransactionListener<ProjectId,
-                                             Aggregate<ProjectId, Project, Project.Builder>,
-                                             Project,
-                                             Project.Builder> listener) {
+                         TransactionListener<ProjectId> listener) {
         AggregateTransaction<ProjectId, Project, Project.Builder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);

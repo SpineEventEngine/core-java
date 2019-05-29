@@ -147,7 +147,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
                         .add(ConstraintViolation
                                      .newBuilder()
                                      .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY)
-                                     .build())
+                                     .vBuild())
                         .build();
             }
             return violations;
@@ -200,7 +200,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         private void addViolation(String message) {
             result.add(ConstraintViolation.newBuilder()
                                           .setMsgFormat(message)
-                                          .build());
+                                          .vBuild());
         }
     }
 }

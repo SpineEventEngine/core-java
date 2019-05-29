@@ -79,14 +79,8 @@ class PmTransactionTest
             Project,
             Project.Builder
             >
-    createTxWithListener(
-            ProcessManager<ProjectId, Project, Project.Builder> entity,
-            TransactionListener<
-                    ProjectId,
-                    ProcessManager<ProjectId, Project, Project.Builder>,
-                    Project,
-                    Project.Builder
-                    > listener) {
+    createTxWithListener(ProcessManager<ProjectId, Project, Project.Builder> entity,
+                         TransactionListener<ProjectId> listener) {
         PmTransaction<ProjectId, Project, Project.Builder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);

@@ -100,7 +100,7 @@ public abstract class TransactionTest<I,
                                                                  Version version);
 
     protected abstract Transaction<I, E, S, B>
-    createTxWithListener(E entity, TransactionListener<I, E, S, B> listener);
+    createTxWithListener(E entity, TransactionListener<I> listener);
 
     protected abstract E createEntity();
 
@@ -266,7 +266,7 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("notify listener during transaction execution")
     void notifyListenerDuringExecution() {
-        TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
+        TransactionListener<I> listener = mock(TransactionListener.class);
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTxWithListener(entity, listener);
         Event event = withMessage(createEventMessage());
