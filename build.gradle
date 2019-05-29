@@ -286,3 +286,6 @@ apply from: spineJacocoScript
 
 // Generate a repository-wide report of 3rd-party dependencies and their licenses.
 apply from: deps.scripts.repoLicenseReport
+
+// Generate a `pom.xml` file containing first-level dependency of all projects in the repository.
+apply from: deps.scripts.generatePom
