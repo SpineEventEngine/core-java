@@ -162,6 +162,7 @@ enum CommandValidationError {
 // Data from a `Command` which is accessible from the end user code to which
 // the command was dispatched.
 message DispatchedCommand {
+    option deprecated = true;
 
     // The message of the command.
     google.protobuf.Any message = 1 [(required) = true];

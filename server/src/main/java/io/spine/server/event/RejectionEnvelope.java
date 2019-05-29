@@ -22,14 +22,12 @@ package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.ActorContext;
-import io.spine.core.CommandContext;
-import io.spine.core.DispatchedCommand;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
@@ -46,8 +44,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.base.Throwables.getStackTraceAsString;
-import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
@@ -122,7 +118,7 @@ public final class RejectionEnvelope
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
         RejectionMessage thrownMessage = throwableMessage.messageThrown();
-        RejectionEventContext context = rejectionContext(origin.message(), throwableMessage);
+        RejectionEventContext context = rejectionContext(origin.outerObject(), throwableMessage);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
     }
@@ -131,21 +127,21 @@ public final class RejectionEnvelope
      * Constructs a new {@link RejectionEventContext} from the given command message and
      * {@link ThrowableMessage}.
      *
-     * @param commandMessage
+     * @param command
      *         the rejected command
      * @param throwableMessage
      *         the thrown rejection
      * @return the new instance of {@code RejectionEventContext}
      */
-    private static RejectionEventContext rejectionContext(CommandMessage commandMessage,
+    private static RejectionEventContext rejectionContext(Command command,
                                                           ThrowableMessage throwableMessage) {
-        checkNotNull(commandMessage);
+        checkNotNull(command);
         checkNotNull(throwableMessage);
 
         String stacktrace = getStackTraceAsString(throwableMessage);
         return RejectionEventContext
                 .newBuilder()
-                .setCommandMessage(pack(commandMessage))
+                .setCommand(command)
                 .setStacktrace(stacktrace)
                 .build();
     }
@@ -200,17 +196,9 @@ public final class RejectionEnvelope
      *
      * @return the rejected command
      */
-    public DispatchedCommand getOrigin() {
-        EventContext context = context();
-        RejectionEventContext rejectionContext = context().getRejection();
-        Any commandMessage = rejectionContext.getCommandMessage();
-        CommandContext commandContext = context.getCommandContext();
-        DispatchedCommand result = DispatchedCommand
-                .newBuilder()
-                .setMessage(commandMessage)
-                .setContext(commandContext)
-                .build();
-        return result;
+    public Command getOrigin() {
+        return context().getRejection()
+                        .getCommand();
     }
 
     /**
@@ -218,9 +206,10 @@ public final class RejectionEnvelope
      *
      * @return the rejected command message
      */
-    public Message getOriginMessage() {
-        RejectionEventContext context = context().getRejection();
-        Any commandMessage = context.getCommandMessage();
-        return unpack(commandMessage);
+    public CommandMessage getOriginMessage() {
+        CommandMessage commandMessage = context().getRejection()
+                                                 .getCommand()
+                                                 .enclosedMessage();
+        return commandMessage;
     }
 }

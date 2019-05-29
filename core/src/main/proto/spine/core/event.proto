@@ -161,11 +161,13 @@ message EventContext {
 //
 message RejectionEventContext {
 
-    // The message of the command which caused the rejection.
-    google.protobuf.Any command_message = 1;
+    core.Command command = 3;
 
     // A stacktrace of from the code, which generated the rejection message (if available).
     string stacktrace = 2;
+
+    // The message of the command which caused the rejection.
+    google.protobuf.Any command_message = 1 [deprecated = true];
 }
 
 // Enumeration of possible event validation technical error reasons.

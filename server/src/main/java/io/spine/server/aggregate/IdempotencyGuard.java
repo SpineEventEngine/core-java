@@ -29,6 +29,8 @@ import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.function.Predicate;
+
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
  * If it was, the exception is thrown.
@@ -90,10 +92,16 @@ final class IdempotencyGuard {
      */
     private boolean didHandleRecently(EventEnvelope event) {
         EventId eventId = event.id();
-        boolean found = aggregate.historyContains(
-                e -> eventId.equals(e.context()
-                                     .getEventId())
-        );
+        Predicate<Event> causedByEvent = e -> e.context()
+                                               .getPastMessage()
+                                               .qualifier()
+                                               .isEvent();
+        Predicate<Event> originHasGivenId = e -> e.context()
+                                                  .getPastMessage()
+                                                  .qualifier()
+                                                  .asEventId()
+                                                  .equals(eventId);
+        boolean found = aggregate.historyContains(causedByEvent.and(originHasGivenId));
         return found;
     }
 
@@ -112,10 +120,16 @@ final class IdempotencyGuard {
      */
     private boolean didHandleRecently(CommandEnvelope command) {
         CommandId commandId = command.id();
-        boolean found = aggregate.historyContains(
-                e -> commandId.equals(e.context()
-                                       .getCommandId())
-        );
+        Predicate<Event> causedByCommand = e -> e.context()
+                                                 .getPastMessage()
+                                                 .qualifier()
+                                                 .isCommand();
+        Predicate<Event> originHasGivenId = e -> e.context()
+                                                  .getPastMessage()
+                                                  .qualifier()
+                                                  .asCommandId()
+                                                  .equals(commandId);
+        boolean found = aggregate.historyContains(causedByCommand.and(originHasGivenId));
         return found;
     }
 }

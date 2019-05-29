@@ -90,8 +90,8 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      * @return the event without enrichments
      */
     @SuppressWarnings({
-            "ClassReferencesSubclass" /* `Event` is the only case of this mixin. */,
-            "CheckReturnValue" /* calling builder */
+            "ClassReferencesSubclass", //`Event` is the only case of this mixin.
+            "deprecation" // Uses the `event_context` field to be sure to clean up old data.
     })
     @Internal
     default Event clearEnrichments() {

@@ -20,7 +20,7 @@
 
 package io.spine.server.type;
 
-import com.google.protobuf.Any;
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Enrichment;
@@ -162,7 +162,8 @@ public final class EventEnvelope
     public MessageClass originClass() {
         if (isRejection()) {
             RejectionEventContext rejection = context().getRejection();
-            Any commandMessage = rejection.getCommandMessage();
+            CommandMessage commandMessage = rejection.getCommand()
+                                                     .enclosedMessage();
             return CommandClass.of(commandMessage);
         } else {
             return EmptyClass.instance();
