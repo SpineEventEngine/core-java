@@ -46,8 +46,9 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.MessageQualifier;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -558,9 +559,13 @@ class StandTest extends TenantAwareTest {
             Event event = action.newEvent();
             assertNotNull(event);
 
-            CommandContext eventOrigin = event.context()
-                                              .getCommandContext();
-            assertThat(eventOrigin).isEqualTo(cmd.context());
+            EventContext context = event.context();
+            MessageQualifier origin = context.getPastMessage()
+                                             .qualifier();
+            assertThat(origin.asCommandId()).isEqualTo(cmd.id());
+            assertThat(origin.getMessageTypeUrl()).isEqualTo(cmd.command()
+                                                                .typeUrl()
+                                                                .value());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
 

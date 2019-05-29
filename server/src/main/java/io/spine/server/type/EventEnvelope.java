@@ -130,6 +130,7 @@ public final class EventEnvelope
                 .newBuilder()
                 .setQualifier(eventQualifier)
                 .setGrandOrigin(context().getPastMessage())
+                .setActorContext(actorContext())
                 .vBuild();
         builder.setPastMessage(origin);
     }
