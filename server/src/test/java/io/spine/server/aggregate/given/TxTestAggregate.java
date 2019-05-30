@@ -32,7 +32,6 @@ import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -46,21 +45,21 @@ public class TxTestAggregate
         extends Aggregate<ProjectId, Project, Project.Builder> {
 
     private final List<Message> receivedEvents = newArrayList();
-    private final List<ConstraintViolation> violations;
+    private final ImmutableList<ConstraintViolation> violations;
 
     public TxTestAggregate(ProjectId id) {
-        this(id, null);
+        this(id, ImmutableList.of());
     }
 
-    public TxTestAggregate(ProjectId id, @Nullable List<ConstraintViolation> violations) {
+    public TxTestAggregate(ProjectId id, ImmutableList<ConstraintViolation> violations) {
         super(id);
         this.violations = violations;
     }
 
     @Override
     protected List<ConstraintViolation> checkEntityState(Project newState) {
-        if (violations != null) {
-            return ImmutableList.copyOf(violations);
+        if (!violations.isEmpty()) {
+            return violations;
         }
         return super.checkEntityState(newState);
     }

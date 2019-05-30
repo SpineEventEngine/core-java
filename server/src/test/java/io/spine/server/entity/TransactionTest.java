@@ -308,8 +308,8 @@ public abstract class TransactionTest<I,
     }
 
     @Nested
-    @DisplayName("propagate exception as ISE")
-    class PropagateExceptionAsIse {
+    @DisplayName("propagate exception as `IllegalStateException`")
+    class PropagatingExceptions {
 
         @Test
         @DisplayName("on phase failure")
