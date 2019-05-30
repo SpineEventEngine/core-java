@@ -74,9 +74,10 @@ class AggregateTransactionTest
     protected Transaction<ProjectId,
                           Aggregate<ProjectId, Project, Project.Builder>,
                           Project,
-                          Project.Builder> createTxWithState(
-            Aggregate<ProjectId, Project, Project.Builder> entity, Project state,
-            Version version) {
+                          Project.Builder>
+    createTxWithState(Aggregate<ProjectId, Project, Project.Builder> entity,
+                      Project state,
+                      Version version) {
         return new AggregateTransaction<>(entity, state, version);
     }
 
@@ -122,7 +123,7 @@ class AggregateTransactionTest
 
         TestAggregate aggregate = (TestAggregate) entity;
         Message actualMessage = unpack(event.getMessage());
-        assertTrue(aggregate.getReceivedEvents()
+        assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
     }
 
@@ -195,7 +196,7 @@ class AggregateTransactionTest
             throw new RuntimeException("that tests the tx behaviour");
         }
 
-        private List<Message> getReceivedEvents() {
+        private List<Message> receivedEvents() {
             return ImmutableList.copyOf(receivedEvents);
         }
     }

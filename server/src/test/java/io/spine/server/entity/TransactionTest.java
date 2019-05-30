@@ -95,12 +95,11 @@ public abstract class TransactionTest<I,
 
     protected abstract Transaction<I, E, S, B> createTx(E entity);
 
-    protected abstract Transaction<I, E, S, B> createTxWithState(E entity,
-                                                                 S state,
-                                                                 Version version);
+    protected abstract
+    Transaction<I, E, S, B> createTxWithState(E entity, S state, Version version);
 
-    protected abstract Transaction<I, E, S, B>
-    createTxWithListener(E entity, TransactionListener<I, E, S, B> listener);
+    protected abstract
+    Transaction<I, E, S, B> createTxWithListener(E entity, TransactionListener<I, E, S, B> listener);
 
     protected abstract E createEntity();
 
