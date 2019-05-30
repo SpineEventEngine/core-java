@@ -27,7 +27,7 @@ import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.procman.given.tx.TestProcessManager;
+import io.spine.server.procman.given.TxTestProcessManager;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
@@ -97,13 +97,14 @@ class PmTransactionTest
 
     @Override
     protected ProcessManager<ProjectId, Project, Project.Builder> createEntity() {
-        return new TestProcessManager(ID);
+        return new TxTestProcessManager(ID);
     }
 
     @Override
-    protected ProcessManager<ProjectId, Project, Project.Builder> createEntity(
-            ImmutableList<ConstraintViolation> violations) {
-        return new TestProcessManager(ID, violations);
+    protected
+    ProcessManager<ProjectId, Project, Project.Builder>
+    createEntity(ImmutableList<ConstraintViolation> violations) {
+        return new TxTestProcessManager(ID, violations);
     }
 
     @Override
@@ -115,13 +116,11 @@ class PmTransactionTest
     }
 
     @Override
-    protected void checkEventReceived(
-            ProcessManager<ProjectId, Project, Project.Builder> entity,
-            Event event) {
-
-        TestProcessManager aggregate = (TestProcessManager) entity;
+    protected void
+    checkEventReceived(ProcessManager<ProjectId, Project, Project.Builder> entity, Event event) {
+        TxTestProcessManager aggregate = (TxTestProcessManager) entity;
         Message actualMessage = unpack(event.getMessage());
-        assertTrue(aggregate.getReceivedEvents()
+        assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
     }
 

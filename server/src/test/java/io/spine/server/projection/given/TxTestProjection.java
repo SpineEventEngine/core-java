@@ -18,17 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.tx;
+package io.spine.server.projection.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
-import io.spine.server.procman.ProcessManager;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.event.PmProjectCreated;
-import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,21 +35,23 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
-public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, Project.Builder> {
+/**
+ * Test environment projection for {@link io.spine.server.projection.ProjectionTransactionTest}.
+ */
+public class TxTestProjection
+        extends Projection<ProjectId, Project, Project.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
-    private final @Nullable List<ConstraintViolation> violations;
+    private final List<ConstraintViolation> violations;
 
-    public TestProcessManager(ProjectId id) {
+    public TxTestProjection(ProjectId id) {
         this(id, null);
     }
 
-    public TestProcessManager(ProjectId id, @Nullable List<ConstraintViolation> violations) {
+    public TxTestProjection(ProjectId id,
+                            @Nullable ImmutableList<ConstraintViolation> violations) {
         super(id);
-        this.violations = violations == null
-                          ? null
-                          : ImmutableList.copyOf(violations);
+        this.violations = violations;
     }
 
     @Override
@@ -61,22 +62,21 @@ public class TestProcessManager
         return super.checkEntityState(newState);
     }
 
-    @React
-    Nothing event(PmProjectCreated event) {
+    @Subscribe
+    void event(PrjProjectCreated event) {
         receivedEvents.add(event);
         Project newState = Project.newBuilder(state())
                                   .setId(event.getProjectId())
                                   .build();
         builder().mergeFrom(newState);
-        return nothing();
     }
 
-    @React
-    Nothing event(PmTaskAdded event) {
-        throw new RuntimeException("that tests the tx behaviour for process manager");
+    @Subscribe
+    void event(PrjTaskAdded event) {
+        throw new RuntimeException("that tests the projection tx behaviour");
     }
 
-    public List<Message> getReceivedEvents() {
+    public List<Message> receivedEvents() {
         return ImmutableList.copyOf(receivedEvents);
     }
 }

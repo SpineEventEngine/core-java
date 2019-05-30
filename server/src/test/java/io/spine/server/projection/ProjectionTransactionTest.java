@@ -28,7 +28,7 @@ import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.projection.given.ProjectionTransactionTestEnv.TestProjection;
+import io.spine.server.projection.given.TxTestProjection;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.test.projection.Project;
@@ -97,13 +97,13 @@ class ProjectionTransactionTest
 
     @Override
     protected Projection<ProjectId, Project, Project.Builder> createEntity() {
-        return new TestProjection(ID);
+        return new TxTestProjection(ID);
     }
 
     @Override
     protected Projection<ProjectId, Project, Project.Builder>
     createEntity(ImmutableList<ConstraintViolation> violations) {
-        return new TestProjection(ID, violations);
+        return new TxTestProjection(ID, violations);
     }
 
     @Override
@@ -118,9 +118,9 @@ class ProjectionTransactionTest
     protected void checkEventReceived(Projection<ProjectId, Project, Project.Builder> entity,
                                       Event event) {
 
-        TestProjection aggregate = (TestProjection) entity;
+        TxTestProjection aggregate = (TxTestProjection) entity;
         Message actualMessage = unpack(event.getMessage());
-        assertTrue(aggregate.getReceivedEvents()
+        assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
     }
 

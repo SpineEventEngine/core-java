@@ -22,31 +22,23 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.Given;
-import io.spine.server.command.Assign;
+import io.spine.server.aggregate.given.TxTestAggregate;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
@@ -99,13 +91,13 @@ class AggregateTransactionTest
 
     @Override
     protected Aggregate<ProjectId, Project, Project.Builder> createEntity() {
-        return new TestAggregate(ID);
+        return new TxTestAggregate(ID);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, Project.Builder> createEntity(
-            ImmutableList<ConstraintViolation> violations) {
-        return new TestAggregate(ID, violations);
+    protected Aggregate<ProjectId, Project, Project.Builder>
+    createEntity(ImmutableList<ConstraintViolation> violations) {
+        return new TxTestAggregate(ID, violations);
     }
 
     @Override
@@ -117,14 +109,13 @@ class AggregateTransactionTest
     }
 
     @Override
-    protected void checkEventReceived(
-            Aggregate<ProjectId, Project, Project.Builder> entity,
-            Event event) {
-
-        TestAggregate aggregate = (TestAggregate) entity;
+    protected
+    void checkEventReceived(Aggregate<ProjectId, Project, Project.Builder> entity, Event event) {
+        TxTestAggregate aggregate = (TxTestAggregate) entity;
         Message actualMessage = unpack(event.getMessage());
-        assertTrue(aggregate.receivedEvents()
-                            .contains(actualMessage));
+
+        assertThat(aggregate.receivedEvents())
+                .contains(actualMessage);
     }
 
     @Override
@@ -150,54 +141,4 @@ class AggregateTransactionTest
         advanceVersionFromEvent();
     }
 
-    @SuppressWarnings("unused")  // Methods accessed via reflection.
-    static class TestAggregate
-            extends Aggregate<ProjectId, Project, Project.Builder> {
-
-        private final List<Message> receivedEvents = newArrayList();
-        private final List<ConstraintViolation> violations;
-
-        private TestAggregate(ProjectId id) {
-            this(id, null);
-        }
-
-        private TestAggregate(ProjectId id, @Nullable List<ConstraintViolation> violations) {
-            super(id);
-            this.violations = violations;
-        }
-
-        @Override
-        protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if (violations != null) {
-                return ImmutableList.copyOf(violations);
-            }
-            return super.checkEntityState(newState);
-        }
-
-        @Assign
-        AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
-            return projectCreated(cmd.getProjectId(), cmd.getName());
-        }
-
-        @Apply
-        private void event(AggProjectCreated event) {
-            receivedEvents.add(event);
-            Project newState = Project
-                    .newBuilder(state())
-                    .setId(event.getProjectId())
-                    .setName(event.getName())
-                    .build();
-            builder().mergeFrom(newState);
-        }
-
-        @Apply
-        @SuppressWarnings("MethodMayBeStatic")
-        private void event(AggTaskAdded event) {
-            throw new RuntimeException("that tests the tx behaviour");
-        }
-
-        private List<Message> receivedEvents() {
-            return ImmutableList.copyOf(receivedEvents);
-        }
-    }
 }
