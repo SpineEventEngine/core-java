@@ -140,4 +140,12 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
         ActorContext result = eventContext.actorContext();
         return result;
     }
+
+    @Override
+    default MessageQualifier qualifier() {
+        return MessageWithContext.super.qualifier()
+                                       .toBuilder()
+                                       .setVersion(context().getVersion())
+                                       .vBuild();
+    }
 }
