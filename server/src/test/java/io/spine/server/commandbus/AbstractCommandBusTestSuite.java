@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
