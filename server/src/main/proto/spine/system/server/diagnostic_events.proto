@@ -10,12 +10,11 @@ option java_outer_classname = "DiagnosticEventsProto";
 option java_multiple_files = true;
 
 import "spine/core/diagnostics.proto";
-import "spine/system/server/diagnostics.proto";
 import "spine/validate/validation_error.proto";
 
 message ConstraintViolated {
 
-    EntityQualifier entity = 1 [(required) = false];
+    core.EntityQualifier entity = 1 [(required) = false];
 
     core.MessageQualifier last_message = 2 [(required) = false];
 

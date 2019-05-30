@@ -28,6 +28,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.EntityQualifier;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
@@ -38,7 +39,6 @@ import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.EntityQualifier;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.command.AssignTargetToCommand;
 import io.spine.system.server.command.DispatchCommandToHandler;
@@ -274,7 +274,7 @@ public class EntityLifecycle {
                                       Version version) {
         EntityQualifier qualifier = EntityQualifier
                 .newBuilder()
-                .setId(historyId.getEntityId())
+                .setId(historyId.getEntityId().getId())
                 .setTypeUrl(historyId.getTypeUrl())
                 .setVersion(version)
                 .buildPartial();
@@ -391,12 +391,12 @@ public class EntityLifecycle {
             postEvent(event);
         }
     }
-    
+
     protected void postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
         filtered.ifPresent(systemWriteSide::postEvent);
     }
-    
+
     protected void postCommand(CommandMessage command) {
         systemWriteSide.postCommand(command);
     }
