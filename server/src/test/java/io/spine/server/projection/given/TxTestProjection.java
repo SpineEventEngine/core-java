@@ -71,8 +71,14 @@ public class TxTestProjection
         builder().mergeFrom(newState);
     }
 
+    /**
+     * Always throws {@code RuntimeException} to emulate an error in
+     * a subscribing method of a Projection.
+     *
+     * @see io.spine.server.projection.ProjectionTransactionTest#createEventThatFailsInHandler
+     */
     @Subscribe
-    void event(PrjTaskAdded event) {
+    void event(PrjTaskAdded e) {
         throw new RuntimeException("that tests the projection tx behaviour");
     }
 

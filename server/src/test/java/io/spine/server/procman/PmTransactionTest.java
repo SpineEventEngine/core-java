@@ -132,7 +132,7 @@ class PmTransactionTest
     }
 
     @Override
-    protected EventMessage createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventThatFailsInHandler() {
         return PmTaskAdded.newBuilder()
                           .setProjectId(ID)
                           .build();

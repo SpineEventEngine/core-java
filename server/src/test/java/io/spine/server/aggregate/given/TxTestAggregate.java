@@ -80,6 +80,12 @@ public class TxTestAggregate
         builder().mergeFrom(newState);
     }
 
+    /**
+     * Always throws {@code RuntimeException} to emulate an error in an applier method of
+     * a failing Aggregate.
+     *
+     * @see io.spine.server.aggregate.AggregateTransactionTest#createEventThatFailsInHandler()
+     */
     @Apply
     @SuppressWarnings("MethodMayBeStatic")
     private void event(AggTaskAdded event) {

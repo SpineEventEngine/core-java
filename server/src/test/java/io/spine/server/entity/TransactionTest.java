@@ -111,7 +111,7 @@ public abstract class TransactionTest<I,
 
     protected abstract EventMessage createEventMessage();
 
-    protected abstract EventMessage createEventMessageThatFailsInHandler();
+    protected abstract EventMessage createEventThatFailsInHandler();
 
     protected abstract void applyEvent(Transaction tx, Event event);
 
@@ -318,7 +318,7 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
-            Event event = withMessage(createEventMessageThatFailsInHandler());
+            Event event = withMessage(createEventThatFailsInHandler());
 
             assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
         }
@@ -354,7 +354,7 @@ public abstract class TransactionTest<I,
 
             Transaction<I, E, S, B> tx = createTx(entity);
 
-            Event event = withMessage(createEventMessageThatFailsInHandler());
+            Event event = withMessage(createEventThatFailsInHandler());
             try {
                 applyEvent(tx, event);
                 fail("Expected an `Exception` due to a failed phase execution.");

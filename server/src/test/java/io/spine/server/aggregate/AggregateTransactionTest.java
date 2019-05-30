@@ -124,7 +124,7 @@ class AggregateTransactionTest
     }
 
     @Override
-    protected EventMessage createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventThatFailsInHandler() {
         return Given.EventMessage.taskAdded(ID);
     }
 

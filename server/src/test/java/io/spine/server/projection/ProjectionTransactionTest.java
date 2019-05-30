@@ -132,7 +132,7 @@ class ProjectionTransactionTest
     }
 
     @Override
-    protected EventMessage createEventMessageThatFailsInHandler() {
+    protected EventMessage createEventThatFailsInHandler() {
         return PrjTaskAdded.newBuilder()
                            .setProjectId(ID)
                            .build();

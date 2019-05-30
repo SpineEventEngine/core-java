@@ -74,6 +74,12 @@ public class TxTestProcessManager
         return nothing();
     }
 
+    /**
+     * Always throws {@code RuntimeException} to emulate the case of an error in
+     * a reacting method of a Process Manager.
+     *
+     * @see io.spine.server.procman.PmTransactionTest#createEventThatFailsInHandler()
+     */
     @React
     Nothing event(PmTaskAdded event) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
