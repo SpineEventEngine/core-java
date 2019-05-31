@@ -19,9 +19,7 @@
  */
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
@@ -30,10 +28,7 @@ import io.spine.server.entity.TransactionTest;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.PmState;
 import io.spine.server.entity.given.tx.TxProcessManager;
-import io.spine.server.entity.given.tx.event.TxCreated;
-import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -45,10 +40,6 @@ class PmTransactionTest
                                 ProcessManager<Id, PmState, PmState.Builder>,
                                 PmState,
                                 PmState.Builder> {
-
-    private static final Id ID = Id.newBuilder()
-                                   .setId("procman-transaction-should-project")
-                                   .build();
 
     @Override
     protected Transaction<Id,
@@ -64,9 +55,9 @@ class PmTransactionTest
                           ProcessManager<Id, PmState, PmState.Builder>,
                           PmState,
                           PmState.Builder>
-    createTxWithState(ProcessManager<Id, PmState, PmState.Builder> entity,
-                      PmState state,
-                      Version version) {
+    createTx(ProcessManager<Id, PmState, PmState.Builder> entity,
+             PmState state,
+             Version version) {
         return new PmTransaction<>(entity, state, version);
     }
 
@@ -75,11 +66,11 @@ class PmTransactionTest
                           ProcessManager<Id, PmState, PmState.Builder>,
                           PmState,
                           PmState.Builder>
-    createTxWithListener(ProcessManager<Id, PmState, PmState.Builder> entity,
-                         TransactionListener<Id,
-                                             ProcessManager<Id, PmState, PmState.Builder>,
-                                             PmState,
-                                             PmState.Builder> listener) {
+    createTx(ProcessManager<Id, PmState, PmState.Builder> entity,
+             TransactionListener<Id,
+                     ProcessManager<Id, PmState, PmState.Builder>,
+                     PmState,
+                     PmState.Builder> listener) {
         PmTransaction<Id, PmState, PmState.Builder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);
@@ -88,20 +79,13 @@ class PmTransactionTest
 
     @Override
     protected ProcessManager<Id, PmState, PmState.Builder> createEntity() {
-        return new TxProcessManager(ID);
-    }
-
-    @Override
-    protected
-    ProcessManager<Id, PmState, PmState.Builder>
-    createEntity(ImmutableList<ConstraintViolation> violations) {
-        return new TxProcessManager(ID, violations);
+        return new TxProcessManager(id());
     }
 
     @Override
     protected PmState newState() {
         return PmState.newBuilder()
-                             .setId(ID)
+                             .setId(id())
                              .setName("The new project name for procman tx tests")
                              .build();
     }
@@ -113,20 +97,6 @@ class PmTransactionTest
         Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
-    }
-
-    @Override
-    protected EventMessage createEventMessage() {
-        return TxCreated.newBuilder()
-                        .setId(ID)
-                        .build();
-    }
-
-    @Override
-    protected EventMessage createEventThatFailsInHandler() {
-        return TxErrorRequested.newBuilder()
-                               .setId(ID)
-                               .build();
     }
 
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})

@@ -29,7 +29,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.given.tx.command.TxCreate;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
-import io.spine.validate.ConstraintViolation;
+import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 
 import java.util.List;
 
@@ -41,35 +41,17 @@ import static com.google.common.collect.Lists.newArrayList;
 public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Builder> {
 
     private final List<Message> receivedEvents = newArrayList();
-    private final ImmutableList<ConstraintViolation> violations;
 
     public TxAggregate(Id id) {
-        this(id, ImmutableList.of());
-    }
-
-    public TxAggregate(Id id, ImmutableList<ConstraintViolation> violations) {
         super(id);
-        this.violations = violations;
-    }
-
-    @Override
-    protected List<ConstraintViolation> checkEntityState(AggregateState newState) {
-        if (!violations.isEmpty()) {
-            return violations;
-        }
-        return super.checkEntityState(newState);
     }
 
     @Assign
     TxCreated handle(TxCreate cmd, CommandContext ctx) {
-        return projectCreated(cmd.getId(), cmd.getName());
-    }
-
-    public static TxCreated projectCreated(Id id, String projectName) {
-        return TxCreated.newBuilder()
-                        .setId(id)
-                        .setName(projectName)
-                        .build();
+        return TxCreated
+                .newBuilder()
+                .setId(cmd.getId())
+                .build();
     }
 
     @Apply
@@ -88,12 +70,19 @@ public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Bu
      * Always throws {@code RuntimeException} to emulate an error in an applier method of
      * a failing Aggregate.
      *
-     * @see io.spine.server.aggregate.AggregateTransactionTest#createEventThatFailsInHandler()
+     * @see io.spine.server.aggregate.AggregateTransactionTest#failingInHandler()
      */
     @Apply
     @SuppressWarnings("MethodMayBeStatic")
     private void event(TxErrorRequested e) {
         throw new RuntimeException("that tests the tx behaviour");
+    }
+
+    @Apply
+    private void event(TxStateErrorRequested e) {
+        // By convention the first field of state is required.
+        // Clearing it should fail the validation when the transaction is committed.
+        builder().clearId();
     }
 
     public List<Message> receivedEvents() {

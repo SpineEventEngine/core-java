@@ -264,7 +264,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         a state object to replace the current state
      * @return the violation constraints
      */
-    protected List<ConstraintViolation> checkEntityState(S newState) {
+    protected final List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
         return MessageValidator.newInstance(newState)
                                .validate();

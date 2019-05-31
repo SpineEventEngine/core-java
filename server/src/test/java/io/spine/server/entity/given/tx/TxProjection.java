@@ -25,9 +25,9 @@ import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
+import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
+import io.spine.server.event.React;
 import io.spine.server.projection.Projection;
-import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -39,24 +39,9 @@ import static com.google.common.collect.Lists.newLinkedList;
 public class TxProjection extends Projection<Id, ProjectionState, ProjectionState.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
-    private final List<ConstraintViolation> violations;
 
     public TxProjection(Id id) {
-        this(id, null);
-    }
-
-    public TxProjection(Id id,
-                        @Nullable ImmutableList<ConstraintViolation> violations) {
         super(id);
-        this.violations = violations;
-    }
-
-    @Override
-    protected List<ConstraintViolation> checkEntityState(ProjectionState newState) {
-        if (violations != null) {
-            return ImmutableList.copyOf(violations);
-        }
-        return super.checkEntityState(newState);
     }
 
     @Subscribe
@@ -74,11 +59,18 @@ public class TxProjection extends Projection<Id, ProjectionState, ProjectionStat
      * Always throws {@code RuntimeException} to emulate an error in
      * a subscribing method of a Projection.
      *
-     * @see io.spine.server.projection.ProjectionTransactionTest#createEventThatFailsInHandler
+     * @see io.spine.server.projection.ProjectionTransactionTest#failingInHandler
      */
     @Subscribe
     void event(TxErrorRequested e) {
         throw new RuntimeException("that tests the projection tx behaviour");
+    }
+
+    @React
+    void event(TxStateErrorRequested e) {
+        // By convention the first field of state is required.
+        // Clearing it should fail the validation when the transaction is committed.
+        builder().clearId();
     }
 
     public List<Message> receivedEvents() {

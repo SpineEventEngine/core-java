@@ -24,11 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
+import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
-import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -40,25 +39,9 @@ import static com.google.common.collect.Lists.newLinkedList;
 public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
-    private final @Nullable List<ConstraintViolation> violations;
 
     public TxProcessManager(Id id) {
-        this(id, null);
-    }
-
-    public TxProcessManager(Id id, @Nullable List<ConstraintViolation> violations) {
         super(id);
-        this.violations = violations == null
-                          ? null
-                          : ImmutableList.copyOf(violations);
-    }
-
-    @Override
-    protected List<ConstraintViolation> checkEntityState(PmState newState) {
-        if (violations != null) {
-            return ImmutableList.copyOf(violations);
-        }
-        return super.checkEntityState(newState);
     }
 
     @React
@@ -76,11 +59,19 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
      * Always throws {@code RuntimeException} to emulate the case of an error in
      * a reacting method of a Process Manager.
      *
-     * @see io.spine.server.procman.PmTransactionTest#createEventThatFailsInHandler()
+     * @see io.spine.server.procman.PmTransactionTest#failingInHandler()
      */
     @React
     Nothing event(TxErrorRequested e) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
+    }
+
+    @React
+    Nothing event(TxStateErrorRequested e) {
+        // By convention the first field of state is required.
+        // Clearing it should fail the validation when the transaction is committed.
+        builder().clearId();
+        return nothing();
     }
 
     public List<Message> receivedEvents() {
