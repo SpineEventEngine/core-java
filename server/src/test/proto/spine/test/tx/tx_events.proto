@@ -32,13 +32,12 @@ import "spine/core/user_id.proto";
 
 import "spine/test/tx/tx_entities.proto";
 
-message TxProjectCreated {
-    ProjectId project_id = 1;
+message TxCreated {
+    Id project_id = 1;
     string name = 2;
-    repeated ProjectId child_project_id = 3;
 }
 
-message TxTaskAdded {
-    ProjectId project_id = 1;
-    Task task = 2;
+// The event which causes the handling entity to fail with a `RuntimeException`.
+message TxErrorRequested {
+    Id project_id = 1;
 }

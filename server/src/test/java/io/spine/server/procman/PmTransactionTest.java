@@ -27,11 +27,11 @@ import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.entity.given.tx.Project;
-import io.spine.server.entity.given.tx.ProjectId;
-import io.spine.server.entity.given.tx.TxTestProcessManager;
-import io.spine.server.entity.given.tx.event.TxProjectCreated;
-import io.spine.server.entity.given.tx.event.TxTaskAdded;
+import io.spine.server.entity.given.tx.Id;
+import io.spine.server.entity.given.tx.PmState;
+import io.spine.server.entity.given.tx.TxProcessManager;
+import io.spine.server.entity.given.tx.event.TxCreated;
+import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
@@ -41,84 +41,75 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("PmTransaction should")
 class PmTransactionTest
-        extends TransactionTest<ProjectId,
-                                ProcessManager<ProjectId, Project, Project.Builder>,
-                                Project,
-                                Project.Builder> {
+        extends TransactionTest<Id,
+                                ProcessManager<Id, PmState, PmState.Builder>,
+                                PmState,
+                                PmState.Builder> {
 
-    private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("procman-transaction-should-project")
-                                                 .build();
+    private static final Id ID = Id.newBuilder()
+                                   .setId("procman-transaction-should-project")
+                                   .build();
 
     @Override
-    protected Transaction<
-            ProjectId,
-            ProcessManager<ProjectId, Project, Project.Builder>,
-            Project,
-            Project.Builder
-            >
-    createTx(ProcessManager<ProjectId, Project, Project.Builder> entity) {
+    protected Transaction<Id,
+                          ProcessManager<Id, PmState, PmState.Builder>,
+                          PmState,
+                          PmState.Builder>
+    createTx(ProcessManager<Id, PmState, PmState.Builder> entity) {
         return new PmTransaction<>(entity);
     }
 
     @Override
-    protected Transaction<
-            ProjectId,
-            ProcessManager<ProjectId, Project, Project.Builder>,
-            Project,
-            Project.Builder
-            >
-    createTxWithState(ProcessManager<ProjectId, Project, Project.Builder> entity,
-                      Project state,
+    protected Transaction<Id,
+                          ProcessManager<Id, PmState, PmState.Builder>,
+                          PmState,
+                          PmState.Builder>
+    createTxWithState(ProcessManager<Id, PmState, PmState.Builder> entity,
+                      PmState state,
                       Version version) {
         return new PmTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<
-            ProjectId,
-            ProcessManager<ProjectId, Project, Project.Builder>,
-            Project,
-            Project.Builder
-            >
-    createTxWithListener(
-            ProcessManager<ProjectId, Project, Project.Builder> entity,
-            TransactionListener<
-                    ProjectId,
-                    ProcessManager<ProjectId, Project, Project.Builder>,
-                    Project,
-                    Project.Builder
-                    > listener) {
-        PmTransaction<ProjectId, Project, Project.Builder> transaction =
+    protected Transaction<Id,
+                          ProcessManager<Id, PmState, PmState.Builder>,
+                          PmState,
+                          PmState.Builder>
+    createTxWithListener(ProcessManager<Id, PmState, PmState.Builder> entity,
+                         TransactionListener<Id,
+                                             ProcessManager<Id, PmState, PmState.Builder>,
+                                             PmState,
+                                             PmState.Builder> listener) {
+        PmTransaction<Id, PmState, PmState.Builder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected ProcessManager<ProjectId, Project, Project.Builder> createEntity() {
-        return new TxTestProcessManager(ID);
+    protected ProcessManager<Id, PmState, PmState.Builder> createEntity() {
+        return new TxProcessManager(ID);
     }
 
     @Override
     protected
-    ProcessManager<ProjectId, Project, Project.Builder>
+    ProcessManager<Id, PmState, PmState.Builder>
     createEntity(ImmutableList<ConstraintViolation> violations) {
-        return new TxTestProcessManager(ID, violations);
+        return new TxProcessManager(ID, violations);
     }
 
     @Override
-    protected Project createNewState() {
-        return Project.newBuilder()
-                      .setId(ID)
-                      .setName("The new project name for procman tx tests")
-                      .build();
+    protected PmState createNewState() {
+        return PmState.newBuilder()
+                             .setId(ID)
+                             .setName("The new project name for procman tx tests")
+                             .build();
     }
 
     @Override
     protected void
-    checkEventReceived(ProcessManager<ProjectId, Project, Project.Builder> entity, Event event) {
-        TxTestProcessManager aggregate = (TxTestProcessManager) entity;
+    checkEventReceived(ProcessManager<Id, PmState, PmState.Builder> entity, Event event) {
+        TxProcessManager aggregate = (TxProcessManager) entity;
         Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
@@ -126,16 +117,16 @@ class PmTransactionTest
 
     @Override
     protected EventMessage createEventMessage() {
-        return TxProjectCreated.newBuilder()
-                               .setProjectId(ID)
-                               .build();
+        return TxCreated.newBuilder()
+                        .setProjectId(ID)
+                        .build();
     }
 
     @Override
     protected EventMessage createEventThatFailsInHandler() {
-        return TxTaskAdded.newBuilder()
-                          .setProjectId(ID)
-                          .build();
+        return TxErrorRequested.newBuilder()
+                               .setProjectId(ID)
+                               .build();
     }
 
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})

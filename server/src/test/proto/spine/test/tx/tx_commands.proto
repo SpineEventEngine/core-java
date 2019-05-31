@@ -30,7 +30,7 @@ option java_multiple_files = true;
 
 import "spine/test/tx/tx_entities.proto";
 
-message TxCreateProject {
-    ProjectId project_id = 1;
+message TxCreate {
+    Id project_id = 1;
     string name = 2;
 }

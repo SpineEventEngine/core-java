@@ -22,10 +22,11 @@ package io.spine.server.entity.given.tx;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.core.Subscribe;
-import io.spine.server.entity.given.tx.event.TxProjectCreated;
-import io.spine.server.entity.given.tx.event.TxTaskAdded;
-import io.spine.server.projection.Projection;
+import io.spine.server.entity.given.tx.event.TxCreated;
+import io.spine.server.entity.given.tx.event.TxErrorRequested;
+import io.spine.server.event.React;
+import io.spine.server.model.Nothing;
+import io.spine.server.procman.ProcessManager;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -34,50 +35,51 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
- * Test environment projection for {@link io.spine.server.projection.ProjectionTransactionTest}.
+ * Test environment Process Manager for {@link io.spine.server.procman.PmTransactionTest}.
  */
-public class TxTestProjection
-        extends Projection<ProjectId, Project, Project.Builder> {
+public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
-    private final List<ConstraintViolation> violations;
+    private final @Nullable List<ConstraintViolation> violations;
 
-    public TxTestProjection(ProjectId id) {
+    public TxProcessManager(Id id) {
         this(id, null);
     }
 
-    public TxTestProjection(ProjectId id,
-                            @Nullable ImmutableList<ConstraintViolation> violations) {
+    public TxProcessManager(Id id, @Nullable List<ConstraintViolation> violations) {
         super(id);
-        this.violations = violations;
+        this.violations = violations == null
+                          ? null
+                          : ImmutableList.copyOf(violations);
     }
 
     @Override
-    protected List<ConstraintViolation> checkEntityState(Project newState) {
+    protected List<ConstraintViolation> checkEntityState(PmState newState) {
         if (violations != null) {
             return ImmutableList.copyOf(violations);
         }
         return super.checkEntityState(newState);
     }
 
-    @Subscribe
-    void event(TxProjectCreated event) {
+    @React
+    Nothing event(TxCreated event) {
         receivedEvents.add(event);
-        Project newState = Project.newBuilder(state())
+        PmState newState = PmState.newBuilder(state())
                                   .setId(event.getProjectId())
                                   .build();
         builder().mergeFrom(newState);
+        return nothing();
     }
 
     /**
-     * Always throws {@code RuntimeException} to emulate an error in
-     * a subscribing method of a Projection.
+     * Always throws {@code RuntimeException} to emulate the case of an error in
+     * a reacting method of a Process Manager.
      *
-     * @see io.spine.server.projection.ProjectionTransactionTest#createEventThatFailsInHandler
+     * @see io.spine.server.procman.PmTransactionTest#createEventThatFailsInHandler()
      */
-    @Subscribe
-    void event(TxTaskAdded e) {
-        throw new RuntimeException("that tests the projection tx behaviour");
+    @React
+    Nothing event(TxErrorRequested event) {
+        throw new RuntimeException("that tests the tx behaviour for process manager");
     }
 
     public List<Message> receivedEvents() {

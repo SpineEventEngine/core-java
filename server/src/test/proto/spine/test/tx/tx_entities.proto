@@ -27,43 +27,32 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.entity.given.tx";
 option java_multiple_files = true;
 
-import "google/protobuf/any.proto";
-
-message ProjectId {
+message Id {
     string id = 1;
 }
 
-enum Status {
-    PS_UNDEFINED = 0;
-    CREATED = 1;
-    STARTED = 2;
-    DONE = 3;
-    CANCELLED = 4;
-}
-
-message Project {
+message AggregateState {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
     // The aggregate ID.
     //
     // In order to skip verbose test set up, this ID may be not set.
     //
-    ProjectId id = 1 [(required) = false];
+    Id id = 1 [(required) = false];
 
     string name = 2;
-    repeated Task task = 3;
-    Status status = 4;
 }
 
-message TaskId {
-    int32 id = 1;
+message PmState {
+    option (entity) = {kind: PROCESS_MANAGER visibility: FULL};
+
+    Id id = 1 [(required) = false];
+    string name = 2;
 }
 
-message Task {
-    option (entity) = {kind: AGGREGATE visibility: FULL};
+message ProjectionState {
+    option (entity) = {kind: PROJECTION visibility: FULL};
 
-    ProjectId id = 1 [(required) = false, (validate) = false];
-    TaskId task_id = 2;
-    string title = 3;
-    string description = 4;
+    Id id = 1 [(required) = false];
+    string name = 2;
 }

@@ -26,9 +26,9 @@ import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.given.tx.command.TxCreateProject;
-import io.spine.server.entity.given.tx.event.TxProjectCreated;
-import io.spine.server.entity.given.tx.event.TxTaskAdded;
+import io.spine.server.entity.given.tx.command.TxCreate;
+import io.spine.server.entity.given.tx.event.TxCreated;
+import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
@@ -38,23 +38,22 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * Test environment aggregate for {@link io.spine.server.aggregate.AggregateTransactionTest}.
  */
-public class TxTestAggregate
-        extends Aggregate<ProjectId, Project, Project.Builder> {
+public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Builder> {
 
     private final List<Message> receivedEvents = newArrayList();
     private final ImmutableList<ConstraintViolation> violations;
 
-    public TxTestAggregate(ProjectId id) {
+    public TxAggregate(Id id) {
         this(id, ImmutableList.of());
     }
 
-    public TxTestAggregate(ProjectId id, ImmutableList<ConstraintViolation> violations) {
+    public TxAggregate(Id id, ImmutableList<ConstraintViolation> violations) {
         super(id);
         this.violations = violations;
     }
 
     @Override
-    protected List<ConstraintViolation> checkEntityState(Project newState) {
+    protected List<ConstraintViolation> checkEntityState(AggregateState newState) {
         if (!violations.isEmpty()) {
             return violations;
         }
@@ -62,21 +61,21 @@ public class TxTestAggregate
     }
 
     @Assign
-    TxProjectCreated handle(TxCreateProject cmd, CommandContext ctx) {
+    TxCreated handle(TxCreate cmd, CommandContext ctx) {
         return projectCreated(cmd.getProjectId(), cmd.getName());
     }
 
-    public static TxProjectCreated projectCreated(ProjectId id, String projectName) {
-        return TxProjectCreated.newBuilder()
-                               .setProjectId(id)
-                               .setName(projectName)
-                               .build();
+    public static TxCreated projectCreated(Id id, String projectName) {
+        return TxCreated.newBuilder()
+                        .setProjectId(id)
+                        .setName(projectName)
+                        .build();
     }
 
     @Apply
-    private void event(TxProjectCreated event) {
+    private void event(TxCreated event) {
         receivedEvents.add(event);
-        Project newState = Project
+        AggregateState newState = AggregateState
                 .newBuilder(state())
                 .setId(event.getProjectId())
                 .setName(event.getName())
@@ -92,7 +91,7 @@ public class TxTestAggregate
      */
     @Apply
     @SuppressWarnings("MethodMayBeStatic")
-    private void event(TxTaskAdded event) {
+    private void event(TxErrorRequested event) {
         throw new RuntimeException("that tests the tx behaviour");
     }
 

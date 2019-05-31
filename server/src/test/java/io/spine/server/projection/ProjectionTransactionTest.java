@@ -28,11 +28,11 @@ import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.entity.given.tx.Project;
-import io.spine.server.entity.given.tx.ProjectId;
-import io.spine.server.entity.given.tx.TxTestProjection;
-import io.spine.server.entity.given.tx.event.TxProjectCreated;
-import io.spine.server.entity.given.tx.event.TxTaskAdded;
+import io.spine.server.entity.given.tx.Id;
+import io.spine.server.entity.given.tx.ProjectionState;
+import io.spine.server.entity.given.tx.TxProjection;
+import io.spine.server.entity.given.tx.event.TxCreated;
+import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.validate.ConstraintViolation;
@@ -50,75 +50,75 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @DisplayName("ProjectionTransaction should")
 class ProjectionTransactionTest
-        extends TransactionTest<ProjectId,
-                                Projection<ProjectId, Project, Project.Builder>,
-                                Project,
-                                Project.Builder> {
+        extends TransactionTest<Id,
+                                Projection<Id, ProjectionState, ProjectionState.Builder>,
+        ProjectionState,
+        ProjectionState.Builder> {
 
-    private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("projection-transaction-should-project")
-                                                 .build();
+    private static final Id ID = Id.newBuilder()
+                                   .setId("projection-transaction-should-project")
+                                   .build();
 
     @Override
-    protected Transaction<ProjectId,
-                          Projection<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder>
-    createTx(Projection<ProjectId, Project, Project.Builder> entity) {
+    protected Transaction<Id,
+                          Projection<Id, ProjectionState, ProjectionState.Builder>,
+            ProjectionState,
+            ProjectionState.Builder>
+    createTx(Projection<Id, ProjectionState, ProjectionState.Builder> entity) {
         return new ProjectionTransaction<>(entity);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Projection<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder>
-    createTxWithState(Projection<ProjectId, Project, Project.Builder> entity,
-                      Project state,
+    protected Transaction<Id,
+                          Projection<Id, ProjectionState, ProjectionState.Builder>,
+            ProjectionState,
+            ProjectionState.Builder>
+    createTxWithState(Projection<Id, ProjectionState, ProjectionState.Builder> entity,
+                      ProjectionState state,
                       Version version) {
         return new ProjectionTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Projection<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder>
-    createTxWithListener(Projection<ProjectId, Project, Project.Builder> entity,
-                         TransactionListener<ProjectId,
-                                             Projection<ProjectId, Project, Project.Builder>,
-                                             Project,
-                                             Project.Builder> listener) {
-        ProjectionTransaction<ProjectId, Project, Project.Builder> transaction =
+    protected Transaction<Id,
+                          Projection<Id, ProjectionState, ProjectionState.Builder>,
+            ProjectionState,
+            ProjectionState.Builder>
+    createTxWithListener(Projection<Id, ProjectionState, ProjectionState.Builder> entity,
+                         TransactionListener<Id,
+                                             Projection<Id, ProjectionState, ProjectionState.Builder>,
+                                 ProjectionState,
+                                 ProjectionState.Builder> listener) {
+        ProjectionTransaction<Id, ProjectionState, ProjectionState.Builder> transaction =
                 new ProjectionTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected Projection<ProjectId, Project, Project.Builder> createEntity() {
-        return new TxTestProjection(ID);
+    protected Projection<Id, ProjectionState, ProjectionState.Builder> createEntity() {
+        return new TxProjection(ID);
     }
 
     @Override
-    protected Projection<ProjectId, Project, Project.Builder>
+    protected Projection<Id, ProjectionState, ProjectionState.Builder>
     createEntity(ImmutableList<ConstraintViolation> violations) {
-        return new TxTestProjection(ID, violations);
+        return new TxProjection(ID, violations);
     }
 
     @Override
-    protected Project createNewState() {
-        return Project.newBuilder()
-                      .setId(ID)
-                      .setName("The new name for the projection state in this tx")
-                      .build();
+    protected ProjectionState createNewState() {
+        return ProjectionState.newBuilder()
+                             .setId(ID)
+                             .setName("The new name for the projection state in this tx")
+                             .build();
     }
 
     @Override
-    protected void checkEventReceived(Projection<ProjectId, Project, Project.Builder> entity,
+    protected void checkEventReceived(Projection<Id, ProjectionState, ProjectionState.Builder> entity,
                                       Event event) {
 
-        TxTestProjection aggregate = (TxTestProjection) entity;
+        TxProjection aggregate = (TxProjection) entity;
         Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
@@ -126,16 +126,16 @@ class ProjectionTransactionTest
 
     @Override
     protected EventMessage createEventMessage() {
-        return TxProjectCreated.newBuilder()
-                               .setProjectId(ID)
-                               .build();
+        return TxCreated.newBuilder()
+                        .setProjectId(ID)
+                        .build();
     }
 
     @Override
     protected EventMessage createEventThatFailsInHandler() {
-        return TxTaskAdded.newBuilder()
-                          .setProjectId(ID)
-                          .build();
+        return TxErrorRequested.newBuilder()
+                               .setProjectId(ID)
+                               .build();
     }
 
     @Override
@@ -158,7 +158,7 @@ class ProjectionTransactionTest
     @Test
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {
-        Projection<ProjectId, Project, Project.Builder> entity = createEntity();
+        Projection<Id, ProjectionState, ProjectionState.Builder> entity = createEntity();
         Version oldVersion = entity.version();
         Event event = GivenEvent.withMessage(createEventMessage());
         Projection.playOn(entity, Collections.singleton(event));

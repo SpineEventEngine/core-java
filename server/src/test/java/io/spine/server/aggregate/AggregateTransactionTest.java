@@ -27,10 +27,10 @@ import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.entity.given.tx.Project;
-import io.spine.server.entity.given.tx.ProjectId;
-import io.spine.server.entity.given.tx.TxTestAggregate;
-import io.spine.server.entity.given.tx.event.TxTaskAdded;
+import io.spine.server.entity.given.tx.AggregateState;
+import io.spine.server.entity.given.tx.Id;
+import io.spine.server.entity.given.tx.TxAggregate;
+import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
@@ -41,76 +41,75 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
-        extends TransactionTest<ProjectId,
-                                Aggregate<ProjectId,
-                                          Project,
-                                          Project.Builder>,
-                                Project,
-                                Project.Builder> {
+        extends TransactionTest<Id,
+                                Aggregate<Id, AggregateState, AggregateState.Builder>,
+                                AggregateState,
+                                AggregateState.Builder> {
 
-    private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("aggregate-transaction-should-project")
-                                                 .build();
+    private static final Id ID = Id.newBuilder()
+                                   .setId("aggregate-transaction-should-project")
+                                   .build();
 
     @Override
-    protected Transaction<ProjectId,
-            Aggregate<ProjectId, Project, Project.Builder>,
-            Project,
-            Project.Builder>
-    createTx(Aggregate<ProjectId, Project, Project.Builder> entity) {
+    protected Transaction<Id,
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
+    createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity) {
         return new AggregateTransaction<>(entity);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder>
-    createTxWithState(Aggregate<ProjectId, Project, Project.Builder> entity,
-                      Project state,
+    protected Transaction<Id,
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
+    createTxWithState(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
+                      AggregateState state,
                       Version version) {
         return new AggregateTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder>
-    createTxWithListener(Aggregate<ProjectId, Project, Project.Builder> entity,
-                         TransactionListener<ProjectId,
-                                             Aggregate<ProjectId, Project, Project.Builder>,
-                                             Project,
-                                             Project.Builder> listener) {
-        AggregateTransaction<ProjectId, Project, Project.Builder> transaction =
+    protected Transaction<Id,
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
+    createTxWithListener(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
+                         TransactionListener<Id,
+                                             Aggregate<Id, AggregateState, AggregateState.Builder>,
+                                             AggregateState,
+                                             AggregateState.Builder> listener) {
+        AggregateTransaction<Id, AggregateState, AggregateState.Builder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, Project.Builder> createEntity() {
-        return new TxTestAggregate(ID);
+    protected Aggregate<Id, AggregateState, AggregateState.Builder> createEntity() {
+        return new TxAggregate(ID);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, Project.Builder>
+    protected Aggregate<Id, AggregateState, AggregateState.Builder>
     createEntity(ImmutableList<ConstraintViolation> violations) {
-        return new TxTestAggregate(ID, violations);
+        return new TxAggregate(ID, violations);
     }
 
     @Override
-    protected Project createNewState() {
-        return Project.newBuilder()
-                      .setId(ID)
-                      .setName("The new project name to set in tx")
-                      .build();
+    protected AggregateState createNewState() {
+        return AggregateState.newBuilder()
+                             .setId(ID)
+                             .setName("The new project name to set in tx")
+                             .build();
     }
 
     @Override
     protected
-    void checkEventReceived(Aggregate<ProjectId, Project, Project.Builder> entity, Event event) {
-        TxTestAggregate aggregate = (TxTestAggregate) entity;
+    void checkEventReceived(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
+                            Event event) {
+        TxAggregate aggregate = (TxAggregate) entity;
         Message actualMessage = unpack(event.getMessage());
 
         assertThat(aggregate.receivedEvents())
@@ -119,7 +118,7 @@ class AggregateTransactionTest
 
     @Override
     protected EventMessage createEventMessage() {
-        return TxTestAggregate.projectCreated(ID, "Project created in a transaction");
+        return TxAggregate.projectCreated(ID, "Project created in a transaction");
     }
 
     @Override
@@ -127,10 +126,11 @@ class AggregateTransactionTest
         return taskAdded(ID);
     }
 
-    public static TxTaskAdded taskAdded(ProjectId id) {
-        return TxTaskAdded.newBuilder()
-                          .setProjectId(id)
-                          .build();
+    public static TxErrorRequested taskAdded(Id id) {
+        return TxErrorRequested
+                .newBuilder()
+                .setProjectId(id)
+                .build();
     }
 
     @Override
