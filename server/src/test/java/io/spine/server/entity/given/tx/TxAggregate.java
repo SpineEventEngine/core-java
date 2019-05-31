@@ -62,23 +62,23 @@ public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Bu
 
     @Assign
     TxCreated handle(TxCreate cmd, CommandContext ctx) {
-        return projectCreated(cmd.getProjectId(), cmd.getName());
+        return projectCreated(cmd.getId(), cmd.getName());
     }
 
     public static TxCreated projectCreated(Id id, String projectName) {
         return TxCreated.newBuilder()
-                        .setProjectId(id)
+                        .setId(id)
                         .setName(projectName)
                         .build();
     }
 
     @Apply
-    private void event(TxCreated event) {
-        receivedEvents.add(event);
+    private void event(TxCreated e) {
+        receivedEvents.add(e);
         AggregateState newState = AggregateState
                 .newBuilder(state())
-                .setId(event.getProjectId())
-                .setName(event.getName())
+                .setId(e.getId())
+                .setName(e.getName())
                 .build();
         builder().mergeFrom(newState);
     }
@@ -91,7 +91,7 @@ public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Bu
      */
     @Apply
     @SuppressWarnings("MethodMayBeStatic")
-    private void event(TxErrorRequested event) {
+    private void event(TxErrorRequested e) {
         throw new RuntimeException("that tests the tx behaviour");
     }
 

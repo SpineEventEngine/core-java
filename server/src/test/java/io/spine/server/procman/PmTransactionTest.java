@@ -118,14 +118,14 @@ class PmTransactionTest
     @Override
     protected EventMessage createEventMessage() {
         return TxCreated.newBuilder()
-                        .setProjectId(ID)
+                        .setId(ID)
                         .build();
     }
 
     @Override
     protected EventMessage createEventThatFailsInHandler() {
         return TxErrorRequested.newBuilder()
-                               .setProjectId(ID)
+                               .setId(ID)
                                .build();
     }
 

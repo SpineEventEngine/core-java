@@ -33,11 +33,11 @@ import "spine/core/user_id.proto";
 import "spine/test/tx/tx_entities.proto";
 
 message TxCreated {
-    Id project_id = 1;
+    Id id = 1;
     string name = 2;
 }
 
 // The event which causes the handling entity to fail with a `RuntimeException`.
 message TxErrorRequested {
-    Id project_id = 1;
+    Id id = 1;
 }

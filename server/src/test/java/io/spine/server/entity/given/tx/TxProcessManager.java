@@ -62,10 +62,10 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
     }
 
     @React
-    Nothing event(TxCreated event) {
-        receivedEvents.add(event);
+    Nothing event(TxCreated e) {
+        receivedEvents.add(e);
         PmState newState = PmState.newBuilder(state())
-                                  .setId(event.getProjectId())
+                                  .setId(e.getId())
                                   .build();
         builder().mergeFrom(newState);
         return nothing();
@@ -78,7 +78,7 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
      * @see io.spine.server.procman.PmTransactionTest#createEventThatFailsInHandler()
      */
     @React
-    Nothing event(TxErrorRequested event) {
+    Nothing event(TxErrorRequested e) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
     }
 

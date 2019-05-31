@@ -129,7 +129,7 @@ class AggregateTransactionTest
     public static TxErrorRequested taskAdded(Id id) {
         return TxErrorRequested
                 .newBuilder()
-                .setProjectId(id)
+                .setId(id)
                 .build();
     }
 

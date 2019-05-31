@@ -60,11 +60,11 @@ public class TxProjection extends Projection<Id, ProjectionState, ProjectionStat
     }
 
     @Subscribe
-    void event(TxCreated event) {
-        receivedEvents.add(event);
+    void event(TxCreated e) {
+        receivedEvents.add(e);
         ProjectionState newState = ProjectionState
                 .newBuilder(state())
-                .setId(event.getProjectId())
+                .setId(e.getId())
                 .build();
         builder().mergeFrom(newState);
     }
