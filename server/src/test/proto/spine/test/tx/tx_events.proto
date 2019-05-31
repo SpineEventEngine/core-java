@@ -41,3 +41,9 @@ message TxCreated {
 message TxErrorRequested {
     Id id = 1;
 }
+
+// The event which causes the state builder of the handling entity to go into the state which
+// does not pass the validation.
+message TxStateErrorRequested {
+    Id id = 1;
+}

@@ -32,27 +32,19 @@ message Id {
 }
 
 message AggregateState {
-    option (entity) = {kind: AGGREGATE visibility: FULL};
-
-    // The aggregate ID.
-    //
-    // In order to skip verbose test set up, this ID may be not set.
-    //
-    Id id = 1 [(required) = false];
-
+    option (entity) = { kind: AGGREGATE visibility: FULL };
+    Id id = 1;
     string name = 2;
 }
 
 message PmState {
-    option (entity) = {kind: PROCESS_MANAGER visibility: FULL};
-
-    Id id = 1 [(required) = false];
+    option (entity) = { kind: PROCESS_MANAGER visibility: FULL };
+    Id id = 1;
     string name = 2;
 }
 
 message ProjectionState {
-    option (entity) = {kind: PROJECTION visibility: FULL};
-
-    Id id = 1 [(required) = false];
+    option (entity) = { kind: PROJECTION visibility: FULL };
+    Id id = 1;
     string name = 2;
 }
