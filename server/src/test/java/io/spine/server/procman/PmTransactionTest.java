@@ -27,12 +27,12 @@ import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.procman.given.TxTestProcessManager;
+import io.spine.server.entity.given.tx.Project;
+import io.spine.server.entity.given.tx.ProjectId;
+import io.spine.server.entity.given.tx.TxTestProcessManager;
+import io.spine.server.entity.given.tx.event.TxProjectCreated;
+import io.spine.server.entity.given.tx.event.TxTaskAdded;
 import io.spine.server.type.EventEnvelope;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.event.PmProjectCreated;
-import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 
@@ -126,14 +126,14 @@ class PmTransactionTest
 
     @Override
     protected EventMessage createEventMessage() {
-        return PmProjectCreated.newBuilder()
+        return TxProjectCreated.newBuilder()
                                .setProjectId(ID)
                                .build();
     }
 
     @Override
     protected EventMessage createEventThatFailsInHandler() {
-        return PmTaskAdded.newBuilder()
+        return TxTaskAdded.newBuilder()
                           .setProjectId(ID)
                           .build();
     }

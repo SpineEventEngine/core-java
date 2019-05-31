@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given;
+package io.spine.server.entity.given.tx;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
@@ -26,17 +26,14 @@ import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.server.entity.given.tx.command.TxCreateProject;
+import io.spine.server.entity.given.tx.event.TxProjectCreated;
+import io.spine.server.entity.given.tx.event.TxTaskAdded;
 import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
 /**
  * Test environment aggregate for {@link io.spine.server.aggregate.AggregateTransactionTest}.
@@ -65,12 +62,19 @@ public class TxTestAggregate
     }
 
     @Assign
-    AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
+    TxProjectCreated handle(TxCreateProject cmd, CommandContext ctx) {
         return projectCreated(cmd.getProjectId(), cmd.getName());
     }
 
+    public static TxProjectCreated projectCreated(ProjectId id, String projectName) {
+        return TxProjectCreated.newBuilder()
+                               .setProjectId(id)
+                               .setName(projectName)
+                               .build();
+    }
+
     @Apply
-    private void event(AggProjectCreated event) {
+    private void event(TxProjectCreated event) {
         receivedEvents.add(event);
         Project newState = Project
                 .newBuilder(state())
@@ -88,7 +92,7 @@ public class TxTestAggregate
      */
     @Apply
     @SuppressWarnings("MethodMayBeStatic")
-    private void event(AggTaskAdded event) {
+    private void event(TxTaskAdded event) {
         throw new RuntimeException("that tests the tx behaviour");
     }
 

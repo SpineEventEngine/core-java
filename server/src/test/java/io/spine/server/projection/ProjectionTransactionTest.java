@@ -28,13 +28,13 @@ import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.projection.given.TxTestProjection;
+import io.spine.server.entity.given.tx.Project;
+import io.spine.server.entity.given.tx.ProjectId;
+import io.spine.server.entity.given.tx.TxTestProjection;
+import io.spine.server.entity.given.tx.event.TxProjectCreated;
+import io.spine.server.entity.given.tx.event.TxTaskAdded;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.event.PrjProjectCreated;
-import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -126,16 +126,16 @@ class ProjectionTransactionTest
 
     @Override
     protected EventMessage createEventMessage() {
-        return PrjProjectCreated.newBuilder()
-                                .setProjectId(ID)
-                                .build();
+        return TxProjectCreated.newBuilder()
+                               .setProjectId(ID)
+                               .build();
     }
 
     @Override
     protected EventMessage createEventThatFailsInHandler() {
-        return PrjTaskAdded.newBuilder()
-                           .setProjectId(ID)
-                           .build();
+        return TxTaskAdded.newBuilder()
+                          .setProjectId(ID)
+                          .build();
     }
 
     @Override

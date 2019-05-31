@@ -111,7 +111,17 @@ public abstract class TransactionTest<I,
 
     protected abstract EventMessage createEventMessage();
 
+    /**
+     * Creates an event message handling of which causes an exception in the entity
+     * served by the transaction under the test.
+     */
     protected abstract EventMessage createEventThatFailsInHandler();
+
+    /**
+     * Creates an event message handling of which turns the builder of the entity state
+     * into the state which fails the validation.
+     */
+    //protected abstract EventMessage createEventThatFailsInStateTransition();
 
     protected abstract void applyEvent(Transaction tx, Event event);
 

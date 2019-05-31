@@ -24,21 +24,20 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.server.aggregate.given.Given;
-import io.spine.server.aggregate.given.TxTestAggregate;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
+import io.spine.server.entity.given.tx.Project;
+import io.spine.server.entity.given.tx.ProjectId;
+import io.spine.server.entity.given.tx.TxTestAggregate;
+import io.spine.server.entity.given.tx.event.TxTaskAdded;
 import io.spine.server.type.EventEnvelope;
-import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectId;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
@@ -120,12 +119,18 @@ class AggregateTransactionTest
 
     @Override
     protected EventMessage createEventMessage() {
-        return projectCreated(ID, "Project created in a transaction");
+        return TxTestAggregate.projectCreated(ID, "Project created in a transaction");
     }
 
     @Override
     protected EventMessage createEventThatFailsInHandler() {
-        return Given.EventMessage.taskAdded(ID);
+        return taskAdded(ID);
+    }
+
+    public static TxTaskAdded taskAdded(ProjectId id) {
+        return TxTaskAdded.newBuilder()
+                          .setProjectId(id)
+                          .build();
     }
 
     @Override
