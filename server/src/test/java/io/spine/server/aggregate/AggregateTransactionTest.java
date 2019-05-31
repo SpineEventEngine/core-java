@@ -98,7 +98,7 @@ class AggregateTransactionTest
     }
 
     @Override
-    protected AggregateState createNewState() {
+    protected AggregateState newState() {
         return AggregateState.newBuilder()
                              .setId(ID)
                              .setName("The new project name to set in tx")

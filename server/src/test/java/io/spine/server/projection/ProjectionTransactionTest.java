@@ -107,7 +107,7 @@ class ProjectionTransactionTest
     }
 
     @Override
-    protected ProjectionState createNewState() {
+    protected ProjectionState newState() {
         return ProjectionState.newBuilder()
                              .setId(ID)
                              .setName("The new name for the projection state in this tx")

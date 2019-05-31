@@ -92,7 +92,7 @@ class TransactionalEntityTest {
     @Test
     @DisplayName("have null transaction by default")
     void haveNullTxByDefault() {
-        assertNull(newEntity().getTransaction());
+        assertNull(newEntity().transaction());
     }
 
     @Nested
@@ -131,7 +131,7 @@ class TransactionalEntityTest {
         when(tx.entity()).thenReturn(entity);
         entity.injectTransaction(tx);
 
-        assertEquals(tx, entity.getTransaction());
+        assertEquals(tx, entity.transaction());
     }
 
     @SuppressWarnings("unchecked")  // OK for the test.
@@ -195,7 +195,7 @@ class TransactionalEntityTest {
         assertThat(modifiedFlags)
                 .isNotEqualTo(originalFlags);
 
-        Transaction txMock = entity.getTransaction();
+        Transaction txMock = entity.transaction();
         assertNotNull(txMock);
         when(txMock.isActive()).thenReturn(true);
         when(txMock.lifecycleFlags()).thenReturn(modifiedFlags);

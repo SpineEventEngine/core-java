@@ -26,6 +26,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.event.EventFactory;
 import io.spine.test.validation.FakeOptionFactory;
@@ -42,7 +43,6 @@ import org.mockito.ArgumentMatcher;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
-import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -89,8 +89,8 @@ public abstract class TransactionTest<I,
         return equalIds && isSuccessful;
     }
 
-    private static Version someVersion() {
-        return newVersion(42, currentTime());
+    private static Version newVersion() {
+        return Versions.newVersion(42, currentTime());
     }
 
     protected abstract Transaction<I, E, S, B> createTx(E entity);
@@ -105,7 +105,7 @@ public abstract class TransactionTest<I,
 
     protected abstract E createEntity(ImmutableList<ConstraintViolation> violations);
 
-    protected abstract S createNewState();
+    protected abstract S newState();
 
     protected abstract void checkEventReceived(E entity, Event event);
 
@@ -168,8 +168,8 @@ public abstract class TransactionTest<I,
         @DisplayName("from entity, state, and version")
         void fromEntityStateAndVersion() {
             E entity = createEntity();
-            S newState = createNewState();
-            Version newVersion = someVersion();
+            S newState = newState();
+            Version newVersion = newVersion();
 
             assertThat(newState)
                     .isNotEqualTo(entity.state());
@@ -310,8 +310,8 @@ public abstract class TransactionTest<I,
     void notInjectToEntityWithVersion() {
         E entity = createEntity();
         entity.incrementVersion();
-        S newState = createNewState();
-        Version newVersion = someVersion();
+        S newState = newState();
+        Version newVersion = newVersion();
 
         assertThrows(IllegalStateException.class,
                      () -> createTxWithState(entity, newState, newVersion));
@@ -337,8 +337,8 @@ public abstract class TransactionTest<I,
         @DisplayName("on commit failure")
         void onCommitFailure() {
             E entity = createEntity(someViolations());
-            S newState = createNewState();
-            Version version = someVersion();
+            S newState = newState();
+            Version version = newVersion();
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
             try {
@@ -380,8 +380,8 @@ public abstract class TransactionTest<I,
             S originalState = entity.state();
             Version originalVersion = entity.version();
 
-            S newState = createNewState();
-            Version version = someVersion();
+            S newState = newState();
+            Version version = newVersion();
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
             try {
@@ -393,7 +393,7 @@ public abstract class TransactionTest<I,
         }
 
         private void checkRollback(E entity, S originalState, Version originalVersion) {
-            assertNull(entity.getTransaction());
+            assertNull(entity.transaction());
             assertThat(entity.state())
                     .isEqualTo(originalState);
             assertThat(entity.version())
@@ -406,8 +406,8 @@ public abstract class TransactionTest<I,
     void throwIfViolationOnCommit() {
         E entity = createEntity();
 
-        S newState = createNewState();
-        Version version = someVersion();
+        S newState = newState();
+        Version version = newVersion();
 
         Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
         ValidationException toThrow = validationException();
