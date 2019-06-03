@@ -27,8 +27,6 @@ dependencies {
     testAnnotationProcessor deps.build.autoService.processor
     testCompileOnly deps.build.autoService.annotations
 
-    testImplementation "org.junit.jupiter:junit-jupiter-params:$deps.versions.junit5"
-
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation project(path: ":core", configuration: 'testArtifacts')
     testImplementation project(path: ":client", configuration: 'testArtifacts')
