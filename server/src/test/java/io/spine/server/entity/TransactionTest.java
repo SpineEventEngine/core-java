@@ -42,6 +42,7 @@ import org.mockito.ArgumentMatcher;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.type.given.GivenEvent.withMessage;
+import static io.spine.server.type.given.GivenEvent.withMessageAndVersion;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -379,13 +380,14 @@ public abstract class TransactionTest<I,
             Version originalVersion = entity.version();
 
             Transaction<I, E, S, B> tx = createTx(entity);
-            Event event = withMessage(failingStateTransition());
+            Version nextVersion = Versions.increment(entity.version());
+            Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
             applyEvent(tx, event);
 
             try {
                 tx.commit();
                 fail("Expected an `InvalidEntityStateException` due to a failed commit.");
-            } catch (InvalidEntityStateException e) {
+            } catch (IllegalStateException e) {
                 checkRollback(entity, originalState, originalVersion);
             }
         }

@@ -60,6 +60,11 @@ public final class GivenEvent {
         return event;
     }
 
+    public static Event withMessageAndVersion(EventMessage message, Version version) {
+        Event event = eventFactory.createEvent(message, version);
+        return event;
+    }
+
     private static Version someVersion() {
         return Versions.newVersion(42, currentTime());
     }
