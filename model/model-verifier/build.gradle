@@ -22,10 +22,6 @@ buildscript {
     apply from: "$rootDir/version.gradle"
 }
 
-ext {
-    jUnitPioneerVersion = '0.3.0'
-}
-
 group 'io.spine.tools'
 
 sourceSets {
@@ -52,7 +48,7 @@ dependencies {
     testImplementation gradleTestKit()
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
-    testImplementation "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
+    testImplementation deps.test.junitPioneer
     testImplementation project(":testutil-server")
 }
 
