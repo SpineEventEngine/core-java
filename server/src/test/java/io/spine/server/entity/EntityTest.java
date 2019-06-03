@@ -52,9 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("Entity should")
 class EntityTest {
@@ -157,14 +154,6 @@ class EntityTest {
 
         assertEquals(state, entityNew.state());
         assertEquals(ver, entityNew.version());
-    }
-
-    @Test
-    @DisplayName("check entity state when setting it")
-    void checkStateWhenUpdating() {
-        TestEntity spyEntityNew = spy(entityNew);
-        spyEntityNew.updateState(state, Versions.zero());
-        verify(spyEntityNew).checkEntityState(eq(state));
     }
 
     @Test
