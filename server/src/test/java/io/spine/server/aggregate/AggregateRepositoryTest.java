@@ -360,7 +360,7 @@ public class AggregateRepositoryTest {
             ProjectAggregate aggregate = givenStoredAggregate();
 
             AggregateTransaction tx = AggregateTransaction.start(aggregate);
-            aggregate.setArchived(true);
+            aggregate.archive();
             tx.commit();
             repository().store(aggregate);
 
@@ -374,7 +374,7 @@ public class AggregateRepositoryTest {
             ProjectAggregate aggregate = givenStoredAggregate();
 
             AggregateTransaction tx = AggregateTransaction.start(aggregate);
-            aggregate.setDeleted(true);
+            aggregate.archive();
             tx.commit();
 
             repository().store(aggregate);
@@ -435,10 +435,11 @@ public class AggregateRepositoryTest {
              */
             TestEventFactory factory = TestEventFactory.newInstance(Identifier.pack(parentId),
                                                                     getClass());
-            AggProjectArchived msg = AggProjectArchived.newBuilder()
-                                                       .setProjectId(parentId)
-                                                       .addChildProjectId(childId)
-                                                       .build();
+            AggProjectArchived msg = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parentId)
+                    .addChildProjectId(childId)
+                    .build();
             Event event = factory.createEvent(msg);
 
             // Posting this event should archive the aggregate.

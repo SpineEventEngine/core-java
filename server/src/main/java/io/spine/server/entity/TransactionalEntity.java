@@ -239,7 +239,7 @@ public abstract class TransactionalEntity<I,
      * of active transaction}.
      */
     @Override
-    protected void setArchived(boolean archived) {
+    protected final void setArchived(boolean archived) {
         tx().setArchived(archived);
     }
 
@@ -250,7 +250,7 @@ public abstract class TransactionalEntity<I,
      * of active transaction}.
      */
     @Override
-    protected void setDeleted(boolean deleted) {
+    protected final void setDeleted(boolean deleted) {
         tx().setDeleted(deleted);
     }
 }
