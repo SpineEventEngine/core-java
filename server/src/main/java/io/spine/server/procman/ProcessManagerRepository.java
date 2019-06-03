@@ -98,6 +98,8 @@ public abstract class ProcessManagerRepository<I,
     /** An underlying {@link Inbox} storage for entities managed by this repository. */
     private @Nullable InboxStorage inboxStorage;
 
+    private @MonotonicNonNull Inbox<I> inbox;
+
     /**
      * The configurable lifecycle rules of the repository.
      *
@@ -161,6 +163,16 @@ public abstract class ProcessManagerRepository<I,
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
         systemSubscriber.registerIn(boundedContext);
+
+        checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
+        inbox = Inbox
+                .<I>newBuilder(entityStateType())
+                .setStorage(inboxStorage)
+                .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
+                                  e -> PmEventEndpoint.of(this, e))
+                .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
+                                    c -> PmCommandEndpoint.of(this, c))
+                .build();
     }
 
     @Override
@@ -292,9 +304,7 @@ public abstract class ProcessManagerRepository<I,
      *         the command to dispatch
      */
     void dispatchNowTo(I id, CommandEnvelope command) {
-        Inbox inbox = getInbox(id);
-        inbox.put(command)
-             .toHandle();
+        inbox.send(command).toHandler(id);
     }
 
     /**
@@ -316,25 +326,8 @@ public abstract class ProcessManagerRepository<I,
      *         the event to dispatch
      */
     void dispatchNowTo(I id, EventEnvelope event) {
-        Inbox inbox = getInbox(id);
-        inbox.put(event)
-             .toReact();
+        inbox.send(event).toReactor(id);
     }
-
-    //TODO:2019-01-10:alex.tymchenko: cache the `Inbox` instances.
-    private Inbox<I> getInbox(I id) {
-        checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
-        Inbox<I> inbox = Inbox
-                .<I>newBuilder(id, entityStateType())
-                .setStorage(inboxStorage)
-                .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
-                                  e -> PmEventEndpoint.of(this, e))
-                .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
-                                    c -> PmCommandEndpoint.of(this, c))
-                .build();
-        return inbox;
-    }
-
 
     @Override
     public void onError(CommandEnvelope cmd, RuntimeException exception) {

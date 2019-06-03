@@ -23,7 +23,7 @@ package io.spine.server.inbox;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.Optional;
+import java.util.Collection;
 
 /**
  * The part of {@link Inbox} responsible for processing incoming
@@ -34,8 +34,8 @@ import java.util.Optional;
  */
 class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
-    InboxOfCommands(CommandEnvelope envelope, Inbox.Builder<I> builder, I entityId) {
-        super(entityId, envelope, builder, builder.getCommandEndpoints());
+    InboxOfCommands(Inbox.Builder<I> builder) {
+        super(builder, builder.getCommandEndpoints());
     }
 
     @Override
@@ -43,29 +43,38 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
         builder.setCommand(envelope.outerObject());
     }
 
-    //TODO:2019-01-25:alex.tymchenko: should we post rejections?
-    @Override
-    protected Optional<DuplicateCommandException> checkDuplicates(InboxContentRecord contents) {
-        CommandEnvelope envelope = getEnvelope();
-        boolean hasDuplicate = contents.getMessageList()
-                                       .stream()
-                                       .filter(InboxMessage::hasCommand)
-                                       .anyMatch(m -> envelope.id()
-                                                              .equals(m.getCommand()
-                                                                       .getId()));
-        if (hasDuplicate) {
-            DuplicateCommandException exception =
-                    DuplicateCommandException.of(envelope.outerObject());
-            return Optional.of(exception);
-        }
-        return Optional.empty();
-    }
-
     @Override
     protected InboxMessageId inboxMsgIdFrom(CommandEnvelope envelope) {
         String rawValue = envelope.id()
                                   .getUuid();
-        InboxMessageId result = InboxMessageId.of(rawValue);
+        InboxMessageId result = InboxMessageId.newBuilder()
+                                              .setValue(rawValue)
+                                              .build();
         return result;
+    }
+
+    @Override
+    protected CommandEnvelope asEnvelope(InboxMessage message) {
+        return CommandEnvelope.of(message.getCommand());
+    }
+
+    @Override
+    protected Delivery deliveryBasedOn(Collection<InboxMessage> deduplicationSource) {
+        return new CommandDelivery(deduplicationSource);
+    }
+
+    /**
+     * A strategy of command delivery from this {@code Inbox} to the command target.
+     */
+    class CommandDelivery extends Delivery {
+
+        protected CommandDelivery(Collection<InboxMessage> deduplicationSource) {
+            super(deduplicationSource);
+        }
+
+        @Override
+        protected RuntimeException onDuplicateFound(InboxMessage duplicate) {
+            return DuplicateCommandException.of(duplicate.getCommand());
+        }
     }
 }

@@ -21,19 +21,21 @@
 package io.spine.server.sharding;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
+import io.spine.core.BoundedContextNames;
+import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,11 +69,21 @@ public final class Sharding {
      * <p>The messages cannot be read up until the current moment, as there may be several messages
      * in a single millisecond.
      */
-    public static final Duration ONE_MS = Durations.fromMillis(1);
+    private static final Duration ONE_MS = Durations.fromMillis(1);
 
     private final ShardingStrategy strategy;
     private final Duration deduplicationPeriod;
-    private final Map<String, ProcessingBehavior<InboxMessage>> behaviors;
+    /**
+     * The behaviors to call for the postponed message dispatching.
+     *
+     * <p>Mapped per {@link TypeUrl}, which is a state type of a target {@code Entity}.
+     *
+     * <p>Once messages arrive for the postponed processing, a corresponding behavior is selected
+     * according to the message contents. The {@code TypeUrl} in this map is stored
+     * as {@code String} to avoid an extra boxing into {@code TypeUrl} of the value,
+     * which resides as a Protobuf {@code string} inside an incoming message.
+     */
+    private final Map<String, ProcessingBehavior<InboxMessage>> inboxBehaviors;
     private final ShardedWorkRegistry workRegistry;
     private final InboxStorage inboxStorage;
 
@@ -80,7 +92,7 @@ public final class Sharding {
         this.workRegistry = builder.workRegistry;
         this.deduplicationPeriod = builder.deduplicationPeriod;
         this.inboxStorage = builder.inboxStorage;
-        this.behaviors = ImmutableMap.copyOf(builder.behaviors);
+        this.inboxBehaviors = Maps.newConcurrentMap();
     }
 
     /**
@@ -90,7 +102,19 @@ public final class Sharding {
         return new Builder();
     }
 
-    public void process(ShardIndex index) {
+    /**
+     * Delivers the messages put into the shard with the passed index to their targets.
+     *
+     * <p>At a given moment of time, the only application node may deliver messages from
+     * a particular shard. Therefore, in scope of this delivery, an approach based on pessimistic
+     * locking per-{@code ShardIndex} is applied.
+     *
+     * //TODO:2019-06-03:alex.tymchenko: this is not a behavior I'd expect.
+     * <p>In case the given shard is not available for delivery, this method does nothing.
+     *
+     * @param index the shard index to deliver the messages from.
+     */
+    public void deliverShardedMessages(ShardIndex index) {
         ShardProcessingSession session = workRegistry.pickUp(index);
 
         Timestamp now = Time.currentTime();
@@ -139,7 +163,7 @@ public final class Sharding {
             Map<String, List<InboxMessage>> dedupSourceByType = groupByTargetType(dedupSource);
 
             for (String typeUrl : messagesByType.keySet()) {
-                ProcessingBehavior<InboxMessage> behavior = behaviors.get(typeUrl);
+                ProcessingBehavior<InboxMessage> behavior = inboxBehaviors.get(typeUrl);
                 List<InboxMessage> messagesForBehavior = messagesByType.get(typeUrl);
                 List<InboxMessage> dedupSourceForBehavior = dedupSourceByType.get(typeUrl);
                 behavior.process(messagesForBehavior, dedupSourceForBehavior);
@@ -150,6 +174,11 @@ public final class Sharding {
             inboxStorage.removeAll(toRemoveBuilder.build());
             maybePage = currentPage.next();
         }
+    }
+
+    public void register(Inbox<?> inbox) {
+        TypeUrl entityType = inbox.getEntityStateType();
+        inboxBehaviors.put(entityType.value(), inbox.getProcessingBehavior());
     }
 
     private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {
@@ -179,9 +208,8 @@ public final class Sharding {
         private InboxStorage inboxStorage;
         private Supplier<StorageFactory> storageFactorySupplier;
         private ShardingStrategy strategy;
-        private Duration deduplicationPeriod;
-        private final Map<String, ProcessingBehavior<InboxMessage>> behaviors = new HashMap<>();
         private ShardedWorkRegistry workRegistry;
+        private Duration deduplicationPeriod = Duration.getDefaultInstance();
 
         /**
          * Prevents a direct instantiation of this class.
@@ -189,20 +217,17 @@ public final class Sharding {
         private Builder() {
         }
 
+        public void setWorkRegistry(ShardedWorkRegistry workRegistry) {
+            this.workRegistry = checkNotNull(workRegistry);
+        }
+
         public Builder setStrategy(ShardingStrategy strategy) {
             this.strategy = checkNotNull(strategy);
             return this;
         }
 
-        public Builder addBehavior(TypeUrl messageType, ProcessingBehavior<InboxMessage> behavior) {
-            checkNotNull(behavior);
-            behaviors.put(messageType.value(), behavior);
-            return this;
-        }
-
         public Builder setDeduplicationPeriod(Duration deduplicationPeriod) {
-            checkNotNull(deduplicationPeriod);
-            this.deduplicationPeriod = deduplicationPeriod;
+            this.deduplicationPeriod = checkNotNull(deduplicationPeriod); ;
             return this;
         }
 
@@ -217,8 +242,14 @@ public final class Sharding {
             if (strategy == null) {
                 strategy = UniformAcrossAllShards.singleShard();
             }
-            inboxStorage = storageFactorySupplier.get()
-                                                 .createInboxStorage();
+            StorageFactory storageFactory;
+            if (storageFactorySupplier == null) {
+                storageFactory = InMemoryStorageFactory.newInstance(
+                        BoundedContextNames.newName("Sharding"), true);
+            } else {
+                storageFactory = storageFactorySupplier.get();
+            }
+            inboxStorage = storageFactory.createInboxStorage();
             Sharding sharding = new Sharding(this);
             return sharding;
         }

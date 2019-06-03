@@ -23,7 +23,7 @@ package io.spine.server.inbox;
 import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Optional;
+import java.util.Collection;
 
 /**
  * The part of {@link Inbox} responsible for processing incoming
@@ -34,8 +34,8 @@ import java.util.Optional;
  */
 class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
-    InboxOfEvents(EventEnvelope envelope, Inbox.Builder<I> builder, I entityId) {
-        super(entityId, envelope, builder, builder.getEventEndpoints());
+    InboxOfEvents(Inbox.Builder<I> builder) {
+        super(builder, builder.getEventEndpoints());
     }
 
     @Override
@@ -44,27 +44,37 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected Optional<DuplicateEventException> checkDuplicates(InboxContentRecord contents) {
-        EventEnvelope envelope = getEnvelope();
-        boolean hasDuplicate = contents.getMessageList()
-                                       .stream()
-                                       .filter(InboxMessage::hasEvent)
-                                       .anyMatch(m -> envelope.id()
-                                                              .equals(m.getEvent()
-                                                                       .getId()));
-        if (hasDuplicate) {
-            DuplicateEventException exception =
-                    new DuplicateEventException(envelope.outerObject());
-            return Optional.of(exception);
-        }
-        return Optional.empty();
-    }
-
-    @Override
     protected InboxMessageId inboxMsgIdFrom(EventEnvelope envelope) {
         String rawValue = envelope.id()
                                   .getValue();
-        InboxMessageId result = InboxMessageId.of(rawValue);
+        InboxMessageId result = InboxMessageId.newBuilder()
+                                              .setValue(rawValue)
+                                              .build();
         return result;
+    }
+
+    @Override
+    protected EventEnvelope asEnvelope(InboxMessage message) {
+        return EventEnvelope.of(message.getEvent());
+    }
+
+    @Override
+    protected Delivery deliveryBasedOn(Collection<InboxMessage> deduplicationSource) {
+        return new EventDelivery(deduplicationSource);
+    }
+
+    /**
+     * A strategy of event delivery from this {@code Inbox} to the event targets.
+     */
+    class EventDelivery extends Delivery {
+
+        protected EventDelivery(Collection<InboxMessage> deduplicationSource) {
+            super(deduplicationSource);
+        }
+
+        @Override
+        protected RuntimeException onDuplicateFound(InboxMessage duplicate) {
+            return new DuplicateEventException(duplicate.getEvent());
+        }
     }
 }

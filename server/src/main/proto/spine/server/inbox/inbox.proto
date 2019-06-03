@@ -78,11 +78,13 @@ enum InboxLabel {
     COMMAND_UPON_EVENT = 6;
 }
 
-// A UUID-generated identifier of an `Inbox` message.
-//
 message InboxMessageId {
 
-    string uuid = 1 [(required) = true];
+    // The value of the identifier of the source message, that has been put into the `Inbox`.
+    //
+    // E.g. if an instance of `Event` is put into the `Inbox`,
+    // this field has a value of `Event.id.value`.
+    string value = 1 [(required) = true];
 }
 
 // A message in the inbox.

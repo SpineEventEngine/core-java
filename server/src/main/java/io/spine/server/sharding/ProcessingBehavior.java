@@ -49,5 +49,5 @@ public abstract class ProcessingBehavior<M extends ShardedRecord> {
      * @param deduplicationSource
      *         the messages to look for duplicates amongst
      */
-    abstract void process(List<M> toProcess, List<M> deduplicationSource);
+    protected abstract void process(List<M> toProcess, List<M> deduplicationSource);
 }

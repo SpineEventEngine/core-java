@@ -18,33 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
-
-import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.type.ActorMessageEnvelope;
-
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
-
 /**
- * The {@linkplain io.spine.server.inbox.LazyEndpoint endpoints} configured as destinations for
- * a certain {@linkplain io.spine.server.inbox.InboxLabel label}.
+ * This package contains in-memory implementations of sharding routines.
  */
-class LabelledEndpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.sharding.memory;
 
-    private final Map<InboxLabel, LazyEndpoint<I, M>> endpoints =
-            new EnumMap<>(InboxLabel.class);
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-    void add(InboxLabel label, LazyEndpoint<I, M> lazyEndpoint) {
-        endpoints.put(label, lazyEndpoint);
-    }
-
-    Optional<MessageEndpoint<I, M>> get(InboxLabel label, M envelope) {
-        if (!endpoints.containsKey(label)) {
-            return Optional.empty();
-        }
-        return Optional.of(endpoints.get(label)
-                                    .apply(envelope));
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

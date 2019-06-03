@@ -20,14 +20,20 @@
 
 package io.spine.server.inbox;
 
+import com.google.protobuf.Any;
 import io.spine.base.Time;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.sharding.ShardIndex;
 import io.spine.server.sharding.Sharding;
 import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.type.TypeUrl;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * An abstract base of {@link Inbox inbox} part.
@@ -44,19 +50,14 @@ import java.util.Optional;
  */
 abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    private final I entityId;
-    private final M envelope;
-    private final LabelledEndpoints<I, M> endpoints;
+    private final Endpoints<I, M> endpoints;
     private final InboxStorage storage;
-    private final InboxId inboxId;
+    private final TypeUrl entityStateType;
 
-    InboxPart(I entityId, M envelope, Inbox.Builder<I> builder,
-              LabelledEndpoints<I, M> endpoints) {
-        this.entityId = entityId;
-        this.envelope = envelope;
+    InboxPart(Inbox.Builder<I> builder, Endpoints<I, M> endpoints) {
         this.endpoints = endpoints;
         this.storage = builder.getStorage();
-        this.inboxId = builder.getInboxId();
+        this.entityStateType = builder.getEntityStateType();
     }
 
     /**
@@ -65,21 +66,15 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      */
     protected abstract void setRecordPayload(M envelope, InboxMessageVBuilder builder);
 
-    /**
-     * Checks whether the message has already been stored in the inbox.
-     *
-     * <p>In case of duplication returns an {@code Optional} containing the duplication exception
-     * wrapped into a inbox-specific runtime exception for further handling.
-     */
-    protected abstract Optional<? extends RuntimeException>
-    checkDuplicates(InboxContentRecord contents);
-
     protected abstract InboxMessageId inboxMsgIdFrom(M envelope);
 
-    void storeOrDeliver(InboxLabel label) {
-        MessageEndpoint<I, M> endpoint =
-                endpoints.get(label, envelope)
-                         .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
+    protected abstract M asEnvelope(InboxMessage message);
+
+    protected abstract Delivery deliveryBasedOn(Collection<InboxMessage> deduplicationSource);
+
+    void storeOrDeliver(M envelope, I entityId, InboxLabel label) {
+        InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
+        MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
         Sharding sharding = ServerEnvironment.getInstance()
                                              .sharding();
         if (!sharding.enabled()) {
@@ -100,7 +95,74 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         }
     }
 
-    protected M getEnvelope() {
-        return envelope;
+    private MessageEndpoint<I, M> getEndpoint(M envelope, InboxLabel label, InboxId inboxId) {
+        return endpoints.get(label, envelope)
+                        .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
+    }
+
+    private MessageEndpoint<I, M> getEndpoint(InboxMessage message) {
+        M envelope = asEnvelope(message);
+        InboxLabel label = message.getLabel();
+        InboxId inboxId = message.getInboxId();
+        return getEndpoint(envelope, label, inboxId);
+    }
+
+    /**
+     * An abstract base for routines which deliver {@code InboxMessage}s to their endpoints.
+     *
+     * <p>In case a duplication is found, the respective endpoint is
+     * {@linkplain MessageEndpoint#onError(ActorMessageEnvelope, RuntimeException) notified}.
+     */
+    abstract class Delivery {
+
+        private final Set<String> rawIds;
+
+        Delivery(Collection<InboxMessage> deduplicationSource) {
+            this.rawIds = deduplicationSource.stream()
+                                             .map(InboxMessage::getId)
+                                             .map(InboxMessageId::getValue)
+                                             .collect(Collectors.toSet());
+        }
+
+        void deliver(InboxMessage message) {
+            Optional<? extends RuntimeException> duplicationException = checkDuplicate(message);
+            MessageEndpoint<I, M> endpoint = getEndpoint(message);
+            if(duplicationException.isPresent()) {
+                endpoint.onError(asEnvelope(message), duplicationException.get());
+            } else {
+                Any entityId = message.getInboxId()
+                                .getEntityId()
+                                .getId();
+                I unpackedId = (I) AnyPacker.unpack(entityId);
+                endpoint.dispatchTo(unpackedId);
+            }
+        }
+
+        /**
+         * Emits a exception, specific to the type of the message, in case the passed message
+         * is determined to be a duplicate.
+         *
+         * @param duplicate
+         *         the duplicate message
+         * @return a type-specific exception
+         */
+        protected abstract RuntimeException onDuplicateFound(InboxMessage duplicate);
+
+        /**
+         * Checks whether the message has already been stored in the inbox.
+         *
+         * <p>In case of duplication returns an {@code Optional} containing the duplication
+         * exception wrapped into a inbox-specific runtime exception for further handling.
+         */
+        private Optional<? extends RuntimeException> checkDuplicate(InboxMessage message) {
+            String currentId = message.getId()
+                                      .getValue();
+            boolean hasDuplicate = rawIds.contains(currentId);
+            if (hasDuplicate) {
+                RuntimeException exception = onDuplicateFound(message);
+                return Optional.of(exception);
+            }
+            return Optional.empty();
+        }
     }
 }

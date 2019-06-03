@@ -20,11 +20,21 @@
 
 package io.spine.server.inbox;
 
+import io.spine.server.sharding.ProcessingBehavior;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.inbox.InboxLabel.COMMAND_UPON_EVENT;
+import static io.spine.server.inbox.InboxLabel.HANDLE_COMMAND;
+import static io.spine.server.inbox.InboxLabel.IMPORT_EVENT;
+import static io.spine.server.inbox.InboxLabel.REACT_UPON_EVENT;
+import static io.spine.server.inbox.InboxLabel.TRANSFORM_COMMAND;
+import static io.spine.server.inbox.InboxLabel.UPDATE_SUBSCRIBER;
 
 /**
  * A container for the messages dispatched to a certain consumer, such as an event subscriber
@@ -38,56 +48,58 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Inbox<I> {
 
-    private final I entityId;
-    private final Builder<I> builder;
+    private final TypeUrl entityStateType;
+    private final InboxOfCommands<I> commandPart;
+    private final InboxOfEvents<I> eventPart;
 
     private Inbox(Builder<I> builder) {
-        this.builder = builder;
-        this.entityId = toEntityId(builder.getInboxId());
-    }
-
-    @SuppressWarnings("unchecked")  // Ensured by the `Inbox` definition.
-    private I toEntityId(InboxId inboxId) {
-        return (I) InboxIds.unwrap(inboxId);
+        this.entityStateType = builder.entityStateType;
+        this.commandPart = new InboxOfCommands<>(builder);
+        this.eventPart = new InboxOfEvents<>(builder);
     }
 
     /**
      * Creates an instance of {@code Builder} with the given consumer identifier.
      *
-     * @param id
-     *         the identifier of a consumer
      * @param typeUrl
      *         the type URL of a consumer
      */
-    public static <I> Builder<I> newBuilder(Object id, TypeUrl typeUrl) {
-        InboxId inboxId = InboxIds.wrap(id, typeUrl);
-        return new Builder<>(inboxId);
+    public static <I> Builder<I> newBuilder(TypeUrl typeUrl) {
+        return new Builder<>(typeUrl);
     }
 
     /**
-     * Puts an event envelope to the {@code Inbox} and allows to set a label for this message,
-     * determining its processing destiny.
+     * Sends an event envelope to the {@code Inbox} and allows to set a destination for this
+     * message, determining its processing destiny.
      *
-     * @param envelope
+     * @param event
      *         the event to put to {@code Inbox}
-     * @return the choice of labels for an event message available in this {@code Inbox}
+     * @return the choice of destination for an event message available in this {@code Inbox}
      */
-    public EventLabels put(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        return new EventLabels(envelope);
+    public EventDestinations send(EventEnvelope event) {
+        checkNotNull(event);
+        return new EventDestinations(event);
     }
 
     /**
-     * Puts a command envelope to the {@code Inbox} and allows to set a label for this message,
-     * determining its processing destiny.
+     * Sends a command envelope to the {@code Inbox} and allows to set a destination for this
+     * message, determining its processing destiny.
      *
-     * @param envelope
-     *         the event to put to {@code Inbox}
-     * @return the choice of labels for a command message available in this {@code Inbox}
+     * @param command
+     *         the command to put to {@code Inbox}
+     * @return the choice of destination for a command message available in this {@code Inbox}
      */
-    public CommandLabels put(CommandEnvelope envelope) {
-        checkNotNull(envelope);
-        return new CommandLabels(envelope);
+    public CommandDestinations send(CommandEnvelope command) {
+        checkNotNull(command);
+        return new CommandDestinations(command);
+    }
+
+    public TypeUrl getEntityStateType() {
+        return entityStateType;
+    }
+
+    public ProcessingBehavior<InboxMessage> getProcessingBehavior() {
+        return new InboxMessageProcessor();
     }
 
     /**
@@ -98,16 +110,19 @@ public class Inbox<I> {
      */
     public static class Builder<I> {
 
-        private final InboxId inboxId;
-        private final LabelledEndpoints<I, EventEnvelope> eventEndpoints = new LabelledEndpoints<>();
-        private final LabelledEndpoints<I, CommandEnvelope> commandEndpoints = new LabelledEndpoints<>();
+        private final TypeUrl entityStateType;
+        private final Endpoints<I, EventEnvelope> eventEndpoints = new Endpoints<>();
+        private final Endpoints<I, CommandEnvelope> commandEndpoints = new Endpoints<>();
         private InboxStorage storage;
 
         /**
-         * Creates an instance of {@code Builder} with the given consumer identifier.
+         * Creates an instance of {@code Builder} for the given {@code Inbox} consumer entity type.
+         *
+         * @param type
+         *         the type URL of the entity, to which belongs the {@code Inbox} being built
          */
-        private Builder(InboxId id) {
-            inboxId = id;
+        private Builder(TypeUrl type) {
+            entityStateType = type;
         }
 
         /**
@@ -140,95 +155,103 @@ public class Inbox<I> {
         }
 
         public Inbox<I> build() {
+            checkNotNull(entityStateType, "Entity state type must be set");
+            checkNotNull(storage, "Inbox storage must be set");
+            checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),
+                          "There must be at least one event or command endpoint");
             return new Inbox<>(this);
         }
 
-        InboxId getInboxId() {
-            return inboxId;
-        }
-
-        LabelledEndpoints<I, EventEnvelope> getEventEndpoints() {
+        Endpoints<I, EventEnvelope> getEventEndpoints() {
             return eventEndpoints;
         }
 
-        LabelledEndpoints<I, CommandEnvelope> getCommandEndpoints() {
+        Endpoints<I, CommandEnvelope> getCommandEndpoints() {
             return commandEndpoints;
         }
 
         InboxStorage getStorage() {
             return storage;
         }
-    }
 
-    /**
-     * Labels to put to the event in {@code Inbox}.
-     *
-     * <p>Determines how the event is going to be processed.
-     */
-    public class EventLabels {
-
-        private final InboxOfEvents handler;
-
-        private EventLabels(EventEnvelope envelope) {
-            this.handler = new InboxOfEvents<>(envelope, builder, entityId);
-        }
-
-        /**
-         * Marks the event envelope with a label for passing to an event reactor method.
-         */
-        public void toReact() {
-            handler.storeOrDeliver(InboxLabel.REACT_UPON_EVENT);
-        }
-
-        /**
-         * Marks the event envelope with a label for passing to an event importer method.
-         */
-        public void toImport() {
-            handler.storeOrDeliver(InboxLabel.IMPORT_EVENT);
-        }
-
-        /**
-         * Marks the event envelope with a label for passing to a method emitting commands in
-         * response.
-         */
-        public void toCommand() {
-            handler.storeOrDeliver(InboxLabel.COMMAND_UPON_EVENT);
-        }
-
-        /**
-         * Marks the event envelope with a label for passing to an event subscriber method.
-         */
-        public void forSubscriber() {
-            handler.storeOrDeliver(InboxLabel.UPDATE_SUBSCRIBER);
+        TypeUrl getEntityStateType() {
+            return entityStateType;
         }
     }
 
     /**
-     * Labels to put to the command in {@code Inbox}.
-     *
-     * <p>Determines how the command is going to be processed.
+     * The available destinations for the {@code Event}s sent via this inbox.
      */
-    public class CommandLabels {
+    public class EventDestinations {
 
-        private final InboxOfCommands handler;
+        private final EventEnvelope event;
 
-        private CommandLabels(CommandEnvelope envelope) {
-            this.handler = new InboxOfCommands<>(envelope, builder, entityId);
+        private EventDestinations(EventEnvelope event) {
+            this.event = event;
         }
 
-        /**
-         * Marks the command envelope with a label for passing to a command handler method.
-         */
-        public void toHandle() {
-            handler.storeOrDeliver(InboxLabel.HANDLE_COMMAND);
+        public void toReactor(I entityId) {
+            eventPart.storeOrDeliver(event, entityId, REACT_UPON_EVENT);
         }
 
-        /**
-         * Marks the command envelope with a label for passing to a method emitting commands in
-         * response.
-         */
-        public void toTransform() {
-            handler.storeOrDeliver(InboxLabel.TRANSFORM_COMMAND);
+        public void toImporter(I entityId) {
+            eventPart.storeOrDeliver(event, entityId, IMPORT_EVENT);
+        }
+
+        public void toCommander(I entityId) {
+            eventPart.storeOrDeliver(event, entityId, COMMAND_UPON_EVENT);
+        }
+
+        public void toSubscriber(I entityId) {
+            eventPart.storeOrDeliver(event, entityId, UPDATE_SUBSCRIBER);
+        }
+    }
+
+    /**
+     * The available destinations for the {@code Commands}s sent via this inbox.
+     */
+    public class CommandDestinations {
+
+        private final CommandEnvelope command;
+
+        private CommandDestinations(CommandEnvelope command) {
+            this.command = command;
+        }
+
+        public void toHandler(I entityId) {
+            commandPart.storeOrDeliver(command, entityId, HANDLE_COMMAND);
+        }
+
+        public void toCommander(I entityId) {
+            commandPart.storeOrDeliver(command, entityId, TRANSFORM_COMMAND);
+        }
+    }
+
+    /**
+     * Takes the messages, which were previously sent to their targets via this inbox and
+     * delivers them, performing their de-duplication.
+     *
+     * <p>Source messages for the de-duplication are supplied separately.
+     */
+    public class InboxMessageProcessor extends ProcessingBehavior<InboxMessage> {
+
+        @Override
+        protected void process(List<InboxMessage> incomingMessages,
+                               List<InboxMessage> deduplicationSource) {
+
+            InboxPart<I, CommandEnvelope>.Delivery commandDelivery =
+                    commandPart.deliveryBasedOn(deduplicationSource);
+            InboxPart<I, EventEnvelope>.Delivery eventDelivery =
+                    eventPart.deliveryBasedOn(deduplicationSource);
+
+            for (InboxMessage incomingMessage : incomingMessages) {
+
+                if(incomingMessage.hasCommand()) {
+                    commandDelivery.deliver(incomingMessage);
+                } else {
+                    eventDelivery.deliver(incomingMessage);
+                }
+            }
         }
     }
 }
