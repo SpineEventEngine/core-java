@@ -73,7 +73,7 @@ public abstract class TransactionTest<I,
 
     private static boolean checkPhase(Event event, Phase phase) {
         EventId id = event.getId();
-        Message phaseId = phase.getMessageId();
+        Message phaseId = phase.messageId();
         boolean equalIds = id.equals(phaseId);
         boolean isSuccessful = phase.isSuccessful();
         return equalIds && isSuccessful;
