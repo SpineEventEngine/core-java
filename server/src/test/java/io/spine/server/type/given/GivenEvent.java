@@ -33,6 +33,7 @@ import io.spine.testing.server.TestEventFactory;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.testing.TestValues.random;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 
 public final class GivenEvent {
@@ -66,7 +67,7 @@ public final class GivenEvent {
     }
 
     private static Version someVersion() {
-        return Versions.newVersion(42, currentTime());
+        return Versions.newVersion(random(1, 100), currentTime());
     }
 
     public static Event arbitrary() {

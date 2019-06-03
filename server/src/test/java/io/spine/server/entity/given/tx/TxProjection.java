@@ -26,7 +26,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
-import io.spine.server.event.React;
 import io.spine.server.projection.Projection;
 
 import java.util.List;
@@ -66,7 +65,7 @@ public class TxProjection extends Projection<Id, ProjectionState, ProjectionStat
         throw new RuntimeException("that tests the projection tx behaviour");
     }
 
-    @React
+    @Subscribe
     void event(TxStateErrorRequested e) {
         // By convention the first field of state is required.
         // Clearing it should fail the validation when the transaction is committed.
