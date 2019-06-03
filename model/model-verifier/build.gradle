@@ -23,7 +23,7 @@ buildscript {
 }
 
 ext {
-    jUnitPioneerVersion = '0.1.2'
+    jUnitPioneerVersion = '0.3.0'
 }
 
 group 'io.spine.tools'
