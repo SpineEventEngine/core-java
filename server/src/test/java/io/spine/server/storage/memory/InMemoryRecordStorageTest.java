@@ -64,7 +64,7 @@ public class InMemoryRecordStorageTest
     @Test
     @DisplayName("return storage spec")
     void returnStorageSpec() {
-        StorageSpec spec = getStorage().getSpec();
+        StorageSpec spec = storage().spec();
         assertEquals(ProjectId.class, spec.getIdClass());
     }
 }

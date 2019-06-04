@@ -53,10 +53,6 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
         this.recordStorage = recordStorage;
     }
 
-    StorageSpec<I> getSpec() {
-        return recordStorage.getSpec();
-    }
-
     @Override
     public Iterator<I> index() {
         return recordStorage.index();

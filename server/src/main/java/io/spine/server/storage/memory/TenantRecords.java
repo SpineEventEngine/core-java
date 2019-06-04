@@ -47,7 +47,7 @@ import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
  * The memory-based storage for {@link EntityRecord} that represents
  * all storage operations available for data of a single tenant.
  */
-class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
+final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> activeRecords =

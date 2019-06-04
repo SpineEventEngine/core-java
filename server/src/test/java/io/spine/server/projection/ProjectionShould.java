@@ -323,7 +323,7 @@ class ProjectionShould {
         EntityColumnCache cache = EntityColumnCache.initializeFor(projectionType);
         EntityColumn column = cache.findColumn(columnName.toString());
         assertThat(column).isNotNull();
-        assertThat(column.getType()).isEqualTo(columnType);
+        assertThat(column.type()).isEqualTo(columnType);
     }
 
     private static ProjectId newId() {

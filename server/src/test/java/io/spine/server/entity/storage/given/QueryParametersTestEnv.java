@@ -37,8 +37,8 @@ public class QueryParametersTestEnv {
 
     public static EntityColumn mockColumn(LifecycleFlagField flag, String storedName) {
         EntityColumn column = mock(EntityColumn.class);
-        when(column.getStoredName()).thenReturn(storedName);
-        when(column.getName()).thenReturn(flag.name());
+        when(column.storedName()).thenReturn(storedName);
+        when(column.name()).thenReturn(flag.name());
         return column;
     }
 

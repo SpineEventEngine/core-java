@@ -49,13 +49,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Column {
 
     /**
-     * (Optional) The custom {@linkplain EntityColumn#getStoredName() name} of the column
+     * (Optional) The custom {@linkplain EntityColumn#storedName() name} of the column
      * to be persisted.
      *
-     * <p>Defaults to the {@linkplain EntityColumn#getName() name} extracted from the getter
+     * <p>Defaults to the {@linkplain EntityColumn#name() name} extracted from the getter
      * which is used for querying.
      *
-     * <p>This value does not changes a {@linkplain EntityColumn#getName() name} of column
+     * <p>This value does not changes a {@linkplain EntityColumn#name() name} of column
      * that should be used for {@linkplain EntityQueries querying}.
      */
     String name() default "";

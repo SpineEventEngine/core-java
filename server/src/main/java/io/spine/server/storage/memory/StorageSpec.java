@@ -39,7 +39,6 @@ public final class StorageSpec<I> implements Serializable {
 
     private static final long serialVersionUID = 0L;
     
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // duplicates have different purpose.
     private static final String FLD_BOUNDED_CONTEXT_NAME = "boundedContextName";
     private static final String FLD_ENTITY_STATE_URL = "entityStateUrl";
     private static final String FLD_ID_CLASS = "idClass";

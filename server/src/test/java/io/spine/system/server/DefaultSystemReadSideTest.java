@@ -173,8 +173,9 @@ class DefaultSystemReadSideTest {
             EntityStateWithVersion next = iterator.next();
             Message foundMessage = unpack(next.getState());
 
-            assertEquals(aggregate().state(), foundMessage);
-            assertEquals(aggregate().version(), next.getVersion());
+            ShoppingListAggregate aggregate = aggregate();
+            assertEquals(aggregate.state(), foundMessage);
+            assertEquals(aggregate.version(), next.getVersion());
         }
 
         private ShoppingListAggregate aggregate() {
