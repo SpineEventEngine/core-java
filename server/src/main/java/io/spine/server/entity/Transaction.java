@@ -159,9 +159,7 @@ public abstract class Transaction<I,
      * @see TransactionListener
      */
     protected Transaction(E entity) {
-        checkNotNull(entity);
-
-        this.entity = entity;
+        this.entity = checkNotNull(entity);
         this.initialState = entity.state();
         this.builder = entity.builderFromState();
         this.version = entity.version();
@@ -169,7 +167,6 @@ public abstract class Transaction<I,
         this.active = true;
 
         this.transactionListener = new SilentWitness<>();
-
         injectTo(entity);
         this.entityBeforeTransaction = createRecord();
     }

@@ -173,26 +173,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             synchronized (this) {
                 result = state;
                 if (result == null) {
-                    state = initStateIdField(defaultState());
+                    state = defaultState();
                     result = state;
                 }
             }
         }
         return result;
-    }
-
-    /**
-     * Updates the first field of the state with the value of the ID, if it is not already set.
-     *
-     * @implNote This is a convenience feature that allows avoid explicit setting of such
-     *         fields in handler methods. By convention, this field is required, but its
-     *         initialization is often forgotten in handling methods.
-     */
-    private S initStateIdField(S state) {
-        return state;
-//        IdField idField = modelClass().idField();
-//        S updatedState = idField.init(state, id());
-//        return updatedState;
     }
 
     /**

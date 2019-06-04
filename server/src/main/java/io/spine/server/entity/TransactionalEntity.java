@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.model.IdField;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -203,9 +204,21 @@ public abstract class TransactionalEntity<I,
         this.stateChanged = tx().isStateChanged();
     }
 
+    /**
+     * Obtains the builder for being used by a transaction.
+     *
+     * <p>If the entity has the default state, and the first field of the state is its ID, and
+     * the field is required, initializes the builder with the value of the entity ID.
+     */
     final B builderFromState() {
+        S currentState = state();
         @SuppressWarnings("unchecked") // Logically checked.
-        B builder = (B) state().toBuilder();
+        B builder = (B) currentState.toBuilder();
+
+        if (currentState.equals(defaultState())) {
+            IdField idField = modelClass().idField();
+            idField.initBuilder(builder, id());
+        }
         return builder;
     }
 

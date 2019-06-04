@@ -285,7 +285,11 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        ProtoTruth.assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
+        ProtoTruth.assertThat(projection.state())
+                  // Ignore the different in the ID field of the state which
+                  // was set automatically by the tx.
+                  .comparingExpectedFieldsOnly()
+                  .isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()

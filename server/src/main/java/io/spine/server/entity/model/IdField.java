@@ -25,6 +25,8 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.code.proto.FieldDeclaration;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.validate.option.Required;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.io.Serializable;
@@ -84,26 +86,21 @@ public final class IdField implements Serializable {
     }
 
     /**
-     * Initializes the ID field with the passed value if it was not set yet.
-     *
-     * @return updated state if the field was updated, otherwise the passed instance
+     * Initializes the passed builder with the passed value of the entity ID,
+     * <em>iff</em> the field is required.
      */
-    public <I, S extends Message> S init(S state, I id) {
-        checkNotNull(state);
+    public <I, S extends Message, B extends ValidatingBuilder<S>>
+    void initBuilder(B builder, I id) {
+        checkNotNull(builder);
         checkNotNull(id);
         if (!declared()) {
-            return state;
+            return;
         }
         FieldDescriptor idField = declaration.descriptor();
-        Object currentValue = state.getField(idField);
-        if (declaration.isDefault(currentValue)) {
-            @SuppressWarnings("unchecked") /* safe as converting the passed instance. */
-            S updatedState = (S)
-                state.toBuilder()
-                     .setField(idField, id)
-                     .build();
-            return updatedState;
+        @SuppressWarnings("Immutable") // all supported types of IDs are immutable.
+        boolean isRequired = Required.<I>create(false).shouldValidate(idField);
+        if (isRequired) {
+            builder.setField(idField, id);
         }
-        return state;
     }
 }
