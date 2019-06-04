@@ -29,12 +29,12 @@ import java.util.List;
  *         the type of sharded messages
  * @author Alex Tymchenko
  */
-public abstract class ProcessingBehavior<M extends ShardedRecord> {
+public abstract class ShardedMessageDelivery<M extends ShardedRecord> {
 
     /**
-     * Sends the postponed messages for processing.
+     * Delivers the previously sharded messages to their targets..
      *
-     * <p>The descendants typically will load the targets for the messages
+     * <p>The descendants typically will initialize the targets for the messages (such as entities)
      * and handle the dispatching results.
      *
      * <p>Any runtime issues should be handled by the descendants by emitting the corresponding
@@ -44,10 +44,10 @@ public abstract class ProcessingBehavior<M extends ShardedRecord> {
      * {@code now - de-duplication depth} timeframe. In most of cases, the set of messages sent
      * for processing are included in the set of those to be used for de-duplication.
      *
-     * @param toProcess
-     *         the messages to send for processing
+     * @param incoming
+     *         the incoming messages to deliver
      * @param deduplicationSource
      *         the messages to look for duplicates amongst
      */
-    protected abstract void process(List<M> toProcess, List<M> deduplicationSource);
+    protected abstract void deliver(List<M> incoming, List<M> deduplicationSource);
 }

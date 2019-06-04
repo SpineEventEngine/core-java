@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.inbox.Inbox;
@@ -36,12 +37,14 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
@@ -73,6 +76,7 @@ public final class Sharding {
 
     private final ShardingStrategy strategy;
     private final Duration deduplicationPeriod;
+
     /**
      * The behaviors to call for the postponed message dispatching.
      *
@@ -83,7 +87,8 @@ public final class Sharding {
      * as {@code String} to avoid an extra boxing into {@code TypeUrl} of the value,
      * which resides as a Protobuf {@code string} inside an incoming message.
      */
-    private final Map<String, ProcessingBehavior<InboxMessage>> inboxBehaviors;
+    private final Map<String, ShardedMessageDelivery<InboxMessage>> inboxDeliveries;
+    private final List<StreamObserver<ShardIndex>> shardObservers;
     private final ShardedWorkRegistry workRegistry;
     private final InboxStorage inboxStorage;
 
@@ -92,7 +97,8 @@ public final class Sharding {
         this.workRegistry = builder.workRegistry;
         this.deduplicationPeriod = builder.deduplicationPeriod;
         this.inboxStorage = builder.inboxStorage;
-        this.inboxBehaviors = Maps.newConcurrentMap();
+        this.inboxDeliveries = Maps.newConcurrentMap();
+        this.shardObservers = synchronizedList(new ArrayList<>());
     }
 
     /**
@@ -112,9 +118,10 @@ public final class Sharding {
      * //TODO:2019-06-03:alex.tymchenko: this is not a behavior I'd expect.
      * <p>In case the given shard is not available for delivery, this method does nothing.
      *
-     * @param index the shard index to deliver the messages from.
+     * @param index
+     *         the shard index to deliver the messages from.
      */
-    public void deliverShardedMessages(ShardIndex index) {
+    public void deliverMessagesFrom(ShardIndex index) {
         ShardProcessingSession session = workRegistry.pickUp(index);
 
         Timestamp now = Time.currentTime();
@@ -163,10 +170,10 @@ public final class Sharding {
             Map<String, List<InboxMessage>> dedupSourceByType = groupByTargetType(dedupSource);
 
             for (String typeUrl : messagesByType.keySet()) {
-                ProcessingBehavior<InboxMessage> behavior = inboxBehaviors.get(typeUrl);
+                ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
                 List<InboxMessage> messagesForBehavior = messagesByType.get(typeUrl);
                 List<InboxMessage> dedupSourceForBehavior = dedupSourceByType.get(typeUrl);
-                behavior.process(messagesForBehavior, dedupSourceForBehavior);
+                delivery.deliver(messagesForBehavior, dedupSourceForBehavior);
             }
 
             InboxMessage lastMessage = messages.get(messages.size() - 1);
@@ -176,9 +183,35 @@ public final class Sharding {
         }
     }
 
+    //TODO:2019-06-04:alex.tymchenko: try to pack the logic into the `register` call.
+    /**
+     * Notifies that the shard with the given index has been updated with some message(s).
+     *
+     * @param shardIndex
+     *         an index of the shard
+     */
+    public void notify(ShardIndex shardIndex) {
+        for (StreamObserver<ShardIndex> observer : shardObservers) {
+            observer.onNext(shardIndex);
+        }
+    }
+
+    /**
+     * Subscribes to the updates of shard contents.
+     *
+     * <p>The passed observer will be notified that the contents of a shard with a particular index
+     * were changed.
+     *
+     * @param observer
+     *         an observer to notify of updates.
+     */
+    public void subscribe(StreamObserver<ShardIndex> observer) {
+        shardObservers.add(observer);
+    }
+
     public void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
-        inboxBehaviors.put(entityType.value(), inbox.getProcessingBehavior());
+        inboxDeliveries.put(entityType.value(), inbox.getProcessingBehavior());
     }
 
     private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {

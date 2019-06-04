@@ -24,6 +24,7 @@ import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * The part of {@link Inbox} responsible for processing incoming
@@ -59,18 +60,24 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected Delivery deliveryBasedOn(Collection<InboxMessage> deduplicationSource) {
-        return new EventDelivery(deduplicationSource);
+    protected Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource) {
+        return new EventDispatcher(deduplicationSource);
     }
 
     /**
      * A strategy of event delivery from this {@code Inbox} to the event targets.
      */
-    class EventDelivery extends Delivery {
+    class EventDispatcher extends Dispatcher {
 
-        protected EventDelivery(Collection<InboxMessage> deduplicationSource) {
+        private EventDispatcher(Collection<InboxMessage> deduplicationSource) {
             super(deduplicationSource);
         }
+
+        @Override
+        protected Predicate<? super InboxMessage> filterByType() {
+            return (Predicate<InboxMessage>) InboxMessage::hasEvent;
+        }
+
 
         @Override
         protected RuntimeException onDuplicateFound(InboxMessage duplicate) {

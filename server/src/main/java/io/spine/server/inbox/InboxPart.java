@@ -31,8 +31,11 @@ import io.spine.server.type.ActorMessageEnvelope;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -70,15 +73,14 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     protected abstract M asEnvelope(InboxMessage message);
 
-    protected abstract Delivery deliveryBasedOn(Collection<InboxMessage> deduplicationSource);
+    protected abstract Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource);
 
     void storeOrDeliver(M envelope, I entityId, InboxLabel label) {
         InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
-        MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
         Sharding sharding = ServerEnvironment.getInstance()
                                              .sharding();
         if (!sharding.enabled()) {
-            endpoint.dispatchTo(entityId);
+            deliverDirectly(envelope, entityId, label, inboxId);
         } else {
             ShardIndex shardIndex = sharding.whichShardFor(entityId);
             InboxMessageVBuilder builder = InboxMessageVBuilder
@@ -95,44 +97,63 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         }
     }
 
+    private void deliverDirectly(M envelope, I entityId, InboxLabel label, InboxId inboxId) {
+        MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
+        endpoint.dispatchTo(entityId);
+    }
+
     private MessageEndpoint<I, M> getEndpoint(M envelope, InboxLabel label, InboxId inboxId) {
         return endpoints.get(label, envelope)
                         .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
     }
 
-    private MessageEndpoint<I, M> getEndpoint(InboxMessage message) {
-        M envelope = asEnvelope(message);
-        InboxLabel label = message.getLabel();
-        InboxId inboxId = message.getInboxId();
-        return getEndpoint(envelope, label, inboxId);
-    }
-
     /**
-     * An abstract base for routines which deliver {@code InboxMessage}s to their endpoints.
+     * An abstract base for routines which dispatch {@code InboxMessage}s to their endpoints.
+     *
+     *
+     * <p>Takes care of de-duplication of the messages, using the prepared collection of previously
+     * dispatched messages to look for duplicate amongst.
      *
      * <p>In case a duplication is found, the respective endpoint is
      * {@linkplain MessageEndpoint#onError(ActorMessageEnvelope, RuntimeException) notified}.
      */
-    abstract class Delivery {
+    abstract class Dispatcher {
 
+        /**
+         * A set of IDs of previously dispatched messages, stored as {@code String} values.
+         */
         private final Set<String> rawIds;
 
-        Delivery(Collection<InboxMessage> deduplicationSource) {
-            this.rawIds = deduplicationSource.stream()
-                                             .map(InboxMessage::getId)
-                                             .map(InboxMessageId::getValue)
-                                             .collect(Collectors.toSet());
+        @SuppressWarnings({ /* To avoid extra filtering in descendants and improve performance. */
+                "AbstractMethodCallInConstructor",
+                "OverridableMethodCallDuringObjectConstruction",
+                "OverriddenMethodCallDuringObjectConstruction"})
+        Dispatcher(Collection<InboxMessage> deduplicationSource) {
+            this.rawIds =
+                    deduplicationSource
+                            .stream()
+                            .filter(filterByType())
+                            .map(InboxMessage::getId)
+                            .map(InboxMessageId::getValue)
+                            .collect(Collectors.toCollection((Supplier<Set<String>>) HashSet::new));
         }
+
+        protected abstract Predicate<? super InboxMessage> filterByType();
 
         void deliver(InboxMessage message) {
             Optional<? extends RuntimeException> duplicationException = checkDuplicate(message);
-            MessageEndpoint<I, M> endpoint = getEndpoint(message);
-            if(duplicationException.isPresent()) {
+            M envelope = asEnvelope(message);
+            InboxLabel label = message.getLabel();
+            InboxId inboxId = message.getInboxId();
+            MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
+
+            if (duplicationException.isPresent()) {
                 endpoint.onError(asEnvelope(message), duplicationException.get());
             } else {
                 Any entityId = message.getInboxId()
-                                .getEntityId()
-                                .getId();
+                                      .getEntityId()
+                                      .getId();
+                @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored and queried.
                 I unpackedId = (I) AnyPacker.unpack(entityId);
                 endpoint.dispatchTo(unpackedId);
             }

@@ -24,6 +24,7 @@ import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.type.CommandEnvelope;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * The part of {@link Inbox} responsible for processing incoming
@@ -59,17 +60,22 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected Delivery deliveryBasedOn(Collection<InboxMessage> deduplicationSource) {
-        return new CommandDelivery(deduplicationSource);
+    protected Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource) {
+        return new CommandDispatcher(deduplicationSource);
     }
 
     /**
      * A strategy of command delivery from this {@code Inbox} to the command target.
      */
-    class CommandDelivery extends Delivery {
+    class CommandDispatcher extends Dispatcher {
 
-        protected CommandDelivery(Collection<InboxMessage> deduplicationSource) {
+        private CommandDispatcher(Collection<InboxMessage> deduplicationSource) {
             super(deduplicationSource);
+        }
+
+        @Override
+        protected Predicate<? super InboxMessage> filterByType() {
+            return (Predicate<InboxMessage>) InboxMessage::hasCommand;
         }
 
         @Override

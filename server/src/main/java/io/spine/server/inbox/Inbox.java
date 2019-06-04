@@ -20,7 +20,7 @@
 
 package io.spine.server.inbox;
 
-import io.spine.server.sharding.ProcessingBehavior;
+import io.spine.server.sharding.ShardedMessageDelivery;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -98,8 +98,8 @@ public class Inbox<I> {
         return entityStateType;
     }
 
-    public ProcessingBehavior<InboxMessage> getProcessingBehavior() {
-        return new InboxMessageProcessor();
+    public ShardedMessageDelivery<InboxMessage> getProcessingBehavior() {
+        return new InboxMessageDelivery();
     }
 
     /**
@@ -233,23 +233,23 @@ public class Inbox<I> {
      *
      * <p>Source messages for the de-duplication are supplied separately.
      */
-    public class InboxMessageProcessor extends ProcessingBehavior<InboxMessage> {
+    public class InboxMessageDelivery extends ShardedMessageDelivery<InboxMessage> {
 
         @Override
-        protected void process(List<InboxMessage> incomingMessages,
+        protected void deliver(List<InboxMessage> incoming,
                                List<InboxMessage> deduplicationSource) {
 
-            InboxPart<I, CommandEnvelope>.Delivery commandDelivery =
-                    commandPart.deliveryBasedOn(deduplicationSource);
-            InboxPart<I, EventEnvelope>.Delivery eventDelivery =
-                    eventPart.deliveryBasedOn(deduplicationSource);
+            InboxPart.Dispatcher commandDispatcher =
+                    commandPart.dispatcherWith(deduplicationSource);
+            InboxPart.Dispatcher eventDispatcher =
+                    eventPart.dispatcherWith(deduplicationSource);
 
-            for (InboxMessage incomingMessage : incomingMessages) {
+            for (InboxMessage incomingMessage : incoming) {
 
                 if(incomingMessage.hasCommand()) {
-                    commandDelivery.deliver(incomingMessage);
+                    commandDispatcher.deliver(incomingMessage);
                 } else {
-                    eventDelivery.deliver(incomingMessage);
+                    eventDispatcher.deliver(incomingMessage);
                 }
             }
         }
