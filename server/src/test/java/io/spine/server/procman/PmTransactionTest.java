@@ -85,9 +85,9 @@ class PmTransactionTest
     @Override
     protected PmState newState() {
         return PmState.newBuilder()
-                             .setId(id())
-                             .setName("The new project name for procman tx tests")
-                             .build();
+                      .setId(id())
+                      .setName("The new project name for procman tx tests")
+                      .build();
     }
 
     @Override
