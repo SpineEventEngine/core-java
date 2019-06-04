@@ -25,12 +25,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
@@ -41,7 +43,6 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -72,14 +73,16 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *     CQRS Journey Guide: A Saga on Sagas</a>
  * </ul>
  *
- * @param <I> the type of the process manager IDs
- * @param <S> the type of the process manager state
+ * @param <I>
+ *         the type of the process manager IDs
+ * @param <S>
+ *         the type of the process manager state
  */
 public abstract class ProcessManager<I,
                                      S extends Message,
-                                     B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                     B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventReactor, Commander {
+        implements EventReactor, Commander, HasVersionColumn<I, S> {
 
     /** The Command Bus to post routed commands. */
     private volatile @MonotonicNonNull CommandBus commandBus;
@@ -94,7 +97,8 @@ public abstract class ProcessManager<I,
     /**
      * Creates a new instance.
      *
-     * @param  id an ID for the new instance
+     * @param id
+     *         an ID for the new instance
      */
     protected ProcessManager(I id) {
         super(id);
@@ -122,14 +126,14 @@ public abstract class ProcessManager<I,
      * <p>In {@code ProcessManager}, this method must be called from an event reactor, a rejection
      * reactor, or a command handler.
      *
-     * @throws IllegalStateException if the method is called from outside an event/rejection reactor
-     *         or a command handler
+     * @throws IllegalStateException
+     *         if the method is called from outside an event/rejection reactor or a command handler
      * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
-     *          It does not affect the visibility for inheritors, which stays {@code protected}
-     *          {@linkplain io.spine.server.entity.TransactionalEntity#builder() as originally
-     *          defined in parents}.
-     *          See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
-     *          for reason behind the warning.
+     *         It does not affect the visibility for inheritors which stays {@code protected}
+     *         {@linkplain io.spine.server.entity.TransactionalEntity#builder() as originally
+     *         defined in parents}.
+     *         See <a href="https://youtrack.jetbrains.com/issue/IDEA-204081">IDEA issue</a>
+     *         for reason behind the warning.
      */
     @Override
     @VisibleForTesting
@@ -150,7 +154,8 @@ public abstract class ProcessManager<I,
     /**
      * Dispatches the command to the handling method.
      *
-     * @param  command the envelope with the command to dispatch
+     * @param command
+     *         the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command,
      *         <em>if</em> the process manager <em>handles</em> the event.
      *         Empty list, if the process manager substitutes the command
@@ -187,14 +192,17 @@ public abstract class ProcessManager<I,
     /**
      * Dispatches an event the handling method.
      *
-     * @param  event the envelope with the event
+     * @param event
+     *         the envelope with the event
      * @return one of the following:
-     * <ul>
-     *  <li>a list of produced events, if the process manager chooses to react on the event;
-     *  <li>an empty list, if the process manager chooses <em>NOT</em> to react on the event;
-     *  <li>an empty list, if the process manager generates one or more commands in response
-     *      to the event.
-     * </ul>
+     *         <ul>
+     *             <li>a list of produced events if the process manager chooses to react
+     *                 on the event;
+     *             <li>an empty list if the process manager chooses <em>NOT</em> to react
+     *                 on the event;
+     *             <li>an empty list if the process manager generates one or more commands
+     *                 in response to the event.
+     *         </ul>
      */
     List<Event> dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();

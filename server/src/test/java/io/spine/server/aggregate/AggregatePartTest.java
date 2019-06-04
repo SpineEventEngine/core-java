@@ -111,7 +111,7 @@ class AggregatePartTest {
     @DisplayName("return aggregate part state by class")
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
-        AggTask task = taskCommentsPart.getPartState(AggTask.class);
+        AggTask task = taskCommentsPart.partState(AggTask.class);
         assertEquals(ASSIGNEE, task.getAssignee());
     }
 

@@ -27,7 +27,6 @@ import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -56,11 +55,10 @@ public abstract class Bus<T extends Message,
         implements AutoCloseable {
 
     /** A queue of envelopes to post. */
-    private @Nullable DispatchingQueue<E> queue;
+    private final DispatchingQueue<E> queue;
 
     /** Dispatchers of messages by their class. */
-    @LazyInit
-    private @MonotonicNonNull DispatcherRegistry<C, E, D> registry;
+    private final DispatcherRegistry<C, E, D> registry;
 
     /** Listeners of the messages posted to the bus. */
     private final Listeners<E> listeners;
@@ -68,10 +66,12 @@ public abstract class Bus<T extends Message,
     /** The supplier of filter chain for this bus. */
     private final FilterChainSupplier filterChain;
 
-    protected Bus(BusBuilder<E, T, ?> builder) {
+    protected Bus(BusBuilder<?, T, E, C, D> builder) {
         super();
         this.listeners = new Listeners<>(builder);
         this.filterChain = new FilterChainSupplier(builder);
+        this.queue = new DispatchingQueue<>(this::dispatch);
+        this.registry = builder.newRegistry();
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class Bus<T extends Message,
      * of the call. The {@link StreamObserver#onNext StreamObserver.onNext()} is called for each
      * message posted to the bus.
      *
-     * <p>In case the message is accepted by the bus, {@link Ack} with the
+     * <p>If the message is accepted by the bus, {@link Ack} with the
      * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
@@ -125,8 +125,8 @@ public abstract class Bus<T extends Message,
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@linkplain io.spine.base.ThrowableMessage rejection} may result either a rejection status or
-     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
-     * the rejection status may only pop up if the {@link MessageDispatcher} processes the message
+     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance.
+     * The rejection status may only pop up if the {@link MessageDispatcher} processes the message
      * sequentially and throws the rejection (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
@@ -140,7 +140,7 @@ public abstract class Bus<T extends Message,
     public final void post(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        messages.forEach(m -> listeners.accept(toEnvelope(m)));
+        messages.forEach(message -> listeners.accept(toEnvelope(message)));
         StreamObserver<Ack> wrappedObserver = prepareObserver(messages, observer);
         filterAndPost(messages, wrappedObserver);
     }
@@ -156,7 +156,7 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Prepares the given {@link StreamObserver} in order to post messages into this bus.
+     * Prepares the given {@link StreamObserver} to post messages into this bus.
      *
      * <p>This method is an extension point of a {@code Bus}.
      *
@@ -169,7 +169,7 @@ public abstract class Bus<T extends Message,
      * this convention, the {@code Bus} implementation should specify the altered behavior
      * explicitly.
      *
-     * <p>The {@code messages} can be used in order to construct the observer. The resulting
+     * <p>The {@code messages} can be used to construct the observer. The resulting
      * observer is used only for acknowledgment of the given messages.
      *
      * <p>By default, this method returns the {@code source} observer. See {@code Bus} subclasses
@@ -210,9 +210,6 @@ public abstract class Bus<T extends Message,
      * Obtains the dispatcher registry.
      */
     protected DispatcherRegistry<C, E, D> registry() {
-        if (registry == null) {
-            registry = createRegistry();
-        }
         return registry;
     }
 
@@ -244,25 +241,6 @@ public abstract class Bus<T extends Message,
     protected Collection<BusFilter<E>> filterChainHead() {
         return emptyList();
     }
-
-    /**
-     * Obtains the queue of the envelopes.
-     *
-     * <p>Posted envelopes are organized into a queue to maintain the order of dispatching.
-     *
-     * @see DispatchingQueue
-     */
-    private DispatchingQueue<E> queue() {
-        if (queue == null) {
-            queue = new DispatchingQueue<>(this::dispatch);
-        }
-        return queue;
-    }
-
-    /**
-     * Factory method for creating an instance of the registry for dispatchers of the bus.
-     */
-    protected abstract DispatcherRegistry<C, E, D> createRegistry();
 
     /**
      * Filters the given messages.
@@ -346,7 +324,7 @@ public abstract class Bus<T extends Message,
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {
-            queue().add(message, observer);
+            queue.add(message, observer);
         }
     }
 
@@ -379,7 +357,7 @@ public abstract class Bus<T extends Message,
         @LazyInit
         private @MonotonicNonNull FilterChain<E> chain;
 
-        private FilterChainSupplier(BusBuilder<E, T, ?> builder) {
+        private FilterChainSupplier(BusBuilder<?, T, E, ?, ?> builder) {
             this.chainBuilder = builder.chainBuilderCopy();
         }
 

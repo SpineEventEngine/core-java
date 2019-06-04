@@ -37,11 +37,10 @@ import java.util.Comparator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.gson.internal.Primitives.wrap;
-import static io.spine.server.entity.storage.Methods.checkGetter;
+import static io.spine.server.entity.storage.Methods.checkAnnotatedGetter;
 import static io.spine.server.entity.storage.Methods.mayReturnNull;
 import static io.spine.server.entity.storage.Methods.nameFromAnnotation;
 import static io.spine.server.entity.storage.Methods.nameFromGetter;
-import static io.spine.server.entity.storage.Methods.retrieveAnnotatedVersion;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -53,14 +52,14 @@ import static java.lang.String.format;
  * marked with {@link Column} annotation.
  *
  * <p>An entity can inherit the columns from its parent classes and interfaces.
- * In this case, column getter is annotated only once when its first declared.
+ * In this case column getter is annotated only once when it is first declared.
  *
  * <h1>Column names</h1>
  *
  * <p>A column can have different names for storing and for querying.
  *
  * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
- * is determined by a name of column getter, e.g. {@code value} for {@code getValue()}.
+ * is determined by a name of column getter, for example, {@code value} for {@code getValue()}.
  * A client should specify this value to a {@linkplain io.spine.client.TargetFilters
  * column filters}.
  *
@@ -106,14 +105,14 @@ import static java.lang.String.format;
  *      {@code
  *         --UserAggregate.java--
  *
- *         // only methods annotated with @Column may be considered Columns
+ *         // only methods annotated with @Column can be considered Columns
  *         public Department getDepartment() { ... }
  *
- *         // non-public methods may not represent Columns
+ *         // non-public methods cannot represent Columns
  *         \@Column
  *         private double getHourRate() { ... }
  *
- *         // only methods starting with "get" or "is" may be considered Columns
+ *         // only methods starting with "get" or "is" can be considered Columns
  *         \@Column
  *         public boolean hasChildren() { ... }
  *
@@ -142,7 +141,7 @@ import static java.lang.String.format;
  * into the {@link io.spine.server.storage.StorageFactory StorageFactory} upon creation.
  *
  * <p>Note that the column type must either be a primitive or implement {@link Serializable}.
- * To order the query results on a column value it is also required to implement {@link Comparable}.
+ * To order the query results on a column value, it is also required to implement {@link Comparable}.
  *
  * <h1>Nullability</h1>
  *
@@ -153,7 +152,7 @@ import static java.lang.String.format;
  * <p>If a non-null getter method returns {@code null} when trying to get the value of a column,
  * a {@link RuntimeException} is thrown. See {@link #isNullable()}.
  *
- * <p>The example below shows a faulty column, which will throw {@linkplain RuntimeException} when
+ * <p>The example below shows a faulty column which will throw {@linkplain RuntimeException} when
  * trying to get its value.
  * <pre>
  *     {@code
@@ -180,7 +179,7 @@ public class EntityColumn implements Serializable {
     /**
      * <p>The getter which declares this {@code EntityColumn}.
      *
-     * <p>This field contains the getter method declared in an {@link Entity} class, which
+     * <p>This field contains the getter method declared in an {@link Entity} class which
      * represents the entity column described by this instance.
      *
      * <p>The equality of this field in two different instances of {@code EntityColumn} determines
@@ -190,7 +189,7 @@ public class EntityColumn implements Serializable {
      *
      * <p>This field is left non-final for serialization purposes.
      *
-     * <p>The only place where this field is updated, except the constructor, is
+     * <p>The only place where this field is updated, except for the constructor, is
      * {@link #readObject(ObjectInputStream)} method.
      */
     @SuppressWarnings("Immutable") // See Javadoc.
@@ -223,6 +222,8 @@ public class EntityColumn implements Serializable {
                          String storedName,
                          boolean nullable) {
         this.getter = getter;
+        // To allow calling on non-public classes.
+        this.getter.setAccessible(true);
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
@@ -232,23 +233,26 @@ public class EntityColumn implements Serializable {
     }
 
     /**
-     * Creates new instance of the {@code EntityColumn} from the given getter method.
+     * Creates a new instance of the {@code EntityColumn} from the given getter method.
+     *
+     * <p>The given method must be annotated with the {@link Column} annotation.
+     * An {@code IllegalArgumentException} is thrown otherwise.
      *
      * @param getter
      *         the getter of the EntityColumn
      * @return new instance of the {@code EntityColumn} reflecting the given property
      */
+    @VisibleForTesting
     public static EntityColumn from(Method getter) {
-        checkGetter(getter);
-        Method annotatedVersion = retrieveAnnotatedVersion(getter);
+        checkAnnotatedGetter(getter);
         String nameForQuery = nameFromGetter(getter);
-        String nameForStore = nameFromAnnotation(annotatedVersion).orElse(nameForQuery);
+        String nameForStore = nameFromAnnotation(getter).orElse(nameForQuery);
         boolean nullable = mayReturnNull(getter);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
 
     /**
-     * Obtains the name of the column, which is used for querying.
+     * Obtains the name of the column which is used for querying.
      *
      * <p>For example, if the getter method has name "isArchivedOrDeleted",
      * the returned value is "archivedOrDeleted".
@@ -260,10 +264,10 @@ public class EntityColumn implements Serializable {
     }
 
     /**
-     * Obtains the name of the column, which is used to store it in a {@code Storage}.
+     * Obtains the name of the column which is used to store it in a {@code Storage}.
      *
      * <p>The value is obtained from the annotation {@linkplain Column#name() property}.
-     * If the property value is empty, then the value is equal
+     * If the property value is empty, the value is equal
      * to {@linkplain #getName() name for querying}.
      *
      * @return the column name for storing
@@ -293,23 +297,23 @@ public class EntityColumn implements Serializable {
         try {
             Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
-                checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
+                checkNotNull(result, format("Not null getter `%s` returned null.", getter.getName()));
             }
             Serializable value = toPersistedValue(result);
             return value;
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(
-                    format("Could not invoke getter of property %s from object %s",
-                           getName(),
-                           source),
-                    e);
+            throw newIllegalStateException(
+                    e, "Could not invoke getter of property `%s` from object `%s`.",
+                    getName(),
+                    source
+            );
         }
     }
 
     /**
      * Retrieves the column value from the given {@link Entity}.
      *
-     * <p>The value is wrapped into a special container,
+     * <p>The value is wrapped into a special container
      * which bears information about the field's metadata.
      *
      * @param source
@@ -334,7 +338,7 @@ public class EntityColumn implements Serializable {
      * Returns the type under which the column values are persisted in the data storage.
      *
      * <p>For the non-{@link Enumerated} entity columns this type will be equal to the one
-     * retrieved via the {@link #getType()}.
+     * retrieved using the {@link #getType()}.
      *
      * <p>For the {@link Enumerated} columns, see {@link EnumConverter} implementations.
      *
@@ -354,8 +358,8 @@ public class EntityColumn implements Serializable {
      * The output value type will be the same as {@link #getPersistedType()}.
      *
      * <p>As the column value may be {@linkplain #isNullable() nullable}, and all {@code null}
-     * values are persisted in the data storage as {@code null}, i.e. without any conversion, for
-     * the {@code null} input argument this method will always return {@code null}.
+     * values are persisted in the data storage as {@code null}, for example, without any conversion.
+     * For the {@code null} input argument this method will always return {@code null}.
      *
      * <p>The method is accessible outside of the {@code EntityColumn} class to enable the proper
      * {@linkplain io.spine.client.Filter filters} conversion for the {@link Enumerated} column
@@ -404,7 +408,7 @@ public class EntityColumn implements Serializable {
     }
 
     /**
-     * Checks that the passed value's type is the same as
+     * Checks that the passed value type is the same as
      * the {@linkplain #getType() entity column type}.
      *
      * @param value
@@ -460,7 +464,7 @@ public class EntityColumn implements Serializable {
     /**
      * A value of the associated {@code EntityColumn} saved at some point of time.
      *
-     * <p>The class associates the column value with its metadata, i.e. {@linkplain EntityColumn}.
+     * <p>The class associates the column value with its metadata, for example, {@linkplain EntityColumn}.
      *
      * @see EntityColumn#memoizeFor(Entity)
      */

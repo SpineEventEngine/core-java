@@ -29,13 +29,12 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.net.Url;
 import io.spine.system.server.DispatchedMessageId;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.system.server.Photo;
 import io.spine.test.system.server.PhotoId;
-import io.spine.test.system.server.PhotoVBuilder;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 
@@ -77,7 +76,7 @@ public class RepositoryTestEnv {
                 .newBuilder()
                 .setSpec(url + "-thumbnail")
                 .build();
-        Photo photo = PhotoVBuilder
+        Photo photo = Photo
                 .newBuilder()
                 .setId(PhotoId.generate())
                 .setFullSizeUrl(fullSizeUrl)

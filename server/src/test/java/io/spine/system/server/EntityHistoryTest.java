@@ -36,9 +36,9 @@ import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityCreated;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityExtractedFromArchive;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityUnarchived;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.given.entity.HistoryEventWatcher;
@@ -83,7 +83,7 @@ class EntityHistoryTest {
         context = BoundedContext
                 .newBuilder()
                 .setName(contextName)
-                .setStorageFactorySupplier(() -> newInstance(contextName, false))
+                .setStorageFactorySupplier(() -> newInstance(contextName.getValue(), false))
                 .build();
         system = systemOf(context);
 
@@ -275,17 +275,19 @@ class EntityHistoryTest {
         }
 
         private void createPerson() {
-            CreatePerson command = CreatePerson.newBuilder()
-                                               .setId(id)
-                                               .build();
+            CreatePerson command = CreatePerson
+                    .newBuilder()
+                    .setId(id)
+                    .build();
             postCommand(command);
         }
 
         @CanIgnoreReturnValue
         private HidePerson hidePerson() {
-            HidePerson command = HidePerson.newBuilder()
-                                           .setId(id)
-                                           .build();
+            HidePerson command = HidePerson
+                    .newBuilder()
+                    .setId(id)
+                    .build();
             postCommand(command);
             return command;
         }
@@ -369,8 +371,8 @@ class EntityHistoryTest {
         }
 
         private void checkEntityExtracted() {
-            EntityExtractedFromArchive event =
-                    eventAccumulator.assertNextEventIs(EntityExtractedFromArchive.class);
+            EntityUnarchived event =
+                    eventAccumulator.assertNextEventIs(EntityUnarchived.class);
 
             EntityHistoryId historyId = event.getId();
             assertEquals(PersonAggregate.TYPE.value(),

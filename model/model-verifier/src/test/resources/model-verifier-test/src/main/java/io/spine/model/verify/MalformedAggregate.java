@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.UInt64Value;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.Assign;
@@ -34,7 +33,7 @@ import java.util.List;
  * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
  * an invalid command handler method.
  */
-public class MalformedAggregate extends Aggregate<String, VoidState, VoidStateVBuilder> {
+public class MalformedAggregate extends Aggregate<String, VoidState, VoidState.Builder> {
 
     protected MalformedAggregate(String id) {
         super(id);

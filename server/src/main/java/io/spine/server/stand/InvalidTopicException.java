@@ -33,9 +33,9 @@ public class InvalidTopicException extends InvalidRequestException {
     /**
      * Creates a new instance.
      *
-     * @param messageText an error message text
-     * @param topic       a related topic
-     * @param error       an error occurred
+     * @param messageText the error message text
+     * @param topic       the related topic
+     * @param error       the error occurred
      */
     InvalidTopicException(String messageText, Topic topic, Error error) {
         super(messageText, topic, error);

@@ -21,6 +21,8 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Message;
 import io.spine.client.Target;
+import io.spine.option.EntityOption.Visibility;
+import io.spine.server.entity.EntityVisibility;
 import io.spine.type.TypeUrl;
 
 /**
@@ -29,18 +31,27 @@ import io.spine.type.TypeUrl;
  */
 abstract class AbstractTargetValidator<M extends Message> extends RequestValidator<M> {
 
+    private final Visibility requiredVisibility;
     private final TypeRegistry typeRegistry;
 
-    AbstractTargetValidator(TypeRegistry typeRegistry) {
+    AbstractTargetValidator(Visibility requiredVisibility,
+                            TypeRegistry typeRegistry) {
         super();
+        this.requiredVisibility = requiredVisibility;
         this.typeRegistry = typeRegistry;
     }
 
     boolean typeRegistryContains(Target target) {
         TypeUrl typeUrl = getTypeOf(target);
-        boolean result = typeRegistry.getTypes()
+        boolean result = typeRegistry.allTypes()
                                      .contains(typeUrl);
         return result;
+    }
+
+    boolean visibilitySufficient(Target target) {
+        TypeUrl typeUrl = getTypeOf(target);
+        EntityVisibility visibility = EntityVisibility.of(typeUrl.getMessageClass());
+        return visibility.isAsLeast(requiredVisibility);
     }
 
     static TypeUrl getTypeOf(Target target) {

@@ -36,11 +36,12 @@ import io.spine.server.bus.Buses;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.event.CommandAcknowledged;
-import io.spine.system.server.event.CommandErrored;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
-import io.spine.test.commandbus.CmdBusStartProject;
+import io.spine.system.server.event.CommandAcknowledged;
+import io.spine.system.server.event.CommandErrored;
+import io.spine.test.commandbus.ProjectId;
+import io.spine.test.commandbus.command.CmdBusStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -253,9 +254,13 @@ class CommandAckMonitorTest {
     }
 
     private static Ack rejectionAck(CommandId commandId) {
-        CommandMessage commandMessage = CmdBusStartProject
+        ProjectId projectId = ProjectId
                 .newBuilder()
                 .setId(commandId.getUuid())
+                .build();
+        CommandMessage commandMessage = CmdBusStartProject
+                .newBuilder()
+                .setProjectId(projectId)
                 .build();
         Command command = Command
                 .newBuilder()

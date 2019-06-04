@@ -21,9 +21,7 @@
 package io.spine.server.aggregate.given.importado;
 
 import io.spine.server.aggregate.given.importado.command.Move;
-import io.spine.server.aggregate.given.importado.command.MoveVBuilder;
 import io.spine.server.aggregate.given.importado.event.Moved;
-import io.spine.server.aggregate.given.importado.event.MovedVBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,7 +40,7 @@ public final class MoveMessages {
     public static Move move(ObjectId object, Direction direction) {
         checkNotNull(object);
         checkNotNull(direction);
-        return MoveVBuilder
+        return Move
                 .newBuilder()
                 .setObject(object)
                 .setDirection(direction)
@@ -55,7 +53,7 @@ public final class MoveMessages {
     public static Moved moved(ObjectId object, Direction direction) {
         checkNotNull(object);
         checkNotNull(direction);
-        return MovedVBuilder
+        return Moved
                 .newBuilder()
                 .setObject(object)
                 .setDirection(direction)

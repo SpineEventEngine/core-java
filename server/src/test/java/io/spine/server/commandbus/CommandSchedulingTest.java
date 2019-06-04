@@ -26,7 +26,8 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.commandbus.CmdBusStartProject;
+import io.spine.test.commandbus.ProjectId;
+import io.spine.test.commandbus.command.CmdBusStartProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -140,9 +141,14 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         }
 
         private Command createCommand() {
-            CmdBusStartProject command = CmdBusStartProject.newBuilder()
-                                                           .setId(newUuid())
-                                                           .build();
+            ProjectId id = ProjectId
+                    .newBuilder()
+                    .setId(newUuid())
+                    .build();
+            CmdBusStartProject command = CmdBusStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
             CommandMessage commandMessage = toMessage(command, CommandMessage.class);
             Command cmd = requestFactory.command()
                                         .create(commandMessage);

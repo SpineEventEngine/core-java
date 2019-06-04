@@ -23,7 +23,7 @@ package io.spine.server.route;
 import com.google.protobuf.Message;
 
 /**
- * A route for a message to be delivered ton one entity.
+ * A route for a message to be delivered to one entity.
  *
  * @param <I> the type of entity ID
  */

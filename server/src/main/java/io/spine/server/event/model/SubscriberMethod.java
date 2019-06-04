@@ -40,19 +40,19 @@ import static io.spine.base.FieldPaths.getValue;
 import static io.spine.protobuf.TypeConverter.toObject;
 
 /**
- * An event handler method which may have side effects, but provides no visible output.
+ * A method annotated with the {@link io.spine.core.Subscribe @Subscribe} annotation.
  *
- * <p>A subscriber method must be annotated with the {@link io.spine.core.Subscribe @Subscribe}
- * annotation.
+ * <p>Such a method may have side effects, but provides no visible output.
  *
  * @see io.spine.core.Subscribe
  */
-public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscriber,
-                                                                     EventMessage,
-                                                                     EventClass,
-                                                                     EventEnvelope,
-                                                                     EmptyClass,
-                                                                     MethodResult<Empty>> {
+public abstract class SubscriberMethod
+        extends AbstractHandlerMethod<EventSubscriber,
+                                      EventMessage,
+                                      EventClass,
+                                      EventEnvelope,
+                                      EmptyClass,
+                                      MethodResult<Empty>> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
@@ -70,7 +70,7 @@ public abstract class SubscriberMethod extends AbstractHandlerMethod<EventSubscr
         FieldPath fieldPath = filter.getField();
         return fieldPath.getFieldNameList().isEmpty()
                ? typeBasedToken
-               : typeBasedToken.toVBuilder()
+               : typeBasedToken.toBuilder()
                                .setFilter(filter)
                                .build();
     }

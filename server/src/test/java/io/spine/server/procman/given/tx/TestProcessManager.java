@@ -37,7 +37,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, PatchedProjectBuilder> {
+        extends ProcessManager<ProjectId, Project, Project.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
     private final @Nullable List<ConstraintViolation> violations;

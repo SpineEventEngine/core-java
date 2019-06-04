@@ -74,10 +74,10 @@ class AggregateRootTest {
     @Test
     @DisplayName("obtain part state by its class")
     void returnPartStateByClass() {
-        Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
+        Message definitionPart = aggregateRoot.partState(ProjectDefinition.class);
         assertNotNull(definitionPart);
 
-        Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifecycle.class);
+        Message lifeCyclePart = aggregateRoot.partState(ProjectLifecycle.class);
         assertNotNull(lifeCyclePart);
     }
 }

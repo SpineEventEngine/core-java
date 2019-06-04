@@ -20,10 +20,7 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -45,17 +42,11 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EmptyClass, SubscriberMethod> eventSubscriptions;
-    private final ImmutableSet<EventClass> domesticSubscriptions;
-    private final ImmutableSet<EventClass> externalSubscriptions;
+    private final EventReceivingClassDelegate<S, EmptyClass, SubscriberMethod> delegate;
 
-    private EventSubscriberClass(Class<? extends S> cls) {
+    private EventSubscriberClass(Class<S> cls) {
         super(cls);
-        this.eventSubscriptions = MessageHandlerMap.create(cls, new SubscriberSignature());
-        this.domesticSubscriptions =
-                    eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalSubscriptions =
-                    eventSubscriptions.getMessageClasses(HandlerMethod::isExternal);
+        this.delegate = new EventReceivingClassDelegate<>(cls, new SubscriberSignature());
     }
 
     /**
@@ -70,18 +61,18 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public Set<EventClass> incomingEvents() {
-        return domesticSubscriptions;
+    public Set<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
     }
 
     @Override
     public Set<EventClass> externalEvents() {
-        return externalSubscriptions;
+        return delegate.externalEvents();
     }
 
     @Override
-    public Collection<SubscriberMethod> getSubscribers(EventClass eventClass,
-                                                       MessageClass originClass) {
-        return eventSubscriptions.getMethods(eventClass, originClass);
+    public
+    Collection<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
+        return delegate.handlersOf(eventClass, originClass);
     }
 }

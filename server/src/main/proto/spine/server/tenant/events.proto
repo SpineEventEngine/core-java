@@ -37,5 +37,5 @@ import "spine/core/tenant_id.proto";
 message TenantAdded {
 
     // The new tenant ID.
-    spine.core.TenantId id = 1 [(required) = true, (valid) = true];
+    spine.core.TenantId id = 1 [(required) = true, (validate) = true];
 }

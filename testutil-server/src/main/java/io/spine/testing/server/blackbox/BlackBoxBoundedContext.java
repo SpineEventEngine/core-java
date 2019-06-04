@@ -21,7 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -34,7 +33,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
-import io.spine.option.EntityOption.Visibility;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -60,6 +58,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -69,11 +68,11 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
+import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.singletonList;
 
 /**
@@ -140,6 +139,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     private final MemoizingObserver<Ack> observer;
 
+    private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
+
     protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
         this.commands = new CommandCollector();
         this.postedCommands = new HashSet<>();
@@ -160,6 +161,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                 .setEventBus(eventBus)
                 .build();
         this.observer = memoizingObserver();
+        this.repositories = newHashMap();
     }
 
     /**
@@ -235,15 +237,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Obtains set of type names of entities known to this Bounded Context.
      */
     @VisibleForTesting
-    Set<TypeName> getAllEntityStateTypes() {
-        ImmutableSet.Builder<TypeName> result = ImmutableSet.builder();
-        for (Visibility visibility : Visibility.values()) {
-            if (visibility == Visibility.VISIBILITY_UNKNOWN) {
-                continue;
-            }
-            result.addAll(boundedContext.entityStateTypes(visibility));
-        }
-        return result.build();
+    Set<TypeName> allStateTypes() {
+        return boundedContext.stateTypes();
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */
@@ -265,7 +260,15 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
-        return registerAll(boundedContext::register, repositories);
+        registerAll(boundedContext::register, repositories);
+        registerAll(this::remember, repositories);
+        return thisRef();
+    }
+
+    private void remember(Repository<?, ?> repository) {
+        Class<Message> stateClass = repository.entityStateType()
+                                              .getMessageClass();
+        repositories.put(stateClass, repository);
     }
 
     /**
@@ -277,7 +280,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
-        return registerAll(boundedContext::registerEventDispatcher, dispatchers);
+        registerAll(boundedContext::registerEventDispatcher, dispatchers);
+        return thisRef();
     }
 
     /**
@@ -289,17 +293,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public final T withHandlers(CommandDispatcher<?>... dispatchers) {
-        return registerAll(boundedContext::registerCommandDispatcher, dispatchers);
+        registerAll(boundedContext::registerCommandDispatcher, dispatchers);
+        return thisRef();
     }
 
     @SafeVarargs
-    private final <S> T registerAll(Consumer<S> registerFn, S... itemsToRegister) {
+    private static <S> void registerAll(Consumer<S> registerFn, S... itemsToRegister) {
         checkNotNull(itemsToRegister);
         for (S item : itemsToRegister) {
             checkNotNull(item);
             registerFn.accept(item);
         }
-        return thisRef();
     }
 
     /**
@@ -460,6 +464,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *         optional domain events to be dispatched to the Bounded Context in supplied order
      * @return current instance
      */
+    @CanIgnoreReturnValue
     public T receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
         List<Event> sentEvents = setup().postEvents(producerId, first, rest);
         postedEvents.addAll(sentEvents);
@@ -705,9 +710,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     public List<EventMessage> eventMessages() {
         return events().stream()
-                       .map(Event::getMessage)
-                       .map(AnyPacker::unpack)
-                       .map(m -> (EventMessage) m)
+                       .map(Event::enclosedMessage)
                        .collect(toImmutableList());
     }
 
@@ -754,26 +757,16 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals") // is safe as calling sites are bound.
-    private @Nullable <I, S extends Message, E extends Entity<I, S>>
-    E findByState(Class<S> stateClass, I id) {
+    private <I, S extends Message, E extends Entity<I, S>>
+    @Nullable E findByState(Class<S> stateClass, I id) {
         @SuppressWarnings("unchecked")
-        Repository<I, Entity<I, S>> repo = repositoryOf(stateClass);
-        return readOperation(() -> {
-            @SuppressWarnings("unchecked") // safe as bound by entity class declaration.
-                    E result = (E) repo.find(id)
-                                       .orElse(null);
-            return result;
-        });
+        Repository<I, E> repo = (Repository<I, E>) repositoryOf(stateClass);
+        return readOperation(() -> repo.find(id).orElse(null));
     }
 
-    private Repository repositoryOf(Class<? extends Message> stateClass) {
-        return boundedContext.findRepository(stateClass)
-                             .orElseThrow(
-                                     () -> newIllegalStateException(
-                                         "Unable to find repository for entities with state `%s`.",
-                                         stateClass.getCanonicalName()
-                                     )
-                             );
+    private Repository<?, ?> repositoryOf(Class<? extends Message> stateClass) {
+        Repository<?, ?> repository = repositories.get(stateClass);
+        return repository;
     }
 
     /**

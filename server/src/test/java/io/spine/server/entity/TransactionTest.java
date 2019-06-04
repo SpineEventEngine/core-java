@@ -19,27 +19,27 @@
  */
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.event.EventFactory;
+import io.spine.test.validation.FakeOptionFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
@@ -61,9 +61,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  */
 @SuppressWarnings({"unused" /* JUnit nested classes. */, "ClassWithTooManyMethods"})
 public abstract class TransactionTest<I,
-        E extends TransactionalEntity<I, S, B>,
-        S extends Message,
-        B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+                                      E extends TransactionalEntity<I, S, B>,
+                                      S extends Message,
+                                      B extends ValidatingBuilder<S>> {
 
     private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionTest.class);
 
@@ -72,13 +72,13 @@ public abstract class TransactionTest<I,
         return ex;
     }
 
-    private static List<ConstraintViolation> someViolations() {
+    private static ImmutableList<ConstraintViolation> someViolations() {
         ConstraintViolation expectedViolation = ConstraintViolation
                 .newBuilder()
                 .setMsgFormat("Some violation %s")
                 .addParam("1")
                 .build();
-        return newArrayList(expectedViolation);
+        return ImmutableList.of(expectedViolation);
     }
 
     private static boolean checkPhase(Event event, Phase phase) {
@@ -104,7 +104,7 @@ public abstract class TransactionTest<I,
 
     protected abstract E createEntity();
 
-    protected abstract E createEntity(List<ConstraintViolation> violations);
+    protected abstract E createEntity(ImmutableList<ConstraintViolation> violations);
 
     protected abstract S createNewState();
 
@@ -116,11 +116,14 @@ public abstract class TransactionTest<I,
 
     protected abstract void applyEvent(Transaction tx, Event event);
 
-    protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
-
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
+    }
+
+    @AfterEach
+    void tearDown() {
+        FakeOptionFactory.shouldNotFail();
     }
 
     @Nested
@@ -379,7 +382,7 @@ public abstract class TransactionTest<I,
 
         Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
         ValidationException toThrow = validationException();
-        breakEntityValidation(entity, toThrow);
+        breakEntityValidation(toThrow);
 
         assertThrows(InvalidEntityStateException.class, tx::commit);
     }
@@ -406,5 +409,9 @@ public abstract class TransactionTest<I,
 
     private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {
         return phase -> checkPhase(event, phase);
+    }
+
+    private static void breakEntityValidation(RuntimeException toThrow) {
+        FakeOptionFactory.shouldFailWith(toThrow);
     }
 }

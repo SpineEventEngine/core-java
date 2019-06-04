@@ -36,7 +36,6 @@ import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
-import io.spine.test.aggregate.task.AggTaskVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -47,7 +46,7 @@ import java.util.Optional;
  *
  * @see io.spine.server.aggregate.AggregateTest.CreateSingleEventForPair
  */
-public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {
+public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTask.Builder> {
 
     private static final UserId EMPTY_USER_ID = UserId.getDefaultInstance();
 

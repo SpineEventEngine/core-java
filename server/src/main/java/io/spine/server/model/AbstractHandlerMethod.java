@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static java.lang.String.format;
 
 /**
@@ -108,7 +109,7 @@ public abstract class AbstractHandlerMethod<T,
      */
     protected AbstractHandlerMethod(Method method, ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
-        this.messageClass = getFirstParamType(method);
+        this.messageClass = firstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
         this.producedTypes = ProducedTypeSet.collect(method);
@@ -164,7 +165,7 @@ public abstract class AbstractHandlerMethod<T,
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    protected static <M extends Message> Class<M> getFirstParamType(Method handler) {
+    protected static <M extends Message> Class<M> firstParamType(Method handler) {
         @SuppressWarnings("unchecked")
             // We always expect first param as a Message of required type.
         Class<M> result = (Class<M>) handler.getParameterTypes()[0];
@@ -172,15 +173,18 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Method rawMethod() {
+    public final Method rawMethod() {
         return method;
     }
 
-    private int getModifiers() {
+    private int modifiers() {
         return method.getModifiers();
     }
 
-    protected ParameterSpec<E> getParameterSpec() {
+    /**
+     * Obtains the specification of parameters for this method.
+     */
+    protected ParameterSpec<E> parameterSpec() {
         return parameterSpec;
     }
 
@@ -194,7 +198,7 @@ public abstract class AbstractHandlerMethod<T,
      * {@code false} otherwise.
      */
     protected boolean isPublic() {
-        boolean result = Modifier.isPublic(getModifiers());
+        boolean result = Modifier.isPublic(modifiers());
         return result;
     }
 
@@ -203,7 +207,7 @@ public abstract class AbstractHandlerMethod<T,
      * {@code false} otherwise.
      */
     protected boolean isPrivate() {
-        boolean result = Modifier.isPrivate(getModifiers());
+        boolean result = Modifier.isPrivate(modifiers());
         return result;
     }
 
@@ -232,7 +236,7 @@ public abstract class AbstractHandlerMethod<T,
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             Message message = envelope.message();
             Message context = envelope.context();
-            throw new HandlerMethodFailedException(target, message, context, e);
+            throw new HandlerMethodFailedException(target, message, context, getRootCause(e));
         }
     }
 

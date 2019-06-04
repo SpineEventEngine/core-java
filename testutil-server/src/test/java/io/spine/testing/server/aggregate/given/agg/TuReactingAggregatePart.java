@@ -25,7 +25,6 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuComments;
-import io.spine.testing.server.given.entity.TuCommentsVBuilder;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.event.TuCommentAdded;
 import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
@@ -34,7 +33,7 @@ import io.spine.testing.server.given.entity.event.TuCommentLimitReached;
  * A sample aggregate part that handles commands.
  */
 public final class TuReactingAggregatePart
-        extends AggregatePart<TuTaskId, TuComments, TuCommentsVBuilder, TuAggregateRoot> {
+        extends AggregatePart<TuTaskId, TuComments, TuComments.Builder, TuAggregateRoot> {
 
     public static final TuTaskId ID = TuTaskId.newBuilder()
                                               .setValue("agg-part-id")
@@ -48,7 +47,7 @@ public final class TuReactingAggregatePart
         TuReactingAggregatePart result =
                 Given.aggregatePartOfClass(TuReactingAggregatePart.class)
                      .withRoot(root)
-                     .withId(root.getId())
+                     .withId(root.id())
                      .withVersion(5)
                      .build();
         return result;

@@ -27,9 +27,8 @@ import io.spine.server.command.Assign;
 import io.spine.test.model.verify.command.EditPhoto;
 import io.spine.test.model.verify.event.PhotoEdited;
 import io.spine.test.model.verify.given.EditState;
-import io.spine.test.model.verify.given.EditStateVBuilder;
 
-public class EditAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
+public class EditAggregate extends Aggregate<String, EditState, EditState.Builder> {
 
     @Assign
     PhotoEdited handle(EditPhoto command, CommandContext ctx) {

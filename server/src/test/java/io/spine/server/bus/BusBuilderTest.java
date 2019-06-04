@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
  * @see io.spine.server.event.EventBusBuilderTest
  * @see io.spine.server.rejection.RejectionBusBuilderTest
  */
-public abstract class BusBuilderTest<B extends BusBuilder<E, T, ?>,
+public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
                                      E extends MessageEnvelope<?, T, ?>,
                                      T extends Message> {
 

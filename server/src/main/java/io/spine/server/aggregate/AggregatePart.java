@@ -22,9 +22,9 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.aggregate.model.AggregatePartClass;
-import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 
@@ -43,10 +43,10 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  *   <li>managed by a separate repository class derived from {@link AggregateRepository}
  * </ul>
  *
- * <p>In order to access parts of the aggregate {@link AggregateRoot} should be used.
+ * <p>To access parts of the aggregate, {@link AggregateRoot} should be used.
  *
- * <p>If your business logic cannot be split into parts that can be modified separately,
- * consider extending {@link Aggregate} instead of several {@code AggregatePart}s.
+ * <p>If your business logic cannot be split into parts, it can be modified separately.
+ * Consider extending {@link Aggregate} instead of several {@code AggregatePart}s.
  *
  * @param <I>
  *         the type for IDs of this class of aggregates
@@ -60,7 +60,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  */
 public abstract class AggregatePart<I,
                                     S extends Message,
-                                    B extends ValidatingBuilder<S, ? extends Message.Builder>,
+                                    B extends ValidatingBuilder<S>,
                                     R extends AggregateRoot<I>>
                       extends Aggregate<I, S, B> {
 
@@ -72,7 +72,7 @@ public abstract class AggregatePart<I,
      * @param root a root of the aggregate to which this part belongs
      */
     protected AggregatePart(R root) {
-        super(root.getId());
+        super(root.id());
         this.root = root;
     }
 
@@ -100,8 +100,8 @@ public abstract class AggregatePart<I,
      *                               or the ID type of the part state does not match
      *                               the ID type of the {@code root}
      */
-    protected <P extends Message> P getPartState(Class<P> partStateClass) {
-        P partState = root.getPartState(partStateClass);
+    protected <P extends Message> P partState(Class<P> partStateClass) {
+        P partState = root.partState(partStateClass);
         return partState;
     }
 

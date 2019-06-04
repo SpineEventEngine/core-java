@@ -51,17 +51,17 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * <em>without</em> having intermediate commands or events.
  *
  * <p>Adding an event to an aggregate history normally requires
- * either a command (handling of which produces the event), or an event (reaction on which may
+ * either a command (handling of which produces the event) or an event (reaction on which may
  * produce the event). Such a command or an event:
  * <ol>
- *   <li>serves as a dispatched message type, which is used as the first argument of the
+ *   <li>serves as a dispatched message type which is used as the first argument of the
  *       corresponding aggregate handler method;
  *   <li>carries the information about the fact we want to remember.
  * </ol>
  *
  * <p>{@linkplain Apply#allowImport() Marking} events and ensuring proper
- * {@linkplain AggregateRepository#eventImportRouting() routing} allows to store aggregate
- * events without having intermediate messages.
+ * {@linkplain AggregateRepository#setupImportRouting(io.spine.server.route.EventRouting) routing}
+ * allows to store aggregate events without having intermediate messages.
  *
  * <h1>Temporal Logic</h1>
  *
@@ -101,11 +101,6 @@ public final class ImportBus
     @Override
     protected EnvelopeValidator<EventEnvelope> validator() {
         return validator;
-    }
-
-    @Override
-    protected Registry createRegistry() {
-        return new Registry();
     }
 
     @Override
@@ -172,11 +167,20 @@ public final class ImportBus
     /**
      * The builder for {@link ImportBus}.
      */
-    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
+    public static class Builder extends BusBuilder<Builder,
+                                                   Event,
+                                                   EventEnvelope,
+                                                   EventClass,
+                                                   EventImportDispatcher<?>> {
 
         /** Prevents direct instantiation. */
         private Builder() {
             super();
+        }
+
+        @Override
+        protected Registry newRegistry() {
+            return new Registry();
         }
 
         @Override

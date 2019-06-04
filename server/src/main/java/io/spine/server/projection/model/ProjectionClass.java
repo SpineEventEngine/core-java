@@ -21,6 +21,8 @@
 package io.spine.server.projection.model;
 
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.model.StateClass;
+import io.spine.server.entity.model.StateSubscribingClass;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.event.model.SubscriberMethod;
@@ -44,7 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class ProjectionClass<P extends Projection>
         extends EntityClass<P>
-        implements EventReceiverClass, SubscribingClass {
+        implements EventReceiverClass, SubscribingClass, StateSubscribingClass {
 
     private static final long serialVersionUID = 0L;
     private final EventReceivingClassDelegate<P, EmptyClass, SubscriberMethod> delegate;
@@ -65,18 +67,28 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public Set<EventClass> incomingEvents() {
-        return delegate.incomingEvents();
+    public final Set<EventClass> domesticEvents() {
+        return delegate.domesticEvents();
     }
 
     @Override
-    public Set<EventClass> externalEvents() {
+    public final Set<StateClass> domesticStates() {
+        return delegate.domesticStates();
+    }
+
+    @Override
+    public final Set<EventClass> externalEvents() {
         return delegate.externalEvents();
     }
 
     @Override
-    public Collection<SubscriberMethod>
-    getSubscribers(EventClass eventClass, MessageClass originClass) {
-        return delegate.getMethods(eventClass, originClass);
+    public final Set<StateClass> externalStates() {
+        return delegate.externalStates();
+    }
+
+    @Override
+    public final Collection<SubscriberMethod>
+    subscribersOf(EventClass eventClass, MessageClass originClass) {
+        return delegate.handlersOf(eventClass, originClass);
     }
 }

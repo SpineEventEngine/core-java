@@ -35,34 +35,21 @@ import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.DispatchedMessageIdVBuilder;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.command.AssignTargetToCommand;
-import io.spine.system.server.command.AssignTargetToCommandVBuilder;
 import io.spine.system.server.command.DispatchCommandToHandler;
-import io.spine.system.server.command.DispatchCommandToHandlerVBuilder;
 import io.spine.system.server.command.DispatchEventToReactor;
 import io.spine.system.server.command.DispatchEventToSubscriber;
-import io.spine.system.server.command.DispatchEventToSubscriberVBuilder;
 import io.spine.system.server.event.CommandHandled;
-import io.spine.system.server.event.CommandHandledVBuilder;
 import io.spine.system.server.event.CommandRejected;
-import io.spine.system.server.event.CommandRejectedVBuilder;
 import io.spine.system.server.event.EntityArchived;
-import io.spine.system.server.event.EntityArchivedVBuilder;
 import io.spine.system.server.event.EntityCreated;
-import io.spine.system.server.event.EntityCreatedVBuilder;
 import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityDeletedVBuilder;
-import io.spine.system.server.event.EntityExtractedFromArchive;
-import io.spine.system.server.event.EntityExtractedFromArchiveVBuilder;
 import io.spine.system.server.event.EntityRestored;
-import io.spine.system.server.event.EntityRestoredVBuilder;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.system.server.event.EntityStateChangedVBuilder;
+import io.spine.system.server.event.EntityUnarchived;
 import io.spine.system.server.event.EventImported;
-import io.spine.system.server.event.EventImportedVBuilder;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -138,7 +125,7 @@ public class EntityLifecycle {
      *         the kind of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
-        EntityCreated event = EntityCreatedVBuilder
+        EntityCreated event = EntityCreated
                 .newBuilder()
                 .setId(historyId)
                 .setKind(entityKind)
@@ -159,7 +146,7 @@ public class EntityLifecycle {
                 .setEntityId(historyId.getEntityId())
                 .setTypeUrl(historyId.getTypeUrl())
                 .build();
-        AssignTargetToCommand command = AssignTargetToCommandVBuilder
+        AssignTargetToCommand command = AssignTargetToCommand
                 .newBuilder()
                 .setId(commandId)
                 .setTarget(target)
@@ -174,7 +161,7 @@ public class EntityLifecycle {
      *         the dispatched command
      */
     public final void onDispatchCommand(Command command) {
-        DispatchCommandToHandler systemCommand = DispatchCommandToHandlerVBuilder
+        DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                 .newBuilder()
                 .setReceiver(historyId)
                 .setCommand(command)
@@ -189,7 +176,7 @@ public class EntityLifecycle {
      *         the handled command
      */
     public final void onCommandHandled(Command command) {
-        CommandHandled systemEvent = CommandHandledVBuilder
+        CommandHandled systemEvent = CommandHandled
                 .newBuilder()
                 .setId(command.getId())
                 .build();
@@ -205,7 +192,7 @@ public class EntityLifecycle {
      *         the rejection event
      */
     public final void onCommandRejected(CommandId commandId, Event rejection) {
-        CommandRejected systemEvent = CommandRejectedVBuilder
+        CommandRejected systemEvent = CommandRejected
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
@@ -220,7 +207,7 @@ public class EntityLifecycle {
      *         the dispatched event
      */
     public final void onDispatchEventToSubscriber(Event event) {
-        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriberVBuilder
+        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEvent(event)
@@ -229,7 +216,7 @@ public class EntityLifecycle {
     }
 
     public final void onEventImported(Event event) {
-        EventImported systemEvent = EventImportedVBuilder
+        EventImported systemEvent = EventImported
                 .newBuilder()
                 .setReceiver(historyId)
                 .setEventId(event.getId())
@@ -286,7 +273,7 @@ public class EntityLifecycle {
         if (!oldState.equals(newState)) {
             Version newVersion = change.getNewValue()
                                        .getVersion();
-            EntityStateChanged event = EntityStateChangedVBuilder
+            EntityStateChanged event = EntityStateChanged
                     .newBuilder()
                     .setId(historyId)
                     .setNewState(newState)
@@ -308,7 +295,7 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
-            EntityArchived event = EntityArchivedVBuilder
+            EntityArchived event = EntityArchived
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
@@ -329,7 +316,7 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
-            EntityDeleted event = EntityDeletedVBuilder
+            EntityDeleted event = EntityDeleted
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
@@ -350,7 +337,7 @@ public class EntityLifecycle {
         if (!newValue && oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
-            EntityExtractedFromArchive event = EntityExtractedFromArchiveVBuilder
+            EntityUnarchived event = EntityUnarchived
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
@@ -371,7 +358,7 @@ public class EntityLifecycle {
         if (!newValue && oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
-            EntityRestored event = EntityRestoredVBuilder
+            EntityRestored event = EntityRestored
                     .newBuilder()
                     .setId(historyId)
                     .addAllMessageId(ImmutableList.copyOf(messageIds))
@@ -402,7 +389,7 @@ public class EntityLifecycle {
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
         checkNotNull(messageId);
-        DispatchedMessageIdVBuilder builder = DispatchedMessageId.vBuilder();
+        DispatchedMessageId.Builder builder = DispatchedMessageId.newBuilder();
         if (messageId instanceof EventId) {
             EventId eventId = (EventId) messageId;
             return builder.setEventId(eventId)

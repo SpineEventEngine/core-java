@@ -39,7 +39,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class TestProjection
-            extends Projection<String, SavedString, SavedStringVBuilder> {
+            extends Projection<String, SavedString, SavedString.Builder> {
 
         /** The number of events this class handles. */
         public static final int HANDLING_EVENT_COUNT = 2;
@@ -63,7 +63,7 @@ public class ProjectionTestEnv {
 
         private SavedString createNewState(String type, String value) {
             // Get the current state within the transaction.
-            String currentState = builder().internalBuild()
+            String currentState = builder().buildPartial()
                                            .getValue();
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
@@ -74,7 +74,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class FilteringProjection
-            extends Projection<String, SavedString, SavedStringVBuilder> {
+            extends Projection<String, SavedString, SavedString.Builder> {
 
         public static final String SET_A = "SET A";
 
@@ -101,7 +101,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class NoDefaultOptionProjection
-            extends Projection<String, SavedString, SavedStringVBuilder> {
+            extends Projection<String, SavedString, SavedString.Builder> {
 
         public static final String ACCEPTED_VALUE = "AAA";
 
@@ -116,7 +116,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class MalformedProjection
-            extends Projection<String, SavedString, SavedStringVBuilder> {
+            extends Projection<String, SavedString, SavedString.Builder> {
 
         private MalformedProjection(String id) {
             super(id);
@@ -138,7 +138,7 @@ public class ProjectionTestEnv {
     }
 
     public static final class DuplicateFilterProjection
-            extends Projection<String, SavedString, SavedStringVBuilder> {
+            extends Projection<String, SavedString, SavedString.Builder> {
 
         private DuplicateFilterProjection(String id) {
             super(id);

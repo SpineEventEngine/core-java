@@ -21,19 +21,19 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.entity.Entity;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("InMemoryAggregateStorage should")
 class InMemoryAggregateStorageTest extends AggregateStorageTest {
 
     @Override
-    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity<?, ?>> cls) {
         return InMemoryAggregateStorage.newInstance();
     }
 
@@ -42,7 +42,7 @@ class InMemoryAggregateStorageTest extends AggregateStorageTest {
             Class<? extends I> idClass,
             Class<? extends Aggregate<I,
                                       ? extends Message,
-                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass) {
+                                      ? extends ValidatingBuilder<?>>> aggregateClass) {
         return InMemoryAggregateStorage.newInstance();
     }
 }

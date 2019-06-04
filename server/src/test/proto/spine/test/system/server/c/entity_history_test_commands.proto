@@ -34,41 +34,41 @@ import "spine/test/system/server/entity_history_test.proto";
 
 message CreatePerson {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 
     spine.people.PersonName name = 2;
 }
 
 message CreatePersonName {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 
     string first_name = 2;
 }
 
 message RenamePerson {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 
     string new_first_name = 2;
 }
 
 message HidePerson {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 }
 
 message ExposePerson {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 }
 
 message CompletePersonCreation {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 }
 
 message StartPersonCreation {
 
-    PersonId id = 1;
+    PersonId id = 1 [(required) = true];
 }

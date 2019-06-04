@@ -23,9 +23,9 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandErrorHandler;
@@ -35,7 +35,6 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.inbox.Inbox;
@@ -47,23 +46,23 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityStateChanged;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
-import static io.spine.server.entity.EventBlackList.discardEvents;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -71,9 +70,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * The abstract base for Process Managers repositories.
  *
- * @param <I> the type of IDs of process managers
- * @param <P> the type of process managers
- * @param <S> the type of process manager state messages
+ * @param <I>
+ *         the type of IDs of process managers
+ * @param <P>
+ *         the type of process managers
+ * @param <S>
+ *         the type of process manager state messages
  * @see ProcessManager
  */
 public abstract class ProcessManagerRepository<I,
@@ -83,9 +85,7 @@ public abstract class ProcessManagerRepository<I,
                 implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
-    private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
-    private final EventFilter entityStateChangedFilter = discardEvents(EntityStateChanged.class);
+    private final Supplier<CommandRouting<I>> commandRouting;
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -111,11 +111,9 @@ public abstract class ProcessManagerRepository<I,
      */
     private final LifecycleRules lifecycleRules = new LifecycleRules();
 
-    /**
-     * Creates a new instance with the event routing by the first message field.
-     */
     protected ProcessManagerRepository() {
-        super(EventRoute.byFirstMessageField());
+        super();
+        this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
     }
 
     /**
@@ -134,6 +132,8 @@ public abstract class ProcessManagerRepository<I,
     /**
      * {@inheritDoc}
      *
+     * <p>Customizes event routing to use first message field.
+     *
      * <p>Registers with the {@code CommandBus} for dispatching commands
      * (via {@linkplain DelegatingCommandDispatcher delegating dispatcher}).
      *
@@ -150,19 +150,25 @@ public abstract class ProcessManagerRepository<I,
      * </ul>
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
+     * @param context
+     *         the Bounded Context of this repository
+     * @throws IllegalStateException
+     *          if the Process Manager class of this repository does not declare message
+     *          handling methods
      */
     @Override
-    public void onRegistered() {
-        super.onRegistered();
+    @OverridingMethodsMustInvokeSuper
+    protected void init(BoundedContext context) {
+        super.init(context);
 
-        BoundedContext boundedContext = boundedContext();
-        boundedContext.registerCommandDispatcher(this);
-
+        setupCommandRouting(commandRouting());
         checkNotDeaf();
 
-        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        context.registerCommandDispatcher(this);
+
+        this.commandErrorHandler = context.createCommandErrorHandler();
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(boundedContext);
+        systemSubscriber.registerIn(context);
 
         checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
         inbox = Inbox
@@ -173,6 +179,46 @@ public abstract class ProcessManagerRepository<I,
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
                                     c -> PmCommandEndpoint.of(this, c))
                 .build();
+    }
+
+    /**
+     * Replaces default routing with the one which takes the target ID from the first field
+     * of an event message.
+     *
+     * @param routing
+     *          the routing to customize
+     */
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void setupEventRouting(EventRouting<I> routing) {
+        super.setupEventRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(idClass()));
+    }
+
+    /**
+     * A callback for derived classes to customize routing schema for commands.
+     *
+     * <p>Default routing returns the value of the first field of a command message.
+     *
+     * @param routing
+     *         the routing schema to customize
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // See Javadoc
+    protected void setupCommandRouting(CommandRouting<I> routing) {
+        // Do nothing.
+    }
+
+    /**
+     * Ensures the process manager class handles at least one type of messages.
+     */
+    private void checkNotDeaf() {
+        boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
+
+        if (!dispatchesCommands() && !dispatchesEvents) {
+            throw newIllegalStateException(
+                    "Process managers of the repository %s have no command handlers, " +
+                            "and do not react to any events.", this);
+        }
     }
 
     @Override
@@ -189,36 +235,22 @@ public abstract class ProcessManagerRepository<I,
 
         this.inboxStorage = factory.createInboxStorage();
     }
-
     /**
-     * Ensures the process manager class handles at least one type of messages.
-     */
-    private void checkNotDeaf() {
-        boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
-
-        if (!dispatchesCommands() && !dispatchesEvents) {
-            throw newIllegalStateException(
-                    "Process managers of the repository %s have no command handlers, " +
-                            "and do not react on any events.", this);
-        }
-    }
-
-    /**
-     * Obtains a set of event classes on which process managers of this repository react.
+     * Obtains a set of event classes to which process managers of this repository react.
      *
-     * @return a set of event classes or empty set if process managers do not react on
+     * @return a set of event classes or empty set if process managers do not react to
      *         domestic events
      */
     @Override
     public Set<EventClass> messageClasses() {
-        return processManagerClass().incomingEvents();
+        return processManagerClass().domesticEvents();
     }
 
     /**
-     * Obtains classes of external events on which process managers managed by this repository
+     * Obtains classes of external events to which the process managers managed by this repository
      * react.
      *
-     * @return a set of event classes or an empty set, if process managers do not react on
+     * @return a set of event classes or an empty set if process managers do not react to
      *         external events
      */
     @Override
@@ -240,8 +272,8 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Obtains command routing schema used by this repository.
      */
-    protected final CommandRouting<I> commandRouting() {
-        return commandRouting;
+    private CommandRouting<I> commandRouting() {
+        return commandRouting.get();
     }
 
     /**
@@ -349,7 +381,7 @@ public abstract class ProcessManagerRepository<I,
      */
     void postEvents(Collection<Event> events) {
         Iterable<Event> filteredEvents = eventFilter().filter(events);
-        EventBus bus = boundedContext().eventBus();
+        EventBus bus = context().eventBus();
         bus.post(filteredEvents);
     }
 
@@ -366,7 +398,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Loads or creates a process manager by the passed ID.
      *
-     * <p>The process manager is created if there was no manager with such an ID stored before.
+     * <p>The process manager is created if there was no manager with such ID stored before.
      *
      * <p>The repository injects {@code CommandBus} from its {@code BoundedContext} into the
      * instance of the process manager so that it can post commands if needed.
@@ -377,7 +409,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected P findOrCreate(I id) {
         P result = super.findOrCreate(id);
-        CommandBus commandBus = boundedContext().commandBus();
+        CommandBus commandBus = context().commandBus();
         result.setCommandBus(commandBus);
         return result;
     }
@@ -395,31 +427,6 @@ public abstract class ProcessManagerRepository<I,
             return Optional.empty();
         }
         return Optional.of(new PmExternalEventDispatcher());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The {@code ProcessManagerRepository} changes the default behaviour and allows all
-     * the events <b>except</b> for {@link EntityStateChanged}. It is supposed that the changes of
-     * a process manager state are not worth being published.
-     *
-     * <p>Override this method to change the behaviour.
-     */
-    @Pure
-    @SPI
-    @Override
-    protected EventFilter eventFilter() {
-        return entityStateChangedFilter;
-    }
-
-    @Override
-    public void close() {
-        super.close();
-        if(inboxStorage != null) {
-            inboxStorage.close();
-            inboxStorage = null;
-        }
     }
 
     /**

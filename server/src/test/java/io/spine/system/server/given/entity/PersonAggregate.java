@@ -33,14 +33,13 @@ import io.spine.system.server.PersonExposed;
 import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonRenamed;
-import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.RenamePerson;
 import io.spine.type.TypeUrl;
 
 /**
  * Test aggregate on which to track history.
  */
-public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder> {
+public class PersonAggregate extends Aggregate<PersonId, Person, Person.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(Person.class);
 
@@ -50,32 +49,36 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Assign
     PersonCreated handle(CreatePerson command) {
-        return PersonCreated.newBuilder()
-                            .setId(command.getId())
-                            .setName(command.getName())
-                            .build();
+        return PersonCreated
+                .newBuilder()
+                .setId(command.getId())
+                .setName(command.getName())
+                .build();
     }
 
     @Assign
     PersonHidden handle(HidePerson command) {
-        return PersonHidden.newBuilder()
-                           .setId(command.getId())
-                           .build();
+        return PersonHidden
+                .newBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
     PersonExposed handle(ExposePerson command) {
-        return PersonExposed.newBuilder()
-                            .setId(command.getId())
-                            .build();
+        return PersonExposed
+                .newBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
     PersonRenamed handle(RenamePerson command) {
-        return PersonRenamed.newBuilder()
-                            .setId(command.getId())
-                            .setNewFirstName(command.getNewFirstName())
-                            .build();
+        return PersonRenamed
+                .newBuilder()
+                .setId(command.getId())
+                .setNewFirstName(command.getNewFirstName())
+                .build();
     }
 
     @Apply
@@ -96,12 +99,12 @@ public class PersonAggregate extends Aggregate<PersonId, Person, PersonVBuilder>
 
     @Apply
     private void on(PersonRenamed event) {
-        PersonVBuilder builder = builder();
-        PersonName newName =
-                builder.getName()
-                       .toBuilder()
-                       .setGivenName(event.getNewFirstName())
-                       .build();
+        Person.Builder builder = builder();
+        PersonName newName = builder
+                .getName()
+                .toBuilder()
+                .setGivenName(event.getNewFirstName())
+                .build();
         builder.setName(newName);
     }
 }

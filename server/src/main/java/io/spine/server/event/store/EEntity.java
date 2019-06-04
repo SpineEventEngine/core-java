@@ -24,7 +24,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.EventVBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
@@ -38,10 +37,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>An underlying event doesn't contain {@linkplain Event#clearEnrichments() enrichments}.
  *
  * @apiNote This class is public so that {@link io.spine.server.entity.storage.EntityColumn
- * EntityColumn} can access its column declarations.
+ *         EntityColumn} can access its column declarations.
  */
 @Internal
-public final class EEntity extends TransactionalEntity<EventId, Event, EventVBuilder> {
+public final class EEntity extends TransactionalEntity<EventId, Event, Event.Builder> {
 
     /** Cached value of the event message type name. */
     private @Nullable TypeName typeName;
@@ -93,7 +92,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, EventVBui
     /**
      * Creates a new entity stripping enrichments from the passed event.
      */
-    private static class Factory extends Transaction<EventId, EEntity, Event, EventVBuilder> {
+    private static class Factory extends Transaction<EventId, EEntity, Event, Event.Builder> {
 
         private final Event event;
 

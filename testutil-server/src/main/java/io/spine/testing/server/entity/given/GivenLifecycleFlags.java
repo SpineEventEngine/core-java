@@ -21,7 +21,6 @@
 package io.spine.testing.server.entity.given;
 
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.LifecycleFlagsVBuilder;
 
 public class GivenLifecycleFlags {
 
@@ -33,7 +32,7 @@ public class GivenLifecycleFlags {
      * Creates an instance with archived flag set to {@code true}.
      */
     public static LifecycleFlags archived() {
-        return LifecycleFlagsVBuilder
+        return LifecycleFlags
                 .newBuilder()
                 .setArchived(true)
                 .build();
@@ -43,7 +42,7 @@ public class GivenLifecycleFlags {
      * Creates an instance with deleted flag set to {@code true}.
      */
     public static LifecycleFlags deleted() {
-        return LifecycleFlagsVBuilder
+        return LifecycleFlags
                 .newBuilder()
                 .setDeleted(true)
                 .build();

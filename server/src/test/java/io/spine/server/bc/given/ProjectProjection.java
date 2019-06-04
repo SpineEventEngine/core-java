@@ -24,10 +24,9 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.bc.event.BcProjectCreated;
 
-public class ProjectProjection extends Projection<ProjectId, Project, ProjectVBuilder> {
+public class ProjectProjection extends Projection<ProjectId, Project, Project.Builder> {
 
     protected ProjectProjection(ProjectId id) {
         super(id);

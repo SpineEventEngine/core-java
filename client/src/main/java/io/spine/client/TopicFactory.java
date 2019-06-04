@@ -34,7 +34,7 @@ import static java.lang.String.format;
 /**
  * A factory of {@link Topic} instances.
  *
- * <p>Uses the given {@link ActorRequestFactory} as the source of the topic meta information,
+ * <p>Uses the given {@link ActorRequestFactory} as a source of the topic meta information
  * such as the actor.
  *
  * @see ActorRequestFactory#topic()
@@ -54,7 +54,7 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a new instance of {@link TopicBuilder} for the further {@link Topic}
+     * Creates a new instance of {@link TopicBuilder} for further {@link Topic}
      * construction.
      *
      * @param targetType
@@ -72,7 +72,7 @@ public final class TopicFactory {
      *
      * @param targetType
      *         a class of target events/entities
-     * @return the instance of {@code Topic} assembled according to the parameters
+     * @return an instance of {@code Topic} assembled according to the parameters
      */
     public Topic allOf(Class<? extends Message> targetType) {
         checkNotNull(targetType);
@@ -83,8 +83,8 @@ public final class TopicFactory {
     }
 
     /**
-     * Creates a {@link Topic} for the specified {@link Target}, updates for which will include
-     * only the fields specified by the {@link FieldMask}.
+     * Creates a {@link Topic} for the specified {@link Target};
+     * updates for it will include only the fields specified by the {@link FieldMask}.
      *
      * @param target
      *         a {@code Target} to create a topic for
@@ -92,20 +92,21 @@ public final class TopicFactory {
      *         a {@code FieldMask} defining fields to be included in updates
      * @return an instance of {@code Topic}
      */
+    @SuppressWarnings("CheckReturnValue")
     Topic composeTopic(Target target, @Nullable FieldMask fieldMask) {
         checkNotNull(target, "Target must be specified to compose a Topic.");
-        TopicVBuilder builder = builderForTarget(target);
+        Topic.Builder builder = builderForTarget(target);
         if (fieldMask != null) {
             builder.setFieldMask(fieldMask);
         }
-        Topic query = builder.build();
+        Topic query = builder.vBuild();
         return query;
     }
 
     /**
      * Creates a {@link Topic} for the specified {@link Target}.
      *
-     * <p>This method is intended for internal use only. To achieve the similar result use
+     * <p>This method is intended for internal use only. To achieve the similar result, use
      * {@linkplain #allOf(Class)}.
      *
      * @param target
@@ -115,20 +116,22 @@ public final class TopicFactory {
     @Internal
     public Topic forTarget(Target target) {
         checkNotNull(target);
-        return builderForTarget(target).build();
+        return builderForTarget(target).vBuild();
     }
 
-    private TopicVBuilder builderForTarget(Target target) {
-        return TopicVBuilder.newBuilder()
-                            .setId(generateId())
-                            .setContext(actorContext)
-                            .setTarget(target);
+    private Topic.Builder builderForTarget(Target target) {
+        return Topic
+                .newBuilder()
+                .setId(generateId())
+                .setContext(actorContext)
+                .setTarget(target);
     }
 
     private static TopicId generateId() {
         String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
-        return TopicId.newBuilder()
-                      .setValue(formattedId)
-                      .build();
+        return TopicId
+                .newBuilder()
+                .setValue(formattedId)
+                .vBuild();
     }
 }

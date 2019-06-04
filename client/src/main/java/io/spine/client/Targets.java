@@ -95,6 +95,7 @@ public final class Targets {
      *         a set of predicates which target entity state or event message must match
      * @return a {@code Target} instance formed according to the provided parameters
      */
+    @SuppressWarnings("CheckReturnValue")
     public static Target composeTarget(Class<? extends Message> targetClass,
                                        @Nullable Iterable<?> ids,
                                        @Nullable Iterable<CompositeFilter> filters) {
@@ -103,7 +104,7 @@ public final class Targets {
         boolean includeAll = (ids == null && filters == null);
 
         TypeUrl typeUrl = TypeUrl.of(targetClass);
-        TargetVBuilder builder = Target.vBuilder()
+        Target.Builder builder = Target.newBuilder()
                                        .setType(typeUrl.value());
         if (includeAll) {
             builder.setIncludeAll(true);
@@ -131,9 +132,10 @@ public final class Targets {
     }
 
     private static IdFilter idFilter(List<Any> ids) {
-        return IdFilter.vBuilder()
-                       .addAllIds(ids)
-                       .build();
+        return IdFilter
+                .newBuilder()
+                .addAllIds(ids)
+                .build();
     }
 
     /**
@@ -153,7 +155,7 @@ public final class Targets {
     }
 
     private static TargetFilters targetFilters(List<CompositeFilter> filters, IdFilter idFilter) {
-        return TargetFilters.vBuilder()
+        return TargetFilters.newBuilder()
                             .setIdFilter(idFilter)
                             .addAllFilter(filters)
                             .build();
@@ -166,7 +168,7 @@ public final class Targets {
      */
     private static <T> ImmutableList<T> nonNullList(@Nullable Iterable<T> input) {
         if (input == null) {
-            return ImmutableList.<T>builder().build();
+            return ImmutableList.of();
         }
         return ImmutableList.copyOf(input);
     }

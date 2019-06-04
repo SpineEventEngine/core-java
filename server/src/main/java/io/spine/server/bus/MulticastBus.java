@@ -39,7 +39,7 @@ public abstract class MulticastBus<M extends Message,
                                    D extends MessageDispatcher<C, E, ?>>
         extends Bus<M, E, C, D> {
 
-    protected MulticastBus(BusBuilder<E, M, ?> builder) {
+    protected MulticastBus(BusBuilder<?, M, E, C, D> builder) {
         super(builder);
     }
 
@@ -47,7 +47,7 @@ public abstract class MulticastBus<M extends Message,
      * Call the dispatchers for the {@code messageEnvelope}.
      *
      * @param messageEnvelope the message envelope to pass to the dispatchers.
-     * @return the number of the dispatchers called, or {@code 0} if there weren't any.
+     * @return the number of the dispatchers called or {@code 0} if there weren't any.
      */
     protected int callDispatchers(E messageEnvelope) {
         Collection<D> dispatchers = registry().getDispatchers(messageEnvelope);

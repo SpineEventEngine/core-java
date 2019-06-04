@@ -164,12 +164,12 @@ public class SubscriptionService
         /**
          * Builds the {@link SubscriptionService}.
          *
-         * @throws IllegalStateException if no bounded contexts were added.
+         * @throws IllegalStateException if no Bounded Contexts were added.
          */
         public SubscriptionService build() throws IllegalStateException {
             if (boundedContexts.isEmpty()) {
                 throw new IllegalStateException(
-                        "Subscription service must have at least one bounded context.");
+                        "Subscription service must have at least one Bounded Context.");
             }
             ImmutableMap<TypeUrl, BoundedContext> map = createMap();
             SubscriptionService result = new SubscriptionService(map);

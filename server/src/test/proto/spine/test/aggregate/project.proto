@@ -42,7 +42,7 @@ enum Status {
 }
 
 message Project {
-    option (entity).kind = AGGREGATE;
+    option (entity) = {kind: AGGREGATE visibility: FULL};
 
     // The aggregate ID.
     //
@@ -56,11 +56,15 @@ message Project {
 }
 
 message ProjectLifecycle {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
     ProjectId id = 1;
     Status status = 2;
 }
 
 message ProjectDefinition {
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+
     ProjectId id = 1;
     string name = 2;
 }
@@ -70,16 +74,16 @@ message TaskId {
 }
 
 message Task {
-    option (entity).kind = AGGREGATE;
+    option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    ProjectId id = 1 [(required) = false, (valid) = false];
+    ProjectId id = 1 [(required) = false, (validate) = false];
     TaskId task_id = 2;
     string title = 3;
     string description = 4;
 }
 
 message SubProjectList {
-    option (entity).kind = AGGREGATE;
-
-    repeated ProjectId item = 1;
+    option (entity) = {kind: AGGREGATE visibility: FULL};
+    ProjectId parent_project = 1 [(required) = false, (validate) = false];
+    repeated ProjectId item = 2;
 }

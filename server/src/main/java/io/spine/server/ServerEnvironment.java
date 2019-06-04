@@ -49,7 +49,7 @@ public final class ServerEnvironment {
 
     /**
      * The deployment detector is instantiated with a system {@link DeploymentDetector} and
-     * can be reassigned the value via {@link #configureDeployment(Supplier)}.
+     * can be reassigned the value using {@link #configureDeployment(Supplier)}.
      *
      * <p>Value from this supplier are used to {@linkplain #getDeploymentType() get the deployment
      * type}.
@@ -76,7 +76,7 @@ public final class ServerEnvironment {
      * Returns {@code true} if the code is running on the Google App Engine,
      * {@code false} otherwise.
      *
-     * @deprecated this method will be removed in 1.0, check {@linkplain #getDeploymentType()
+     * @deprecated this method will be removed in 1.0, please verify {@linkplain #getDeploymentType()
      *         deployment type} to match any of
      *         {@link DeploymentType#APPENGINE_EMULATOR APPENGINE_EMULATOR} or
      *         {@link DeploymentType#APPENGINE_CLOUD APPENGINE_CLOUD} instead.
@@ -136,7 +136,7 @@ public final class ServerEnvironment {
     /**
      * Makes the {@link #getDeploymentType()} return the values from the provided supplier.
      *
-     * <p>When supplying your own deployment type in tests, do not forget to
+     * <p>When supplying your own deployment type in tests, remember to
      * {@linkplain #resetDeploymentType() reset it} during tear down.
      */
     @VisibleForTesting

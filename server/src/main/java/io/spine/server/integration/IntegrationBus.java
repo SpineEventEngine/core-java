@@ -51,15 +51,15 @@ import static io.spine.validate.Validate.checkNotDefault;
 import static java.lang.String.format;
 
 /**
- * Dispatches {@linkplain ExternalMessage external messages} from and to the bounded context,
+ * Dispatches {@linkplain ExternalMessage external messages} from and to the Bounded Context
  * in which this bus operates.
  *
  * <p>This bus is available as a part of single {@code BoundedContext}.
- * In a multi-component environment messages may travel across components from one bounded context
+ * In a multi-component environment messages may travel across components from one Bounded Context
  * to another.
  *
- * <p>{@code IntegrationBus} is always based upon some {@linkplain TransportFactory transport},
- * that delivers the messages from and to it. For several bounded contexts to communicate,
+ * <p>{@code IntegrationBus} is always based upon some {@linkplain TransportFactory transport}
+ * that delivers the messages from and to it. For several Bounded Contexts to communicate,
  * their integration buses have to share the transport. Typically that would be a single
  * messaging broker.
  *
@@ -67,9 +67,9 @@ import static java.lang.String.format;
  * via the transport are propagated into the bounded context. They are dispatched
  * to the subscribers and reactors marked with {@code external = true} on per-message-type basis.
  *
- * {@code IntegrationBus} is also responsible for publishing the messages,
- * born within the current `BoundedContext`, to external collaborators. To do that properly,
- * the bus listens to a special document message called {@linkplain RequestForExternalMessages},
+ * {@code IntegrationBus} is also responsible for publishing the messages
+ * born within the current `BoundedContext` to external collaborators. To do that properly,
+ * the bus listens to a special document message called {@linkplain RequestForExternalMessages}
  * that describes the needs of other parties.
  *
  * <p><b>Sample Usage.</b> The Bounded Context named Projects has an external event handler method
@@ -89,30 +89,29 @@ import static java.lang.String.format;
  *  }
  * </pre>
  *
- * <p>Upon a registration of the corresponding repository the  integration bus of
+ * <p>Upon a registration of the corresponding repository, the integration bus of
  * "Projects" context sends out a {@code RequestForExternalMessages} saying that an {@code Event}
  * of {@code UserDeleted} type is needed from other parties.
  *
- * <p>Let's say the second bounded context is "Users". Its integration bus will receive
- * the {@code RequestForExternalMessages} request sent out by "Projects". To handle it properly
+ * <p>Let's say the second Bounded Context is "Users". Its integration bus will receive
+ * the {@code RequestForExternalMessages} request sent out by "Projects". To handle it properly,
  * it will create a bridge between "Users"'s event bus (which may eventually be transmitting
  * a {@code UserDeleted} event) and an external transport.
  *
  * <p>Once {@code UserDeleted} is published locally in "Users" context, it will be received
- * by this bridge (as well as other local dispatchers), and published to the external transport.
+ * by this bridge (as well as other local dispatchers) and published to the external transport.
  *
  * <p>The integration bus of "Projects" context will receive the {@code UserDeleted}
  * external message. The event will be dispatched to the external event handler of
  * {@code ProjectListView} projection.
  */
-@SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageEnvelope,
                                                  ExternalMessageClass,
                                                  ExternalMessageDispatcher<?>> {
 
     /**
-     * An identification of the channel, serving to exchange {@linkplain RequestForExternalMessages
+     * An identification of the channel serving to exchange {@linkplain RequestForExternalMessages
      * configuration messages} with other parties, such as instances of {@code IntegrationBus}
      * from other {@code BoundedContext}s.
      */
@@ -168,11 +167,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected DomesticDispatcherRegistry createRegistry() {
-        return new DomesticDispatcherRegistry();
-    }
-
-    @Override
     protected DeadMessageHandler<ExternalMessageEnvelope> deadMessageHandler() {
         return DeadExternalMessageHandler.INSTANCE;
     }
@@ -216,11 +210,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @Override
     protected void store(Iterable<ExternalMessage> messages) {
-        // we don't store the incoming messages yet.
+        // We don't store the incoming messages yet.
     }
 
     /**
-     * Registers a local dispatcher, which is subscribed to {@code external} messages.
+     * Registers a local dispatcher which is subscribed to {@code external} messages.
      *
      * @param dispatcher the dispatcher to register
      */
@@ -243,7 +237,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     /**
-     * Unregisters a local dispatcher, which should no longer be subscribed
+     * Unregisters a local dispatcher which should no longer be subscribed
      * to {@code external} messages.
      *
      * @param dispatcher the dispatcher to unregister
@@ -252,7 +246,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     public void unregister(ExternalMessageDispatcher<?> dispatcher) {
         super.unregister(dispatcher);
 
-        // Remember the IDs of channels, that we have been subscribed before.
+        // Remember the IDs of channels for which we have been subscribed before.
         Set<ChannelId> requestedBefore = subscriberHub.ids();
 
         // Unsubscribe from the types requested by this dispatcher.
@@ -266,7 +260,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     /**
      * Notifies other parts of the application that this integration bus instance now requests
-     * for a different set of message types than previously.
+     * for a different set of message types.
      *
      * <p>Sends out an instance of {@linkplain RequestForExternalMessages
      * request for external messages} for that purpose.
@@ -368,15 +362,18 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
     @CanIgnoreReturnValue
-    public static class Builder
-            extends BusBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
+    public static class Builder extends BusBuilder<Builder,
+                                                   ExternalMessage,
+                                                   ExternalMessageEnvelope,
+                                                   ExternalMessageClass,
+                                                   ExternalMessageDispatcher<?>> {
 
         /**
-         * Buses that act inside the bounded context, e.g. {@code EventBus}, and which allow
+         * Buses that act inside the bounded context, for example {@code EventBus}, which allow
          * dispatching their events to other bounded contexts.
          *
-         * <p>{@code CommandBus} does <em>not</em> allow such a dispatching, as commands cannot be
-         * sent to another bounded context for a postponed handling.
+         * <p>{@code CommandBus} does <em>not</em> allow such dispatching as commands cannot be
+         * sent to another Bounded Context for a postponed handling.
          */
 
         private EventBus eventBus;
@@ -414,6 +411,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         public Optional<TransportFactory> getTransportFactory() {
             return Optional.ofNullable(transportFactory);
+        }
+
+        @Override
+        protected DomesticDispatcherRegistry newRegistry() {
+            return new DomesticDispatcherRegistry();
         }
 
         @Override

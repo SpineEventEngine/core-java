@@ -21,6 +21,7 @@
 package io.spine.testing.server.entity.given;
 
 import com.google.protobuf.Message;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
@@ -30,7 +31,6 @@ import io.spine.testing.server.aggregate.AggregateBuilder;
 import io.spine.testing.server.aggregate.AggregatePartBuilder;
 import io.spine.testing.server.procman.ProcessManagerBuilder;
 import io.spine.testing.server.projection.ProjectionBuilder;
-import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -74,7 +74,7 @@ public class Given {
     public static <P extends Projection<I, S, B>,
                    I,
                    S extends Message,
-                   B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                   B extends ValidatingBuilder<S>>
     ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
         ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
@@ -88,7 +88,7 @@ public class Given {
     public static <P extends ProcessManager<I, S, B>,
                    I,
                    S extends Message,
-                   B extends ValidatingBuilder<S, ?>>
+                   B extends ValidatingBuilder<S>>
     ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);
         ProcessManagerBuilder<P, I, S, B> result = ProcessManagerBuilder.newInstance();

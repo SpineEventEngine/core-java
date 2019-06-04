@@ -38,8 +38,8 @@ import static io.spine.validate.Validate.checkValid;
 /**
  * A factory of {@link Command} instances.
  *
- * <p>Uses the given {@link ActorRequestFactory} as the source of the command meta information,
- * such as the actor, the tenant, etc.
+ * <p>Uses the given {@link ActorRequestFactory} as a source of command meta information
+ * such as the actor, the tenant, and others.
  *
  * <p>The command messages passed to the factory are
  * {@linkplain io.spine.validate.Validate#checkValid(com.google.protobuf.Message) validated}
@@ -61,7 +61,7 @@ public final class CommandFactory {
      *
      * @param message the command message
      * @return new command instance
-     * @throws ValidationException if the passed message does not satisfy the constraints
+     * @throws ValidationException if the passed message does not satisfy the constraints,
      *                             set for it in its Protobuf definition
      */
     public Command create(CommandMessage message) throws ValidationException {
@@ -78,7 +78,7 @@ public final class CommandFactory {
      *
      * <p>The {@code targetVersion} parameter defines the version of the entity which handles
      * the resulting command. Note that the framework performs no validation of the target version
-     * before a command is handled. The validation may be performed by the user themselves instead.
+     * before a command is handled. Instead users themselves can perform validation.
      *
      * @param message       the command message
      * @param targetVersion the version of the entity for which this command is intended
@@ -96,7 +96,7 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates new {@code Command} with the passed message, using the existing context.
+     * Creates new {@code Command} with the passed message using the existing context.
      *
      * <p>The produced command is created with a {@code CommandContext} instance, copied from
      * the given one, but with the current time set as a context timestamp.
@@ -170,11 +170,11 @@ public final class CommandFactory {
     private static CommandContext withCurrentTime(CommandContext value) {
         ActorContext withCurrentTime =
                 value.getActorContext()
-                     .toVBuilder()
+                     .toBuilder()
                      .setTimestamp(currentTime())
                      .build();
         CommandContext result =
-                value.toVBuilder()
+                value.toBuilder()
                      .setActorContext(withCurrentTime)
                      .build();
         return result;

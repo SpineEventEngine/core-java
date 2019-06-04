@@ -48,7 +48,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
         ImmutableSet<? extends ParameterSpec<EventEnvelope>> result = ImmutableSet
                 .<ParameterSpec<EventEnvelope>>builder()
                 .addAll(super.paramSpecs())
-                .addAll(ImmutableList.copyOf(EntityStateSubscriberSpec.values()))
+                .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
                 .build();
         return result;
     }
@@ -56,7 +56,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     @Override
     public SubscriberMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         return isEntitySubscriber(method)
-               ? new EntitySubscriberMethod(method, parameterSpec)
+               ? new StateSubscriberMethod(method, parameterSpec)
                : new EventSubscriberMethod(method, parameterSpec);
     }
 

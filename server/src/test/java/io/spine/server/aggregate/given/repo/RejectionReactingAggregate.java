@@ -24,7 +24,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.rejection.Rejections;
@@ -37,7 +36,7 @@ import java.util.Optional;
  * reacts on events.
  */
 public class RejectionReactingAggregate
-        extends Aggregate<ProjectId, StringAggregate, StringAggregateVBuilder> {
+        extends Aggregate<ProjectId, StringAggregate, StringAggregate.Builder> {
 
     public static final String PARENT_ARCHIVED = "parent-archived";
 

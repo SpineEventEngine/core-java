@@ -34,7 +34,6 @@ import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
-import io.spine.client.TargetFiltersVBuilder;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -258,7 +257,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             Collection<E> found = newArrayList(loadMany(ids));
 
             assertThat(found).hasSize(ids.size());
-            assertThat(entities).containsAllIn(found);
+            assertThat(entities).containsAtLeastElementsIn(found);
         }
 
         @Test
@@ -281,7 +280,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
                     .addFilter(filter)
                     .setOperator(ALL)
                     .build();
-            TargetFilters filters = TargetFiltersVBuilder
+            TargetFilters filters = TargetFilters
                     .newBuilder()
                     .addFilter(aggregatingFilter)
                     .build();
@@ -425,7 +424,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
                     .newBuilder()
                     .addAllIds(ids)
                     .build();
-            TargetFilters filters = TargetFiltersVBuilder
+            TargetFilters filters = TargetFilters
                     .newBuilder()
                     .setIdFilter(filter)
                     .build();
@@ -556,7 +555,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         storeEntity(deletedEntity);
 
         CompositeFilter filter = all(eq(archived.name(), false));
-        TargetFilters filters = TargetFiltersVBuilder
+        TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(filter)
                 .build();

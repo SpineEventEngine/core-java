@@ -32,7 +32,7 @@ import io.spine.base.FieldPaths;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.client.IdFilter;
-import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
@@ -79,7 +79,7 @@ class EntityQueryTest {
     @DisplayName("be serializable")
     void beSerializable() {
         String columnName = deleted.name();
-        EntityColumn column = findColumn(Entity.class, columnName);
+        EntityColumn column = findColumn(TestEntity.class, columnName);
         Filter filter = Filters.eq(columnName, false);
         Multimap<EntityColumn, Filter> filters = ImmutableMultimap.of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
@@ -126,7 +126,7 @@ class EntityQueryTest {
     @Test
     @DisplayName("fail to append lifecycle columns if they are already present")
     void notDuplicateLifecycleColumns() {
-        EntityColumn deletedColumn = Columns.findColumn(Entity.class, deleted.name());
+        EntityColumn deletedColumn = Columns.findColumn(TestEntity.class, deleted.name());
         CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, Filter.getDefaultInstance()), ALL
         );

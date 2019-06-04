@@ -23,11 +23,8 @@ package io.spine.client.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.IdFilter;
-import io.spine.client.IdFilterVBuilder;
 import io.spine.client.TargetFilters;
-import io.spine.client.TargetFiltersVBuilder;
 import io.spine.test.queries.TaskId;
-import io.spine.test.queries.TaskIdVBuilder;
 
 import java.util.List;
 
@@ -48,11 +45,11 @@ public class TargetsTestEnv {
                 .stream()
                 .map(TargetsTestEnv::newId)
                 .collect(toList());
-        IdFilter idFilter = IdFilterVBuilder
+        IdFilter idFilter = IdFilter
                 .newBuilder()
                 .addAllIds(packedIds)
                 .build();
-        return TargetFiltersVBuilder.newBuilder()
+        return TargetFilters.newBuilder()
                                     .setIdFilter(idFilter)
                                     .build();
     }
@@ -62,7 +59,7 @@ public class TargetsTestEnv {
     }
 
     public static TaskId newTaskId() {
-        return TaskIdVBuilder.newBuilder()
+        return TaskId.newBuilder()
                              .setValue(newUuid())
                              .build();
     }

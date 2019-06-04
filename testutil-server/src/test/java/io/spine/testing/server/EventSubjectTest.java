@@ -51,7 +51,7 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
     Event createMessage() {
         TuTaskId taskId = generateTaskId();
         TuCommentAdded event = TuCommentAdded
-                .vBuilder()
+                .newBuilder()
                 .setId(taskId)
                 .build();
         return newEvent(event);
@@ -61,7 +61,7 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
     Event createAnotherMessage() {
         TuTaskId taskId = generateTaskId();
         TuTaskCreated event = TuTaskCreated
-                .vBuilder()
+                .newBuilder()
                 .setId(taskId)
                 .build();
         return newEvent(event);
@@ -73,7 +73,7 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
 
     private static TuTaskId generateTaskId() {
         return TuTaskId
-                .vBuilder()
+                .newBuilder()
                 .setValue(newUuid())
                 .build();
     }

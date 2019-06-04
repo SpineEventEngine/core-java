@@ -33,11 +33,11 @@ import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.StorageRecords;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.storage.StateImported;
 import io.spine.testdata.Sample;
 import io.spine.testing.TestValues;
@@ -137,7 +137,7 @@ public abstract class AggregateStorageTest
     }
 
     @Override
-    protected Class<? extends TestAggregate> getTestEntityClass() {
+    protected Class<? extends Entity<?, ?>> getTestEntityClass() {
         return TestAggregate.class;
     }
 
@@ -545,14 +545,14 @@ public abstract class AggregateStorageTest
         @DisplayName("for EventContext")
         void forEventContext() {
             EventContext enrichedContext = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             Event event = Event
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newEventId())
                     .setContext(enrichedContext)
                     .setMessage(AnyPacker.pack(TestValues.newUuidValue()))
@@ -569,20 +569,20 @@ public abstract class AggregateStorageTest
         @DisplayName("for origin of EventContext type")
         void forEventContextOrigin() {
             EventContext origin = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .setCommandContext(GivenCommandContext.withRandomActor())
                     .build();
             EventContext context = EventContext
-                    .vBuilder()
+                    .newBuilder()
                     .setEventContext(origin)
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
                     .build();
             Event event = Event
-                    .vBuilder()
+                    .newBuilder()
                     .setId(newEventId())
                     .setContext(context)
                     .setMessage(AnyPacker.pack(TestValues.newUuidValue()))
@@ -665,7 +665,7 @@ public abstract class AggregateStorageTest
         return storage.historyBackward(readRequest);
     }
 
-    public static class TestAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    public static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         protected TestAggregate(ProjectId id) {
             super(id);
@@ -673,7 +673,7 @@ public abstract class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdString
-            extends Aggregate<String, Project, ProjectVBuilder> {
+            extends Aggregate<String, Project, Project.Builder> {
 
         private TestAggregateWithIdString(String id) {
             super(id);
@@ -681,7 +681,7 @@ public abstract class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdInteger
-            extends Aggregate<Integer, Project, ProjectVBuilder> {
+            extends Aggregate<Integer, Project, Project.Builder> {
 
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
@@ -689,7 +689,7 @@ public abstract class AggregateStorageTest
     }
 
     private static class TestAggregateWithIdLong
-            extends Aggregate<Long, Project, ProjectVBuilder> {
+            extends Aggregate<Long, Project, Project.Builder> {
 
         private TestAggregateWithIdLong(Long id) {
             super(id);

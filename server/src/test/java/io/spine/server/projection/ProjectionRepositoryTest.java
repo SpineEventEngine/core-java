@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
-import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -73,8 +72,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.currentTime;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
@@ -96,7 +95,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 
-    private static final Any PRODUCER_ID = Identifier.pack(GivenEventMessage.ENTITY_ID);
+    private static final Any PRODUCER_ID = pack(GivenEventMessage.ENTITY_ID);
 
     private BoundedContext boundedContext;
 
@@ -546,15 +545,15 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
+    @DisplayName("check that its `Projection` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
-        BoundedContext boundedContext = BoundedContext
+        BoundedContext context = BoundedContext
                 .newBuilder()
                 .setMultitenant(false)
                 .build();
-        repo.setBoundedContext(boundedContext);
 
-        assertThrows(IllegalStateException.class, repo::onRegistered);
+        assertThrows(IllegalStateException.class, () ->
+                repo.setContext(context));
     }
 }

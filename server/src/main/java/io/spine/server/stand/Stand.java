@@ -44,18 +44,17 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.EntityRecordChangeVBuilder;
-import io.spine.server.entity.EntityRecordVBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.SystemReadSide;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -115,7 +114,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private final SubscriptionRegistry subscriptionRegistry;
 
     /**
-     * Manages the entity {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
+     * Manages the entity {@linkplain TypeUrl types} exposed via this instance of {@code Stand}.
      */
     private final TypeRegistry typeRegistry;
 
@@ -162,7 +161,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
      * through the artificially created {@link EntityStateChanged} event. It
-     * doesn't do any proper lifecycle management, ignoring "archived"/"deleted" actions, applied
+     * doesn't do any proper lifecycle management ignoring "archived"/"deleted" actions, applied
      * messages IDs, etc.
      *
      * @param entity
@@ -176,12 +175,12 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     public void post(Entity entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
-        EntityRecord record = EntityRecordVBuilder
+        EntityRecord record = EntityRecord
                 .newBuilder()
                 .setEntityId(id)
                 .setState(state)
                 .build();
-        EntityRecordChange change = EntityRecordChangeVBuilder
+        EntityRecordChange change = EntityRecordChange
                 .newBuilder()
                 .setNewValue(record)
                 .build();
@@ -225,9 +224,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     @Override
     public Set<EventClass> messageClasses() {
-        EventClass entityStateChanged = EventClass.from(EntityStateChanged.class);
         Set<EventClass> result =
-                union(eventRegistry.eventClasses(), singleton(entityStateChanged));
+                union(eventRegistry.eventClasses(), singleton(StateClass.updateEvent()));
         return result;
     }
 
@@ -257,8 +255,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param topic
      *         a {@link Topic} defining the subscription target
      */
-    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
-        topicValidator.validate(topic, responseObserver);
+    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver)
+            throws InvalidRequestException {
+        topicValidator.validate(topic);
 
         TenantId tenantId = topic.getContext()
                                  .getTenantId();
@@ -283,16 +282,17 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @param subscription
      *         the subscription to activate
      * @param notifyAction
-     *         an action which notifies the subscribers about an update
+     *         the action which notifies the subscribers about an update
      * @see #subscribe(Topic, StreamObserver)
      */
     public void activate(Subscription subscription,
                          NotifySubscriptionAction notifyAction,
-                         StreamObserver<Response> responseObserver) {
+                         StreamObserver<Response> responseObserver)
+            throws InvalidRequestException {
         checkNotNull(subscription);
         checkNotNull(notifyAction);
 
-        subscriptionValidator.validate(subscription, responseObserver);
+        subscriptionValidator.validate(subscription);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
@@ -315,11 +315,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * related to the given {@code Subscription}.
      *
      * @param subscription
-     *         a subscription to cancel
+     *         the subscription to cancel
      */
-    public void cancel(Subscription subscription,
-                       StreamObserver<Response> responseObserver) {
-        subscriptionValidator.validate(subscription, responseObserver);
+    public void cancel(Subscription subscription, StreamObserver<Response> responseObserver)
+            throws InvalidRequestException {
+        subscriptionValidator.validate(subscription);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
@@ -349,7 +349,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        return typeRegistry.getTypes();
+        return typeRegistry.allTypes();
     }
 
     /**
@@ -370,7 +370,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
-        return typeRegistry.getAggregateTypes();
+        return typeRegistry.aggregateTypes();
     }
 
     /**
@@ -383,13 +383,13 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * of {@link StreamObserver}&lt;{@link QueryResponse}&gt;.
      *
      * @param query
-     *         an instance of query
+     *         the instance of query
      * @param responseObserver
-     *         an observer to feed the query results to
+     *         the observer to feed the query results to
      */
-    public void execute(Query query,
-                        StreamObserver<QueryResponse> responseObserver) {
-        queryValidator.validate(query, responseObserver);
+    public void execute(Query query, StreamObserver<QueryResponse> responseObserver)
+            throws InvalidRequestException {
+        queryValidator.validate(query);
 
         TypeUrl type = typeOf(query);
         QueryProcessor queryProcessor = processorFor(type);
@@ -458,7 +458,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private QueryProcessor processorFor(TypeUrl type) {
         Optional<? extends RecordBasedRepository<?, ?, ?>> foundRepository =
-                typeRegistry.getRecordRepository(type);
+                typeRegistry.recordRepositoryOf(type);
         if (foundRepository.isPresent()) {
             RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
             return new EntityQueryProcessor(repository);

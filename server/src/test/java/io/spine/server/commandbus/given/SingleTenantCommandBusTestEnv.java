@@ -27,13 +27,13 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdRemoveTask;
-import io.spine.test.command.FirstCmdCreateProject;
-import io.spine.test.command.SecondCmdStartProject;
-import io.spine.test.command.event.CmdProjectCreated;
-import io.spine.test.command.event.CmdProjectStarted;
-import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.test.commandbus.command.CmdBusAddTask;
+import io.spine.test.commandbus.command.CmdBusRemoveTask;
+import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
+import io.spine.test.commandbus.command.SecondCmdBusStartProject;
+import io.spine.test.commandbus.event.CmdBusProjectCreated;
+import io.spine.test.commandbus.event.CmdBusProjectStarted;
+import io.spine.test.commandbus.event.CmdBusTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
 
@@ -66,13 +66,14 @@ public class SingleTenantCommandBusTestEnv {
 
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
-        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) throws InvalidProjectName {
+        CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context) throws
+                                                                          InvalidProjectName {
             throw rejection;
         }
 
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
-        CmdTaskAdded handle(CmdRemoveTask msg, CommandContext context) {
+        CmdBusTaskAdded handle(CmdBusRemoveTask msg, CommandContext context) {
             throw newIllegalStateException("Command handling failed with unexpected exception");
         }
 
@@ -98,19 +99,19 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        CmdProjectCreated handle(FirstCmdCreateProject command) {
+        CmdBusProjectCreated handle(FirstCmdBusCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
-            return CmdProjectCreated
+            return CmdBusProjectCreated
                     .newBuilder()
                     .setProjectId(command.getId())
                     .build();
         }
 
         @Assign
-        CmdProjectStarted handle(SecondCmdStartProject command) {
+        CmdBusProjectStarted handle(SecondCmdBusStartProject command) {
             handledCommands.add(command);
-            return CmdProjectStarted
+            return CmdBusProjectStarted
                     .newBuilder()
                     .setProjectId(command.getId())
                     .build();

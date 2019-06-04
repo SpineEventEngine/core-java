@@ -60,8 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AbstractCommanderTest {
 
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
-    private final EventFactory eventFactory =
-            TestEventFactory.newInstance(getClass());
+    private final EventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     private final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                 .build();
@@ -99,7 +98,9 @@ class AbstractCommanderTest {
         CmdTaskAdded eventMessage = CmdTaskAdded
                 .newBuilder()
                 .setProjectId(newProjectId())
-                .setTask(Task.newBuilder().setTaskId(newTaskId()))
+                .setTask(Task.newBuilder()
+                             .setTaskId(newTaskId())
+                             .build())
                 .build();
 
         createEventAndPost(eventMessage);

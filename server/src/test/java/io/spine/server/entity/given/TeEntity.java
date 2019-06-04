@@ -22,10 +22,9 @@ package io.spine.server.entity.given;
 
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.test.shared.EmptyEntity;
-import io.spine.server.test.shared.EmptyEntityVBuilder;
 
 public class TeEntity
-        extends TransactionalEntity<Long, EmptyEntity, EmptyEntityVBuilder> {
+        extends TransactionalEntity<Long, EmptyEntity, EmptyEntity.Builder> {
 
     public TeEntity(Long id) {
         super(id);

@@ -5,7 +5,7 @@ package spine.test.server.groups;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.groups";
+option java_package = "io.spine.server.given.groups";
 option java_outer_classname = "GroupProto";
 option java_multiple_files = true;
 
@@ -17,6 +17,7 @@ message GroupId {
 
 message Group {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = SUBSCRIBE;
 
     GroupId id = 1;
 
@@ -26,7 +27,6 @@ message Group {
 }
 
 message GroupName {
-
     option (entity).kind = PROJECTION;
 
     GroupId id = 1;

@@ -208,7 +208,7 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
                         ADVISE_CHECK_ROUTING;
         checkArgument(firstParamType.isAssignableFrom(actualArgumentType),
                       errorMessage,
-                      actualArgumentType.getName(),
-                      firstParamType.getName());
+                      firstParamType.getName(),
+                      actualArgumentType.getName());
     }
 }

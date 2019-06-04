@@ -23,11 +23,11 @@ package io.spine.client.given;
 import io.spine.core.ActorContext;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
+import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeUrl;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
-import static io.spine.core.Utils.toTemporal;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TopicFactoryTestEnv {
 
@@ -51,9 +51,8 @@ public class TopicFactoryTestEnv {
 
         // It's impossible to get the same creation time for the `expected` value,
         //    so checking that the `actual` value is not later than `expected`.
-        assertTrue(
-                toTemporal(actual.getTimestamp())
-                        .isEarlierOrSameAs(toTemporal(expected.getTimestamp()))
-        );
+        Comparable<TimestampTemporal> actualTemporal = TimestampTemporal.from(actual.getTimestamp());
+        TimestampTemporal expectedTimestamp = TimestampTemporal.from(expected.getTimestamp());
+        assertThat(actualTemporal).isAtMost(expectedTimestamp);
     }
 }

@@ -25,7 +25,6 @@ import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuPmState;
-import io.spine.testing.server.given.entity.TuPmStateVBuilder;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.command.TuAssignProject;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
@@ -35,7 +34,7 @@ import io.spine.testing.server.given.entity.event.TuProjectCreated;
  * routes a nested command.
  */
 public class CommandingPm
-        extends ProcessManager<TuProjectId, TuPmState, TuPmStateVBuilder> {
+        extends ProcessManager<TuProjectId, TuPmState, TuPmState.Builder> {
 
     public static final TuProjectId ID =
             TuProjectId.newBuilder()

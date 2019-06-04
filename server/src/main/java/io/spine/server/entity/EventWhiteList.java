@@ -29,10 +29,10 @@ import java.util.Optional;
 /**
  * An {@link EventFilter} which allows only events of given types.
  *
- * <p>All the other events are discarded by this filter by default.
+ * <p>All other events are discarded by this filter by default.
  *
- * <p><b>Caution:</b> when using this filter, make sure you're aware of consequences of discarding
- * system events posted by a repository.
+ * <p><b>Caution:</b> Make sure you are aware of consequences of discarding
+ * system events posted by a repository when using this filter.
  *
  * @see EventBlackList
  */

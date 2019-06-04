@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  *     <li>be annotated with {@link React @React};
  *     <li>have package-private visibility;
  *     <li>accept an event message (derived from {@link io.spine.base.EventMessage
- *         EventMessage}), as the first parameter;
+ *         EventMessage}) as the first parameter;
  *     <li>return an event message derived from {@link io.spine.base.EventMessage Message}
  *         <strong>or</strong> several event messages returned as an {@code Iterable}.
  * </ul>

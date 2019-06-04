@@ -64,7 +64,7 @@ message CommandLifecycle {
 message CommandTarget {
 
     // The ID of the entity which the command is dispatched to.
-    spine.client.EntityId entity_id = 1 [(valid) = true];
+    spine.client.EntityId entity_id = 1 [(validate) = true];
 
     // The state type URL of the entity which receives the command.
     string type_url = 2 [(required) = true];

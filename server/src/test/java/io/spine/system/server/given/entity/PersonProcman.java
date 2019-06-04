@@ -26,7 +26,8 @@ import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.PersonCreation;
-import io.spine.system.server.PersonCreationVBuilder;
+import io.spine.system.server.PersonCreationCompleted;
+import io.spine.system.server.PersonCreationStarted;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonNameCreated;
 import io.spine.system.server.StartPersonCreation;
@@ -36,7 +37,7 @@ import io.spine.type.TypeUrl;
  * A process manager which handles person creation.
  */
 public final class PersonProcman
-        extends ProcessManager<PersonId, PersonCreation, PersonCreationVBuilder> {
+        extends ProcessManager<PersonId, PersonCreation, PersonCreation.Builder> {
 
     public static final TypeUrl TYPE = TypeUrl.of(PersonCreation.class);
 
@@ -45,16 +46,22 @@ public final class PersonProcman
     }
 
     @Assign
-    Nothing handle(StartPersonCreation command) {
+    PersonCreationStarted handle(StartPersonCreation command) {
         builder().setId(command.getId());
-        return nothing();
+        return PersonCreationStarted
+                .newBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
-    Nothing handle(CompletePersonCreation command) {
+    PersonCreationCompleted handle(CompletePersonCreation command) {
         builder().setId(command.getId())
-                    .setCreated(true);
-        return nothing();
+                 .setCreated(true);
+        return PersonCreationCompleted
+                .newBuilder()
+                .setId(command.getId())
+                .build();
     }
 
     @React

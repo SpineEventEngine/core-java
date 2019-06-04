@@ -36,16 +36,15 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.CmdStartProject;
-import io.spine.test.command.Project;
-import io.spine.test.command.ProjectId;
-import io.spine.test.command.ProjectVBuilder;
-import io.spine.test.command.Task;
-import io.spine.test.command.event.CmdProjectCreated;
-import io.spine.test.command.event.CmdProjectStarted;
-import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.test.commandbus.Project;
+import io.spine.test.commandbus.ProjectId;
+import io.spine.test.commandbus.Task;
+import io.spine.test.commandbus.command.CmdBusAddTask;
+import io.spine.test.commandbus.command.CmdBusCreateProject;
+import io.spine.test.commandbus.command.CmdBusStartProject;
+import io.spine.test.commandbus.event.CmdBusProjectCreated;
+import io.spine.test.commandbus.event.CmdBusProjectStarted;
+import io.spine.test.commandbus.event.CmdBusTaskAdded;
 
 import java.util.Collections;
 import java.util.Set;
@@ -60,8 +59,8 @@ public class CommandDispatcherRegistryTestEnv {
      ***************************/
 
     public static class NoCommandsProcessManager
-            extends ProcessManager<ProjectId, Project, ProjectVBuilder>
-            implements TestEntityWithStringColumn {
+            extends ProcessManager<ProjectId, Project, Project.Builder>
+            implements TestEntityWithStringColumn<ProjectId, Project> {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
@@ -75,7 +74,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        void on(CmdProjectCreated event) {
+        void on(CmdBusProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -91,7 +90,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        void on(CmdTaskAdded event) {
+        void on(CmdBusTaskAdded event) {
             keep(event);
 
             Task task = event.getTask();
@@ -106,7 +105,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Subscribe
-        void on(CmdProjectStarted event) {
+        void on(CmdBusProjectStarted event) {
             keep(event);
 
             handleProjectStarted();
@@ -152,9 +151,9 @@ public class CommandDispatcherRegistryTestEnv {
 
         @Override
         public Set<CommandClass> messageClasses() {
-            return CommandClass.setOf(CmdCreateProject.class,
-                                      CmdStartProject.class,
-                                      CmdAddTask.class);
+            return CommandClass.setOf(CmdBusCreateProject.class,
+                                      CmdBusStartProject.class,
+                                      CmdBusAddTask.class);
         }
 
         @Override
@@ -172,7 +171,7 @@ public class CommandDispatcherRegistryTestEnv {
 
         @Override
         public Set<CommandClass> messageClasses() {
-            return CommandClass.setOf(CmdCreateProject.class);
+            return CommandClass.setOf(CmdBusCreateProject.class);
         }
 
         @Override
@@ -190,7 +189,7 @@ public class CommandDispatcherRegistryTestEnv {
 
         @Override
         public Set<CommandClass> messageClasses() {
-            return CommandClass.setOf(CmdAddTask.class);
+            return CommandClass.setOf(CmdBusAddTask.class);
         }
 
         @Override
@@ -216,8 +215,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Assign
-        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
-            return CmdProjectCreated.getDefaultInstance();
+        CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
+            return CmdBusProjectCreated.getDefaultInstance();
         }
     }
 
@@ -228,18 +227,18 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Assign
-        CmdProjectCreated handle(CmdCreateProject command, CommandContext ctx) {
-            return CmdProjectCreated.getDefaultInstance();
+        CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
+            return CmdBusProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        CmdTaskAdded handle(CmdAddTask command) {
-            return CmdTaskAdded.getDefaultInstance();
+        CmdBusTaskAdded handle(CmdBusAddTask command) {
+            return CmdBusTaskAdded.getDefaultInstance();
         }
 
         @Assign
-        CmdProjectStarted handle(CmdStartProject command) {
-            return CmdProjectStarted.getDefaultInstance();
+        CmdBusProjectStarted handle(CmdBusStartProject command) {
+            return CmdBusProjectStarted.getDefaultInstance();
         }
     }
 

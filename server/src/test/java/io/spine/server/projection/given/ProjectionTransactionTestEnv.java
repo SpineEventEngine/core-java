@@ -23,7 +23,6 @@ package io.spine.server.projection.given;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.projection.Projection;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -43,7 +42,7 @@ public class ProjectionTransactionTestEnv {
     }
 
     public static class TestProjection
-            extends Projection<ProjectId, Project, PatchedProjectBuilder> {
+            extends Projection<ProjectId, Project, Project.Builder> {
 
         private final List<Message> receivedEvents = newLinkedList();
         private final List<ConstraintViolation> violations;
@@ -52,7 +51,8 @@ public class ProjectionTransactionTestEnv {
             this(id, null);
         }
 
-        public TestProjection(ProjectId id, @Nullable List<ConstraintViolation> violations) {
+        public TestProjection(ProjectId id,
+                              @Nullable ImmutableList<ConstraintViolation> violations) {
             super(id);
             this.violations = violations;
         }
@@ -81,21 +81,6 @@ public class ProjectionTransactionTestEnv {
 
         public List<Message> getReceivedEvents() {
             return ImmutableList.copyOf(receivedEvents);
-        }
-    }
-
-    /**
-     * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
-     * during the state building.
-     *
-     * <p>Must be declared {@code public} to allow accessing from the
-     * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
-     */
-    public static class PatchedProjectBuilder
-            extends ThrowingValidatingBuilder<Project, Project.Builder> {
-
-        public static PatchedProjectBuilder newBuilder() {
-            return new PatchedProjectBuilder();
         }
     }
 }

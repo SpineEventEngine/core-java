@@ -27,7 +27,6 @@ import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.system.server.CreatePersonName;
 import io.spine.system.server.PersonFirstName;
-import io.spine.system.server.PersonFirstNameVBuilder;
 import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonNameCreated;
 import io.spine.system.server.PersonRenamed;
@@ -37,7 +36,7 @@ import io.spine.type.TypeUrl;
  * An aggregate part which handles a person first name.
  */
 public class PersonNamePart
-        extends AggregatePart<PersonId, PersonFirstName, PersonFirstNameVBuilder, PersonRoot> {
+        extends AggregatePart<PersonId, PersonFirstName, PersonFirstName.Builder, PersonRoot> {
 
     public static final TypeUrl TYPE = TypeUrl.of(PersonFirstName.class);
 
@@ -52,10 +51,11 @@ public class PersonNamePart
 
     @Assign
     PersonNameCreated handle(CreatePersonName command) {
-        return PersonNameCreated.newBuilder()
-                                .setId(command.getId())
-                                .setFirstName(command.getFirstName())
-                                .build();
+        return PersonNameCreated
+                .newBuilder()
+                .setId(command.getId())
+                .setFirstName(command.getFirstName())
+                .build();
     }
 
     @Apply

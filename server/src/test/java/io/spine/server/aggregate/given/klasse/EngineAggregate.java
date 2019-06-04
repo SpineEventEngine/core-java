@@ -43,7 +43,7 @@ import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
 /**
  * A engine which handles commands and reacts on domestic and external events.
  */
-public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder> {
+public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder> {
 
     @Assign
     EngineStarted handle(StartEngine command) throws EngineAlreadyStarted {
@@ -84,7 +84,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      */
     @Apply(allowImport = true)
     private void on(SettingsAdjusted event) {
-        // Do nothing for now.
+        builder().setStatus(STOPPED);
     }
 
     /*
@@ -115,8 +115,8 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
      *
      * Since this class reacts on own rejections (which are derived from
      * ThrowableMessage and have the same names as corresponding rejection
-     * message classes), we cannot import the outer class in which they
-     * are declared.
+     * message classes), we cannot import the nested classes because of
+     * the name clash.
      *********************************************************************/
 
     @React

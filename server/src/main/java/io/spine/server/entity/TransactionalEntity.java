@@ -24,8 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.reflect.GenericTypeIndex;
-import io.spine.validate.ValidatingBuilder;
+import io.spine.protobuf.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,20 +33,20 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A base for entities, perform transactions {@linkplain Event events}.
  *
- * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
+ * <p>Defines a transaction-based mechanism for state, version, and lifecycle flags update.
  *
  * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
  */
 public abstract class TransactionalEntity<I,
                                           S extends Message,
-                                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                          B extends ValidatingBuilder<S>>
                       extends AbstractEntity<I, S> {
 
     private final RecentHistory recentHistory = new RecentHistory();
 
     /**
-     * The flag, which becomes {@code true}, if the state of the entity has been changed
+     * The flag which becomes {@code true} if the state of the entity has been changed
      * since it has been {@linkplain RecordBasedRepository#findOrCreate(Object) loaded or created}.
      */
     private volatile boolean stateChanged;
@@ -124,7 +123,7 @@ public abstract class TransactionalEntity<I,
     }
 
     /**
-     * Ensures that the entity has non-null and active transaction.
+     * Ensures that the entity has not null and active transaction.
      *
      * @throws IllegalStateException if the transaction is null or not active
      */
@@ -132,7 +131,7 @@ public abstract class TransactionalEntity<I,
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(missingTxMessage());
         }
-        return transaction;
+        return checkNotNull(transaction);
     }
 
     /**
@@ -153,7 +152,7 @@ public abstract class TransactionalEntity<I,
      * @return {@code true} if it is active, {@code false} otherwise
      */
     @VisibleForTesting
-    boolean isTransactionInProgress() {
+    final boolean isTransactionInProgress() {
         Transaction<?, ?, ?, ?> tx = this.transaction;
         boolean result = tx != null && tx.isActive();
         return result;
@@ -165,8 +164,8 @@ public abstract class TransactionalEntity<I,
         checkNotNull(tx);
 
         /*
-            In order to be sure we are not hijacked, we must be sure that the transaction
-            is injected to the very same object, wrapped into the transaction.
+            To ensure we are not hijacked, we must be sure that the transaction
+            is injected to the very same object and wrapped into the transaction.
         */
         checkState(tx.entity() == this,
                    "Transaction injected to this " + this
@@ -193,8 +192,8 @@ public abstract class TransactionalEntity<I,
     }
 
     B builderFromState() {
-        B builder = newBuilderInstance();
-        builder.setOriginalState(state());
+        @SuppressWarnings("unchecked") // Logically checked.
+        B builder = (B) state().toBuilder();
         return builder;
     }
 
@@ -241,54 +240,5 @@ public abstract class TransactionalEntity<I,
     @Override
     protected void setDeleted(boolean deleted) {
         tx().setDeleted(deleted);
-    }
-
-    private B newBuilderInstance() {
-        @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
-        Class<? extends TransactionalEntity<I, S, B>> cls =
-                (Class<? extends TransactionalEntity<I, S, B>>) getClass();
-        Class<B> builderClass = getBuilderClass(cls);
-        B builder = ValidatingBuilder.newInstance(builderClass);
-        return builder;
-    }
-
-    /**
-     * Enumeration of generic type parameters of this class.
-     */
-    enum GenericParameter implements GenericTypeIndex<TransactionalEntity> {
-
-        /** The index of the generic type {@code <I>}. */
-        ID(0),
-
-        /** The index of the generic type {@code <S>}. */
-        STATE(1),
-
-        /** The index of the generic type {@code <B>}. */
-        STATE_BUILDER(2);
-
-        private final int index;
-
-        GenericParameter(int index) {
-            this.index = index;
-        }
-
-        @Override
-        public int index() {
-            return this.index;
-        }
-
-    }
-
-    /**
-     * Obtains the class of the {@linkplain io.spine.validate.ValidatingBuilder} for the given
-     * {@code TransactionalEntity} descendant class {@code entityClass}.
-     */
-    private static <I, S extends Message, B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
-        checkNotNull(entityClass);
-        @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
-        Class<B> builderClass = (Class<B>)
-                    GenericParameter.STATE_BUILDER.argumentIn(entityClass);
-        return builderClass;
     }
 }

@@ -44,7 +44,6 @@ import io.spine.server.entity.storage.Enumerated;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testing.core.given.GivenVersion;
 
 import java.util.Collection;
@@ -162,7 +161,7 @@ public class RecordStorageTestEnv {
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity
-            extends TransactionalEntity<ProjectId, Project, ProjectVBuilder> {
+            extends TransactionalEntity<ProjectId, Project, Project.Builder> {
 
         private int counter = 0;
 
@@ -261,6 +260,7 @@ public class RecordStorageTestEnv {
 
         LifecycleColumns(String getterName) {
             try {
+
                 this.column = EntityColumn.from(Entity.class.getDeclaredMethod(getterName));
             } catch (NoSuchMethodException e) {
                 throw illegalStateWithCauseOf(e);

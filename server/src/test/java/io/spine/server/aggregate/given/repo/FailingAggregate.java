@@ -31,7 +31,6 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.StringAggregate;
-import io.spine.server.test.shared.StringAggregateVBuilder;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.DoNothing;
 import io.spine.test.aggregate.number.FloatEncountered;
@@ -53,7 +52,7 @@ import static java.util.Collections.emptyList;
  *
  * @see FailingAggregateRepository
  */
-class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregateVBuilder> {
+class FailingAggregate extends Aggregate<Long, StringAggregate, StringAggregate.Builder> {
 
     @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
     static long toId(FloatEncountered message) {

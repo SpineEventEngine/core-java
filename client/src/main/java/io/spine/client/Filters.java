@@ -45,7 +45,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
 /**
  * A factory of {@link Filter} instances.
  *
- * <p>The public methods of this class represent the recommended way to create
+ * <p>Public methods of this class represent the recommended way to create
  * a {@link Filter}.
  *
  * <a name="types"></a>
@@ -60,7 +60,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
  * <p>The {@linkplain #eq equality comparison} supports any data type for the compared objects.
  *
  * <p>The ordering comparison ({@link #gt &gt;}, {@link #lt &lt;}, {@link #ge &gt;=},
- * {@link #le &lt;=}) supports only following types:
+ * {@link #le &lt;=}) supports only the following types:
  * <ul>
  *     <li>{@link Timestamp com.google.protobuf.Timestamp};
  *     <li>Java primitive number types;
@@ -111,7 +111,7 @@ public final class Filters {
     /**
      * Creates new "less than" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
      * @param fieldPath
      *         the field path or the entity column name for entity filters
@@ -129,7 +129,7 @@ public final class Filters {
     /**
      * Creates new "greater or equal" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
      * @param fieldPath
      *         the field path or the entity column name for entity filters
@@ -147,7 +147,7 @@ public final class Filters {
     /**
      * Creates new "less or equal" {@link Filter}.
      *
-     * <p>For the supported types description see <a href="#types">Comparison types section</a>.
+     * <p>See <a href="#types">Comparison types</a> section for the supported types description.
      *
      * @param fieldPath
      *         the field path or the entity column name for entity filters
@@ -224,7 +224,7 @@ public final class Filters {
     private static Filter createFilter(String fieldPath, Object value, Operator operator) {
         FieldPath path = FieldPaths.parse(fieldPath);
         Any wrappedValue = toAny(value);
-        Filter filter = FilterVBuilder
+        Filter filter = Filter
                 .newBuilder()
                 .setFieldPath(path)
                 .setValue(wrappedValue)

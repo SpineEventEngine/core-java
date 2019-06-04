@@ -55,7 +55,6 @@ ext {
 
     credentialsPropertyFile = 'credentials.properties'
     publishPlugin = "$rootDir/config/gradle/publish.gradle"
-    modelCompilerConfiguration = "$rootDir/config/gradle/model-compiler.gradle"
     projectsToPublish = ["core",
                          "client",
                          "server",
@@ -103,7 +102,7 @@ subprojects {
     apply plugin: spineProtobufPluginId
 
     apply from: deps.scripts.javacArgs
-    apply from: modelCompilerConfiguration
+    apply from: deps.scripts.modelCompiler
     apply from: deps.scripts.projectLicenseReport
 
     // Specific setup for a Travis build,
@@ -184,6 +183,10 @@ subprojects {
             java.srcDirs generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir
             resources.srcDirs "$generatedRootDir/test/resources"
         }
+    }
+
+    modelCompiler {
+        generateValidatingBuilders = false
     }
 
     test {

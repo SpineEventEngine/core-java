@@ -23,8 +23,9 @@ dependencies {
 
     implementation deps.grpc.grpcNetty
     implementation deps.grpc.grpcProtobuf
-
-    testImplementation "org.junit.jupiter:junit-jupiter-params:$deps.versions.junit5"
+    
+    testAnnotationProcessor deps.build.autoService.processor
+    testCompileOnly deps.build.autoService.annotations
 
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation project(path: ":core", configuration: 'testArtifacts')

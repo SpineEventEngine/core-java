@@ -38,7 +38,6 @@ import io.spine.server.stand.Stand;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -489,7 +488,7 @@ class SubscriptionServiceTest {
         return Targets.allOf(Project.class);
     }
 
-    private static class PAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    private static class PAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         protected PAggregate(ProjectId id) {
             super(id);

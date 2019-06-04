@@ -75,7 +75,7 @@ public class EventFactory {
      * Creates an event for the passed event message.
      *
      * <p>The message passed is validated according to the constraints set in its Protobuf
-     * definition. In case the message isn't valid, an {@linkplain ValidationException
+     * definition. If the message is invalid, an {@linkplain ValidationException
      * exception} is thrown.
      *
      * <p>In the message is an instance of {@code Any}, it is unpacked for validation.
@@ -161,7 +161,7 @@ public class EventFactory {
         checkNotNull(context);
         Any packed = pack(message);
         Event result = Event
-                .vBuilder()
+                .newBuilder()
                 .setId(id)
                 .setMessage(packed)
                 .setContext(context)

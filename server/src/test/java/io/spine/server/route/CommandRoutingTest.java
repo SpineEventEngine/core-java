@@ -81,7 +81,7 @@ class CommandRoutingTest {
 
     @BeforeEach
     void setUp() {
-        commandRouting = CommandRouting.newInstance();
+        commandRouting = CommandRouting.newInstance(Long.class);
     }
 
     @Test
@@ -97,15 +97,15 @@ class CommandRoutingTest {
     @Test
     @DisplayName("have default route")
     void haveDefaultRoute() {
-        assertNotNull(commandRouting.getDefault());
-        assertTrue(commandRouting.getDefault() instanceof DefaultCommandRoute);
+        assertNotNull(commandRouting.defaultRoute());
+        assertTrue(commandRouting.defaultRoute() instanceof DefaultCommandRoute);
     }
 
     @Test
     @DisplayName("replace default route")
     void replaceDefaultRoute() {
         assertEquals(commandRouting, commandRouting.replaceDefault(customDefault));
-        assertEquals(customDefault, commandRouting.getDefault());
+        assertEquals(customDefault, commandRouting.defaultRoute());
     }
 
     @Test

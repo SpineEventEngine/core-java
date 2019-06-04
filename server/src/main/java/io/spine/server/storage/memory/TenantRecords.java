@@ -140,7 +140,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         EntityRecord record = recordWithColumns.getRecord();
         Any recordState = record.getState();
         Any maskedState = new FieldMaskApplier(fieldMask).maskAny(recordState);
-        EntityRecord maskedRecord = record.toVBuilder()
+        EntityRecord maskedRecord = record.toBuilder()
                                           .setState(maskedState)
                                           .build();
         return maskedRecord;

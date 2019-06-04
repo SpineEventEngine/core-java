@@ -27,12 +27,12 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * An annotation, which is used to mark getters for {@linkplain EntityColumn entity columns}.
+ * An annotation which is used to mark getters for {@linkplain EntityColumn entity columns}.
  *
  * <p>The properties of the annotation affect how the column will be persisted.
  *
  * <p>The annotation will have effect only if it's applied to a {@code public} instance getter,
- * i.e. a method without parameters and with {@code get-} prefix. An {@code is-} prefix is also
+ * meaning a method without parameters and with {@code get-} prefix. An {@code is-} prefix is also
  * supported but only for properties of {@code boolean} and {@code Boolean} types.
  *
  * <p>The class declaring an entity column <b>must</b> as well be {@code public}.
@@ -52,10 +52,10 @@ public @interface Column {
      * (Optional) The custom {@linkplain EntityColumn#getStoredName() name} of the column
      * to be persisted.
      *
-     * <p>Defaults to the {@linkplain EntityColumn#getName() name} extracted from the getter,
+     * <p>Defaults to the {@linkplain EntityColumn#getName() name} extracted from the getter
      * which is used for querying.
      *
-     * <p>This value does not changes a {@linkplain EntityColumn#getName() name} of column,
+     * <p>This value does not changes a {@linkplain EntityColumn#getName() name} of column
      * that should be used for {@linkplain EntityQueries querying}.
      */
     String name() default "";

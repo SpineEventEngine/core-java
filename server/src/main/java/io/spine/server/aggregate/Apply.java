@@ -40,11 +40,11 @@ import java.lang.annotation.Target;
  *         as the only parameter.
  * </ul>
  *
- * <p>In order to update the state of the aggregate, the {@link Aggregate#builder()} method
+ * <p>To update the state of the aggregate, the {@link Aggregate#builder()} method
  * should be used.
  *
  * <p>If the annotation comes with the attribute {@link #allowImport() allowImport} set to
- * {@code true}, the aggregate would be able receive incoming events as if they were produced
+ * {@code true}, the aggregate can receive incoming events as if they were produced
  * by the aggregate.
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -56,7 +56,7 @@ public @interface Apply {
      * defined as the first parameter of the annotated method.
      *
      * @see ImportBus
-     * @see AggregateRepository#eventImportRouting()
+     * @see AggregateRepository#setupImportRouting(io.spine.server.route.EventRouting)
      */
     boolean allowImport() default false;
 }

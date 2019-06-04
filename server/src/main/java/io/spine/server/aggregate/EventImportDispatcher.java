@@ -64,7 +64,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
 
     @Override
     public Set<EventClass> messageClasses() {
-        return repository.importableEventClasses();
+        return repository.importableEvents();
     }
 
     /**

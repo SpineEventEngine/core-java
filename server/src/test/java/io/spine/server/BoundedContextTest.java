@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.truth.Truth8;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
@@ -39,6 +40,7 @@ import io.spine.server.bc.given.ProjectReport;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.store.EventStore;
@@ -65,12 +67,13 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
+import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -99,32 +102,33 @@ class BoundedContextTest {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
 
     private boolean handlersRegistered = false;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
+        context = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
     }
 
     @AfterEach
     void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.eventBus()
-                          .unregister(subscriber);
+            context.eventBus()
+                   .unregister(subscriber);
         }
-        boundedContext.close();
+        context.close();
     }
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
-        boundedContext.eventBus()
-                      .register(subscriber);
+        context.register(DefaultRepository.of(ProjectAggregate.class));
+        context.eventBus()
+               .register(subscriber);
         handlersRegistered = true;
     }
 
@@ -135,27 +139,28 @@ class BoundedContextTest {
         @Test
         @DisplayName("EventBus")
         void eventBus() {
-            assertNotNull(boundedContext.eventBus());
+            assertNotNull(context.eventBus());
         }
 
         @Test
         @DisplayName("IntegrationBus")
         void integrationBus() {
-            assertNotNull(boundedContext.integrationBus());
+            assertNotNull(context.integrationBus());
         }
 
         @Test
         @DisplayName("CommandDispatcher")
         void commandDispatcher() {
-            assertNotNull(boundedContext.commandBus());
+            assertNotNull(context.commandBus());
         }
 
         @Test
         @DisplayName("multitenancy state")
         void ifSetMultitenant() {
-            BoundedContext bc = BoundedContext.newBuilder()
-                                              .setMultitenant(true)
-                                              .build();
+            BoundedContext bc = BoundedContext
+                    .newBuilder()
+                    .setMultitenant(true)
+                    .build();
             assertTrue(bc.isMultitenant());
         }
     }
@@ -167,21 +172,75 @@ class BoundedContextTest {
         @Test
         @DisplayName("AggregateRepository")
         void aggregateRepository() {
-            boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
+            registerAndAssertRepository(ProjectAggregate.class);
         }
 
         @Test
         @DisplayName("ProcessManagerRepository")
         void processManagerRepository() {
-            ModelTests.dropAllModels();
-
-            boundedContext.register(DefaultRepository.of(ProjectProcessManager.class));
+            registerAndAssertRepository(ProjectProcessManager.class);
         }
 
         @Test
         @DisplayName("ProjectionRepository")
         void projectionRepository() {
-            boundedContext.register(DefaultRepository.of(ProjectReport.class));
+            registerAndAssertRepository(ProjectReport.class);
+        }
+
+        <I, E extends Entity<I, ?>> void registerAndAssertRepository(Class<E> cls) {
+            context.register(DefaultRepository.of(cls));
+            assertTrue(context.hasEntitiesOfType(cls));
+        }
+
+        @Test
+        @DisplayName("DefaultRepository via passed entity class")
+        void entityClass() {
+            context.register(ProjectAggregate.class);
+            assertTrue(context.hasEntitiesOfType(ProjectAggregate.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("test presence of entities by")
+    class EntityTypePresence {
+
+        @Nested
+        @DisplayName("entity state class for")
+        class ByEntityStateClass {
+
+            @Test
+            @DisplayName("visible entities")
+            void visible() {
+                context.register(ProjectAggregate.class);
+                assertTrue(context.hasEntitiesWithState(Project.class));
+            }
+
+            @Test
+            @DisplayName("invisible entities")
+            void invisible() {
+                context.register(new SecretProjectRepository());
+                assertTrue(context.hasEntitiesWithState(SecretProject.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("entity class for")
+        class ByEntityClass {
+
+            @Test
+            @DisplayName("visible entities")
+            void visible() {
+                context.register(ProjectAggregate.class);
+                assertTrue(context.hasEntitiesOfType(ProjectAggregate.class));
+            }
+
+            @Test
+            @DisplayName("invisible entities")
+            void invisible() {
+                // Process Managers are invisible by default.
+                context.register(ProjectProcessManager.class);
+                assertTrue(context.hasEntitiesOfType(ProjectProcessManager.class));
+            }
         }
     }
 
@@ -194,7 +253,8 @@ class BoundedContextTest {
         assertTrue(stand.getExposedTypes().isEmpty());
         Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
         boundedContext.register(repo);
-        assertThat(stand.getExposedTypes()).containsExactly(repo.entityStateType());
+        assertThat(stand.getExposedTypes())
+                .containsExactly(repo.entityStateType());
     }
 
     @Test
@@ -214,9 +274,10 @@ class BoundedContextTest {
     @ParameterizedTest
     @MethodSource("sameStateRepositories")
     @DisplayName("not allow two entity repositories with entities of same state")
-    void throwOnSameEntityState(Repository<?, ?> firstRepo, Repository<?, ?> secondRepo) {
-        boundedContext.register(firstRepo);
-        assertThrows(IllegalStateException.class, () -> boundedContext.register(secondRepo));
+    void throwOnSameEntityState(Repository<?, ?> firstRepo,
+                                Repository<?, ?> secondRepo) {
+        context.register(firstRepo);
+        assertThrows(IllegalStateException.class, () -> context.register(secondRepo));
     }
 
     /**
@@ -249,9 +310,9 @@ class BoundedContextTest {
 
         Set<List<Repository<?, ?>>> cartesianProduct =
                 Sets.cartesianProduct(repositories, sameStateRepositories);
-        Stream<Arguments> result = cartesianProduct.stream()
-                                                   .map(repos -> Arguments.of(repos.get(0),
-                                                                              repos.get(1)));
+        Stream<Arguments> result =
+                cartesianProduct.stream()
+                                .map(repos -> Arguments.of(repos.get(0), repos.get(1)));
         return result;
     }
 
@@ -260,7 +321,7 @@ class BoundedContextTest {
     void setStorageOnRegister() {
         Repository<ProjectId, ProjectAggregate> repository =
                 DefaultRepository.of(ProjectAggregate.class);
-        boundedContext.register(repository);
+        context.register(repository);
         assertTrue(repository.isStorageAssigned());
     }
 
@@ -269,21 +330,22 @@ class BoundedContextTest {
     void notOverrideStorage() {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         Repository spy = spy(repository);
-        boundedContext.register(repository);
+        context.register(repository);
         verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 
     @Test
-    @DisplayName("set storage factory for EventBus")
+    @DisplayName("allow custom EventBus")
     void setEventBusStorageFactory() {
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setEventBus(EventBus.newBuilder())
-                                          .build();
+        BoundedContext bc = BoundedContext
+                .newBuilder()
+                .setEventBus(EventBus.newBuilder())
+                .build();
         assertNotNull(bc.eventBus());
     }
 
     @Test
-    @DisplayName("not set storage factory for EventBus if EventStore is set")
+    @DisplayName("not overwrite EventStore if already set in EventBus.Builder")
     void useEventStoreIfSet() {
         EventStore eventStore = eventStore();
         BoundedContext bc = BoundedContext.newBuilder()
@@ -303,10 +365,11 @@ class BoundedContextTest {
         void ofCommandBus() {
             CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                       .setMultitenant(false);
-            assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
-                                                                          .setMultitenant(true)
-                                                                          .setCommandBus(commandBus)
-                                                                          .build());
+            assertThrows(IllegalStateException.class,
+                         () -> BoundedContext.newBuilder()
+                                             .setMultitenant(true)
+                                             .setCommandBus(commandBus)
+                                             .build());
         }
 
         @Test
@@ -314,10 +377,11 @@ class BoundedContextTest {
         void ofStand() {
             Stand.Builder stand = Stand.newBuilder()
                                        .setMultitenant(false);
-            assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
-                                                                          .setMultitenant(true)
-                                                                          .setStand(stand)
-                                                                          .build());
+            assertThrows(IllegalStateException.class,
+                         () -> BoundedContext.newBuilder()
+                                             .setMultitenant(true)
+                                             .setStand(stand)
+                                             .build());
         }
     }
 
@@ -325,40 +389,47 @@ class BoundedContextTest {
     @DisplayName("assign own multitenancy state to")
     class AssignMultitenancyState {
 
+        private BoundedContext context;
+
         @Test
         @DisplayName("CommandBus")
         void toCommandBus() {
-            BoundedContext bc = BoundedContext.newBuilder()
-                                              .setMultitenant(true)
-                                              .build();
+            context = multiTenant();
+            assertMultitenancyEqual(context::isMultitenant, context.commandBus()::isMultitenant);
 
-            assertEquals(bc.isMultitenant(), bc.commandBus()
-                                               .isMultitenant());
-
-            bc = BoundedContext.newBuilder()
-                               .setMultitenant(false)
-                               .build();
-
-            assertEquals(bc.isMultitenant(), bc.commandBus()
-                                               .isMultitenant());
+            context = singleTenant();
+            assertMultitenancyEqual(context::isMultitenant, context.commandBus()::isMultitenant);
         }
 
         @Test
         @DisplayName("Stand")
         void toStand() {
-            BoundedContext bc = BoundedContext.newBuilder()
-                                              .setMultitenant(true)
-                                              .build();
+            context = multiTenant();
 
-            assertEquals(bc.isMultitenant(), bc.stand()
-                                               .isMultitenant());
+            assertMultitenancyEqual(context::isMultitenant, context.stand()::isMultitenant);
 
-            bc = BoundedContext.newBuilder()
-                               .setMultitenant(false)
-                               .build();
+            context = singleTenant();
 
-            assertEquals(bc.isMultitenant(), bc.stand()
-                                               .isMultitenant());
+            assertMultitenancyEqual(context::isMultitenant, context.stand()::isMultitenant);
+        }
+
+        private void assertMultitenancyEqual(BooleanSupplier s1, BooleanSupplier s2) {
+            assertThat(s1.getAsBoolean())
+                    .isEqualTo(s2.getAsBoolean());
+        }
+
+        private BoundedContext multiTenant() {
+            return BoundedContext
+                    .newBuilder()
+                    .setMultitenant(true)
+                    .build();
+        }
+
+        private BoundedContext singleTenant() {
+            return BoundedContext
+                    .newBuilder()
+                    .setMultitenant(false)
+                    .build();
         }
     }
 
@@ -372,13 +443,13 @@ class BoundedContextTest {
     @Test
     @DisplayName("obtain entity types by visibility")
     void getEntityTypesByVisibility() {
-        assertTrue(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
-                                 .isEmpty());
+        assertThat(context.stateTypes(EntityOption.Visibility.FULL))
+                .isEmpty();
 
         registerAll();
 
-        assertFalse(boundedContext.entityStateTypes(EntityOption.Visibility.FULL)
-                                  .isEmpty());
+        assertThat(context.stateTypes(EntityOption.Visibility.FULL))
+                .isNotEmpty();
     }
 
     @Test
@@ -386,7 +457,7 @@ class BoundedContextTest {
     void throwOnNoRepoFound() {
         // Attempt to get a repository without registering.
         assertThrows(IllegalStateException.class,
-                     () -> boundedContext.findRepository(Project.class));
+                     () -> context.findRepository(Project.class));
     }
 
     @Test
@@ -394,10 +465,10 @@ class BoundedContextTest {
     void notExposeInvisibleAggregates() {
         ModelTests.dropAllModels();
 
-        boundedContext.register(new SecretProjectRepository());
+        context.register(new SecretProjectRepository());
 
-        assertFalse(boundedContext.findRepository(SecretProject.class)
-                                  .isPresent());
+        Truth8.assertThat(context.findRepository(SecretProject.class))
+              .isEmpty();
     }
 
     @Test
@@ -441,5 +512,17 @@ class BoundedContextTest {
         SubstituteLoggingEvent systemLogEvent = log.poll();
         assertThat(systemLogEvent.getMessage()).contains(systemContextName.getValue());
         assertThat(systemLogEvent.getLevel()).isAtLeast(DEBUG);
+    }
+
+    @Test
+    @DisplayName("return its name in `toString()`")
+    void stringForm() {
+        String name = randomString();
+
+        assertThat(BoundedContext.newBuilder()
+                                 .setName(name)
+                                 .build()
+                                 .toString())
+                .isEqualTo(name);
     }
 }

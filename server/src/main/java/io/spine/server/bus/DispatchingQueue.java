@@ -49,7 +49,7 @@ class DispatchingQueue<E extends MessageEnvelope> {
     /**
      * Enqueues the envelope for dispatching and dispatches it in its turn.
      *
-     * <p>Once an envelope is added to the queue, the following happens: .
+     * <p>Once an envelope is added to the queue, the following happens:
      * <ul>
      *     <li>if another envelope is currently being dispatched, the given envelope is enqueued
      *         as the first item and its dispatching is postponed.

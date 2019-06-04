@@ -28,6 +28,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
@@ -50,9 +51,11 @@ import static java.util.Optional.ofNullable;
  * @param <B> the own type of the builder
  */
 @CanIgnoreReturnValue
-public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
+public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  T extends Message,
-                                 B extends BusBuilder<E, T, B>> {
+                                 E extends MessageEnvelope<?, T, ?>,
+                                 C extends MessageClass<? extends Message>,
+                                 D extends MessageDispatcher<C, E, ?>> {
 
     private final ChainBuilder<E> chainBuilder;
     private final Set<Consumer<E>> listeners = new HashSet<>();
@@ -121,7 +124,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Inject the {@link SystemWriteSide} of the bounded context to which the built bus belongs.
+     * Inject the {@link SystemWriteSide} of the Bounded Context to which the built bus belongs.
      *
      * @apiNote This method is {@link Internal} to the framework. The name of the method starts
      *          with the {@code inject} prefix so that this method does not appear in an
@@ -134,7 +137,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     }
 
     /**
-     * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
+     * Inject the {@link TenantIndex} of the Bounded Context to which the built bus belongs.
      *
      * @apiNote This method is {@link Internal} to the framework. The name of the method starts
      *          with the {@code inject} prefix so that this method does not appear in an
@@ -165,6 +168,8 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
     ChainBuilder<E> chainBuilderCopy() {
         return chainBuilder.copy();
     }
+
+    protected abstract DispatcherRegistry<C, E, D> newRegistry();
 
     /**
      * Creates new instance of {@code Bus} with the set parameters.

@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.AutoIncrement;
 import io.spine.server.entity.CommandDispatchingPhase;
@@ -35,7 +36,6 @@ import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ import static com.google.common.base.Throwables.getRootCause;
 @Internal
 public class PmTransaction<I,
                            S extends Message,
-                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                           B extends ValidatingBuilder<S>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
     /**
@@ -161,7 +161,7 @@ public class PmTransaction<I,
      */
     static <I,
             S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+            B extends ValidatingBuilder<S>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager, LifecycleRules lifecycleRules) {
         PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, lifecycleRules);
         return tx;

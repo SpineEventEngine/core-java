@@ -93,10 +93,10 @@ public class TestEventFactory extends EventFactory {
         checkNotNull(atTime);
         Event event = createEvent(message, version);
         EventContext context = event.context()
-                                    .toVBuilder()
+                                    .toBuilder()
                                     .setTimestamp(atTime)
                                     .build();
-        Event result = event.toVBuilder()
+        Event result = event.toBuilder()
                             .setContext(context)
                             .build();
         return result;

@@ -21,6 +21,7 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -38,23 +39,20 @@ import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvMember;
 import io.spine.test.event.EvMemberInvitation;
 import io.spine.test.event.EvTeam;
 import io.spine.test.event.EvTeamCreation;
-import io.spine.test.event.EvTeamCreationVBuilder;
 import io.spine.test.event.EvTeamId;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamMemberInvited;
 import io.spine.test.event.EvTeamProjectAdded;
-import io.spine.test.event.EvTeamVBuilder;
 import io.spine.test.event.EvUserSignUp;
-import io.spine.test.event.EvUserSignUpVBuilder;
 import io.spine.test.event.Project;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.test.event.ProjectVBuilder;
 import io.spine.test.event.Task;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.command.CreateProject;
@@ -184,21 +182,23 @@ public class EventRootCommandIdTestEnv {
      * This is done for the purposes of the
      * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#aggregate()} test.
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
             extends AggregateRepository<EvTeamId, TeamAggregate> {
 
-        public TeamAggregateRepository() {
-            eventRouting()
-                    .route(ProjectCreated.class,
-                           new EventRoute<EvTeamId, ProjectCreated>() {
-                               private static final long serialVersionUID = 0L;
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+        @Override
+        protected void setupEventRouting(EventRouting<EvTeamId> routing) {
+            super.setupEventRouting(routing);
+            routing.route(ProjectCreated.class,
+                          new EventRoute<EvTeamId, ProjectCreated>() {
+                              private static final long serialVersionUID = 0L;
 
-                               @Override
-                               public Set<EvTeamId> apply(ProjectCreated msg, EventContext ctx) {
-                                   return singleton(msg.getTeamId());
-                               }
-                           });
+                              @Override
+                              public Set<EvTeamId> apply(ProjectCreated msg, EventContext ctx) {
+                                  return singleton(msg.getTeamId());
+                              }
+                          });
+
         }
     }
 
@@ -207,23 +207,25 @@ public class EventRootCommandIdTestEnv {
      * created the invitation. This is done for the purposes of the
      * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#processManager()} test.
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    public static class TeamCreationRepository
+    public static final class TeamCreationRepository
             extends ProcessManagerRepository<EvTeamId, TeamCreationProcessManager, EvTeamCreation> {
 
-        public TeamCreationRepository() {
-            eventRouting()
-                    .route(EvInvitationAccepted.class,
-                           new EventRoute<EvTeamId, EvInvitationAccepted>() {
-                               private static final long serialVersionUID = 0L;
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+        @OverridingMethodsMustInvokeSuper
+        @Override
+        protected void setupEventRouting(EventRouting<EvTeamId> routing) {
+            super.setupEventRouting(routing);
+            routing.route(EvInvitationAccepted.class,
+                          new EventRoute<EvTeamId, EvInvitationAccepted>() {
+                              private static final long serialVersionUID = 0L;
 
-                               @Override
-                               public Set<EvTeamId> apply(EvInvitationAccepted msg,
-                                                          EventContext ctx) {
-                                   return singleton(msg.getInvitation()
-                                                       .getTeamId());
-                               }
-                           });
+                              @Override
+                              public Set<EvTeamId> apply(EvInvitationAccepted msg,
+                                                         EventContext ctx) {
+                                  return singleton(msg.getInvitation()
+                                                      .getTeamId());
+                              }
+                          });
         }
     }
 
@@ -231,7 +233,7 @@ public class EventRootCommandIdTestEnv {
             extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> {
     }
 
-    static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+    static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -283,7 +285,7 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class TeamAggregate extends Aggregate<EvTeamId, EvTeam, EvTeamVBuilder> {
+    static class TeamAggregate extends Aggregate<EvTeamId, EvTeam, EvTeam.Builder> {
 
         private TeamAggregate(EvTeamId id) {
             super(id);
@@ -310,7 +312,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     static class TeamCreationProcessManager
-            extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
+            extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreation.Builder> {
 
         private TeamCreationProcessManager(EvTeamId id) {
             super(id);
@@ -381,7 +383,7 @@ public class EventRootCommandIdTestEnv {
     }
 
     static class UserSignUpProcessManager
-            extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
+            extends ProcessManager<UserId, EvUserSignUp, EvUserSignUp.Builder> {
 
         private UserSignUpProcessManager(UserId id) {
             super(id);

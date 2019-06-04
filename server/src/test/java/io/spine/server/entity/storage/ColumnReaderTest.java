@@ -22,6 +22,7 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.NullPointerTester.Visibility;
+import io.spine.server.entity.storage.given.column.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.column.EntityWithASetterButNoGetter;
 import io.spine.server.entity.storage.given.column.EntityWithBooleanColumns;
 import io.spine.server.entity.storage.given.column.EntityWithColumnFromInterface;
@@ -45,7 +46,6 @@ import static io.spine.server.entity.storage.ColumnTests.assertNotContainsColumn
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,6 +72,13 @@ class ColumnReaderTest {
         assertThrows(IllegalStateException.class, columnReader::readColumns);
     }
 
+    @Test
+    @DisplayName("throw if a column is redefined")
+    void throwOnRedefiningColumn() {
+        ColumnReader columnReader = forClass(EntityRedefiningColumnAnnotation.class);
+        assertThrows(IllegalStateException.class, columnReader::readColumns);
+    }
+
     @Nested
     @DisplayName("retrieve entity columns")
     class RetrieveColumns {
@@ -84,7 +91,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    version.name(), archived.name(), deleted.name(),
+                    archived.name(), deleted.name(),
                     "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
             );
         }
@@ -104,7 +111,7 @@ class ColumnReaderTest {
                                  .map(EntityColumn::getName)
                                  .collect(toList());
             assertThat(columnNames)
-                    .containsAllIn(defaultColumns);
+                    .containsAtLeastElementsIn(defaultColumns);
         }
 
         @Test
@@ -115,7 +122,7 @@ class ColumnReaderTest {
 
             assertContainsColumns(
                     entityColumns,
-                    version.name(), archived.name(), deleted.name(), "visible", "someTime"
+                    archived.name(), deleted.name(), "visible", "someTime"
             );
         }
 
@@ -125,7 +132,7 @@ class ColumnReaderTest {
             ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
             Collection<EntityColumn> entityColumns = columnReader.readColumns();
             assertContainsColumns(entityColumns,
-                                  version.name(), archived.name(), deleted.name(),
+                                  archived.name(), deleted.name(),
                                   "integerFieldValue");
         }
     }

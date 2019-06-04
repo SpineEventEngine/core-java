@@ -23,12 +23,13 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
@@ -42,14 +43,16 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  * <p>Event subscribers are invoked by a {@link ProjectionRepository} that manages instances
  * of a stream projection class.
  *
- * @param <I> the type of the IDs
- * @param <M> the type of the state objects holding projection data
+ * @param <I>
+ *         the type of the IDs
+ * @param <M>
+ *         the type of the state objects holding projection data
  */
 public abstract class Projection<I,
                                  M extends Message,
-                                 B extends ValidatingBuilder<M, ? extends Message.Builder>>
+                                 B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer, EventSubscriber {
+        implements EventPlayer, EventSubscriber, HasVersionColumn<I, M> {
 
     /**
      * Creates a new instance.
@@ -61,7 +64,8 @@ public abstract class Projection<I,
     /**
      * Creates a new instance.
      *
-     * @param id the ID for the new instance
+     * @param id
+     *         the ID for the new instance
      */
     protected Projection(I id) {
         super(id);
@@ -97,8 +101,8 @@ public abstract class Projection<I,
     /**
      * Plays events on the projection.
      *
-     * <p>Unlike {@link Projection#play(Iterable)} this static method opens the
-     * {@linkplain ProjectionTransaction transaction} before events are played, and closes it after.
+     * <p>Unlike {@link Projection#play(Iterable)}, this static method opens the
+     * {@linkplain ProjectionTransaction transaction} before events are played and closes it after.
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
@@ -110,7 +114,7 @@ public abstract class Projection<I,
     }
 
     void apply(EventEnvelope event) {
-        thisClass().getSubscriber(event)
+        thisClass().subscriberOf(event)
                    .ifPresent(method -> method.invoke(this, event));
     }
 

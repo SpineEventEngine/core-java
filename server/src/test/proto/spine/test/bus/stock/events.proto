@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package spine.test.bus.stock;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.bus";
+option java_outer_classname = "StockEventsProto";
+option java_multiple_files = true;
+
+import "spine/test/bus/stock/share.proto";
+
+message ShareTraded {
+
+    stock.ShareId share = 1;
+
+    int32 amount = 2;
+}
+
+message PriceRaised {
+
+    stock.ShareId share = 1;
+
+    float percent = 2;
+}
+
+message PriceDropped {
+
+    stock.ShareId share = 1;
+
+    float percent = 2;
+}
+
+message OfferPublished {
+
+    stock.ShareId share = 1;
+
+    stock.Price initial_price = 2;
+}

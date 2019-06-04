@@ -115,7 +115,7 @@ message Query {
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
     //
     Target target = 2 [(required) = true,
-                       (valid) = true,
+                       (validate) = true,
                        (if_invalid).msg_format = "Invalid query target"];
 
     // Field mask to be applied to the items of the query result.
@@ -125,17 +125,17 @@ message Query {
     // Service information about the environment in which the query was created.
     //
     core.ActorContext context = 4 [(required) = true,
-                                   (valid) = true,
+                                   (validate) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
 
     // An order for entities returned by the Query.
     //
-    OrderBy orderBy = 5 [(valid) = true,
+    OrderBy orderBy = 5 [(validate) = true,
                          (if_invalid).msg_format = "Invalid query order"];
 
     // A specification for a way to paginate the Query results.
     //
-    Pagination pagination = 6 [(valid) = true,
+    Pagination pagination = 6 [(validate) = true,
                                (goes).with = "order",
                                (if_invalid).msg_format = "Invalid query pagination"];
 

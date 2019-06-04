@@ -37,7 +37,6 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmArchiveProject;
@@ -46,6 +45,7 @@ import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.event.PmNothingDone;
 import io.spine.test.procman.event.PmProjectArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectDeleted;
@@ -59,8 +59,8 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.testdata.Sample.builderForType;
 
 public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, ProjectVBuilder>
-        implements TestEntityWithStringColumn {
+        extends ProcessManager<ProjectId, Project, Project.Builder>
+        implements TestEntityWithStringColumn<ProjectId, Project> {
 
     /** The event message we store for inspecting in delivery tests. */
     private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
@@ -84,7 +84,7 @@ public class TestProcessManager
     }
 
     private void handleProjectCreated(ProjectId projectId) {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .setId(projectId)
                                   .setStatus(Project.Status.CREATED)
                                   .build();
@@ -92,14 +92,14 @@ public class TestProcessManager
     }
 
     private void handleTaskAdded(Task task) {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .addTask(task)
                                   .build();
         builder().mergeFrom(newState);
     }
 
     private void handleProjectStarted() {
-        Project newState = state().toVBuilder()
+        Project newState = state().toBuilder()
                                   .setStatus(Project.Status.STARTED)
                                   .build();
         builder().mergeFrom(newState);
@@ -166,9 +166,12 @@ public class TestProcessManager
     }
 
     @Assign
-    Nothing handle(PmDoNothing command, CommandContext ignored) {
+    PmNothingDone handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
-        return nothing();
+        return PmNothingDone
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
     }
 
     @Assign
@@ -188,7 +191,6 @@ public class TestProcessManager
 
     @React
     Nothing on(StandardRejections.EntityAlreadyDeleted rejection) {
-        keep(rejection);
         return nothing();
     }
 

@@ -25,7 +25,6 @@ import io.spine.server.command.Assign;
 import io.spine.test.model.verify.command.RestorePhoto;
 import io.spine.test.model.verify.event.PhotoRestored;
 import io.spine.test.model.verify.given.EditState;
-import io.spine.test.model.verify.given.EditStateVBuilder;
 
 /**
  * This aggregate declares a command handling method that breaks the contract imposed by
@@ -33,7 +32,7 @@ import io.spine.test.model.verify.given.EditStateVBuilder;
  *
  * <p>This should result in a warning.
  */
-public class InvalidRestoreAggregate extends Aggregate<String, EditState, EditStateVBuilder> {
+public class InvalidRestoreAggregate extends Aggregate<String, EditState, EditState.Builder> {
 
     @SuppressWarnings("MethodMayBeStatic")
     @Assign

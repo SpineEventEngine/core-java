@@ -42,7 +42,6 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -53,13 +52,12 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
-import io.spine.test.commandservice.customer.CustomerVBuilder;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
+import io.spine.time.Now;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -148,7 +146,8 @@ public class Given {
         }
 
         static Command createCustomer() {
-            LocalDate localDate = LocalDates.now();
+            LocalDate localDate = Now.get()
+                                     .asLocalDate();
             CustomerId customerId = CustomerId
                     .newBuilder()
                     .setRegistrationDate(localDate)
@@ -220,7 +219,7 @@ public class Given {
     }
 
     private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+            extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
@@ -275,7 +274,7 @@ public class Given {
     }
 
     public static class CustomerAggregate
-            extends Aggregate<CustomerId, Customer, CustomerVBuilder> {
+            extends Aggregate<CustomerId, Customer, Customer.Builder> {
 
         @Assign
         CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
@@ -308,7 +307,7 @@ public class Given {
     static class ProjectDetails
             extends Projection<io.spine.test.commandservice.ProjectId,
                                io.spine.test.projection.Project,
-                               io.spine.test.projection.ProjectVBuilder> {
+                               io.spine.test.projection.Project.Builder> {
 
         private ProjectDetails(io.spine.test.commandservice.ProjectId id) {
             super(id);
