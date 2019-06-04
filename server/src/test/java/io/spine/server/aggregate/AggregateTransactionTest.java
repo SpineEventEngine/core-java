@@ -38,24 +38,24 @@ import static io.spine.protobuf.AnyPacker.unpack;
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
         extends TransactionTest<Id,
-        Aggregate<Id, AggregateState, AggregateState.Builder>,
-        AggregateState,
-        AggregateState.Builder> {
+                                Aggregate<Id, AggregateState, AggregateState.Builder>,
+                                AggregateState,
+                                AggregateState.Builder> {
 
     @Override
     protected Transaction<Id,
-            Aggregate<Id, AggregateState, AggregateState.Builder>,
-            AggregateState,
-            AggregateState.Builder>
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
     createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity) {
         return new AggregateTransaction<>(entity);
     }
 
     @Override
     protected Transaction<Id,
-            Aggregate<Id, AggregateState, AggregateState.Builder>,
-            AggregateState,
-            AggregateState.Builder>
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
     createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
              AggregateState state,
              Version version) {
@@ -64,14 +64,14 @@ class AggregateTransactionTest
 
     @Override
     protected Transaction<Id,
-            Aggregate<Id, AggregateState, AggregateState.Builder>,
-            AggregateState,
-            AggregateState.Builder>
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
     createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
              TransactionListener<Id,
-                     Aggregate<Id, AggregateState, AggregateState.Builder>,
-                     AggregateState,
-                     AggregateState.Builder> listener) {
+                                 Aggregate<Id, AggregateState, AggregateState.Builder>,
+                                 AggregateState,
+                                 AggregateState.Builder> listener) {
         AggregateTransaction<Id, AggregateState, AggregateState.Builder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);
@@ -85,10 +85,11 @@ class AggregateTransactionTest
 
     @Override
     protected AggregateState newState() {
-        return AggregateState.newBuilder()
-                             .setId(id())
-                             .setName("The new project name to set in tx")
-                             .build();
+        return AggregateState
+                .newBuilder()
+                .setId(id())
+                .setName("The new project name to set in tx")
+                .build();
     }
 
     @Override
