@@ -18,18 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.model;
+package io.spine.server.entity;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.validate.option.Required;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,58 +37,42 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Helps to initialize ID field of an entity state, if such a field is declared.
  */
 @Immutable
-@SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
-public final class IdField implements Serializable {
+final class IdField {
 
-    private static final long serialVersionUID = 0L;
-    private final EntityClass<?> entityClass;
-
-    @LazyInit
-    private transient volatile @MonotonicNonNull Boolean declared;
-    @LazyInit
-    private transient volatile @MonotonicNonNull FieldDeclaration declaration;
+    private final @MonotonicNonNull FieldDeclaration declaration;
 
     IdField(EntityClass<?> entityClass) {
-        this.entityClass = entityClass;
+        Message defaultState = entityClass.defaultState();
+        List<FieldDescriptor> fields =
+                defaultState.getDescriptorForType()
+                            .getFields();
+        if (fields.isEmpty()) {
+            /* The entity state is an empty message.
+               This is weird for production purposes, but can be used for test stubs. */
+            declaration = null;
+        } else {
+            FieldDescriptor firstField = fields.get(0);
+            Class<?> fieldClass = defaultState.getField(firstField)
+                                              .getClass();
+            declaration = fieldClass.equals(entityClass.idClass())
+                ? new FieldDeclaration(firstField)
+                : null;
+        }
     }
 
     /**
      * Returns {@code true} if the entity state type declares a field which is the ID of the entity,
      * {@code false} otherwise.
      */
-    public boolean declared() {
-        Boolean result = declared;
-        if (result == null) {
-            synchronized (this) {
-                result = declared;
-                if (result == null) {
-                    Message defaultState = entityClass.defaultState();
-                    List<FieldDescriptor> fields =
-                            defaultState.getDescriptorForType()
-                                        .getFields();
-                    if (fields.isEmpty()) {
-                        /* The entity state is an empty message. This is weird for
-                        production purposes, but can be used for test stubs. */
-                        declared = false;
-                    } else {
-                        FieldDescriptor firstField = fields.get(0);
-                        declaration = new FieldDeclaration(firstField);
-                        Class<?> fieldClass = defaultState.getField(firstField)
-                                                          .getClass();
-                        declared = fieldClass.equals(entityClass.idClass());
-                    }
-                    result = declared;
-                }
-            }
-        }
-        return result;
+    private boolean declared() {
+        return declaration != null;
     }
 
     /**
      * Initializes the passed builder with the passed value of the entity ID,
      * <em>iff</em> the field is required.
      */
-    public <I, S extends Message, B extends ValidatingBuilder<S>>
+    <I, S extends Message, B extends ValidatingBuilder<S>>
     void initBuilder(B builder, I id) {
         checkNotNull(builder);
         checkNotNull(id);

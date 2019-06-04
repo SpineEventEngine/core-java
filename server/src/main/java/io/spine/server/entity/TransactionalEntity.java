@@ -25,7 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.entity.model.IdField;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -216,7 +215,7 @@ public abstract class TransactionalEntity<I,
         B builder = (B) currentState.toBuilder();
 
         if (currentState.equals(defaultState())) {
-            IdField idField = modelClass().idField();
+            IdField idField = new IdField(modelClass());
             idField.initBuilder(builder, id());
         }
         return builder;
