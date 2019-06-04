@@ -47,6 +47,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
@@ -168,8 +169,8 @@ class DefaultSystemReadSideTest {
             Query query =
                     actorRequestFactory.query()
                                        .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
-            EntityStateWithVersion next = systemReadSide.readDomainAggregate(query)
-                                                        .next();
+            Iterator<EntityStateWithVersion> iterator = systemReadSide.readDomainAggregate(query);
+            EntityStateWithVersion next = iterator.next();
             Message foundMessage = unpack(next.getState());
 
             assertEquals(aggregate().state(), foundMessage);
