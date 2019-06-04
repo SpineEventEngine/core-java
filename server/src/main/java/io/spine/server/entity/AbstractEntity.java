@@ -31,6 +31,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.entity.model.IdField;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.string.Stringifiers;
@@ -189,11 +190,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         initialization is often forgotten in handling methods.
      */
     private S initStateIdField(S state) {
-        return state;
-        //TODO:2019-05-24:alexander.yevsyukov: Restore when test of transactions are updated.
-//        S updatedState = modelClass().idField()
-//                                     .init(state, id());
-//        return updatedState;
+//        return state;
+        IdField idField = modelClass().idField();
+        S updatedState = idField.init(state, id());
+        return updatedState;
     }
 
     /**

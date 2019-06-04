@@ -388,8 +388,8 @@ public abstract class TransactionTest<I,
 
             try {
                 tx.commit();
-                fail("Expected an `IllegalStateException` due to a failed commit.");
-            } catch (IllegalStateException e) {
+                fail("Expected an `InvalidEntityStateException` due to a failed commit.");
+            } catch (InvalidEntityStateException e) {
                 checkRollback(entity, originalState, originalVersion);
             }
         }

@@ -285,19 +285,28 @@ public abstract class Transaction<I,
             commitAttributeChanges();
             EntityRecord newRecord = createRecord();
             afterCommit(entityBeforeTransaction, newRecord);
-        } catch (ValidationException exception) {  /* Could only happen if the state
+        } catch (ValidationException validationException) {  /* Could only happen if the state
                                                       has been injected not using
                                                       the builder setters. */
-            InvalidEntityStateException invalidStateException = of(exception);
-            rollback(invalidStateException);
-
-            throw invalidStateException;
-        } catch (RuntimeException genericException) {
+            InvalidEntityStateException se = toStateException(validationException);
+            rollback(se);
+            throw se;
+        } catch (InvalidEntityStateException stateException) {
+            rollback(stateException);
+            throw stateException;
+        }
+        catch (RuntimeException genericException) {
+            /* Exception occurred during execution of a handler method. */
             rollback(genericException);
             throw illegalStateWithCauseOf(genericException);
         } finally {
             releaseTx();
         }
+    }
+
+    private InvalidEntityStateException toStateException(ValidationException exception) {
+        @NonValidated Message invalidState = currentBuilderState();
+        return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
     /**
@@ -376,11 +385,6 @@ public abstract class Transaction<I,
                 .setState(state)
                 .setLifecycleFlags(lifecycleFlags)
                 .build();
-    }
-
-    private InvalidEntityStateException of(ValidationException exception) {
-        @NonValidated Message invalidState = currentBuilderState();
-        return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
     private @NonValidated S currentBuilderState() {
