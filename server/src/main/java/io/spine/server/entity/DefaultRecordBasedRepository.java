@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
@@ -56,8 +55,7 @@ public abstract class DefaultRecordBasedRepository<I,
     }
 
     @Override
-    @CanIgnoreReturnValue
-    protected StorageConverter<I, E, S> storageConverter() {
+    protected final StorageConverter<I, E, S> storageConverter() {
         if (storageConverter == null) {
             EntityClass<E> entityClass = entityModelClass();
             TypeUrl stateType = entityClass.stateType();
@@ -73,8 +71,9 @@ public abstract class DefaultRecordBasedRepository<I,
      * @param context
      *         the Bounded Context of this repository
      */
-    @OverridingMethodsMustInvokeSuper
     @Override
+    @OverridingMethodsMustInvokeSuper
+    @SuppressWarnings("CanIgnoreReturnValue") // See Javadoc.
     protected void init(BoundedContext context) {
         super.init(context);
         storageConverter();
