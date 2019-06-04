@@ -211,7 +211,7 @@ public final class Sharding {
 
     public void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
-        inboxDeliveries.put(entityType.value(), inbox.getProcessingBehavior());
+        inboxDeliveries.put(entityType.value(), inbox.delivery());
     }
 
     private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {

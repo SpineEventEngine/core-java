@@ -98,7 +98,7 @@ public class Inbox<I> {
         return entityStateType;
     }
 
-    public ShardedMessageDelivery<InboxMessage> getProcessingBehavior() {
+    public ShardedMessageDelivery<InboxMessage> delivery() {
         return new InboxMessageDelivery();
     }
 
