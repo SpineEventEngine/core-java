@@ -46,12 +46,10 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
 
     @React
     Nothing event(TxCreated e) {
-        builder().setId(id());
         receivedEvents.add(e);
-        PmState newState = PmState.newBuilder(state())
-                                  .setId(e.getId())
-                                  .build();
-        builder().mergeFrom(newState);
+        builder().setId(id())
+                 .setName(e.getName())
+                 .build();
         return nothing();
     }
 

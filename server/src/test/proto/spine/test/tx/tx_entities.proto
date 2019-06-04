@@ -34,17 +34,17 @@ message Id {
 message AggregateState {
     option (entity) = { kind: AGGREGATE visibility: FULL };
     Id id = 1;
-    string name = 2;
+    string name = 2 [(required) = true];
 }
 
 message PmState {
     option (entity) = { kind: PROCESS_MANAGER visibility: FULL };
     Id id = 1;
-    string name = 2;
+    string name = 2 [(required) = true];
 }
 
 message ProjectionState {
     option (entity) = { kind: PROJECTION visibility: FULL };
     Id id = 1;
-    string name = 2;
+    string name = 2 [(required) = true];
 }

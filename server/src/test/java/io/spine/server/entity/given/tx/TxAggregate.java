@@ -51,19 +51,16 @@ public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Bu
         return TxCreated
                 .newBuilder()
                 .setId(cmd.getId())
+                .setName(cmd.getName())
                 .build();
     }
 
     @Apply
     private void event(TxCreated e) {
-        builder().setId(id());
         receivedEvents.add(e);
-        AggregateState newState = AggregateState
-                .newBuilder(state())
-                .setId(e.getId())
-                .setName(e.getName())
-                .build();
-        builder().mergeFrom(newState);
+        builder().setId(id())
+                 .setName(e.getName())
+                 .build();
     }
 
     /**

@@ -32,5 +32,5 @@ import "spine/test/tx/tx_entities.proto";
 
 message TxCreate {
     Id id = 1;
-    string name = 2;
+    string name = 2 [(required) = true];
 }

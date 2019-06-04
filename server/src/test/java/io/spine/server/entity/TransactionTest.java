@@ -43,6 +43,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.server.type.given.GivenEvent.withMessageAndVersion;
+import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -103,6 +104,7 @@ public abstract class TransactionTest<I,
     protected final EventMessage createEventMessage() {
         return TxCreated.newBuilder()
                         .setId(id())
+                        .setName("Name " + randomString())
                         .build();
     }
 
