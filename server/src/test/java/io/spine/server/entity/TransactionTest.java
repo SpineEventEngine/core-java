@@ -19,6 +19,7 @@
  */
 package io.spine.server.entity;
 
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -410,6 +411,21 @@ public abstract class TransactionTest<I,
             assertThat(entity.version())
                     .isEqualTo(originalVersion);
         }
+    }
+
+    @Test
+    @DisplayName("init builder with the entity ID, if the field is required or assumed required")
+    void initBuilderWithId() {
+        E entity = createEntity();
+        Transaction<I, E, S, B> tx = createTx(entity);
+        FieldDescriptor firstField =
+                entity.state()
+                      .getDescriptorForType()
+                      .getFields()
+                      .get(0);
+        assertThat(tx.builder()
+                     .getField(firstField))
+                .isEqualTo(entity.id());
     }
 
     /**

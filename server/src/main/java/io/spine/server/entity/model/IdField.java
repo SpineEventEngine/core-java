@@ -98,7 +98,9 @@ public final class IdField implements Serializable {
         }
         FieldDescriptor idField = declaration.descriptor();
         @SuppressWarnings("Immutable") // all supported types of IDs are immutable.
-        boolean isRequired = Required.<I>create(false).shouldValidate(idField);
+        Required<I> required = Required.create(false);
+        boolean isRequired = required.valueFrom(idField)
+                                     .orElse(true); // assume required, if not set to false
         if (isRequired) {
             builder.setField(idField, id);
         }
