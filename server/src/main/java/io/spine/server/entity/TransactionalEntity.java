@@ -235,8 +235,8 @@ public abstract class TransactionalEntity<I,
     /**
      * {@inheritDoc}
      *
-     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
-     * of active transaction}.
+     * <p>The execution of this method requires an {@linkplain #isTransactionInProgress()
+     * active transaction}.
      */
     @Override
     protected final void setArchived(boolean archived) {
@@ -246,8 +246,8 @@ public abstract class TransactionalEntity<I,
     /**
      * {@inheritDoc}
      *
-     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
-     * of active transaction}.
+     * <p>The execution of this method requires an {@linkplain #isTransactionInProgress()
+     * active transaction}.
      */
     @Override
     protected final void setDeleted(boolean deleted) {
