@@ -348,16 +348,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Internal
     protected void dispatchNowTo(I id, EventEnvelope event) {
-        Inbox inbox = getInbox(id);
-        inbox.put(event)
-             .forSubscriber();
+        Inbox<I> inbox = getInbox(id);
+        inbox.send(event)
+             .toSubscriber(id);
     }
 
     //TODO:2019-01-10:alex.tymchenko: cache the `Inbox` instances.
     private Inbox<I> getInbox(I id) {
         checkNotNull(inboxStorage, "Inbox storage is not initialized in %s", this);
         Inbox<I> inbox = Inbox
-                .<I>newBuilder(id, entityStateType())
+                .<I>newBuilder(entityStateType())
                 .setStorage(inboxStorage)
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))

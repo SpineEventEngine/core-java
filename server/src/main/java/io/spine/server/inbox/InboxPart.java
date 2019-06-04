@@ -67,7 +67,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * Fetches the message object wrapped into the {@code envelope} and sets it as a payload of
      * the record further passed to storage.
      */
-    protected abstract void setRecordPayload(M envelope, InboxMessageVBuilder builder);
+    protected abstract void setRecordPayload(M envelope, InboxMessage.Builder builder);
 
     protected abstract InboxMessageId inboxMsgIdFrom(M envelope);
 
@@ -83,7 +83,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
             deliverDirectly(envelope, entityId, label, inboxId);
         } else {
             ShardIndex shardIndex = sharding.whichShardFor(entityId);
-            InboxMessageVBuilder builder = InboxMessageVBuilder
+            InboxMessage.Builder builder = InboxMessage
                     .newBuilder()
                     .setId(inboxMsgIdFrom(envelope))
                     .setInboxId(inboxId)
@@ -91,7 +91,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                     .setLabel(label)
                     .setWhenReceived(Time.currentTime());
             setRecordPayload(envelope, builder);
-            InboxMessage message = builder.build();
+            InboxMessage message = builder.vBuild();
 
             storage.write(message);
         }

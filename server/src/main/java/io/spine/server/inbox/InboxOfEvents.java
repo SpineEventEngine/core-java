@@ -40,7 +40,7 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected void setRecordPayload(EventEnvelope envelope, InboxMessageVBuilder builder) {
+    protected void setRecordPayload(EventEnvelope envelope, InboxMessage.Builder builder) {
         builder.setEvent(envelope.outerObject());
     }
 

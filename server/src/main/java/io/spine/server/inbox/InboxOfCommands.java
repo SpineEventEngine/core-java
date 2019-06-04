@@ -40,7 +40,7 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected void setRecordPayload(CommandEnvelope envelope, InboxMessageVBuilder builder) {
+    protected void setRecordPayload(CommandEnvelope envelope, InboxMessage.Builder builder) {
         builder.setCommand(envelope.outerObject());
     }
 
