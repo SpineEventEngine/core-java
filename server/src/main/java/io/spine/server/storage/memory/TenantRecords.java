@@ -80,7 +80,7 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         return activeRecords;
     }
 
-    Iterator<EntityRecord> readAllRecords() {
+    Iterator<EntityRecord> readAll() {
         return activeRecords()
                 .values()
                 .stream()
@@ -88,9 +88,9 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
                 .iterator();
     }
 
-    Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+    Iterator<EntityRecord> readAll(FieldMask fieldMask) {
         if (fieldMask.getPathsCount() == 0) {
-            return readAllRecords();
+            return readAll();
         }
 
         return activeRecords()
@@ -101,7 +101,7 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
                 .iterator();
     }
 
-    Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+    Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
         return findRecords(query)
                 .map(UNPACKER)
                 .map(new FieldMaskApplier(fieldMask))

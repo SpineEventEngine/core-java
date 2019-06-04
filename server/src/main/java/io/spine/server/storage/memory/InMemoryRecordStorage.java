@@ -63,18 +63,18 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public Iterator<I> index() {
-        return storage().index();
+        return records().index();
     }
 
     @Override
     public boolean delete(I id) {
-        return storage().delete(id);
+        return records().delete(id);
     }
 
     @Override
     protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> givenIds,
                                                                    FieldMask fieldMask) {
-        TenantRecords<I> storage = storage();
+        TenantRecords<I> storage = records();
 
         // It is impossible to return an immutable collection,
         // since null may be present in it.
@@ -94,18 +94,18 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        return storage().readAllRecords();
+        return records().readAll();
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return storage().readAllRecords(fieldMask);
+        return records().readAll(fieldMask);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         EntityQuery<I> completeQuery = toCompleteQuery(query);
-        return storage().readAllRecords(completeQuery, fieldMask);
+        return records().readAll(completeQuery, fieldMask);
     }
 
     /**
@@ -133,24 +133,24 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
         return query;
     }
 
-    private TenantRecords<I> storage() {
-        return multitenantStorage.getStorage();
+    private TenantRecords<I> records() {
+        return multitenantStorage.currentSlice();
     }
 
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
-        return storage().get(id)
+        return records().get(id)
                         .map(EntityRecordUnpacker.INSTANCE);
     }
 
     @Override
     protected void writeRecord(I id, EntityRecordWithColumns record) {
-        storage().put(id, record);
+        records().put(id, record);
     }
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        TenantRecords<I> storage = storage();
+        TenantRecords<I> storage = records();
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue());
         }

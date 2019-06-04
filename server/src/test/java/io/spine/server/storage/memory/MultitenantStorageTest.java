@@ -64,7 +64,7 @@ class MultitenantStorageTest {
 
         for (int i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {
-                TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
+                TenantRecords<ProjectId> storage = multitenantStorage.currentSlice();
                 return storage;
             });
         }
