@@ -30,14 +30,12 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.NonValidated;
-import io.spine.validate.ValidationException;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -282,28 +280,17 @@ public abstract class Transaction<I,
             commitAttributeChanges();
             EntityRecord newRecord = createRecord();
             afterCommit(entityBeforeTransaction, newRecord);
-        } catch (ValidationException validationException) {  /* Could only happen if the state
-                                                      has been injected not using
-                                                      the builder setters. */
-            InvalidEntityStateException se = toStateException(validationException);
-            rollback(se);
-            throw se;
-        } catch (InvalidEntityStateException stateException) {
-            rollback(stateException);
-            throw stateException;
-        }
-        catch (RuntimeException genericException) {
+        } catch (InvalidEntityStateException e) {
+            /* New state of the entity does not pass validation. */
+            rollback(e);
+            throw e;
+        } catch (RuntimeException e) {
             /* Exception occurred during execution of a handler method. */
-            rollback(genericException);
-            throw illegalStateWithCauseOf(genericException);
+            rollback(e);
+            throw illegalStateWithCauseOf(e);
         } finally {
             releaseTx();
         }
-    }
-
-    private InvalidEntityStateException toStateException(ValidationException exception) {
-        @NonValidated Message invalidState = currentBuilderState();
-        return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
     /**
