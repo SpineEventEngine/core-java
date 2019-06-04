@@ -10,7 +10,8 @@ all modules and does not describe the project structure per-subproject.
  
  -->
 
-<artifactId>spine</artifactId>
+<groupId>io.spine</groupId>
+<artifactId>spine-core</artifactId>
 <version>1.0.0-SNAPSHOT</version>
 
 <inceptionYear>2015</inceptionYear>
@@ -165,7 +166,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.junit-pioneer</groupId>
     <artifactId>junit-pioneer</artifactId>
-    <version>0.1.2</version>
+    <version>0.3.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
