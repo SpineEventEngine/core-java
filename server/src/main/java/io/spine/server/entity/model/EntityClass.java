@@ -73,7 +73,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
 
     /** Creates new instance of the model class for the passed class of entities. */
-    @SuppressWarnings("ThisEscapedInObjectConstruction")
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // safe, used for later referencing.
     protected EntityClass(Class<E> cls) {
         super(cls);
         this.idClass = idClass(cls);
