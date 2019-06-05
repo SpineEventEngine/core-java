@@ -215,8 +215,8 @@ public abstract class AggregateStorage<I>
      * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
      * the latest snapshot.
      *
-     * <p>If the specified snapshot number is higher than the overall snapshot count for some
-     * entity, this entity's records remain intact.
+     * <p>If the specified snapshot number is higher than the overall snapshot count for the
+     * entity, entity's records remain intact.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotNumber} is {@code 0} or less
@@ -233,8 +233,8 @@ public abstract class AggregateStorage<I>
      * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
      * the latest snapshot.
      *
-     * <p>If the specified snapshot number is higher than the overall snapshot count for some
-     * entity, this entity's records remain intact.
+     * <p>If the specified snapshot number is higher than the overall snapshot count for the
+     * entity, entity's records remain intact.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotNumber} is {@code 0} or less
@@ -251,5 +251,8 @@ public abstract class AggregateStorage<I>
      */
     protected abstract void clipRecords(int snapshotNumber);
 
+    /**
+     * Drops all records older than {@code date} but not newer than Nth snapshot.
+     */
     protected abstract void clipRecords(Timestamp date, int snapshotNumber);
 }
