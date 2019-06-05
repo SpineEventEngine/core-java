@@ -186,7 +186,7 @@ public abstract class Transaction<I,
         B result = (B) currentState.toBuilder();
 
         if (currentState.equals(entity.defaultState())) {
-            IdField idField = new IdField(entity.modelClass());
+            IdField idField = IdField.of(entity.modelClass());
             idField.initBuilder(result, entity.id());
         }
         return result;

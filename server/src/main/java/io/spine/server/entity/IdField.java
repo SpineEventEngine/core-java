@@ -41,7 +41,7 @@ final class IdField {
 
     private final @Nullable FieldDeclaration declaration;
 
-    IdField(EntityClass<?> entityClass) {
+    static IdField of (EntityClass<?> entityClass) {
         Message defaultState = entityClass.defaultState();
         List<FieldDescriptor> fields =
                 defaultState.getDescriptorForType()
@@ -49,15 +49,21 @@ final class IdField {
         if (fields.isEmpty()) {
             /* The entity state is an empty message.
                This is weird for production purposes, but can be used for test stubs. */
-            declaration = null;
+            return new IdField(null);
         } else {
             FieldDescriptor firstField = fields.get(0);
             Class<?> fieldClass = defaultState.getField(firstField)
                                               .getClass();
-            declaration = fieldClass.equals(entityClass.idClass())
-                ? new FieldDeclaration(firstField)
-                : null;
+            @Nullable FieldDeclaration declaration =
+                    fieldClass.equals(entityClass.idClass())
+                    ? new FieldDeclaration(firstField)
+                    : null;
+            return new IdField(declaration);
         }
+    }
+
+    private IdField(@Nullable FieldDeclaration declaration) {
+        this.declaration = declaration;
     }
 
     /**
