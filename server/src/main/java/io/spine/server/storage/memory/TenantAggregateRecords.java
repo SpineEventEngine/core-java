@@ -33,15 +33,14 @@ import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-import static io.spine.server.aggregate.AggregateEventRecord.KindCase.SNAPSHOT;
 import static io.spine.util.Exceptions.unsupported;
 import static io.spine.validate.Validate.isDefault;
 
@@ -141,48 +140,48 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     /**
-     * For each entity, clips records that are older than Nth snapshot.
+     * For each entity, clips records that are older than the Nth snapshot.
      *
      * @see io.spine.server.aggregate.AggregateStorage#clipRecordsUntilSnapshot(int)
      */
     void clipRecordsUntilSnapshot(int snapshotNumber) {
-        ImmutableSet.copyOf(records.keys())
-                    .forEach(key -> clipRecordsUntilSnapshot(key, snapshotNumber));
-    }
-
-    private void clipRecordsUntilSnapshot(I key, int snapshotNumber) {
-        Collection<AggregateEventRecord> aggregateRecords = ImmutableList.copyOf(records.get(key));
-        int snapshotsHit = 0;
-        for (AggregateEventRecord record : aggregateRecords) {
-            if (snapshotsHit >= snapshotNumber) {
-                records.remove(key, record);
-            }
-            if (record.getKindCase() == SNAPSHOT) {
-                snapshotsHit++;
-            }
-        }
+        clipRecords(snapshotNumber, record -> true);
     }
 
     /**
      * For each entity, clips records that are older than the specified {@code date}, but
-     * preserving at least N latest snapshots.
+     * leaving at least N latest snapshots.
      *
      * @see io.spine.server.aggregate.AggregateStorage#clipRecordsOlderThan(Timestamp, int)
      */
     void clipRecordsOlderThan(Timestamp date, int snapshotNumber) {
-        ImmutableSet.copyOf(records.keys())
-                    .forEach(key -> clipRecordsOlderThan(key, date, snapshotNumber));
+        Predicate<AggregateEventRecord> isOlder =
+                record -> Timestamps.compare(date, record.getTimestamp()) > 0;
+        clipRecords(snapshotNumber, isOlder);
     }
 
-    private void clipRecordsOlderThan(I key, Timestamp date, int snapshotNumber) {
-        Collection<AggregateEventRecord> aggregateRecords = ImmutableList.copyOf(records.get(key));
+    /**
+     * Clips records that are preceding the specified snapshot and match the specified
+     * {@code Predicate}.
+     */
+    private void clipRecords(int snapshotNumber, Predicate<AggregateEventRecord> predicate) {
+        ImmutableSet.copyOf(records.keys())
+                    .forEach(id -> clipRecords(id, snapshotNumber, predicate));
+    }
+
+    /**
+     * Clips records for the given ID that are preceding the specified snapshot and match
+     * the specified {@code Predicate}.
+     */
+    private void
+    clipRecords(I id, int snapshotNumber, Predicate<AggregateEventRecord> predicate) {
+        ImmutableList<AggregateEventRecord> recordsCopy = ImmutableList.copyOf(records.get(id));
         int snapshotsHit = 0;
-        for (AggregateEventRecord record : aggregateRecords) {
-            boolean isAfterDate = Timestamps.compare(date, record.getTimestamp()) > 0;
-            if (snapshotsHit >= snapshotNumber && isAfterDate) {
-                records.remove(key, record);
+        for (AggregateEventRecord record : recordsCopy) {
+            if (snapshotsHit >= snapshotNumber && predicate.test(record)) {
+                this.records.remove(id, record);
             }
-            if (record.getKindCase() == SNAPSHOT) {
+            if (AggregateStorageRecordReverseComparator.isSnapshot(record)) {
                 snapshotsHit++;
             }
         }
