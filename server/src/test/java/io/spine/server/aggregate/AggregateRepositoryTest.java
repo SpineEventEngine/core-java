@@ -439,7 +439,7 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(parentId)
                     .addChildProjectId(childId)
-                    .build();
+                    .vBuild();
             Event event = factory.createEvent(msg);
 
             // Posting this event should archive the aggregate.
