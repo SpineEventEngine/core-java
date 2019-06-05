@@ -159,7 +159,7 @@ public abstract class Transaction<I,
     protected Transaction(E entity) {
         this.entity = checkNotNull(entity);
         this.initialState = entity.state();
-        this.builder = entity.builderFromState();
+        this.builder = toBuilder(entity);
         this.version = entity.version();
         this.lifecycleFlags = entity.lifecycleFlags();
         this.active = true;
@@ -167,6 +167,29 @@ public abstract class Transaction<I,
         this.transactionListener = new SilentWitness<>();
         injectTo(entity);
         this.entityBeforeTransaction = createRecord();
+    }
+
+    /**
+     * Creates the builder for being used by a transaction when modifying the passed entity.
+     *
+     * <p>If the entity has the default state, and the first field of the state is its ID, and
+     * the field is required, initializes the builder with the value of the entity ID.
+     */
+    @VisibleForTesting
+    static <I,
+            E extends TransactionalEntity<I, S, B>,
+            S extends Message,
+            B extends ValidatingBuilder<S>>
+    B toBuilder(E entity) {
+        S currentState = entity.state();
+        @SuppressWarnings("unchecked") // ensured by argument of <E>.
+        B result = (B) currentState.toBuilder();
+
+        if (currentState.equals(entity.defaultState())) {
+            IdField idField = new IdField(entity.modelClass());
+            idField.initBuilder(result, entity.id());
+        }
+        return result;
     }
 
     /**

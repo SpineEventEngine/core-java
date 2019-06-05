@@ -204,24 +204,6 @@ public abstract class TransactionalEntity<I,
     }
 
     /**
-     * Obtains the builder for being used by a transaction.
-     *
-     * <p>If the entity has the default state, and the first field of the state is its ID, and
-     * the field is required, initializes the builder with the value of the entity ID.
-     */
-    final B builderFromState() {
-        S currentState = state();
-        @SuppressWarnings("unchecked") // Logically checked.
-        B builder = (B) currentState.toBuilder();
-
-        if (currentState.equals(defaultState())) {
-            IdField idField = new IdField(modelClass());
-            idField.initBuilder(builder, id());
-        }
-        return builder;
-    }
-
-    /**
      * Sets an initial state for the entity.
      *
      * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence

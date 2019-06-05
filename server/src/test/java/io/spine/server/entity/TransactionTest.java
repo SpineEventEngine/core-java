@@ -42,6 +42,7 @@ import org.mockito.ArgumentMatcher;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
+import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.server.type.given.GivenEvent.withMessageAndVersion;
 import static io.spine.testing.TestValues.randomString;
@@ -151,7 +152,7 @@ public abstract class TransactionTest<I,
         @DisplayName("from entity")
         void fromEntity() {
             E entity = createEntity();
-            B expectedBuilder = entity.builderFromState();
+            B expectedBuilder = toBuilder(entity);
             Version expectedVersion = entity.version();
             LifecycleFlags expectedLifecycleFlags = entity.lifecycleFlags();
 

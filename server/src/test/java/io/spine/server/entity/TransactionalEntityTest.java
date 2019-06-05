@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.when;
 @DisplayName("TransactionalEntity should")
 class TransactionalEntityTest {
 
-    TransactionalEntity newEntity() {
+    TransactionalEntity<?, ?, ?> newEntity() {
         return new TeEntity(1L);
     }
 
@@ -211,26 +212,27 @@ class TransactionalEntityTest {
         @Test
         @DisplayName("which is non-null")
         void nonNull() {
-            ValidatingBuilder builder = newEntity().builderFromState();
+            ValidatingBuilder builder = toBuilder(newEntity());
             assertNotNull(builder);
         }
 
         @Test
         @DisplayName("which reflects current state")
         void reflectingCurrentState() {
-            TransactionalEntity entity = newEntity();
-            Message originalState = entity.builderFromState()
-                                          .build();
+            TransactionalEntity<?, ?, ?> entity = newEntity();
+            Message originalState = toBuilder(entity)
+                    .build();
 
-            EmptyEntity newState = EmptyEntity.newBuilder()
-                                              .setId(newUuidValue().getValue())
-                                              .build();
+            EmptyEntity newState = EmptyEntity
+                    .newBuilder()
+                    .setId(newUuidValue().getValue())
+                    .build();
             assertThat(newState)
                     .isNotEqualTo(originalState);
 
             TestTransaction.injectState(entity, newState, Version.getDefaultInstance());
-            Message modifiedState = entity.builderFromState()
-                                          .build();
+            Message modifiedState = toBuilder(entity)
+                    .build();
 
             assertEquals(newState, modifiedState);
         }
