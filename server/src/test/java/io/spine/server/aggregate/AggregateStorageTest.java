@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -61,6 +61,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
@@ -539,264 +540,118 @@ public abstract class AggregateStorageTest
         assertEquals(eventCountAfterSnapshot, stateRecord.getEventCount());
     }
 
-    @Test
-    @DisplayName("to the Nth latest snapshot")
-    void toTheNthSnapshot() {
-        Version currentVersion = zero();
-        Snapshot snapshot1 = Snapshot.newBuilder()
-                                     .setVersion(currentVersion)
-                                     .build();
-        storage.writeSnapshot(id, snapshot1);
-
-        currentVersion = increment(currentVersion);
-        Project state = Project.getDefaultInstance();
-        Event event = eventFactory.createEvent(event(state), currentVersion);
-        storage.writeEvent(id, event);
-
-        Snapshot snapshot2 = Snapshot.newBuilder()
-                                     .setVersion(increment(currentVersion))
-                                     .build();
-        storage.writeSnapshot(id, snapshot2);
-
-        int snapshotNumber = 1;
-        storage.clipRecordsUntilSnapshot(snapshotNumber);
-
-        int batchSize = 1;
-        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-        Iterator<AggregateEventRecord> records = storage.historyBackward(request);
-        ImmutableList<AggregateEventRecord> recordList = ImmutableList.copyOf(records);
-        assertThat(recordList).hasSize(1);
-        Snapshot receivedSnapshot = recordList.get(0)
-                                              .getSnapshot();
-        assertThat(receivedSnapshot).isEqualTo(snapshot2);
-    }
-
-    @Test
-    @DisplayName("by date")
-    void byDate() {
-        long millis = System.currentTimeMillis();
-        Timestamp now = Timestamps.fromMillis(millis);
-        Timestamp before = Timestamps.fromMillis(millis - 100);
-        Timestamp after = Timestamps.fromMillis(millis + 100);
-        Version currentVersion = zero();
-        Snapshot snapshot1 = Snapshot.newBuilder()
-                                     .setVersion(currentVersion)
-                                     .setTimestamp(before)
-                                     .build();
-        storage.writeSnapshot(id, snapshot1);
-
-        Project state = Project.getDefaultInstance();
-
-        currentVersion = increment(currentVersion);
-        Event eventBefore = eventFactory.createEvent(event(state), currentVersion, before);
-        storage.writeEvent(id, eventBefore);
-
-        currentVersion = increment(currentVersion);
-        Event eventAfter = eventFactory.createEvent(event(state), currentVersion, after);
-        storage.writeEvent(id, eventAfter);
-
-        Snapshot snapshot2 = Snapshot.newBuilder()
-                                     .setVersion(increment(currentVersion))
-                                     .setTimestamp(after)
-                                     .build();
-        storage.writeSnapshot(id, snapshot2);
-
-        int snapshotNumber = 1;
-        storage.clipRecordsOlderThan(now, snapshotNumber);
-
-        int batchSize = 1;
-        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-        Iterator<AggregateEventRecord> records = storage.historyBackward(request);
-        ImmutableList<AggregateEventRecord> recordList = ImmutableList.copyOf(records);
-
-        // Only event and snapshot after the `now` timestamp are left.
-        assertThat(recordList).hasSize(2);
-        Snapshot theSnapshot = recordList.get(0)
-                                         .getSnapshot();
-        assertThat(theSnapshot).isEqualTo(snapshot2);
-        Event event = recordList.get(1)
-                                .getEvent();
-        assertThat(event).isEqualTo(eventAfter);
-    }
-
-    @Test
-    @DisplayName("by date preserving at least Nth latest snapshot")
-    void byDateAndSnapshot() {
-        long millis = System.currentTimeMillis();
-        Timestamp now = Timestamps.fromMillis(millis);
-        Timestamp before = Timestamps.fromMillis(millis - 100);
-        Timestamp after = Timestamps.fromMillis(millis + 100);
-        Version currentVersion = zero();
-
-        Project state = Project.getDefaultInstance();
-        Event eventBeforeSnapshots =
-                eventFactory.createEvent(event(state), currentVersion, before);
-        storage.writeEvent(id, eventBeforeSnapshots);
-
-        currentVersion = increment(currentVersion);
-        Snapshot snapshot1 = Snapshot.newBuilder()
-                                     .setVersion(currentVersion)
-                                     .setTimestamp(before)
-                                     .build();
-        storage.writeSnapshot(id, snapshot1);
-
-
-        currentVersion = increment(currentVersion);
-        Event event1 = eventFactory.createEvent(event(state), currentVersion, before);
-        storage.writeEvent(id, event1);
-
-        currentVersion = increment(currentVersion);
-        Event event2 = eventFactory.createEvent(event(state), currentVersion, after);
-        storage.writeEvent(id, event2);
-
-        Snapshot snapshot2 = Snapshot.newBuilder()
-                                     .setVersion(increment(currentVersion))
-                                     .setTimestamp(after)
-                                     .build();
-        storage.writeSnapshot(id, snapshot2);
-
-        int snapshotNumber = 2;
-        storage.clipRecordsOlderThan(now, snapshotNumber);
-
-        int batchSize = 1;
-        AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-        Iterator<AggregateEventRecord> records = storage.historyBackward(request);
-        ImmutableList<AggregateEventRecord> recordList = ImmutableList.copyOf(records);
-
-        // There are two snapshots left and all events that follow them.
-        assertThat(recordList).hasSize(4);
-    }
-
     @Nested
     @DisplayName("clip records")
     class ClipRecords {
 
+        private Version currentVersion;
+
+        @BeforeEach
+        void setUp() {
+            currentVersion = zero();
+        }
+
         @Test
         @DisplayName("to the Nth latest snapshot")
         void toTheNthSnapshot() {
-            Version currentVersion = zero();
-            Snapshot snapshot1 = Snapshot.newBuilder()
-                                         .setVersion(currentVersion)
-                                         .build();
-            storage.writeSnapshot(id, snapshot1);
-
-            currentVersion = increment(currentVersion);
-            Project state = Project.getDefaultInstance();
-            Event event = eventFactory.createEvent(event(state), currentVersion);
-            storage.writeEvent(id, event);
-
-            Snapshot snapshot2 = Snapshot.newBuilder()
-                                         .setVersion(increment(currentVersion))
-                                         .build();
-            storage.writeSnapshot(id, snapshot2);
+            writeSnapshot();
+            writeEvent();
+            Snapshot lastSnapshot = writeSnapshot();
 
             int snapshotNumber = 1;
             storage.clipRecordsUntilSnapshot(snapshotNumber);
 
-            int batchSize = 1;
-            AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-            Iterator<AggregateEventRecord> records = storage.historyBackward(request);
-            ImmutableList<AggregateEventRecord> recordList = ImmutableList.copyOf(records);
-            assertThat(recordList).hasSize(1);
-            Snapshot receivedSnapshot = recordList.get(0)
-                                                  .getSnapshot();
-            assertThat(receivedSnapshot).isEqualTo(snapshot2);
+            List<AggregateEventRecord> records = newArrayList(historyBackward());
+            assertThat(records)
+                    .hasSize(1);
+            assertThat(records.get(0).getSnapshot())
+                    .isEqualTo(lastSnapshot);
         }
 
         @Test
         @DisplayName("by date")
         void byDate() {
-            long millis = System.currentTimeMillis();
-            Timestamp now = Timestamps.fromMillis(millis);
-            Timestamp before = Timestamps.fromMillis(millis - 100);
-            Timestamp after = Timestamps.fromMillis(millis + 100);
-            Version currentVersion = zero();
-            Snapshot snapshot1 = Snapshot.newBuilder()
-                                         .setVersion(currentVersion)
-                                         .setTimestamp(before)
-                                         .build();
-            storage.writeSnapshot(id, snapshot1);
+            Duration delta = seconds(10);
+            Timestamp now = currentTime();
+            Timestamp before = subtract(now, delta);
+            Timestamp after = add(now, delta);
 
-            Project state = Project.getDefaultInstance();
-
-            currentVersion = increment(currentVersion);
-            Event eventBefore = eventFactory.createEvent(event(state), currentVersion, before);
-            storage.writeEvent(id, eventBefore);
-
-            currentVersion = increment(currentVersion);
-            Event eventAfter = eventFactory.createEvent(event(state), currentVersion, after);
-            storage.writeEvent(id, eventAfter);
-
-            Snapshot snapshot2 = Snapshot.newBuilder()
-                                         .setVersion(increment(currentVersion))
-                                         .setTimestamp(after)
-                                         .build();
-            storage.writeSnapshot(id, snapshot2);
+            writeSnapshot(before);
+            writeEvent(before);
+            Event latestEvent = writeEvent(after);
+            Snapshot latestSnapshot = writeSnapshot(after);
 
             int snapshotNumber = 1;
             storage.clipRecordsOlderThan(now, snapshotNumber);
 
-            int batchSize = 1;
-            AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-            Iterator<AggregateEventRecord> records = storage.historyBackward(request);
-            ImmutableList<AggregateEventRecord> recordList = ImmutableList.copyOf(records);
-
-            // Only event and snapshot after the `now` timestamp are left.
-            assertThat(recordList).hasSize(2);
-            Snapshot theSnapshot = recordList.get(0)
-                                             .getSnapshot();
-            assertThat(theSnapshot).isEqualTo(snapshot2);
-            Event event = recordList.get(1)
-                                    .getEvent();
-            assertThat(event).isEqualTo(eventAfter);
+            List<AggregateEventRecord> records = newArrayList(historyBackward());
+            assertThat(records)
+                    .hasSize(2);
+            assertThat(records.get(0).getSnapshot())
+                    .isEqualTo(latestSnapshot);
+            assertThat(records.get(1).getEvent())
+                    .isEqualTo(latestEvent);
         }
 
         @Test
         @DisplayName("by date preserving at least Nth latest snapshot")
         void byDateAndSnapshot() {
-            long millis = System.currentTimeMillis();
-            Timestamp now = Timestamps.fromMillis(millis);
-            Timestamp before = Timestamps.fromMillis(millis - 100);
-            Timestamp after = Timestamps.fromMillis(millis + 100);
-            Version currentVersion = zero();
+            Duration delta = seconds(10);
+            Timestamp now = currentTime();
+            Timestamp before = subtract(now, delta);
+            Timestamp after = add(now, delta);
 
-            Project state = Project.getDefaultInstance();
-            Event eventBeforeSnapshots =
-                    eventFactory.createEvent(event(state), currentVersion, before);
-            storage.writeEvent(id, eventBeforeSnapshots);
-
-            currentVersion = increment(currentVersion);
-            Snapshot snapshot1 = Snapshot.newBuilder()
-                                         .setVersion(currentVersion)
-                                         .setTimestamp(before)
-                                         .build();
-            storage.writeSnapshot(id, snapshot1);
-
-
-            currentVersion = increment(currentVersion);
-            Event event1 = eventFactory.createEvent(event(state), currentVersion, before);
-            storage.writeEvent(id, event1);
-
-            currentVersion = increment(currentVersion);
-            Event event2 = eventFactory.createEvent(event(state), currentVersion, after);
-            storage.writeEvent(id, event2);
-
-            Snapshot snapshot2 = Snapshot.newBuilder()
-                                         .setVersion(increment(currentVersion))
-                                         .setTimestamp(after)
-                                         .build();
-            storage.writeSnapshot(id, snapshot2);
+            writeEvent(before);
+            Snapshot snapshot1 = writeSnapshot(before);
+            Event event1 = writeEvent(before);
+            Event event2 = writeEvent(after);
+            Snapshot snapshot2 = writeSnapshot(after);
 
             int snapshotNumber = 2;
             storage.clipRecordsOlderThan(now, snapshotNumber);
 
-            int batchSize = 1;
-            AggregateReadRequest<ProjectId> request = new AggregateReadRequest<>(id, batchSize);
-            Iterator<AggregateEventRecord> records = storage.historyBackward(request);
-            ImmutableList<AggregateEventRecord> recordList = ImmutableList.copyOf(records);
+            // The `event1` should be preserved event though it occurred before the specified date.
+            List<AggregateEventRecord> records = newArrayList(historyBackward());
+            assertThat(records).hasSize(4);
+            assertThat(records.get(0).getSnapshot())
+                    .isEqualTo(snapshot2);
+            assertThat(records.get(1).getEvent())
+                    .isEqualTo(event2);
+            assertThat(records.get(2).getEvent())
+                    .isEqualTo(event1);
+            assertThat(records.get(3).getSnapshot())
+                    .isEqualTo(snapshot1);
+        }
 
-            // There are two snapshots left and all events that follow them.
-            assertThat(recordList).hasSize(4);
+        @CanIgnoreReturnValue
+        private Snapshot writeSnapshot() {
+            return writeSnapshot(Timestamp.getDefaultInstance());
+        }
+
+        @CanIgnoreReturnValue
+        private Snapshot writeSnapshot(Timestamp atTime) {
+            currentVersion = increment(currentVersion);
+            Snapshot snapshot = Snapshot
+                    .newBuilder()
+                    .setTimestamp(atTime)
+                    .setVersion(currentVersion)
+                    .build();
+            storage.writeSnapshot(id, snapshot);
+            return snapshot;
+        }
+
+        @CanIgnoreReturnValue
+        private Event writeEvent() {
+            return writeEvent(Timestamp.getDefaultInstance());
+        }
+
+        @CanIgnoreReturnValue
+        private Event writeEvent(Timestamp atTime) {
+            currentVersion = increment(currentVersion);
+            Project state = Project.getDefaultInstance();
+            Event event = eventFactory.createEvent(event(state), currentVersion, atTime);
+            storage.writeEvent(id, event);
+            return event;
         }
     }
 
