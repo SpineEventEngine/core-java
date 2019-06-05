@@ -20,19 +20,87 @@
 
 package io.spine.server.sharding.memory;
 
+import com.google.common.collect.Maps;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Time;
+import io.spine.server.NodeId;
 import io.spine.server.sharding.ShardIndex;
 import io.spine.server.sharding.ShardProcessingSession;
+import io.spine.server.sharding.ShardProcessingSessionRecord;
 import io.spine.server.sharding.ShardedWorkRegistry;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * An in-memory implementation of {@link io.spine.server.sharding.ShardedWorkRegistry
- * ShardedWordRegistry}.
+ * ShardedWorKRegistry}.
  */
 public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
 
+    private final Map<ShardIndex, ShardProcessingSessionRecord> workByNode =
+            Maps.newConcurrentMap();
 
     @Override
-    public ShardProcessingSession pickUp(ShardIndex index) {
-        return null;
+    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+        if (workByNode.containsKey(index)) {
+            ShardProcessingSessionRecord existingRecord = workByNode.get(index);
+            if (existingRecord.hasPickedBy()) {
+                return Optional.empty();
+            } else {
+                ShardProcessingSessionRecord updatedRecord = updatePickedBy(existingRecord,nodeId);
+                return Optional.of(asSession(updatedRecord));
+            }
+        }
+        ShardProcessingSessionRecord record =
+                ShardProcessingSessionRecord
+                        .newBuilder()
+                        .setIndex(index)
+                        .setPickedBy(nodeId)
+                        .vBuild();
+        workByNode.put(index, record);
+        return Optional.of(asSession(record));
+    }
+
+    private ShardProcessingSessionRecord updatePickedBy(ShardProcessingSessionRecord record,
+                                                        NodeId nodeId) {
+        ShardProcessingSessionRecord updatedRecord = record.toBuilder()
+                                                           .setPickedBy(nodeId)
+                                                           .vBuild();
+        workByNode.put(record.getIndex(), updatedRecord);
+        return updatedRecord;
+    }
+
+    private ShardProcessingSession asSession(ShardProcessingSessionRecord record) {
+        return new InMemoryShardSession(record);
+    }
+
+    /**
+     * Implementation of shard processing session, based on in-memory storage mechanism.
+     */
+    public class InMemoryShardSession extends ShardProcessingSession {
+
+        private InMemoryShardSession(ShardProcessingSessionRecord record) {
+            super(record);
+        }
+
+        @Override
+        protected void updateLastProcessed(Timestamp timestamp) {
+            super.updateLastProcessed(timestamp);
+            ShardIndex index = shardIndex();
+            ShardProcessingSessionRecord record = workByNode.get(index);
+            ShardProcessingSessionRecord updatedRecord =
+                    record.toBuilder()
+                          .setWhenLastMessageProcessed(Time.currentTime())
+                          .vBuild();
+            workByNode.put(index, updatedRecord);
+        }
+
+        @Override
+        protected void complete() {
+            ShardProcessingSessionRecord record = workByNode.get(shardIndex());
+            // Clear the node ID value and release the session.
+            updatePickedBy(record, NodeId.getDefaultInstance());
+        }
     }
 }

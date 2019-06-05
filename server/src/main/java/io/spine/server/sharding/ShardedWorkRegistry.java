@@ -20,6 +20,10 @@
 
 package io.spine.server.sharding;
 
+import io.spine.server.NodeId;
+
+import java.util.Optional;
+
 /**
  * The registry of the shard indexes along with the identifiers of the nodes, which
  * process the messages corresponding to each index.
@@ -30,5 +34,5 @@ package io.spine.server.sharding;
  */
 public interface ShardedWorkRegistry {
 
-    ShardProcessingSession pickUp(ShardIndex index);
+    Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId);
 }

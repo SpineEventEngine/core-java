@@ -233,11 +233,11 @@ public class Inbox<I> {
      *
      * <p>Source messages for the de-duplication are supplied separately.
      */
-    public class InboxMessageDelivery extends ShardedMessageDelivery<InboxMessage> {
+    public class InboxMessageDelivery implements ShardedMessageDelivery<InboxMessage> {
 
         @Override
-        protected void deliver(List<InboxMessage> incoming,
-                               List<InboxMessage> deduplicationSource) {
+        public void deliver(List<InboxMessage> incoming,
+                            List<InboxMessage> deduplicationSource) {
 
             InboxPart.Dispatcher commandDispatcher =
                     commandPart.dispatcherWith(deduplicationSource);

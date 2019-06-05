@@ -21,8 +21,8 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.Identifier;
 import io.spine.server.sharding.Sharding;
-import io.spine.server.sharding.ShardingStrategy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -56,13 +56,23 @@ public final class ServerEnvironment {
      */
     private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
-    private ShardingStrategy shardingStrategy;
+    /**
+     * The identifier of the application.
+     */
+    private final ApplicationId applicationId;
+
+    /**
+     * The identifier of the server instance running in scope of this application.
+     */
+    private final NodeId nodeId;
 
     private Sharding sharding;
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
         sharding = Sharding.newBuilder().build();
+        applicationId = ApplicationId.newBuilder().setValue("Application").build();
+        nodeId = NodeId.newBuilder().setAppId(applicationId).setValue(Identifier.newUuid()).build();
     }
 
     /**
@@ -98,22 +108,30 @@ public final class ServerEnvironment {
         return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
-    public ShardingStrategy getShardingStrategy() {
-        return shardingStrategy;
-    }
-
-    public void setShardingStrategy(ShardingStrategy shardingStrategy) {
-        checkNotNull(shardingStrategy);
-        this.shardingStrategy = shardingStrategy;
-    }
-
     public void setSharding(Sharding sharding) {
         checkNotNull(sharding);
         this.sharding = sharding;
     }
 
+    /**
+     * Returns the sharding mechanism specific to this environment.
+     */
     public Sharding sharding() {
         return sharding;
+    }
+
+    /**
+     * Obtains the current application identifier.
+     */
+    public ApplicationId getApplicationId() {
+        return applicationId;
+    }
+
+    /**
+     * Obtains the identifier of the application node, on which this code is running at the moment.
+     */
+    public NodeId getNodeId() {
+        return nodeId;
     }
 
     /**

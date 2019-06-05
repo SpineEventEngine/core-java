@@ -23,16 +23,16 @@ package io.spine.server.sharding;
 import java.util.List;
 
 /**
- * A behavior of postponed processing the previously sharded messages.
+ * A delivery routine of postponed processing the previously sharded messages.
  *
  * @param <M>
  *         the type of sharded messages
  * @author Alex Tymchenko
  */
-public abstract class ShardedMessageDelivery<M extends ShardedRecord> {
+public interface ShardedMessageDelivery<M extends ShardedRecord> {
 
     /**
-     * Delivers the previously sharded messages to their targets..
+     * Delivers the previously sharded messages to their targets.
      *
      * <p>The descendants typically will initialize the targets for the messages (such as entities)
      * and handle the dispatching results.
@@ -49,5 +49,5 @@ public abstract class ShardedMessageDelivery<M extends ShardedRecord> {
      * @param deduplicationSource
      *         the messages to look for duplicates amongst
      */
-    protected abstract void deliver(List<M> incoming, List<M> deduplicationSource);
+    void deliver(List<M> incoming, List<M> deduplicationSource);
 }

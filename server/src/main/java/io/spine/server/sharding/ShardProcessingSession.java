@@ -21,23 +21,26 @@
 package io.spine.server.sharding;
 
 import com.google.protobuf.Timestamp;
+import io.spine.server.NodeId;
+
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
- * The session of processing the messages, which belong to a shard.
+ * The session of processing the messages, which reside in a shard.
  *
- * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex) picking up} the shard to process.
+ * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex, NodeId)} picking up}
+ * the shard to process.
  *
  * @author Alex Tymchenko
  */
-public class ShardProcessingSession {
+public abstract class ShardProcessingSession {
 
     private final ShardIndex index;
-    private final Timestamp whenLastMessageProcessed;
+    private Timestamp whenLastMessageProcessed;
 
-    public ShardProcessingSession(ShardIndex index, Timestamp processed) {
-
-        this.index = index;
-        whenLastMessageProcessed = processed;
+    protected ShardProcessingSession(ShardProcessingSessionRecord record) {
+        this.index = record.getIndex();
+        whenLastMessageProcessed = record.getWhenLastMessageProcessed();
     }
 
     public ShardIndex shardIndex() {
@@ -48,7 +51,10 @@ public class ShardProcessingSession {
         return whenLastMessageProcessed;
     }
 
-    void updateLastProcessed(Timestamp timestamp) {};
+    @OverridingMethodsMustInvokeSuper
+    protected void updateLastProcessed(Timestamp timestamp) {
+        this.whenLastMessageProcessed = timestamp;
+    }
 
-    void complete() {}
+    protected abstract void complete();
 }

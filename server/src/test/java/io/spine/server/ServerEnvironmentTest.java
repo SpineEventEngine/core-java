@@ -20,7 +20,7 @@
 
 package io.spine.server;
 
-import io.spine.server.sharding.ShardingStrategy;
+import io.spine.server.sharding.Sharding;
 import io.spine.server.sharding.UniformAcrossAllShards;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,23 +67,24 @@ class ServerEnvironmentTest {
     }
 
     @Test
-    @DisplayName("return single-shard sharding strategy by default")
+    @DisplayName("return disabled sharding by default")
     void returnSingleShardStrategyDefault() {
-        assertEquals(1,
-                     ServerEnvironment.getInstance().getShardingStrategy().getShardCount());
+        assertFalse( ServerEnvironment.getInstance().sharding().enabled());
     }
 
     @Test
-    @DisplayName("allow to customize sharding strategy")
+    @DisplayName("allow to customize sharding mechanism")
     void allowToCustomizeShardingStrategy() {
-        ShardingStrategy strategy = UniformAcrossAllShards.forNumber(42);
+        Sharding newSharding = Sharding.newBuilder()
+                                       .setStrategy(UniformAcrossAllShards.forNumber(42))
+                                       .build();
         ServerEnvironment environment = ServerEnvironment.getInstance();
-        ShardingStrategy defaultValue = environment.getShardingStrategy();
-        environment.setShardingStrategy(strategy);
-        assertEquals(strategy, environment.getShardingStrategy());
+        Sharding defaultValue = environment.sharding();
+        environment.setSharding(newSharding);
+        assertEquals(newSharding, environment.sharding());
 
         // Restore the default value.
-        environment.setShardingStrategy(defaultValue);
+        environment.setSharding(defaultValue);
     }
 
     @Test

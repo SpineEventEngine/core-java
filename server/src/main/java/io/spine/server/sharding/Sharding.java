@@ -30,9 +30,11 @@ import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.BoundedContextNames;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
+import io.spine.server.sharding.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;
@@ -51,8 +53,6 @@ import static java.util.stream.Collectors.groupingBy;
  * A mechanism of splitting the data among the application nodes and dedicating the processing
  * of a particular data piece to a particular node to avoid concurrent modification and prevent
  * the data loss.
- *
- * @author Alex Tymchenko
  */
 public final class Sharding {
 
@@ -122,7 +122,13 @@ public final class Sharding {
      *         the shard index to deliver the messages from.
      */
     public void deliverMessagesFrom(ShardIndex index) {
-        ShardProcessingSession session = workRegistry.pickUp(index);
+        Optional<ShardProcessingSession> picked =
+                workRegistry.pickUp(index, ServerEnvironment.getInstance()
+                                                            .getNodeId());
+        if (!picked.isPresent()) {
+            return;
+        }
+        ShardProcessingSession session = picked.get();
 
         Timestamp now = Time.currentTime();
         Timestamp deduplicationStart = Timestamps.subtract(now, deduplicationPeriod);
@@ -184,6 +190,7 @@ public final class Sharding {
     }
 
     //TODO:2019-06-04:alex.tymchenko: try to pack the logic into the `register` call.
+
     /**
      * Notifies that the shard with the given index has been updated with some message(s).
      *
@@ -275,6 +282,20 @@ public final class Sharding {
             if (strategy == null) {
                 strategy = UniformAcrossAllShards.singleShard();
             }
+
+            StorageFactory storageFactory = initStorageFactory();
+
+            inboxStorage = storageFactory.createInboxStorage();
+
+            if (workRegistry == null) {
+                workRegistry = new InMemoryShardedWorkRegistry();
+            }
+
+            Sharding sharding = new Sharding(this);
+            return sharding;
+        }
+
+        private StorageFactory initStorageFactory() {
             StorageFactory storageFactory;
             if (storageFactorySupplier == null) {
                 storageFactory = InMemoryStorageFactory.newInstance(
@@ -282,9 +303,7 @@ public final class Sharding {
             } else {
                 storageFactory = storageFactorySupplier.get();
             }
-            inboxStorage = storageFactory.createInboxStorage();
-            Sharding sharding = new Sharding(this);
-            return sharding;
+            return storageFactory;
         }
     }
 }

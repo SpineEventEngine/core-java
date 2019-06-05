@@ -29,10 +29,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
 
 /**
- *  The strategy of splitting the entities into a number of shards uniformly.
+ * The strategy of splitting the entities into a number of shards uniformly.
  *
- *  <p>Uses a hash code of the entity identifier and the remainder of its division by the total
- *  number of shards to determine the index of a shard, at which the modification is allowed.
+ * <p>Uses a hash code of the entity identifier and the remainder of its division by the total
+ * number of shards to determine the index of a shard, at which the modification is allowed.
  */
 @Immutable
 public final class UniformAcrossAllShards implements ShardingStrategy, Serializable {
@@ -44,7 +44,8 @@ public final class UniformAcrossAllShards implements ShardingStrategy, Serializa
     /**
      * Creates an instance of this strategy.
      *
-     * @param numberOfShards a number of shards; must be greater than zero
+     * @param numberOfShards
+     *         a number of shards; must be greater than zero
      */
     private UniformAcrossAllShards(int numberOfShards) {
         checkArgument(numberOfShards > 0, "Number of shards must be positive");
@@ -53,7 +54,7 @@ public final class UniformAcrossAllShards implements ShardingStrategy, Serializa
 
     @Override
     public ShardIndex getIndexFor(Object entityId) {
-        if(1 == numberOfShards) {
+        if (1 == numberOfShards) {
             return newIndex(0, 1);
         }
         int hashValue = entityId.hashCode();
@@ -71,7 +72,8 @@ public final class UniformAcrossAllShards implements ShardingStrategy, Serializa
     /**
      * Creates a strategy of uniform target distribution across shards, for a given shard number.
      *
-     * @param totalShards a number of shards
+     * @param totalShards
+     *         a number of shards
      * @return a uniform distribution strategy instance for a given shard number
      */
     public static ShardingStrategy forNumber(int totalShards) {
