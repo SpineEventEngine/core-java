@@ -48,6 +48,9 @@ public abstract class AggregateStorage<I>
         extends AbstractStorage<I, AggregateHistory, AggregateReadRequest<I>>
         implements StorageWithLifecycleFlags<I, AggregateHistory, AggregateReadRequest<I>> {
 
+    private static final String CLIP_ON_WRONG_SNAPSHOT_MESSAGE =
+            "The specified snapshot ordinal number is incorrect";
+
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
     }
@@ -209,24 +212,44 @@ public abstract class AggregateStorage<I>
     /**
      * Drops all records which occur before the Nth snapshot.
      *
-     * <p>The snapshot number is counted from the latest to oldest, where {@code 1} represents the
-     * latest snapshot.
+     * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
+     * the latest snapshot.
+     *
+     * <p>If the specified snapshot number is higher than the overall snapshot count for some
+     * entity, this entity's records remain intact.
      *
      * @throws IllegalArgumentException
-     *         if the {@code snapshotOrdinal} is {@code 0} or less
+     *         if the {@code snapshotNumber} is {@code 0} or less
      */
     @Internal
-    public abstract void clipRecordsUntilSnapshot(int snapshotOrdinal);
+    public void clipRecordsUntilSnapshot(int snapshotNumber) {
+        checkArgument(snapshotNumber > 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
+        clipRecords(snapshotNumber);
+    }
 
     /**
      * Drops all records older than {@code date} but not newer than Nth snapshot.
      *
-     * <p>The snapshot number is counted from the latest to oldest, where {@code 1} represents the
-     * latest snapshot.
+     * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
+     * the latest snapshot.
+     *
+     * <p>If the specified snapshot number is higher than the overall snapshot count for some
+     * entity, this entity's records remain intact.
      *
      * @throws IllegalArgumentException
-     *         if the {@code snapshotOrdinal} is {@code 0} or less
+     *         if the {@code snapshotNumber} is {@code 0} or less
      */
     @Internal
-    public abstract void clipRecordsOlderThan(Timestamp date, int snapshotOrdinal);
+    public void clipRecordsOlderThan(Timestamp date, int snapshotNumber) {
+        checkNotNull(date);
+        checkArgument(snapshotNumber > 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
+        clipRecords(date, snapshotNumber);
+    }
+
+    /**
+     * Drops all records which occur before the Nth snapshot.
+     */
+    protected abstract void clipRecords(int snapshotNumber);
+
+    protected abstract void clipRecords(Timestamp date, int snapshotNumber);
 }

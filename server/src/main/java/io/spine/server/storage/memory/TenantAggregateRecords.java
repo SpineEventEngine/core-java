@@ -21,8 +21,10 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
@@ -31,6 +33,7 @@ import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.spine.server.aggregate.AggregateEventRecord.KindCase.SNAPSHOT;
 import static io.spine.util.Exceptions.unsupported;
 import static io.spine.validate.Validate.isDefault;
 
@@ -134,6 +138,54 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     @Override
     public boolean isEmpty() {
         return records.isEmpty();
+    }
+
+    /**
+     * For each entity, clips records that are older than Nth snapshot.
+     *
+     * @see io.spine.server.aggregate.AggregateStorage#clipRecordsUntilSnapshot(int)
+     */
+    void clipRecordsUntilSnapshot(int snapshotNumber) {
+        ImmutableSet.copyOf(records.keys())
+                    .forEach(key -> clipRecordsUntilSnapshot(key, snapshotNumber));
+    }
+
+    private void clipRecordsUntilSnapshot(I key, int snapshotNumber) {
+        Collection<AggregateEventRecord> aggregateRecords = ImmutableList.copyOf(records.get(key));
+        int snapshotsHit = 0;
+        for (AggregateEventRecord record : aggregateRecords) {
+            if (snapshotsHit >= snapshotNumber) {
+                records.remove(key, record);
+            }
+            if (record.getKindCase() == SNAPSHOT) {
+                snapshotsHit++;
+            }
+        }
+    }
+
+    /**
+     * For each entity, clips records that are older than the specified {@code date}, but
+     * preserving at least N latest snapshots.
+     *
+     * @see io.spine.server.aggregate.AggregateStorage#clipRecordsOlderThan(Timestamp, int)
+     */
+    void clipRecordsOlderThan(Timestamp date, int snapshotNumber) {
+        ImmutableSet.copyOf(records.keys())
+                    .forEach(key -> clipRecordsOlderThan(key, date, snapshotNumber));
+    }
+
+    private void clipRecordsOlderThan(I key, Timestamp date, int snapshotNumber) {
+        Collection<AggregateEventRecord> aggregateRecords = ImmutableList.copyOf(records.get(key));
+        int snapshotsHit = 0;
+        for (AggregateEventRecord record : aggregateRecords) {
+            boolean isAfterDate = Timestamps.compare(date, record.getTimestamp()) > 0;
+            if (snapshotsHit >= snapshotNumber && isAfterDate) {
+                records.remove(key, record);
+            }
+            if (record.getKindCase() == SNAPSHOT) {
+                snapshotsHit++;
+            }
+        }
     }
 
     /** Used for sorting keys by the key hash codes. */
