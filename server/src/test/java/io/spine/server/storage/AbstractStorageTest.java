@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * An abstract base for test suites testing storages.
  *
- * <p>Manages creation and closing of the {@linkplain #getStorage() storage}
+ * <p>Manages creation and closing of the {@linkplain #storage() storage}
  * for the {@linkplain #getTestEntityClass() test entity class}.
  *
  * <p>In case if the storage for different entity class should be tested,
@@ -84,7 +84,7 @@ public abstract class AbstractStorageTest<I,
      *
      * @return the storage, which will be closed automatically after a test
      */
-    protected final S getStorage() {
+    protected final S storage() {
         return storage;
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractStorageTest<I,
      * <p>The resulting storage should be {@linkplain #close(AbstractStorage) closed} manually to
      * release resources, which may be used by the storage.
      *
-     * <p>Use {@linkplain #getStorage() existing storage} if the storage may be tested for
+     * <p>Use {@linkplain #storage() existing storage} if the storage may be tested for
      * the {@linkplain #getTestEntityClass() entity class}.
      *
      * @return an empty storage instance

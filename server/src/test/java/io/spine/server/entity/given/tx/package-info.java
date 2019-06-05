@@ -18,32 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
-
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.storage.LifecycleFlagField;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
- * A test environment for {@link io.spine.server.entity.storage.QueryParametersTest}.
+ * This package contains test environment for {@link io.spine.server.entity.TransactionTest}
+ * and derived test cases.
  */
-public class QueryParametersTestEnv {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.entity.given.tx;
 
-    private QueryParametersTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public static EntityColumn mockColumn(LifecycleFlagField flag, String storedName) {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.storedName()).thenReturn(storedName);
-        when(column.name()).thenReturn(flag.name());
-        return column;
-    }
-
-    public static EntityColumn mockColumn() {
-        EntityColumn column = mock(EntityColumn.class);
-        return column;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

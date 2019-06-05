@@ -65,7 +65,7 @@ class ColumnValueExtractorTest {
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
             assertEquals(entity.getSomeMessage(), columnValues.get("someMessage")
-                                                              .getValue());
+                                                              .value());
         }
 
         @Test
@@ -75,7 +75,7 @@ class ColumnValueExtractorTest {
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
             assertEquals(entity.getIntValue(), columnValues.get("intValue")
-                                                           .getValue());
+                                                           .value());
         }
     }
 
@@ -87,7 +87,7 @@ class ColumnValueExtractorTest {
 
         EntityColumn.MemoizedValue memoizedFloatNull = columnValues.get("floatNull");
         assertNotNull(memoizedFloatNull);
-        assertNull(memoizedFloatNull.getValue());
+        assertNull(memoizedFloatNull.value());
     }
 
     @Test
@@ -98,7 +98,7 @@ class ColumnValueExtractorTest {
 
         assertEquals(entity.getIntegerFieldValue(),
                      columnValues.get(CUSTOM_COLUMN_NAME)
-                                 .getValue());
+                                 .value());
     }
 
     @Test

@@ -100,8 +100,8 @@ public final class EntityLifecycleMonitor<I,
      */
     @Override
     public void onAfterPhase(Phase<I, ?> phase) {
-        checkSameEntity(phase.getEntityId());
-        MessageId messageId = phase.getMessageId();
+        checkSameEntity(phase.entityId());
+        MessageId messageId = phase.messageId();
         acknowledgedMessageIds.add(messageId);
     }
 

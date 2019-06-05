@@ -47,7 +47,7 @@ import static io.spine.server.storage.memory.EntityRecordComparator.orderedBy;
  * The memory-based storage for {@link EntityRecord} that represents
  * all storage operations available for data of a single tenant.
  */
-class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
+final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> activeRecords =
@@ -80,7 +80,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return activeRecords;
     }
 
-    Iterator<EntityRecord> readAllRecords() {
+    Iterator<EntityRecord> readAll() {
         return activeRecords()
                 .values()
                 .stream()
@@ -88,9 +88,9 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                 .iterator();
     }
 
-    Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+    Iterator<EntityRecord> readAll(FieldMask fieldMask) {
         if (fieldMask.getPathsCount() == 0) {
-            return readAllRecords();
+            return readAll();
         }
 
         return activeRecords()
@@ -101,7 +101,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                 .iterator();
     }
 
-    Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+    Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
         return findRecords(query)
                 .map(UNPACKER)
                 .map(new FieldMaskApplier(fieldMask))

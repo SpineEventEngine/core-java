@@ -45,8 +45,8 @@ class ColumnTypeRegistryTest {
 
     private static <T> EntityColumn mockProperty(Class<T> cls) {
         EntityColumn column = mock(EntityColumn.class);
-        when(column.getType()).thenReturn(cls);
-        when(column.getPersistedType()).thenReturn(cls);
+        when(column.type()).thenReturn(cls);
+        when(column.persistedType()).thenReturn(cls);
         return column;
     }
 

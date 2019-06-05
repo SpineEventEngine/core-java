@@ -129,7 +129,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      */
     protected final Object get(int index) {
         Element element = values.get(index);
-        Object result = element.getValue();
+        Object result = element.value();
         return result;
     }
 
@@ -170,7 +170,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         @Override
         public Message next() {
             Element next = source.next();
-            Message result = next.getMessage();
+            Message result = next.toMessage();
             return result;
         }
     }

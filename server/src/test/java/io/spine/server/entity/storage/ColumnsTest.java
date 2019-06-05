@@ -69,16 +69,16 @@ class ColumnsTest {
         String floatNullKey = "floatNull";
         MemoizedValue floatMemoizedNull = fields.get(floatNullKey);
         assertNotNull(floatMemoizedNull);
-        assertNull(floatMemoizedNull.getValue());
+        assertNull(floatMemoizedNull.value());
 
         assertEquals(entity.getIntegerFieldValue(),
                      fields.get(CUSTOM_COLUMN_NAME)
-                           .getValue());
+                           .value());
 
         String messageKey = "someMessage";
         assertEquals(entity.getSomeMessage(),
                      fields.get(messageKey)
-                           .getValue());
+                           .value());
     }
 
     @Test
@@ -120,7 +120,7 @@ class ColumnsTest {
         String existingColumnName = archived.name();
         EntityColumn archivedColumn = findColumn(entityClass, existingColumnName);
         assertNotNull(archivedColumn);
-        assertEquals(existingColumnName, archivedColumn.getName());
+        assertEquals(existingColumnName, archivedColumn.name());
     }
 
     @Test

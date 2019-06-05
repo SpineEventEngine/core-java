@@ -58,12 +58,12 @@ import static java.lang.String.format;
  *
  * <p>A column can have different names for storing and for querying.
  *
- * <p>A {@linkplain #getName() name} for working with {@linkplain EntityQueries queries}
+ * <p>A {@linkplain #name() name} for working with {@linkplain EntityQueries queries}
  * is determined by a name of column getter, for example, {@code value} for {@code getValue()}.
  * A client should specify this value to a {@linkplain io.spine.client.TargetFilters
  * column filters}.
  *
- * <p>A {@linkplain #getStoredName() stored name} is used as a {@code Storage} column name
+ * <p>A {@linkplain #storedName() stored name} is used as a {@code Storage} column name
  * an is defined by the column annotation {@linkplain Column#name() property}.
  *
  * <h2>Examples</h2>
@@ -259,7 +259,7 @@ public class EntityColumn implements Serializable {
      *
      * @return the column name for querying
      */
-    public String getName() {
+    public String name() {
         return name;
     }
 
@@ -268,11 +268,11 @@ public class EntityColumn implements Serializable {
      *
      * <p>The value is obtained from the annotation {@linkplain Column#name() property}.
      * If the property value is empty, the value is equal
-     * to {@linkplain #getName() name for querying}.
+     * to {@linkplain #name() name for querying}.
      *
      * @return the column name for storing
      */
-    public String getStoredName() {
+    public String storedName() {
         return storedName;
     }
 
@@ -293,18 +293,18 @@ public class EntityColumn implements Serializable {
      *         the {@link Entity} to get the Columns from
      * @return the value of the column represented by this instance
      */
-    public @Nullable Serializable getFor(Entity<?, ?> source) {
+    public @Nullable Serializable valueIn(Entity<?, ?> source) {
         try {
             Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
-                checkNotNull(result, format("Not null getter `%s` returned null.", getter.getName()));
+                checkNotNull(result, "Not null getter `%s` returned null.", getter.getName());
             }
             Serializable value = toPersistedValue(result);
             return value;
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw newIllegalStateException(
                     e, "Could not invoke getter of property `%s` from object `%s`.",
-                    getName(),
+                    name(),
                     source
             );
         }
@@ -322,7 +322,7 @@ public class EntityColumn implements Serializable {
      *         into {@link MemoizedValue}
      */
     MemoizedValue memoizeFor(Entity<?, ?> source) {
-        Serializable value = getFor(source);
+        Serializable value = valueIn(source);
         MemoizedValue result = new MemoizedValue(this, value);
         return result;
     }
@@ -330,22 +330,22 @@ public class EntityColumn implements Serializable {
     /**
      * Obtains the type of the column.
      */
-    public Class getType() {
-        return valueConverter.getSourceType();
+    public Class type() {
+        return valueConverter.sourceType();
     }
 
     /**
      * Returns the type under which the column values are persisted in the data storage.
      *
      * <p>For the non-{@link Enumerated} entity columns this type will be equal to the one
-     * retrieved using the {@link #getType()}.
+     * retrieved using the {@link #type()}.
      *
      * <p>For the {@link Enumerated} columns, see {@link EnumConverter} implementations.
      *
      * @return the persistence type of the column values
      */
-    public Class getPersistedType() {
-        return valueConverter.getTargetType();
+    public Class persistedType() {
+        return valueConverter.targetType();
     }
 
     /**
@@ -354,8 +354,8 @@ public class EntityColumn implements Serializable {
      * <p>This method can be used to transform the value obtained through the {@code EntityColumn}
      * getter into the corresponding value used for persistence in the data storage.
      *
-     * <p>The value type should be the same as the one obtained through the {@link #getType()}.
-     * The output value type will be the same as {@link #getPersistedType()}.
+     * <p>The value type should be the same as the one obtained through the {@link #type()}.
+     * The output value type will be the same as {@link #persistedType()}.
      *
      * <p>As the column value may be {@linkplain #isNullable() nullable}, and all {@code null}
      * values are persisted in the data storage as {@code null}, for example, without any conversion.
@@ -369,7 +369,7 @@ public class EntityColumn implements Serializable {
      *         the column value to convert
      * @return the column value converted to the form used for persistence in the data storage
      * @throws IllegalArgumentException
-     *         if the value type is not equal to the {@linkplain #getType() entity column type}
+     *         if the value type is not equal to the {@linkplain #type() entity column type}
      */
     public @Nullable Serializable toPersistedValue(@Nullable Object columnValue) {
         if (columnValue == null) {
@@ -403,13 +403,13 @@ public class EntityColumn implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append(entityType.getSimpleName())
           .append('.')
-          .append(getName());
+          .append(name());
         return sb.toString();
     }
 
     /**
      * Checks that the passed value type is the same as
-     * the {@linkplain #getType() entity column type}.
+     * the {@linkplain #type() entity column type}.
      *
      * @param value
      *         the value to check
@@ -417,7 +417,7 @@ public class EntityColumn implements Serializable {
      *         in case the check fails
      */
     private void checkTypeMatches(Object value) {
-        Class<?> type = getType();
+        Class<?> type = type();
         Class<?> columnType = wrap(type);
         Class<?> valueType = wrap(value.getClass());
         if (!columnType.isAssignableFrom(valueType)) {
@@ -484,7 +484,7 @@ public class EntityColumn implements Serializable {
             this.value = value;
         }
 
-        public @Nullable Serializable getValue() {
+        public @Nullable Serializable value() {
             return value;
         }
 
@@ -495,7 +495,7 @@ public class EntityColumn implements Serializable {
         /**
          * Returns the {@link EntityColumn} representing this column.
          */
-        public EntityColumn getSourceColumn() {
+        public EntityColumn sourceColumn() {
             return sourceColumn;
         }
 
@@ -508,23 +508,23 @@ public class EntityColumn implements Serializable {
                 return false;
             }
             MemoizedValue value1 = (MemoizedValue) o;
-            return Objects.equal(getSourceColumn(), value1.getSourceColumn()) &&
-                    Objects.equal(getValue(), value1.getValue());
+            return Objects.equal(sourceColumn(), value1.sourceColumn()) &&
+                    Objects.equal(value(), value1.value());
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(getSourceColumn(), getValue());
+            return Objects.hashCode(sourceColumn(), value());
         }
 
         /**
          * Creates a new comparator which orders memoized values in an order specified
-         * by {@link MemoizedValue#getValue() their values} comparison.
+         * by {@link MemoizedValue#value() their values} comparison.
          *
          * <p>The memoized values with {@code null} are considered to be less than any other value.
          *
          * <p>A created comparator throws {@link IllegalArgumentException} if
-         * {@link MemoizedValue#getSourceColumn() source columns} do not match.
+         * {@link MemoizedValue#sourceColumn() source columns} do not match.
          *
          * @return an new comparator for non-null {@code MemoizedValue} instances
          */
@@ -535,8 +535,8 @@ public class EntityColumn implements Serializable {
                 checkArgument(columnTypeOf(a).equals(columnTypeOf(b)),
                               "Memoized value compared to mismatching value type.");
 
-                Serializable aValue = a.getValue();
-                Serializable bValue = b.getValue();
+                Serializable aValue = a.value();
+                Serializable bValue = b.value();
 
                 if (aValue == null) {
                     return bValue == null ? 0 : -1;
@@ -555,12 +555,12 @@ public class EntityColumn implements Serializable {
 
         /**
          * Returns a default {@code MemoizedValue} comparator which orders memoized values
-         * in an order specified by {@link MemoizedValue#getValue() their values} comparison.
+         * in an order specified by {@link MemoizedValue#value() their values} comparison.
          *
          * <p>The memoized values with {@code null} are added to the end of the ordered set.
          *
          * <p>The returned comparator throws {@link IllegalArgumentException} if
-         * {@link MemoizedValue#getSourceColumn() source columns} do not match.
+         * {@link MemoizedValue#sourceColumn() source columns} do not match.
          *
          * @return an instance of a default comparator for {@code MemoizedValue} instance
          */
@@ -570,8 +570,8 @@ public class EntityColumn implements Serializable {
 
         private static Class columnTypeOf(MemoizedValue value) {
             checkNotNull(value);
-            return value.getSourceColumn()
-                        .getType();
+            return value.sourceColumn()
+                        .type();
         }
 
         @Override

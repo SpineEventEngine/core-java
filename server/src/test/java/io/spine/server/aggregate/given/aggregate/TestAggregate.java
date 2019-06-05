@@ -50,30 +50,27 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 
 /**
  * An aggregate class with handlers and appliers.
- *
- * <p>This class is declared here instead of being inner class of {@link AggregateTestEnv}
- * because it is heavily connected with internals of this test suite.
  */
 @SuppressWarnings("PublicField") /* For inspection in tests. */
 public class TestAggregate
         extends Aggregate<ProjectId, Project, Project.Builder> {
 
     @VisibleForTesting
-    public boolean isCreateProjectCommandHandled = false;
+    public boolean createProjectCommandHandled = false;
     @VisibleForTesting
-    public boolean isAddTaskCommandHandled = false;
+    public boolean addTaskCommandHandled = false;
     @VisibleForTesting
-    public boolean isStartProjectCommandHandled = false;
+    public boolean startProjectCommandHandled = false;
     @VisibleForTesting
-    public boolean isProjectCreatedEventApplied = false;
+    public boolean projectCreatedEventApplied = false;
     @VisibleForTesting
-    public boolean isTaskAddedEventApplied = false;
+    public boolean taskAddedEventApplied = false;
     @VisibleForTesting
-    public boolean isProjectStartedEventApplied = false;
+    public boolean projectStartedEventApplied = false;
     @VisibleForTesting
-    public boolean isRejectionHandled = false;
+    public boolean rejectionHandled = false;
     @VisibleForTesting
-    public boolean isRejectionWithCmdHandled = false;
+    public boolean rejectionWithCmdHandled = false;
 
     public TestAggregate(ProjectId id) {
         super(id);
@@ -81,15 +78,14 @@ public class TestAggregate
 
     @Assign
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
-        isCreateProjectCommandHandled = true;
-        AggProjectCreated event = projectCreated(cmd.getProjectId(),
-                                                 cmd.getName());
+        createProjectCommandHandled = true;
+        AggProjectCreated event = projectCreated(cmd.getProjectId(), cmd.getName());
         return event;
     }
 
     @Assign
     AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
-        isAddTaskCommandHandled = true;
+        addTaskCommandHandled = true;
         AggTaskAdded event = taskAdded(cmd.getProjectId());
         return event.toBuilder()
                     .setTask(cmd.getTask())
@@ -98,42 +94,42 @@ public class TestAggregate
 
     @Assign
     List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
-        isStartProjectCommandHandled = true;
+        startProjectCommandHandled = true;
         AggProjectStarted message = projectStarted(cmd.getProjectId());
         return ImmutableList.of(message);
     }
 
     @Apply
-    private void event(AggProjectCreated event) {
-        builder().setId(event.getProjectId())
+    private void event(AggProjectCreated e) {
+        builder().setId(e.getProjectId())
                  .setStatus(Status.CREATED);
 
-        isProjectCreatedEventApplied = true;
+        projectCreatedEventApplied = true;
     }
 
     @Apply
-    private void event(AggTaskAdded event) {
-        isTaskAddedEventApplied = true;
-        builder().addTask(event.getTask());
+    private void event(AggTaskAdded e) {
+        taskAddedEventApplied = true;
+        builder().addTask(e.getTask());
     }
 
     @Apply
-    private void event(AggProjectStarted event) {
-        builder().setId(event.getProjectId())
+    private void event(AggProjectStarted e) {
+        builder().setId(e.getProjectId())
                  .setStatus(Status.STARTED);
 
-        isProjectStartedEventApplied = true;
+        projectStartedEventApplied = true;
     }
 
     @React
     Nothing on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
-        isRejectionWithCmdHandled = true;
+        rejectionWithCmdHandled = true;
         return nothing();
     }
 
     @React
     Nothing on(StandardRejections.CannotModifyDeletedEntity rejection) {
-        isRejectionHandled = true;
+        rejectionHandled = true;
         return nothing();
     }
 
