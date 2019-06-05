@@ -40,7 +40,7 @@ import "spine/core/version.proto";
 
 // Event identifier.
 message EventId {
-    option (is).java_type = "io.spine.core.MessageId";
+    option (is).java_type = "io.spine.core.EventIdMixin";
 
     // A value of the event identifier.
     //

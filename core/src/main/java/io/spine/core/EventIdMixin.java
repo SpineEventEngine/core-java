@@ -20,17 +20,13 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
+import io.spine.annotation.GeneratedMixin;
 
-/**
- * An identifier of a message.
- *
- * @see CommandId
- * @see EventId
- */
-@Internal
-public interface MessageId extends Message {
+@GeneratedMixin
+interface EventIdMixin extends MessageId, EventIdOrBuilder {
 
-    String value();
+    @Override
+    default String value() {
+        return getValue();
+    }
 }

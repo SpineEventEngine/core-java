@@ -37,7 +37,7 @@ import "spine/core/diagnostics.proto";
 
 // Command identifier.
 message CommandId {
-    option (is).java_type = "io.spine.core.MessageId";
+    option (is).java_type = "io.spine.core.CommandIdMixin";
 
     string uuid = 1;
 }

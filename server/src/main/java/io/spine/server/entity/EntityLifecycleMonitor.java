@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
@@ -27,6 +28,7 @@ import io.spine.core.MessageQualifier;
 import io.spine.core.MessageWithContext;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
+import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -113,9 +115,9 @@ public final class EntityLifecycleMonitor<I>
     public void onTransactionFailed(Throwable t,
                                     EntityRecord entityRecord,
                                     @Nullable Phase<I, ?> phase) {
-        if (t instanceof InvalidEntityStateException) {
-            ValidationError error = ((InvalidEntityStateException) t).getError()
-                                                                     .getValidationError();
+        Throwable cause = Throwables.getRootCause(t);
+        if (cause instanceof ValidationException) {
+            ValidationError error = ((ValidationException) cause).asValidationError();
             MessageQualifier causeMessage;
             MessageQualifier rootMessage;
             if (phase != null) {
