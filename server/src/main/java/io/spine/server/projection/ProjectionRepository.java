@@ -30,7 +30,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
@@ -236,16 +235,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     protected final Stand stand() {
         return context().stand();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the package.
-     */
-    @Override
-    protected StorageConverter<I, P, S> storageConverter() {
-        return super.storageConverter();
     }
 
     /**

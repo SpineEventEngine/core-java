@@ -128,7 +128,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
     }
 
     /**
-     * Obtains entity column {@linkplain EntityColumn#getStoredName() names} for the record.
+     * Obtains entity column {@linkplain EntityColumn#storedName() names} for the record.
      *
      * @return the entity column names
      */
@@ -138,7 +138,7 @@ public final class EntityRecordWithColumns implements WithLifecycle, Serializabl
 
     /**
      * Obtains the memorized value of the entity column
-     * by the specified {@linkplain EntityColumn#getStoredName() name}.
+     * by the specified {@linkplain EntityColumn#storedName() name}.
      *
      * @param columnName the stored column name
      * @return the memoized value of the column

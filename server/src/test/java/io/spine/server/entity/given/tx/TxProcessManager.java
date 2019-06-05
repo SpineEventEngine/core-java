@@ -18,65 +18,61 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.tx;
+package io.spine.server.entity.given.tx;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.server.entity.given.tx.event.TxCreated;
+import io.spine.server.entity.given.tx.event.TxErrorRequested;
+import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.event.PmProjectCreated;
-import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 
-public class TestProcessManager
-        extends ProcessManager<ProjectId, Project, Project.Builder> {
+/**
+ * Test environment Process Manager for {@link io.spine.server.procman.PmTransactionTest}.
+ */
+public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builder> {
 
     private final List<Message> receivedEvents = newLinkedList();
-    private final @Nullable List<ConstraintViolation> violations;
 
-    public TestProcessManager(ProjectId id) {
-        this(id, null);
-    }
-
-    public TestProcessManager(ProjectId id, @Nullable List<ConstraintViolation> violations) {
+    public TxProcessManager(Id id) {
         super(id);
-        this.violations = violations == null
-                          ? null
-                          : ImmutableList.copyOf(violations);
-    }
-
-    @Override
-    protected List<ConstraintViolation> checkEntityState(Project newState) {
-        if (violations != null) {
-            return ImmutableList.copyOf(violations);
-        }
-        return super.checkEntityState(newState);
     }
 
     @React
-    Nothing event(PmProjectCreated event) {
-        receivedEvents.add(event);
-        Project newState = Project.newBuilder(state())
-                                  .setId(event.getProjectId())
-                                  .build();
-        builder().mergeFrom(newState);
+    Nothing event(TxCreated e) {
+        receivedEvents.add(e);
+        builder().setId(id())
+                 .setName(e.getName())
+                 .build();
         return nothing();
     }
 
+    /**
+     * Always throws {@code RuntimeException} to emulate the case of an error in
+     * a reacting method of a Process Manager.
+     *
+     * @see io.spine.server.procman.PmTransactionTest#failingInHandler()
+     */
     @React
-    Nothing event(PmTaskAdded event) {
+    Nothing event(TxErrorRequested e) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
     }
 
-    public List<Message> getReceivedEvents() {
+    @React
+    Nothing event(TxStateErrorRequested e) {
+        // By convention the first field of state is required.
+        // Clearing it should fail the validation when the transaction is committed.
+        builder().clearId();
+        return nothing();
+    }
+
+    public List<Message> receivedEvents() {
         return ImmutableList.copyOf(receivedEvents);
     }
 }

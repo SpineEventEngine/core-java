@@ -162,7 +162,7 @@ final class ColumnReader {
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
         Collection<String> checkedNames = newLinkedList();
         for (EntityColumn column : columns) {
-            String columnName = column.getStoredName();
+            String columnName = column.storedName();
             if (checkedNames.contains(columnName)) {
                 throw newIllegalStateException(
                         "The entity `%s` has columns with the same name for storing `%s`.",

@@ -119,7 +119,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @Test
     @DisplayName("write and read record by Message ID")
     void writeAndReadByMessageId() {
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         I id = newId();
         EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
@@ -140,7 +140,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .addPaths("invalid-path")
                 .build();
-        RecordStorage storage = getStorage();
+        RecordStorage storage = storage();
         Iterator empty = storage.readAll(nonEmptyFieldMask);
 
         assertNotNull(empty);
@@ -150,7 +150,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @Test
     @DisplayName("delete record")
     void deleteRecord() {
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         I id = newId();
         EntityRecord record = newStorageRecord(id);
 
@@ -169,7 +169,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @Test
     @DisplayName("write none storage fields if none are passed")
     void writeNoneFieldsIfNonePassed() {
-        RecordStorage<I> storage = spy(getStorage());
+        RecordStorage<I> storage = spy(storage());
         I id = newId();
         Any state = pack(Sample.messageOfType(Project.class));
         EntityRecord record =
@@ -185,7 +185,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @DisplayName("fail to write lifecycle flags to non-existing record")
     void notWriteStatusToNonExistent() {
         I id = newId();
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
 
         assertThrows(IllegalStateException.class,
                      () -> storage.writeLifecycleFlags(id, archived()));
@@ -198,7 +198,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         EntityRecord record = newStorageRecord(id);
         EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
         assertFalse(recordWithStorageFields.hasColumns());
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
 
         storage.write(id, recordWithStorageFields);
         RecordReadRequest<I> readRequest = newReadRequest(id);
@@ -217,7 +217,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     void singleRecord() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         storage.write(id, record);
 
         Message state = newState(id);
@@ -237,7 +237,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @Test
     @DisplayName("given field mask, read multiple records")
     void multipleRecords() {
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         int count = 10;
         List<I> ids = new ArrayList<>();
         Class<? extends Message> messageClass = null;
@@ -269,7 +269,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @Test
     @DisplayName("given bulk of records, write them for the first time")
     void forTheFirstTime() {
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         int bulkSize = 5;
 
         Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
@@ -303,7 +303,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @DisplayName("given bulk of records, write them re-writing existing ones")
     void rewritingExisting() {
         int recordCount = 3;
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
 
         Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
         Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
@@ -335,7 +335,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     @DisplayName("return lifecycle flags for missing record")
     void forMissingRecord() {
         I id = newId();
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertFalse(optional.isPresent());
     }
@@ -345,7 +345,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     void forNewRecord() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         storage.write(id, record);
 
         Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
@@ -358,7 +358,7 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
     void forUpdatedRecord() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
-        RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = storage();
         storage.write(id, EntityRecordWithColumns.of(record));
 
         storage.writeLifecycleFlags(id, archived());

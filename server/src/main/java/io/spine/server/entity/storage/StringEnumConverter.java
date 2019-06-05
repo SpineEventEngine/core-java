@@ -33,7 +33,7 @@ final class StringEnumConverter extends EnumConverter {
     }
 
     @Override
-    public Class<? extends Serializable> getTargetType() {
+    public Class<? extends Serializable> targetType() {
         return String.class;
     }
 

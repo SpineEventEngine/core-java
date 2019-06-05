@@ -285,7 +285,11 @@ class ProjectionShould {
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
-        ProtoTruth.assertThat(projection.state()).isEqualTo(SavedString.getDefaultInstance());
+        ProtoTruth.assertThat(projection.state())
+                  // Ignore the difference in the ID field of the state which
+                  // was set automatically by the tx.
+                  .comparingExpectedFieldsOnly()
+                  .isEqualTo(SavedString.getDefaultInstance());
 
         StringImported dispatched = StringImported
                 .newBuilder()
@@ -323,7 +327,7 @@ class ProjectionShould {
         EntityColumnCache cache = EntityColumnCache.initializeFor(projectionType);
         EntityColumn column = cache.findColumn(columnName.toString());
         assertThat(column).isNotNull();
-        assertThat(column.getType()).isEqualTo(columnType);
+        assertThat(column.type()).isEqualTo(columnType);
     }
 
     private static ProjectId newId() {

@@ -40,7 +40,7 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
 /**
  * A factory for in-memory storages.
  */
-public class InMemoryStorageFactory implements StorageFactory {
+public final class InMemoryStorageFactory implements StorageFactory {
 
     private final BoundedContextName context;
     private final boolean multitenant;

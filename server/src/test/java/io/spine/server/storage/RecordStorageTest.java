@@ -95,7 +95,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         ProjectId id = newId();
         EntityRecord record = newStorageRecord(id);
         Entity<ProjectId, ?> testEntity = newEntity(id);
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         EntityRecordWithColumns recordWithColumns = create(record, testEntity, storage);
         storage.write(id, recordWithColumns);
 
@@ -131,7 +131,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(aggregatingFilter)
                 .build();
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
 
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
         ProjectId idMatching = newId();
@@ -199,7 +199,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord notFineRecord1 = buildStorageRecord(idWrong1, newState(idWrong1));
         EntityRecord notFineRecord2 = buildStorageRecord(idWrong2, newState(idWrong2));
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
 
         EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
         EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1, storage);
@@ -243,7 +243,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         archive(archivedEntity);
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         storage.write(activeRecordId, create(activeRecord, activeEntity, storage));
         storage.write(archivedRecordId, create(archivedRecord, archivedEntity, storage));
 
@@ -276,7 +276,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
@@ -317,7 +317,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
@@ -359,7 +359,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
@@ -400,7 +400,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecord deletedRecord = buildStorageRecord(deletedId, deletedEntity.state(),
                                                         deletedEntity.lifecycleFlags());
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
@@ -444,7 +444,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(aggregatingFilter)
                 .build();
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
 
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
 
@@ -506,7 +506,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setIdFilter(idFilter)
                 .addFilter(filter)
                 .build();
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
                 .withActiveLifecycle(storage);
         Iterator<EntityRecord> read = storage.readAll(query);
@@ -551,7 +551,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(aggregatingFilter)
                 .build();
 
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
 
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
         ProjectId idMatching = newId();
@@ -577,7 +577,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
     }
 
     private void write(Entity<ProjectId, ?> entity) {
-        RecordStorage<ProjectId> storage = getStorage();
+        RecordStorage<ProjectId> storage = storage();
         EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
                                                  entity.lifecycleFlags());
         storage.write(entity.id(), create(record, entity, storage));
