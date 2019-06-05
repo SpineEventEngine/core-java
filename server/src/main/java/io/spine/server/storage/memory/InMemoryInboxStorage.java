@@ -20,12 +20,16 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.inbox.InboxId;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Timestamp;
 import io.spine.server.inbox.InboxMessage;
+import io.spine.server.inbox.InboxMessageId;
+import io.spine.server.inbox.InboxReadRequest;
 import io.spine.server.inbox.InboxStorage;
+import io.spine.server.sharding.ShardIndex;
 
 import java.util.Iterator;
-import java.util.List;
+import java.util.Optional;
 
 /**
  * In-memory implementation of messages stored in {@link io.spine.server.inbox.Inbox Inbox}.
@@ -45,26 +49,36 @@ public class InMemoryInboxStorage extends InboxStorage {
     }
 
     @Override
+    public Page<InboxMessage> readAll(ShardIndex index, Timestamp from, Timestamp till) {
+        TenantInboxRecords storage = multitenantStorage.getStorage();
+        ImmutableList<InboxMessage> filtered =
+                storage.readAll()
+                       .stream()
+                       .filter((r) -> index.equals(r.getShardIndex()))
+                       .collect(ImmutableList.toImmutableList());
+        return new InMemoryPage(filtered);
+    }
+
+    @Override
     protected void write(InboxMessage message) {
         multitenantStorage.getStorage()
-                          .put(message.getInboxId(), message);
+                          .put(message.getId(), message);
     }
 
     @Override
-    protected Iterator<InboxMessage> readAll(InboxId id) {
-        List<InboxMessage> result = multitenantStorage.getStorage()
-                                                      .getAll(id);
-        return result.iterator();
-    }
-
-    @Override
-    public Iterator<InboxId> index() {
+    public Iterator<InboxMessageId> index() {
         return multitenantStorage.getStorage()
                                  .index();
     }
 
     @Override
-    public void write(InboxId id, InboxMessage record) {
+    public Optional<InboxMessage> read(InboxReadRequest request) {
+        return multitenantStorage.getStorage()
+                                 .get(request.getRecordId());
+    }
+
+    @Override
+    public void write(InboxMessageId id, InboxMessage record) {
         multitenantStorage.getStorage()
                           .put(id, record);
     }
@@ -74,6 +88,36 @@ public class InMemoryInboxStorage extends InboxStorage {
         TenantInboxRecords storage = multitenantStorage.getStorage();
         for (InboxMessage message : messages) {
             storage.remove(message);
+        }
+    }
+
+    /**
+     * An in-memory implementation of a page of read operation results.
+     *
+     * <p>Always contains the whole result set, so {@link #next() next()} always returns
+     * {@code Optional.empty()}.
+     */
+    private static final class InMemoryPage implements Page<InboxMessage> {
+
+        private final ImmutableList<InboxMessage> contents;
+
+        private InMemoryPage(ImmutableList<InboxMessage> contents) {
+            this.contents = contents;
+        }
+
+        @Override
+        public ImmutableList<InboxMessage> contents() {
+            return contents;
+        }
+
+        @Override
+        public int size() {
+            return contents.size();
+        }
+
+        @Override
+        public Optional<Page<InboxMessage>> next() {
+            return Optional.empty();
         }
     }
 }

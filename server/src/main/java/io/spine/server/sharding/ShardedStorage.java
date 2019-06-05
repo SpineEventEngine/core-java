@@ -50,28 +50,7 @@ public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadR
      *         the shard index to return the results for
      * @return the first page of the results
      */
-    public Page<M> readAll(ShardIndex index, Timestamp from, Timestamp till) {
-        return emptyPage();
-    }
-
-    private Page<M> emptyPage() {
-        return new Page<M>() {
-            @Override
-            public ImmutableList<M> contents() {
-                return ImmutableList.of();
-            }
-
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public Optional<Page<M>> next() {
-                return Optional.empty();
-            }
-        };
-    }
+    public abstract Page<M> readAll(ShardIndex index, Timestamp from, Timestamp till);
 
     public abstract void removeAll(Iterable<M> messages);
 

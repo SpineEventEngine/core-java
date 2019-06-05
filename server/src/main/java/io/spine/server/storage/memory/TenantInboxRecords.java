@@ -20,44 +20,38 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.TreeMultimap;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.server.inbox.InboxId;
 import io.spine.server.inbox.InboxMessage;
+import io.spine.server.inbox.InboxMessageId;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import static io.spine.util.Exceptions.unsupported;
+import java.util.SortedSet;
 
 /**
  * The memory-based storage for {@link io.spine.server.inbox.InboxMessage InboxMessage}s
  * that represents all storage operations available for inbox data of a single tenant.
  */
-class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
+class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMessage> {
 
-    private final Multimap<InboxId, InboxMessage> records = TreeMultimap.create(
-            new InboxStorageKeyComparator(), // key comparator
-            new InboxStorageRecordComparator() // value comparator
-    );
+    private final Map<InboxMessageId, InboxMessage> records = Maps.newConcurrentMap();
 
     @Override
-    public Iterator<InboxId> index() {
+    public Iterator<InboxMessageId> index() {
         return records.keySet()
                       .iterator();
     }
 
     @Override
-    public Optional<InboxMessage> get(InboxId id) {
-        throw unsupported("Returning single record by Inbox ID is not supported");
+    public Optional<InboxMessage> get(InboxMessageId id) {
+        return Optional.ofNullable(records.get(id));
     }
 
     /**
@@ -65,48 +59,26 @@ class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
      *
      * <p>Returns all messages, placing those received earlier first.
      *
-     * @param id
-     *         the identifier of {@code Inbox}
      * @return messages of the {@code Inbox}
      */
-    public List<InboxMessage> getAll(InboxId id) {
-        Collection<InboxMessage> messages = records.get(id);
-        return ImmutableList.copyOf(messages);
+    public SortedSet<InboxMessage> readAll() {
+        ImmutableSortedSet<InboxMessage> result =
+                ImmutableSortedSet.copyOf(new InboxStorageRecordComparator(), records.values());
+        return result;
     }
 
     @Override
-    public void put(InboxId id, InboxMessage record) {
+    public void put(InboxMessageId id, InboxMessage record) {
         records.put(id, record);
     }
 
     public void remove(InboxMessage message) {
-        for (InboxId key : records.keys()) {
-            records.get(key).remove(message);
-        }
+        records.remove(message.getId());
     }
 
     @Override
     public boolean isEmpty() {
         return records.isEmpty();
-    }
-
-    /**
-     * {@code hashCode()}-based comparator for {@code InboxId}-typed keys of the in-memory storage.
-     */
-    static class InboxStorageKeyComparator implements Comparator<InboxId>, Serializable {
-
-        private static final long serialVersionUID = 0L;
-
-        @Override
-        public int compare(InboxId first, InboxId second) {
-            if (Objects.equals(first,second)) {
-                return 0;
-            }
-            int firstHashCode = first.hashCode();
-            int secondHashCode = second.hashCode();
-            int result = Integer.compare(firstHashCode, secondHashCode);
-            return result;
-        }
     }
 
     /**
@@ -121,7 +93,7 @@ class TenantInboxRecords implements TenantStorage<InboxId, InboxMessage> {
 
         @Override
         public int compare(InboxMessage first, InboxMessage second) {
-            if (Objects.equals(first,second)) {
+            if (Objects.equals(first, second)) {
                 return 0;
             }
             Timestamp whenFirstReceived = first.getWhenReceived();

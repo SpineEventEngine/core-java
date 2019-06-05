@@ -23,18 +23,18 @@ package io.spine.server.inbox;
 import io.spine.server.storage.ReadRequest;
 
 /**
- * A request to read the contents of a certain {@link Inbox}.
+ * A request to read a certain {@link InboxMessage} by its ID.
  */
-public class InboxReadRequest implements ReadRequest<InboxId> {
+public class InboxReadRequest implements ReadRequest<InboxMessageId> {
 
-    private final InboxId inboxId;
+    private final InboxMessageId messageId;
 
-    InboxReadRequest(InboxId id) {
-        inboxId = id;
+    InboxReadRequest(InboxMessageId id) {
+        messageId = id;
     }
 
     @Override
-    public InboxId getRecordId() {
-        return inboxId;
+    public InboxMessageId getRecordId() {
+        return messageId;
     }
 }
