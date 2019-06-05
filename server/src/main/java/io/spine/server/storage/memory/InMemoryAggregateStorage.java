@@ -20,6 +20,8 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
@@ -68,7 +70,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        int result = getStorage().getEventCount(id);
+        int result = getStorage().eventCount(id);
         return result;
     }
 
@@ -99,7 +101,19 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         checkNotNull(request);
-        List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
+        List<AggregateEventRecord> records = getStorage().historyBackward(request);
         return records.iterator();
+    }
+
+    @Internal
+    @Override
+    public void clipRecordsUntilSnapshot(int snapshotOrdinal) {
+        // NO-OP for now.
+    }
+
+    @Internal
+    @Override
+    public void clipRecordsOlderThan(Timestamp date, int snapshotOrdinal) {
+        // NO-OP for now.
     }
 }

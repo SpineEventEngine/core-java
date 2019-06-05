@@ -80,7 +80,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      *
      * @return immutable list
      */
-    List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
+    List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         I id = request.getRecordId();
         return ImmutableList.copyOf(records.get(id));
     }
@@ -93,7 +93,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      * @param id the ID of the aggregate
      * @return the number of events stored for the aggregate or zero
      */
-    int getEventCount(I id) {
+    int eventCount(I id) {
         Integer count = eventCounts.get(id);
         if (count == null) {
             return 0;
