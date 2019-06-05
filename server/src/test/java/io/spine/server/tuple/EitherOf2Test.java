@@ -82,8 +82,8 @@ class EitherOf2Test {
     @Test
     @DisplayName("return value index")
     void returnValueIndex() {
-        assertEquals(0, eitherWithA.getIndex());
-        assertEquals(1, eitherWithB.getIndex());
+        assertEquals(0, eitherWithA.index());
+        assertEquals(1, eitherWithB.index());
     }
 
     @Test

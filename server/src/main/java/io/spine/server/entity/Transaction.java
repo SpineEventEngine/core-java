@@ -30,14 +30,12 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.NonValidated;
-import io.spine.validate.ValidationException;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -159,19 +157,39 @@ public abstract class Transaction<I,
      * @see TransactionListener
      */
     protected Transaction(E entity) {
-        checkNotNull(entity);
-
-        this.entity = entity;
+        this.entity = checkNotNull(entity);
         this.initialState = entity.state();
-        this.builder = entity.builderFromState();
+        this.builder = toBuilder(entity);
         this.version = entity.version();
         this.lifecycleFlags = entity.lifecycleFlags();
         this.active = true;
 
         this.transactionListener = new SilentWitness<>();
-
         injectTo(entity);
         this.entityBeforeTransaction = createRecord();
+    }
+
+    /**
+     * Creates the builder for being used by a transaction when modifying the passed entity.
+     *
+     * <p>If the entity has the default state, and the first field of the state is its ID, and
+     * the field is required, initializes the builder with the value of the entity ID.
+     */
+    @VisibleForTesting
+    static <I,
+            E extends TransactionalEntity<I, S, B>,
+            S extends Message,
+            B extends ValidatingBuilder<S>>
+    B toBuilder(E entity) {
+        S currentState = entity.state();
+        @SuppressWarnings("unchecked") // ensured by argument of <E>.
+        B result = (B) currentState.toBuilder();
+
+        if (currentState.equals(entity.defaultState())) {
+            IdField idField = IdField.of(entity.modelClass());
+            idField.initBuilder(result, entity.id());
+        }
+        return result;
     }
 
     /**
@@ -285,16 +303,14 @@ public abstract class Transaction<I,
             commitAttributeChanges();
             EntityRecord newRecord = createRecord();
             afterCommit(entityBeforeTransaction, newRecord);
-        } catch (ValidationException exception) {  /* Could only happen if the state
-                                                      has been injected not using
-                                                      the builder setters. */
-            InvalidEntityStateException invalidStateException = of(exception);
-            rollback(invalidStateException);
-
-            throw invalidStateException;
-        } catch (RuntimeException genericException) {
-            rollback(genericException);
-            throw illegalStateWithCauseOf(genericException);
+        } catch (InvalidEntityStateException e) {
+            /* New state of the entity does not pass validation. */
+            rollback(e);
+            throw e;
+        } catch (RuntimeException e) {
+            /* Exception occurred during execution of a handler method. */
+            rollback(e);
+            throw illegalStateWithCauseOf(e);
         } finally {
             releaseTx();
         }
@@ -376,11 +392,6 @@ public abstract class Transaction<I,
                 .setState(state)
                 .setLifecycleFlags(lifecycleFlags)
                 .build();
-    }
-
-    private InvalidEntityStateException of(ValidationException exception) {
-        @NonValidated Message invalidState = currentBuilderState();
-        return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
     private @NonValidated S currentBuilderState() {

@@ -53,7 +53,7 @@ public final class ColumnRecords {
      *        the {@link io.spine.server.storage.Storage Storage} {@link ColumnTypeRegistry}
      * @param mapColumnIdentifier
      *        a {@linkplain Function} mapping the column name
-     *        {@linkplain EntityColumn#getStoredName()} for storing} to the database specific
+     *        {@linkplain EntityColumn#storedName()} for storing} to the database specific
      *        column identifier
      * @param <D>
      *        the type of the database record
@@ -85,14 +85,14 @@ public final class ColumnRecords {
         I columnIdentifier = mapColumnIdentifier.apply(columnName);
         checkNotNull(columnIdentifier);
         MemoizedValue columnValue = record.getColumnValue(columnName);
-        EntityColumn columnMetadata = columnValue.getSourceColumn();
+        EntityColumn columnMetadata = columnValue.sourceColumn();
 
         @SuppressWarnings("unchecked") // We don't know the exact types of the value
         ColumnType<Object, Object, D, I> columnType =
                 (ColumnType<Object, Object, D, I>) registry.get(columnMetadata);
         checkArgument(columnType != null,
                       format("ColumnType for %s could not be found.",
-                                    columnMetadata.getPersistedType()
+                                    columnMetadata.persistedType()
                                                   .getCanonicalName()));
         setValue(columnValue, destination, columnIdentifier, columnType);
     }
@@ -102,7 +102,7 @@ public final class ColumnRecords {
                                               I columnIdentifier,
                                               ColumnType<J, S, D, I> columnType) {
         @SuppressWarnings("unchecked") // Checked at runtime
-        J initialValue = (J) columnValue.getValue();
+        J initialValue = (J) columnValue.value();
         if (initialValue == null) {
             columnType.setNull(destination, columnIdentifier);
         } else {

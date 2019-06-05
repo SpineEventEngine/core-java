@@ -105,8 +105,8 @@ class EntityQueryMatcherTest {
         Serializable acceptedValue = true;
         EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
-        when(target.getStoredName()).thenReturn(targetName);
-        when(target.getType()).thenReturn(Boolean.class);
+        when(target.storedName()).thenReturn(targetName);
+        when(target.type()).thenReturn(Boolean.class);
         when(target.toPersistedValue(any())).thenReturn(acceptedValue);
 
         Collection<Object> ids = Collections.emptyList();
@@ -130,8 +130,8 @@ class EntityQueryMatcherTest {
                                                .setEntityId(nonMatchingId)
                                                .build();
         EntityColumn.MemoizedValue storedValue = mock(EntityColumn.MemoizedValue.class);
-        when(storedValue.getSourceColumn()).thenReturn(target);
-        when(storedValue.getValue()).thenReturn(acceptedValue);
+        when(storedValue.sourceColumn()).thenReturn(target);
+        when(storedValue.value()).thenReturn(acceptedValue);
         Map<String, EntityColumn.MemoizedValue> matchingColumns =
                 ImmutableMap.of(targetName, storedValue);
         EntityRecordWithColumns nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
@@ -150,13 +150,13 @@ class EntityQueryMatcherTest {
         Any actualValue = AnyPacker.pack(someMessage);
 
         EntityColumn column = mock(EntityColumn.class);
-        when(column.getType()).thenReturn(Any.class);
-        when(column.getStoredName()).thenReturn(columnName);
+        when(column.type()).thenReturn(Any.class);
+        when(column.storedName()).thenReturn(columnName);
         when(column.toPersistedValue(any())).thenReturn(actualValue);
 
         EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
-        when(value.getSourceColumn()).thenReturn(column);
-        when(value.getValue()).thenReturn(actualValue);
+        when(value.sourceColumn()).thenReturn(column);
+        when(value.value()).thenReturn(actualValue);
 
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
         Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);

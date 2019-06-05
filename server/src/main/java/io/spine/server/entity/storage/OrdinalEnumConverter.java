@@ -33,7 +33,7 @@ final class OrdinalEnumConverter extends EnumConverter {
     }
 
     @Override
-    public Class<? extends Serializable> getTargetType() {
+    public Class<? extends Serializable> targetType() {
         return Integer.class;
     }
 

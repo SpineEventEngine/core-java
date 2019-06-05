@@ -195,7 +195,7 @@ class EntityQueryTest {
 
     private static EntityColumn mockColumn() {
         EntityColumn column = mock(EntityColumn.class);
-        when(column.getName()).thenReturn("mockColumn");
+        when(column.name()).thenReturn("mockColumn");
         return column;
     }
 
@@ -204,7 +204,7 @@ class EntityQueryTest {
         Multimap<EntityColumn, Filter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
             EntityColumn column = param.getKey();
-            FieldPath fieldPath = FieldPaths.parse(column.getName());
+            FieldPath fieldPath = FieldPaths.parse(column.name());
             Filter filter = Filter
                     .newBuilder()
                     .setOperator(EQUAL)

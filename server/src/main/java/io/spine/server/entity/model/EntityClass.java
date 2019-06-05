@@ -57,6 +57,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
+    /** Provides info on operations that can see entities of this class. */
     private final EntityVisibility visibility;
 
     /** The default state of entities of this class. */

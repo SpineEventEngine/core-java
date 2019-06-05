@@ -60,7 +60,7 @@ abstract class EnumConverter implements ColumnValueConverter {
     }
 
     @Override
-    public Class<? extends Enum> getSourceType() {
+    public Class<? extends Enum> sourceType() {
         return sourceType;
     }
 

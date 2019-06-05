@@ -108,7 +108,7 @@ class ColumnReaderTest {
 
             Collection<String> columnNames =
                     entityColumns.stream()
-                                 .map(EntityColumn::getName)
+                                 .map(EntityColumn::name)
                                  .collect(toList());
             assertThat(columnNames)
                     .containsAtLeastElementsIn(defaultColumns);

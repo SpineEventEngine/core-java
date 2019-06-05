@@ -103,7 +103,7 @@ public abstract class ProjectionStorageTest
 
     @BeforeEach
     void setUpProjectionStorageTest() {
-        storage = getStorage();
+        storage = storage();
     }
 
     @AfterEach

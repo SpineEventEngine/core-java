@@ -82,10 +82,10 @@ public abstract class Phase<I, R> {
     /**
      * Returns the ID of the entity to which the {@code Message} is dispatched.
      */
-    protected abstract I getEntityId();
+    protected abstract I entityId();
 
     /**
      * Returns the dispatched {@code Message} ID.
      */
-    protected abstract MessageId getMessageId();
+    protected abstract MessageId messageId();
 }

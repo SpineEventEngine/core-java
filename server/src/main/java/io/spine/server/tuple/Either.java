@@ -55,29 +55,29 @@ public abstract class Either implements Iterable<Message>, Serializable {
     /**
      * Obtains the stored value.
      */
-    protected final Message getValue() {
+    protected final Message value() {
         return value;
     }
 
     /**
      * Obtains a zero-based index of the value.
      */
-    protected final int getIndex() {
+    protected final int index() {
         return index;
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals") // We want to save of casts at the callers.
     protected static <T> T get(Either either, int index) {
-        if (index != either.getIndex()) {
+        if (index != either.index()) {
             String errMsg =
                     format("`Either` instance has value of a different type than requested. " +
                                    "Value index in `Either` is %d. Requested index: %d",
-                           either.getIndex(), index);
+                           either.index(), index);
             throw new IllegalStateException(errMsg);
         }
 
         @SuppressWarnings("unchecked") // It's the caller responsibility to ensure correct type.
-        T result = (T) either.getValue();
+        T result = (T) either.value();
         return result;
     }
 

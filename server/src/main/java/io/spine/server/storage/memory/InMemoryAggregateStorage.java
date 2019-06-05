@@ -57,7 +57,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private TenantAggregateRecords<I> getStorage() {
-        return multitenantStorage.getStorage();
+        return multitenantStorage.currentSlice();
     }
 
     @Override

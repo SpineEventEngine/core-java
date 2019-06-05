@@ -63,10 +63,8 @@ class EventPlayingTransaction<I,
     @VisibleForTesting
     public void play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
-        Phase<I, Nothing> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, entity(), event),
-                increment
-        );
+        EventDispatch<I, E, Nothing> dsp = new EventDispatch<>(this::dispatch, entity(), event);
+        Phase<I, Nothing> phase = new EventDispatchingPhase<>(dsp, increment);
         propagate(phase);
     }
 
