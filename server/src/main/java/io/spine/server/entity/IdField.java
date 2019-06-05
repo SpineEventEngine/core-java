@@ -27,7 +27,7 @@ import io.spine.code.proto.FieldDeclaration;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.validate.option.Required;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 final class IdField {
 
-    private final @MonotonicNonNull FieldDeclaration declaration;
+    private final @Nullable FieldDeclaration declaration;
 
     IdField(EntityClass<?> entityClass) {
         Message defaultState = entityClass.defaultState();
