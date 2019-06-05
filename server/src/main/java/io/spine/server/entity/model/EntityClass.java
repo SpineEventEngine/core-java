@@ -68,7 +68,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull EntityFactory<E> factory;
 
-
     /** Creates new instance of the model class for the passed class of entities. */
     protected EntityClass(Class<E> cls) {
         super(cls);
