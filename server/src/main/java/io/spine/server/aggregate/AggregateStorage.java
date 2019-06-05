@@ -213,10 +213,10 @@ public abstract class AggregateStorage<I>
      * latest snapshot.
      *
      * @throws IllegalArgumentException
-     *         if the {@code snapshotNumber} is {@code 0} or less
+     *         if the {@code snapshotOrdinal} is {@code 0} or less
      */
     @Internal
-    public abstract void clipRecordsUntilSnapshot(int snapshotNumber);
+    public abstract void clipRecordsUntilSnapshot(int snapshotOrdinal);
 
     /**
      * Drops all records older than {@code date} but not newer than Nth snapshot.
@@ -225,8 +225,8 @@ public abstract class AggregateStorage<I>
      * latest snapshot.
      *
      * @throws IllegalArgumentException
-     *         if the {@code snapshotNumber} is {@code 0} or less
+     *         if the {@code snapshotOrdinal} is {@code 0} or less
      */
     @Internal
-    public abstract void clipRecordsOlderThan(Timestamp date, int snapshotNumber);
+    public abstract void clipRecordsOlderThan(Timestamp date, int snapshotOrdinal);
 }
