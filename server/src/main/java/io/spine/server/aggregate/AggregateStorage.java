@@ -222,7 +222,7 @@ public abstract class AggregateStorage<I>
      *         if the {@code snapshotNumber} is {@code 0} or less
      */
     @Internal
-    public void clipRecordsUntilSnapshot(int snapshotNumber) {
+    public void clipRecordsBeforeSnapshot(int snapshotNumber) {
         checkArgument(snapshotNumber > 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
         clipRecords(snapshotNumber);
     }

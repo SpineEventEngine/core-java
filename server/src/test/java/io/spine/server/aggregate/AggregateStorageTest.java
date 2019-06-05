@@ -559,7 +559,7 @@ public abstract class AggregateStorageTest
             Snapshot lastSnapshot = writeSnapshot();
 
             int snapshotNumber = 1;
-            storage.clipRecordsUntilSnapshot(snapshotNumber);
+            storage.clipRecordsBeforeSnapshot(snapshotNumber);
 
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records)
@@ -658,7 +658,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("throw IAE when the incorrect snapshot number is specified for clipping")
     void throwIaeOnInvalidClipping() {
-        assertThrows(IllegalArgumentException.class, () -> storage.clipRecordsUntilSnapshot(0));
+        assertThrows(IllegalArgumentException.class, () -> storage.clipRecordsBeforeSnapshot(0));
         assertThrows(IllegalArgumentException.class,
                      () -> storage.clipRecordsOlderThan(Timestamp.getDefaultInstance(), -1));
     }

@@ -142,9 +142,9 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     /**
      * For each entity, clips records that are older than the Nth snapshot.
      *
-     * @see io.spine.server.aggregate.AggregateStorage#clipRecordsUntilSnapshot(int)
+     * @see io.spine.server.aggregate.AggregateStorage#clipRecordsBeforeSnapshot(int)
      */
-    void clipRecordsUntilSnapshot(int snapshotNumber) {
+    void clipRecordsBeforeSnapshot(int snapshotNumber) {
         clipRecords(snapshotNumber, record -> true);
     }
 

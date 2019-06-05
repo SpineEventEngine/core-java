@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -109,7 +108,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Internal
     @Override
     public void clipRecords(int snapshotNumber) {
-        getStorage().clipRecordsUntilSnapshot(snapshotNumber);
+        getStorage().clipRecordsBeforeSnapshot(snapshotNumber);
     }
 
     @Internal
