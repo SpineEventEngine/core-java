@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
@@ -204,4 +205,28 @@ public abstract class AggregateStorage<I>
      */
     protected abstract Iterator<AggregateEventRecord> historyBackward(
             AggregateReadRequest<I> request);
+
+    /**
+     * Drops all records which occur before the Nth snapshot.
+     *
+     * <p>The snapshot number is counted from the latest to oldest, where {@code 1} represents the
+     * latest snapshot.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotNumber} is {@code 0} or less
+     */
+    @Internal
+    public abstract void clipRecordsUntilSnapshot(int snapshotNumber);
+
+    /**
+     * Drops all records older than {@code date} but not newer than Nth snapshot.
+     *
+     * <p>The snapshot number is counted from the latest to oldest, where {@code 1} represents the
+     * latest snapshot.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotNumber} is {@code 0} or less
+     */
+    @Internal
+    public abstract void clipRecordsOlderThan(Timestamp date, int snapshotNumber);
 }
