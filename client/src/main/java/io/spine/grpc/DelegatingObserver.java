@@ -24,6 +24,16 @@ import io.grpc.stub.StreamObserver;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A stream observer which delegates calls to another observer of the same target type.
+ *
+ * <p>This class is meant to be used as an implementation base for observers which delegate all or
+ * some calls to a given observer. The implementations may discard calls to {@code super} when not
+ * required.
+ *
+ * @param <T>
+ *         the observed type
+ */
 public abstract class DelegatingObserver<T> implements StreamObserver<T> {
 
     private final StreamObserver<? super T> delegate;

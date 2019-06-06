@@ -159,6 +159,12 @@ public interface MessageWithContext<I extends MessageId,
         return timeTemporal.isBetween(start, end);
     }
 
+    /**
+     * Obtains the qualifier of this message.
+     *
+     * <p>A message qualifier is a digest information about the message which describes it's origin
+     * but does not describe the message contents.
+     */
     default MessageQualifier qualifier() {
         return MessageQualifier
                 .newBuilder()
@@ -167,5 +173,11 @@ public interface MessageWithContext<I extends MessageId,
                 .vBuild();
     }
 
+    /**
+     * Obtains the qualifier of the first message in the chain.
+     *
+     * <p>The root message is always produced by an actor directly. Tenant and actor of the root
+     * message define the tenant and actor of the whole chain.
+     */
     MessageQualifier rootMessage();
 }

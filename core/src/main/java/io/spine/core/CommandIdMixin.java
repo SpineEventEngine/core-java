@@ -22,6 +22,9 @@ package io.spine.core;
 
 import io.spine.annotation.GeneratedMixin;
 
+/**
+ * A mixin interface for {@link CommandId}.
+ */
 @GeneratedMixin
 interface CommandIdMixin extends MessageId, CommandIdOrBuilder {
 

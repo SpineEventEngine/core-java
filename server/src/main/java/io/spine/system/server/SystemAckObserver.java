@@ -32,23 +32,40 @@ import org.slf4j.Logger;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
-final class SystemMessageObserver implements StreamObserver<Ack> {
+/**
+ * A {@link StreamObserver} for acknowledgement of system messages.
+ *
+ * <p>A single observer observes handling of a single message. Thus, the observer expects the stream
+ * to be unary.
+ *
+ * <p>Logs the message handling results:
+ * <ul>
+ *     <li>successful handling - on {@code debug} level;
+ *     <li>rejections - on {@code warn} level;
+ *     <li>errors - on {@code error} level.
+ * </ul>
+ */
+final class SystemAckObserver implements StreamObserver<Ack> {
 
     private final TypeName messageType;
     private final MessageId messageId;
     private final Logger logger;
 
-    private SystemMessageObserver(TypeName type, MessageId id, Logger logger) {
+    private SystemAckObserver(TypeName type, MessageId id, Logger logger) {
         this.messageType = checkNotNull(type);
         this.messageId = checkNotNull(id);
         this.logger = checkNotNull(logger);
     }
 
-    static SystemMessageObserver ofResultsOf(MessageWithContext<?, ?, ?> message) {
+    /**
+     * Creates a new instance of {@code SystemAckObserver} which observes acknowledgement of the
+     * given system message.
+     */
+    static SystemAckObserver ofResultsOf(MessageWithContext<?, ?, ?> message) {
         MessageId id = message.id();
         TypeName name = message.typeUrl()
                                .toTypeName();
-        return new SystemMessageObserver(name, id, Logging.get(SystemWriteSide.class));
+        return new SystemAckObserver(name, id, Logging.get(SystemWriteSide.class));
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases")

@@ -25,8 +25,11 @@ import io.spine.annotation.GeneratedMixin;
 
 import static io.spine.validate.Validate.isNotDefault;
 
+/**
+ * A mixin interface for the {@link Origin} message type.
+ */
 @GeneratedMixin
-public interface OriginMixin extends Message {
+interface OriginMixin extends Message {
 
     @SuppressWarnings("override")
     MessageQualifier getQualifier();
@@ -38,11 +41,16 @@ public interface OriginMixin extends Message {
     @SuppressWarnings("override")
     OriginMixin getGrandOrigin();
 
+    /**
+     * Obtains the root origin message qualifier.
+     *
+     * <p>The root message has no further origin, as it is produced by an actor.
+     */
     default MessageQualifier root() {
         OriginMixin parent = this;
         while (isNotDefault(parent.getGrandOrigin())) {
             parent = parent.getGrandOrigin();
         }
-        return parent.getQualifier();
+        return parent.qualifier();
     }
 }

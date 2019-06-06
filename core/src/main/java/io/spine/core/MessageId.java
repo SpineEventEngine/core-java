@@ -32,5 +32,10 @@ import io.spine.annotation.Internal;
 @Internal
 public interface MessageId extends Message {
 
+    /**
+     * Obtains the string value of this ID.
+     *
+     * <p>In most cases, the value is a UUID.
+     */
     String value();
 }

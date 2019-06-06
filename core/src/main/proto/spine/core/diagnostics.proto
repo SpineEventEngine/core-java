@@ -28,6 +28,8 @@ message MessageQualifier {
     core.Version version = 3 [(required) = false, (validate) = true];
 }
 
+// Information about an entity at a point in time.
+//
 message EntityQualifier {
 
     google.protobuf.Any id = 1 [(required) = true, (validate) = true];
@@ -37,12 +39,22 @@ message EntityQualifier {
     core.Version version = 3 [(required) = false, (validate) = true];
 }
 
+// An origin of a message.
+//
+// Describes the message chain which led to the associated message to be produced.
+//
 message Origin {
     option (is).java_type = "io.spine.core.OriginMixin";
 
+    // The qualifier of the direct parent of the message.
     MessageQualifier qualifier = 1 [(required) = true, (validate) = true];
 
+    // The origin of the direct parent of the message.
     Origin grand_origin = 2 [(required) = false, (validate) = true];
 
+    // The actor of the message.
+    //
+    // The actor context is shared between all the messages in the chain.
+    //
     ActorContext actor_context = 3 [(validate) = true];
 }

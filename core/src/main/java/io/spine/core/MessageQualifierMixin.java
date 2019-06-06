@@ -26,30 +26,50 @@ import io.spine.annotation.GeneratedMixin;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 
+/**
+ * A mixin interface for the {@link MessageQualifier} type.
+ */
 @GeneratedMixin
-public interface MessageQualifierMixin {
+interface MessageQualifierMixin extends MessageQualifierOrBuilder {
 
-    Any getMessageId();
-
+    /**
+     * Obtains the ID of the message.
+     */
     default MessageId id() {
         return (MessageId) unpack(getMessageId());
     }
 
+    /**
+     * Checks if the associated message is an event.
+     */
     default boolean isEvent() {
         Any id = getMessageId();
         return id.is(EventId.class);
     }
 
+    /**
+     * Obtains the {@link EventId} of the associated message.
+     *
+     * <p>Throws an {@link IllegalStateException} if the associated message is not an event.
+     */
     default EventId asEventId() {
         checkState(isEvent(), "%s is not an event ID.", getMessageId().getTypeUrl());
         return unpack(getMessageId(), EventId.class);
     }
 
+    /**
+     * Checks if the associated message is a command.
+     */
     default boolean isCommand() {
         Any id = getMessageId();
         return id.is(CommandId.class);
     }
 
+    /**
+     * Obtains the {@link CommandId} of the associated message.
+     *
+     * <p>Throws an {@link IllegalStateException} if the associated message is not a command.
+     */
     default CommandId asCommandId() {
         checkState(isCommand(), "%s is not a command ID.", getMessageId().getTypeUrl());
         return unpack(getMessageId(), CommandId.class);
