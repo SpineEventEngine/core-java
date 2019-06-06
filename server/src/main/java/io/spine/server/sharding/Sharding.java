@@ -34,6 +34,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
+import io.spine.server.inbox.InboxWriter;
 import io.spine.server.sharding.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -75,14 +76,15 @@ public final class Sharding {
     private static final Duration ONE_MS = Durations.fromMillis(1);
 
     private final ShardingStrategy strategy;
-    private final Duration deduplicationPeriod;
+
+    private final Duration deduplicationWindow;
 
     /**
-     * The behaviors to call for the postponed message dispatching.
+     * The delivery strategies to use for the postponed message dispatching.
      *
-     * <p>Mapped per {@link TypeUrl}, which is a state type of a target {@code Entity}.
+     * <p>Stored per {@link TypeUrl}, which is a state type of a target {@code Entity}.
      *
-     * <p>Once messages arrive for the postponed processing, a corresponding behavior is selected
+     * <p>Once messages arrive for the postponed processing, a corresponding delivery is selected
      * according to the message contents. The {@code TypeUrl} in this map is stored
      * as {@code String} to avoid an extra boxing into {@code TypeUrl} of the value,
      * which resides as a Protobuf {@code string} inside an incoming message.
@@ -95,7 +97,7 @@ public final class Sharding {
     private Sharding(Builder builder) {
         this.strategy = builder.strategy;
         this.workRegistry = builder.workRegistry;
-        this.deduplicationPeriod = builder.deduplicationPeriod;
+        this.deduplicationWindow = builder.deduplicationWindow;
         this.inboxStorage = builder.inboxStorage;
         this.inboxDeliveries = Maps.newConcurrentMap();
         this.shardObservers = synchronizedList(new ArrayList<>());
@@ -111,12 +113,14 @@ public final class Sharding {
     /**
      * Delivers the messages put into the shard with the passed index to their targets.
      *
-     * <p>At a given moment of time, the only application node may deliver messages from
+     * <p>At a given moment of time, exactly one application node may serve messages from
      * a particular shard. Therefore, in scope of this delivery, an approach based on pessimistic
      * locking per-{@code ShardIndex} is applied.
      *
      * //TODO:2019-06-03:alex.tymchenko: this is not a behavior I'd expect.
      * <p>In case the given shard is not available for delivery, this method does nothing.
+     *
+     * //TODO:2019-06-06:alex.tymchenko: descibe per-page reading.
      *
      * @param index
      *         the shard index to deliver the messages from.
@@ -131,7 +135,7 @@ public final class Sharding {
         ShardProcessingSession session = picked.get();
 
         Timestamp now = Time.currentTime();
-        Timestamp deduplicationStart = Timestamps.subtract(now, deduplicationPeriod);
+        Timestamp deduplicationStart = Timestamps.subtract(now, deduplicationWindow);
         Timestamp whenLastProcessed = session.whenLastMessageProcessed();
 
         Timestamp readTo = Timestamps.subtract(now, ONE_MS);
@@ -189,15 +193,13 @@ public final class Sharding {
         }
     }
 
-    //TODO:2019-06-04:alex.tymchenko: try to pack the logic into the `register` call.
-
     /**
      * Notifies that the shard with the given index has been updated with some message(s).
      *
      * @param shardIndex
      *         an index of the shard
      */
-    public void notify(ShardIndex shardIndex) {
+    private void notify(ShardIndex shardIndex) {
         for (StreamObserver<ShardIndex> observer : shardObservers) {
             observer.onNext(shardIndex);
         }
@@ -219,6 +221,16 @@ public final class Sharding {
     public void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
         inboxDeliveries.put(entityType.value(), inbox.delivery());
+    }
+
+    public InboxWriter inboxWriter() {
+        return new ShardedInboxWriter(inboxStorage) {
+
+            @Override
+            protected void notifyOfUpdate(ShardIndex index) {
+                Sharding.this.notify(index);
+            }
+        };
     }
 
     private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {
@@ -249,7 +261,7 @@ public final class Sharding {
         private Supplier<StorageFactory> storageFactorySupplier;
         private ShardingStrategy strategy;
         private ShardedWorkRegistry workRegistry;
-        private Duration deduplicationPeriod = Duration.getDefaultInstance();
+        private Duration deduplicationWindow = Duration.getDefaultInstance();
 
         /**
          * Prevents a direct instantiation of this class.
@@ -266,8 +278,8 @@ public final class Sharding {
             return this;
         }
 
-        public Builder setDeduplicationPeriod(Duration deduplicationPeriod) {
-            this.deduplicationPeriod = checkNotNull(deduplicationPeriod); ;
+        public Builder setDeduplicationWindow(Duration deduplicationWindow) {
+            this.deduplicationWindow = checkNotNull(deduplicationWindow); ;
             return this;
         }
 

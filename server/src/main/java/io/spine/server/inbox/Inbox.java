@@ -20,7 +20,9 @@
 
 package io.spine.server.inbox;
 
+import io.spine.server.ServerEnvironment;
 import io.spine.server.sharding.ShardedMessageDelivery;
+import io.spine.server.sharding.Sharding;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -113,7 +115,7 @@ public class Inbox<I> {
         private final TypeUrl entityStateType;
         private final Endpoints<I, EventEnvelope> eventEndpoints = new Endpoints<>();
         private final Endpoints<I, CommandEnvelope> commandEndpoints = new Endpoints<>();
-        private InboxStorage storage;
+        private InboxWriter writer;
 
         /**
          * Creates an instance of {@code Builder} for the given {@code Inbox} consumer entity type.
@@ -149,17 +151,17 @@ public class Inbox<I> {
             return this;
         }
 
-        public Builder<I> setStorage(InboxStorage storage) {
-            this.storage = checkNotNull(storage);
-            return this;
-        }
-
         public Inbox<I> build() {
+            Sharding sharding = ServerEnvironment.getInstance()
+                                                 .sharding();
+            this.writer = sharding.inboxWriter();
+            checkNotNull(writer, "Inbox writer must be set");
             checkNotNull(entityStateType, "Entity state type must be set");
-            checkNotNull(storage, "Inbox storage must be set");
             checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),
                           "There must be at least one event or command endpoint");
-            return new Inbox<>(this);
+            Inbox<I> inbox = new Inbox<>(this);
+            sharding.register(inbox);
+            return inbox;
         }
 
         Endpoints<I, EventEnvelope> getEventEndpoints() {
@@ -170,8 +172,8 @@ public class Inbox<I> {
             return commandEndpoints;
         }
 
-        InboxStorage getStorage() {
-            return storage;
+        InboxWriter writer() {
+            return writer;
         }
 
         TypeUrl getEntityStateType() {

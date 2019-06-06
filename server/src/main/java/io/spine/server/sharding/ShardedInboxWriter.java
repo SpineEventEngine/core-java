@@ -18,24 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.sharding;
 
-import io.spine.server.sharding.ShardedStorage;
+import io.spine.server.inbox.InboxMessage;
+import io.spine.server.inbox.InboxStorage;
+import io.spine.server.inbox.InboxWriter;
 
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * A writer of {@link io.spine.server.inbox.Inbox Inbox} messages listens to the write
+ * operations and notifies {@link Sharding} of them.
  */
-public abstract class InboxStorage
-        extends ShardedStorage<InboxMessageId, InboxMessage, InboxReadRequest> {
+public abstract class ShardedInboxWriter implements InboxWriter {
 
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
+    private final InboxStorage storage;
+
+    ShardedInboxWriter(InboxStorage storage) {
+        this.storage = storage;
     }
 
-    /**
-     * Writes a message to the storage.
-     *
-     * @param message a message to write
-     */
-    public abstract void write(InboxMessage message);
+    protected abstract void notifyOfUpdate(ShardIndex index);
+
+    @Override
+    public void write(InboxMessage message) {
+        storage.write(message);
+        notifyOfUpdate(message.getShardIndex());
+    }
 }

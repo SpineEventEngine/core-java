@@ -54,12 +54,12 @@ import java.util.stream.Collectors;
 abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     private final Endpoints<I, M> endpoints;
-    private final InboxStorage storage;
+    private final InboxWriter writer;
     private final TypeUrl entityStateType;
 
     InboxPart(Inbox.Builder<I> builder, Endpoints<I, M> endpoints) {
         this.endpoints = endpoints;
-        this.storage = builder.getStorage();
+        this.writer = builder.writer();
         this.entityStateType = builder.getEntityStateType();
     }
 
@@ -93,7 +93,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
             setRecordPayload(envelope, builder);
             InboxMessage message = builder.vBuild();
 
-            storage.write(message);
+            writer.write(message);
         }
     }
 

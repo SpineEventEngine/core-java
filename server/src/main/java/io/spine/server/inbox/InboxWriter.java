@@ -20,22 +20,10 @@
 
 package io.spine.server.inbox;
 
-import io.spine.server.sharding.ShardedStorage;
-
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * Writes messages into the inbox storage.
  */
-public abstract class InboxStorage
-        extends ShardedStorage<InboxMessageId, InboxMessage, InboxReadRequest> {
+public interface InboxWriter {
 
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
-    }
-
-    /**
-     * Writes a message to the storage.
-     *
-     * @param message a message to write
-     */
-    public abstract void write(InboxMessage message);
+    void write(InboxMessage message);
 }

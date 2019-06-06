@@ -173,7 +173,6 @@ public abstract class ProcessManagerRepository<I,
         checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
         inbox = Inbox
                 .<I>newBuilder(entityStateType())
-                .setStorage(inboxStorage)
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> PmEventEndpoint.of(this, e))
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
