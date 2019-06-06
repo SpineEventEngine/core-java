@@ -48,8 +48,8 @@ public abstract class AggregateStorage<I>
         extends AbstractStorage<I, AggregateHistory, AggregateReadRequest<I>>
         implements StorageWithLifecycleFlags<I, AggregateHistory, AggregateReadRequest<I>> {
 
-    private static final String CLIP_ON_WRONG_SNAPSHOT_MESSAGE =
-            "The specified snapshot ordinal number is incorrect";
+    private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
+            "The specified snapshot index is incorrect";
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -224,7 +224,7 @@ public abstract class AggregateStorage<I>
      */
     @Internal
     public void truncateOlderThan(int snapshotIndex) {
-        checkArgument(snapshotIndex >= 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
         truncate(snapshotIndex);
     }
 
@@ -244,7 +244,7 @@ public abstract class AggregateStorage<I>
     @Internal
     public void truncateOlderThan(Timestamp date, int snapshotIndex) {
         checkNotNull(date);
-        checkArgument(snapshotIndex >= 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
         truncate(date, snapshotIndex);
     }
 
