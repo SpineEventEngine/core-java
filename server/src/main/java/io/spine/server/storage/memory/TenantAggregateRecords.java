@@ -165,7 +165,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      * {@code Predicate}.
      */
     private void clipRecords(int snapshotNumber, Predicate<AggregateEventRecord> predicate) {
-        ImmutableSet.copyOf(records.keys())
+        ImmutableSet.copyOf(records.keySet())
                     .forEach(id -> clipRecords(id, snapshotNumber, predicate));
     }
 
