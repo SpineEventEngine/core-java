@@ -152,9 +152,9 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      * Drops all records older than {@code date} but not newer than the Nth snapshot for each
      * entity.
      *
-     * @see io.spine.server.aggregate.AggregateStorage#truncateOlderThan(Timestamp, int)
+     * @see io.spine.server.aggregate.AggregateStorage#truncateOlderThan(int, Timestamp)
      */
-    void truncateOlderThan(Timestamp date, int snapshotIndex) {
+    void truncateOlderThan(int snapshotIndex, Timestamp date) {
         Predicate<AggregateEventRecord> isOlder =
                 record -> Timestamps.compare(date, record.getTimestamp()) > 0;
         truncate(snapshotIndex, isOlder);

@@ -242,10 +242,10 @@ public abstract class AggregateStorage<I>
      *         if the {@code snapshotIndex} is negative
      */
     @Internal
-    public void truncateOlderThan(Timestamp date, int snapshotIndex) {
+    public void truncateOlderThan(int snapshotIndex, Timestamp date) {
         checkNotNull(date);
         checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
-        truncate(date, snapshotIndex);
+        truncate(snapshotIndex, date);
     }
 
     /**
@@ -257,5 +257,5 @@ public abstract class AggregateStorage<I>
      * Drops all records older than {@code date} but not newer than the Nth snapshot for each
      * entity.
      */
-    protected abstract void truncate(Timestamp date, int snapshotIndex);
+    protected abstract void truncate(int snapshotIndex, Timestamp date);
 }

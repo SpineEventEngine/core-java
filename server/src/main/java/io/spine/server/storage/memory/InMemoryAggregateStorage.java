@@ -21,7 +21,6 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
@@ -105,15 +104,13 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         return records.iterator();
     }
 
-    @Internal
     @Override
-    public void truncate(int snapshotIndex) {
+    protected void truncate(int snapshotIndex) {
         getStorage().truncateOlderThan(snapshotIndex);
     }
 
-    @Internal
     @Override
-    public void truncate(Timestamp date, int snapshotIndex) {
-        getStorage().truncateOlderThan(date, snapshotIndex);
+    protected void truncate(int snapshotIndex, Timestamp date) {
+        getStorage().truncateOlderThan(snapshotIndex, date);
     }
 }

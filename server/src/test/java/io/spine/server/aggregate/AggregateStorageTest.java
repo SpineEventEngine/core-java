@@ -582,7 +582,7 @@ public abstract class AggregateStorageTest
             Snapshot latestSnapshot = writeSnapshot(after);
 
             int snapshotIndex = 0;
-            storage.truncateOlderThan(now, snapshotIndex);
+            storage.truncateOlderThan(snapshotIndex, now);
 
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records)
@@ -608,7 +608,7 @@ public abstract class AggregateStorageTest
             Snapshot snapshot2 = writeSnapshot(after);
 
             int snapshotIndex = 1;
-            storage.truncateOlderThan(now, snapshotIndex);
+            storage.truncateOlderThan(snapshotIndex, now);
 
             // The `event1` should be preserved event though it occurred before the specified date.
             List<AggregateEventRecord> records = newArrayList(historyBackward());
@@ -660,7 +660,7 @@ public abstract class AggregateStorageTest
     void throwIaeOnInvalidTruncate() {
         assertThrows(IllegalArgumentException.class, () -> storage.truncateOlderThan(-1));
         assertThrows(IllegalArgumentException.class,
-                     () -> storage.truncateOlderThan(Timestamp.getDefaultInstance(), -2));
+                     () -> storage.truncateOlderThan(-2, Timestamp.getDefaultInstance()));
     }
 
     @Nested
