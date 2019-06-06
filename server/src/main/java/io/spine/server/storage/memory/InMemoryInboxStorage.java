@@ -38,7 +38,7 @@ public class InMemoryInboxStorage extends InboxStorage {
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
-    protected InMemoryInboxStorage(boolean multitenant) {
+    InMemoryInboxStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantInboxRecords>(multitenant) {
             @Override
