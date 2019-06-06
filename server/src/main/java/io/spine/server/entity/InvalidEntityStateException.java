@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
@@ -63,8 +62,9 @@ public final class InvalidEntityStateException extends ValidationException {
      */
     private final Error error;
 
-    private InvalidEntityStateException(Message entityState, Error error, ImmutableList<ConstraintViolation> violations) {
-        super(violations);
+    private InvalidEntityStateException(Message entityState, Error error) {
+        super(error.getValidationError()
+                   .getConstraintViolationList());
         this.entityState = entityState instanceof GeneratedMessageV3
                            ? (GeneratedMessageV3) entityState
                            : AnyPacker.pack(entityState);
@@ -166,9 +166,7 @@ public final class InvalidEntityStateException extends ValidationException {
             List<ConstraintViolation> violations = error.getValidationError()
                                                         .getConstraintViolationList();
             checkArgument(!violations.isEmpty(), "No constraint violations provided.");
-            return new InvalidEntityStateException(entityState,
-                                                   error,
-                                                   ImmutableList.copyOf(violations));
+            return new InvalidEntityStateException(entityState, error);
         }
     }
 }
