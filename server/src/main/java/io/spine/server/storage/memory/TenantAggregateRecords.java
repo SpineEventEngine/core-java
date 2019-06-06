@@ -161,7 +161,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     /**
-     * Drops records that are preceding the specified snapshot and match the specified
+     * Drops the records that are preceding the specified snapshot and match the specified
      * {@code Predicate}.
      */
     private void truncate(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {

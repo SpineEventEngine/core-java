@@ -236,7 +236,7 @@ public abstract class AggregateStorage<I>
      * the latest snapshot for each entity.
      *
      * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
-     * entity records remain intact in this case.
+     * records remain intact in this case.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotIndex} is negative
