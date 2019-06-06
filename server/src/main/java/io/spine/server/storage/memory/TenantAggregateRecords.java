@@ -170,7 +170,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     /**
-     * Clips records for the given ID that are preceding the specified snapshot and match
+     * Clips records for the given entity ID that are preceding the specified snapshot and match
      * the specified {@code Predicate}.
      */
     private void

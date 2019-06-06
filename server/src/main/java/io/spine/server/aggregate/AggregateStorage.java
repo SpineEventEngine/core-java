@@ -210,13 +210,13 @@ public abstract class AggregateStorage<I>
             AggregateReadRequest<I> request);
 
     /**
-     * Drops all records which occur before the Nth snapshot.
+     * Drops all records which occur before the Nth snapshot for each entity.
      *
      * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
      * the latest snapshot.
      *
-     * <p>If the specified snapshot number is higher than the overall snapshot count for the
-     * entity, entity's records remain intact.
+     * <p>The snapshot number higher than the overall snapshot count of the entity is allowed, the
+     * entity records remain intact in this case.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotNumber} is {@code 0} or less
@@ -228,13 +228,13 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * Drops all records older than {@code date} but not newer than Nth snapshot.
+     * Drops all records older than {@code date} but not newer than Nth snapshot for each entity.
      *
      * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
      * the latest snapshot.
      *
-     * <p>If the specified snapshot number is higher than the overall snapshot count for the
-     * entity, entity's records remain intact.
+     * <p>The snapshot number higher than the overall snapshot count of the entity is allowed, the
+     * entity records remain intact in this case.
      *
      * @throws IllegalArgumentException
      *         if the {@code snapshotNumber} is {@code 0} or less
@@ -247,12 +247,12 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * Drops all records which occur before the Nth snapshot.
+     * Drops all records which occur before the Nth snapshot for each entity.
      */
     protected abstract void clipRecords(int snapshotNumber);
 
     /**
-     * Drops all records older than {@code date} but not newer than Nth snapshot.
+     * Drops all records older than {@code date} but not newer than Nth snapshot for each entity.
      */
     protected abstract void clipRecords(Timestamp date, int snapshotNumber);
 }
