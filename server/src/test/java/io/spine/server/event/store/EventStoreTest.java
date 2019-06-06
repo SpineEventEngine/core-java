@@ -26,9 +26,9 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.ActorContext;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
@@ -198,43 +198,43 @@ public class EventStoreTest {
         TenantId firstTenantId = TenantId
                 .newBuilder()
                 .setValue("abc")
-                .build();
+                .buildPartial();
         TenantId secondTenantId = TenantId
                 .newBuilder()
                 .setValue("xyz")
-                .build();
+                .buildPartial();
         ActorContext firstTenantActor = ActorContext
                 .newBuilder()
                 .setTenantId(firstTenantId)
-                .build();
+                .buildPartial();
         ActorContext secondTenantActor = ActorContext
                 .newBuilder()
                 .setTenantId(secondTenantId)
-                .build();
-        CommandContext firstTenantCommand = CommandContext
+                .buildPartial();
+        Origin firstTenantOrigin = Origin
                 .newBuilder()
                 .setActorContext(firstTenantActor)
-                .build();
-        CommandContext secondTenantCommand = CommandContext
+                .buildPartial();
+        Origin secondTenantOrigin = Origin
                 .newBuilder()
                 .setActorContext(secondTenantActor)
-                .build();
+                .buildPartial();
         EventContext firstTenantContext = EventContext
                 .newBuilder()
-                .setCommandContext(firstTenantCommand)
-                .build();
+                .setPastMessage(firstTenantOrigin)
+                .buildPartial();
         EventContext secondTenantContext = EventContext
                 .newBuilder()
-                .setCommandContext(secondTenantCommand)
-                .build();
+                .setPastMessage(secondTenantOrigin)
+                .buildPartial();
         Event firstTenantEvent = Event
                 .newBuilder()
                 .setContext(firstTenantContext)
-                .build();
+                .buildPartial();
         Event secondTenantEvent = Event
                 .newBuilder()
                 .setContext(secondTenantContext)
-                .build();
+                .buildPartial();
         Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
 
         assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
@@ -262,16 +262,18 @@ public class EventStoreTest {
             assertTrue(isDefault(context.getEnrichment()));
         }
 
+        @SuppressWarnings("deprecation")
+            // Enrichment cleanup still checks for the deprecated fields, so keep the test.
         @Test
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
             Event event = projectCreated(Time.currentTime());
-            CommandContext commandContext = event.context()
-                                                 .getCommandContext();
+            Origin pastMessage = event.context()
+                                      .getPastMessage();
             EventContext originContext =
                     EventContext.newBuilder()
                                 .setEnrichment(withOneAttribute())
-                                .setCommandContext(commandContext)
+                                .setPastMessage(pastMessage)
                                 .setTimestamp(event.context()
                                                    .getTimestamp())
                                 .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
