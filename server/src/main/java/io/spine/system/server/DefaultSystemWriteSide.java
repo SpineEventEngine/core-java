@@ -20,24 +20,14 @@
 
 package io.spine.system.server;
 
-import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.CommandFactory;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.MessageId;
-import io.spine.core.MessageWithContext;
-import io.spine.core.Status;
-import io.spine.core.Status.StatusCase;
 import io.spine.core.UserId;
-import io.spine.logging.Logging;
-import io.spine.type.TypeName;
-import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * The default implementation of {@link SystemWriteSide}.
@@ -64,83 +54,28 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
         Command command = commandFactory.create(systemCommand);
         system.commandBus()
-              .post(command, LoggingObserver.ofResultsOf(command));
+              .post(command, SystemMessageObserver.ofResultsOf(command));
     }
 
     @Override
     public void postEvent(EventMessage systemEvent) {
         checkNotNull(systemEvent);
-        SystemEventFactory factory = SystemEventFactory.forMessage(systemEvent,
-                                                                   system.isMultitenant());
-        Event event = factory.createEvent(systemEvent, null);
+        Event event = event(systemEvent);
         system.importBus()
-              .post(event, LoggingObserver.ofResultsOf(event));
+              .post(event, SystemMessageObserver.ofResultsOf(event));
     }
 
-    private static final class LoggingObserver implements StreamObserver<Ack> {
+    @Override
+    public void notifySystem(EventMessage notification) {
+        checkNotNull(notification);
+        Event event = event(notification);
+        system.eventBus()
+              .post(event, SystemMessageObserver.ofResultsOf(event));
+    }
 
-        private final TypeName messageType;
-        private final MessageId messageId;
-        private final Logger logger;
-
-        private LoggingObserver(TypeName type, MessageId id, Logger logger) {
-            this.messageType = checkNotNull(type);
-            this.messageId = checkNotNull(id);
-            this.logger = checkNotNull(logger);
-        }
-
-        private static LoggingObserver ofResultsOf(MessageWithContext<?, ?, ?> message) {
-            MessageId id = message.id();
-            TypeName name = message.typeUrl()
-                                   .toTypeName();
-            return new LoggingObserver(name, id, Logging.get(SystemWriteSide.class));
-        }
-
-        @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-            // Intentionally covered by the "default" branch.
-        @Override
-        public void onNext(Ack ack) {
-            Status status = ack.getStatus();
-            StatusCase statusCase = status.getStatusCase();
-            switch (statusCase) {
-                case OK:
-                    logger.debug("Message {} acknowledged.", messageInfo());
-                    break;
-                case ERROR:
-                    logger.error("Message {} handled with an error:{}{}",
-                                 messageInfo(),
-                                 System.lineSeparator(),
-                                 status.getError());
-                    break;
-                case REJECTION:
-                    logger.warn("Message {} rejected:{}{}",
-                                messageInfo(),
-                                System.lineSeparator(),
-                                status.getRejection().enclosedMessage());
-                    break;
-                default:
-                    logger.error("Message {} handled with an unexpected status:{}{}",
-                                 messageInfo(),
-                                 System.lineSeparator(),
-                                 ack);
-            }
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            logger.error(format("Error while posting a system message %s.", messageInfo()), t);
-        }
-
-        @Override
-        public void onCompleted() {
-            logger.debug("System message {} posted successfully.", messageInfo());
-        }
-
-        private String messageInfo() {
-            return format("%s[%s: %s]",
-                          messageType,
-                          messageId.getClass().getSimpleName(),
-                          messageId.value());
-        }
+    private Event event(EventMessage message) {
+        SystemEventFactory factory = SystemEventFactory.forMessage(message, system.isMultitenant());
+        Event event = factory.createEvent(message, null);
+        return event;
     }
 }

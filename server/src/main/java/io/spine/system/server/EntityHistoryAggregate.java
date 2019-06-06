@@ -171,9 +171,6 @@ final class EntityHistoryAggregate
         updateLastEventTime(event.getWhenImported());
     }
 
-    @Apply(allowImport = true)
-    private void on(ConstraintViolated event) {}
-
     private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
         DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
         boolean duplicate = lookup.isDuplicate(event);

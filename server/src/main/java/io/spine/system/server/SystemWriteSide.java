@@ -56,6 +56,8 @@ public interface SystemWriteSide {
      */
     void postEvent(EventMessage systemEvent);
 
+    void notifySystem(EventMessage notification);
+
     /**
      * Creates new instance of the {@code SystemWriteSide} which serves the passed system context.
      */

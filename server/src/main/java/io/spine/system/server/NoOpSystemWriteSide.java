@@ -44,4 +44,9 @@ public enum NoOpSystemWriteSide implements SystemWriteSide {
     public void postEvent(EventMessage systemEvent) {
         // NOP.
     }
+
+    @Override
+    public void notifySystem(EventMessage notification) {
+        // NOP.
+    }
 }

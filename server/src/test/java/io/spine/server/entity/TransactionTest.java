@@ -20,7 +20,6 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -40,6 +39,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.newVersion;
 import static io.spine.server.type.given.GivenEvent.withMessage;
@@ -49,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -68,7 +67,9 @@ public abstract class TransactionTest<I,
     private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionTest.class);
 
     private static ValidationException validationException() {
-        ValidationException ex = new ValidationException(Lists.newLinkedList());
+        ImmutableList<ConstraintViolation> violations =
+                ImmutableList.of(ConstraintViolation.getDefaultInstance());
+        ValidationException ex = new ValidationException(violations);
         return ex;
     }
 
@@ -314,13 +315,9 @@ public abstract class TransactionTest<I,
             Version version = someVersion();
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-            try {
-                tx.commit();
-                fail("Expected an exception due to a failed commit.");
-            } catch (IllegalStateException e) {
-                assertEquals(InvalidEntityStateException.class, e.getCause()
-                                                                 .getClass());
-            }
+            InvalidEntityStateException exception =
+                    assertThrows(InvalidEntityStateException.class, tx::commit);
+            assertThat(exception.entityState()).isEqualTo(newState);
         }
     }
 
@@ -338,12 +335,8 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(createEventMessageThatFailsInHandler());
-            try {
-                applyEvent(tx, event);
-                fail("Expected an `Exception` due to a failed phase execution.");
-            } catch (Exception e) {
-                checkRollback(entity, originalState, originalVersion);
-            }
+            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            checkRollback(entity, originalState, originalVersion);
         }
 
         @Test
@@ -357,12 +350,8 @@ public abstract class TransactionTest<I,
             Version version = someVersion();
 
             Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-            try {
-                tx.commit();
-                fail("Expected an IllegalStateException due to a failed commit.");
-            } catch (IllegalStateException e) {
-                checkRollback(entity, originalState, originalVersion);
-            }
+            assertThrows(InvalidEntityStateException.class, tx::commit);
+            checkRollback(entity, originalState, originalVersion);
         }
 
         private void checkRollback(E entity, S originalState, Version originalVersion) {

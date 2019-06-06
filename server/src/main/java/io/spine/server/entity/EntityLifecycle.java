@@ -285,7 +285,7 @@ public class EntityLifecycle {
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
                 .vBuild();
-        postEvent(event);
+        postNotification(event);
     }
 
     private void postIfChanged(EntityRecordChange change,
@@ -395,6 +395,11 @@ public class EntityLifecycle {
     protected void postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
         filtered.ifPresent(systemWriteSide::postEvent);
+    }
+
+    protected void postNotification(EventMessage event) {
+        Optional<? extends EventMessage> filtered = eventFilter.filter(event);
+        filtered.ifPresent(systemWriteSide::notifySystem);
     }
 
     protected void postCommand(CommandMessage command) {
