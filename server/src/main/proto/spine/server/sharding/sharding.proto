@@ -51,7 +51,7 @@ message ShardIndex {
 
 // A record describing the session in scope of which sharded messages are being processed.
 //
-message ShardProcessingSessionRecord {
+message ShardSessionRecord {
 
     // The index of a shard processed in this session.
     //

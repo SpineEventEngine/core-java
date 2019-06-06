@@ -26,7 +26,7 @@ import io.spine.base.Time;
 import io.spine.server.NodeId;
 import io.spine.server.sharding.ShardIndex;
 import io.spine.server.sharding.ShardProcessingSession;
-import io.spine.server.sharding.ShardProcessingSessionRecord;
+import io.spine.server.sharding.ShardSessionRecord;
 import io.spine.server.sharding.ShardedWorkRegistry;
 
 import java.util.Map;
@@ -38,22 +38,22 @@ import java.util.Optional;
  */
 public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
 
-    private final Map<ShardIndex, ShardProcessingSessionRecord> workByNode =
+    private final Map<ShardIndex, ShardSessionRecord> workByNode =
             Maps.newConcurrentMap();
 
     @Override
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
         if (workByNode.containsKey(index)) {
-            ShardProcessingSessionRecord existingRecord = workByNode.get(index);
+            ShardSessionRecord existingRecord = workByNode.get(index);
             if (existingRecord.hasPickedBy()) {
                 return Optional.empty();
             } else {
-                ShardProcessingSessionRecord updatedRecord = updatePickedBy(existingRecord,nodeId);
+                ShardSessionRecord updatedRecord = updatePickedBy(existingRecord,nodeId);
                 return Optional.of(asSession(updatedRecord));
             }
         }
-        ShardProcessingSessionRecord record =
-                ShardProcessingSessionRecord
+        ShardSessionRecord record =
+                ShardSessionRecord
                         .newBuilder()
                         .setIndex(index)
                         .setPickedBy(nodeId)
@@ -62,16 +62,16 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         return Optional.of(asSession(record));
     }
 
-    private ShardProcessingSessionRecord updatePickedBy(ShardProcessingSessionRecord record,
+    private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
                                                         NodeId nodeId) {
-        ShardProcessingSessionRecord updatedRecord = record.toBuilder()
+        ShardSessionRecord updatedRecord = record.toBuilder()
                                                            .setPickedBy(nodeId)
                                                            .vBuild();
         workByNode.put(record.getIndex(), updatedRecord);
         return updatedRecord;
     }
 
-    private ShardProcessingSession asSession(ShardProcessingSessionRecord record) {
+    private ShardProcessingSession asSession(ShardSessionRecord record) {
         return new InMemoryShardSession(record);
     }
 
@@ -80,7 +80,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
      */
     public class InMemoryShardSession extends ShardProcessingSession {
 
-        private InMemoryShardSession(ShardProcessingSessionRecord record) {
+        private InMemoryShardSession(ShardSessionRecord record) {
             super(record);
         }
 
@@ -88,8 +88,8 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         protected void updateLastProcessed(Timestamp timestamp) {
             super.updateLastProcessed(timestamp);
             ShardIndex index = shardIndex();
-            ShardProcessingSessionRecord record = workByNode.get(index);
-            ShardProcessingSessionRecord updatedRecord =
+            ShardSessionRecord record = workByNode.get(index);
+            ShardSessionRecord updatedRecord =
                     record.toBuilder()
                           .setWhenLastMessageProcessed(Time.currentTime())
                           .vBuild();
@@ -98,7 +98,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
 
         @Override
         protected void complete() {
-            ShardProcessingSessionRecord record = workByNode.get(shardIndex());
+            ShardSessionRecord record = workByNode.get(shardIndex());
             // Clear the node ID value and release the session.
             updatePickedBy(record, NodeId.getDefaultInstance());
         }

@@ -38,7 +38,7 @@ public abstract class ShardProcessingSession {
     private final ShardIndex index;
     private Timestamp whenLastMessageProcessed;
 
-    protected ShardProcessingSession(ShardProcessingSessionRecord record) {
+    protected ShardProcessingSession(ShardSessionRecord record) {
         this.index = record.getIndex();
         whenLastMessageProcessed = record.getWhenLastMessageProcessed();
     }

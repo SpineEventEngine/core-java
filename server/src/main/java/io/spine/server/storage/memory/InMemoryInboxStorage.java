@@ -60,7 +60,7 @@ public class InMemoryInboxStorage extends InboxStorage {
     }
 
     @Override
-    protected void write(InboxMessage message) {
+    public void write(InboxMessage message) {
         multitenantStorage.getStorage()
                           .put(message.getId(), message);
     }

@@ -358,7 +358,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         checkNotNull(inboxStorage, "Inbox storage is not initialized in %s", this);
         Inbox<I> inbox = Inbox
                 .<I>newBuilder(entityStateType())
-                .setStorage(inboxStorage)
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))
                 .build();
