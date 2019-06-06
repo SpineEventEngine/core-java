@@ -210,50 +210,52 @@ public abstract class AggregateStorage<I>
             AggregateReadRequest<I> request);
 
     /**
-     * Drops all records which occur before the Nth snapshot for each entity.
+     * Truncates the storage, dropping all records which occur before the Nth snapshot for each
+     * entity.
      *
-     * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
+     * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
      * the latest snapshot.
      *
-     * <p>The snapshot number higher than the overall snapshot count of the entity is allowed, the
+     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
      * entity records remain intact in this case.
      *
      * @throws IllegalArgumentException
-     *         if the {@code snapshotNumber} is {@code 0} or less
+     *         if the {@code snapshotIndex} is negative
      */
     @Internal
-    public void clipRecordsBeforeSnapshot(int snapshotNumber) {
-        checkArgument(snapshotNumber > 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
-        clipRecords(snapshotNumber);
+    public void truncateOlderThan(int snapshotIndex) {
+        checkArgument(snapshotIndex >= 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
+        truncate(snapshotIndex);
     }
+
+    /**
+     * Truncates the storage, dropping all records older than {@code date} but not newer than the
+     * Nth snapshot.
+     *
+     * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
+     * the latest snapshot for each entity.
+     *
+     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
+     * entity records remain intact in this case.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotIndex} is negative
+     */
+    @Internal
+    public void truncateOlderThan(Timestamp date, int snapshotIndex) {
+        checkNotNull(date);
+        checkArgument(snapshotIndex >= 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
+        truncate(date, snapshotIndex);
+    }
+
+    /**
+     * Drops all records which occur before the Nth snapshot for each entity.
+     */
+    protected abstract void truncate(int snapshotIndex);
 
     /**
      * Drops all records older than {@code date} but not newer than the Nth snapshot for each
      * entity.
-     *
-     * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
-     * the latest snapshot.
-     *
-     * <p>The snapshot number higher than the overall snapshot count of the entity is allowed, the
-     * entity records remain intact in this case.
-     *
-     * @throws IllegalArgumentException
-     *         if the {@code snapshotNumber} is {@code 0} or less
      */
-    @Internal
-    public void clipRecordsOlderThan(Timestamp date, int snapshotNumber) {
-        checkNotNull(date);
-        checkArgument(snapshotNumber > 0, CLIP_ON_WRONG_SNAPSHOT_MESSAGE);
-        clipRecords(date, snapshotNumber);
-    }
-
-    /**
-     * Drops all records which occur before the Nth snapshot for each entity.
-     */
-    protected abstract void clipRecords(int snapshotNumber);
-
-    /**
-     * Drops all records older than {@code date} but not newer than Nth snapshot for each entity.
-     */
-    protected abstract void clipRecords(Timestamp date, int snapshotNumber);
+    protected abstract void truncate(Timestamp date, int snapshotIndex);
 }

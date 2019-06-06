@@ -140,45 +140,41 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     /**
-     * For each entity, clips the records that are older than the Nth snapshot.
+     * Drops all records that are older than the Nth snapshot for each entity.
      *
-     * @see io.spine.server.aggregate.AggregateStorage#clipRecordsBeforeSnapshot(int)
+     * @see io.spine.server.aggregate.AggregateStorage#truncateOlderThan(int)
      */
-    void clipRecordsBeforeSnapshot(int snapshotNumber) {
-        clipRecords(snapshotNumber, record -> true);
+    void truncateOlderThan(int snapshotIndex) {
+        truncate(snapshotIndex, record -> true);
     }
 
     /**
-     * For each entity, clips the records that are older than the specified {@code date}, but
-     * leaving at least N latest snapshots.
+     * Drops all records older than {@code date} but not newer than the Nth snapshot for each
+     * entity.
      *
-     * @see io.spine.server.aggregate.AggregateStorage#clipRecordsOlderThan(Timestamp, int)
+     * @see io.spine.server.aggregate.AggregateStorage#truncateOlderThan(Timestamp, int)
      */
-    void clipRecordsOlderThan(Timestamp date, int snapshotNumber) {
+    void truncateOlderThan(Timestamp date, int snapshotIndex) {
         Predicate<AggregateEventRecord> isOlder =
                 record -> Timestamps.compare(date, record.getTimestamp()) > 0;
-        clipRecords(snapshotNumber, isOlder);
+        truncate(snapshotIndex, isOlder);
     }
 
     /**
-     * Clips records that are preceding the specified snapshot and match the specified
+     * Drops records that are preceding the specified snapshot and match the specified
      * {@code Predicate}.
      */
-    private void clipRecords(int snapshotNumber, Predicate<AggregateEventRecord> predicate) {
+    private void truncate(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
         ImmutableSet.copyOf(records.keySet())
-                    .forEach(id -> clipRecords(id, snapshotNumber, predicate));
+                    .forEach(id -> truncate(id, snapshotIndex, predicate));
     }
 
-    /**
-     * Clips records for the given entity ID that are preceding the specified snapshot and match
-     * the specified {@code Predicate}.
-     */
     private void
-    clipRecords(I id, int snapshotNumber, Predicate<AggregateEventRecord> predicate) {
+    truncate(I id, int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
         ImmutableList<AggregateEventRecord> recordsCopy = ImmutableList.copyOf(records.get(id));
         int snapshotsHit = 0;
         for (AggregateEventRecord record : recordsCopy) {
-            if (snapshotsHit >= snapshotNumber && predicate.test(record)) {
+            if (snapshotsHit > snapshotIndex && predicate.test(record)) {
                 this.records.remove(id, record);
             }
             if (AggregateStorageRecordReverseComparator.isSnapshot(record)) {

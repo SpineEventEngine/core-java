@@ -541,8 +541,8 @@ public abstract class AggregateStorageTest
     }
 
     @Nested
-    @DisplayName("clip records")
-    class ClipRecords {
+    @DisplayName("truncate storage")
+    class Truncate {
 
         private Version currentVersion;
 
@@ -556,16 +556,16 @@ public abstract class AggregateStorageTest
         void toTheNthSnapshot() {
             writeSnapshot();
             writeEvent();
-            Snapshot lastSnapshot = writeSnapshot();
+            Snapshot latestSnapshot = writeSnapshot();
 
-            int snapshotNumber = 1;
-            storage.clipRecordsBeforeSnapshot(snapshotNumber);
+            int snapshotIndex = 0;
+            storage.truncateOlderThan(snapshotIndex);
 
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records)
                     .hasSize(1);
             assertThat(records.get(0).getSnapshot())
-                    .isEqualTo(lastSnapshot);
+                    .isEqualTo(latestSnapshot);
         }
 
         @Test
@@ -581,8 +581,8 @@ public abstract class AggregateStorageTest
             Event latestEvent = writeEvent(after);
             Snapshot latestSnapshot = writeSnapshot(after);
 
-            int snapshotNumber = 1;
-            storage.clipRecordsOlderThan(now, snapshotNumber);
+            int snapshotIndex = 0;
+            storage.truncateOlderThan(now, snapshotIndex);
 
             List<AggregateEventRecord> records = newArrayList(historyBackward());
             assertThat(records)
@@ -594,7 +594,7 @@ public abstract class AggregateStorageTest
         }
 
         @Test
-        @DisplayName("by date preserving at least Nth latest snapshot")
+        @DisplayName("by date preserving at least the Nth latest snapshot")
         void byDateAndSnapshot() {
             Duration delta = seconds(10);
             Timestamp now = currentTime();
@@ -607,8 +607,8 @@ public abstract class AggregateStorageTest
             Event event2 = writeEvent(after);
             Snapshot snapshot2 = writeSnapshot(after);
 
-            int snapshotNumber = 2;
-            storage.clipRecordsOlderThan(now, snapshotNumber);
+            int snapshotIndex = 1;
+            storage.truncateOlderThan(now, snapshotIndex);
 
             // The `event1` should be preserved event though it occurred before the specified date.
             List<AggregateEventRecord> records = newArrayList(historyBackward());
@@ -656,11 +656,11 @@ public abstract class AggregateStorageTest
     }
 
     @Test
-    @DisplayName("throw IAE when the incorrect snapshot number is specified for clipping")
-    void throwIaeOnInvalidClipping() {
-        assertThrows(IllegalArgumentException.class, () -> storage.clipRecordsBeforeSnapshot(0));
+    @DisplayName("throw IAE when the incorrect snapshot index is specified for truncate operation")
+    void throwIaeOnInvalidTruncate() {
+        assertThrows(IllegalArgumentException.class, () -> storage.truncateOlderThan(-1));
         assertThrows(IllegalArgumentException.class,
-                     () -> storage.clipRecordsOlderThan(Timestamp.getDefaultInstance(), -1));
+                     () -> storage.truncateOlderThan(Timestamp.getDefaultInstance(), -2));
     }
 
     @Nested

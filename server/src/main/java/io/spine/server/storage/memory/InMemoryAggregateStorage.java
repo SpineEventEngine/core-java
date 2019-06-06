@@ -107,13 +107,13 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Internal
     @Override
-    public void clipRecords(int snapshotNumber) {
-        getStorage().clipRecordsBeforeSnapshot(snapshotNumber);
+    public void truncate(int snapshotIndex) {
+        getStorage().truncateOlderThan(snapshotIndex);
     }
 
     @Internal
     @Override
-    public void clipRecords(Timestamp date, int snapshotNumber) {
-        getStorage().clipRecordsOlderThan(date, snapshotNumber);
+    public void truncate(Timestamp date, int snapshotIndex) {
+        getStorage().truncateOlderThan(date, snapshotIndex);
     }
 }
