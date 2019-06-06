@@ -228,7 +228,8 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * Drops all records older than {@code date} but not newer than Nth snapshot for each entity.
+     * Drops all records older than {@code date} but not newer than the Nth snapshot for each
+     * entity.
      *
      * <p>The snapshot number is counted from the latest to earliest, where {@code 1} represents
      * the latest snapshot.

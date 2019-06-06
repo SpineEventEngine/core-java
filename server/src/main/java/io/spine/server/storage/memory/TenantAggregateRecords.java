@@ -140,7 +140,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     /**
-     * For each entity, clips records that are older than the Nth snapshot.
+     * For each entity, clips the records that are older than the Nth snapshot.
      *
      * @see io.spine.server.aggregate.AggregateStorage#clipRecordsBeforeSnapshot(int)
      */
@@ -149,7 +149,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     }
 
     /**
-     * For each entity, clips records that are older than the specified {@code date}, but
+     * For each entity, clips the records that are older than the specified {@code date}, but
      * leaving at least N latest snapshots.
      *
      * @see io.spine.server.aggregate.AggregateStorage#clipRecordsOlderThan(Timestamp, int)
