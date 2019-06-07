@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -268,7 +267,7 @@ public abstract class TransactionTest<I,
         applyEvent(tx, event);
         S stateBeforeRollback = entity.state();
         Version versionBeforeRollback = entity.version();
-        tx.rollback(new RuntimeException("that triggers rollback"), null);
+        tx.rollback(new RuntimeException("that triggers rollback"));
 
         S stateAfterRollback = entity.state();
         Version versionAfterRollback = entity.version();
@@ -359,7 +358,7 @@ public abstract class TransactionTest<I,
     class RollbackAutomatically {
 
         @Test
-        @DisplayName("if phase failed")
+        @DisplayName("on violation at phase")
         void ifPhaseFailed() {
             E entity = createEntity();
             S originalState = entity.state();
@@ -368,16 +367,12 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(failingInHandler());
-            try {
-                applyEvent(tx, event);
-                fail("Expected an `Exception` due to a failed phase execution.");
-            } catch (Exception e) {
-                checkRollback(entity, originalState, originalVersion);
-            }
+            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            checkRollback(entity, originalState, originalVersion);
         }
 
         @Test
-        @DisplayName("if commit failed")
+        @DisplayName("on violation at commit")
         void ifCommitFailed() {
             E entity = createAndModify();
             S originalState = entity.state();
@@ -388,12 +383,8 @@ public abstract class TransactionTest<I,
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
             applyEvent(tx, event);
 
-            try {
-                tx.commit();
-                fail("Expected an `InvalidEntityStateException` due to a failed commit.");
-            } catch (InvalidEntityStateException e) {
-                checkRollback(entity, originalState, originalVersion);
-            }
+            assertThrows(InvalidEntityStateException.class, tx::commit);
+            checkRollback(entity, originalState, originalVersion);
         }
 
         private E createAndModify() {

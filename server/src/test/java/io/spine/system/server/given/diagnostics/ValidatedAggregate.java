@@ -17,31 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.tx;
+package io.spine.system.server.given.diagnostics;
 
-import "spine/options.proto";
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.system.server.test.TextValidated;
+import io.spine.system.server.test.ValidateAndSet;
+import io.spine.system.server.test.Validated;
+import io.spine.system.server.test.ValidatedId;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.entity.given.tx.event";
-option java_outer_classname = "TxTestEventsProto";
-option java_multiple_files = true;
+public final class ValidatedAggregate extends Aggregate<ValidatedId, Validated, Validated.Builder> {
 
-import "spine/test/tx/tx_entities.proto";
+    @Assign
+    TextValidated handle(ValidateAndSet command) {
+        return TextValidated
+                .newBuilder()
+                .setId(id())
+                .setValidText(command.getTextToValidate())
+                .vBuild();
+    }
 
-message TxCreated {
-    Id id = 1;
-    string name = 2;
-}
-
-// The event which causes the handling entity to fail with a `RuntimeException`.
-message TxErrorRequested {
-    Id id = 1;
-}
-
-// The event which causes the state builder of the handling entity to go into the state which
-// does not pass the validation.
-message TxStateErrorRequested {
-    Id id = 1;
+    @Apply
+    private void on(TextValidated event) {
+        builder().setId(event.getId())
+                 .setOnlyLetters(event.getValidText());
+    }
 }

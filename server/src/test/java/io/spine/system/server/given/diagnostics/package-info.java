@@ -17,31 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.tx;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server.given.diagnostics;
 
-import "spine/options.proto";
+import com.google.errorprone.annotations.CheckReturnValue;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.entity.given.tx.event";
-option java_outer_classname = "TxTestEventsProto";
-option java_multiple_files = true;
-
-import "spine/test/tx/tx_entities.proto";
-
-message TxCreated {
-    Id id = 1;
-    string name = 2;
-}
-
-// The event which causes the handling entity to fail with a `RuntimeException`.
-message TxErrorRequested {
-    Id id = 1;
-}
-
-// The event which causes the state builder of the handling entity to go into the state which
-// does not pass the validation.
-message TxStateErrorRequested {
-    Id id = 1;
-}
+import javax.annotation.ParametersAreNonnullByDefault;
