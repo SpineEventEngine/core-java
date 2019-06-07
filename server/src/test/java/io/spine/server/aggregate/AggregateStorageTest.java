@@ -112,7 +112,7 @@ public abstract class AggregateStorageTest
     @BeforeEach
     public void setUpAbstractStorageTest() {
         super.setUpAbstractStorageTest();
-        storage = getStorage();
+        storage = storage();
     }
 
     @Override

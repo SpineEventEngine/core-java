@@ -76,7 +76,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * <p>Assigned either through the {@linkplain #AbstractEntity(Object)} constructor which
      * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
      */
-    private I id;
+    private @MonotonicNonNull I id;
 
     /** Cached version of string ID. */
     @LazyInit
@@ -96,7 +96,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     private volatile Version version;
 
     /** The lifecycle flags of the entity. */
-    private volatile LifecycleFlags lifecycleFlags;
+    private volatile @MonotonicNonNull LifecycleFlags lifecycleFlags;
 
     /**
      * Indicates if the lifecycle flags of the entity were changed since initialization.
@@ -128,7 +128,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Assigns the ID to the entity.
      */
-    @SuppressWarnings("InstanceVariableUsedBeforeInitialized") // safety check on overriding the ID.
     final void setId(I id) {
         checkNotNull(id);
         if (this.id != null) {
@@ -185,6 +184,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Obtains model class for this entity.
      */
+    @Internal
     protected EntityClass<?> thisClass() {
         EntityClass<?> result = thisClass;
         if (result == null) {
@@ -249,7 +249,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         a state object to replace the current state
      * @return the violation constraints
      */
-    protected List<ConstraintViolation> checkEntityState(S newState) {
+    protected final List<ConstraintViolation> checkEntityState(S newState) {
         checkNotNull(newState);
         return MessageValidator.newInstance(newState)
                                .validate();

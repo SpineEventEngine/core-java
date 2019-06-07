@@ -17,33 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.entity.storage.given;
+package spine.test.tx;
 
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.storage.LifecycleFlagField;
+import "spine/options.proto";
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.entity.given.tx.event";
+option java_outer_classname = "TxTestEventsProto";
+option java_multiple_files = true;
 
-/**
- * A test environment for {@link io.spine.server.entity.storage.QueryParametersTest}.
- */
-public class QueryParametersTestEnv {
+import "spine/core/user_id.proto";
 
-    private QueryParametersTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
+import "spine/test/tx/tx_entities.proto";
 
-    public static EntityColumn mockColumn(LifecycleFlagField flag, String storedName) {
-        EntityColumn column = mock(EntityColumn.class);
-        when(column.storedName()).thenReturn(storedName);
-        when(column.name()).thenReturn(flag.name());
-        return column;
-    }
+message TxCreated {
+    Id id = 1;
+    string name = 2;
+}
 
-    public static EntityColumn mockColumn() {
-        EntityColumn column = mock(EntityColumn.class);
-        return column;
-    }
+// The event which causes the handling entity to fail with a `RuntimeException`.
+message TxErrorRequested {
+    Id id = 1;
+}
+
+// The event which causes the state builder of the handling entity to go into the state which
+// does not pass the validation.
+message TxStateErrorRequested {
+    Id id = 1;
 }

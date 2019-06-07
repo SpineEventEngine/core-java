@@ -107,7 +107,7 @@ class ColumnTest {
         TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
                                     .withId(1L)
                                     .build();
-        boolean isArchived = (boolean) column.getFor(entity);
+        boolean isArchived = (boolean) column.valueIn(entity);
         assertFalse(isArchived);
     }
 
@@ -133,9 +133,9 @@ class ColumnTest {
         entity.setMutableState(initialState);
         MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
         entity.setMutableState(changedState);
-        int extractedState = (int) mutableColumn.getFor(entity);
+        int extractedState = (int) mutableColumn.valueIn(entity);
 
-        Integer value = (Integer) memoizedState.getValue();
+        Integer value = (Integer) memoizedState.value();
         assertNotNull(value);
         assertEquals(initialState, value.intValue());
         assertEquals(changedState, extractedState);
@@ -220,7 +220,7 @@ class ColumnTest {
         EntityColumn column = forMethod("getMutableState", TestEntity.class);
 
         assertThrows(IllegalArgumentException.class,
-                     () -> column.getFor(new EntityWithCustomColumnNameForStoring("")));
+                     () -> column.valueIn(new EntityWithCustomColumnNameForStoring("")));
     }
 
     @Test
@@ -238,14 +238,14 @@ class ColumnTest {
     void checkNonNullable() {
         EntityColumn column = forMethod("getNotNull", TestEntity.class);
 
-        assertThrows(NullPointerException.class, () -> column.getFor(new TestEntity("")));
+        assertThrows(NullPointerException.class, () -> column.valueIn(new TestEntity("")));
     }
 
     @Test
     @DisplayName("allow null values if getter is nullable")
     void allowNullForNullable() {
         EntityColumn column = forMethod("getNull", TestEntity.class);
-        Object value = column.getFor(new TestEntity(""));
+        Object value = column.valueIn(new TestEntity(""));
         assertNull(value);
     }
 
@@ -253,7 +253,7 @@ class ColumnTest {
     @DisplayName("contain property type")
     void containType() {
         EntityColumn column = forMethod("getLong", TestEntity.class);
-        assertEquals(Long.TYPE, column.getType());
+        assertEquals(Long.TYPE, column.type());
     }
 
     @Nested
@@ -266,7 +266,7 @@ class ColumnTest {
             EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
             MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
             assertTrue(memoizedNull.isNull());
-            assertNull(memoizedNull.getValue());
+            assertNull(memoizedNull.value());
         }
 
         @Test
@@ -275,7 +275,7 @@ class ColumnTest {
             EntityColumn column = forMethod("getMutableState", TestEntity.class);
             Entity<String, Any> entity = new TestEntity("");
             MemoizedValue memoizedValue = column.memoizeFor(entity);
-            assertSame(column, memoizedValue.getSourceColumn());
+            assertSame(column, memoizedValue.sourceColumn());
         }
 
         @Test
@@ -286,7 +286,7 @@ class ColumnTest {
             MemoizedValue actualValue = column.memoizeFor(entity);
             int expectedValue = entity.getEnumOrdinal()
                                       .ordinal();
-            assertEquals(expectedValue, actualValue.getValue());
+            assertEquals(expectedValue, actualValue.value());
         }
 
         @Test
@@ -297,7 +297,7 @@ class ColumnTest {
             MemoizedValue actualValue = column.memoizeFor(entity);
             String expectedValue = entity.getEnumOrdinal()
                                          .name();
-            assertEquals(expectedValue, actualValue.getValue());
+            assertEquals(expectedValue, actualValue.value());
         }
     }
 
@@ -309,8 +309,8 @@ class ColumnTest {
         @DisplayName("custom if specified")
         void custom() {
             EntityColumn column = forMethod("getValue", EntityWithCustomColumnNameForStoring.class);
-            assertEquals("value", column.getName());
-            assertEquals(CUSTOM_COLUMN_NAME.trim(), column.getStoredName());
+            assertEquals("value", column.name());
+            assertEquals(CUSTOM_COLUMN_NAME.trim(), column.storedName());
         }
 
         @Test
@@ -319,8 +319,8 @@ class ColumnTest {
             EntityColumn column = forMethod("getValue",
                                             EntityWithDefaultColumnNameForStoring.class);
             String expectedName = "value";
-            assertEquals(expectedName, column.getName());
-            assertEquals(expectedName, column.getStoredName());
+            assertEquals(expectedName, column.name());
+            assertEquals(expectedName, column.storedName());
         }
     }
 
@@ -336,7 +336,7 @@ class ColumnTest {
     void acceptEnumGetter() {
         EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         Class<?> expectedType = Integer.class;
-        Class actualType = column.getPersistedType();
+        Class actualType = column.persistedType();
         assertEquals(expectedType, actualType);
     }
 
@@ -348,7 +348,7 @@ class ColumnTest {
         @DisplayName("is same as column type for non-enum getter")
         void forNonEnumGetter() {
             EntityColumn column = forMethod("getLong", TestEntity.class);
-            assertEquals(column.getType(), column.getPersistedType());
+            assertEquals(column.type(), column.persistedType());
         }
 
         @Test
@@ -356,7 +356,7 @@ class ColumnTest {
         void forOrdinalEnumGetter() {
             EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
             Class expectedType = Integer.class;
-            Class actualType = column.getPersistedType();
+            Class actualType = column.persistedType();
             assertEquals(expectedType, actualType);
         }
 
@@ -365,7 +365,7 @@ class ColumnTest {
         void forStringEnumGetter() {
             EntityColumn column = forMethod("getEnumString", TestEntity.class);
             Class expectedType = String.class;
-            Class actualType = column.getPersistedType();
+            Class actualType = column.persistedType();
             assertEquals(expectedType, actualType);
         }
     }

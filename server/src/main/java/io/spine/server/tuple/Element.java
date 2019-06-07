@@ -95,16 +95,16 @@ final class Element implements Serializable {
                 valueClass);
     }
 
-    Object getValue() {
+    Object value() {
         return this.value;
     }
 
-    Message getMessage() {
+    Message toMessage() {
         switch (type) {
             case MESSAGE:
                 return (Message) value;
             case EITHER:
-                return ((Either) value).getValue();
+                return ((Either) value).value();
             case OPTIONAL: {
                 Optional optional = (Optional) value;
                 Message result = optional.isPresent()

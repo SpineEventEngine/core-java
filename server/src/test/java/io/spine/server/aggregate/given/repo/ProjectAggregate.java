@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given.repo;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -109,12 +108,12 @@ public class ProjectAggregate
 
     @Apply
     private void apply(AggProjectArchived event) {
-        setArchived(true);
+        archive();
     }
 
     /**
-     * Emits {@link io.spine.test.aggregate.event.AggProjectDeleted} if the event is from the parent project.
-     * Otherwise returns empty iterable.
+     * Emits {@link io.spine.test.aggregate.event.AggProjectDeleted} if the event is from
+     * the parent project. Otherwise returns empty iterable.
      */
     @React
     Optional<AggProjectDeleted> on(AggProjectDeleted event) {
@@ -130,25 +129,7 @@ public class ProjectAggregate
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the test suite.
-     */
-    @Override
-    @VisibleForTesting
-    public void setArchived(boolean archived) {
-        super.setArchived(archived);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the test suite.
-     */
-    @Override
-    @VisibleForTesting
-    public void setDeleted(boolean deleted) {
-        super.setDeleted(deleted);
+    public final void archive() {
+        setArchived(true);
     }
 }

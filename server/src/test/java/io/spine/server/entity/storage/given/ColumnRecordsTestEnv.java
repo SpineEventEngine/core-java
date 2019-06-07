@@ -45,15 +45,15 @@ public class ColumnRecordsTestEnv {
 
     public static Map<String, EntityColumn.MemoizedValue> setupMockColumnsAllowingNulls() {
         EntityColumn mockColumn = mock(EntityColumn.class);
-        when(mockColumn.getType()).thenReturn(Object.class);
-        when(mockColumn.getPersistedType()).thenReturn(Object.class);
+        when(mockColumn.type()).thenReturn(Object.class);
+        when(mockColumn.persistedType()).thenReturn(Object.class);
         Map<String, EntityColumn.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
             Integer columnValueToPersist = (i % 2 != 0) ? null : i;
 
             EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
-            when(value.getSourceColumn()).thenReturn(mockColumn);
-            when(value.getValue()).thenReturn(columnValueToPersist);
+            when(value.sourceColumn()).thenReturn(mockColumn);
+            when(value.value()).thenReturn(columnValueToPersist);
 
             columns.put(String.valueOf(i), value);
         }
