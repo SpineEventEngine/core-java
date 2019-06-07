@@ -30,7 +30,6 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.NonValidated;
-import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -304,7 +303,7 @@ public abstract class Transaction<I,
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
             EntityRecord newRecord = entityRecord();
-            afterCommit(entityBeforeTransaction, newRecord);
+            afterCommit(newRecord);
         } catch (InvalidEntityStateException e) {
             /* New state of the entity does not pass validation. */
             rollback(e, null);

@@ -19,8 +19,7 @@
  */
 package io.spine.server.entity;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -52,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -62,27 +62,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * {@link TransactionalEntity} implementations.
  */
 public abstract class TransactionTest<I,
-                                      E extends TransactionalEntity<I, S, B>,
-                                      S extends Message,
-                                      B extends ValidatingBuilder<S>> {
-
-    private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionTest.class);
-
-    private static ValidationException validationException() {
-        ImmutableList<ConstraintViolation> violations =
-                ImmutableList.of(ConstraintViolation.getDefaultInstance());
-        ValidationException ex = new ValidationException(violations);
-        return ex;
-    }
-
-    private static ImmutableList<ConstraintViolation> someViolations() {
-        ConstraintViolation expectedViolation = ConstraintViolation
-                .newBuilder()
-                .setMsgFormat("Some violation %s")
-                .addParam("1")
-                .build();
-        return ImmutableList.of(expectedViolation);
-    }
+        E extends TransactionalEntity<I, S, B>,
+        S extends Message,
+        B extends ValidatingBuilder<S>> {
 
     /**
      * Creates the instance of the ID with the simple name of test suite class.
@@ -368,10 +350,7 @@ public abstract class TransactionTest<I,
             Event event = withMessage(failingStateTransition());
             applyEvent(tx, event);
 
-            Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-            InvalidEntityStateException exception =
-                    assertThrows(InvalidEntityStateException.class, tx::commit);
-            assertThat(exception.entityState()).isEqualTo(newState);
+            assertThrows(InvalidEntityStateException.class, tx::commit);
         }
     }
 
@@ -389,8 +368,12 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(failingInHandler());
-            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
-            checkRollback(entity, originalState, originalVersion);
+            try {
+                applyEvent(tx, event);
+                fail("Expected an `Exception` due to a failed phase execution.");
+            } catch (Exception e) {
+                checkRollback(entity, originalState, originalVersion);
+            }
         }
 
         @Test
@@ -405,9 +388,12 @@ public abstract class TransactionTest<I,
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
             applyEvent(tx, event);
 
-            Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-            assertThrows(InvalidEntityStateException.class, tx::commit);
-            checkRollback(entity, originalState, originalVersion);
+            try {
+                tx.commit();
+                fail("Expected an `InvalidEntityStateException` due to a failed commit.");
+            } catch (InvalidEntityStateException e) {
+                checkRollback(entity, originalState, originalVersion);
+            }
         }
 
         private E createAndModify() {

@@ -76,10 +76,7 @@ class ProjectionTransactionTest
                           ProjectionState,
                           ProjectionState.Builder>
     createTx(Projection<Id, ProjectionState, ProjectionState.Builder> entity,
-             TransactionListener<Id,
-                     Projection<Id, ProjectionState, ProjectionState.Builder>,
-                     ProjectionState,
-                     ProjectionState.Builder> listener) {
+             TransactionListener<Id> listener) {
         ProjectionTransaction<Id, ProjectionState, ProjectionState.Builder> transaction =
                 new ProjectionTransaction<>(entity);
         transaction.setListener(listener);
