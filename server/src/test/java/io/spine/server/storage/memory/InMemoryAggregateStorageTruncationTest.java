@@ -20,14 +20,14 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.aggregate.AggregateStorageTruncateTest;
+import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import io.spine.server.storage.StorageFactory;
 import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.core.BoundedContextNames.newName;
 
 @DisplayName("InMemoryAggregateStorage after truncation should")
-public class InMemoryAggregateStorageTruncateTest extends AggregateStorageTruncateTest {
+public class InMemoryAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
 
     @Override
     protected StorageFactory storageFactory() {

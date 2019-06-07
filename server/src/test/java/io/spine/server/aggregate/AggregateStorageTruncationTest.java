@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.Iterators;
-import io.spine.server.aggregate.given.fibonacci.FibonacciAggregate;
 import io.spine.server.aggregate.given.fibonacci.FibonacciRepository;
 import io.spine.server.aggregate.given.fibonacci.SequenceId;
 import io.spine.server.aggregate.given.fibonacci.command.MoveSequence;
@@ -37,10 +36,18 @@ import java.util.Iterator;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.server.aggregate.given.fibonacci.FibonacciAggregate.lastNumberOne;
+import static io.spine.server.aggregate.given.fibonacci.FibonacciAggregate.lastNumberTwo;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
-public abstract class AggregateStorageTruncateTest {
+/**
+ * Verifies the integrity of the aggregate history after the storage truncation happens.
+ *
+ * <p>Please note, that for the test name to make sense the implementor class should have some
+ * meaningful display name like {@code "InMemoryAggregateStorage after truncation should"}.
+ */
+public abstract class AggregateStorageTruncationTest {
 
     private static final SequenceId ID = SequenceId
             .newBuilder()
@@ -50,8 +57,8 @@ public abstract class AggregateStorageTruncateTest {
     protected abstract StorageFactory storageFactory();
 
     @Test
-    @DisplayName("restore aggregate history properly")
-    void truncate() {
+    @DisplayName("restore aggregate state properly")
+    void restoreAggregateState() {
         FibonacciRepository repo = new FibonacciRepository();
         repo.initStorage(storageFactory());
         SingleTenantBlackBoxContext context = BlackBoxBoundedContext
@@ -81,9 +88,9 @@ public abstract class AggregateStorageTruncateTest {
         // Compare against the numbers calculated by hand.
         int expectedNumberOne = 121393;
         int expectedNumberTwo = 196418;
-        assertThat(FibonacciAggregate.lastNumberOne())
+        assertThat(lastNumberOne())
                 .isEqualTo(expectedNumberOne);
-        assertThat(FibonacciAggregate.lastNumberTwo())
+        assertThat(lastNumberTwo())
                 .isEqualTo(expectedNumberTwo);
 
         // Truncate the storage.
@@ -97,9 +104,9 @@ public abstract class AggregateStorageTruncateTest {
                 .isAtMost(snapshotTrigger);
 
         // Run one more command and check the result.
-        int expectedNext = FibonacciAggregate.lastNumberOne() + FibonacciAggregate.lastNumberTwo();
+        int expectedNext = lastNumberOne() + lastNumberTwo();
         context.receivesCommand(moveSequence);
-        assertThat(FibonacciAggregate.lastNumberTwo())
+        assertThat(lastNumberTwo())
                 .isEqualTo(expectedNext);
     }
 
