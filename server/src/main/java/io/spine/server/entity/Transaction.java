@@ -30,7 +30,6 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.NonValidated;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -256,14 +255,16 @@ public abstract class Transaction<I,
      */
     @CanIgnoreReturnValue
     protected <R> R propagate(Phase<I, R> phase) {
+        TransactionListener<I> listener = listener();
+        listener.onBeforePhase(phase);
         try {
             return phase.propagate();
         } catch (Throwable t) {
-            rollback(t, phase);
+            rollback(t);
             throw illegalStateWithCauseOf(t);
         } finally {
             phases.add(phase);
-            listener().onAfterPhase(phase);
+            listener.onAfterPhase(phase);
         }
     }
 
@@ -306,11 +307,11 @@ public abstract class Transaction<I,
             afterCommit(newRecord);
         } catch (InvalidEntityStateException e) {
             /* New state of the entity does not pass validation. */
-            rollback(e, null);
+            rollback(e);
             throw e;
         } catch (RuntimeException e) {
             /* Exception occurred during execution of a handler method. */
-            rollback(e, null);
+            rollback(e);
             throw illegalStateWithCauseOf(e);
         } finally {
             releaseTx();
@@ -363,7 +364,7 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    void rollback(Throwable cause, @Nullable Phase<I, ?> atPhase) {
+    void rollback(Throwable cause) {
         beforeRollback(cause);
         TransactionListener<I> listener = listener();
         @NonValidated EntityRecord record = EntityRecord
@@ -373,7 +374,7 @@ public abstract class Transaction<I,
                 .setVersion(version)
                 .setLifecycleFlags(lifecycleFlags())
                 .buildPartial();
-        listener.onTransactionFailed(cause, record, atPhase);
+        listener.onTransactionFailed(cause, record);
         this.active = false;
         entity.releaseTransaction();
     }

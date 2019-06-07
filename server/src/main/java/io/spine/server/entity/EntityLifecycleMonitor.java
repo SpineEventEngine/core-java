@@ -26,10 +26,11 @@ import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
 import io.spine.core.MessageQualifier;
 import io.spine.core.MessageWithContext;
+import io.spine.logging.Logging;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
 import io.spine.validate.ValidationException;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 import java.util.Set;
@@ -55,14 +56,14 @@ import static com.google.common.collect.Lists.newLinkedList;
  *         ID type of the entity under transaction
  */
 @Internal
-public final class EntityLifecycleMonitor<I>
-        implements TransactionListener<I> {
+public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, Logging {
 
     private static final MessageQualifier UNKNOWN_MESSAGE = MessageQualifier.getDefaultInstance();
 
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessageIds;
     private final I entityId;
+    private @MonotonicNonNull MessageWithContext<?, ?, ?> lastMessage;
 
     private EntityLifecycleMonitor(Repository<I, ?> repository, I id) {
         this.repository = repository;
@@ -79,6 +80,16 @@ public final class EntityLifecycleMonitor<I>
         checkNotNull(repository);
         checkNotNull(id);
         return new EntityLifecycleMonitor<>(repository, id);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Memoizes the dispatched message for diagnostics in case of a failure.
+     */
+    @Override
+    public void onBeforePhase(Phase<I, ?> phase) {
+        lastMessage = phase.message();
     }
 
     /**
@@ -111,19 +122,21 @@ public final class EntityLifecycleMonitor<I>
                   .onStateChanged(change, messageIds);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Notifies the {@link EntityLifecycle} of the failure.
+     */
     @Override
-    public void onTransactionFailed(Throwable t,
-                                    EntityRecord entityRecord,
-                                    @Nullable Phase<I, ?> phase) {
+    public void onTransactionFailed(Throwable t, EntityRecord entityRecord) {
         Throwable cause = Throwables.getRootCause(t);
         if (cause instanceof ValidationException) {
             ValidationError error = ((ValidationException) cause).asValidationError();
             MessageQualifier causeMessage;
             MessageQualifier rootMessage;
-            if (phase != null) {
-                MessageWithContext<?, ?, ?> message = phase.message();
-                causeMessage = message.qualifier();
-                rootMessage = message.rootMessage();
+            if (lastMessage != null) {
+                causeMessage = lastMessage.qualifier();
+                rootMessage = lastMessage.rootMessage();
             } else {
                 causeMessage = UNKNOWN_MESSAGE;
                 rootMessage = UNKNOWN_MESSAGE;

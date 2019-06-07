@@ -21,7 +21,6 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.validate.NonValidated;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A common contract for the {@linkplain Transaction transaction} listeners.
@@ -33,6 +32,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @Internal
 public interface TransactionListener<I> {
+
+    /**
+     * A callback invoked before applying a {@linkplain Phase transaction phase}.
+     *
+     * @param phase
+     *         the phase which is being applied
+     */
+    void onBeforePhase(Phase<I, ?> phase);
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
@@ -59,13 +66,9 @@ public interface TransactionListener<I> {
      *         the {@code Throwable} which caused the commit failure
      * @param entityRecord
      *         the entity modified within the transaction
-     * @param phase
-     *         the failed phase or {@code null} if the transaction failed at commit instead of at
-     *         a phase
      */
     void onTransactionFailed(Throwable t,
-                             @NonValidated EntityRecord entityRecord,
-                             @Nullable Phase<I, ?> phase);
+                             @NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked after a successful commit.
@@ -82,6 +85,11 @@ public interface TransactionListener<I> {
     class SilentWitness<I> implements TransactionListener<I> {
 
         @Override
+        public void onBeforePhase(Phase<I, ?> phase) {
+            // Do nothing.
+        }
+
+        @Override
         public void onAfterPhase(Phase<I, ?> phase) {
             // Do nothing.
         }
@@ -93,8 +101,7 @@ public interface TransactionListener<I> {
 
         @Override
         public void onTransactionFailed(Throwable t,
-                                        EntityRecord record,
-                                        @Nullable Phase<I, ?> phase) {
+                                        EntityRecord record) {
             // Do nothing.
         }
 

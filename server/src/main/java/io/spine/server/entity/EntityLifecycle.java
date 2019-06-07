@@ -78,7 +78,8 @@ import static java.util.stream.Collectors.toList;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings("OverlyCoupledClass") // Posts system messages in multiple cases.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+    // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
     /**
