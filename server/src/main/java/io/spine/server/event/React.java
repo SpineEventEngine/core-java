@@ -50,7 +50,7 @@ public @interface React {
 
     /**
      * When {@code true}, the annotated method of the entity reacts on the event generated from
-     * outside of the Bounded Context to which this this entity belongs.
+     * outside of the Bounded Context to which this entity belongs.
      */
     boolean external() default false;
 }

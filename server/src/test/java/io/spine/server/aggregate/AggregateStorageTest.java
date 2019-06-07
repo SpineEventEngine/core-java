@@ -541,7 +541,7 @@ public abstract class AggregateStorageTest
     }
 
     @Nested
-    @DisplayName("truncate storage")
+    @DisplayName("truncate itself")
     class Truncate {
 
         private Version currentVersion;
