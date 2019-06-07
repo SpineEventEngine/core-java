@@ -37,7 +37,7 @@ import static io.spine.system.server.given.diagnostics.ViolationsWatch.DEFAULT;
 @DisplayName("ConstraintViolated should be emitted when")
 class ConstraintViolatedTest {
 
-    //@MuteLogging
+    @MuteLogging
     @Test
     @DisplayName("an entity state is set to an invalid value")
     void invalidEntity() {
