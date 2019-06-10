@@ -61,7 +61,7 @@ public final class SystemContext extends BoundedContext {
         CommandLifecycleRepository repository = new CommandLifecycleRepository();
         BoundedContextBuilder preparedBuilder = prepareEnricher(builder, repository);
         SystemContext result = new SystemContext(preparedBuilder);
-        result.registerRepositories(repository);
+        result.registerRepositories();
         return result;
     }
 
@@ -74,10 +74,7 @@ public final class SystemContext extends BoundedContext {
         return builder.setEventBus(builderWithEnricher);
     }
 
-    private void registerRepositories(CommandLifecycleRepository commandLifecycle) {
-        register(commandLifecycle);
-        register(new EntityHistoryRepository());
-
+    private void registerRepositories() {
         register(new ScheduledCommandRepository());
         register(new MirrorRepository());
     }
