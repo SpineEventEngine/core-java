@@ -68,13 +68,13 @@ class ServerEnvironmentTest {
 
     @Test
     @DisplayName("return disabled delivery by default")
-    void returnSingleShardStrategyDefault() {
+    void returnSingleDeliveryStrategyDefault() {
         assertFalse( ServerEnvironment.getInstance().delivery().enabled());
     }
 
     @Test
     @DisplayName("allow to customize delivery mechanism")
-    void allowToCustomizeShardingStrategy() {
+    void allowToCustomizeDeliveryStrategy() {
         Delivery newDelivery = Delivery.newBuilder()
                                        .setStrategy(UniformAcrossAllShards.forNumber(42))
                                        .build();
