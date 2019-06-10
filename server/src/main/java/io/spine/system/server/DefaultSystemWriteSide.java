@@ -49,7 +49,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     public void postEvent(EventMessage systemEvent) {
         checkNotNull(systemEvent);
         Event event = event(systemEvent);
-        system.importBus()
+        system.eventBus()
               .post(event, SystemAckObserver.ofResultsOf(event));
     }
 
