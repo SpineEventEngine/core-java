@@ -162,14 +162,14 @@ public interface MessageWithContext<I extends MessageId,
     /**
      * Obtains the qualifier of this message.
      *
-     * <p>A message qualifier is a digest information about the message which describes it's origin
+     * <p>A message qualifier is a digest information about the message which describes its origin
      * but does not describe the message contents.
      */
     default MessageQualifier qualifier() {
         return MessageQualifier
                 .newBuilder()
                 .setMessageId(pack(id()))
-                .setMessageTypeUrl(typeUrl().value())
+                .setTypeUrl(typeUrl().value())
                 .vBuild();
     }
 
