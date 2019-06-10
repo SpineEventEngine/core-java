@@ -61,6 +61,7 @@ import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -378,6 +379,8 @@ class ProjectionRepositoryTest
         }
     }
 
+    // TODO:2019-06-10:dmytro.dashenkov: Create a GitHub issue.
+    @Disabled("Until Inbox implements the feature")
     @Nested
     @DisplayName("not allow duplicate")
     @MuteLogging
