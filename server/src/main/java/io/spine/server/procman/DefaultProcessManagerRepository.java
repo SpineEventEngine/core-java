@@ -2,6 +2,7 @@ package io.spine.server.procman;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.server.DefaultRepositoryString;
 import io.spine.server.procman.model.ProcessManagerClass;
 
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -30,5 +31,10 @@ public final class DefaultProcessManagerRepository<I,
     @Override
     protected ProcessManagerClass<P> entityModelClass() {
         return modelClass;
+    }
+
+    @Override
+    public String toString() {
+        return DefaultRepositoryString.representationFor(modelClass);
     }
 }
