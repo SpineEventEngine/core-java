@@ -124,7 +124,7 @@ public final class EventEnvelope
         MessageQualifier eventQualifier = MessageQualifier
                 .newBuilder()
                 .setMessageId(pack(id()))
-                .setMessageTypeUrl(outerObject().typeUrl().value())
+                .setTypeUrl(outerObject().typeUrl().value())
                 .buildPartial();
         Origin origin = Origin
                 .newBuilder()

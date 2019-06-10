@@ -23,7 +23,7 @@ message MessageQualifier {
 
     google.protobuf.Any message_id = 1 [(required) = true, (validate) = true];
 
-    string message_type_url = 2 [(required) = true];
+    string type_url = 2 [(required) = true];
 
     core.Version version = 3 [(required) = false, (validate) = true];
 }

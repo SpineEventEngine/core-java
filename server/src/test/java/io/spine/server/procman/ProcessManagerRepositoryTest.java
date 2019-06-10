@@ -28,14 +28,12 @@ import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.MessageQualifier;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.EventFilter;
@@ -255,7 +253,7 @@ class ProcessManagerRepositoryTest
         MessageQualifier qualifier = MessageQualifier
                 .newBuilder()
                 .setMessageId(pack(randomCommandId))
-                .setMessageTypeUrl("example.org/example.test.InjectEvent")
+                .setTypeUrl("example.org/example.test.InjectEvent")
                 .buildPartial();
         ActorContext actor = requestFactory.newActorContext();
         Origin origin = Origin

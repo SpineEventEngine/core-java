@@ -563,9 +563,9 @@ class StandTest extends TenantAwareTest {
             MessageQualifier origin = context.getPastMessage()
                                              .qualifier();
             assertThat(origin.asCommandId()).isEqualTo(cmd.id());
-            assertThat(origin.getMessageTypeUrl()).isEqualTo(cmd.command()
-                                                                .typeUrl()
-                                                                .value());
+            assertThat(origin.getTypeUrl()).isEqualTo(cmd.command()
+                                                         .typeUrl()
+                                                         .value());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
 

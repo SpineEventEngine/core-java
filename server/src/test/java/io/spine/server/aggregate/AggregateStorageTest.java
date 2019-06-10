@@ -556,7 +556,7 @@ public abstract class AggregateStorageTest
             MessageQualifier qualifier = MessageQualifier
                     .newBuilder()
                     .setMessageId(AnyPacker.pack(newEventId()))
-                    .setMessageTypeUrl(TypeUrl.of(Nothing.class).value())
+                    .setTypeUrl(TypeUrl.of(Nothing.class).value())
                     .buildPartial();
             Origin origin = Origin
                     .newBuilder()

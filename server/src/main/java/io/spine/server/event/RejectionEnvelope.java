@@ -192,7 +192,7 @@ public final class RejectionEnvelope
     }
 
     /**
-     * Obtains the origin {@linkplain DispatchedCommand command}.
+     * Obtains the origin command.
      *
      * @return the rejected command
      */

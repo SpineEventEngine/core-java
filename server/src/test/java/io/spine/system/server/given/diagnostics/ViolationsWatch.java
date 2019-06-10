@@ -44,7 +44,7 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
     public static final WatchId DEFAULT = WatchId.generate();
 
     @Subscribe(filter = @ByField(
-            path = "last_message.message_type_url",
+            path = "last_message.type_url",
             value = "type.spine.io/spine.system.server.test.TextValidated"
     ))
     void on(ConstraintViolated event) {

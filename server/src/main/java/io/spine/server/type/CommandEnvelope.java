@@ -122,7 +122,7 @@ public final class CommandEnvelope
         MessageQualifier commandQualifier = MessageQualifier
                 .newBuilder()
                 .setMessageId(pack(id()))
-                .setMessageTypeUrl(outerObject().typeUrl().value())
+                .setTypeUrl(outerObject().typeUrl().value())
                 .buildPartial();
         Origin origin = Origin
                 .newBuilder()
