@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
@@ -37,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public final class MemoizingWriteSide implements SystemWriteSide {
 
-    private @MonotonicNonNull MemoizedSystemMessage lastSeenCommand;
     private @MonotonicNonNull MemoizedSystemMessage lastSeenEvent;
 
     private final boolean multitenant;
@@ -67,19 +65,6 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     /**
      * {@inheritDoc}
      *
-     * <p>Memoizes the given command message and the {@link TenantId} which it was posted for.
-     *
-     * @see #lastSeenCommand()
-     */
-    @Override
-    public void postCommand(CommandMessage systemCommand) {
-        TenantId tenantId = currentTenant();
-        lastSeenCommand = new MemoizedSystemMessage(systemCommand, tenantId);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * <p>Memoizes the given event message and the {@link TenantId} which it was posted for.
      *
      * @see #lastSeenEvent()
@@ -88,12 +73,6 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     public void postEvent(EventMessage systemEvent) {
         TenantId tenantId = currentTenant();
         lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
-    }
-
-    @Override
-    public void notifySystem(EventMessage notification) {
-        TenantId tenantId = currentTenant();
-        lastSeenEvent = new MemoizedSystemMessage(notification, tenantId);
     }
 
     /** Obtains the ID of the current tenant. */
@@ -105,16 +84,6 @@ public final class MemoizingWriteSide implements SystemWriteSide {
             }
         }.execute();
         return checkNotNull(result);
-    }
-
-    /**
-     * Obtains the last command message posted to {@link SystemWriteSide}.
-     *
-     * <p>Fails if no commands were posted yet.
-     */
-    public MemoizedSystemMessage lastSeenCommand() {
-        assertNotNull(lastSeenCommand);
-        return lastSeenCommand;
     }
 
     /**

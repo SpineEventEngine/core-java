@@ -48,17 +48,7 @@ public final class NoOpLifecycle extends EntityLifecycle {
     }
 
     @Override
-    protected void postCommand(CommandMessage command) {
-        // NoOp.
-    }
-
-    @Override
     protected void postEvent(EventMessage event) {
-        // NoOp.
-    }
-
-    @Override
-    protected void postNotification(EventMessage event) {
         // NoOp.
     }
 }

@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.EntityQualifier;
@@ -40,10 +40,7 @@ import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.command.AssignTargetToCommand;
-import io.spine.system.server.command.DispatchCommandToHandler;
-import io.spine.system.server.command.DispatchEventToReactor;
-import io.spine.system.server.command.DispatchEventToSubscriber;
+import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.CommandHandled;
 import io.spine.system.server.event.CommandRejected;
 import io.spine.system.server.event.EntityArchived;
@@ -52,7 +49,10 @@ import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EntityUnarchived;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
+import io.spine.system.server.event.TargetAssignedToCommand;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
 
@@ -78,8 +78,7 @@ import static java.util.stream.Collectors.toList;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
-    // Posts system messages in multiple cases.
+@SuppressWarnings("OverlyCoupledClass") // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
     /**
@@ -139,7 +138,7 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link AssignTargetToCommand AssignTargetToCommand}
+     * Posts the {@link TargetAssignedToCommand}
      * system command.
      *
      * @param commandId
@@ -151,27 +150,28 @@ public class EntityLifecycle {
                 .setEntityId(historyId.getEntityId())
                 .setTypeUrl(historyId.getTypeUrl())
                 .vBuild();
-        AssignTargetToCommand command = AssignTargetToCommand
+        TargetAssignedToCommand event = TargetAssignedToCommand
                 .newBuilder()
                 .setId(commandId)
                 .setTarget(target)
                 .vBuild();
-        postCommand(command);
+        postEvent(event);
     }
 
     /**
-     * Posts the {@link DispatchCommandToHandler} system command.
+     * Posts the {@link io.spine.system.server.event.CommandDispatchedToHandler} system command.
      *
      * @param command
      *         the dispatched command
      */
     public final void onDispatchCommand(Command command) {
-        DispatchCommandToHandler systemCommand = DispatchCommandToHandler
+        CommandDispatchedToHandler systemCommand = CommandDispatchedToHandler
                 .newBuilder()
                 .setReceiver(historyId)
-                .setCommand(command)
+                .setPayload(command)
+                .setWhenDispatched(Time.currentTime())
                 .vBuild();
-        postCommand(systemCommand);
+        postEvent(systemCommand);
     }
 
     /**
@@ -206,18 +206,19 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link DispatchEventToSubscriber} system command.
+     * Posts the {@link EventDispatchedToSubscriber} system event.
      *
      * @param event
      *         the dispatched event
      */
     public final void onDispatchEventToSubscriber(Event event) {
-        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
+        EventDispatchedToSubscriber systemCommand = EventDispatchedToSubscriber
                 .newBuilder()
                 .setReceiver(historyId)
-                .setEvent(event)
+                .setPayload(event)
+                .setWhenDispatched(Time.currentTime())
                 .vBuild();
-        postCommand(systemCommand);
+        postEvent(systemCommand);
     }
 
     public final void onEventImported(Event event) {
@@ -231,18 +232,19 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link DispatchEventToReactor} system command.
+     * Posts the {@link EventDispatchedToReactor} system event.
      *
      * @param event
      *         the dispatched event
      */
     public final void onDispatchEventToReactor(Event event) {
-        DispatchEventToReactor systemCommand = DispatchEventToReactor
+        EventDispatchedToReactor systemCommand = EventDispatchedToReactor
                 .newBuilder()
                 .setReceiver(historyId)
-                .setEvent(event)
+                .setPayload(event)
+                .setWhenDispatched(currentTime())
                 .vBuild();
-        postCommand(systemCommand);
+        postEvent(systemCommand);
     }
 
     /**
@@ -298,7 +300,7 @@ public class EntityLifecycle {
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
                 .vBuild();
-        postNotification(event);
+        postEvent(event);
     }
 
     private void postIfChanged(EntityRecordChange change,
@@ -408,15 +410,6 @@ public class EntityLifecycle {
     protected void postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
         filtered.ifPresent(systemWriteSide::postEvent);
-    }
-
-    protected void postNotification(EventMessage event) {
-        Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        filtered.ifPresent(systemWriteSide::notifySystem);
-    }
-
-    protected void postCommand(CommandMessage command) {
-        systemWriteSide.postCommand(command);
     }
 
     private static Collection<DispatchedMessageId>

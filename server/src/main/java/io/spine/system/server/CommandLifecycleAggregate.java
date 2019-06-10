@@ -28,10 +28,7 @@ import io.spine.core.Responses;
 import io.spine.core.Status;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
 import io.spine.system.server.Substituted.Sequence;
-import io.spine.system.server.command.AssignTargetToCommand;
-import io.spine.system.server.command.ScheduleCommand;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandDispatched;
 import io.spine.system.server.event.CommandErrored;
@@ -54,22 +51,6 @@ import static io.spine.base.Time.currentTime;
 @SuppressWarnings("OverlyCoupledClass") // because of the handled commands
 final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycle.Builder> {
-
-    @Assign
-    CommandScheduled handle(ScheduleCommand command) {
-        return CommandScheduled.newBuilder()
-                               .setId(command.getId())
-                               .setSchedule(command.getSchedule())
-                               .build();
-    }
-
-    @Assign
-    TargetAssignedToCommand handle(AssignTargetToCommand event) {
-        return TargetAssignedToCommand.newBuilder()
-                                      .setId(event.getId())
-                                      .setTarget(event.getTarget())
-                                      .build();
-    }
 
     /**
      * Imports the event {@link CommandReceived}.

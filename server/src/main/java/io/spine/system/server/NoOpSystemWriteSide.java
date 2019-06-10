@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 
 /**
@@ -36,17 +35,7 @@ public enum NoOpSystemWriteSide implements SystemWriteSide {
     INSTANCE;
 
     @Override
-    public void postCommand(CommandMessage systemCommand) {
-        // NOP.
-    }
-
-    @Override
     public void postEvent(EventMessage systemEvent) {
-        // NOP.
-    }
-
-    @Override
-    public void notifySystem(EventMessage notification) {
         // NOP.
     }
 }

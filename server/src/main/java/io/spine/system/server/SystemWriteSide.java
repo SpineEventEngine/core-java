@@ -35,17 +35,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface SystemWriteSide {
 
     /**
-     * Posts a system command.
-     *
-     * <p>If the associated bounded context is
-     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the command is
-     * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
-     *
-     * @param systemCommand command to post
-     */
-    void postCommand(CommandMessage systemCommand);
-
-    /**
      * Posts a system event.
      *
      * <p>If the associated bounded context is
@@ -55,20 +44,6 @@ public interface SystemWriteSide {
      * @param systemEvent event to post
      */
     void postEvent(EventMessage systemEvent);
-
-    /**
-     * Notifies the system context with the given event.
-     *
-     * <p>Whereas an event posted via {@link #postEvent(EventMessage)} must be handled,
-     * a notification event may be simply appended into the event store.
-     *
-     * <p>If the associated bounded context is
-     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the event is
-     * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
-     *
-     * @param notification event to post
-     */
-    void notifySystem(EventMessage notification);
 
     /**
      * Creates new instance of the {@code SystemWriteSide} which serves the passed system context.

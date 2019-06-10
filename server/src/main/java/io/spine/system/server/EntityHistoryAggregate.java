@@ -26,11 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.system.server.command.DispatchCommandToHandler;
-import io.spine.system.server.command.DispatchEventToReactor;
-import io.spine.system.server.command.DispatchEventToSubscriber;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityCreated;
@@ -66,67 +62,28 @@ import static com.google.protobuf.util.Timestamps.compare;
  * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
  * an entity history of its own.
  */
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
+@SuppressWarnings("OverlyCoupledClass") // OK for an Aggregate class.
 final class EntityHistoryAggregate
         extends Aggregate<EntityHistoryId, EntityHistory, EntityHistory.Builder> {
-
-    @Assign
-    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
-            throws CannotDispatchEventTwice {
-        Event event = command.getEvent();
-        checkNotDuplicate(event);
-        return EventDispatchedToSubscriber
-                .newBuilder()
-                .setReceiver(command.getReceiver())
-                .setPayload(event)
-                .setWhenDispatched(now())
-                .vBuild();
-    }
-
-    @Assign
-    EventDispatchedToReactor handle(DispatchEventToReactor command)
-            throws CannotDispatchEventTwice {
-        Event event = command.getEvent();
-        checkNotDuplicate(event);
-        return EventDispatchedToReactor
-                .newBuilder()
-                .setReceiver(command.getReceiver())
-                .setPayload(event)
-                .setWhenDispatched(now())
-                .vBuild();
-    }
-
-    @Assign
-    CommandDispatchedToHandler handle(DispatchCommandToHandler command)
-            throws CannotDispatchCommandTwice {
-        Command domainCommand = command.getCommand();
-        checkNotDuplicate(domainCommand);
-        return CommandDispatchedToHandler
-                .newBuilder()
-                .setReceiver(command.getReceiver())
-                .setPayload(domainCommand)
-                .setWhenDispatched(now())
-                .vBuild();
-    }
 
     @Apply(allowImport = true)
     private void on(EntityCreated event) {
         builder().setId(event.getId());
     }
 
-    @Apply
+    @Apply(allowImport = true)
     private void on(EventDispatchedToSubscriber event) {
         builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
-    @Apply
+    @Apply(allowImport = true)
     private void on(EventDispatchedToReactor event) {
         builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
-    @Apply
+    @Apply(allowImport = true)
     private void on(CommandDispatchedToHandler event) {
         builder().setId(event.getReceiver());
         updateLastCommandTime(event.getWhenDispatched());
