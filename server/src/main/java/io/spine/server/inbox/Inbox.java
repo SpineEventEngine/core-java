@@ -21,8 +21,8 @@
 package io.spine.server.inbox;
 
 import io.spine.server.ServerEnvironment;
+import io.spine.server.sharding.Delivery;
 import io.spine.server.sharding.ShardedMessageDelivery;
-import io.spine.server.sharding.Sharding;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -152,15 +152,15 @@ public class Inbox<I> {
         }
 
         public Inbox<I> build() {
-            Sharding sharding = ServerEnvironment.getInstance()
-                                                 .sharding();
-            this.writer = sharding.inboxWriter();
+            Delivery delivery = ServerEnvironment.getInstance()
+                                                 .delivery();
+            this.writer = delivery.inboxWriter();
             checkNotNull(writer, "Inbox writer must be set");
             checkNotNull(entityStateType, "Entity state type must be set");
             checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),
                           "There must be at least one event or command endpoint");
             Inbox<I> inbox = new Inbox<>(this);
-            sharding.register(inbox);
+            delivery.register(inbox);
             return inbox;
         }
 

@@ -55,7 +55,7 @@ import static java.util.stream.Collectors.groupingBy;
  * of a particular data piece to a particular node to avoid concurrent modification and prevent
  * the data loss.
  */
-public final class Sharding {
+public final class Delivery {
 
     /**
      * The unset value of the {@link Timestamp} values.
@@ -75,7 +75,7 @@ public final class Sharding {
      */
     private static final Duration ONE_MS = Durations.fromMillis(1);
 
-    private final ShardingStrategy strategy;
+    private final DeliveryStrategy strategy;
 
     private final Duration deduplicationWindow;
 
@@ -94,7 +94,7 @@ public final class Sharding {
     private final ShardedWorkRegistry workRegistry;
     private final InboxStorage inboxStorage;
 
-    private Sharding(Builder builder) {
+    private Delivery(Builder builder) {
         this.strategy = builder.strategy;
         this.workRegistry = builder.workRegistry;
         this.deduplicationWindow = builder.deduplicationWindow;
@@ -104,7 +104,7 @@ public final class Sharding {
     }
 
     /**
-     * Creates an instance of new {@code Builder} of {@code Sharding}.
+     * Creates an instance of new {@code Builder} of {@code Delivery}.
      */
     public static Builder newBuilder() {
         return new Builder();
@@ -228,7 +228,7 @@ public final class Sharding {
 
             @Override
             protected void notifyOfUpdate(ShardIndex index) {
-                Sharding.this.notify(index);
+                Delivery.this.notify(index);
             }
         };
     }
@@ -240,9 +240,9 @@ public final class Sharding {
     }
 
     /**
-     * Tells whether the sharding is enabled.
+     * Tells whether the delivery is enabled.
      *
-     * <p>If there is just a single shard configured, the sharding is considered disabled.
+     * <p>If there is just a single shard configured, the delivery is considered disabled.
      */
     public boolean enabled() {
         return strategy.getShardCount() > 1;
@@ -253,13 +253,13 @@ public final class Sharding {
     }
 
     /**
-     * A builder for {@code Sharding} instances.
+     * A builder for {@code Delivery} instances.
      */
     public static class Builder {
 
         private InboxStorage inboxStorage;
         private Supplier<StorageFactory> storageFactorySupplier;
-        private ShardingStrategy strategy;
+        private DeliveryStrategy strategy;
         private ShardedWorkRegistry workRegistry;
         private Duration deduplicationWindow = Duration.getDefaultInstance();
 
@@ -273,7 +273,7 @@ public final class Sharding {
             this.workRegistry = checkNotNull(workRegistry);
         }
 
-        public Builder setStrategy(ShardingStrategy strategy) {
+        public Builder setStrategy(DeliveryStrategy strategy) {
             this.strategy = checkNotNull(strategy);
             return this;
         }
@@ -290,7 +290,7 @@ public final class Sharding {
         }
 
         //TODO:2019-05-22:alex.tymchenko: set the work registry using the storage factory.
-        public Sharding build() {
+        public Delivery build() {
             if (strategy == null) {
                 strategy = UniformAcrossAllShards.singleShard();
             }
@@ -303,15 +303,15 @@ public final class Sharding {
                 workRegistry = new InMemoryShardedWorkRegistry();
             }
 
-            Sharding sharding = new Sharding(this);
-            return sharding;
+            Delivery delivery = new Delivery(this);
+            return delivery;
         }
 
         private StorageFactory initStorageFactory() {
             StorageFactory storageFactory;
             if (storageFactorySupplier == null) {
                 storageFactory = InMemoryStorageFactory.newInstance(
-                        BoundedContextNames.newName("Sharding"), true);
+                        BoundedContextNames.newName("Delivery"), true);
             } else {
                 storageFactory = storageFactorySupplier.get();
             }

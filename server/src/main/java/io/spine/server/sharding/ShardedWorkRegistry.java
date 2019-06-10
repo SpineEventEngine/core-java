@@ -28,11 +28,29 @@ import java.util.Optional;
  * The registry of the shard indexes along with the identifiers of the nodes, which
  * process the messages corresponding to each index.
  *
- * <p>
- *
  * @author Alex Tymchenko
  */
 public interface ShardedWorkRegistry {
 
+    /**
+     * Picks up the shard at a given index to process.
+     *
+     * <p>This action is intended to be exclusive, i.e. a single shard may be served
+     * by a single application node at a given moment of time.
+     *
+     * <p>In case of a successful operation, an instance of {@link ShardProcessingSession}
+     * is returned. The node obtained the session should perform the desired actions with the
+     * sharded messages and then {@link ShardProcessingSession#complete() complete} the session.
+     *
+     * <p>In case the shard at a given index is already picked up by some node,
+     * an {@link Optional#empty() Optional.empty()} is returned.
+     *
+     * @param index
+     *         the index of the shard to pick up for processing
+     * @param nodeId
+     *         the identifier of the node for which to pick the shard
+     * @return the session of shard processing,
+     *         or {@code Optional.empty()} if the shard is not available
+     */
     Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId);
 }

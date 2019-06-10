@@ -27,7 +27,7 @@ package io.spine.server.sharding;
  * on several app nodes. Therefore an entity is put into a shard, which in turn is designed to
  * process all the shard-incoming messages on a single application node at a time.
  */
-public interface ShardingStrategy {
+public interface DeliveryStrategy {
 
     int MAX_SHARD_COUNT = 100;
 

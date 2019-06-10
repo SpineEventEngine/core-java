@@ -25,8 +25,8 @@ import io.spine.base.Time;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.sharding.Delivery;
 import io.spine.server.sharding.ShardIndex;
-import io.spine.server.sharding.Sharding;
 import io.spine.server.type.ActorMessageEnvelope;
 import io.spine.type.TypeUrl;
 
@@ -77,12 +77,12 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     void storeOrDeliver(M envelope, I entityId, InboxLabel label) {
         InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
-        Sharding sharding = ServerEnvironment.getInstance()
-                                             .sharding();
-        if (!sharding.enabled()) {
+        Delivery delivery = ServerEnvironment.getInstance()
+                                             .delivery();
+        if (!delivery.enabled()) {
             deliverDirectly(envelope, entityId, label, inboxId);
         } else {
-            ShardIndex shardIndex = sharding.whichShardFor(entityId);
+            ShardIndex shardIndex = delivery.whichShardFor(entityId);
             InboxMessage.Builder builder = InboxMessage
                     .newBuilder()
                     .setId(inboxMsgIdFrom(envelope))

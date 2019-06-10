@@ -19,7 +19,7 @@
  */
 
 /**
- * This package contains in-memory implementations of sharding routines.
+ * This package contains in-memory implementations of delivery routines.
  */
 @Internal
 @CheckReturnValue

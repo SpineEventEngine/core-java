@@ -19,8 +19,7 @@
  */
 
 /**
- * This package describes splitting the entities into shards and grouping the messages
- * dispatched to entities of a shard.
+ * This package describes how messages are split into shards and grouped when delivered to entities.
  */
 
 @Internal

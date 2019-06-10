@@ -22,7 +22,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Identifier;
-import io.spine.server.sharding.Sharding;
+import io.spine.server.sharding.Delivery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -66,11 +66,11 @@ public final class ServerEnvironment {
      */
     private final NodeId nodeId;
 
-    private Sharding sharding;
+    private Delivery delivery;
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        sharding = Sharding.newBuilder().build();
+        delivery = Delivery.newBuilder().build();
         applicationId = ApplicationId.newBuilder().setValue("Application").build();
         nodeId = NodeId.newBuilder().setAppId(applicationId).setValue(Identifier.newUuid()).build();
     }
@@ -108,16 +108,16 @@ public final class ServerEnvironment {
         return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
-    public void setSharding(Sharding sharding) {
-        checkNotNull(sharding);
-        this.sharding = sharding;
+    public void setDelivery(Delivery delivery) {
+        checkNotNull(delivery);
+        this.delivery = delivery;
     }
 
     /**
-     * Returns the sharding mechanism specific to this environment.
+     * Returns the delivery mechanism specific to this environment.
      */
-    public Sharding sharding() {
-        return sharding;
+    public Delivery delivery() {
+        return delivery;
     }
 
     /**

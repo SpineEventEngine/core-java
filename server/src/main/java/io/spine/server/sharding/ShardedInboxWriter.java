@@ -26,7 +26,7 @@ import io.spine.server.inbox.InboxWriter;
 
 /**
  * A writer of {@link io.spine.server.inbox.Inbox Inbox} messages listens to the write
- * operations and notifies {@link Sharding} of them.
+ * operations and notifies {@link Delivery} of them.
  */
 public abstract class ShardedInboxWriter implements InboxWriter {
 

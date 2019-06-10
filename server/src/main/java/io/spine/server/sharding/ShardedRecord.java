@@ -22,17 +22,20 @@ package io.spine.server.sharding;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.GeneratedMixin;
 
 /**
  * A Protobuf {@link com.google.protobuf.Message Message} used for storage in a sharded environment.
  *
  * @author Alex Tymchenko
  */
+@GeneratedMixin
 public interface ShardedRecord extends Message {
 
     /**
      * Returns the index of the shard in which this record resides.
      */
+    @SuppressWarnings("override")   // Implemented in Protobuf-generated code.
     ShardIndex getShardIndex();
 
     /**
@@ -41,5 +44,6 @@ public interface ShardedRecord extends Message {
      * <p>This is not the time of storing the record, but the time of the message originating in
      * the subsystem, which stores data splitting it into shards.
      */
+    @SuppressWarnings("override")   // Implemented in Protobuf-generated code.
     Timestamp getWhenReceived();
 }

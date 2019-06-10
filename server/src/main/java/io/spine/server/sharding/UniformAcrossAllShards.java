@@ -35,7 +35,7 @@ import static java.lang.Math.abs;
  * number of shards to determine the index of a shard, at which the modification is allowed.
  */
 @Immutable
-public final class UniformAcrossAllShards implements ShardingStrategy, Serializable {
+public final class UniformAcrossAllShards implements DeliveryStrategy, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -76,7 +76,7 @@ public final class UniformAcrossAllShards implements ShardingStrategy, Serializa
      *         a number of shards
      * @return a uniform distribution strategy instance for a given shard number
      */
-    public static ShardingStrategy forNumber(int totalShards) {
+    public static DeliveryStrategy forNumber(int totalShards) {
         UniformAcrossAllShards result = new UniformAcrossAllShards(totalShards);
         return result;
     }
@@ -99,7 +99,7 @@ public final class UniformAcrossAllShards implements ShardingStrategy, Serializa
      *
      * @return a strategy that puts all entities in a single shard
      */
-    public static ShardingStrategy singleShard() {
+    public static DeliveryStrategy singleShard() {
         return SingleShard.INSTANCE.strategy;
     }
 

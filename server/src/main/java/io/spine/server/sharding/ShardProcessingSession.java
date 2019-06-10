@@ -56,5 +56,8 @@ public abstract class ShardProcessingSession {
         this.whenLastMessageProcessed = timestamp;
     }
 
+    /**
+     * Completes this session and releases the picked shard, making it available for picking up.
+     */
     protected abstract void complete();
 }
