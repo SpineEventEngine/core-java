@@ -36,7 +36,7 @@ import "google/protobuf/timestamp.proto";
 import "spine/client/entities.proto";
 import "spine/core/event.proto";
 import "spine/core/command.proto";
-import "spine/server/sharding/sharding.proto";
+import "spine/server/delivery/delivery.proto";
 
 
 // An identifier of an entity inbox.
