@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
-import io.spine.system.server.given.client.ShoppingListAggregate;
+import io.spine.system.server.given.client.ShoppingListProjection;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import org.junit.jupiter.api.AfterEach;
@@ -30,14 +30,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.client.SystemClientTestEnv.contextWithSystemAggregate;
 import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Default implementation of SystemWriteSide should")
 class DefaultSystemWriteSideTest {
@@ -81,42 +78,24 @@ class DefaultSystemWriteSideTest {
             HardCopyPrinted event = HardCopyPrinted
                     .newBuilder()
                     .setListId(aggregateId)
-                    .build();
+                    .vBuild();
             systemWriteSide.postEvent(event);
 
             int newCopiesCount = aggregateState().getHardCopiesCount();
             assertEquals(copiesCount + 1, newCopiesCount);
         }
 
-        @Test
-        @DisplayName("commands")
-        void commands() {
-            List<String> items = aggregateState().getItemList();
-            assertTrue(items.isEmpty());
-
-            AddListItem command = AddListItem
-                    .newBuilder()
-                    .setListId(aggregateId)
-                    .setItem("Milk")
-                    .build();
-            systemWriteSide.postCommand(command);
-
-            List<String> newItems = aggregateState().getItemList();
-            assertEquals(1, newItems.size());
-            assertEquals(command.getItem(), newItems.get(0));
-        }
-
         private ShoppingList aggregateState() {
-            ShoppingListAggregate aggregate = findAggregate(aggregateId, systemContext);
+            ShoppingListProjection aggregate = findAggregate(aggregateId, systemContext);
             return aggregate.state();
         }
 
         private void createAggregate() {
-            CreateShoppingList command = CreateShoppingList
+            ShoppingListCreated command = ShoppingListCreated
                     .newBuilder()
                     .setId(aggregateId)
-                    .build();
-            systemWriteSide.postCommand(command);
+                    .vBuild();
+            systemWriteSide.postEvent(command);
         }
     }
 }

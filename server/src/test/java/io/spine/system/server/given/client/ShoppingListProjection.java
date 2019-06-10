@@ -20,11 +20,8 @@
 
 package io.spine.system.server.given.client;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
-import io.spine.system.server.AddListItem;
-import io.spine.system.server.CreateShoppingList;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
 import io.spine.system.server.HardCopyLost;
 import io.spine.system.server.HardCopyPrinted;
 import io.spine.system.server.ListItemAdded;
@@ -32,47 +29,25 @@ import io.spine.system.server.ShoppingListCreated;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 
-public class ShoppingListAggregate extends Aggregate<ListId, ShoppingList, ShoppingList.Builder> {
+public class ShoppingListProjection extends Projection<ListId, ShoppingList, ShoppingList.Builder> {
 
-    private ShoppingListAggregate(ListId id) {
-        super(id);
+    @Subscribe
+    void on(ShoppingListCreated event) {
     }
 
-    @Assign
-    ShoppingListCreated handle(CreateShoppingList command) {
-        return ShoppingListCreated
-                .newBuilder()
-                .setId(command.getId())
-                .build();
-    }
-
-    @Assign
-    ListItemAdded handle(AddListItem command) {
-        return ListItemAdded
-                .newBuilder()
-                .setListId(command.getListId())
-                .setItem(command.getItem())
-                .build();
-    }
-
-    @Apply
-    private void on(ShoppingListCreated event) {
-        builder().setId(event.getId());
-    }
-
-    @Apply
-    private void on(ListItemAdded event) {
+    @Subscribe
+    void on(ListItemAdded event) {
         builder().addItem(event.getItem());
     }
 
-    @Apply(allowImport = true)
-    private void on(HardCopyPrinted event) {
+    @Subscribe
+    void on(HardCopyPrinted event) {
         int newCount = builder().getHardCopiesCount() + 1;
         builder().setHardCopiesCount(newCount);
     }
 
-    @Apply(allowImport = true)
-    private void on(HardCopyLost event) {
+    @Subscribe
+    void on(HardCopyLost event) {
         ShoppingList.Builder builder = builder();
         int newCount = builder.getHardCopiesCount() - 1;
         if (newCount >= 0) {

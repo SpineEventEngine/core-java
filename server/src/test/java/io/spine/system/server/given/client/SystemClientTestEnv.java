@@ -42,11 +42,11 @@ public class SystemClientTestEnv {
         return context;
     }
 
-    public static ShoppingListAggregate findAggregate(ListId aggregateId, BoundedContext context) {
+    public static ShoppingListProjection findAggregate(ListId aggregateId, BoundedContext context) {
         ShoppingListRepository repository = (ShoppingListRepository)
                 context.findRepository(ShoppingList.class)
                        .orElseGet(() -> fail("Repository should be registered."));
-        ShoppingListAggregate aggregate =
+        ShoppingListProjection aggregate =
                 repository.find(aggregateId)
                           .orElseGet(() -> fail("Aggregate should be present."));
         return aggregate;

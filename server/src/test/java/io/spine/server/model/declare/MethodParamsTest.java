@@ -27,7 +27,7 @@ import com.google.protobuf.Int32Value;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
 import io.spine.server.model.declare.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
-import io.spine.system.server.command.ScheduleCommand;
+import io.spine.test.model.ModCreateProject;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,11 +57,11 @@ class MethodParamsTest extends UtilityClassTest<MethodParams> {
     @DisplayName("detect that a method has exactly one parameter of an expected type")
     void detectSingleParam() {
         assertTrue(consistsOfSingle(singleParamCommand().getParameterTypes(),
-                                    ScheduleCommand.class));
+                                    ModCreateProject.class));
         assertFalse(consistsOfSingle(twoParamCommandAndCtx().getParameterTypes(),
-                                     ScheduleCommand.class));
+                                     ModCreateProject.class));
         assertFalse(consistsOfSingle(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                     ScheduleCommand.class));
+                                     ModCreateProject.class));
 
     }
 
@@ -69,11 +69,11 @@ class MethodParamsTest extends UtilityClassTest<MethodParams> {
     @DisplayName("detect that a method has exactly two parameters of expected types")
     void detectTwoParams() {
         assertTrue(consistsOfTwo(twoParamCommandAndCtx().getParameterTypes(),
-                                 ScheduleCommand.class, CommandContext.class));
+                                 ModCreateProject.class, CommandContext.class));
         assertFalse(consistsOfTwo(singleParamCommand().getParameterTypes(),
-                                  ScheduleCommand.class, CommandContext.class));
+                                  ModCreateProject.class, CommandContext.class));
         assertFalse(consistsOfTwo(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                  ScheduleCommand.class, CommandContext.class));
+                                  ModCreateProject.class, CommandContext.class));
 
     }
 

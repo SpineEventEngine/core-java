@@ -20,8 +20,20 @@
 
 package io.spine.system.server.given.client;
 
-import io.spine.server.aggregate.AggregateRepository;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 import io.spine.test.system.server.ListId;
+import io.spine.test.system.server.ShoppingList;
 
-public class ShoppingListRepository extends AggregateRepository<ListId, ShoppingListAggregate> {
+public class ShoppingListRepository
+        extends ProjectionRepository<ListId, ShoppingListProjection, ShoppingList> {
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    protected void setupEventRouting(EventRouting<ListId> routing) {
+        super.setupEventRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(ListId.class));
+    }
 }
