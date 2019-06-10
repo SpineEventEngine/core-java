@@ -246,7 +246,7 @@ public class EntityLifecycle {
     }
 
     /**
-     * Posts the {@link EntityStateChanged} system event and the event related to
+     * Posts the {@link EntityStateChanged} system event and the events related to
      * the lifecycle flags.
      *
      * <p>Only the actual changes in the entity attributes result into system events.
@@ -269,7 +269,19 @@ public class EntityLifecycle {
         postIfRestored(change, dispatchedMessageIds);
     }
 
-    public final void onInvalidEntity(MessageQualifier cause,
+    /**
+     * Posts the {@link ConstraintViolated} system event.
+     *
+     * @param lastMessage
+     *         the last message handled by the entity
+     * @param root
+     *         the root message of the message chain which led to the violation
+     * @param error
+     *         the description of violation
+     * @param version
+     *         the version of the invalid entity
+     */
+    public final void onInvalidEntity(MessageQualifier lastMessage,
                                       MessageQualifier root,
                                       ValidationError error,
                                       Version version) {
@@ -282,7 +294,7 @@ public class EntityLifecycle {
         ConstraintViolated event = ConstraintViolated
                 .newBuilder()
                 .setEntity(qualifier)
-                .setLastMessage(cause)
+                .setLastMessage(lastMessage)
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
                 .vBuild();
