@@ -28,11 +28,10 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.EntityQualifier;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
-import io.spine.core.MessageQualifier;
+import io.spine.core.Qualifier;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
@@ -281,11 +280,11 @@ public class EntityLifecycle {
      * @param version
      *         the version of the invalid entity
      */
-    public final void onInvalidEntity(MessageQualifier lastMessage,
-                                      MessageQualifier root,
+    public final void onInvalidEntity(Qualifier lastMessage,
+                                      Qualifier root,
                                       ValidationError error,
                                       Version version) {
-        EntityQualifier qualifier = EntityQualifier
+        Qualifier qualifier = Qualifier
                 .newBuilder()
                 .setId(historyId.getEntityId().getId())
                 .setTypeUrl(historyId.getTypeUrl())

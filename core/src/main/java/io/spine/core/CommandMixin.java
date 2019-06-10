@@ -51,7 +51,7 @@ public interface CommandMixin
     }
 
     @Override
-    default MessageQualifier rootMessage() {
+    default Qualifier rootMessage() {
         return context().getOrigin()
                         .root();
     }

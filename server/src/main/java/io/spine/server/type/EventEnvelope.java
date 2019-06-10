@@ -28,7 +28,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.MessageQualifier;
+import io.spine.core.Qualifier;
 import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
@@ -121,9 +121,9 @@ public final class EventEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        MessageQualifier eventQualifier = MessageQualifier
+        Qualifier eventQualifier = Qualifier
                 .newBuilder()
-                .setMessageId(pack(id()))
+                .setId(pack(id()))
                 .setTypeUrl(outerObject().typeUrl().value())
                 .buildPartial();
         Origin origin = Origin

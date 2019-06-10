@@ -48,7 +48,7 @@ import io.spine.client.Topic;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.MessageQualifier;
+import io.spine.core.Qualifier;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -560,8 +560,8 @@ class StandTest extends TenantAwareTest {
             assertNotNull(event);
 
             EventContext context = event.context();
-            MessageQualifier origin = context.getPastMessage()
-                                             .qualifier();
+            Qualifier origin = context.getPastMessage()
+                                      .qualifier();
             assertThat(origin.asCommandId()).isEqualTo(cmd.id());
             assertThat(origin.getTypeUrl()).isEqualTo(cmd.command()
                                                          .typeUrl()

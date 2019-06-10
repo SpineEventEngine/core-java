@@ -31,7 +31,7 @@ import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.MessageQualifier;
+import io.spine.core.Qualifier;
 import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -553,9 +553,9 @@ public abstract class AggregateStorageTest
             ActorContext context = ActorContext
                     .newBuilder()
                     .buildPartial();
-            MessageQualifier qualifier = MessageQualifier
+            Qualifier qualifier = Qualifier
                     .newBuilder()
-                    .setMessageId(AnyPacker.pack(newEventId()))
+                    .setId(AnyPacker.pack(newEventId()))
                     .setTypeUrl(TypeUrl.of(Nothing.class).value())
                     .buildPartial();
             Origin origin = Origin

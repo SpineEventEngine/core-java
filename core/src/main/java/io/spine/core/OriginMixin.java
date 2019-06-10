@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 
 import static io.spine.validate.Validate.isNotDefault;
@@ -29,24 +28,18 @@ import static io.spine.validate.Validate.isNotDefault;
  * A mixin interface for the {@link Origin} message type.
  */
 @GeneratedMixin
-interface OriginMixin extends Message {
+interface OriginMixin extends OriginOrBuilder {
 
-    @SuppressWarnings("override")
-    MessageQualifier getQualifier();
-
-    default MessageQualifier qualifier() {
+    default Qualifier qualifier() {
         return getQualifier();
     }
-
-    @SuppressWarnings("override")
-    OriginMixin getGrandOrigin();
 
     /**
      * Obtains the root origin message qualifier.
      *
      * <p>The root message has no further origin, as it is produced by an actor.
      */
-    default MessageQualifier root() {
+    default Qualifier root() {
         OriginMixin parent = this;
         while (isNotDefault(parent.getGrandOrigin())) {
             parent = parent.getGrandOrigin();

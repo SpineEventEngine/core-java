@@ -50,7 +50,7 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     }
 
     @Override
-    default MessageQualifier rootMessage() {
+    default Qualifier rootMessage() {
         EventContext.OriginCase origin = context().getOriginCase();
         return origin == PAST_MESSAGE
                ? context().getPastMessage().root()
@@ -142,7 +142,7 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     }
 
     @Override
-    default MessageQualifier qualifier() {
+    default Qualifier qualifier() {
         return MessageWithContext.super.qualifier()
                                        .toBuilder()
                                        .setVersion(context().getVersion())

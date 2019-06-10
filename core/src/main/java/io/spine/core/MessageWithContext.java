@@ -165,10 +165,10 @@ public interface MessageWithContext<I extends MessageId,
      * <p>A message qualifier is a digest information about the message which describes its origin
      * but does not describe the message contents.
      */
-    default MessageQualifier qualifier() {
-        return MessageQualifier
+    default Qualifier qualifier() {
+        return Qualifier
                 .newBuilder()
-                .setMessageId(pack(id()))
+                .setId(pack(id()))
                 .setTypeUrl(typeUrl().value())
                 .vBuild();
     }
@@ -179,5 +179,5 @@ public interface MessageWithContext<I extends MessageId,
      * <p>The root message is always produced by an actor directly. Tenant and actor of the root
      * message define the tenant and actor of the whole chain.
      */
-    MessageQualifier rootMessage();
+    Qualifier rootMessage();
 }

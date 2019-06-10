@@ -21,29 +21,30 @@
 package io.spine.core;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * A mixin interface for the {@link MessageQualifier} type.
+ * A mixin interface for the {@link Qualifier} type.
  */
 @GeneratedMixin
-interface MessageQualifierMixin extends MessageQualifierOrBuilder {
+interface QualifierMixin extends QualifierOrBuilder {
 
     /**
      * Obtains the ID of the message.
      */
-    default MessageId id() {
-        return (MessageId) unpack(getMessageId());
+    default Message id() {
+        return unpack(getId());
     }
 
     /**
      * Checks if the associated message is an event.
      */
     default boolean isEvent() {
-        Any id = getMessageId();
+        Any id = getId();
         return id.is(EventId.class);
     }
 
@@ -53,15 +54,15 @@ interface MessageQualifierMixin extends MessageQualifierOrBuilder {
      * <p>Throws an {@link IllegalStateException} if the associated message is not an event.
      */
     default EventId asEventId() {
-        checkState(isEvent(), "%s is not an event ID.", getMessageId().getTypeUrl());
-        return unpack(getMessageId(), EventId.class);
+        checkState(isEvent(), "%s is not an event ID.", getId().getTypeUrl());
+        return unpack(getId(), EventId.class);
     }
 
     /**
      * Checks if the associated message is a command.
      */
     default boolean isCommand() {
-        Any id = getMessageId();
+        Any id = getId();
         return id.is(CommandId.class);
     }
 
@@ -71,7 +72,14 @@ interface MessageQualifierMixin extends MessageQualifierOrBuilder {
      * <p>Throws an {@link IllegalStateException} if the associated message is not a command.
      */
     default CommandId asCommandId() {
-        checkState(isCommand(), "%s is not a command ID.", getMessageId().getTypeUrl());
-        return unpack(getMessageId(), CommandId.class);
+        checkState(isCommand(), "%s is not a command ID.", getId().getTypeUrl());
+        return unpack(getId(), CommandId.class);
+    }
+
+    /**
+     * Checks if the associated message is an entity.
+     */
+    default boolean isEntity() {
+        return !isCommand() && !isEvent();
     }
 }

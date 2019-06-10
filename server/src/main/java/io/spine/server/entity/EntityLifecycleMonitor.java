@@ -24,7 +24,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
-import io.spine.core.MessageQualifier;
+import io.spine.core.Qualifier;
 import io.spine.core.MessageWithContext;
 import io.spine.logging.Logging;
 import io.spine.validate.NonValidated;
@@ -58,7 +58,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 @Internal
 public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, Logging {
 
-    private static final MessageQualifier UNKNOWN_MESSAGE = MessageQualifier.getDefaultInstance();
+    private static final Qualifier UNKNOWN_MESSAGE = Qualifier.getDefaultInstance();
 
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessageIds;
@@ -132,8 +132,8 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
         Throwable cause = Throwables.getRootCause(t);
         if (cause instanceof ValidationException) {
             ValidationError error = ((ValidationException) cause).asValidationError();
-            MessageQualifier causeMessage;
-            MessageQualifier rootMessage;
+            Qualifier causeMessage;
+            Qualifier rootMessage;
             if (lastMessage != null) {
                 causeMessage = lastMessage.qualifier();
                 rootMessage = lastMessage.rootMessage();
