@@ -102,8 +102,7 @@ public abstract class EventDispatchingRepository<I,
     @CanIgnoreReturnValue
     public final Set<I> dispatch(EventEnvelope event) {
         checkNotNull(event);
-        Set<I> targets = with(event.tenantId())
-                .evaluate(() -> doDispatch(event));
+        Set<I> targets = with(event.tenantId()).evaluate(() -> doDispatch(event));
         return targets;
     }
 

@@ -157,8 +157,6 @@ public abstract class ProcessManagerRepository<I,
         context.registerCommandDispatcher(this);
 
         this.commandErrorHandler = context.createCommandErrorHandler();
-        PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(context);
     }
 
     /**
@@ -283,6 +281,8 @@ public abstract class ProcessManagerRepository<I,
     private I doDispatch(CommandEnvelope command) {
         I target = route(command);
         lifecycleOf(target).onDispatchCommand(command.command());
+        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
+        endpoint.dispatchTo(target);
         return target;
     }
 
@@ -294,19 +294,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Dispatches the given command to the {@link ProcessManager} with the given ID.
-     *
-     * @param id
-     *         the target entity ID
-     * @param command
-     *         the command to dispatch
-     */
-    void dispatchNowTo(I id, CommandEnvelope command) {
-        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
-        endpoint.dispatchTo(id);
-    }
-
-    /**
      * {@inheritDoc}
      *
      * <p>Sends a system command to dispatch the given event to a reactor.
@@ -314,18 +301,8 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected final void dispatchTo(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
-    /**
-     * Dispatches the given event to the {@link ProcessManager} with the given ID.
-     *
-     * @param id
-     *         the target entity ID
-     * @param event
-     *         the event to dispatch
-     */
-    void dispatchNowTo(I id, EventEnvelope event) {
-        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
+        EventEnvelope envelope = EventEnvelope.of(event);
+        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, envelope);
         endpoint.dispatchTo(id);
     }
 

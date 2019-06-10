@@ -468,10 +468,9 @@ class ProcessManagerRepositoryTest
     void throwOnUnknownCommand() {
         Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
-        ProjectId id = createId(42);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repo.dispatchNowTo(id, request));
+                                           () -> repo.dispatchCommand(request));
         Truth.assertThat(getRootCause(exception))
              .isInstanceOf(IllegalStateException.class);
     }

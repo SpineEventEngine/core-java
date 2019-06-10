@@ -34,6 +34,7 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -69,7 +70,7 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * <p>In other cases, an entity won't have a {@link Mirror}.
  */
 final class MirrorRepository
-        extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+        extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final Logger log = Logging.get(MirrorRepository.class);
     private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
