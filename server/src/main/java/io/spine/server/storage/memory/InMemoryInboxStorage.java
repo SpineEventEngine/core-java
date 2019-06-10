@@ -22,11 +22,11 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import io.spine.server.delivery.ShardIndex;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxMessageId;
 import io.spine.server.inbox.InboxReadRequest;
 import io.spine.server.inbox.InboxStorage;
-import io.spine.server.sharding.ShardIndex;
 
 import java.util.Iterator;
 import java.util.Optional;

@@ -20,8 +20,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.sharding.ShardIndex;
-
 /**
  * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
  *

@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import io.spine.server.NodeId;
-import io.spine.server.sharding.ShardIndex;
 
 import java.util.Optional;
 

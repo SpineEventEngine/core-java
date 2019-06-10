@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
-import io.spine.server.sharding.ShardIndex;
 
 /**
  * A Protobuf {@link com.google.protobuf.Message Message} used for storage in a sharded environment.

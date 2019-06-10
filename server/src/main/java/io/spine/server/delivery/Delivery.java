@@ -36,7 +36,6 @@ import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
 import io.spine.server.inbox.InboxWriter;
-import io.spine.server.sharding.ShardIndex;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;

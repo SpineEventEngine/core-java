@@ -22,8 +22,6 @@ package io.spine.server.delivery;
 
 import com.google.protobuf.Timestamp;
 import io.spine.server.NodeId;
-import io.spine.server.sharding.ShardIndex;
-import io.spine.server.sharding.ShardSessionRecord;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 

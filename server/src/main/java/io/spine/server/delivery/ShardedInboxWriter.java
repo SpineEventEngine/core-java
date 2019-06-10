@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
 import io.spine.server.inbox.InboxWriter;
-import io.spine.server.sharding.ShardIndex;
 
 /**
  * A writer of {@link io.spine.server.inbox.Inbox Inbox} messages listens to the write

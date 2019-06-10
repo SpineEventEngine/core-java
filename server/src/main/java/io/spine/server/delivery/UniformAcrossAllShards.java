@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.sharding.ShardIndex;
 
 import java.io.Serializable;
 import java.util.Objects;

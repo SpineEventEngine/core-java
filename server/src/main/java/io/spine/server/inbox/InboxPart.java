@@ -26,7 +26,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.sharding.ShardIndex;
+import io.spine.server.delivery.ShardIndex;
 import io.spine.server.type.ActorMessageEnvelope;
 import io.spine.type.TypeUrl;
 

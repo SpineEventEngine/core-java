@@ -24,10 +24,10 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.NodeId;
+import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
+import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
-import io.spine.server.sharding.ShardIndex;
-import io.spine.server.sharding.ShardSessionRecord;
 
 import java.util.Map;
 import java.util.Optional;
