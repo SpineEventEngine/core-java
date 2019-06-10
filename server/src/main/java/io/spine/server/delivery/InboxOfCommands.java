@@ -18,36 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.delivery;
 
-import io.spine.server.event.DuplicateEventException;
-import io.spine.server.type.EventEnvelope;
+import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.type.CommandEnvelope;
 
 import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
  * The part of {@link Inbox} responsible for processing incoming
- * {@link io.spine.server.type.EventEnvelope events}.
+ * {@link io.spine.server.type.CommandEnvelope commands}.
  *
  * @param <I>
  *         the type of identifier or inbox target entities
  */
-class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
+class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
-    InboxOfEvents(Inbox.Builder<I> builder) {
-        super(builder, builder.getEventEndpoints());
+    InboxOfCommands(Inbox.Builder<I> builder) {
+        super(builder, builder.getCommandEndpoints());
     }
 
     @Override
-    protected void setRecordPayload(EventEnvelope envelope, InboxMessage.Builder builder) {
-        builder.setEvent(envelope.outerObject());
+    protected void setRecordPayload(CommandEnvelope envelope, InboxMessage.Builder builder) {
+        builder.setCommand(envelope.outerObject());
     }
 
     @Override
-    protected InboxMessageId inboxMsgIdFrom(EventEnvelope envelope) {
+    protected InboxMessageId inboxMsgIdFrom(CommandEnvelope envelope) {
         String rawValue = envelope.id()
-                                  .getValue();
+                                  .getUuid();
         InboxMessageId result = InboxMessageId.newBuilder()
                                               .setValue(rawValue)
                                               .build();
@@ -55,33 +55,32 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected EventEnvelope asEnvelope(InboxMessage message) {
-        return EventEnvelope.of(message.getEvent());
+    protected CommandEnvelope asEnvelope(InboxMessage message) {
+        return CommandEnvelope.of(message.getCommand());
     }
 
     @Override
     protected Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource) {
-        return new EventDispatcher(deduplicationSource);
+        return new CommandDispatcher(deduplicationSource);
     }
 
     /**
-     * A strategy of event delivery from this {@code Inbox} to the event targets.
+     * A strategy of command delivery from this {@code Inbox} to the command target.
      */
-    class EventDispatcher extends Dispatcher {
+    class CommandDispatcher extends Dispatcher {
 
-        private EventDispatcher(Collection<InboxMessage> deduplicationSource) {
+        private CommandDispatcher(Collection<InboxMessage> deduplicationSource) {
             super(deduplicationSource);
         }
 
         @Override
         protected Predicate<? super InboxMessage> filterByType() {
-            return (Predicate<InboxMessage>) InboxMessage::hasEvent;
+            return (Predicate<InboxMessage>) InboxMessage::hasCommand;
         }
-
 
         @Override
         protected RuntimeException onDuplicateFound(InboxMessage duplicate) {
-            return new DuplicateEventException(duplicate.getEvent());
+            return DuplicateCommandException.of(duplicate.getCommand());
         }
     }
 }

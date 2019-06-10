@@ -18,15 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.delivery.Delivery;
-import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.delivery.ShardIndex;
 import io.spine.server.type.ActorMessageEnvelope;
 import io.spine.type.TypeUrl;
 

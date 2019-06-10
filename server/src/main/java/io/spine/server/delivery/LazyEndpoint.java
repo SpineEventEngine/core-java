@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,13 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
+import io.spine.annotation.Internal;
+import io.spine.server.type.ActorMessageEnvelope;
+
+import java.util.function.Function;
+
 /**
- * This package is devoted to classes and interfaces of {@link io.spine.server.inbox.Inbox Inbox}.
+ * A lazily initialized {@link io.spine.server.delivery.MessageEndpoint MessageEndpoint},
+ * which should be used as a destination for inbox messages.
+ *
+ * @param <I>
+ *         the type of identifier of the endpoint targets
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.inbox;
+@Internal
+@FunctionalInterface
+public interface LazyEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>>
+        extends Function<M, MessageEndpoint<I, M>> {
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+}

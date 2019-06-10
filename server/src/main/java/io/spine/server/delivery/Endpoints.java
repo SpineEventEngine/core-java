@@ -18,32 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.delivery;
 
-import io.spine.string.Stringifiers;
+import io.spine.server.type.ActorMessageEnvelope;
 
-import static java.lang.String.format;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * Thrown if there is an attempt to mark a message put to {@code Inbox} with a label, which was
- * not added for the {@code Inbox} instance.
+ * The {@linkplain LazyEndpoint endpoints} configured as destinations for
+ * a certain {@linkplain io.spine.server.delivery.InboxLabel label}.
  */
-public class LabelNotFoundException extends RuntimeException {
+class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
-    private static final long serialVersionUID = 1L;
+    private final Map<InboxLabel, LazyEndpoint<I, M>> endpoints =
+            new EnumMap<>(InboxLabel.class);
 
-    private final InboxLabel label;
-    private final InboxId inboxId;
-
-    public LabelNotFoundException(InboxId id, InboxLabel label) {
-        super();
-        this.label = label;
-        inboxId = id;
+    void add(InboxLabel label, LazyEndpoint<I, M> lazyEndpoint) {
+        endpoints.put(label, lazyEndpoint);
     }
 
-    @Override
-    public String getMessage() {
-        return format("Inbox %s has no available label %s",
-                      Stringifiers.toString(inboxId), label);
+    Optional<MessageEndpoint<I, M>> get(InboxLabel label, M envelope) {
+        if (!endpoints.containsKey(label)) {
+            return Optional.empty();
+        }
+        return Optional.of(endpoints.get(label)
+                                    .apply(envelope));
+    }
+
+    boolean isEmpty() {
+        return endpoints.isEmpty();
     }
 }

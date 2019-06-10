@@ -22,17 +22,18 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import io.spine.server.delivery.Inbox;
+import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.InboxMessageId;
+import io.spine.server.delivery.InboxReadRequest;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.server.inbox.InboxMessage;
-import io.spine.server.inbox.InboxMessageId;
-import io.spine.server.inbox.InboxReadRequest;
-import io.spine.server.inbox.InboxStorage;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * In-memory implementation of messages stored in {@link io.spine.server.inbox.Inbox Inbox}.
+ * In-memory implementation of messages stored in {@link Inbox Inbox}.
  */
 public class InMemoryInboxStorage extends InboxStorage {
 

@@ -20,12 +20,8 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.inbox.InboxMessage;
-import io.spine.server.inbox.InboxStorage;
-import io.spine.server.inbox.InboxWriter;
-
 /**
- * A writer of {@link io.spine.server.inbox.Inbox Inbox} messages listens to the write
+ * A writer of {@link Inbox Inbox} messages listens to the write
  * operations and notifies {@link Delivery} of them.
  */
 public abstract class ShardedInboxWriter implements InboxWriter {

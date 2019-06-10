@@ -18,23 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
-
-import io.spine.server.storage.ReadRequest;
+package io.spine.server.delivery;
 
 /**
- * A request to read a certain {@link InboxMessage} by its ID.
+ * Writes messages into the inbox storage.
  */
-public class InboxReadRequest implements ReadRequest<InboxMessageId> {
+public interface InboxWriter {
 
-    private final InboxMessageId messageId;
-
-    InboxReadRequest(InboxMessageId id) {
-        messageId = id;
-    }
-
-    @Override
-    public InboxMessageId getRecordId() {
-        return messageId;
-    }
+    void write(InboxMessage message);
 }

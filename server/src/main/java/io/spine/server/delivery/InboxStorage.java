@@ -18,9 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
-
-import io.spine.server.delivery.ShardedStorage;
+package io.spine.server.delivery;
 
 /**
  * Abstract base for the storage of {@link Inbox} messages.

@@ -23,9 +23,9 @@ package io.spine.server.storage;
 import io.spine.core.BoundedContextName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.store.EventStore;
-import io.spine.server.inbox.InboxStorage;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 

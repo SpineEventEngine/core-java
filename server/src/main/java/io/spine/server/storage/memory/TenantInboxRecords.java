@@ -24,8 +24,9 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.server.inbox.InboxMessage;
-import io.spine.server.inbox.InboxMessageId;
+import io.spine.server.delivery.Inbox;
+import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.InboxMessageId;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -55,7 +56,7 @@ class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMessage> 
     }
 
     /**
-     * Obtains the contents of {@link io.spine.server.inbox.Inbox Inbox} by its identifier.
+     * Obtains the contents of {@link Inbox Inbox} by its identifier.
      *
      * <p>Returns all messages, placing those received earlier first.
      *

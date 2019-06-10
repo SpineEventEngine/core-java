@@ -18,24 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
-import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.string.Stringifiers;
 
-import java.util.function.Function;
+import static java.lang.String.format;
 
 /**
- * A lazily initialized {@link io.spine.server.delivery.MessageEndpoint MessageEndpoint},
- * which should be used as a destination for inbox messages.
- *
- * @param <I>
- *         the type of identifier of the endpoint targets
+ * Thrown if there is an attempt to mark a message put to {@code Inbox} with a label, which was
+ * not added for the {@code Inbox} instance.
  */
-@Internal
-@FunctionalInterface
-public interface LazyEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>>
-        extends Function<M, MessageEndpoint<I, M>> {
+public class LabelNotFoundException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
+    private final InboxLabel label;
+    private final InboxId inboxId;
+
+    public LabelNotFoundException(InboxId id, InboxLabel label) {
+        super();
+        this.label = label;
+        inboxId = id;
+    }
+
+    @Override
+    public String getMessage() {
+        return format("Inbox %s has no available label %s",
+                      Stringifiers.toString(inboxId), label);
+    }
 }

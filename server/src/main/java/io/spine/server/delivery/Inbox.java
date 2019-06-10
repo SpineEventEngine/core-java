@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev. All rights reserved.
+ * Copyright 2019, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,11 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.delivery;
 
 import io.spine.server.ServerEnvironment;
-import io.spine.server.delivery.Delivery;
-import io.spine.server.delivery.ShardedMessageDelivery;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -31,12 +29,12 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.inbox.InboxLabel.COMMAND_UPON_EVENT;
-import static io.spine.server.inbox.InboxLabel.HANDLE_COMMAND;
-import static io.spine.server.inbox.InboxLabel.IMPORT_EVENT;
-import static io.spine.server.inbox.InboxLabel.REACT_UPON_EVENT;
-import static io.spine.server.inbox.InboxLabel.TRANSFORM_COMMAND;
-import static io.spine.server.inbox.InboxLabel.UPDATE_SUBSCRIBER;
+import static io.spine.server.delivery.InboxLabel.COMMAND_UPON_EVENT;
+import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
+import static io.spine.server.delivery.InboxLabel.IMPORT_EVENT;
+import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
+import static io.spine.server.delivery.InboxLabel.TRANSFORM_COMMAND;
+import static io.spine.server.delivery.InboxLabel.UPDATE_SUBSCRIBER;
 
 /**
  * A container for the messages dispatched to a certain consumer, such as an event subscriber

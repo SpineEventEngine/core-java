@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.inbox;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
@@ -29,8 +29,7 @@ import io.spine.type.TypeUrl;
 import static io.spine.base.Identifier.pack;
 
 /**
- * Utilities for working with {@linkplain io.spine.server.inbox.InboxId inbox
- * identifiers}.
+ * Utilities for working with {@linkplain io.spine.server.delivery.InboxId inbox identifiers}.
  */
 @Internal
 public final class InboxIds {
