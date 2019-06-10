@@ -21,8 +21,8 @@
 package io.spine.server.inbox;
 
 import io.spine.server.ServerEnvironment;
-import io.spine.server.sharding.Delivery;
-import io.spine.server.sharding.ShardedMessageDelivery;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.ShardedMessageDelivery;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;

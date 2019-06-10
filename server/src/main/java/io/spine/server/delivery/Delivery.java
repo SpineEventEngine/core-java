@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -31,11 +31,12 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.inbox.Inbox;
 import io.spine.server.inbox.InboxMessage;
 import io.spine.server.inbox.InboxStorage;
 import io.spine.server.inbox.InboxWriter;
-import io.spine.server.sharding.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.sharding.ShardIndex;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;

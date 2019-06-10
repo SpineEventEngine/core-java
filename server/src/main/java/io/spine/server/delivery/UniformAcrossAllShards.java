@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.sharding.ShardIndex;
 
 import java.io.Serializable;
 import java.util.Objects;

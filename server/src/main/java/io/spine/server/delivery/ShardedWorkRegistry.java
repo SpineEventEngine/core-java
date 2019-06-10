@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import io.spine.server.NodeId;
+import io.spine.server.sharding.ShardIndex;
 
 import java.util.Optional;
 

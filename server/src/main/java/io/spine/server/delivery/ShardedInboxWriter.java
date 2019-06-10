@@ -18,24 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
+
+import io.spine.server.inbox.InboxMessage;
+import io.spine.server.inbox.InboxStorage;
+import io.spine.server.inbox.InboxWriter;
+import io.spine.server.sharding.ShardIndex;
 
 /**
- * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
- *
- * <p>The idea is to avoid the concurrent modification of the same {@code Entity} instance
- * on several app nodes. Therefore an entity is put into a shard, which in turn is designed to
- * process all the shard-incoming messages on a single application node at a time.
+ * A writer of {@link io.spine.server.inbox.Inbox Inbox} messages listens to the write
+ * operations and notifies {@link Delivery} of them.
  */
-public interface DeliveryStrategy {
+public abstract class ShardedInboxWriter implements InboxWriter {
 
-    int MAX_SHARD_COUNT = 100;
+    private final InboxStorage storage;
 
-    default int getMaxShardCount() {
-        return MAX_SHARD_COUNT;
+    ShardedInboxWriter(InboxStorage storage) {
+        this.storage = storage;
     }
 
-    ShardIndex getIndexFor(Object entityId);
+    protected abstract void notifyOfUpdate(ShardIndex index);
 
-    int getShardCount();
+    @Override
+    public void write(InboxMessage message) {
+        storage.write(message);
+        notifyOfUpdate(message.getShardIndex());
+    }
 }

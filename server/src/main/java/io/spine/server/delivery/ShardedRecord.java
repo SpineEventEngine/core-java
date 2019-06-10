@@ -18,15 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.server.sharding.ShardIndex;
+
 /**
- * This package contains in-memory implementations of delivery routines.
+ * A Protobuf {@link com.google.protobuf.Message Message} used for storage in a sharded environment.
+ *
+ * @author Alex Tymchenko
  */
-@Internal
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.sharding.memory;
+@GeneratedMixin
+public interface ShardedRecord extends Message {
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.annotation.Internal;
+    /**
+     * Returns the index of the shard in which this record resides.
+     */
+    @SuppressWarnings("override")   // Implemented in Protobuf-generated code.
+    ShardIndex getShardIndex();
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * Returns the moment of time, when the message was originally received to be sharded.
+     *
+     * <p>This is not the time of storing the record, but the time of the message originating in
+     * the subsystem, which stores data splitting it into shards.
+     */
+    @SuppressWarnings("override")   // Implemented in Protobuf-generated code.
+    Timestamp getWhenReceived();
+}

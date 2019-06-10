@@ -18,32 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import io.spine.annotation.GeneratedMixin;
+import io.spine.server.sharding.ShardIndex;
 
 /**
- * A Protobuf {@link com.google.protobuf.Message Message} used for storage in a sharded environment.
+ * Determines the {@linkplain ShardIndex index of a shard} for the given identifier of an entity.
  *
- * @author Alex Tymchenko
+ * <p>The idea is to avoid the concurrent modification of the same {@code Entity} instance
+ * on several app nodes. Therefore an entity is put into a shard, which in turn is designed to
+ * process all the shard-incoming messages on a single application node at a time.
  */
-@GeneratedMixin
-public interface ShardedRecord extends Message {
+public interface DeliveryStrategy {
 
-    /**
-     * Returns the index of the shard in which this record resides.
-     */
-    @SuppressWarnings("override")   // Implemented in Protobuf-generated code.
-    ShardIndex getShardIndex();
+    int MAX_SHARD_COUNT = 100;
 
-    /**
-     * Returns the moment of time, when the message was originally received to be sharded.
-     *
-     * <p>This is not the time of storing the record, but the time of the message originating in
-     * the subsystem, which stores data splitting it into shards.
-     */
-    @SuppressWarnings("override")   // Implemented in Protobuf-generated code.
-    Timestamp getWhenReceived();
+    default int getMaxShardCount() {
+        return MAX_SHARD_COUNT;
+    }
+
+    ShardIndex getIndexFor(Object entityId);
+
+    int getShardCount();
 }

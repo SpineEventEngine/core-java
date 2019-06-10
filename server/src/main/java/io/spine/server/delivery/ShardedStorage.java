@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import io.spine.server.sharding.ShardIndex;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.ReadRequest;
 

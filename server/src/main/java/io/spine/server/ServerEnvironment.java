@@ -22,7 +22,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Identifier;
-import io.spine.server.sharding.Delivery;
+import io.spine.server.delivery.Delivery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;

@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
+package io.spine.server.delivery;
 
 import com.google.protobuf.Timestamp;
 import io.spine.server.NodeId;
+import io.spine.server.sharding.ShardIndex;
+import io.spine.server.sharding.ShardSessionRecord;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 

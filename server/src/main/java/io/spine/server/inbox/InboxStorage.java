@@ -20,7 +20,7 @@
 
 package io.spine.server.inbox;
 
-import io.spine.server.sharding.ShardedStorage;
+import io.spine.server.delivery.ShardedStorage;
 
 /**
  * Abstract base for the storage of {@link Inbox} messages.

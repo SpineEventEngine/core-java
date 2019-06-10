@@ -18,22 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding.memory;
+package io.spine.server.delivery.memory;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.NodeId;
+import io.spine.server.delivery.ShardProcessingSession;
+import io.spine.server.delivery.ShardedWorkRegistry;
 import io.spine.server.sharding.ShardIndex;
-import io.spine.server.sharding.ShardProcessingSession;
 import io.spine.server.sharding.ShardSessionRecord;
-import io.spine.server.sharding.ShardedWorkRegistry;
 
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * An in-memory implementation of {@link io.spine.server.sharding.ShardedWorkRegistry
+ * An in-memory implementation of {@link ShardedWorkRegistry
  * ShardedWorKRegistry}.
  */
 public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {

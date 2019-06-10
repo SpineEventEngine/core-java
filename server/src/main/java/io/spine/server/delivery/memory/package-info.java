@@ -18,29 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.sharding;
-
-import io.spine.server.inbox.InboxMessage;
-import io.spine.server.inbox.InboxStorage;
-import io.spine.server.inbox.InboxWriter;
-
 /**
- * A writer of {@link io.spine.server.inbox.Inbox Inbox} messages listens to the write
- * operations and notifies {@link Delivery} of them.
+ * This package contains in-memory implementations of delivery routines.
  */
-public abstract class ShardedInboxWriter implements InboxWriter {
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.delivery.memory;
 
-    private final InboxStorage storage;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-    ShardedInboxWriter(InboxStorage storage) {
-        this.storage = storage;
-    }
-
-    protected abstract void notifyOfUpdate(ShardIndex index);
-
-    @Override
-    public void write(InboxMessage message) {
-        storage.write(message);
-        notifyOfUpdate(message.getShardIndex());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

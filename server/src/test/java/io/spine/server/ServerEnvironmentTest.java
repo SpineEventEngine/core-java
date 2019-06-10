@@ -20,8 +20,8 @@
 
 package io.spine.server;
 
-import io.spine.server.sharding.Delivery;
-import io.spine.server.sharding.UniformAcrossAllShards;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.UniformAcrossAllShards;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
