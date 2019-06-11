@@ -47,9 +47,28 @@ import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
- * A mechanism of splitting the data among the application nodes and dedicating the processing
- * of a particular data piece to a particular node to avoid concurrent modification and prevent
- * the data loss.
+ * Delivers the messages to the entities.
+ *
+ * <p>Splits the incoming messages into shards and allows to deliver the
+ * messages to their destinations on a per-shard basis. Guarantees that one and only one
+ * application server node serves the messages from the given shard at a time, thus preventing
+ * any concurrent modifications of entity state.
+ *
+ * <b>Configuration</b>
+ *
+ * <p>By default, a shard is assigned according to the identifier of the target entity. The messages
+ * heading to a single entity will always reside in a single shard. However, the framework users
+ * may {@linkplain Builder#setStrategy(DeliveryStrategy) customize} this behavior.
+ *
+ * <p>{@linkplain Builder#setDeduplicationWindow(Duration) Provides} the time-based de-duplication
+ * capabilities to eliminate the messages, which may have been already delivered to their targets.
+ * The duplicates will be detected among the messages, which are not older, than
+ * {@code now - [de-duplication window]}.
+ *
+ * <p>Delegates the message dispatching and low-level handling of message duplicates to
+ * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
+ * should be created in each of {@code Entity} repositories.
+ *
  */
 public final class Delivery {
 
@@ -202,6 +221,19 @@ public final class Delivery {
     }
 
     /**
+     * Creates an instance of {@link Inbox.Builder} for the given entity type.
+     *
+     * @param entityType
+     *         the type of the entity, to which the inbox will belong
+     * @param <I>
+     *         the type if entity identifiers
+     * @return the builder for the {@code Inbox}
+     */
+    public <I> Inbox.Builder<I> newInbox(TypeUrl entityType) {
+        return Inbox.newBuilder(entityType, inboxWriter());
+    }
+
+    /**
      * Subscribes to the updates of shard contents.
      *
      * <p>The passed observer will be notified that the contents of a shard with a particular index
@@ -214,12 +246,12 @@ public final class Delivery {
         shardObservers.add(observer);
     }
 
-    public void register(Inbox<?> inbox) {
+    void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
         inboxDeliveries.put(entityType.value(), inbox.delivery());
     }
 
-    public InboxWriter inboxWriter() {
+    InboxWriter inboxWriter() {
         return new ShardedInboxWriter(inboxStorage) {
 
             @Override
@@ -244,7 +276,7 @@ public final class Delivery {
         return strategy.getShardCount() > 1;
     }
 
-    public ShardIndex whichShardFor(Object msgDestinationId) {
+    ShardIndex whichShardFor(Object msgDestinationId) {
         return strategy.getIndexFor(msgDestinationId);
     }
 

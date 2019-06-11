@@ -28,13 +28,14 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -47,13 +48,11 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -94,9 +93,6 @@ public abstract class ProcessManagerRepository<I,
      * method.
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
-
-    /** An underlying {@link Inbox} storage for entities managed by this repository. */
-    private @Nullable InboxStorage inboxStorage;
 
     private @MonotonicNonNull Inbox<I> inbox;
 
@@ -170,9 +166,10 @@ public abstract class ProcessManagerRepository<I,
         PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
         systemSubscriber.registerIn(context);
 
-        checkNotNull(inboxStorage, "Inbox storage is not initialized in PM %s", this);
-        inbox = Inbox
-                .<I>newBuilder(entityStateType())
+        Delivery delivery = ServerEnvironment.getInstance()
+                                             .delivery();
+        inbox = delivery
+                .<I>newInbox(entityStateType())
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> PmEventEndpoint.of(this, e))
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
@@ -220,20 +217,6 @@ public abstract class ProcessManagerRepository<I,
         }
     }
 
-    @Override
-    public void initStorage(StorageFactory factory) {
-        super.initStorage(factory);
-        initInboxStorage(factory);
-    }
-
-    private void initInboxStorage(StorageFactory factory) {
-        if (this.inboxStorage != null) {
-            throw newIllegalStateException("The PM repository %s already has the inbox storage %s.",
-                                           this, this.inboxStorage);
-        }
-
-        this.inboxStorage = factory.createInboxStorage();
-    }
     /**
      * Obtains a set of event classes to which process managers of this repository react.
      *

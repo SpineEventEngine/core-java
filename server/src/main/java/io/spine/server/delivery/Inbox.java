@@ -64,8 +64,8 @@ public class Inbox<I> {
      * @param typeUrl
      *         the type URL of a consumer
      */
-    public static <I> Builder<I> newBuilder(TypeUrl typeUrl) {
-        return new Builder<>(typeUrl);
+    static <I> Builder<I> newBuilder(TypeUrl typeUrl, InboxWriter writer) {
+        return new Builder<>(typeUrl, writer);
     }
 
     /**
@@ -111,23 +111,26 @@ public class Inbox<I> {
     public static class Builder<I> {
 
         private final TypeUrl entityStateType;
+        private final InboxWriter writer;
         private final Endpoints<I, EventEnvelope> eventEndpoints = new Endpoints<>();
         private final Endpoints<I, CommandEnvelope> commandEndpoints = new Endpoints<>();
-        private InboxWriter writer;
 
         /**
          * Creates an instance of {@code Builder} for the given {@code Inbox} consumer entity type.
          *
          * @param type
          *         the type URL of the entity, to which belongs the {@code Inbox} being built
+         * @param writer
+         *         the writer to use when messages are sent via the inbox being built
          */
-        private Builder(TypeUrl type) {
-            entityStateType = type;
+        private Builder(TypeUrl type, InboxWriter writer) {
+            this.entityStateType = type;
+            this.writer = writer;
         }
 
         /**
-         * Adds a certain label for the {@code Inbox} and specify a lazy-initialized endpoint,
-         * to which the respectively labelled events should be delivered.
+         * Adds an endpoint for events which will be delivered through the {@code Inbox} and
+         * marks it with the certain label.
          */
         public Builder<I> addEventEndpoint(InboxLabel label,
                                            LazyEndpoint<I, EventEnvelope> lazyEndpoint) {
@@ -138,8 +141,8 @@ public class Inbox<I> {
         }
 
         /**
-         * Adds a certain label for the {@code Inbox} and specify a lazy-initialized endpoint,
-         * to which the respectively labelled commands should be delivered.
+         * Adds an endpoint for commands which will be delivered through the {@code Inbox} and
+         * marks it with the certain label.
          */
         public Builder<I> addCommandEndpoint(InboxLabel label,
                                              LazyEndpoint<I, CommandEnvelope> lazyEndpoint) {
@@ -152,8 +155,6 @@ public class Inbox<I> {
         public Inbox<I> build() {
             Delivery delivery = ServerEnvironment.getInstance()
                                                  .delivery();
-            this.writer = delivery.inboxWriter();
-            checkNotNull(writer, "Inbox writer must be set");
             checkNotNull(entityStateType, "Entity state type must be set");
             checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),
                           "There must be at least one event or command endpoint");
@@ -246,7 +247,7 @@ public class Inbox<I> {
 
             for (InboxMessage incomingMessage : incoming) {
 
-                if(incomingMessage.hasCommand()) {
+                if (incomingMessage.hasCommand()) {
                     commandDispatcher.deliver(incomingMessage);
                 } else {
                     eventDispatcher.deliver(incomingMessage);
