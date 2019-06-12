@@ -66,11 +66,17 @@ public final class ServerEnvironment {
      */
     private final NodeId nodeId;
 
+    /**
+     * A strategy of delivering the messages received by entity repositories
+     * to the entity instances.
+     *
+     * <p>By default, initialized with the {@linkplain Delivery#local() local} delivery.
+     */
     private Delivery delivery;
 
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
-        delivery = Delivery.newBuilder().build();
+        delivery = Delivery.local();
         applicationId = ApplicationId.newBuilder().setValue("Application").build();
         nodeId = NodeId.newBuilder().setAppId(applicationId).setValue(Identifier.newUuid()).build();
     }
@@ -108,6 +114,13 @@ public final class ServerEnvironment {
         return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
+    /**
+     * Updates the delivery for this environment.
+     *
+     * <p>This method is most typically used upon an application start. It's very uncommon and
+     * even dangerous to update the delivery mechanism later when the message delivery
+     * process may have been already used by various {@code BoundedContext}s.
+     */
     public void setDelivery(Delivery delivery) {
         checkNotNull(delivery);
         this.delivery = delivery;

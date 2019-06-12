@@ -327,8 +327,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected void dispatchTo(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToSubscriber(event);
-        //TODO:2019-01-09:alex.tymchenko: move `inbox.put` here and kill `dispatchNowTo(I id, EventEnvelope envelope)`
+        inbox.send(EventEnvelope.of(event))
+             .toSubscriber(id);
     }
 
     /**
@@ -341,6 +341,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Internal
     protected void dispatchNowTo(I id, EventEnvelope event) {
+        //TODO:2019-01-09:alex.tymchenko: kill `dispatchNowTo(I id, EventEnvelope envelope)`
         inbox.send(event)
              .toSubscriber(id);
     }

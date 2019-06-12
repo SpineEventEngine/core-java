@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.ActorMessageEnvelope;
 import io.spine.type.TypeUrl;
 
@@ -72,26 +73,26 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     protected abstract Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource);
 
-    void storeOrDeliver(M envelope, I entityId, InboxLabel label) {
+    void store(M envelope, I entityId, InboxLabel label) {
         InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
-        if (!delivery.enabled()) {
-            deliverDirectly(envelope, entityId, label, inboxId);
-        } else {
-            ShardIndex shardIndex = delivery.whichShardFor(entityId);
-            InboxMessage.Builder builder = InboxMessage
-                    .newBuilder()
-                    .setId(inboxMsgIdFrom(envelope))
-                    .setInboxId(inboxId)
-                    .setShardIndex(shardIndex)
-                    .setLabel(label)
-                    .setWhenReceived(Time.currentTime());
-            setRecordPayload(envelope, builder);
-            InboxMessage message = builder.vBuild();
+        ShardIndex shardIndex = delivery.whichShardFor(entityId);
+        InboxMessage.Builder builder = InboxMessage
+                .newBuilder()
+                .setId(inboxMsgIdFrom(envelope))
+                .setInboxId(inboxId)
+                .setShardIndex(shardIndex)
+                .setLabel(label)
+                .setWhenReceived(Time.currentTime());
+        setRecordPayload(envelope, builder);
+        InboxMessage message = builder.vBuild();
 
-            writer.write(message);
-        }
+        TenantAwareRunner
+                .with(envelope.tenantId())
+                .run(() -> {
+                    writer.write(message);
+                });
     }
 
     private void deliverDirectly(M envelope, I entityId, InboxLabel label, InboxId inboxId) {
@@ -144,16 +145,20 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
             InboxId inboxId = message.getInboxId();
             MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
 
-            if (duplicationException.isPresent()) {
-                endpoint.onError(asEnvelope(message), duplicationException.get());
-            } else {
-                Any entityId = message.getInboxId()
-                                      .getEntityId()
-                                      .getId();
-                @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored and queried.
-                I unpackedId = (I) AnyPacker.unpack(entityId);
-                endpoint.dispatchTo(unpackedId);
-            }
+            TenantAwareRunner
+                    .with(envelope.tenantId())
+                    .run(() -> {
+                        if (duplicationException.isPresent()) {
+                            endpoint.onError(envelope, duplicationException.get());
+                        } else {
+                            Any entityId = message.getInboxId()
+                                                  .getEntityId()
+                                                  .getId();
+                            @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
+                                    I unpackedId = (I) AnyPacker.unpack(entityId);
+                            endpoint.dispatchTo(unpackedId);
+                        }
+                    });
         }
 
         /**

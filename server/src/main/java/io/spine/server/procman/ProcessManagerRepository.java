@@ -63,7 +63,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
-import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -94,6 +93,10 @@ public abstract class ProcessManagerRepository<I,
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
+    /**
+     * The {@link Inbox} for the messages, which are sent to the instances managed by this
+     * repository.
+     */
     private @MonotonicNonNull Inbox<I> inbox;
 
     /**
@@ -292,13 +295,8 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I target = with(command.tenantId()).evaluate(() -> doDispatch(command));
-        return target;
-    }
-
-    private I doDispatch(CommandEnvelope command) {
         I target = route(command);
-        lifecycleOf(target).onDispatchCommand(command.command());
+        inbox.send(command).toHandler(target);
         return target;
     }
 
@@ -324,11 +322,11 @@ public abstract class ProcessManagerRepository<I,
     /**
      * {@inheritDoc}
      *
-     * <p>Sends a system command to dispatch the given event to a reactor.
+     * <p>Sends the given event to the {@code Inbox} of this repository.
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
+        inbox.send(EventEnvelope.of(event)).toReactor(id);
     }
 
     /**

@@ -20,23 +20,20 @@
 
 package io.spine.server.delivery;
 
+import io.spine.server.ServerEnvironment;
+
 /**
- * A writer of {@link Inbox Inbox} messages listens to the write
- * operations and notifies {@link Delivery} of them.
+ * An observer of changes to the shard contents, which triggers immediate delivery of the
+ * sharded messages.
+ *
+ * <p>Suitable for the local and development environment.
  */
-public abstract class ShardedInboxWriter implements InboxWriter {
-
-    private final InboxStorage storage;
-
-    ShardedInboxWriter(InboxStorage storage) {
-        this.storage = storage;
-    }
-
-    protected abstract void notifyOfUpdate(ShardIndex index);
+public class LocalDispatchingObserver extends ShardObserver {
 
     @Override
-    public void write(InboxMessage message) {
-        storage.write(message);
-        notifyOfUpdate(message.getShardIndex());
+    public void onNext(ShardIndex value) {
+        Delivery delivery = ServerEnvironment.getInstance()
+                                             .delivery();
+        delivery.deliverMessagesFrom(value);
     }
 }

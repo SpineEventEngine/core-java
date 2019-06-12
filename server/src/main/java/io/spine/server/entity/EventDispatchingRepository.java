@@ -33,7 +33,6 @@ import io.spine.server.type.EventEnvelope;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
@@ -100,9 +99,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public final Set<I> dispatch(EventEnvelope event) {
         checkNotNull(event);
-        Set<I> targets = with(event.tenantId())
-                .evaluate(() -> doDispatch(event));
-        return targets;
+        return doDispatch(event);
     }
 
     private Set<I> doDispatch(EventEnvelope event) {

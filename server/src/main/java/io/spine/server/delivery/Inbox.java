@@ -192,19 +192,19 @@ public class Inbox<I> {
         }
 
         public void toReactor(I entityId) {
-            eventPart.storeOrDeliver(event, entityId, REACT_UPON_EVENT);
+            eventPart.store(event, entityId, REACT_UPON_EVENT);
         }
 
         public void toImporter(I entityId) {
-            eventPart.storeOrDeliver(event, entityId, IMPORT_EVENT);
+            eventPart.store(event, entityId, IMPORT_EVENT);
         }
 
         public void toCommander(I entityId) {
-            eventPart.storeOrDeliver(event, entityId, COMMAND_UPON_EVENT);
+            eventPart.store(event, entityId, COMMAND_UPON_EVENT);
         }
 
         public void toSubscriber(I entityId) {
-            eventPart.storeOrDeliver(event, entityId, UPDATE_SUBSCRIBER);
+            eventPart.store(event, entityId, UPDATE_SUBSCRIBER);
         }
     }
 
@@ -220,11 +220,11 @@ public class Inbox<I> {
         }
 
         public void toHandler(I entityId) {
-            commandPart.storeOrDeliver(command, entityId, HANDLE_COMMAND);
+            commandPart.store(command, entityId, HANDLE_COMMAND);
         }
 
         public void toCommander(I entityId) {
-            commandPart.storeOrDeliver(command, entityId, TRANSFORM_COMMAND);
+            commandPart.store(command, entityId, TRANSFORM_COMMAND);
         }
     }
 

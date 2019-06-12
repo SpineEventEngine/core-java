@@ -54,7 +54,8 @@ class ServerEnvironmentTest {
     @DisplayName("tell when not running under AppEngine")
     void tellIfNotInAppEngine() {
         // Tests are not run by AppEngine by default.
-        assertFalse(ServerEnvironment.getInstance().isAppEngine());
+        assertFalse(ServerEnvironment.getInstance()
+                                     .isAppEngine());
     }
 
     @Test
@@ -64,12 +65,6 @@ class ServerEnvironmentTest {
         assertFalse(ServerEnvironment.getInstance()
                                      .appEngineVersion()
                                      .isPresent());
-    }
-
-    @Test
-    @DisplayName("return disabled delivery by default")
-    void returnSingleDeliveryStrategyDefault() {
-        assertFalse( ServerEnvironment.getInstance().delivery().enabled());
     }
 
     @Test

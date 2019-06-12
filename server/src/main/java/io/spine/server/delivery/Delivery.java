@@ -68,7 +68,6 @@ import static java.util.stream.Collectors.groupingBy;
  * <p>Delegates the message dispatching and low-level handling of message duplicates to
  * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
  * should be created in each of {@code Entity} repositories.
- *
  */
 public final class Delivery {
 
@@ -105,7 +104,7 @@ public final class Delivery {
      * which resides as a Protobuf {@code string} inside an incoming message.
      */
     private final Map<String, ShardedMessageDelivery<InboxMessage>> inboxDeliveries;
-    private final List<StreamObserver<ShardIndex>> shardObservers;
+    private final List<ShardObserver> shardObservers;
     private final ShardedWorkRegistry workRegistry;
     private final InboxStorage inboxStorage;
 
@@ -123,6 +122,18 @@ public final class Delivery {
      */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Creates a new instance of {@code Delivery} suitable for local and development environment.
+     *
+     * <p>Uses a single-shard splitting. Delivers the sharded messages from their {@code Inbox}es
+     * right away.
+     */
+    public static Delivery local() {
+        Delivery delivery = newBuilder().build();
+        delivery.subscribe(new LocalDispatchingObserver());
+        return delivery;
     }
 
     /**
@@ -196,9 +207,11 @@ public final class Delivery {
 
             for (String typeUrl : messagesByType.keySet()) {
                 ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
-                List<InboxMessage> messagesForBehavior = messagesByType.get(typeUrl);
-                List<InboxMessage> dedupSourceForBehavior = dedupSourceByType.get(typeUrl);
-                delivery.deliver(messagesForBehavior, dedupSourceForBehavior);
+                List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
+                List<InboxMessage> deduplicationPackage = dedupSourceByType.get(typeUrl);
+                delivery.deliver(deliveryPackage,
+                                 deduplicationPackage ==
+                                         null ? ImmutableList.of() : deduplicationPackage);
             }
 
             InboxMessage lastMessage = messages.get(messages.size() - 1);
@@ -242,7 +255,7 @@ public final class Delivery {
      * @param observer
      *         an observer to notify of updates.
      */
-    public void subscribe(StreamObserver<ShardIndex> observer) {
+    public void subscribe(ShardObserver observer) {
         shardObservers.add(observer);
     }
 
@@ -251,11 +264,11 @@ public final class Delivery {
         inboxDeliveries.put(entityType.value(), inbox.delivery());
     }
 
-    InboxWriter inboxWriter() {
-        return new ShardedInboxWriter(inboxStorage) {
+    private InboxWriter inboxWriter() {
+        return new NotifyingWriter(inboxStorage) {
 
             @Override
-            protected void notifyOfUpdate(ShardIndex index) {
+            protected void onUpdated(ShardIndex index) {
                 Delivery.this.notify(index);
             }
         };
