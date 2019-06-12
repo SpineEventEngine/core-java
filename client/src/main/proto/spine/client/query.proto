@@ -112,7 +112,6 @@ message Query {
                        (if_invalid).msg_format = "Invalid query target"];
 
     // Field mask to be applied to the items of the query result.
-    //
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the query was created.
@@ -126,11 +125,8 @@ message Query {
 
     // A specification for a way to paginate the Query results.
     Pagination pagination = 6 [(validate) = true,
-                               (goes).with = "order",
+                               (goes).with = "orderBy",
                                (if_invalid).msg_format = "Invalid query pagination"];
-
-    // Reserved for utility fields required response timeframe etc.
-    reserved 7 to 10;
 }
 
 // The result of `Query` processing.
@@ -146,11 +142,8 @@ message QueryResponse {
     //
     core.Response response = 1 [(required) = true];
 
-    // Reserved for more query response attributes, e.g. to describe paginated response etc.
-    reserved 2 to 4;
-
     // Entity states and versions returned to the API user as a result of Query execution.
-    repeated EntityStateWithVersion message = 5;
+    repeated EntityStateWithVersion message = 2;
 }
 
 // Represents the entity state combined with entity version.
