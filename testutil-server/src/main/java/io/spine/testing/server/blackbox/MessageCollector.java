@@ -23,8 +23,8 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
-import io.spine.core.MessageId;
-import io.spine.core.MessageWithContext;
+import io.spine.core.SignalId;
+import io.spine.core.Signal;
 import io.spine.core.TenantId;
 import io.spine.server.type.MessageEnvelope;
 
@@ -49,8 +49,8 @@ import static java.util.Optional.ofNullable;
  * @param <E>
  *         the type of the message envelopes
  */
-abstract class MessageCollector<I extends MessageId,
-                                T extends MessageWithContext<I, ?, ?>,
+abstract class MessageCollector<I extends SignalId,
+                                T extends Signal<I, ?, ?>,
                                 E extends MessageEnvelope<I, T, ?>>
         implements Consumer<E> {
 

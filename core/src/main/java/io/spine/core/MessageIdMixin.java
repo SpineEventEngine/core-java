@@ -28,10 +28,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * A mixin interface for the {@link Qualifier} type.
+ * A mixin interface for the {@link MessageId} type.
  */
 @GeneratedMixin
-interface QualifierMixin extends QualifierOrBuilder {
+interface MessageIdMixin extends MessageIdOrBuilder {
 
     /**
      * Obtains the ID of the message.

@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("MessageWithContext should")
-class MessageWithContextTest {
+@DisplayName("Signal should")
+class SignalTest {
 
     @Test
     @DisplayName("verify type of the enclosed message")

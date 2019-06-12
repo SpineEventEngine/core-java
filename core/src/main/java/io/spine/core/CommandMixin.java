@@ -33,7 +33,7 @@ import static io.spine.validate.Validate.isNotDefault;
  */
 @Immutable
 public interface CommandMixin
-        extends MessageWithContext<CommandId, CommandMessage, CommandContext> {
+        extends Signal<CommandId, CommandMessage, CommandContext> {
 
     /**
      * Obtains the ID of the tenant of the command.
@@ -51,7 +51,7 @@ public interface CommandMixin
     }
 
     @Override
-    default Qualifier rootMessage() {
+    default MessageId rootMessage() {
         return context().getOrigin()
                         .root();
     }

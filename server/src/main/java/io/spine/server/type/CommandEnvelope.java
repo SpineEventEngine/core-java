@@ -26,7 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.EventContext;
-import io.spine.core.Qualifier;
+import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
@@ -119,7 +119,7 @@ public final class CommandEnvelope
      */
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        Qualifier commandQualifier = Qualifier
+        MessageId commandQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
                 .setTypeUrl(outerObject().typeUrl().value())
@@ -127,7 +127,7 @@ public final class CommandEnvelope
         Origin origin = Origin
                 .newBuilder()
                 .setActorContext(context().getActorContext())
-                .setQualifier(commandQualifier)
+                .setMessage(commandQualifier)
                 .setGrandOrigin(context().getOrigin())
                 .vBuild();
         builder.setPastMessage(origin);

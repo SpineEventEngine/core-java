@@ -20,13 +20,13 @@ import "spine/validate/validation_error.proto";
 message ConstraintViolated {
 
     // The violated entity info.
-    core.Qualifier entity = 1 [(required) = false];
+    core.MessageId entity = 1 [(required) = false];
 
     // The last message handled by the entity.
-    core.Qualifier last_message = 2 [(required) = false];
+    core.MessageId last_message = 2 [(required) = false];
 
     // The last message in the chain which produced the `last_message`.
-    core.Qualifier root_message = 3 [(required) = false];
+    core.MessageId root_message = 3 [(required) = false];
 
     // The validation constraint violations.
     repeated validate.ConstraintViolation violation = 4 [(required) = false];

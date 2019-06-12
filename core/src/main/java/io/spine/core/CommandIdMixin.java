@@ -26,7 +26,7 @@ import io.spine.annotation.GeneratedMixin;
  * A mixin interface for {@link CommandId}.
  */
 @GeneratedMixin
-interface CommandIdMixin extends MessageId, CommandIdOrBuilder {
+interface CommandIdMixin extends SignalId, CommandIdOrBuilder {
 
     @Override
     default String value() {

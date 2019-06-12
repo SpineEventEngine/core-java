@@ -21,7 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.client.EntityId;
-import io.spine.core.Qualifier;
+import io.spine.core.MessageId;
 import io.spine.server.route.EventRouting;
 
 import static io.spine.server.route.EventRoute.withId;
@@ -39,11 +39,11 @@ final class EntityHistoryRepository
                       (message, context) -> withId(asHistoryId(message.getEntity())));
     }
 
-    private static EntityHistoryId asHistoryId(Qualifier qualifier) {
+    private static EntityHistoryId asHistoryId(MessageId id) {
         return EntityHistoryId
                 .newBuilder()
-                .setEntityId(EntityId.newBuilder().setId(qualifier.getId()))
-                .setTypeUrl(qualifier.getTypeUrl())
+                .setEntityId(EntityId.newBuilder().setId(id.getId()))
+                .setTypeUrl(id.getTypeUrl())
                 .vBuild();
     }
 }

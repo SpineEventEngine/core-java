@@ -22,8 +22,8 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.MessageId;
-import io.spine.core.MessageWithContext;
+import io.spine.core.SignalId;
+import io.spine.core.Signal;
 import io.spine.server.command.DispatchCommand;
 
 import java.util.List;
@@ -61,13 +61,13 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     }
 
     @Override
-    public MessageId messageId() {
+    public SignalId messageId() {
         return dispatch.command()
                        .id();
     }
 
     @Override
-    protected MessageWithContext<?, ?, ?> message() {
+    protected Signal<?, ?, ?> message() {
         return dispatch.command()
                        .outerObject();
     }

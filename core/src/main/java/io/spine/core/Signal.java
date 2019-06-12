@@ -34,19 +34,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
- * Base interfaces for outer objects of messages with contexts, such as commands or events.
+ * A message which can be dispatched and cause other messages.
+ *
+ * <p>A signal message travels through the system just like an electronic signal travels through
+ * a neural network. It cases the system to change its state either directly or by exciting other
+ * signals.
+ *
+ * <p>A signal message may originate from outside the system, from a user, or from a policy
+ * implemented in the system.
  *
  * @param <I>
- *         the type of the message identifier
+ *         the type of the signal identifier
  * @param <M>
  *         the type of the enclosed messages
  * @param <C>
  *         the type of the message context
  */
 @GeneratedMixin
-public interface MessageWithContext<I extends MessageId,
-                                    M extends SerializableMessage,
-                                    C extends MessageContext>
+public interface Signal<I extends SignalId,
+                        M extends SerializableMessage,
+                        C extends MessageContext>
         extends Message {
 
     /**
@@ -160,13 +167,10 @@ public interface MessageWithContext<I extends MessageId,
     }
 
     /**
-     * Obtains the qualifier of this message.
-     *
-     * <p>A message qualifier is a digest information about the message which describes its origin
-     * but does not describe the message contents.
+     * Obtains the ID of this message.
      */
-    default Qualifier qualifier() {
-        return Qualifier
+    default MessageId messageId() {
+        return MessageId
                 .newBuilder()
                 .setId(pack(id()))
                 .setTypeUrl(typeUrl().value())
@@ -174,10 +178,10 @@ public interface MessageWithContext<I extends MessageId,
     }
 
     /**
-     * Obtains the qualifier of the first message in the chain.
+     * Obtains the ID of the first message in the chain.
      *
      * <p>The root message is always produced by an actor directly. Tenant and actor of the root
      * message define the tenant and actor of the whole chain.
      */
-    Qualifier rootMessage();
+    MessageId rootMessage();
 }
