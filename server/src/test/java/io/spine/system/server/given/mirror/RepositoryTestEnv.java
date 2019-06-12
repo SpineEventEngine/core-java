@@ -29,7 +29,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.net.Url;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityStateChanged;
@@ -54,12 +54,12 @@ public class RepositoryTestEnv {
     private RepositoryTestEnv() {
     }
 
-    public static Map<EntityHistoryId, Photo> givenPhotos() {
+    public static Map<EntityLogId, Photo> givenPhotos() {
         Photo spineLogo = newPhoto("spine.io/logo", "Spine Logo");
         Photo projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
         Photo jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
-        Map<EntityHistoryId, Photo> map = ImmutableMap
-                .<EntityHistoryId, Photo>builder()
+        Map<EntityLogId, Photo> map = ImmutableMap
+                .<EntityLogId, Photo>builder()
                 .put(historyIdOf(spineLogo), spineLogo)
                 .put(historyIdOf(projectsLogo), projectsLogo)
                 .put(historyIdOf(jxBrowserLogo), jxBrowserLogo)
@@ -86,14 +86,14 @@ public class RepositoryTestEnv {
         return photo;
     }
 
-    private static EntityHistoryId historyIdOf(Photo photo) {
+    private static EntityLogId historyIdOf(Photo photo) {
         Any id = pack(photo.getId());
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(id)
                 .build();
         TypeUrl typeUrl = TypeUrl.of(Photo.class);
-        EntityHistoryId historyId = EntityHistoryId
+        EntityLogId historyId = EntityLogId
                 .newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(typeUrl.value())
@@ -101,7 +101,7 @@ public class RepositoryTestEnv {
         return historyId;
     }
 
-    public static Event entityStateChanged(EntityHistoryId historyId, Message state) {
+    public static Event entityStateChanged(EntityLogId historyId, Message state) {
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
                 .setId(historyId)
@@ -125,7 +125,7 @@ public class RepositoryTestEnv {
     }
 
     public static Event archived(Photo aggregate) {
-        EntityHistoryId historyId = historyIdOf(aggregate);
+        EntityLogId historyId = historyIdOf(aggregate);
         EntityArchived archived = EntityArchived
                 .newBuilder()
                 .setId(historyId)
@@ -136,7 +136,7 @@ public class RepositoryTestEnv {
     }
 
     public static Event deleted(Photo aggregate) {
-        EntityHistoryId historyId = historyIdOf(aggregate);
+        EntityLogId historyId = historyIdOf(aggregate);
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
                 .setId(historyId)

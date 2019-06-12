@@ -41,7 +41,7 @@ import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
@@ -159,12 +159,12 @@ class AbstractEventSubscriberTest {
         assertThrows(InsufficientVisibilityError.class, HiddenEntitySubscriber::new);
     }
 
-    private static EntityHistoryId historyId(Class<? extends Message> type) {
+    private static EntityLogId historyId(Class<? extends Message> type) {
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(Empty.getDefaultInstance()))
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityLogId historyId = EntityLogId
                 .newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(TypeUrl.of(type).value())

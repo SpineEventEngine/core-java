@@ -32,7 +32,7 @@ import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -74,7 +74,7 @@ public final class SubscriptionRecordTestEnv {
                 .newBuilder()
                 .setId(packedId)
                 .build();
-        EntityHistoryId entityHistoryId = EntityHistoryId
+        EntityLogId entityLogId = EntityLogId
                 .newBuilder()
                 .setTypeUrl(type.value())
                 .setEntityId(entityId)
@@ -82,7 +82,7 @@ public final class SubscriptionRecordTestEnv {
         Any packedMatchingState = TypeConverter.toAny(newState);
         EntityStateChanged result = EntityStateChanged
                 .newBuilder()
-                .setId(entityHistoryId)
+                .setId(entityLogId)
                 .setNewState(packedMatchingState)
                 .build();
         return result;

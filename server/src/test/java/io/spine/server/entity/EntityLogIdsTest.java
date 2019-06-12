@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.protobuf.AnyPacker;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.testing.UtilityClassTest;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
@@ -31,27 +31,27 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("EntityHistoryIds utility should")
-class EntityHistoryIdsTest extends UtilityClassTest<EntityHistoryIds> {
+@DisplayName("EntityLogIds utility should")
+class EntityLogIdsTest extends UtilityClassTest<EntityLogIds> {
 
     private static final TypeUrl TYPE_URL = TypeUrl.of(StringValue.class);
 
-    private EntityHistoryIdsTest() {
-        super(EntityHistoryIds.class);
+    private EntityLogIdsTest() {
+        super(EntityLogIds.class);
     }
 
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
         tester.setDefault(TypeUrl.class, TYPE_URL)
-              .setDefault(EntityHistoryId.class, EntityHistoryId.getDefaultInstance());
+              .setDefault(EntityLogId.class, EntityLogId.getDefaultInstance());
     }
 
     @DisplayName("wrap an entity ID")
     @Test
     void wrapEntityId() {
         StringValue entityId = StringValue.of("id");
-        EntityHistoryId historyId = EntityHistoryIds.wrap(entityId, TYPE_URL);
+        EntityLogId historyId = EntityLogIds.wrap(entityId, TYPE_URL);
         assertEquals(TYPE_URL.value(), historyId.getTypeUrl());
         assertEquals(entityId, AnyPacker.unpack(historyId.getEntityId()
                                                          .getId()));
@@ -61,8 +61,8 @@ class EntityHistoryIdsTest extends UtilityClassTest<EntityHistoryIds> {
     @Test
     void unwrapEntityId() {
         String entityId = "id";
-        EntityHistoryId historyId = EntityHistoryIds.wrap(entityId, TYPE_URL);
-        String entityIdFromHistory = (String) EntityHistoryIds.unwrap(historyId);
+        EntityLogId historyId = EntityLogIds.wrap(entityId, TYPE_URL);
+        String entityIdFromHistory = (String) EntityLogIds.unwrap(historyId);
         assertEquals(entityId, entityIdFromHistory);
     }
 }

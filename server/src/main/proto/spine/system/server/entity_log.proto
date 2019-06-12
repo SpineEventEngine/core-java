@@ -28,7 +28,7 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server";
-option java_outer_classname = "EntityHistoryProto";
+option java_outer_classname = "EntityLogProto";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
@@ -42,7 +42,7 @@ import "spine/server/entity/entity.proto";
 
 // An identifier of an entity history.
 //
-message EntityHistoryId {
+message EntityLogId {
 
     // The ID of the entity.
     spine.client.EntityId entity_id = 1;
@@ -58,10 +58,10 @@ message EntityHistoryId {
 // Stores the lists of all commands and events ever dispatched to the entity, represented by their
 // IDs.
 //
-message EntityHistory {
-    option (entity).kind = AGGREGATE;
+message EntityLog {
+    option (entity).kind = PROJECTION;
 
-    EntityHistoryId id = 1;
+    EntityLogId id = 1;
 
     // The kind of the entity.
     EntityOption.Kind kind = 2;

@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.projection.model.ProjectionClass;
 
 /**
@@ -36,7 +35,7 @@ public final class ModelInfo {
         return ProjectionClass.asProjectionClass(CommandLogProjection.class);
     }
 
-    public static AggregateClass<?> eventLifecycle() {
-        return AggregateClass.asAggregateClass(EntityHistoryAggregate.class);
+    public static ProjectionClass<?> entityLog() {
+        return ProjectionClass.asProjectionClass(EntityLogProjection.class);
     }
 }

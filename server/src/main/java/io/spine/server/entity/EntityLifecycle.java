@@ -36,7 +36,7 @@ import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.CommandHandled;
@@ -90,14 +90,14 @@ public class EntityLifecycle {
     private final EventFilter eventFilter;
 
     /**
-     * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
+     * The ID of {@linkplain io.spine.system.server.EntityLog history} of the associated
      * {@link Entity}.
      *
      * <p>Most commands posted by the {@code EntityLifecycle} are handled by
      * the {@code io.spine.system.server.EntityHistoryAggregate}.
      * Thus, storing an ID as a field is convenient.
      */
-    private final EntityHistoryId historyId;
+    private final EntityLogId historyId;
 
     /**
      * Creates a new instance.
@@ -113,7 +113,7 @@ public class EntityLifecycle {
                               EventFilter eventFilter) {
         this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
-        this.historyId = EntityHistoryIds.wrap(entityId, entityType);
+        this.historyId = EntityLogIds.wrap(entityId, entityType);
     }
 
     private EntityLifecycle(Builder builder) {

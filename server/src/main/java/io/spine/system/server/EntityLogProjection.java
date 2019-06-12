@@ -21,9 +21,10 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
+import io.spine.core.Subscribe;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.projection.Projection;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityCreated;
@@ -57,69 +58,69 @@ import static com.google.protobuf.util.Timestamps.compare;
  * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
  * an entity history of its own.
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for an Aggregate class.
-final class EntityHistoryAggregate
-        extends Aggregate<EntityHistoryId, EntityHistory, EntityHistory.Builder> {
+@SuppressWarnings("OverlyCoupledClass") // OK for an entity class.
+final class EntityLogProjection
+        extends Projection<EntityLogId, EntityLog, EntityLog.Builder> {
 
-    @Apply(allowImport = true)
-    private void on(EntityCreated event) {
+    @Subscribe
+    void on(EntityCreated event) {
         builder().setId(event.getId());
     }
 
-    @Apply(allowImport = true)
-    private void on(EventDispatchedToSubscriber event) {
+    @Subscribe
+    void on(EventDispatchedToSubscriber event) {
         builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
-    @Apply(allowImport = true)
-    private void on(EventDispatchedToReactor event) {
+    @Subscribe
+    void on(EventDispatchedToReactor event) {
         builder().setId(event.getReceiver());
         updateLastEventTime(event.getWhenDispatched());
     }
 
-    @Apply(allowImport = true)
-    private void on(CommandDispatchedToHandler event) {
+    @Subscribe
+    void on(CommandDispatchedToHandler event) {
         builder().setId(event.getReceiver());
         updateLastCommandTime(event.getWhenDispatched());
     }
 
-    @Apply(allowImport = true)
-    private void on(EntityStateChanged event) {
+    @Subscribe
+    void on(EntityStateChanged event) {
         builder().setId(event.getId())
                  .setLastStateChange(event.getWhen());
     }
 
-    @Apply(allowImport = true)
-    private void on(EntityArchived event) {
+    @Subscribe
+    void on(EntityArchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
-    @Apply(allowImport = true)
-    private void on(EntityDeleted event) {
+    @Subscribe
+    void on(EntityDeleted event) {
         updateLifecycleFlags(builder -> builder.setDeleted(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
-    @Apply(allowImport = true)
-    private void on(EntityUnarchived event) {
+    @Subscribe
+    void on(EntityUnarchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
-    @Apply(allowImport = true)
-    private void on(EntityRestored event) {
+    @Subscribe
+    void on(EntityRestored event) {
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
     }
 
-    @Apply(allowImport = true)
-    private void on(EventImported event) {
+    @Subscribe
+    void on(EventImported event) {
         updateLastEventTime(event.getWhenImported());
     }
 
@@ -138,7 +139,7 @@ final class EntityHistoryAggregate
     }
 
     private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistory.Builder> mutation) {
-        EntityHistory.Builder builder = builder();
+        EntityLog.Builder builder = builder();
         LifecycleHistory.Builder history =
                 builder.getLifecycle()
                        .toBuilder();
@@ -165,7 +166,7 @@ final class EntityHistoryAggregate
     }
 
     private void updateDispatchingHistory(UnaryOperator<DispatchingHistory.Builder> mutation) {
-        EntityHistory.Builder builder = builder();
+        EntityLog.Builder builder = builder();
         DispatchingHistory.Builder history =
                 builder.getDispatching()
                        .toBuilder();

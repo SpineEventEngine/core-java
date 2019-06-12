@@ -78,7 +78,7 @@ class MirrorRepositoryTest {
     private MirrorRepository repository;
     private QueryFactory queries;
 
-    private Map<EntityHistoryId, Photo> givenPhotos;
+    private Map<EntityLogId, Photo> givenPhotos;
 
     @BeforeEach
     void setUp() {
@@ -261,7 +261,7 @@ class MirrorRepositoryTest {
                     .newBuilder()
                     .setId(pack(id))
                     .build();
-            EntityHistoryId historyId = EntityHistoryId
+            EntityLogId historyId = EntityLogId
                     .newBuilder()
                     .setEntityId(entityId)
                     .setTypeUrl(type.value())
@@ -283,7 +283,7 @@ class MirrorRepositoryTest {
         }
     }
 
-    private void prepareAggregates(Map<EntityHistoryId, ? extends Message> aggregateStates) {
+    private void prepareAggregates(Map<EntityLogId, ? extends Message> aggregateStates) {
         aggregateStates.entrySet()
                        .stream()
                        .map(entry -> entityStateChanged(entry.getKey(), entry.getValue()))

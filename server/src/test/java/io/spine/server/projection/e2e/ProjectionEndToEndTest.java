@@ -43,7 +43,7 @@ import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -129,7 +129,7 @@ class ProjectionEndToEndTest {
                 .build();
         groups.register(repository);
         UserId organizationHead = GivenUserId.newUuid();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityLogId historyId = EntityLogId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())
                 .setEntityId(EntityId.newBuilder().setId(pack(organizationHead)))

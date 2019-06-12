@@ -26,7 +26,7 @@ import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -76,7 +76,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
         return result;
     }
 
-    private static EntityHistoryId toHistoryId(EventEnvelope event) {
+    private static EntityLogId toHistoryId(EventEnvelope event) {
         return toMessage(event).getId();
     }
 

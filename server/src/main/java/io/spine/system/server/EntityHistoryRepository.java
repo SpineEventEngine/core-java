@@ -20,29 +20,38 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.client.EntityId;
 import io.spine.core.MessageId;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
 import static io.spine.server.route.EventRoute.withId;
 
 /**
- * The repository for {@link EntityHistoryAggregate}s.
+ * The repository for {@link EntityLogProjection}s.
  */
 final class EntityHistoryRepository
-        extends SystemRepository<EntityHistoryId, EntityHistoryAggregate> {
+        extends ProjectionRepository<EntityLogId, EntityLogProjection, EntityLog> {
 
+    @OverridingMethodsMustInvokeSuper
     @Override
-    protected void setupImportRouting(EventRouting<EntityHistoryId> routing) {
-        super.setupImportRouting(routing);
-        routing.route(ConstraintViolated.class,
+    protected void setupEventRouting(EventRouting<EntityLogId> routing) {
+        super.setupEventRouting(routing);
+        routing.replaceDefault(EventRoute.byFirstMessageField(EntityLogId.class))
+               .route(ConstraintViolated.class,
                       (message, context) -> withId(asHistoryId(message.getEntity())));
     }
 
-    private static EntityHistoryId asHistoryId(MessageId id) {
-        return EntityHistoryId
+    private static EntityLogId asHistoryId(MessageId id) {
+        EntityId entityId = EntityId
                 .newBuilder()
-                .setEntityId(EntityId.newBuilder().setId(id.getId()))
+                .setId(id.getId())
+                .buildPartial();
+        return EntityLogId
+                .newBuilder()
+                .setEntityId(entityId)
                 .setTypeUrl(id.getTypeUrl())
                 .vBuild();
     }

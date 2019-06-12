@@ -92,7 +92,7 @@ final class MirrorRepository
                       (message, context) -> targetsFrom(message.getId()));
     }
 
-    private static Set<MirrorId> targetsFrom(EntityHistoryId historyId) {
+    private static Set<MirrorId> targetsFrom(EntityLogId historyId) {
         TypeUrl type = TypeUrl.parse(historyId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
@@ -128,7 +128,7 @@ final class MirrorRepository
         return visibility;
     }
 
-    private static MirrorId idFrom(EntityHistoryId historyId) {
+    private static MirrorId idFrom(EntityLogId historyId) {
         Any any = historyId.getEntityId()
                            .getId();
         MirrorId result = MirrorId

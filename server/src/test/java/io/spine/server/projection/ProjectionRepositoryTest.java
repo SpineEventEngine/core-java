@@ -44,7 +44,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -336,7 +336,7 @@ class ProjectionRepositoryTest
             dispatch(project, eventFactory.createEvent(projectCreated));
             dispatch(project, eventFactory.createEvent(taskAdded));
             Any newState = pack(project.state());
-            EntityHistoryId historyId = EntityHistoryId
+            EntityLogId historyId = EntityLogId
                     .newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
                     .setEntityId(EntityId.newBuilder().setId(pack(id)))

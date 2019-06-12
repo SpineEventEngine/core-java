@@ -25,7 +25,7 @@ import io.spine.client.EntityId;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.MirrorId;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -119,12 +119,12 @@ public final class ProjectionTestEnv {
         return event;
     }
 
-    private static EntityHistoryId historyId(String entityId) {
+    private static EntityLogId historyId(String entityId) {
         EntityId id = EntityId
                 .newBuilder()
                 .setId(toAny(entityId))
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityLogId historyId = EntityLogId
                 .newBuilder()
                 .setEntityId(id)
                 .setTypeUrl(AGGREGATE_TYPE_URL.value())

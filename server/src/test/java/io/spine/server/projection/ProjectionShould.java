@@ -45,7 +45,7 @@ import io.spine.server.type.given.GivenEvent;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -164,7 +164,7 @@ class ProjectionShould {
                 .setStatus(STARTED)
                 .addTask(task)
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityLogId historyId = EntityLogId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(aggregateState).value())
                 .setEntityId(EntityId.newBuilder().setId(pack(id)))

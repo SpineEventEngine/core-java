@@ -24,20 +24,20 @@ import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.EntityLogId;
 import io.spine.type.TypeUrl;
 
 import static io.spine.base.Identifier.pack;
 
 /**
- * Utilities for working with {@linkplain io.spine.system.server.EntityHistoryId entity history
+ * Utilities for working with {@linkplain io.spine.system.server.EntityLogId entity history
  * identifiers}.
  */
 @Internal
-public final class EntityHistoryIds {
+public final class EntityLogIds {
 
     /** Prevents instantiation of this utility class. */
-    private EntityHistoryIds() {
+    private EntityLogIds() {
     }
 
     /**
@@ -49,14 +49,14 @@ public final class EntityHistoryIds {
      *         the type of the entity
      * @param <T>
      *         the type of the ID class
-     * @return the {@link EntityHistoryId}
+     * @return the {@link EntityLogId}
      */
-    public static <T> EntityHistoryId wrap(T id, TypeUrl entityType) {
+    public static <T> EntityLogId wrap(T id, TypeUrl entityType) {
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(id))
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        EntityLogId historyId = EntityLogId
                 .newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(entityType.value())
@@ -65,13 +65,13 @@ public final class EntityHistoryIds {
     }
 
     /**
-     * Obtains the entity ID from the given {@link EntityHistoryId}.
+     * Obtains the entity ID from the given {@link EntityLogId}.
      *
      * @param historyId
      *         the ID of the entity history
      * @return the extracted entity ID
      */
-    public static Object unwrap(EntityHistoryId historyId) {
+    public static Object unwrap(EntityLogId historyId) {
         Any idValue = historyId.getEntityId()
                                .getId();
         Object unpackedId = Identifier.unpack(idValue);

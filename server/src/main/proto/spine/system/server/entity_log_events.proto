@@ -28,7 +28,7 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server.event";
-option java_outer_classname = "HistoryEventsProto";
+option java_outer_classname = "EntityLogEventsProto";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
@@ -37,13 +37,13 @@ import "google/protobuf/timestamp.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/core/version.proto";
-import "spine/system/server/entity_history.proto";
+import "spine/system/server/entity_log.proto";
 
 // An entity was created.
 message EntityCreated {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityLogId id = 1 [(required) = true];
 
     // The kind of the entity.
     EntityOption.Kind kind = 2 [(required) = true];
@@ -56,7 +56,7 @@ message EntityCreated {
 message EventDispatchedToSubscriber {
 
     // The ID of the entity, which the event is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityLogId receiver = 1 [(required) = true];
 
     // The dispatched event.
     core.Event payload = 2 [(validate) = true];
@@ -76,7 +76,7 @@ message EventDispatchedToSubscriber {
 message EventDispatchedToReactor {
 
     // The ID of the entity, which the event is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityLogId receiver = 1 [(required) = true];
 
     // The dispatched event.
     core.Event payload = 2 [(validate) = true];
@@ -96,7 +96,7 @@ message EventDispatchedToReactor {
 message CommandDispatchedToHandler {
 
     // The ID of the entity, which the command is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityLogId receiver = 1 [(required) = true];
 
     // The dispatched command.
     core.Command payload = 2 [(validate) = true];
@@ -113,7 +113,7 @@ message CommandDispatchedToHandler {
 message EventImported {
 
     // The ID of the aggregate, which imported the event.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityLogId receiver = 1 [(required) = true];
 
     // The info about the event.
     core.EventId event_id = 2 [(required) = true, (validate) = true];
@@ -129,7 +129,7 @@ message EventImported {
 message EntityStateChanged {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityLogId id = 1 [(required) = true];
 
     // The new state of the entity.
     google.protobuf.Any new_state = 2 [(required) = true];
@@ -148,7 +148,7 @@ message EntityStateChanged {
 message EntityArchived {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityLogId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
@@ -164,7 +164,7 @@ message EntityArchived {
 message EntityDeleted {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityLogId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
@@ -180,7 +180,7 @@ message EntityDeleted {
 message EntityUnarchived {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityLogId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];
@@ -196,7 +196,7 @@ message EntityUnarchived {
 message EntityRestored {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityLogId id = 1 [(required) = true];
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2 [(required) = true, (validate) = true];

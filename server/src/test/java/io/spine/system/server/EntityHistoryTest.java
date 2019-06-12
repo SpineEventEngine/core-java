@@ -324,7 +324,7 @@ class EntityHistoryTest {
         private void checkEventDispatchedToSubscriber() {
             EventDispatchedToSubscriber event =
                     eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
-            EntityHistoryId receiver = event.getReceiver();
+            EntityLogId receiver = event.getReceiver();
             PersonCreated payload = (PersonCreated) event.getPayload()
                                                          .enclosedMessage();
             assertId(receiver);
@@ -343,7 +343,7 @@ class EntityHistoryTest {
         private void checkCommandDispatchedToAggregateHandler() {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
-            EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
+            EntityLogId receiver = commandDispatchedEvent.getReceiver();
             CreatePerson payload = (CreatePerson)
                     commandDispatchedEvent.getPayload()
                                           .enclosedMessage();
@@ -374,7 +374,7 @@ class EntityHistoryTest {
             EntityUnarchived event =
                     eventAccumulator.assertNextEventIs(EntityUnarchived.class);
 
-            EntityHistoryId historyId = event.getId();
+            EntityLogId historyId = event.getId();
             assertEquals(PersonAggregate.TYPE.value(),
                          historyId.getTypeUrl());
             assertId(historyId);
@@ -389,7 +389,7 @@ class EntityHistoryTest {
             assertId(event.getId());
         }
 
-        private void assertId(EntityHistoryId actual) {
+        private void assertId(EntityLogId actual) {
             EntityId entityId = actual.getEntityId();
             Any idValue = entityId.getId();
             assertEquals(id, Identifier.unpack(idValue));
