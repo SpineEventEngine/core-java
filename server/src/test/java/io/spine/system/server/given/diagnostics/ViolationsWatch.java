@@ -39,6 +39,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.route.EventRoute.withId;
 
+/**
+ * A projection which stores contents of invalid {@link TextValidated} events.
+ */
 public final class ViolationsWatch extends Projection<WatchId, InvalidText, InvalidText.Builder> {
 
     public static final WatchId DEFAULT = WatchId.generate();
