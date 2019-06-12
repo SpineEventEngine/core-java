@@ -135,6 +135,7 @@ message Query {
 // Used as a result of `QueryService.Read(Query)` gRPC method call.
 //
 message QueryResponse {
+    option (is).java_type = "QueryResponseMixin";
 
     // The base status part of the query processing response.
     //
