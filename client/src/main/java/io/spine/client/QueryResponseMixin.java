@@ -23,6 +23,7 @@ package io.spine.client;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 
 import java.util.List;
@@ -37,6 +38,22 @@ public interface QueryResponseMixin {
 
     @SuppressWarnings("override") // in generated code
     List<EntityStateWithVersion> getMessageList();
+
+    /**
+     * Obtains the size of the response.
+     */
+    default int size() {
+        int result = getMessageList().size();
+        return result;
+    }
+
+    /**
+     * Verifies if the response is empty.
+     */
+    default boolean isEmpty() {
+        boolean result = size() == 0;
+        return result;
+    }
 
     /**
      * Obtains immutable list of entity states returned in this query response.
@@ -59,6 +76,18 @@ public interface QueryResponseMixin {
     default Message state(int index) {
         EntityStateWithVersion stateWithVersion = getMessageList().get(index);
         Message result = AnyPacker.unpack(stateWithVersion.getState());
+        return result;
+    }
+
+    /**
+     * Obtains the version of the entity at the given index.
+     *
+     * @throws IndexOutOfBoundsException
+     *         if there is index is out of the range of entities returned by this query response
+     */
+    default Version version(int index) {
+        EntityStateWithVersion stateWithVersion = getMessageList().get(index);
+        Version result = stateWithVersion.getVersion();
         return result;
     }
 }

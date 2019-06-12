@@ -98,8 +98,7 @@ class TestClientTest {
 
         // Query the state of the Game Process Manager, which has Timestamp as its state.
         QueryResponse response = client.queryAll(Table.class);
-        assertThat(response.getMessageList())
-             .isNotEmpty();
+        assertFalse(response.isEmpty());
     }
 
     @Test

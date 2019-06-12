@@ -809,15 +809,11 @@ class StandTest extends TenantAwareTest {
                                     .allWithMask(Project.class, paths);
         MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
-            public void onNext(QueryResponse value) {
-                super.onNext(value);
-                List<EntityStateWithVersion> messages = value.getMessageList();
-                assertThat(messages)
-                        .isNotEmpty();
+            public void onNext(QueryResponse response) {
+                super.onNext(response);
+                assertFalse(response.isEmpty());
 
-                EntityStateWithVersion stateWithVersion = messages.get(0);
-                Any state = stateWithVersion.getState();
-                Project project = unpack(state, Project.class);
+                Project project = (Project) response.state(0);
 
                 assertNotNull(project);
 
@@ -828,7 +824,7 @@ class StandTest extends TenantAwareTest {
                 assertThat(project.getTaskList())
                         .isEmpty();
 
-                Version version = stateWithVersion.getVersion();
+                Version version = response.version(0);
                 assertThat(version.getNumber())
                         .isEqualTo(projectVersion);
             }
