@@ -75,4 +75,9 @@ final class TenantAwareSystemWriteSide implements SystemWriteSide {
     public void postEvent(EventMessage systemEvent) {
         runner.run(() -> delegate.postEvent(systemEvent));
     }
+
+    @Override
+    public void notifySystem(EventMessage notification) {
+        runner.run(() -> delegate.notifySystem(notification));
+    }
 }

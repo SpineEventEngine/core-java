@@ -339,7 +339,7 @@ public abstract class ProcessManagerRepository<I,
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
         PmTransaction<I, S, ?> tx =
                 PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
-        TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
         tx.setListener(listener);
         return tx;
     }

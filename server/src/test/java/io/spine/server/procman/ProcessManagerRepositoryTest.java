@@ -26,10 +26,13 @@ import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
@@ -245,19 +248,28 @@ class ProcessManagerRepositoryTest
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
-    private void dispatchEvent(Event origin) {
-        // EventContext should have CommandContext with appropriate TenantId to avoid usage
-        // of different storages during command and event dispatching.
-        CommandContext commandContext = requestFactory.createCommandContext();
+    private void dispatchEvent(Event event) {
+        CommandId randomCommandId = CommandId.generate();
+        MessageId originId = MessageId
+                .newBuilder()
+                .setId(pack(randomCommandId))
+                .setTypeUrl("example.org/example.test.InjectEvent")
+                .buildPartial();
+        ActorContext actor = requestFactory.newActorContext();
+        Origin origin = Origin
+                .newBuilder()
+                .setActorContext(actor)
+                .setMessage(originId)
+                .buildPartial();
         EventContext eventContextWithTenantId =
                 GivenEvent.context()
                           .toBuilder()
-                          .setCommandContext(commandContext)
-                          .build();
-        Event event = origin.toBuilder()
-                            .setContext(eventContextWithTenantId)
-                            .build();
-        repository().dispatch(EventEnvelope.of(event));
+                          .setPastMessage(origin)
+                          .buildPartial();
+        Event eventWithTenant = event.toBuilder()
+                                     .setContext(eventContextWithTenantId)
+                                     .vBuild();
+        repository().dispatch(EventEnvelope.of(eventWithTenant));
     }
 
     @Test

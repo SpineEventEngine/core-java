@@ -127,7 +127,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     private void writeHandlersTo(File file) {
         ensureFile(file);
         removeDuplicates();
-        CommandHandlers serializedModel = commandHandlers.build();
+        CommandHandlers serializedModel = commandHandlers.vBuild();
         if (!isDefault(serializedModel)) {
             try (FileOutputStream out = new FileOutputStream(file)) {
                 serializedModel.writeTo(out);

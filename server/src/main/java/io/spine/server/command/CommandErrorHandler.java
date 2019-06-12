@@ -119,14 +119,14 @@ public final class CommandErrorHandler implements Logging {
      *         the command which caused the exception
      * @param exception
      *         the thrown exception
-     * @param consumer
-     *         the consumer of the rejection event
+     * @param poster
+     *         posts the rejection event
      */
-    public void handle(CommandEnvelope cmd, RuntimeException exception, Consumer<Event> consumer) {
+    public void handle(CommandEnvelope cmd, RuntimeException exception, Consumer<Event> poster) {
         CaughtError error = handle(cmd, exception);
         error.asRejection()
              .map(RejectionEnvelope::outerObject)
-             .ifPresent(consumer);
+             .ifPresent(poster);
         error.rethrowOnce();
     }
 

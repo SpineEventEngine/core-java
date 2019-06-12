@@ -26,14 +26,13 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.DispatchedCommand;
 import io.spine.core.EventContext;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
 /**
@@ -85,9 +84,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            DispatchedCommand origin = rejection.getOrigin();
-            Message commandMessage = unpack(origin.getMessage());
-            CommandContext context = origin.getContext();
+            Command origin = rejection.getOrigin();
+            CommandMessage commandMessage = origin.enclosedMessage();
+            CommandContext context = origin.context();
 
             return new Object[] {message, commandMessage, context};
         }

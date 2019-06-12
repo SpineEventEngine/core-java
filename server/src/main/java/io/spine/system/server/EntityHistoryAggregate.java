@@ -75,11 +75,12 @@ final class EntityHistoryAggregate
             throws CannotDispatchEventTwice {
         Event event = command.getEvent();
         checkNotDuplicate(event);
-        return EventDispatchedToSubscriber.newBuilder()
-                                          .setReceiver(command.getReceiver())
-                                          .setPayload(event)
-                                          .setWhenDispatched(now())
-                                          .build();
+        return EventDispatchedToSubscriber
+                .newBuilder()
+                .setReceiver(command.getReceiver())
+                .setPayload(event)
+                .setWhenDispatched(now())
+                .vBuild();
     }
 
     @Assign
@@ -87,11 +88,12 @@ final class EntityHistoryAggregate
             throws CannotDispatchEventTwice {
         Event event = command.getEvent();
         checkNotDuplicate(event);
-        return EventDispatchedToReactor.newBuilder()
-                                       .setReceiver(command.getReceiver())
-                                       .setPayload(event)
-                                       .setWhenDispatched(now())
-                                       .build();
+        return EventDispatchedToReactor
+                .newBuilder()
+                .setReceiver(command.getReceiver())
+                .setPayload(event)
+                .setWhenDispatched(now())
+                .vBuild();
     }
 
     @Assign
@@ -99,11 +101,12 @@ final class EntityHistoryAggregate
             throws CannotDispatchCommandTwice {
         Command domainCommand = command.getCommand();
         checkNotDuplicate(domainCommand);
-        return CommandDispatchedToHandler.newBuilder()
-                                         .setReceiver(command.getReceiver())
-                                         .setPayload(domainCommand)
-                                         .setWhenDispatched(now())
-                                         .build();
+        return CommandDispatchedToHandler
+                .newBuilder()
+                .setReceiver(command.getReceiver())
+                .setPayload(domainCommand)
+                .setWhenDispatched(now())
+                .vBuild();
     }
 
     @Apply(allowImport = true)

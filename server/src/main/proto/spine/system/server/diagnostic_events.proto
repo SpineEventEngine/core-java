@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "DiagnosticEventsProto";
+option java_multiple_files = true;
+
+import "spine/core/diagnostics.proto";
+import "spine/validate/validation_error.proto";
+
+// An event emitted whenever an entity validation constraint is violated.
+//
+// None of the fields of this message is required, as we might not know something about
+// the violation but should still be able to record it.
+//
+message ConstraintViolated {
+
+    // The violated entity info.
+    core.MessageId entity = 1 [(required) = false];
+
+    // The last message handled by the entity.
+    core.MessageId last_message = 2 [(required) = false];
+
+    // The last message in the chain which produced the `last_message`.
+    core.MessageId root_message = 3 [(required) = false];
+
+    // The validation constraint violations.
+    repeated validate.ConstraintViolation violation = 4 [(required) = false];
+}

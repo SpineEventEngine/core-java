@@ -32,7 +32,6 @@ option java_outer_classname = "CommandLifecycleCommandsProto";
 option java_multiple_files = true;
 
 import "spine/core/command.proto";
-import "spine/core/event.proto";
 import "spine/system/server/command_lifecycle.proto";
 
 // Schedules a domain command.

@@ -68,10 +68,7 @@ class AggregateTransactionTest
                           AggregateState,
                           AggregateState.Builder>
     createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
-             TransactionListener<Id,
-                                 Aggregate<Id, AggregateState, AggregateState.Builder>,
-                                 AggregateState,
-                                 AggregateState.Builder> listener) {
+             TransactionListener<Id> listener) {
         AggregateTransaction<Id, AggregateState, AggregateState.Builder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);

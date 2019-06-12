@@ -143,7 +143,7 @@ public abstract class Transaction<I,
      */
     private final List<Phase<I, ?>> phases = newLinkedList();
 
-    private TransactionListener<I, E, S, B> transactionListener;
+    private TransactionListener<I> transactionListener;
 
     /**
      * Creates a new instance of {@code Transaction} and
@@ -166,7 +166,7 @@ public abstract class Transaction<I,
 
         this.transactionListener = new SilentWitness<>();
         injectTo(entity);
-        this.entityBeforeTransaction = createRecord();
+        this.entityBeforeTransaction = entityRecord();
     }
 
     /**
@@ -255,6 +255,8 @@ public abstract class Transaction<I,
      */
     @CanIgnoreReturnValue
     protected <R> R propagate(Phase<I, R> phase) {
+        TransactionListener<I> listener = listener();
+        listener.onBeforePhase(phase);
         try {
             return phase.propagate();
         } catch (Throwable t) {
@@ -262,7 +264,7 @@ public abstract class Transaction<I,
             throw illegalStateWithCauseOf(t);
         } finally {
             phases.add(phase);
-            listener().onAfterPhase(phase);
+            listener.onAfterPhase(phase);
         }
     }
 
@@ -301,8 +303,8 @@ public abstract class Transaction<I,
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
-            EntityRecord newRecord = createRecord();
-            afterCommit(entityBeforeTransaction, newRecord);
+            EntityRecord newRecord = entityRecord();
+            afterCommit(newRecord);
         } catch (InvalidEntityStateException e) {
             /* New state of the entity does not pass validation. */
             rollback(e);
@@ -330,20 +332,26 @@ public abstract class Transaction<I,
         }
         commitAttributeChanges();
         releaseTx();
-        EntityRecord newRecord = createRecord();
-        afterCommit(entityBeforeTransaction, newRecord);
+        EntityRecord newRecord = entityRecord();
+        afterCommit(newRecord);
     }
 
     private void beforeCommit(S newState, Version newVersion) {
-        E entity = entity();
         LifecycleFlags newFlags = lifecycleFlags();
-        transactionListener.onBeforeCommit(entity, newState, newVersion, newFlags);
+        @NonValidated EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(entity.id()))
+                .setState(pack(newState))
+                .setLifecycleFlags(newFlags)
+                .setVersion(newVersion)
+                .buildPartial();
+        transactionListener.onBeforeCommit(record);
     }
 
-    private void afterCommit(EntityRecord oldEntity, EntityRecord newEntity) {
+    private void afterCommit(EntityRecord newEntity) {
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()
-                .setPreviousValue(oldEntity)
+                .setPreviousValue(entityBeforeTransaction)
                 .setNewValue(newEntity)
                 .build();
         transactionListener.onAfterCommit(change);
@@ -358,9 +366,15 @@ public abstract class Transaction<I,
      */
     void rollback(Throwable cause) {
         beforeRollback(cause);
-        @NonValidated S currentState = currentBuilderState();
-        TransactionListener<I, E, S, B> listener = listener();
-        listener.onTransactionFailed(cause, entity(), currentState, version(), lifecycleFlags());
+        TransactionListener<I> listener = listener();
+        @NonValidated EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(entity.id()))
+                .setState(pack(currentBuilderState()))
+                .setVersion(version)
+                .setLifecycleFlags(lifecycleFlags())
+                .buildPartial();
+        listener.onTransactionFailed(cause, record);
         this.active = false;
         entity.releaseTransaction();
     }
@@ -379,7 +393,7 @@ public abstract class Transaction<I,
      *
      * @return new {@link EntityRecord}
      */
-    private EntityRecord createRecord() {
+    private EntityRecord entityRecord() {
         E entity = entity();
         Any entityId = Identifier.pack(entity.id());
         Version version = entity.version();
@@ -482,7 +496,7 @@ public abstract class Transaction<I,
      *
      * <p>By default, the returned listener {@linkplain SilentWitness does nothing}.
      */
-    private TransactionListener<I, E, S, B> listener() {
+    private TransactionListener<I> listener() {
         return transactionListener;
     }
 
@@ -494,7 +508,7 @@ public abstract class Transaction<I,
      * @param listener
      *         the listener to use in this transaction
      */
-    public void setListener(TransactionListener<I, E, S, B> listener) {
+    public void setListener(TransactionListener<I> listener) {
         checkNotNull(listener);
         this.transactionListener = listener;
     }

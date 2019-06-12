@@ -21,7 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.MessageId;
+import io.spine.core.SignalId;
+import io.spine.core.Signal;
 import io.spine.server.event.EventDispatch;
 
 /**
@@ -59,8 +60,14 @@ public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
     }
 
     @Override
-    public MessageId messageId() {
+    public SignalId messageId() {
         return dispatch.event()
                        .id();
+    }
+
+    @Override
+    protected Signal<?, ?, ?> signal() {
+        return dispatch.event()
+                       .outerObject();
     }
 }

@@ -133,7 +133,7 @@ class EntityBuilderTest {
         Throwable cause = Throwables.getRootCause(exception);
         assertThat(cause).isInstanceOf(InvalidEntityStateException.class);
         InvalidEntityStateException iese = (InvalidEntityStateException) cause;
-        List<ConstraintViolation> violations = iese.getError()
+        List<ConstraintViolation> violations = iese.error()
                                                    .getValidationError()
                                                    .getConstraintViolationList();
         assertThat(violations).hasSize(user.getAllFields()
