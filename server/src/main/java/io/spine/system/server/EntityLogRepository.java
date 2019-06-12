@@ -32,7 +32,7 @@ import static io.spine.server.route.EventRoute.withId;
 /**
  * The repository for {@link EntityLogProjection}s.
  */
-final class EntityHistoryRepository
+final class EntityLogRepository
         extends ProjectionRepository<EntityLogId, EntityLogProjection, EntityLog> {
 
     @OverridingMethodsMustInvokeSuper
