@@ -387,7 +387,7 @@ class StandTest extends TenantAwareTest {
                 @Override
                 public void onNext(QueryResponse value) {
                     super.onNext(value);
-                    List<EntityStateWithVersion> messages = value.getMessagesList();
+                    List<EntityStateWithVersion> messages = value.getMessageList();
                     assertThat(messages).hasSize(ids.size());
                     for (EntityStateWithVersion stateWithVersion : messages) {
                         Any state = stateWithVersion.getState();
@@ -396,7 +396,8 @@ class StandTest extends TenantAwareTest {
                         assertMatchesMask(project, fieldMask);
 
                         Version version = stateWithVersion.getVersion();
-                        assertEquals(projectVersion, version.getNumber());
+                        assertThat(version.getNumber())
+                                .isEqualTo(projectVersion);
                     }
                 }
             };
@@ -810,8 +811,9 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
-                List<EntityStateWithVersion> messages = value.getMessagesList();
-                assertFalse(messages.isEmpty());
+                List<EntityStateWithVersion> messages = value.getMessageList();
+                assertThat(messages)
+                        .isNotEmpty();
 
                 EntityStateWithVersion stateWithVersion = messages.get(0);
                 Any state = stateWithVersion.getState();
@@ -820,14 +822,15 @@ class StandTest extends TenantAwareTest {
                 assertNotNull(project);
 
                 assertFalse(project.hasId());
-                assertTrue(project.getName()
-                                  .isEmpty());
+                assertThat(project.getName())
+                        .isEmpty();
                 assertEquals(UNDEFINED, project.getStatus());
-                assertTrue(project.getTaskList()
-                                  .isEmpty());
+                assertThat(project.getTaskList())
+                        .isEmpty();
 
                 Version version = stateWithVersion.getVersion();
-                assertEquals(projectVersion, version.getNumber());
+                assertThat(version.getNumber())
+                        .isEqualTo(projectVersion);
             }
         };
         stand.execute(query, observer);
@@ -1190,7 +1193,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
-        List<EntityStateWithVersion> messages = response.getMessagesList();
+        List<EntityStateWithVersion> messages = response.getMessageList();
         assertNotNull(messages, "Query response has null message list");
         return messages;
     }

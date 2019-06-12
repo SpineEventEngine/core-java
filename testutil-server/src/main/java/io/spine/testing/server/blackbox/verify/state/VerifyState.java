@@ -63,11 +63,12 @@ public abstract class VerifyState {
         queryService.read(query, observer);
         assertTrue(observer.isCompleted());
         QueryResponse response = observer.firstResponse();
-        ImmutableList<? extends Message> entities = response.getMessagesList()
-                                                            .stream()
-                                                            .map(EntityStateWithVersion::getState)
-                                                            .map(AnyPacker::unpack)
-                                                            .collect(toImmutableList());
+        ImmutableList<? extends Message> entities =
+                response.getMessageList()
+                        .stream()
+                        .map(EntityStateWithVersion::getState)
+                        .map(AnyPacker::unpack)
+                        .collect(toImmutableList());
         verify(entities);
     }
 

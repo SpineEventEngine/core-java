@@ -160,7 +160,7 @@ message QueryResponse {
 
     // Entity states and versions returned to the API user as a result of Query execution.
     //
-    repeated EntityStateWithVersion messages = 5;
+    repeated EntityStateWithVersion message = 5;
 }
 
 // Represents the entity state combined with entity version.
