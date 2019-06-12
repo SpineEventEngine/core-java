@@ -27,6 +27,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.EventEnrichmentFn;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.projection.Projection;
 import io.spine.system.server.event.CommandScheduled;
 
 import java.util.Optional;
@@ -51,7 +52,7 @@ final class SystemEnricher {
      * @param repo the repository for obtaining scheduled command instances
      * @return new {@link Enricher}
      */
-    public static EventEnricher create(CommandLifecycleRepository repo) {
+    public static EventEnricher create(CommandLogRepository repo) {
         checkNotNull(repo);
         EventEnricher enricher = EventEnricher
                 .newBuilder()
@@ -61,14 +62,14 @@ final class SystemEnricher {
     }
 
     private static EventEnrichmentFn<CommandScheduled, Command>
-    commandLookup(CommandLifecycleRepository repo) {
+    commandLookup(CommandLogRepository repo) {
         return (commandScheduled, context) -> findCommand(repo, commandScheduled.getId());
     }
 
-    private static Command findCommand(CommandLifecycleRepository repo, CommandId id) {
-        Optional<CommandLifecycleAggregate> commandLifecycle = repo.find(id);
-        Command command = commandLifecycle.map(Aggregate::state)
-                                          .map(CommandLifecycle::getCommand)
+    private static Command findCommand(CommandLogRepository repo, CommandId id) {
+        Optional<CommandLogProjection> commandLifecycle = repo.find(id);
+        Command command = commandLifecycle.map(Projection::state)
+                                          .map(CommandLog::getCommand)
                                           .orElse(Command.getDefaultInstance());
         return command;
     }

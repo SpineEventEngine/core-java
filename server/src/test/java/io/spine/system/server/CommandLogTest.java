@@ -68,8 +68,8 @@ import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CommandLifecycle should")
-class CommandLifecycleTest {
+@DisplayName("CommandLog should")
+class CommandLogTest {
 
     private static final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(EntityHistoryTest.class);

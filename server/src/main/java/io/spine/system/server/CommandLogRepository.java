@@ -21,10 +21,11 @@
 package io.spine.system.server;
 
 import io.spine.core.CommandId;
+import io.spine.server.projection.ProjectionRepository;
 
 /**
- * The repository for {@link CommandLifecycleAggregate}s.
+ * The repository for {@link CommandLogProjection}s.
  */
-final class CommandLifecycleRepository
-        extends SystemRepository<CommandId, CommandLifecycleAggregate> {
+final class CommandLogRepository
+        extends ProjectionRepository<CommandId, CommandLogProjection, CommandLog> {
 }
