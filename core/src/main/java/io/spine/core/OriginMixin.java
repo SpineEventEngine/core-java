@@ -39,7 +39,7 @@ interface OriginMixin extends OriginOrBuilder {
      *
      * <p>The root message has no further origin, as it is produced by an actor.
      */
-    default MessageQualifier root() {
+    default MessageId root() {
         OriginMixin parent = this;
         while (isNotDefault(parent.getGrandOrigin())) {
             parent = parent.getGrandOrigin();

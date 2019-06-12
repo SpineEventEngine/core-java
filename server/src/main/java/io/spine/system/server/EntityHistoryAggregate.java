@@ -21,9 +21,6 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.entity.LifecycleFlags;
@@ -37,8 +34,6 @@ import io.spine.system.server.event.EntityUnarchived;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
-import io.spine.system.server.rejection.CannotDispatchCommandTwice;
-import io.spine.system.server.rejection.CannotDispatchEventTwice;
 
 import java.util.function.UnaryOperator;
 
@@ -128,32 +123,6 @@ final class EntityHistoryAggregate
         updateLastEventTime(event.getWhenImported());
     }
 
-    private void checkNotDuplicate(Event event) throws CannotDispatchEventTwice {
-        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
-        boolean duplicate = lookup.isDuplicate(event);
-        if (duplicate) {
-            throw CannotDispatchEventTwice
-                    .newBuilder()
-                    .setReceiver(id())
-                    .setPayload(event)
-                    .setWhenDispatched(now())
-                    .build();
-        }
-    }
-
-    private void checkNotDuplicate(Command command) throws CannotDispatchCommandTwice {
-        DuplicateLookup lookup = DuplicateLookup.through(recentHistory());
-        boolean duplicate = lookup.isDuplicate(command);
-        if (duplicate) {
-            throw CannotDispatchCommandTwice
-                    .newBuilder()
-                    .setReceiver(id())
-                    .setPayload(command)
-                    .setWhenDispatched(now())
-                    .build();
-        }
-    }
-
     private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
         LifecycleHistory oldLifecycleHistory = builder().getLifecycle();
         LifecycleFlags.Builder flagsBuilder =
@@ -204,9 +173,5 @@ final class EntityHistoryAggregate
                 mutation.apply(history)
                         .build();
         builder.setDispatching(newHistory);
-    }
-
-    private static Timestamp now() {
-        return Time.currentTime();
     }
 }

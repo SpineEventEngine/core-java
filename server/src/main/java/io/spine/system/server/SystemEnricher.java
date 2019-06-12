@@ -23,7 +23,6 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.enrich.EventEnrichmentFn;
 import io.spine.server.event.EventEnricher;

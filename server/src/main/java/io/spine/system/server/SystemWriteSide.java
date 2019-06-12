@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;

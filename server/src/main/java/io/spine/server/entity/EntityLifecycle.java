@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
-import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -168,7 +167,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setPayload(command)
-                .setWhenDispatched(Time.currentTime())
+                .setWhenDispatched(currentTime())
                 .vBuild();
         postEvent(systemCommand);
     }
@@ -215,7 +214,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setReceiver(historyId)
                 .setPayload(event)
-                .setWhenDispatched(Time.currentTime())
+                .setWhenDispatched(currentTime())
                 .vBuild();
         postEvent(systemCommand);
     }
