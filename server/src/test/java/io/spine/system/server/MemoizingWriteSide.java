@@ -90,6 +90,12 @@ public final class MemoizingWriteSide implements SystemWriteSide {
         lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
     }
 
+    @Override
+    public void notifySystem(EventMessage notification) {
+        TenantId tenantId = currentTenant();
+        lastSeenEvent = new MemoizedSystemMessage(notification, tenantId);
+    }
+
     /** Obtains the ID of the current tenant. */
     private TenantId currentTenant() {
         TenantId result = new TenantFunction<TenantId>(multitenant) {

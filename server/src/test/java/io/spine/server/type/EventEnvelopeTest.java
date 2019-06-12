@@ -25,6 +25,7 @@ import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.Origin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -77,6 +78,19 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
             EventContext context = eventContext(originContext);
             EventEnvelope envelope = envelope(context);
             assertEquals(commandContext.getActorContext(), envelope.actorContext());
+        }
+
+        @Test
+        @DisplayName("origin message info")
+        void fromPastMessage() {
+            ActorContext actor = actorContext();
+            Origin pastMessage = Origin
+                    .newBuilder()
+                    .setActorContext(actor)
+                    .buildPartial();
+            EventContext context = eventContext(pastMessage);
+            EventEnvelope envelope = envelope(context);
+            assertEquals(actor, envelope.actorContext());
         }
 
         @Test

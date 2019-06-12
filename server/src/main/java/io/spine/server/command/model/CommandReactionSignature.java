@@ -123,7 +123,9 @@ public class CommandReactionSignature
             @Override
             public Object[] extractArguments(EventEnvelope event) {
                 CommandContext originContext = event.context()
-                                                    .getCommandContext();
+                                                    .getRejection()
+                                                    .getCommand()
+                                                    .getContext();
                 return new Object[]{event.message(), originContext};
             }
         }

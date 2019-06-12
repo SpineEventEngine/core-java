@@ -101,7 +101,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     private static final EventId STAND_POST_ORIGIN = EventId
             .newBuilder()
             .setValue("Stand-received-entity-update")
-            .build();
+            .vBuild();
 
     /**
      * Used to return an empty result collection for {@link Query}.
@@ -179,11 +179,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setEntityId(id)
                 .setState(state)
-                .build();
+                .vBuild();
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()
                 .setNewValue(record)
-                .build();
+                .vBuild();
         lifecycle.onStateChanged(change, ImmutableSet.of(STAND_POST_ORIGIN));
     }
 

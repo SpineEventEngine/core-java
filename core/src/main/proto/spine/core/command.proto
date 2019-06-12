@@ -33,10 +33,11 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/any.proto";
 
 import "spine/core/actor_context.proto";
+import "spine/core/diagnostics.proto";
 
 // Command identifier.
 message CommandId {
-    option (is).java_type = "io.spine.core.MessageId";
+    option (is).java_type = "io.spine.core.CommandIdMixin";
 
     string uuid = 1;
 }
@@ -124,6 +125,8 @@ message CommandContext {
 
     // The schedule to execute the command.
     Schedule schedule = 4;
+
+    Origin origin = 5 [(required) = false, (validate) = true];
 }
 
 // Enumeration of possible errors when validating a command.
@@ -159,6 +162,7 @@ enum CommandValidationError {
 // Data from a `Command` which is accessible from the end user code to which
 // the command was dispatched.
 message DispatchedCommand {
+    option deprecated = true;
 
     // The message of the command.
     google.protobuf.Any message = 1 [(required) = true];

@@ -27,7 +27,6 @@ import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
@@ -142,28 +141,20 @@ abstract class AbstractCommandBusTestSuite {
 
     protected static Command newCommandWithoutTenantId() {
         Command cmd = createProject();
-        ActorContext.Builder withNoTenant = ActorContext
-                .newBuilder()
+        Command.Builder commandBuilder = cmd.toBuilder();
+        commandBuilder
+                .getContextBuilder()
+                .getActorContextBuilder()
                 .setTenantId(TenantId.getDefaultInstance());
-        Command invalidCmd =
-                cmd.toBuilder()
-                   .setContext(cmd.context()
-                                  .toBuilder()
-                                  .setActorContext(withNoTenant))
-                   .build();
-        return invalidCmd;
+        return commandBuilder.vBuild();
     }
 
     protected static Command clearTenantId(Command cmd) {
-        ActorContext.Builder withNoTenant = ActorContext
-                .newBuilder()
-                .setTenantId(TenantId.getDefaultInstance());
-        Command result = cmd.toBuilder()
-                            .setContext(cmd.context()
-                                           .toBuilder()
-                                           .setActorContext(withNoTenant))
-                            .build();
-        return result;
+        Command.Builder result = cmd.toBuilder();
+        result.getContextBuilder()
+              .getActorContextBuilder()
+              .clearTenantId();
+        return result.vBuild();
     }
 
     @BeforeEach

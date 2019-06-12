@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package spine.system.server.test;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server.test";
+option java_outer_classname = "ValidatedProto";
+option java_multiple_files = true;
+
+message ValidatedId {
+    string uuid = 1;
+}
+
+message Validated {
+    option (entity) = {kind: AGGREGATE};
+
+    ValidatedId id = 1;
+
+    string only_letters = 2 [(pattern).regex = "[a-zA-Z]*"];
+}

@@ -26,13 +26,14 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
+import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
 import static io.spine.validate.Validate.isDefault;
 
 /**
  * Mixin interface for event objects.
  */
 @Immutable
-public interface EventMixin extends MessageWithContext<EventId, EventMessage, EventContext> {
+public interface EventMixin extends Signal<EventId, EventMessage, EventContext> {
 
     /**
      * Obtains the ID of the tenant of the event.
@@ -48,6 +49,14 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
         return context().getTimestamp();
     }
 
+    @Override
+    default MessageId rootMessage() {
+        EventContext.OriginCase origin = context().getOriginCase();
+        return origin == PAST_MESSAGE
+               ? context().getPastMessage().root()
+               : messageId();
+    }
+
     /**
      * Obtains the ID of the root command, which lead to this event.
      *
@@ -57,7 +66,9 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      * @return the root command ID
      */
     default CommandId rootCommandId() {
-        return context().getRootCommandId();
+        return context().getPastMessage()
+                        .root()
+                        .asCommandId();
     }
 
     /**
@@ -88,8 +99,8 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
      * @return the event without enrichments
      */
     @SuppressWarnings({
-            "ClassReferencesSubclass" /* `Event` is the only case of this mixin. */,
-            "CheckReturnValue" /* calling builder */
+            "ClassReferencesSubclass", //`Event` is the only case of this mixin.
+            "deprecation" // Uses the `event_context` field to be sure to clean up old data.
     })
     @Internal
     default Event clearEnrichments() {
@@ -128,5 +139,13 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
         EventContext eventContext = context();
         ActorContext result = eventContext.actorContext();
         return result;
+    }
+
+    @Override
+    default MessageId messageId() {
+        return Signal.super.messageId()
+                           .toBuilder()
+                           .setVersion(context().getVersion())
+                           .vBuild();
     }
 }
