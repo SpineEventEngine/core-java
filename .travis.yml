@@ -1,5 +1,8 @@
 language: java
 
+jdk:
+  - openjdk8
+
 # To increase the memory size available during Travis build.
 sudo: required
 
