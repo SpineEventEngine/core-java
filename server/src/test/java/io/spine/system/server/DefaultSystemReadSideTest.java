@@ -28,14 +28,15 @@ import io.spine.base.EventMessage;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.core.BoundedContextNames;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.system.server.given.client.ShoppingListProjection;
-import io.spine.system.server.given.client.ShoppingListRepository;
+import io.spine.system.server.given.client.ShoppingListAggregate;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -51,6 +52,7 @@ import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
@@ -153,7 +155,7 @@ class DefaultSystemReadSideTest {
 
         @BeforeEach
         void setUp() {
-            domainContext.register(new ShoppingListRepository());
+            domainContext.register(DefaultRepository.of(ShoppingListAggregate.class));
             aggregateId = ListId
                     .newBuilder()
                     .setId(newUuid())
@@ -171,23 +173,24 @@ class DefaultSystemReadSideTest {
             EntityStateWithVersion next = iterator.next();
             Message foundMessage = unpack(next.getState());
 
-            ShoppingListProjection aggregate = aggregate();
+            ShoppingListAggregate aggregate = aggregate();
             assertEquals(aggregate.state(), foundMessage);
             assertEquals(aggregate.version(), next.getVersion());
         }
 
-        private ShoppingListProjection aggregate() {
+        private ShoppingListAggregate aggregate() {
             return findAggregate(aggregateId, domainContext);
         }
 
         private void createAggregate() {
-            ShoppingListCreated event = ShoppingListCreated
+            CreateShoppingList command = CreateShoppingList
                     .newBuilder()
                     .setId(aggregateId)
                     .build();
-            Event evt = events.createEvent(event);
-            domainContext.eventBus()
-                         .post(evt);
+            Command cmd = actorRequestFactory.command()
+                                             .create(command);
+            domainContext.commandBus()
+                         .post(cmd, noOpObserver());
         }
     }
 

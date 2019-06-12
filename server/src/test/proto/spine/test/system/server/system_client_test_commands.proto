@@ -18,22 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.given.client;
+syntax = "proto3";
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.EventRoute;
-import io.spine.server.route.EventRouting;
-import io.spine.test.system.server.ListId;
-import io.spine.test.system.server.ShoppingList;
+package spine.test.system.server;
 
-public class ShoppingListRepository
-        extends ProjectionRepository<ListId, ShoppingListProjection, ShoppingList> {
+import "spine/options.proto";
 
-    @OverridingMethodsMustInvokeSuper
-    @Override
-    protected void setupEventRouting(EventRouting<ListId> routing) {
-        super.setupEventRouting(routing);
-        routing.replaceDefault(EventRoute.byFirstMessageField(ListId.class));
-    }
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "SCCommandsProto";
+option java_multiple_files = true;
+
+import "spine/test/system/server/shoppling_list.proto";
+
+message CreateShoppingList {
+
+    ListId id = 1;
+}
+
+message AddListItem {
+
+    ListId list_id = 1;
+
+    string item = 2;
 }

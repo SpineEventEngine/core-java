@@ -10,7 +10,8 @@ option java_outer_classname = "ShoppingListProto";
 option java_multiple_files = true;
 
 message ShoppingList {
-    option (entity).kind = PROJECTION;
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = FULL;
 
     ListId id = 1;
 

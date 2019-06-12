@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package spine.test.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.system.server";
+option java_outer_classname = "MealOrderEventsProto";
+option java_multiple_files = true;
+
+import "spine/test/system/server/meal_order.proto";
+
+message OrderPlaced {
+
+    OrderId id = 1;
+
+    repeated string item = 2;
+}
+
+message OrderDelivered {
+
+    OrderId id = 1;
+}

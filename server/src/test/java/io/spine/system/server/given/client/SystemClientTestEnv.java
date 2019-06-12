@@ -21,7 +21,11 @@
 package io.spine.system.server.given.client;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.system.server.ListId;
+import io.spine.test.system.server.MealOrder;
+import io.spine.test.system.server.OrderId;
 import io.spine.test.system.server.ShoppingList;
 
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -35,20 +39,32 @@ public class SystemClientTestEnv {
     private SystemClientTestEnv() {
     }
 
-    public static BoundedContext contextWithSystemAggregate() {
+    public static BoundedContext contextWithSystemProjection() {
         BoundedContext context = BoundedContext.newBuilder().build();
         BoundedContext systemContext = systemOf(context);
-        systemContext.register(new ShoppingListRepository());
+        systemContext.register(new MealOrderRepository());
         return context;
     }
 
-    public static ShoppingListProjection findAggregate(ListId aggregateId, BoundedContext context) {
-        ShoppingListRepository repository = (ShoppingListRepository)
-                context.findRepository(ShoppingList.class)
-                       .orElseGet(() -> fail("Repository should be registered."));
-        ShoppingListProjection aggregate =
+    public static ShoppingListAggregate findAggregate(ListId aggregateId, BoundedContext context) {
+        @SuppressWarnings("unchecked")
+        AggregateRepository<ListId, ShoppingListAggregate> repository =
+                (AggregateRepository<ListId, ShoppingListAggregate>)
+                        context.findRepository(ShoppingList.class)
+                               .orElseGet(() -> fail("Aggregate repository should be registered."));
+        ShoppingListAggregate aggregate =
                 repository.find(aggregateId)
                           .orElseGet(() -> fail("Aggregate should be present."));
         return aggregate;
+    }
+
+    public static MealOrderProjection findProjection(OrderId projectionId, BoundedContext context) {
+        MealOrderRepository repository = (MealOrderRepository)
+                context.findRepository(MealOrder.class)
+                       .orElseGet(() -> fail("Projection repository should be registered."));
+        MealOrderProjection projection =
+                repository.find(projectionId)
+                          .orElseGet(() -> fail("Projection should be present."));
+        return projection;
     }
 }

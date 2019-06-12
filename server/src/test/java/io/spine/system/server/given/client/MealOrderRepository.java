@@ -20,38 +20,24 @@
 
 package io.spine.system.server.given.client;
 
-import io.spine.core.Subscribe;
-import io.spine.server.projection.Projection;
-import io.spine.system.server.HardCopyLost;
-import io.spine.system.server.HardCopyPrinted;
-import io.spine.system.server.ListItemAdded;
-import io.spine.system.server.ShoppingListCreated;
-import io.spine.test.system.server.ListId;
-import io.spine.test.system.server.ShoppingList;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.test.system.server.MealOrder;
+import io.spine.test.system.server.OrderDelivered;
+import io.spine.test.system.server.OrderId;
+import io.spine.test.system.server.OrderPlaced;
 
-public class ShoppingListProjection extends Projection<ListId, ShoppingList, ShoppingList.Builder> {
+import static io.spine.server.route.EventRoute.withId;
 
-    @Subscribe
-    void on(ShoppingListCreated event) {
-    }
+public final class MealOrderRepository
+        extends ProjectionRepository<OrderId, MealOrderProjection, MealOrder> {
 
-    @Subscribe
-    void on(ListItemAdded event) {
-        builder().addItem(event.getItem());
-    }
-
-    @Subscribe
-    void on(HardCopyPrinted event) {
-        int newCount = builder().getHardCopiesCount() + 1;
-        builder().setHardCopiesCount(newCount);
-    }
-
-    @Subscribe
-    void on(HardCopyLost event) {
-        ShoppingList.Builder builder = builder();
-        int newCount = builder.getHardCopiesCount() - 1;
-        if (newCount >= 0) {
-            builder.setHardCopiesCount(newCount);
-        }
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    protected void setupEventRouting(EventRouting<OrderId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(OrderPlaced.class, (message, context) -> withId(message.getId()))
+               .route(OrderDelivered.class, (message, context) -> withId(message.getId()));
     }
 }
