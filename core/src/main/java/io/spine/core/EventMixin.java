@@ -33,7 +33,7 @@ import static io.spine.validate.Validate.isDefault;
  * Mixin interface for event objects.
  */
 @Immutable
-public interface EventMixin extends MessageWithContext<EventId, EventMessage, EventContext> {
+public interface EventMixin extends Signal<EventId, EventMessage, EventContext> {
 
     /**
      * Obtains the ID of the tenant of the event.
@@ -50,11 +50,11 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     }
 
     @Override
-    default MessageQualifier rootMessage() {
+    default MessageId rootMessage() {
         EventContext.OriginCase origin = context().getOriginCase();
         return origin == PAST_MESSAGE
                ? context().getPastMessage().root()
-               : qualifier();
+               : messageId();
     }
 
     /**
@@ -142,10 +142,10 @@ public interface EventMixin extends MessageWithContext<EventId, EventMessage, Ev
     }
 
     @Override
-    default MessageQualifier qualifier() {
-        return MessageWithContext.super.qualifier()
-                                       .toBuilder()
-                                       .setVersion(context().getVersion())
-                                       .vBuild();
+    default MessageId messageId() {
+        return Signal.super.messageId()
+                           .toBuilder()
+                           .setVersion(context().getVersion())
+                           .vBuild();
     }
 }

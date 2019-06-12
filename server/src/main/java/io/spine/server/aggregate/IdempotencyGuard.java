@@ -94,11 +94,11 @@ final class IdempotencyGuard {
         EventId eventId = event.id();
         Predicate<Event> causedByEvent = e -> e.context()
                                                .getPastMessage()
-                                               .qualifier()
+                                               .messageId()
                                                .isEvent();
         Predicate<Event> originHasGivenId = e -> e.context()
                                                   .getPastMessage()
-                                                  .qualifier()
+                                                  .messageId()
                                                   .asEventId()
                                                   .equals(eventId);
         boolean found = aggregate.historyContains(causedByEvent.and(originHasGivenId));
@@ -122,11 +122,11 @@ final class IdempotencyGuard {
         CommandId commandId = command.id();
         Predicate<Event> causedByCommand = e -> e.context()
                                                  .getPastMessage()
-                                                 .qualifier()
+                                                 .messageId()
                                                  .isCommand();
         Predicate<Event> originHasGivenId = e -> e.context()
                                                   .getPastMessage()
-                                                  .qualifier()
+                                                  .messageId()
                                                   .asCommandId()
                                                   .equals(commandId);
         boolean found = aggregate.historyContains(causedByCommand.and(originHasGivenId));

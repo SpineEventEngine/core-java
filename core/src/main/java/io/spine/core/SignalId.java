@@ -30,7 +30,7 @@ import io.spine.annotation.Internal;
  * @see EventId
  */
 @Internal
-public interface MessageId extends Message {
+public interface SignalId extends Message {
 
     /**
      * Obtains the string value of this ID.

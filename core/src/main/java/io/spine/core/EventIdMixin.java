@@ -26,7 +26,7 @@ import io.spine.annotation.GeneratedMixin;
  * A mixin interface for {@link EventId}.
  */
 @GeneratedMixin
-interface EventIdMixin extends MessageId, EventIdOrBuilder {
+interface EventIdMixin extends SignalId, EventIdOrBuilder {
 
     @Override
     default String value() {

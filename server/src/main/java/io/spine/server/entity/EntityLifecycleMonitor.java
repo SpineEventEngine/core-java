@@ -24,8 +24,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
-import io.spine.core.MessageQualifier;
-import io.spine.core.MessageWithContext;
+import io.spine.core.Signal;
+import io.spine.core.SignalId;
 import io.spine.logging.Logging;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
@@ -58,16 +58,16 @@ import static com.google.common.collect.Lists.newLinkedList;
 @Internal
 public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, Logging {
 
-    private static final MessageQualifier UNKNOWN_MESSAGE = MessageQualifier.getDefaultInstance();
+    private static final MessageId UNKNOWN_MESSAGE = MessageId.getDefaultInstance();
 
     private final Repository<I, ?> repository;
-    private final List<MessageId> acknowledgedMessageIds;
+    private final List<SignalId> acknowledgedSignalIds;
     private final I entityId;
-    private @MonotonicNonNull MessageWithContext<?, ?, ?> lastMessage;
+    private @MonotonicNonNull Signal<?, ?, ?> lastMessage;
 
     private EntityLifecycleMonitor(Repository<I, ?> repository, I id) {
         this.repository = repository;
-        this.acknowledgedMessageIds = newLinkedList();
+        this.acknowledgedSignalIds = newLinkedList();
         this.entityId = id;
     }
 
@@ -89,7 +89,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onBeforePhase(Phase<I, ?> phase) {
-        lastMessage = phase.message();
+        lastMessage = phase.signal();
     }
 
     /**
@@ -101,8 +101,8 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onAfterPhase(Phase<I, ?> phase) {
         checkSameEntity(phase.entityId());
-        MessageId messageId = phase.messageId();
-        acknowledgedMessageIds.add(messageId);
+        SignalId signalId = phase.messageId();
+        acknowledgedSignalIds.add(signalId);
     }
 
     @Override
@@ -117,9 +117,9 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onAfterCommit(EntityRecordChange change) {
-        Set<MessageId> messageIds = ImmutableSet.copyOf(acknowledgedMessageIds);
+        Set<SignalId> signalIds = ImmutableSet.copyOf(acknowledgedSignalIds);
         repository.lifecycleOf(entityId)
-                  .onStateChanged(change, messageIds);
+                  .onStateChanged(change, signalIds);
     }
 
     /**
@@ -132,10 +132,10 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
         Throwable cause = Throwables.getRootCause(t);
         if (cause instanceof ValidationException) {
             ValidationError error = ((ValidationException) cause).asValidationError();
-            MessageQualifier causeMessage;
-            MessageQualifier rootMessage;
+            MessageId causeMessage;
+            MessageId rootMessage;
             if (lastMessage != null) {
-                causeMessage = lastMessage.qualifier();
+                causeMessage = lastMessage.messageId();
                 rootMessage = lastMessage.rootMessage();
             } else {
                 causeMessage = UNKNOWN_MESSAGE;

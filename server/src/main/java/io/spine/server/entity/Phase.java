@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.MessageId;
-import io.spine.core.MessageWithContext;
+import io.spine.core.SignalId;
+import io.spine.core.Signal;
 
 /**
  * An atomic entity state change which advances the entity version.
@@ -88,7 +88,10 @@ public abstract class Phase<I, R> {
     /**
      * Returns the dispatched {@code Message} ID.
      */
-    protected abstract MessageId messageId();
+    protected abstract SignalId messageId();
 
-    protected abstract MessageWithContext<?, ?, ?> message();
+    /**
+     * Obtains the signal message applied by this phase.
+     */
+    protected abstract Signal<?, ?, ?> signal();
 }

@@ -18,19 +18,8 @@ import "spine/core/version.proto";
 //
 // May represent either an event or a command.
 //
-message MessageQualifier {
-    option (is).java_type = "io.spine.core.MessageQualifierMixin";
-
-    google.protobuf.Any message_id = 1 [(required) = true, (validate) = true];
-
-    string type_url = 2 [(required) = true];
-
-    core.Version version = 3 [(required) = false, (validate) = true];
-}
-
-// Information about an entity at a point in time.
-//
-message EntityQualifier {
+message MessageId {
+    option (is).java_type = "io.spine.core.MessageIdMixin";
 
     google.protobuf.Any id = 1 [(required) = true, (validate) = true];
 
@@ -46,8 +35,8 @@ message EntityQualifier {
 message Origin {
     option (is).java_type = "io.spine.core.OriginMixin";
 
-    // The qualifier of the direct parent of the message.
-    MessageQualifier qualifier = 1 [(required) = true, (validate) = true];
+    // The messageId of the direct parent of the message.
+    MessageId message = 1 [(required) = true, (validate) = true];
 
     // The origin of the direct parent of the message.
     Origin grand_origin = 2 [(required) = false, (validate) = true];

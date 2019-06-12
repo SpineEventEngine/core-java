@@ -30,12 +30,12 @@ import static io.spine.validate.Validate.isNotDefault;
 @GeneratedMixin
 interface OriginMixin extends OriginOrBuilder {
 
-    default MessageQualifier qualifier() {
-        return getQualifier();
+    default MessageId messageId() {
+        return getMessage();
     }
 
     /**
-     * Obtains the root origin message qualifier.
+     * Obtains the root origin message ID.
      *
      * <p>The root message has no further origin, as it is produced by an actor.
      */
@@ -44,6 +44,6 @@ interface OriginMixin extends OriginOrBuilder {
         while (isNotDefault(parent.getGrandOrigin())) {
             parent = parent.getGrandOrigin();
         }
-        return parent.qualifier();
+        return parent.messageId();
     }
 }

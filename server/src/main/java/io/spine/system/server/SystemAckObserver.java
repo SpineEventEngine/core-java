@@ -22,8 +22,8 @@ package io.spine.system.server;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.MessageId;
-import io.spine.core.MessageWithContext;
+import io.spine.core.SignalId;
+import io.spine.core.Signal;
 import io.spine.core.Status;
 import io.spine.logging.Logging;
 import io.spine.type.TypeName;
@@ -48,12 +48,12 @@ import static java.lang.String.format;
 final class SystemAckObserver implements StreamObserver<Ack> {
 
     private final TypeName messageType;
-    private final MessageId messageId;
+    private final SignalId signalId;
     private final Logger logger;
 
-    private SystemAckObserver(TypeName type, MessageId id, Logger logger) {
+    private SystemAckObserver(TypeName type, SignalId id, Logger logger) {
         this.messageType = checkNotNull(type);
-        this.messageId = checkNotNull(id);
+        this.signalId = checkNotNull(id);
         this.logger = checkNotNull(logger);
     }
 
@@ -61,8 +61,8 @@ final class SystemAckObserver implements StreamObserver<Ack> {
      * Creates a new instance of {@code SystemAckObserver} which observes acknowledgement of the
      * given system message.
      */
-    static SystemAckObserver ofResultsOf(MessageWithContext<?, ?, ?> message) {
-        MessageId id = message.id();
+    static SystemAckObserver ofResultsOf(Signal<?, ?, ?> message) {
+        SignalId id = message.id();
         TypeName name = message.typeUrl()
                                .toTypeName();
         return new SystemAckObserver(name, id, Logging.get(SystemWriteSide.class));
@@ -112,7 +112,7 @@ final class SystemAckObserver implements StreamObserver<Ack> {
     private String messageInfo() {
         return format("%s[%s: %s]",
                       messageType,
-                      messageId.getClass().getSimpleName(),
-                      messageId.value());
+                      signalId.getClass().getSimpleName(),
+                      signalId.value());
     }
 }

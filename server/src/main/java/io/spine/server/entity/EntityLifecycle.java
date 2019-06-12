@@ -28,11 +28,10 @@ import io.spine.base.EventMessage;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.EntityQualifier;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
-import io.spine.core.MessageQualifier;
+import io.spine.core.SignalId;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
@@ -261,7 +260,7 @@ public class EntityLifecycle {
      *         {@link EventId EventId}s or {@link CommandId}s
      */
     public final void onStateChanged(EntityRecordChange change,
-                                     Set<? extends MessageId> messageIds) {
+                                     Set<? extends SignalId> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -283,11 +282,11 @@ public class EntityLifecycle {
      * @param version
      *         the version of the invalid entity
      */
-    public final void onInvalidEntity(MessageQualifier lastMessage,
-                                      MessageQualifier root,
+    public final void onInvalidEntity(MessageId lastMessage,
+                                      MessageId root,
                                       ValidationError error,
                                       Version version) {
-        EntityQualifier qualifier = EntityQualifier
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setId(historyId.getEntityId().getId())
                 .setTypeUrl(historyId.getTypeUrl())
@@ -295,7 +294,7 @@ public class EntityLifecycle {
                 .buildPartial();
         ConstraintViolated event = ConstraintViolated
                 .newBuilder()
-                .setEntity(qualifier)
+                .setEntity(entityId)
                 .setLastMessage(lastMessage)
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
@@ -413,7 +412,7 @@ public class EntityLifecycle {
     }
 
     private static Collection<DispatchedMessageId>
-    toDispatched(Collection<? extends MessageId> messageIds) {
+    toDispatched(Collection<? extends SignalId> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds =
                 messageIds.stream()
                           .map(EntityLifecycle::dispatchedMessageId)
@@ -422,21 +421,21 @@ public class EntityLifecycle {
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")
-    private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
-        checkNotNull(messageId);
+    private static DispatchedMessageId dispatchedMessageId(SignalId signalId) {
+        checkNotNull(signalId);
         DispatchedMessageId.Builder builder = DispatchedMessageId.newBuilder();
-        if (messageId instanceof EventId) {
-            EventId eventId = (EventId) messageId;
+        if (signalId instanceof EventId) {
+            EventId eventId = (EventId) signalId;
             return builder.setEventId(eventId)
                           .vBuild();
-        } else if (messageId instanceof CommandId) {
-            CommandId commandId = (CommandId) messageId;
+        } else if (signalId instanceof CommandId) {
+            CommandId commandId = (CommandId) signalId;
             return builder.setCommandId(commandId)
                           .vBuild();
         } else {
             throw newIllegalArgumentException(
                     "Unexpected message ID of type %s. Expected EventId or CommandId.",
-                    messageId.getClass()
+                    signalId.getClass()
             );
         }
     }

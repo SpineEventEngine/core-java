@@ -31,7 +31,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.MessageQualifier;
+import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -251,16 +251,16 @@ class ProcessManagerRepositoryTest
     @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
     private void dispatchEvent(Event event) {
         CommandId randomCommandId = CommandId.generate();
-        MessageQualifier qualifier = MessageQualifier
+        MessageId originId = MessageId
                 .newBuilder()
-                .setMessageId(pack(randomCommandId))
+                .setId(pack(randomCommandId))
                 .setTypeUrl("example.org/example.test.InjectEvent")
                 .buildPartial();
         ActorContext actor = requestFactory.newActorContext();
         Origin origin = Origin
                 .newBuilder()
                 .setActorContext(actor)
-                .setQualifier(qualifier)
+                .setMessage(originId)
                 .buildPartial();
         EventContext eventContextWithTenantId =
                 GivenEvent.context()
