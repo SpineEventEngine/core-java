@@ -53,20 +53,15 @@ message QueryId {
 message OrderBy {
     
     // A direction of sorting for ordering the Query results.
-    //
     Direction direction = 1 [(required) = true];
 
     // A column name which value is used for ordering the query results. 
-    //
     string column = 2 [(required) = true];
     
-    // A direction of an `OrderBy` clause specifying if greater or lesser values 
-    // should come first.
-    //
+    // A direction of an `OrderBy` clause specifying if greater or lesser values should come first.
     enum Direction {
         
         // Reserved default value.
-        //
         OD_UNKNOWN = 0;
         
         // An order in which every following value is greater than the previous one.
@@ -109,11 +104,9 @@ message Pagination {
 message Query {
 
     // The ID of the query.
-    //
     QueryId id = 1 [(required) = true];
 
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
-    //
     Target target = 2 [(required) = true,
                        (validate) = true,
                        (if_invalid).msg_format = "Invalid query target"];
@@ -123,18 +116,15 @@ message Query {
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the query was created.
-    //
     core.ActorContext context = 4 [(required) = true,
                                    (validate) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
 
     // An order for entities returned by the Query.
-    //
     OrderBy orderBy = 5 [(validate) = true,
                          (if_invalid).msg_format = "Invalid query order"];
 
     // A specification for a way to paginate the Query results.
-    //
     Pagination pagination = 6 [(validate) = true,
                                (goes).with = "order",
                                (if_invalid).msg_format = "Invalid query pagination"];
@@ -151,6 +141,7 @@ message Query {
 message QueryResponse {
 
     // The base status part of the query processing response.
+    //
     // For example: whether the `Query` has been acked or not.
     //
     core.Response response = 1 [(required) = true];
@@ -159,7 +150,6 @@ message QueryResponse {
     reserved 2 to 4;
 
     // Entity states and versions returned to the API user as a result of Query execution.
-    //
     repeated EntityStateWithVersion message = 5;
 }
 
@@ -170,11 +160,9 @@ message QueryResponse {
 message EntityStateWithVersion {
 
     // The state of the entity packed as `Any`.
-    //
     google.protobuf.Any state = 1;
 
     // The version of the entity.
-    //
     core.Version version = 2;
 }
 
