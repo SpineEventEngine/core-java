@@ -67,7 +67,7 @@ public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     }
 
     @Override
-    protected Signal<?, ?, ?> message() {
+    protected Signal<?, ?, ?> signal() {
         return dispatch.command()
                        .outerObject();
     }

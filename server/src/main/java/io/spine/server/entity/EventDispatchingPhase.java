@@ -66,7 +66,7 @@ public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
     }
 
     @Override
-    protected Signal<?, ?, ?> message() {
+    protected Signal<?, ?, ?> signal() {
         return dispatch.event()
                        .outerObject();
     }

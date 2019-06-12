@@ -89,7 +89,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onBeforePhase(Phase<I, ?> phase) {
-        lastMessage = phase.message();
+        lastMessage = phase.signal();
     }
 
     /**

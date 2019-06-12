@@ -90,5 +90,8 @@ public abstract class Phase<I, R> {
      */
     protected abstract SignalId messageId();
 
-    protected abstract Signal<?, ?, ?> message();
+    /**
+     * Obtains the signal message applied by this phase.
+     */
+    protected abstract Signal<?, ?, ?> signal();
 }
