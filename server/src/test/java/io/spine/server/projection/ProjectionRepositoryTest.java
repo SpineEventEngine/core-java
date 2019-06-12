@@ -379,8 +379,8 @@ class ProjectionRepositoryTest
         }
     }
 
-    // TODO:2019-06-10:dmytro.dashenkov: Create a GitHub issue.
-    @Disabled("Until Inbox implements the feature")
+    @Disabled("Until Inbox implements the feature: " +
+            "https://github.com/SpineEventEngine/core-java/issues/1086")
     @Nested
     @DisplayName("not allow duplicate")
     @MuteLogging
