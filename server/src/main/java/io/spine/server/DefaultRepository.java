@@ -38,7 +38,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
- * Static factory for creating a default repository for an entity class.
+ * The marker interface for the repositories which do not require creating a custom subclass
+ * of {@link Repository}.
+ *
+ * <p>If no customization is required, {@link DefaultRepository#of} is the easiest way to create
+ * an instance of repository for a given entity type.
  */
 public interface DefaultRepository {
 
