@@ -28,6 +28,7 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
+import io.spine.grpc.DelegatingObserver;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
@@ -46,13 +47,12 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * All the calls to {@link StreamObserver} methods on an instance of {@code CommandAckMonitor}
  * invoke respective methods on a {@code delegate} instance.
  */
-final class CommandAckMonitor implements StreamObserver<Ack> {
+final class CommandAckMonitor extends DelegatingObserver<Ack> {
 
-    private final StreamObserver<Ack> delegate;
     private final SystemWriteSide writeSide;
 
     private CommandAckMonitor(Builder builder) {
-        this.delegate = builder.delegate;
+        super(builder.delegate);
         this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
     }
 
@@ -66,18 +66,8 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
      */
     @Override
     public void onNext(Ack value) {
-        delegate.onNext(value);
+        super.onNext(value);
         postSystemEvent(value);
-    }
-
-    @Override
-    public void onError(Throwable t) {
-        delegate.onError(t);
-    }
-
-    @Override
-    public void onCompleted() {
-        delegate.onCompleted();
     }
 
     private void postSystemEvent(Ack ack) {

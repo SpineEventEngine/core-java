@@ -122,8 +122,8 @@ public class RecordStorageTestEnv {
 
     private static EntityColumn.MemoizedValue booleanColumn(EntityColumn column, boolean value) {
         EntityColumn.MemoizedValue memoizedValue = mock(EntityColumn.MemoizedValue.class);
-        when(memoizedValue.getSourceColumn()).thenReturn(column);
-        when(memoizedValue.getValue()).thenReturn(value);
+        when(memoizedValue.sourceColumn()).thenReturn(column);
+        when(memoizedValue.value()).thenReturn(value);
         return memoizedValue;
     }
 
@@ -272,7 +272,7 @@ public class RecordStorageTestEnv {
         }
 
         public String columnName() {
-            return column.getStoredName();
+            return column.storedName();
         }
     }
 }

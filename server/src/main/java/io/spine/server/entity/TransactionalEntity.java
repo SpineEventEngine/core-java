@@ -142,6 +142,12 @@ public abstract class TransactionalEntity<I,
         return "Cannot modify entity state: transaction is not available.";
     }
 
+    /**
+     * Obtains the transaction used for modifying the entity.
+     *
+     * @throws IllegalStateException
+     *         if the entity is not in the modification phase
+     */
     protected Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
         return ensureTransaction();
     }
@@ -160,41 +166,41 @@ public abstract class TransactionalEntity<I,
 
     @SuppressWarnings({"ObjectEquality", "ReferenceEquality"}
             /* The refs must to point to the same object; see below. */)
-    void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
+    final void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
-
         /*
             To ensure we are not hijacked, we must be sure that the transaction
             is injected to the very same object and wrapped into the transaction.
         */
         checkState(tx.entity() == this,
-                   "Transaction injected to this " + this
-                           + " is wrapped around a different entity: " + tx.entity());
+                   "Transaction injected to this %s" +
+                           " is wrapped around a different entity: %s.", this, tx.entity());
 
         this.transaction = tx;
     }
 
-    void releaseTransaction() {
+    final void releaseTransaction() {
         this.transaction = null;
     }
 
-    @Nullable
+    /**
+     * Obtains the transaction which modifies this entity.
+     *
+     * <p>This is a test-only method. For production purposes please use {@link #tx()}.
+     *
+     * @return the instance of the transaction or {@code null} if the entity is not being modified
+     * @see #tx()
+     */
     @VisibleForTesting
-    Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> getTransaction() {
+    final @Nullable Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction() {
         return transaction;
     }
 
     /**
      * Updates own {@code stateChanged} flag from the underlying transaction.
      */
-    void updateStateChanged() {
+    final void updateStateChanged() {
         this.stateChanged = tx().isStateChanged();
-    }
-
-    B builderFromState() {
-        @SuppressWarnings("unchecked") // Logically checked.
-        B builder = (B) state().toBuilder();
-        return builder;
     }
 
     /**
@@ -203,7 +209,7 @@ public abstract class TransactionalEntity<I,
      * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
      * of active transaction}.
      */
-    protected void setInitialState(S initialState, Version version) {
+    protected final void setInitialState(S initialState, Version version) {
         tx().initAll(initialState, version);
     }
 
@@ -213,7 +219,7 @@ public abstract class TransactionalEntity<I,
      * <p>If the transaction is in progress, returns the lifecycle flags value for the transaction.
      */
     @Override
-    public LifecycleFlags getLifecycleFlags() {
+    public final LifecycleFlags getLifecycleFlags() {
         if (isTransactionInProgress()) {
             return tx().lifecycleFlags();
         }
@@ -223,22 +229,22 @@ public abstract class TransactionalEntity<I,
     /**
      * {@inheritDoc}
      *
-     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
-     * of active transaction}.
+     * <p>The execution of this method requires an {@linkplain #isTransactionInProgress()
+     * active transaction}.
      */
     @Override
-    protected void setArchived(boolean archived) {
+    protected final void setArchived(boolean archived) {
         tx().setArchived(archived);
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
-     * of active transaction}.
+     * <p>The execution of this method requires an {@linkplain #isTransactionInProgress()
+     * active transaction}.
      */
     @Override
-    protected void setDeleted(boolean deleted) {
+    protected final void setDeleted(boolean deleted) {
         tx().setDeleted(deleted);
     }
 }

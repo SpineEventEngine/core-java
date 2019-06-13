@@ -27,14 +27,12 @@ import io.spine.server.enrich.given.EitUserRepository;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("Enricher should")
-@Disabled("Until new enrichment implementation is finalized")
 public class EventEnricherIntegrationTest {
 
     private BlackBoxBoundedContext context;

@@ -34,7 +34,6 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
@@ -215,12 +214,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projection;
     }
 
-    private void subscribeToSystemEvents() {
-        ProjectionSystemEventWatcher<I> systemSubscriber =
-                new ProjectionSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(context());
-    }
-
     @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {
@@ -250,16 +243,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     protected final Stand stand() {
         return context().stand();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to open the method to the package.
-     */
-    @Override
-    protected StorageConverter<I, P, S> storageConverter() {
-        return super.storageConverter();
     }
 
     /**
@@ -327,22 +310,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected void dispatchTo(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToSubscriber(event);
         inbox.send(EventEnvelope.of(event))
-             .toSubscriber(id);
-    }
-
-    /**
-     * Dispatches the given event to the projection with the given ID.
-     *
-     * @param id
-     *         the ID of the target projection
-     * @param event
-     *         the event to dispatch
-     */
-    @Internal
-    protected void dispatchNowTo(I id, EventEnvelope event) {
-        //TODO:2019-01-09:alex.tymchenko: kill `dispatchNowTo(I id, EventEnvelope envelope)`
-        inbox.send(event)
              .toSubscriber(id);
     }
 

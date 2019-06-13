@@ -102,7 +102,7 @@ class EntityColumnCacheTest {
         String existingColumnName = "floatNull";
         EntityColumn retrievedColumn = entityColumnCache.findColumn(existingColumnName);
         assertNotNull(retrievedColumn);
-        assertEquals(existingColumnName, retrievedColumn.getName());
+        assertEquals(existingColumnName, retrievedColumn.name());
     }
 
     @Test

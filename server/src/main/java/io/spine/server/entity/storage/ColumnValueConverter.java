@@ -47,12 +47,12 @@ interface ColumnValueConverter {
      *
      * @return the source type of the conversion
      */
-    Class<?> getSourceType();
+    Class<?> sourceType();
 
     /**
      * Returns the target {@link Class} of the conversion, i.e. {@link EntityColumn} persisted type.
      *
      * @return the target type of the conversion
      */
-    Class<? extends Serializable> getTargetType();
+    Class<? extends Serializable> targetType();
 }

@@ -220,8 +220,8 @@ public class AggregateTest {
     void handleCommandProperly() {
         dispatchCommand(aggregate, command(createProject));
 
-        assertTrue(aggregate.isCreateProjectCommandHandled);
-        assertTrue(aggregate.isProjectCreatedEventApplied);
+        assertTrue(aggregate.createProjectCommandHandled);
+        assertTrue(aggregate.projectCreatedEventApplied);
     }
 
     @Nested
@@ -301,30 +301,30 @@ public class AggregateTest {
     void handleOnlyDispatchedCommands() {
         dispatchCommand(aggregate, command(createProject));
 
-        assertTrue(aggregate.isCreateProjectCommandHandled);
-        assertTrue(aggregate.isProjectCreatedEventApplied);
+        assertTrue(aggregate.createProjectCommandHandled);
+        assertTrue(aggregate.projectCreatedEventApplied);
 
-        assertFalse(aggregate.isAddTaskCommandHandled);
-        assertFalse(aggregate.isTaskAddedEventApplied);
+        assertFalse(aggregate.addTaskCommandHandled);
+        assertFalse(aggregate.taskAddedEventApplied);
 
-        assertFalse(aggregate.isStartProjectCommandHandled);
-        assertFalse(aggregate.isProjectStartedEventApplied);
+        assertFalse(aggregate.startProjectCommandHandled);
+        assertFalse(aggregate.projectStartedEventApplied);
     }
 
     @Test
     @DisplayName("invoke event applier after command handler")
     void invokeApplierAfterCommandHandler() {
         dispatchCommand(aggregate, command(createProject));
-        assertTrue(aggregate.isCreateProjectCommandHandled);
-        assertTrue(aggregate.isProjectCreatedEventApplied);
+        assertTrue(aggregate.createProjectCommandHandled);
+        assertTrue(aggregate.projectCreatedEventApplied);
 
         dispatchCommand(aggregate, command(addTask));
-        assertTrue(aggregate.isAddTaskCommandHandled);
-        assertTrue(aggregate.isTaskAddedEventApplied);
+        assertTrue(aggregate.addTaskCommandHandled);
+        assertTrue(aggregate.taskAddedEventApplied);
 
         dispatchCommand(aggregate, command(startProject));
-        assertTrue(aggregate.isStartProjectCommandHandled);
-        assertTrue(aggregate.isProjectStartedEventApplied);
+        assertTrue(aggregate.startProjectCommandHandled);
+        assertTrue(aggregate.projectStartedEventApplied);
     }
 
     @Nested
@@ -403,9 +403,9 @@ public class AggregateTest {
         aggregate().play(aggregateHistory);
         tx.commit();
 
-        assertTrue(aggregate.isProjectCreatedEventApplied);
-        assertTrue(aggregate.isTaskAddedEventApplied);
-        assertTrue(aggregate.isProjectStartedEventApplied);
+        assertTrue(aggregate.projectCreatedEventApplied);
+        assertTrue(aggregate.taskAddedEventApplied);
+        assertTrue(aggregate.projectStartedEventApplied);
     }
 
     @Test

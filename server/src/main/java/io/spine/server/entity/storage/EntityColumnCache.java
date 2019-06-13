@@ -57,7 +57,7 @@ public final class EntityColumnCache {
      * A container of {@link EntityColumn entity column} name and its data.
      *
      * Each {@link EntityColumn entity column} data instance can be accessed by the
-     * corresponding entity column {@linkplain EntityColumn#getName() name}.
+     * corresponding entity column {@linkplain EntityColumn#name() name}.
      *
      * <p>The data is stored this way for convenient querying of the specific columns.
      *
@@ -95,7 +95,7 @@ public final class EntityColumnCache {
      * <p>If there is no {@link EntityColumn column} with the given name in the {@link Entity}
      * class managed by this cache, the method will throw {@link IllegalArgumentException}.
      *
-     * @param columnName the {@linkplain EntityColumn#getName() name} of the searched column
+     * @param columnName the {@linkplain EntityColumn#name() name} of the searched column
      * @return {@linkplain EntityColumn found entity column}
      * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
@@ -174,7 +174,7 @@ public final class EntityColumnCache {
      */
     private void cacheEntityColumns(Iterable<EntityColumn> columns) {
         for (EntityColumn column : columns) {
-            entityColumnData.put(column.getName(), column);
+            entityColumnData.put(column.name(), column);
         }
     }
 }

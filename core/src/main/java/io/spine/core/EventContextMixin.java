@@ -46,11 +46,13 @@ public interface EventContextMixin extends EnrichableMessageContext {
      * thrown as it contradicts the Spine validation rules. See {@link EventContext} proto
      * declaration.
      */
-    @SuppressWarnings("ClassReferencesSubclass") // which is the only impl.
+    @SuppressWarnings({
+            "ClassReferencesSubclass", // which is the only impl.
+            "deprecation" // For backward compatibility.
+    })
     default ActorContext actorContext() {
         ActorContext actorContext = null;
-        EventContext thisContext = (EventContext) this;
-        EventContext ctx = thisContext;
+        EventContext ctx = (EventContext) this;
 
         while (actorContext == null) {
             switch (ctx.getOriginCase()) {
@@ -61,15 +63,17 @@ public interface EventContextMixin extends EnrichableMessageContext {
                 case EVENT_CONTEXT:
                     ctx = ctx.getEventContext();
                     break;
+                case PAST_MESSAGE:
+                    actorContext = ctx.getPastMessage()
+                                      .getActorContext();
+                    break;
                 case IMPORT_CONTEXT:
                     actorContext = ctx.getImportContext();
                     break;
                 case ORIGIN_NOT_SET:
                 default:
                     throw newIllegalStateException(
-                            "The provided event context (id: `%s`) has no origin defined.",
-                            thisContext.getEventId()
-                                       .getValue()
+                            "The provided event context has no origin defined."
                     );
             }
         }

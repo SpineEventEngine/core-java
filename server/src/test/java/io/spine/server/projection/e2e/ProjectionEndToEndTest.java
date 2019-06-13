@@ -23,11 +23,11 @@ package io.spine.server.projection.e2e;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.client.EntityId;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Events;
+import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.given.groups.Group;
@@ -43,7 +43,6 @@ import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.TestProjection;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -62,7 +61,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
+import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedEventId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -129,11 +128,11 @@ class ProjectionEndToEndTest {
                 .build();
         groups.register(repository);
         UserId organizationHead = GivenUserId.newUuid();
-        EntityHistoryId historyId = EntityHistoryId
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())
-                .setEntityId(EntityId.newBuilder().setId(pack(organizationHead)))
-                .build();
+                .setId(pack(organizationHead))
+                .vBuild();
         String organizationName = "Contributors";
         Organization newState = Organization
                 .newBuilder()
@@ -143,10 +142,10 @@ class ProjectionEndToEndTest {
                 .build();
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setNewState(pack(newState))
                 .setWhen(currentTime())
-                .addMessageId(dispatchedMessageId())
+                .addSignalId(dispatchedEventId())
                 .build();
         Timestamp producedAt = Time.currentTime();
         EventContext eventContext = EventContext

@@ -88,7 +88,7 @@ class AbstractEntityTest {
 
             fail("Exception expected.");
         } catch (InvalidEntityStateException e) {
-            assertThat(e.getError()
+            assertThat(e.error()
                         .getValidationError()
                         .getConstraintViolationList()).hasSize(1);
         }

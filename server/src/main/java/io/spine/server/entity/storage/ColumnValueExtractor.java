@@ -75,14 +75,14 @@ class ColumnValueExtractor {
      * Extracts the {@linkplain EntityColumn column} values for the processed {@link Entity} using
      * specified {@linkplain EntityColumn entity columns}.
      *
-     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
+     * @return a {@code Map} of the column {@linkplain EntityColumn#storedName()
      *         names for storing} to their {@linkplain EntityColumn.MemoizedValue memoized values}
      * @see EntityColumn.MemoizedValue
      */
     Map<String, EntityColumn.MemoizedValue> extractColumnValues() {
         Map<String, EntityColumn.MemoizedValue> values = new HashMap<>(entityColumns.size());
         for (EntityColumn column : entityColumns) {
-            String name = column.getStoredName();
+            String name = column.storedName();
             EntityColumn.MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }

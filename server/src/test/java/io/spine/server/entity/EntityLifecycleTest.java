@@ -27,6 +27,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.MemoizedSystemMessage;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -106,7 +108,15 @@ class EntityLifecycleTest {
                 .setPreviousValue(previousRecord)
                 .setNewValue(newRecord)
                 .build();
-        lifecycle.onStateChanged(change, ImmutableSet.of(EventId.getDefaultInstance()));
+        EventId causeEventId = EventId.newBuilder()
+                            .setValue("test event ID")
+                            .build();
+        MessageId causeMessage = MessageId
+                .newBuilder()
+                .setId(AnyPacker.pack(causeEventId))
+                .setTypeUrl("example.com/test.Event")
+                .buildPartial();
+        lifecycle.onStateChanged(change, ImmutableSet.of(causeMessage));
         assertSame(lastSeenEvent, writeSide.lastSeenEvent());
     }
 }

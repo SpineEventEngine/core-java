@@ -19,10 +19,7 @@
  */
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.validate.NonValidated;
 
 /**
@@ -30,55 +27,54 @@ import io.spine.validate.NonValidated;
  *
  * <p>Provides an ability to add callbacks to the transaction execution stages.
  *
- * @param <I> ID type of the entity under transaction
- * @param <E> type of entity under transaction
- * @param <S> state type of the entity under transaction
- * @param <B> type of {@link ValidatingBuilder} of {@code S}
+ * @param <I>
+ *         ID type of the entity under transaction
  */
 @Internal
-public interface TransactionListener<I,
-                                     E extends TransactionalEntity<I, S, B>,
-                                     S extends Message,
-                                     B extends ValidatingBuilder<S>> {
+public interface TransactionListener<I> {
+
+    /**
+     * A callback invoked before applying a {@linkplain Phase transaction phase}.
+     *
+     * @param phase
+     *         the phase which is being applied
+     */
+    void onBeforePhase(Phase<I, ?> phase);
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
      *
      * <p>This callback is invoked for both successfully applied and failed phases.
      *
-     * @param phase the phase which was applied before this callback is invoked
+     * @param phase
+     *         the phase which was applied before this callback is invoked
      */
     void onAfterPhase(Phase<I, ?> phase);
 
     /**
      * A callback invoked before committing the transaction.
      *
-     * @param entity         an entity modified within the transaction
-     * @param state          a state to set to the entity during the commit
-     * @param version        a version to set to the entity during the commit
-     * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
+     * @param entityRecord
+     *         the entity modified within the transaction
      */
-    void onBeforeCommit(E entity,
-                        @NonValidated S state,
-                        Version version,
-                        LifecycleFlags lifecycleFlags);
+    void onBeforeCommit(@NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked if the commit has failed.
      *
-     * @param t              a {@code Throwable} caused the commit failure
-     * @param entity         an entity modified within the transaction
-     * @param state          a state of the entity at the moment when the transaction failed
-     * @param version        a version to set to the entity during the commit
-     * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
+     * @param t
+     *         the {@code Throwable} which caused the commit failure
+     * @param entityRecord
+     *         the entity modified within the transaction
      */
-    void onTransactionFailed(Throwable t, E entity, @NonValidated S state,
-                             Version version, LifecycleFlags lifecycleFlags);
+    void onTransactionFailed(Throwable t,
+                             @NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked after a successful commit.
      *
-     * @param change the change of the entity under transaction
+     * @param change
+     *         the change of the entity under transaction
      */
     void onAfterCommit(EntityRecordChange change);
 
@@ -86,11 +82,12 @@ public interface TransactionListener<I,
      * An implementation of a {@code TransactionListener} which does not set any behavior for its
      * callbacks.
      */
-    class SilentWitness<I,
-                        E extends TransactionalEntity<I, S, B>,
-                        S extends Message,
-                        B extends ValidatingBuilder<S>>
-            implements TransactionListener<I, E, S, B> {
+    class SilentWitness<I> implements TransactionListener<I> {
+
+        @Override
+        public void onBeforePhase(Phase<I, ?> phase) {
+            // Do nothing.
+        }
 
         @Override
         public void onAfterPhase(Phase<I, ?> phase) {
@@ -98,14 +95,13 @@ public interface TransactionListener<I,
         }
 
         @Override
-        public void onBeforeCommit(E entity, S state, Version version,
-                                   LifecycleFlags lifecycleFlags) {
+        public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
             // Do nothing.
         }
 
         @Override
-        public void onTransactionFailed(Throwable t, E entity, S state,
-                                        Version version, LifecycleFlags lifecycleFlags) {
+        public void onTransactionFailed(Throwable t,
+                                        EntityRecord record) {
             // Do nothing.
         }
 

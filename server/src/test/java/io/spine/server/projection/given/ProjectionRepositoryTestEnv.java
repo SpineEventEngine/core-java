@@ -22,6 +22,7 @@ package io.spine.server.projection.given;
 
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.given.organizations.OrganizationEstablished;
@@ -29,7 +30,6 @@ import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.MessageEnvelope;
-import io.spine.system.server.DispatchedMessageId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -43,6 +43,7 @@ import io.spine.testing.core.given.GivenUserId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.TestValues.randomString;
 
 public class ProjectionRepositoryTestEnv {
@@ -54,14 +55,15 @@ public class ProjectionRepositoryTestEnv {
     /**
      * Creates a new {@code DispatchedMessageId} with a random {@code EventId}.
      */
-    public static DispatchedMessageId dispatchedMessageId() {
+    public static MessageId dispatchedEventId() {
         EventId eventId = EventId
                 .newBuilder()
                 .setValue(newUuid())
                 .build();
-        return DispatchedMessageId
+        return MessageId
                 .newBuilder()
-                .setEventId(eventId)
+                .setId(pack(eventId))
+                .setTypeUrl("example.org/dispatched.Event")
                 .build();
     }
 

@@ -32,11 +32,11 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.given.client.ShoppingListAggregate;
-import io.spine.system.server.given.client.ShoppingListRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -47,6 +47,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
@@ -154,7 +155,7 @@ class DefaultSystemReadSideTest {
 
         @BeforeEach
         void setUp() {
-            domainContext.register(new ShoppingListRepository());
+            domainContext.register(DefaultRepository.of(ShoppingListAggregate.class));
             aggregateId = ListId
                     .newBuilder()
                     .setId(newUuid())
@@ -168,12 +169,13 @@ class DefaultSystemReadSideTest {
             Query query =
                     actorRequestFactory.query()
                                        .byIds(ShoppingList.class, ImmutableSet.of(aggregateId));
-            EntityStateWithVersion next = systemReadSide.readDomainAggregate(query)
-                                                        .next();
+            Iterator<EntityStateWithVersion> iterator = systemReadSide.readDomainAggregate(query);
+            EntityStateWithVersion next = iterator.next();
             Message foundMessage = unpack(next.getState());
 
-            assertEquals(aggregate().state(), foundMessage);
-            assertEquals(aggregate().version(), next.getVersion());
+            ShoppingListAggregate aggregate = aggregate();
+            assertEquals(aggregate.state(), foundMessage);
+            assertEquals(aggregate.version(), next.getVersion());
         }
 
         private ShoppingListAggregate aggregate() {
@@ -185,7 +187,8 @@ class DefaultSystemReadSideTest {
                     .newBuilder()
                     .setId(aggregateId)
                     .build();
-            Command cmd = actorRequestFactory.createCommand(command);
+            Command cmd = actorRequestFactory.command()
+                                             .create(command);
             domainContext.commandBus()
                          .post(cmd, noOpObserver());
         }

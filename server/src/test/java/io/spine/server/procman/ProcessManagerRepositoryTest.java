@@ -26,10 +26,13 @@ import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityId;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.DuplicateCommandException;
@@ -51,7 +54,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
@@ -75,6 +77,7 @@ import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -245,19 +248,28 @@ class ProcessManagerRepositoryTest
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
-    private void dispatchEvent(Event origin) {
-        // EventContext should have CommandContext with appropriate TenantId to avoid usage
-        // of different storages during command and event dispatching.
-        CommandContext commandContext = requestFactory.createCommandContext();
+    private void dispatchEvent(Event event) {
+        CommandId randomCommandId = CommandId.generate();
+        MessageId originId = MessageId
+                .newBuilder()
+                .setId(pack(randomCommandId))
+                .setTypeUrl("example.org/example.test.InjectEvent")
+                .buildPartial();
+        ActorContext actor = requestFactory.newActorContext();
+        Origin origin = Origin
+                .newBuilder()
+                .setActorContext(actor)
+                .setMessage(originId)
+                .buildPartial();
         EventContext eventContextWithTenantId =
                 GivenEvent.context()
                           .toBuilder()
-                          .setCommandContext(commandContext)
-                          .build();
-        Event event = origin.toBuilder()
-                            .setContext(eventContextWithTenantId)
-                            .build();
-        repository().dispatch(EventEnvelope.of(event));
+                          .setPastMessage(origin)
+                          .buildPartial();
+        Event eventWithTenant = event.toBuilder()
+                                     .setContext(eventContextWithTenantId)
+                                     .vBuild();
+        repository().dispatch(EventEnvelope.of(eventWithTenant));
     }
 
     @Test
@@ -299,6 +311,8 @@ class ProcessManagerRepositoryTest
              .isEqualTo(ID);
     }
 
+    @Disabled("Until Inbox implements the feature: " +
+            "https://github.com/SpineEventEngine/core-java/issues/1086")
     @Nested
     @MuteLogging
     @DisplayName("not dispatch duplicate")
@@ -456,10 +470,9 @@ class ProcessManagerRepositoryTest
     void throwOnUnknownCommand() {
         Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
-        ProjectId id = createId(42);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repo.dispatchNowTo(id, request));
+                                           () -> repo.dispatchCommand(request));
         Truth.assertThat(getRootCause(exception))
              .isInstanceOf(IllegalStateException.class);
     }
@@ -539,14 +552,14 @@ class ProcessManagerRepositoryTest
               .isPresent();
 
         Any newState = pack(currentTime());
-        EntityHistoryId historyId = EntityHistoryId
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState).value())
-                .setEntityId(EntityId.newBuilder().setId(pack(projectId)))
-                .build();
+                .setId(pack(projectId))
+                .vBuild();
         EventMessage discardedEvent = EntityStateChanged
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setNewState(newState)
                 .build();
         Truth8.assertThat(filter.filter(discardedEvent))

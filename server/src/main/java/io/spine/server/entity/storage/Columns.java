@@ -94,7 +94,7 @@ final class Columns {
      * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
      *
      * @param entityClass the class containing the {@link EntityColumn} definition
-     * @param columnName  the entity column {@linkplain EntityColumn#getName() name}
+     * @param columnName  the entity column {@linkplain EntityColumn#name() name}
      * @return an instance of {@link EntityColumn} with the given name
      * @throws IllegalArgumentException if the {@link EntityColumn} is not found
      */
@@ -105,7 +105,7 @@ final class Columns {
         ColumnReader columnReader = ColumnReader.forClass(entityClass);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
         for (EntityColumn column : entityColumns) {
-            if (columnName.equals(column.getName())) {
+            if (columnName.equals(column.name())) {
                 return column;
             }
         }
@@ -145,7 +145,7 @@ final class Columns {
      *         {@linkplain EntityColumn entity columns} which values should be extracted
      * @param  <E>           
      *         the type of the {@link Entity}
-     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
+     * @return a {@code Map} of the column {@linkplain EntityColumn#storedName()
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
      */

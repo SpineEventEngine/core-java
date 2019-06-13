@@ -6,7 +6,7 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.test.system.server";
-option java_outer_classname = "ShopplingListProto";
+option java_outer_classname = "ShoppingListProto";
 option java_multiple_files = true;
 
 message ShoppingList {

@@ -43,12 +43,12 @@ final class IdentityConverter implements ColumnValueConverter {
     }
 
     @Override
-    public Class<?> getSourceType() {
+    public Class<?> sourceType() {
         return type;
     }
 
     @Override
-    public Class<? extends Serializable> getTargetType() {
+    public Class<? extends Serializable> targetType() {
         return type;
     }
 }

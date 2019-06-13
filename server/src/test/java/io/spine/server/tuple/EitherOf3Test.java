@@ -91,9 +91,9 @@ class EitherOf3Test {
     @Test
     @DisplayName("return value index")
     void returnValueIndex() {
-        assertEquals(0, eitherWithA.getIndex());
-        assertEquals(1, eitherWithB.getIndex());
-        assertEquals(2, eitherWithC.getIndex());
+        assertEquals(0, eitherWithA.index());
+        assertEquals(1, eitherWithB.index());
+        assertEquals(2, eitherWithC.index());
     }
 
     @Test

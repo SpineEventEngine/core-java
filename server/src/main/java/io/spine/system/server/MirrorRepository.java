@@ -30,10 +30,12 @@ import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.code.proto.EntityStateOption;
+import io.spine.core.MessageId;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -69,7 +71,7 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * <p>In other cases, an entity won't have a {@link Mirror}.
  */
 final class MirrorRepository
-        extends SystemProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+        extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final Logger log = Logging.get(MirrorRepository.class);
     private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
@@ -80,18 +82,18 @@ final class MirrorRepository
     protected void setupEventRouting(EventRouting<MirrorId> routing) {
         super.setupEventRouting(routing);
         routing.route(EntityStateChanged.class,
-                      (message, context) -> targetsFrom(message.getId()))
+                      (message, context) -> targetsFrom(message.getEntity()))
                .route(EntityArchived.class,
-                      (message, context) -> targetsFrom(message.getId()))
+                      (message, context) -> targetsFrom(message.getEntity()))
                .route(EntityDeleted.class,
-                      (message, context) -> targetsFrom(message.getId()))
+                      (message, context) -> targetsFrom(message.getEntity()))
                .route(EntityUnarchived.class,
-                      (message, context) -> targetsFrom(message.getId()))
+                      (message, context) -> targetsFrom(message.getEntity()))
                .route(EntityRestored.class,
-                      (message, context) -> targetsFrom(message.getId()));
+                      (message, context) -> targetsFrom(message.getEntity()));
     }
 
-    private static Set<MirrorId> targetsFrom(EntityHistoryId historyId) {
+    private static Set<MirrorId> targetsFrom(MessageId historyId) {
         TypeUrl type = TypeUrl.parse(historyId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
@@ -127,13 +129,12 @@ final class MirrorRepository
         return visibility;
     }
 
-    private static MirrorId idFrom(EntityHistoryId historyId) {
-        Any any = historyId.getEntityId()
-                           .getId();
+    private static MirrorId idFrom(MessageId messageId) {
+        Any any = messageId.getId();
         MirrorId result = MirrorId
                 .newBuilder()
                 .setValue(any)
-                .setTypeUrl(historyId.getTypeUrl())
+                .setTypeUrl(messageId.getTypeUrl())
                 .build();
         return result;
     }

@@ -68,7 +68,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @SuppressWarnings("unchecked") // Simplify massive generic args.
     protected void runTransactionFor(P projection) {
         ProjectionTransaction<I, ?, ?> tx = start((Projection<I, ?, ?>) projection);
-        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
+        TransactionListener listener =
+                EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
         invokeDispatcher(projection, envelope());
         tx.commit();

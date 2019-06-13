@@ -74,7 +74,7 @@ final class ColumnTests {
         ImmutableSet<String> expectedColumns = ImmutableSet.copyOf(columnNames);
         ImmutableSet<String> actualColumns = actual
                 .stream()
-                .map(EntityColumn::getName)
+                .map(EntityColumn::name)
                 .collect(toImmutableSet());
         boolean result = expectedColumns.equals(actualColumns);
         return result;

@@ -22,11 +22,10 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.EntityId;
 import io.spine.client.Subscription;
+import io.spine.core.MessageId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -46,7 +45,7 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected TypeUrl extractType(EventEnvelope event) {
-        String type = toHistoryId(event).getTypeUrl();
+        String type = entityId(event).getTypeUrl();
         TypeUrl result = TypeUrl.parse(type);
         return result;
     }
@@ -58,9 +57,8 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Any extractId(EventEnvelope event) {
-        EntityId entityId = toHistoryId(event).getEntityId();
-        Any result = entityId.getId();
-        return result;
+        Any entityId = entityId(event).getId();
+        return entityId;
     }
 
     /**
@@ -70,17 +68,17 @@ final class EntitySubscriptionMatcher extends SubscriptionMatcher {
      */
     @Override
     protected Message extractMessage(EventEnvelope event) {
-        EntityStateChanged eventMessage = toMessage(event);
+        EntityStateChanged eventMessage = asEntityEvent(event);
         Any newState = eventMessage.getNewState();
         Message result = AnyPacker.unpack(newState);
         return result;
     }
 
-    private static EntityHistoryId toHistoryId(EventEnvelope event) {
-        return toMessage(event).getId();
+    private static MessageId entityId(EventEnvelope event) {
+        return asEntityEvent(event).getEntity();
     }
 
-    private static EntityStateChanged toMessage(EventEnvelope event) {
+    private static EntityStateChanged asEntityEvent(EventEnvelope event) {
         return (EntityStateChanged) event.message();
     }
 }

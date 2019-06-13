@@ -166,8 +166,6 @@ public abstract class ProcessManagerRepository<I,
         context.registerCommandDispatcher(this);
 
         this.commandErrorHandler = context.createCommandErrorHandler();
-        PmSystemEventWatcher<I> systemSubscriber = new PmSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(context);
 
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
@@ -296,6 +294,7 @@ public abstract class ProcessManagerRepository<I,
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         I target = route(command);
+        lifecycleOf(target).onDispatchCommand(command.command());
         inbox.send(command).toHandler(target);
         return target;
     }
@@ -326,19 +325,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
         inbox.send(EventEnvelope.of(event)).toReactor(id);
-    }
-
-    /**
-     * Dispatches the given event to the {@link ProcessManager} with the given ID.
-     *
-     * @param id
-     *         the target entity ID
-     * @param event
-     *         the event to dispatch
-     */
-    void dispatchNowTo(I id, EventEnvelope event) {
-        inbox.send(event).toReactor(id);
     }
 
     @Override
@@ -351,7 +339,7 @@ public abstract class ProcessManagerRepository<I,
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
         PmTransaction<I, S, ?> tx =
                 PmTransaction.start((ProcessManager<I, S, ?>) manager, lifecycle());
-        TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
         tx.setListener(listener);
         return tx;
     }

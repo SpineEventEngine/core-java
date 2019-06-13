@@ -19,121 +19,84 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.server.aggregate.given.Given;
-import io.spine.server.command.Assign;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
+import io.spine.server.entity.given.tx.AggregateState;
+import io.spine.server.entity.given.tx.Id;
+import io.spine.server.entity.given.tx.TxAggregate;
 import io.spine.server.type.EventEnvelope;
-import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
-        extends TransactionTest<ProjectId,
-                                Aggregate<ProjectId,
-                                          Project,
-                                          Project.Builder>,
-                                Project,
-                                Project.Builder> {
-
-    private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("aggregate-transaction-should-project")
-                                                 .build();
+        extends TransactionTest<Id,
+                                Aggregate<Id, AggregateState, AggregateState.Builder>,
+                                AggregateState,
+                                AggregateState.Builder> {
 
     @Override
-    protected Transaction<ProjectId,
-            Aggregate<ProjectId, Project, Project.Builder>,
-            Project,
-            Project.Builder>
-    createTx(Aggregate<ProjectId, Project, Project.Builder> entity) {
+    protected Transaction<Id,
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
+    createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity) {
         return new AggregateTransaction<>(entity);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder> createTxWithState(
-            Aggregate<ProjectId, Project, Project.Builder> entity, Project state,
-            Version version) {
+    protected Transaction<Id,
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
+    createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
+             AggregateState state,
+             Version version) {
         return new AggregateTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, Project.Builder>,
-                          Project,
-                          Project.Builder>
-    createTxWithListener(Aggregate<ProjectId, Project, Project.Builder> entity,
-                         TransactionListener<ProjectId,
-                                             Aggregate<ProjectId, Project, Project.Builder>,
-                                             Project,
-                                             Project.Builder> listener) {
-        AggregateTransaction<ProjectId, Project, Project.Builder> transaction =
+    protected Transaction<Id,
+                          Aggregate<Id, AggregateState, AggregateState.Builder>,
+                          AggregateState,
+                          AggregateState.Builder>
+    createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
+             TransactionListener<Id> listener) {
+        AggregateTransaction<Id, AggregateState, AggregateState.Builder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, Project.Builder> createEntity() {
-        return new TestAggregate(ID);
+    protected Aggregate<Id, AggregateState, AggregateState.Builder> createEntity() {
+        return new TxAggregate(id());
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, Project.Builder> createEntity(
-            ImmutableList<ConstraintViolation> violations) {
-        return new TestAggregate(ID, violations);
+    protected AggregateState newState() {
+        return AggregateState
+                .newBuilder()
+                .setId(id())
+                .setName("The new project name to set in tx")
+                .build();
     }
 
     @Override
-    protected Project createNewState() {
-        return Project.newBuilder()
-                      .setId(ID)
-                      .setName("The new project name to set in tx")
-                      .build();
-    }
-
-    @Override
-    protected void checkEventReceived(
-            Aggregate<ProjectId, Project, Project.Builder> entity,
-            Event event) {
-
-        TestAggregate aggregate = (TestAggregate) entity;
+    protected void checkEventReceived(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
+                                      Event event) {
+        TxAggregate aggregate = (TxAggregate) entity;
         Message actualMessage = unpack(event.getMessage());
-        assertTrue(aggregate.getReceivedEvents()
-                            .contains(actualMessage));
-    }
 
-    @Override
-    protected EventMessage createEventMessage() {
-        return projectCreated(ID, "Project created in a transaction");
-    }
-
-    @Override
-    protected EventMessage createEventMessageThatFailsInHandler() {
-        return Given.EventMessage.taskAdded(ID);
+        assertThat(aggregate.receivedEvents())
+                .contains(actualMessage);
     }
 
     @Override
@@ -149,53 +112,4 @@ class AggregateTransactionTest
         advanceVersionFromEvent();
     }
 
-    @SuppressWarnings("unused")  // Methods accessed via reflection.
-    static class TestAggregate
-            extends Aggregate<ProjectId, Project, Project.Builder> {
-
-        private final List<Message> receivedEvents = newArrayList();
-        private final List<ConstraintViolation> violations;
-
-        private TestAggregate(ProjectId id) {
-            this(id, null);
-        }
-
-        private TestAggregate(ProjectId id, @Nullable List<ConstraintViolation> violations) {
-            super(id);
-            this.violations = violations;
-        }
-
-        @Override
-        protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if (violations != null) {
-                return ImmutableList.copyOf(violations);
-            }
-            return super.checkEntityState(newState);
-        }
-
-        @Assign
-        AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
-            return projectCreated(cmd.getProjectId(), cmd.getName());
-        }
-
-        @Apply
-        private void event(AggProjectCreated event) {
-            receivedEvents.add(event);
-            Project newState = Project
-                    .newBuilder(state())
-                    .setId(event.getProjectId())
-                    .setName(event.getName())
-                    .build();
-            builder().mergeFrom(newState);
-        }
-
-        @Apply
-        private void event(AggTaskAdded event) {
-            throw new RuntimeException("that tests the tx behaviour");
-        }
-
-        private List<Message> getReceivedEvents() {
-            return ImmutableList.copyOf(receivedEvents);
-        }
-    }
 }

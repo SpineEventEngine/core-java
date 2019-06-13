@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package spine.system.server.test;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server.test";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
+
+import "spine/test/diagnostics/validated.proto";
+
+message TextValidated {
+
+    spine.system.server.test.ValidatedId id = 1;
+
+    string valid_text = 2;
+}

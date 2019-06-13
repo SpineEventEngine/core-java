@@ -157,7 +157,7 @@ public final class EntityQueries {
                       join(".", fieldPath.getFieldNameList()));
         String columnName = fieldPath.getFieldName(0);
         for (EntityColumn column : entityColumns) {
-            if (column.getName()
+            if (column.name()
                       .equals(columnName)) {
                 return column;
             }
@@ -169,7 +169,7 @@ public final class EntityQueries {
     }
 
     private static void checkFilterType(EntityColumn column, Filter filter) {
-        Class<?> expectedType = column.getType();
+        Class<?> expectedType = column.type();
         Any filterConvent = filter.getValue();
         Object filterValue = toObject(filterConvent, expectedType);
         Class<?> actualType = filterValue.getClass();

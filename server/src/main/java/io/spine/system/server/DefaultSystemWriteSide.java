@@ -20,10 +20,7 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.CommandFactory;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 
@@ -50,21 +47,16 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     }
 
     @Override
-    public void postCommand(CommandMessage systemCommand) {
-        checkNotNull(systemCommand);
-        CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
-        Command command = commandFactory.create(systemCommand);
-        system.commandBus()
-              .post(command, noOpObserver());
-    }
-
-    @Override
     public void postEvent(EventMessage systemEvent) {
         checkNotNull(systemEvent);
-        SystemEventFactory factory = SystemEventFactory.forMessage(systemEvent,
-                                                                   system.isMultitenant());
-        Event event = factory.createEvent(systemEvent, null);
-        system.importBus()
+        Event event = event(systemEvent);
+        system.eventBus()
               .post(event, noOpObserver());
+    }
+
+    private Event event(EventMessage message) {
+        SystemEventFactory factory = SystemEventFactory.forMessage(message, system.isMultitenant());
+        Event event = factory.createEvent(message, null);
+        return event;
     }
 }
