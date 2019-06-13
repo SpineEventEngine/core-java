@@ -21,8 +21,8 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.ActorMessageEnvelope;
@@ -95,11 +95,6 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                 });
     }
 
-    private void deliverDirectly(M envelope, I entityId, InboxLabel label, InboxId inboxId) {
-        MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
-        endpoint.dispatchTo(entityId);
-    }
-
     private MessageEndpoint<I, M> getEndpoint(M envelope, InboxLabel label, InboxId inboxId) {
         return endpoints.get(label, envelope)
                         .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
@@ -155,7 +150,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                                                   .getEntityId()
                                                   .getId();
                             @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-                                    I unpackedId = (I) AnyPacker.unpack(entityId);
+                                    I unpackedId = (I) Identifier.unpack(entityId);
                             endpoint.dispatchTo(unpackedId);
                         }
                     });
