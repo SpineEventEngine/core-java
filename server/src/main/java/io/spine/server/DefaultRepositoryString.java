@@ -50,11 +50,5 @@ public final class DefaultRepositoryString {
      *         the managed entity class
      * @return the string representation of the repository
      */
-    public static String representationFor(EntityClass<?> entityClass) {
-        checkNotNull(entityClass);
-        return format("%s.of(%s.class)",
-                      DefaultRepository.class.getSimpleName(),
-                      entityClass.value()
-                                 .getSimpleName());
-    }
+
 }

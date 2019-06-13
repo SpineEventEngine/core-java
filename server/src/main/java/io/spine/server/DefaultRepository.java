@@ -20,27 +20,27 @@
 
 package io.spine.server;
 
+import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.DefaultAggregatePartRepository;
 import io.spine.server.aggregate.DefaultAggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.procman.DefaultProcessManagerRepository;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.projection.DefaultProjectionRepository;
 import io.spine.server.projection.Projection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.format;
 
 /**
  * Static factory for creating a default repository for an entity class.
  */
-public final class DefaultRepository {
-
-    /** Prevents instantiation of this static factory class. */
-    private DefaultRepository() {
-    }
+public interface DefaultRepository {
 
     /**
      * Creates default repository for the passed entity class.
@@ -57,7 +57,7 @@ public final class DefaultRepository {
      * @return new repository instance
      */
     @SuppressWarnings("unchecked") // Casts are ensured by class assignability checks.
-    public static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
+    static <I, E extends Entity<I, ?>> Repository<I, E> of(Class<E> cls) {
         /*
          * We deliberately "save" on OOP here and detect the class by the chain of if-s below
          * (instead of implementing this using the methods in the `EntityClass` hierarchy).
@@ -78,5 +78,18 @@ public final class DefaultRepository {
         throw newIllegalArgumentException(
                 "No default repository implementation available for the class `%s`.", cls
         );
+    }
+
+    /** Obtains the class of the managed entity. */
+    @Internal
+    EntityClass<?> entityModelClass();
+
+    /** Obtains the logging name of this repository. */
+    @Internal
+    default String logName() {
+        checkNotNull(entityModelClass());
+        return format("%s.of(%s.class)",
+                      DefaultRepository.class.getSimpleName(),
+                      entityModelClass().value().getSimpleName());
     }
 }

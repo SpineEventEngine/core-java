@@ -2,6 +2,7 @@ package io.spine.server.procman;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.server.DefaultRepository;
 import io.spine.server.DefaultRepositoryString;
 import io.spine.server.procman.model.ProcessManagerClass;
 
@@ -16,7 +17,8 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 public final class DefaultProcessManagerRepository<I,
                                                    P extends ProcessManager<I, S, ?>,
                                                    S extends Message>
-    extends ProcessManagerRepository<I, P, S> {
+        extends ProcessManagerRepository<I, P, S>
+        implements DefaultRepository {
 
     private final ProcessManagerClass<P> modelClass;
 
@@ -29,12 +31,12 @@ public final class DefaultProcessManagerRepository<I,
     }
 
     @Override
-    protected ProcessManagerClass<P> entityModelClass() {
+    public ProcessManagerClass<P> entityModelClass() {
         return modelClass;
     }
 
     @Override
     public String toString() {
-        return DefaultRepositoryString.representationFor(modelClass);
+        return logName();
     }
 }

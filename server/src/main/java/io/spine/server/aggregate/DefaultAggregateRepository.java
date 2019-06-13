@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.annotation.Internal;
-import io.spine.server.DefaultRepositoryString;
+import io.spine.server.DefaultRepository;
 import io.spine.server.aggregate.model.AggregateClass;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -33,7 +33,8 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  */
 @Internal
 public final class DefaultAggregateRepository<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateRepository<I, A> {
+        extends AggregateRepository<I, A>
+        implements DefaultRepository {
 
     private final AggregateClass<A> modelClass;
 
@@ -49,12 +50,12 @@ public final class DefaultAggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Obtains the class of aggregates managed by this repository.
      */
     @Override
-    protected AggregateClass<A> entityModelClass() {
+    public AggregateClass<A> entityModelClass() {
         return modelClass;
     }
 
     @Override
     public String toString() {
-        return DefaultRepositoryString.representationFor(modelClass);
+        return logName();
     }
 }
