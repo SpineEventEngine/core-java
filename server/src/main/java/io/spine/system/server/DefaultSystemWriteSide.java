@@ -23,7 +23,6 @@ package io.spine.system.server;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.grpc.StreamObservers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
