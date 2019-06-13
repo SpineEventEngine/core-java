@@ -72,7 +72,7 @@ final class ModelVerifier implements Logging {
      */
     void verify(CommandHandlers handlers) {
         ClassSet classSet = new ClassSet(projectClassLoader,
-                                         handlers.getCommandHandlingTypesList());
+                                         handlers.getCommandHandlingTypeList());
         classSet.reportNotFoundIfAny(log());
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());

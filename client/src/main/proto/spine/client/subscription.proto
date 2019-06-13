@@ -163,9 +163,6 @@ message Subscription {
 
     // Represents the original topic for this subscription.
     Topic topic = 2 [(required) = true, (validate) = true, (if_invalid).msg_format = "Invalid topic"];
-
-    // Reserved for subscription attributes.
-    reserved 3 to 10;
 }
 
 // Enumeration of possible technical error reasons occurred in topic validation.
