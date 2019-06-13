@@ -20,30 +20,12 @@
 
 package io.spine.system.server;
 
-import io.spine.client.EntityId;
-import io.spine.core.MessageId;
-import io.spine.server.route.EventRouting;
-
-import static io.spine.server.route.EventRoute.withId;
+import io.spine.core.CommandId;
+import io.spine.server.projection.ProjectionRepository;
 
 /**
- * The repository for {@link EntityHistoryAggregate}s.
+ * The repository for {@link CommandLogProjection}s.
  */
-final class EntityHistoryRepository
-        extends SystemRepository<EntityHistoryId, EntityHistoryAggregate> {
-
-    @Override
-    protected void setupImportRouting(EventRouting<EntityHistoryId> routing) {
-        super.setupImportRouting(routing);
-        routing.route(ConstraintViolated.class,
-                      (message, context) -> withId(asHistoryId(message.getEntity())));
-    }
-
-    private static EntityHistoryId asHistoryId(MessageId id) {
-        return EntityHistoryId
-                .newBuilder()
-                .setEntityId(EntityId.newBuilder().setId(id.getId()))
-                .setTypeUrl(id.getTypeUrl())
-                .vBuild();
-    }
+final class CommandLogRepository
+        extends ProjectionRepository<CommandId, CommandLogProjection, CommandLog> {
 }

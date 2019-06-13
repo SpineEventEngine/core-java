@@ -20,14 +20,12 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.CommandFactory;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
  * The default implementation of {@link SystemWriteSide}.
@@ -49,28 +47,11 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     }
 
     @Override
-    public void postCommand(CommandMessage systemCommand) {
-        checkNotNull(systemCommand);
-        CommandFactory commandFactory = SystemCommandFactory.newInstance(system.isMultitenant());
-        Command command = commandFactory.create(systemCommand);
-        system.commandBus()
-              .post(command, SystemAckObserver.ofResultsOf(command));
-    }
-
-    @Override
     public void postEvent(EventMessage systemEvent) {
         checkNotNull(systemEvent);
         Event event = event(systemEvent);
-        system.importBus()
-              .post(event, SystemAckObserver.ofResultsOf(event));
-    }
-
-    @Override
-    public void notifySystem(EventMessage notification) {
-        checkNotNull(notification);
-        Event event = event(notification);
         system.eventBus()
-              .post(event, SystemAckObserver.ofResultsOf(event));
+              .post(event, noOpObserver());
     }
 
     private Event event(EventMessage message) {

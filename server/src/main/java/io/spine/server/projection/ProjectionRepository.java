@@ -95,7 +95,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected void init(BoundedContext context) throws IllegalStateException {
         super.init(context);
         ensureDispatchesEvents();
-        subscribeToSystemEvents();
     }
 
     @Override
@@ -200,12 +199,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return projection;
     }
 
-    private void subscribeToSystemEvents() {
-        ProjectionSystemEventWatcher<I> systemSubscriber =
-                new ProjectionSystemEventWatcher<>(this);
-        systemSubscriber.registerIn(context());
-    }
-
     @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {
@@ -303,19 +296,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected void dispatchTo(I id, Event event) {
         lifecycleOf(id).onDispatchEventToSubscriber(event);
-    }
-
-    /**
-     * Dispatches the given event to the projection with the given ID.
-     *
-     * @param id
-     *         the ID of the target projection
-     * @param event
-     *         the event to dispatch
-     */
-    @Internal
-    protected void dispatchNowTo(I id, EventEnvelope event) {
-        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, event);
+        EventEnvelope envelope = EventEnvelope.of(event);
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
         endpoint.dispatchTo(id);
     }
 

@@ -54,7 +54,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
@@ -78,6 +77,7 @@ import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -311,6 +311,8 @@ class ProcessManagerRepositoryTest
              .isEqualTo(ID);
     }
 
+    @Disabled("Until Inbox implements the feature: " +
+            "https://github.com/SpineEventEngine/core-java/issues/1086")
     @Nested
     @MuteLogging
     @DisplayName("not dispatch duplicate")
@@ -468,10 +470,9 @@ class ProcessManagerRepositoryTest
     void throwOnUnknownCommand() {
         Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
-        ProjectId id = createId(42);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repo.dispatchNowTo(id, request));
+                                           () -> repo.dispatchCommand(request));
         Truth.assertThat(getRootCause(exception))
              .isInstanceOf(IllegalStateException.class);
     }
@@ -551,14 +552,14 @@ class ProcessManagerRepositoryTest
               .isPresent();
 
         Any newState = pack(currentTime());
-        EntityHistoryId historyId = EntityHistoryId
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState).value())
-                .setEntityId(EntityId.newBuilder().setId(pack(projectId)))
-                .build();
+                .setId(pack(projectId))
+                .vBuild();
         EventMessage discardedEvent = EntityStateChanged
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setNewState(newState)
                 .build();
         Truth8.assertThat(filter.filter(discardedEvent))

@@ -21,7 +21,6 @@
 package io.spine.testing.server;
 
 import com.google.protobuf.Any;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventFilter;
@@ -48,17 +47,7 @@ public final class NoOpLifecycle extends EntityLifecycle {
     }
 
     @Override
-    protected void postCommand(CommandMessage command) {
-        // NoOp.
-    }
-
-    @Override
     protected void postEvent(EventMessage event) {
-        // NoOp.
-    }
-
-    @Override
-    protected void postNotification(EventMessage event) {
         // NoOp.
     }
 }

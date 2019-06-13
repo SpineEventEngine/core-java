@@ -24,8 +24,8 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityId;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -44,7 +44,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -61,6 +60,7 @@ import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -76,7 +76,7 @@ import static io.spine.base.Identifier.pack;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
-import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedMessageId;
+import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedEventId;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.TestEventFactory.newInstance;
@@ -335,17 +335,17 @@ class ProjectionRepositoryTest
             dispatch(project, eventFactory.createEvent(projectCreated));
             dispatch(project, eventFactory.createEvent(taskAdded));
             Any newState = pack(project.state());
-            EntityHistoryId historyId = EntityHistoryId
+            MessageId entityId = MessageId
                     .newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
-                    .setEntityId(EntityId.newBuilder().setId(pack(id)))
-                    .build();
+                    .setId(pack(id))
+                    .vBuild();
             EntityStateChanged changedEvent = EntityStateChanged
                     .newBuilder()
-                    .setId(historyId)
+                    .setEntity(entityId)
                     .setWhen(currentTime())
                     .setNewState(newState)
-                    .addMessageId(dispatchedMessageId())
+                    .addSignalId(dispatchedEventId())
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
@@ -378,6 +378,8 @@ class ProjectionRepositoryTest
         }
     }
 
+    @Disabled("Until Inbox implements the feature: " +
+            "https://github.com/SpineEventEngine/core-java/issues/1086")
     @Nested
     @DisplayName("not allow duplicate")
     @MuteLogging

@@ -42,8 +42,8 @@ import "spine/client/entities.proto";
 // All the commands in the system have a corresponding lifecycle instance. The only exception are
 // the commands of the `System` bounded contexts, which do not have an explicit lifecycle.
 //
-message CommandLifecycle {
-    option (entity).kind = AGGREGATE;
+message CommandLog {
+    option (entity).kind = PROJECTION;
 
     // The ID of the command.
     spine.core.CommandId id = 1;
@@ -55,7 +55,7 @@ message CommandLifecycle {
     CommandTarget target = 3;
 
     // The log of changes of the command.
-    CommandTimeline status = 4 [(required) = true];
+    CommandTimeline timeline = 4 [(required) = true];
 }
 
 // An identifier of an entity which is the target of a command.

@@ -25,11 +25,11 @@ import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
-import io.spine.client.EntityId;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.server.BoundedContext;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
@@ -78,7 +78,7 @@ class MirrorRepositoryTest {
     private MirrorRepository repository;
     private QueryFactory queries;
 
-    private Map<EntityHistoryId, Photo> givenPhotos;
+    private Map<MessageId, Photo> givenPhotos;
 
     @BeforeEach
     void setUp() {
@@ -257,21 +257,17 @@ class MirrorRepositoryTest {
         }
 
         private void dispatchStateChanged(TypeUrl type, Message id, Message state) {
-            EntityId entityId = EntityId
+            MessageId historyId = MessageId
                     .newBuilder()
                     .setId(pack(id))
-                    .build();
-            EntityHistoryId historyId = EntityHistoryId
-                    .newBuilder()
-                    .setEntityId(entityId)
                     .setTypeUrl(type.value())
                     .build();
             EntityStateChanged event = EntityStateChanged
                     .newBuilder()
-                    .setId(historyId)
+                    .setEntity(historyId)
                     .setWhen(currentTime())
                     .setNewState(pack(state))
-                    .addMessageId(cause())
+                    .addSignalId(cause())
                     .build();
             dispatchEvent(event(event));
         }
@@ -283,7 +279,7 @@ class MirrorRepositoryTest {
         }
     }
 
-    private void prepareAggregates(Map<EntityHistoryId, ? extends Message> aggregateStates) {
+    private void prepareAggregates(Map<MessageId, ? extends Message> aggregateStates) {
         aggregateStates.entrySet()
                        .stream()
                        .map(entry -> entityStateChanged(entry.getKey(), entry.getValue()))

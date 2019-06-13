@@ -18,38 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-syntax = "proto3";
+package io.spine.system.server.given.client;
 
-package spine.system.server;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.test.system.server.MealOrder;
+import io.spine.test.system.server.OrderDelivered;
+import io.spine.test.system.server.OrderId;
+import io.spine.test.system.server.OrderPlaced;
 
-import "spine/options.proto";
+public final class MealOrderProjection extends Projection<OrderId, MealOrder, MealOrder.Builder> {
 
-option (type_url_prefix) = "type.spine.io";
-option (internal_all) = true;
+    @Subscribe
+    void on(OrderPlaced event, EventContext context) {
+        builder().addAllItem(event.getItemList())
+                 .setWhenPlaced(context.getTimestamp());
+    }
 
-option java_package = "io.spine.system.server.command";
-option java_outer_classname = "EventLifecycleCommandsProto";
-option java_multiple_files = true;
-
-import "spine/core/command.proto";
-import "spine/core/event.proto";
-
-// Marks a domain event as one which caused a command.
-message MarkCausedCommand {
-
-    // The ID of the event.
-    core.EventId id = 1;
-
-    // The ID of the command generated in response to the event.
-    core.CommandId produced = 2 [(required) = true];
-}
-
-// Marks a domain event as one which caused two or more commands.
-message MarkCausedCommands {
-
-    // The ID of the event.
-    core.EventId id = 1;
-
-    // Two or more IDs of commands generated in response to the event.
-    repeated core.CommandId produced = 2 [(required) = true];
+    @Subscribe
+    void on(OrderDelivered event, EventContext context) {
+        builder().setWhenDelivered(context.getTimestamp());
+    }
 }

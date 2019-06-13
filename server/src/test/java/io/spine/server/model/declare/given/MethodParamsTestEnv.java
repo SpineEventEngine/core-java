@@ -29,7 +29,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.UserId;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.command.ScheduleCommand;
+import io.spine.test.model.ModCreateProject;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -56,12 +56,15 @@ public class MethodParamsTestEnv {
         return findMethod("fiveParam");
     }
 
-    public void singleParam(ScheduleCommand command) {
+    @SuppressWarnings("unused") // Reflective access.
+    public void singleParam(ModCreateProject command) {
     }
 
-    public void twoParam(ScheduleCommand command, CommandContext context) {
+    @SuppressWarnings("unused") // Reflective access.
+    public void twoParam(ModCreateProject command, CommandContext context) {
     }
 
+    @SuppressWarnings("unused") // Reflective access.
     public void fiveParam(String eurasia,
                           Any australia,
                           Empty antractida,

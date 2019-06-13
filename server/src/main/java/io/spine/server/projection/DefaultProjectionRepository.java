@@ -2,6 +2,7 @@ package io.spine.server.projection;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.server.DefaultRepository;
 import io.spine.server.projection.model.ProjectionClass;
 
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
@@ -13,7 +14,8 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  */
 @Internal
 public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
-    extends ProjectionRepository<I, P, S> {
+        extends ProjectionRepository<I, P, S>
+        implements DefaultRepository {
 
     private final ProjectionClass<P> modelClass;
 
@@ -26,7 +28,12 @@ public class DefaultProjectionRepository<I, P extends Projection<I, S, ?>, S ext
     }
 
     @Override
-    protected ProjectionClass<P> entityModelClass() {
+    public ProjectionClass<P> entityModelClass() {
         return modelClass;
+    }
+
+    @Override
+    public String toString() {
+        return logName();
     }
 }

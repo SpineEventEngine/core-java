@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.core.CommandId;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.CommandDispatched;
 
@@ -34,7 +35,7 @@ import static io.spine.server.route.EventRoute.withId;
  * A repository for {@link ScheduledCommand}s.
  */
 final class ScheduledCommandRepository
-        extends SystemProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
+        extends ProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
 
     @Override
     protected void setupEventRouting(EventRouting<CommandId> routing) {
