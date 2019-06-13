@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import io.spine.server.BoundedContext;
 import io.spine.system.server.given.client.MealOrderProjection;
 import io.spine.test.system.server.MealOrder;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.client.SystemClientTestEnv.contextWithSystemProjection;
 import static io.spine.system.server.given.client.SystemClientTestEnv.findProjection;
@@ -77,8 +79,10 @@ class DefaultSystemWriteSideTest {
             systemWriteSide.postEvent(event);
 
             MealOrder order = projectionState();
-            assertThat(order.getWhenPlaced()).isNotEqualToDefaultInstance();
-            assertThat(order.getItemList()).isEqualTo(event.getItemList());
+            ProtoTruth.assertThat(order.getWhenPlaced())
+                      .isNotEqualToDefaultInstance();
+            assertThat(order.getItemList())
+                    .isEqualTo(event.getItemList());
         }
 
         private MealOrder projectionState() {
