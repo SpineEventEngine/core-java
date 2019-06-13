@@ -61,6 +61,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("System events should be emitted when")
 class EntityEventsTest {

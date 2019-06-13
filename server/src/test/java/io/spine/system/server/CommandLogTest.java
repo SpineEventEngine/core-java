@@ -35,6 +35,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
@@ -207,7 +208,7 @@ class CommandLogTest {
             Command command = Command
                     .newBuilder()
                     .setId(CommandId.generate())
-                    .setMessage(pack(invalidCommand))
+                    .setMessage(AnyPacker.pack(invalidCommand))
                     .setContext(context)
                     .build();
             return command;
