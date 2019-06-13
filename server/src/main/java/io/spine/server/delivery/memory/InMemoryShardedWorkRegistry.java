@@ -28,6 +28,7 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
             if (existingRecord.hasPickedBy()) {
                 return Optional.empty();
             } else {
-                ShardSessionRecord updatedRecord = updatePickedBy(existingRecord,nodeId);
+                ShardSessionRecord updatedRecord = updatePickedBy(existingRecord, nodeId);
                 return Optional.of(asSession(updatedRecord));
             }
         }
@@ -63,10 +64,14 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
     }
 
     private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
-                                                        NodeId nodeId) {
-        ShardSessionRecord updatedRecord = record.toBuilder()
-                                                           .setPickedBy(nodeId)
-                                                           .vBuild();
+                                              @Nullable NodeId nodeId) {
+        ShardSessionRecord.Builder builder = record.toBuilder();
+        if(nodeId == null) {
+            builder.clearPickedBy();
+        } else {
+            builder.setPickedBy(nodeId);
+        }
+        ShardSessionRecord updatedRecord = builder.vBuild();
         workByNode.put(record.getIndex(), updatedRecord);
         return updatedRecord;
     }
@@ -100,7 +105,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         protected void complete() {
             ShardSessionRecord record = workByNode.get(shardIndex());
             // Clear the node ID value and release the session.
-            updatePickedBy(record, NodeId.getDefaultInstance());
+            updatePickedBy(record, null);
         }
     }
 }

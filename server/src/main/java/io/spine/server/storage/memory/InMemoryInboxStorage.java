@@ -32,6 +32,8 @@ import io.spine.server.delivery.ShardIndex;
 import java.util.Iterator;
 import java.util.Optional;
 
+import static com.google.protobuf.util.Timestamps.compare;
+
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
  */
@@ -56,6 +58,8 @@ public class InMemoryInboxStorage extends InboxStorage {
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
+                       .filter((r) -> compare(r.getWhenReceived(), from) >= 0)
+                       .filter((r) -> compare(r.getWhenReceived(), till) <= 0)
                        .collect(ImmutableList.toImmutableList());
         return new InMemoryPage(filtered);
     }
