@@ -53,7 +53,7 @@ public class InMemoryInboxStorage extends InboxStorage {
 
     @Override
     public Page<InboxMessage> readAll(ShardIndex index, Timestamp from, Timestamp till) {
-        TenantInboxRecords storage = multitenantStorage.getStorage();
+        TenantInboxRecords storage = multitenantStorage.currentSlice();
         ImmutableList<InboxMessage> filtered =
                 storage.readAll()
                        .stream()
@@ -66,31 +66,31 @@ public class InMemoryInboxStorage extends InboxStorage {
 
     @Override
     public void write(InboxMessage message) {
-        multitenantStorage.getStorage()
+        multitenantStorage.currentSlice()
                           .put(message.getId(), message);
     }
 
     @Override
     public Iterator<InboxMessageId> index() {
-        return multitenantStorage.getStorage()
+        return multitenantStorage.currentSlice()
                                  .index();
     }
 
     @Override
     public Optional<InboxMessage> read(InboxReadRequest request) {
-        return multitenantStorage.getStorage()
+        return multitenantStorage.currentSlice()
                                  .get(request.getRecordId());
     }
 
     @Override
     public void write(InboxMessageId id, InboxMessage record) {
-        multitenantStorage.getStorage()
+        multitenantStorage.currentSlice()
                           .put(id, record);
     }
 
     @Override
     public void removeAll(Iterable<InboxMessage> messages) {
-        TenantInboxRecords storage = multitenantStorage.getStorage();
+        TenantInboxRecords storage = multitenantStorage.currentSlice();
         for (InboxMessage message : messages) {
             storage.remove(message);
         }
