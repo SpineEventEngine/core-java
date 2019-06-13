@@ -69,9 +69,6 @@ message Topic {
     core.ActorContext context = 4 [(required) = true,
                                    (validate) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
-
-    // Reserved for utility fields.
-    reserved 5 to 10;
 }
 
 // Wrapped collection of read-side entity updates on a topic with the specific subscription ID.
@@ -115,7 +112,7 @@ message SubscriptionUpdate {
 message EntityUpdates {
 
     // The entity state update list.
-    repeated EntityStateUpdate updates = 1 [(validate) = true];
+    repeated EntityStateUpdate update = 1 [(validate) = true];
 }
 
 // The pair of the entity ID and the entity state both packed as Any.

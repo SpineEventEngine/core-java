@@ -69,7 +69,7 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
                 .vBuild();
         EntityUpdates result = EntityUpdates
                 .newBuilder()
-                .addUpdates(stateUpdate)
+                .addUpdate(stateUpdate)
                 .vBuild();
         return result;
     }

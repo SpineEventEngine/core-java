@@ -126,7 +126,7 @@ public class StandTestEnv {
             switch (update.getUpdateCase()) {
                 case ENTITY_UPDATES:
                     EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
-                                                                .getUpdatesList()
+                                                                .getUpdateList()
                                                                 .get(0);
                     newEntityState = entityStateUpdate.getState();
                     break;

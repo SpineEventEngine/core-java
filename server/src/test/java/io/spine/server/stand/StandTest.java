@@ -590,7 +590,7 @@ class StandTest extends TenantAwareTest {
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
                 EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
-                                                            .getUpdatesList()
+                                                            .getUpdateList()
                                                             .get(0);
                 Any newState = entityStateUpdate.getState();
                 Customer customerInCallback = unpack(newState, Customer.class);
