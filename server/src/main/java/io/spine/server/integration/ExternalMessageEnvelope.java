@@ -139,6 +139,7 @@ public final class ExternalMessageEnvelope
     public void setOriginFields(EventContext.Builder builder) {
         throw newIllegalStateException(
                 "An external message like this (%s) may not be a direct origin of any event.",
-                this);
+                this
+        );
     }
 }

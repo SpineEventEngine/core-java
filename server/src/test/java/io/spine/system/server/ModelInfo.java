@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.projection.model.ProjectionClass;
 
 /**
  * Provides information on model classes for entities of {@link io.spine.system.server} package.
@@ -31,11 +31,7 @@ public final class ModelInfo {
     private ModelInfo() {
     }
 
-    public static AggregateClass<?> commandLifecycle() {
-        return AggregateClass.asAggregateClass(CommandLifecycleAggregate.class);
-    }
-
-    public static AggregateClass<?> eventLifecycle() {
-        return AggregateClass.asAggregateClass(EntityHistoryAggregate.class);
+    public static ProjectionClass<?> commandLifecycle() {
+        return ProjectionClass.asProjectionClass(CommandLogProjection.class);
     }
 }

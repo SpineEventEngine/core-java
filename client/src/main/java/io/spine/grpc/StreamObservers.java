@@ -152,17 +152,15 @@ public class StreamObservers {
      *
      * @param <T> type of the observable value
      */
-    private static class ErrorForwardingObserver<T> implements StreamObserver<T> {
-
-        private final StreamObserver<?> delegate;
+    private static class ErrorForwardingObserver<T> extends DelegatingObserver<T> {
 
         private ErrorForwardingObserver(StreamObserver<?> delegate) {
-            this.delegate = delegate;
+            super(cast(delegate));
         }
 
-        @Override
-        public void onError(Throwable t) {
-            delegate.onError(t);
+        @SuppressWarnings("unchecked") // OK since the generic API is never used.
+        private static <T> StreamObserver<T> cast(StreamObserver<?> delegate) {
+            return (StreamObserver<T>) checkNotNull(delegate);
         }
 
         @Override

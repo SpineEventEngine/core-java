@@ -21,19 +21,20 @@
 package io.spine.system.server.given.command;
 
 import io.spine.server.type.EventClass;
+import io.spine.system.server.CommandLog;
 import io.spine.system.server.ModelInfo;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
 import java.util.Set;
 
 /**
- * Accumulates {@link io.spine.system.server.CommandLifecycle} events.
+ * Accumulates {@link CommandLog} events.
  */
 public class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
     @Override
     public Set<EventClass> eventClasses() {
         return ModelInfo.commandLifecycle()
-                        .stateEvents();
+                        .domesticEvents();
     }
 }

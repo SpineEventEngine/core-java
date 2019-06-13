@@ -31,7 +31,7 @@ import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.SerializableMessage;
-import io.spine.core.MessageWithContext;
+import io.spine.core.Signal;
 import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -55,7 +55,7 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
  *         or {@link io.spine.base.EventMessage EventMessage}.
  */
 public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T, M>,
-                                            T extends MessageWithContext,
+                                            T extends Signal,
                                             M extends SerializableMessage>
         extends Subject<S, Iterable<T>> {
 
@@ -144,7 +144,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
                            .filter(m -> {
                                @SuppressWarnings({"unchecked", "RedundantSuppression"})
                                /* avoid `unchecked` warning when calling raw instance
-                               of `MessageWithContext` when filtering. This warning is given only
+                               of `Signal` when filtering. This warning is given only
                                when compiling. Hence, the second suppression. */
                                boolean match = m.is(messageClass);
                                return match;

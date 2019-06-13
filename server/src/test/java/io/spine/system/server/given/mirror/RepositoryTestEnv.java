@@ -24,12 +24,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
+import io.spine.core.Versions;
 import io.spine.net.Url;
-import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityStateChanged;
@@ -54,12 +54,12 @@ public class RepositoryTestEnv {
     private RepositoryTestEnv() {
     }
 
-    public static Map<EntityHistoryId, Photo> givenPhotos() {
+    public static Map<MessageId, Photo> givenPhotos() {
         Photo spineLogo = newPhoto("spine.io/logo", "Spine Logo");
         Photo projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
         Photo jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
-        Map<EntityHistoryId, Photo> map = ImmutableMap
-                .<EntityHistoryId, Photo>builder()
+        Map<MessageId, Photo> map = ImmutableMap
+                .<MessageId, Photo>builder()
                 .put(historyIdOf(spineLogo), spineLogo)
                 .put(historyIdOf(projectsLogo), projectsLogo)
                 .put(historyIdOf(jxBrowserLogo), jxBrowserLogo)
@@ -71,78 +71,76 @@ public class RepositoryTestEnv {
         Url fullSizeUrl = Url
                 .newBuilder()
                 .setSpec(url)
-                .build();
+                .buildPartial();
         Url thumbnail = Url
                 .newBuilder()
                 .setSpec(url + "-thumbnail")
-                .build();
+                .buildPartial();
         Photo photo = Photo
                 .newBuilder()
                 .setId(PhotoId.generate())
                 .setFullSizeUrl(fullSizeUrl)
                 .setThumbnailUrl(thumbnail)
                 .setAltText(altText)
-                .build();
+                .vBuild();
         return photo;
     }
 
-    private static EntityHistoryId historyIdOf(Photo photo) {
+    private static MessageId historyIdOf(Photo photo) {
         Any id = pack(photo.getId());
-        EntityId entityId = EntityId
+        TypeUrl typeUrl = TypeUrl.of(Photo.class);
+        MessageId historyId = MessageId
                 .newBuilder()
                 .setId(id)
-                .build();
-        TypeUrl typeUrl = TypeUrl.of(Photo.class);
-        EntityHistoryId historyId = EntityHistoryId
-                .newBuilder()
-                .setEntityId(entityId)
                 .setTypeUrl(typeUrl.value())
-                .build();
+                .vBuild();
         return historyId;
     }
 
-    public static Event entityStateChanged(EntityHistoryId historyId, Message state) {
+    public static Event entityStateChanged(MessageId entityId, Message state) {
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setNewState(pack(state))
                 .setWhen(currentTime())
-                .addMessageId(cause())
-                .build();
+                .addSignalId(cause())
+                .vBuild();
         return event(stateChanged);
     }
 
-    public static DispatchedMessageId cause() {
+    public static MessageId cause() {
         EventId causeOfChange = EventId
                 .newBuilder()
                 .setValue("For tests")
                 .build();
-        DispatchedMessageId messageId = DispatchedMessageId
+        MessageId messageId = MessageId
                 .newBuilder()
-                .setEventId(causeOfChange)
-                .build();
+                .setId(AnyPacker.pack(causeOfChange))
+                .setVersion(Versions.zero())
+                .setTypeUrl("example.org/test.Type")
+                .vBuild();
         return messageId;
     }
 
     public static Event archived(Photo aggregate) {
-        EntityHistoryId historyId = historyIdOf(aggregate);
+        MessageId entityId = historyIdOf(aggregate);
         EntityArchived archived = EntityArchived
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setWhen(currentTime())
-                .addMessageId(cause())
-                .build();
+                .addSignalId(cause())
+                .vBuild();
         return event(archived);
     }
 
     public static Event deleted(Photo aggregate) {
-        EntityHistoryId historyId = historyIdOf(aggregate);
+        MessageId historyId = historyIdOf(aggregate);
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(historyId)
                 .setWhen(currentTime())
-                .addMessageId(cause())
-                .build();
+                .addSignalId(cause())
+                .vBuild();
         return event(deleted);
     }
 

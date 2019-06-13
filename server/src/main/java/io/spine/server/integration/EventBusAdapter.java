@@ -65,10 +65,10 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
         EventContext modifiedContext = eventBuilder.getContext()
                                                    .toBuilder()
                                                    .setExternal(true)
-                                                   .build();
+                                                   .vBuild();
 
         Event marked = eventBuilder.setContext(modifiedContext)
-                                   .build();
+                                   .vBuild();
         ExternalMessage result = ExternalMessages.of(marked, externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, event.enclosedMessage());
     }

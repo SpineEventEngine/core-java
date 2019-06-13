@@ -20,7 +20,7 @@
 
 /**
  * This package provides the environment for the
- * {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle} tests.
+ * {@link io.spine.system.server.CommandLifecycleAggregate CommandLog} tests.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

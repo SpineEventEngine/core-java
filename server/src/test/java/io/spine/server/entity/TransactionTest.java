@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -62,9 +61,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * {@link TransactionalEntity} implementations.
  */
 public abstract class TransactionTest<I,
-                                      E extends TransactionalEntity<I, S, B>,
-                                      S extends Message,
-                                      B extends ValidatingBuilder<S>> {
+        E extends TransactionalEntity<I, S, B>,
+        S extends Message,
+        B extends ValidatingBuilder<S>> {
 
     /**
      * Creates the instance of the ID with the simple name of test suite class.
@@ -92,7 +91,7 @@ public abstract class TransactionTest<I,
     protected abstract Transaction<I, E, S, B> createTx(E entity, S state, Version version);
 
     protected abstract
-    Transaction<I, E, S, B> createTx(E entity, TransactionListener<I, E, S, B> listener);
+    Transaction<I, E, S, B> createTx(E entity, TransactionListener<I> listener);
 
     protected abstract E createEntity();
 
@@ -302,7 +301,7 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("notify listener during transaction execution")
     void notifyListenerDuringExecution() {
-        TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
+        TransactionListener<I> listener = mock(TransactionListener.class);
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity, listener);
         Event event = withMessage(createEventMessage());
@@ -359,7 +358,7 @@ public abstract class TransactionTest<I,
     class RollbackAutomatically {
 
         @Test
-        @DisplayName("if phase failed")
+        @DisplayName("on violation at phase")
         void ifPhaseFailed() {
             E entity = createEntity();
             S originalState = entity.state();
@@ -368,16 +367,12 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(failingInHandler());
-            try {
-                applyEvent(tx, event);
-                fail("Expected an `Exception` due to a failed phase execution.");
-            } catch (Exception e) {
-                checkRollback(entity, originalState, originalVersion);
-            }
+            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            checkRollback(entity, originalState, originalVersion);
         }
 
         @Test
-        @DisplayName("if commit failed")
+        @DisplayName("on violation at commit")
         void ifCommitFailed() {
             E entity = createAndModify();
             S originalState = entity.state();
@@ -388,12 +383,8 @@ public abstract class TransactionTest<I,
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
             applyEvent(tx, event);
 
-            try {
-                tx.commit();
-                fail("Expected an `InvalidEntityStateException` due to a failed commit.");
-            } catch (InvalidEntityStateException e) {
-                checkRollback(entity, originalState, originalVersion);
-            }
+            assertThrows(InvalidEntityStateException.class, tx::commit);
+            checkRollback(entity, originalState, originalVersion);
         }
 
         private E createAndModify() {

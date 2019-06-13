@@ -44,7 +44,7 @@ class InvalidEntityStateExceptionTest {
                 singletonList(ConstraintViolation.getDefaultInstance()));
 
         assertNotNull(exception.getMessage());
-        assertNotNull(exception.getError());
-        assertEquals(entityState, exception.getEntityState());
+        assertNotNull(exception.error());
+        assertEquals(entityState, exception.entityState());
     }
 }

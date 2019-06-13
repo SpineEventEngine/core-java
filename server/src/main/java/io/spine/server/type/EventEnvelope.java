@@ -20,7 +20,7 @@
 
 package io.spine.server.type;
 
-import com.google.protobuf.Any;
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Enrichment;
@@ -28,6 +28,8 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
+import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.enrich.EnrichmentService;
@@ -37,6 +39,7 @@ import io.spine.type.TypeName;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -118,10 +121,18 @@ public final class EventEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        EventContext context = context();
-        builder.setEventContext(context)
-               .setRootCommandId(context.getRootCommandId())
-               .setEventId(id());
+        MessageId eventQualifier = MessageId
+                .newBuilder()
+                .setId(pack(id()))
+                .setTypeUrl(outerObject().typeUrl().value())
+                .buildPartial();
+        Origin origin = Origin
+                .newBuilder()
+                .setMessage(eventQualifier)
+                .setGrandOrigin(context().getPastMessage())
+                .setActorContext(actorContext())
+                .vBuild();
+        builder.setPastMessage(origin);
     }
 
     /**
@@ -152,7 +163,8 @@ public final class EventEnvelope
     public MessageClass originClass() {
         if (isRejection()) {
             RejectionEventContext rejection = context().getRejection();
-            Any commandMessage = rejection.getCommandMessage();
+            CommandMessage commandMessage = rejection.getCommand()
+                                                     .enclosedMessage();
             return CommandClass.of(commandMessage);
         } else {
             return EmptyClass.instance();

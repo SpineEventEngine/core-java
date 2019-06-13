@@ -67,10 +67,7 @@ class PmTransactionTest
                           PmState,
                           PmState.Builder>
     createTx(ProcessManager<Id, PmState, PmState.Builder> entity,
-             TransactionListener<Id,
-                                 ProcessManager<Id, PmState, PmState.Builder>,
-                                 PmState,
-                                 PmState.Builder> listener) {
+             TransactionListener<Id> listener) {
         PmTransaction<Id, PmState, PmState.Builder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);

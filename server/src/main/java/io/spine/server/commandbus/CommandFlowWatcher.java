@@ -20,15 +20,14 @@
 
 package io.spine.server.commandbus;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
-import io.spine.system.server.command.ScheduleCommand;
 import io.spine.system.server.event.CommandDispatched;
+import io.spine.system.server.event.CommandScheduled;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -57,28 +56,23 @@ final class CommandFlowWatcher {
     }
 
     /**
-     * Posts the {@link ScheduleCommand} system command.
+     * Posts the {@link CommandScheduled} system event.
      *
      * @param command the scheduled command
      */
     void onScheduled(CommandEnvelope command) {
         CommandContext context = command.context();
         CommandContext.Schedule schedule = context.getSchedule();
-        ScheduleCommand systemCommand = ScheduleCommand
+        CommandScheduled systemCommand = CommandScheduled
                 .newBuilder()
                 .setId(command.id())
                 .setSchedule(schedule)
                 .build();
-        postSystemCommand(systemCommand, command.tenantId());
+        postSystemEvent(systemCommand, command.tenantId());
     }
 
     private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {
         SystemWriteSide writeSide = function.get(tenantId);
         writeSide.postEvent(systemEvent);
-    }
-
-    private void postSystemCommand(CommandMessage systemCommand, TenantId tenantId) {
-        SystemWriteSide writeSide = function.get(tenantId);
-        writeSide.postCommand(systemCommand);
     }
 }

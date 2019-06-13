@@ -58,8 +58,9 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
     }
 
     private static EntityUpdates extractEntityUpdates(EntityStateChanged event) {
-        EntityId entityId = event.getId()
-                                 .getEntityId();
+        EntityId entityId = EntityId.newBuilder()
+                                    .setId(event.getEntity().getId())
+                                    .build();
         Any packedId = Identifier.pack(entityId);
         Any packedState = event.getNewState();
         EntityStateUpdate stateUpdate = EntityStateUpdate

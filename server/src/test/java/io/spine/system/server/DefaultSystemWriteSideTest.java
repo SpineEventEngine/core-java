@@ -21,36 +21,29 @@
 package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
-import io.spine.system.server.given.client.ShoppingListAggregate;
-import io.spine.test.system.server.ListId;
-import io.spine.test.system.server.ShoppingList;
+import io.spine.system.server.given.client.MealOrderProjection;
+import io.spine.test.system.server.MealOrder;
+import io.spine.test.system.server.OrderId;
+import io.spine.test.system.server.OrderPlaced;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.client.SystemClientTestEnv.contextWithSystemAggregate;
-import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.spine.system.server.given.client.SystemClientTestEnv.contextWithSystemProjection;
+import static io.spine.system.server.given.client.SystemClientTestEnv.findProjection;
 
 @DisplayName("Default implementation of SystemWriteSide should")
 class DefaultSystemWriteSideTest {
 
     private SystemWriteSide systemWriteSide;
-    private ListId aggregateId;
+    private OrderId projectionId;
 
     @BeforeEach
     void setUp() {
-        aggregateId = ListId
-                .newBuilder()
-                .setId(newUuid())
-                .build();
+        projectionId = OrderId.generate();
     }
 
     @Nested
@@ -62,10 +55,10 @@ class DefaultSystemWriteSideTest {
 
         @BeforeEach
         void setUp() {
-            domainContext = contextWithSystemAggregate();
-            systemWriteSide = domainContext.systemClient().writeSide();
+            domainContext = contextWithSystemProjection();
+            systemWriteSide = domainContext.systemClient()
+                                           .writeSide();
             systemContext = systemOf(domainContext);
-            createAggregate();
         }
 
         @AfterEach
@@ -76,47 +69,21 @@ class DefaultSystemWriteSideTest {
         @Test
         @DisplayName("events")
         void events() {
-            int copiesCount = aggregateState().getHardCopiesCount();
-
-            HardCopyPrinted event = HardCopyPrinted
+            OrderPlaced event = OrderPlaced
                     .newBuilder()
-                    .setListId(aggregateId)
-                    .build();
+                    .setId(projectionId)
+                    .addItem("Pizza")
+                    .vBuild();
             systemWriteSide.postEvent(event);
 
-            int newCopiesCount = aggregateState().getHardCopiesCount();
-            assertEquals(copiesCount + 1, newCopiesCount);
+            MealOrder order = projectionState();
+            assertThat(order.getWhenPlaced()).isNotEqualToDefaultInstance();
+            assertThat(order.getItemList()).isEqualTo(event.getItemList());
         }
 
-        @Test
-        @DisplayName("commands")
-        void commands() {
-            List<String> items = aggregateState().getItemList();
-            assertTrue(items.isEmpty());
-
-            AddListItem command = AddListItem
-                    .newBuilder()
-                    .setListId(aggregateId)
-                    .setItem("Milk")
-                    .build();
-            systemWriteSide.postCommand(command);
-
-            List<String> newItems = aggregateState().getItemList();
-            assertEquals(1, newItems.size());
-            assertEquals(command.getItem(), newItems.get(0));
-        }
-
-        private ShoppingList aggregateState() {
-            ShoppingListAggregate aggregate = findAggregate(aggregateId, systemContext);
+        private MealOrder projectionState() {
+            MealOrderProjection aggregate = findProjection(projectionId, systemContext);
             return aggregate.state();
-        }
-
-        private void createAggregate() {
-            CreateShoppingList command = CreateShoppingList
-                    .newBuilder()
-                    .setId(aggregateId)
-                    .build();
-            systemWriteSide.postCommand(command);
         }
     }
 }

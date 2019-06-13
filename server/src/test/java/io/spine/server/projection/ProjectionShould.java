@@ -22,10 +22,10 @@ package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoTruth;
-import io.spine.client.EntityId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.storage.EntityColumn;
@@ -44,8 +44,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
-import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -164,19 +162,24 @@ class ProjectionShould {
                 .setStatus(STARTED)
                 .addTask(task)
                 .build();
-        EntityHistoryId historyId = EntityHistoryId
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(aggregateState).value())
-                .setEntityId(EntityId.newBuilder().setId(pack(id)))
+                .setId(pack(id))
+                .setVersion(Versions.zero())
+                .build();
+        EventId eventId = EventId
+                .newBuilder()
+                .setValue(newUuid())
                 .build();
         EntityStateChanged systemEvent = EntityStateChanged
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setNewState(pack(aggregateState))
                 .setWhen(currentTime())
-                .addMessageId(DispatchedMessageId
-                                      .newBuilder()
-                                      .setEventId(EventId.newBuilder().setValue(newUuid())))
+                .addSignalId(MessageId.newBuilder()
+                                      .setId(pack(eventId))
+                                      .setTypeUrl("example.org/example.test.Event"))
                 .build();
         EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
         dispatch(projection, withMessage(systemEvent));

@@ -156,18 +156,36 @@ public class EventTest extends UtilityClassTest<Events> {
     class GetTenantId {
 
         @Test
-        @DisplayName("from enclosed command context")
-        void fromCommandContext() {
+        @DisplayName("from the previous message")
+        void fromPastMessage() {
             TenantId targetTenantId = tenantId();
-            CommandContext commandContext = commandContext(targetTenantId);
-            EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
-                                                         .build();
+            Origin origin = Origin
+                    .newBuilder()
+                    .setActorContext(ActorContext.newBuilder().setTenantId(targetTenantId))
+                    .buildPartial();
+            EventContext context = contextWithoutOrigin().setPastMessage(origin)
+                                                         .buildPartial();
             Event event = event(context);
 
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
         }
 
+        @SuppressWarnings("deprecation") // Required for backward compatibility.
+        @Test
+        @DisplayName("from enclosed command context")
+        void fromCommandContext() {
+            TenantId targetTenantId = tenantId();
+            CommandContext commandContext = commandContext(targetTenantId);
+            EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
+                                                         .buildPartial();
+            Event event = event(context);
+
+            assertThat(event.tenant())
+                    .isEqualTo(targetTenantId);
+        }
+
+        @SuppressWarnings("deprecation") // Required for backward compatibility.
         @Test
         @DisplayName("from enclosed context of origin event, which had command as origin")
         void fromEventContextWithCommandContext() {

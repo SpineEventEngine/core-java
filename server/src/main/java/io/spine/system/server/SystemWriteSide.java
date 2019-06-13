@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,24 +34,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface SystemWriteSide {
 
     /**
-     * Posts a system command.
-     *
-     * <p>If the associated bounded context is
-     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the command is
-     * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
-     *
-     * @param systemCommand command message
-     */
-    void postCommand(CommandMessage systemCommand);
-
-    /**
      * Posts a system event.
      *
      * <p>If the associated bounded context is
      * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the event is
      * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
      *
-     * @param systemEvent event message
+     * @param systemEvent event to post
      */
     void postEvent(EventMessage systemEvent);
 

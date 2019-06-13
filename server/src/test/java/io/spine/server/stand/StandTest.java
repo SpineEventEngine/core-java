@@ -46,8 +46,9 @@ import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.MessageId;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -124,7 +125,6 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -559,9 +559,13 @@ class StandTest extends TenantAwareTest {
             Event event = action.newEvent();
             assertNotNull(event);
 
-            CommandContext eventOrigin = event.context()
-                                              .getCommandContext();
-            assertThat(eventOrigin).isEqualTo(cmd.context());
+            EventContext context = event.context();
+            MessageId origin = context.getPastMessage()
+                                      .messageId();
+            assertThat(origin.asCommandId()).isEqualTo(cmd.id());
+            assertThat(origin.getTypeUrl()).isEqualTo(cmd.command()
+                                                         .typeUrl()
+                                                         .value());
             Any packedMessage = event.getMessage();
             CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
 

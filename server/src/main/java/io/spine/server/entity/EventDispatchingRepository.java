@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
@@ -98,10 +99,10 @@ public abstract class EventDispatchingRepository<I,
      * @param event the event to dispatch
      */
     @Override
+    @CanIgnoreReturnValue
     public final Set<I> dispatch(EventEnvelope event) {
         checkNotNull(event);
-        Set<I> targets = with(event.tenantId())
-                .evaluate(() -> doDispatch(event));
+        Set<I> targets = with(event.tenantId()).evaluate(() -> doDispatch(event));
         return targets;
     }
 
@@ -144,7 +145,7 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void onError(EventEnvelope event, RuntimeException exception) {
-        logError("Error dispatching event (class: `%s`, id: `%s`) to entity with state `%s`.",
+        logError("Error dispatching event (class: `%s`, ID: `%s`) to entity with state `%s`.",
                  event, exception);
     }
 

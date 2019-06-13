@@ -25,7 +25,7 @@ import com.google.common.truth.TruthFailureSubject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
 import io.spine.base.SerializableMessage;
-import io.spine.core.MessageWithContext;
+import io.spine.core.Signal;
 import io.spine.testing.server.EmittedMessageSubject.FactKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
 
 abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M>,
-                                         W extends MessageWithContext,
+                                         W extends Signal,
                                          M extends SerializableMessage>
         extends SubjectTest<S, Iterable<W>> {
 
@@ -105,7 +105,7 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
         assertThat(protoSubject).isNotNull();
         protoSubject.isNotEqualToDefaultInstance();
         protoSubject.isNotInstanceOf(Any.class);
-        protoSubject.isNotInstanceOf(MessageWithContext.class);
+        protoSubject.isNotInstanceOf(Signal.class);
     }
 
     @Test

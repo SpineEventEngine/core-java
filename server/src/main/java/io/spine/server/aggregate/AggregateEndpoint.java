@@ -98,7 +98,8 @@ abstract class AggregateEndpoint<I,
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     private AggregateTransaction startTransaction(A aggregate) {
         AggregateTransaction tx = AggregateTransaction.start(aggregate);
-        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
+        TransactionListener listener =
+                EntityLifecycleMonitor.newInstance(repository(), aggregate.id());
         tx.setListener(listener);
         return tx;
     }
