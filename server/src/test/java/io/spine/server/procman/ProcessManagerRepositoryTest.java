@@ -54,7 +54,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
@@ -553,14 +552,14 @@ class ProcessManagerRepositoryTest
               .isPresent();
 
         Any newState = pack(currentTime());
-        EntityLogId historyId = EntityLogId
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState).value())
-                .setEntityId(EntityId.newBuilder().setId(pack(projectId)))
-                .build();
+                .setId(pack(projectId))
+                .vBuild();
         EventMessage discardedEvent = EntityStateChanged
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setNewState(newState)
                 .build();
         Truth8.assertThat(filter.filter(discardedEvent))

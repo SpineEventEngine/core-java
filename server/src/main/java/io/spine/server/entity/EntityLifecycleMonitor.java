@@ -22,10 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
-import io.spine.core.SignalId;
 import io.spine.logging.Logging;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
@@ -37,7 +37,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
@@ -61,20 +60,21 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     private static final MessageId UNKNOWN_MESSAGE = MessageId.getDefaultInstance();
 
     private final Repository<I, ?> repository;
-    private final List<SignalId> acknowledgedSignalIds;
+    private final List<MessageId> acknowledgedMessages;
     private final I entityId;
     private @MonotonicNonNull Signal<?, ?, ?> lastMessage;
 
     private EntityLifecycleMonitor(Repository<I, ?> repository, I id) {
         this.repository = repository;
-        this.acknowledgedSignalIds = newLinkedList();
+        this.acknowledgedMessages = Lists.newArrayList();
         this.entityId = id;
     }
 
     /**
      * Creates a new instance of {@code EntityLifecycleMonitor}.
      *
-     * @param repository the repository of the entity under transaction
+     * @param repository
+     *         the repository of the entity under transaction
      */
     public static <I> TransactionListener<I> newInstance(Repository<I, ?> repository, I id) {
         checkNotNull(repository);
@@ -101,8 +101,9 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onAfterPhase(Phase<I, ?> phase) {
         checkSameEntity(phase.entityId());
-        SignalId signalId = phase.messageId();
-        acknowledgedSignalIds.add(signalId);
+        MessageId messageId = phase.signal()
+                                   .messageId();
+        acknowledgedMessages.add(messageId);
     }
 
     @Override
@@ -117,7 +118,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onAfterCommit(EntityRecordChange change) {
-        Set<SignalId> signalIds = ImmutableSet.copyOf(acknowledgedSignalIds);
+        Set<MessageId> signalIds = ImmutableSet.copyOf(acknowledgedMessages);
         repository.lifecycleOf(entityId)
                   .onStateChanged(change, signalIds);
     }
@@ -158,7 +159,8 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      *
      * @param entityId
      *         the ID of the entity to check
-     * @throws IllegalStateException if the check fails
+     * @throws IllegalStateException
+     *         if the check fails
      */
     private void checkSameEntity(I entityId) throws IllegalStateException {
         checkState(this.entityId.equals(entityId),

@@ -34,8 +34,4 @@ public final class ModelInfo {
     public static ProjectionClass<?> commandLifecycle() {
         return ProjectionClass.asProjectionClass(CommandLogProjection.class);
     }
-
-    public static ProjectionClass<?> entityLog() {
-        return ProjectionClass.asProjectionClass(EntityLogProjection.class);
-    }
 }

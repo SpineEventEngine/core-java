@@ -22,17 +22,16 @@ package io.spine.server.stand.given;
 
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
-import io.spine.client.EntityId;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.EntityLogId;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -70,19 +69,15 @@ public final class SubscriptionRecordTestEnv {
     private static EntityStateChanged
     entityStateChanged(ProjectId id, Project newState, TypeUrl type) {
         Any packedId = Identifier.pack(id);
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(packedId)
-                .build();
-        EntityLogId entityLogId = EntityLogId
+        MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(type.value())
-                .setEntityId(entityId)
+                .setId(packedId)
                 .build();
         Any packedMatchingState = TypeConverter.toAny(newState);
         EntityStateChanged result = EntityStateChanged
                 .newBuilder()
-                .setId(entityLogId)
+                .setEntity(entityId)
                 .setNewState(packedMatchingState)
                 .build();
         return result;

@@ -72,7 +72,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CommandLogTest {
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(EntityHistoryTest.class);
+            new TestActorRequestFactory(EntityEventsTest.class);
 
     private BoundedContext context;
     private BoundedContext system;
@@ -81,7 +81,7 @@ class CommandLogTest {
     void setUp() {
         BoundedContextName contextName = BoundedContextName
                 .newBuilder()
-                .setValue(EntityHistoryTest.class.getSimpleName())
+                .setValue(EntityEventsTest.class.getSimpleName())
                 .build();
         context = BoundedContext
                 .newBuilder()

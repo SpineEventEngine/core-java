@@ -21,11 +21,9 @@
 package io.spine.system.server.given.mirror;
 
 import com.google.protobuf.Empty;
-import io.spine.client.EntityId;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
 import io.spine.core.Version;
-import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityLogId;
 import io.spine.system.server.MirrorId;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
@@ -66,10 +64,10 @@ public final class ProjectionTestEnv {
     public static EntityStateChanged entityStateChanged() {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
-                .setId(historyId(RAW_ID))
+                .setEntity(historyId(RAW_ID))
                 .setNewState(pack(Empty.getDefaultInstance()))
                 .setWhen(currentTime())
-                .addMessageId(cause())
+                .addSignalId(cause())
                 .setNewVersion(VERSION)
                 .build();
         return event;
@@ -78,9 +76,9 @@ public final class ProjectionTestEnv {
     public static EntityArchived entityArchived() {
         EntityArchived event = EntityArchived
                 .newBuilder()
-                .setId(historyId(RAW_ID))
+                .setEntity(historyId(RAW_ID))
                 .setWhen(currentTime())
-                .addMessageId(cause())
+                .addSignalId(cause())
                 .setVersion(VERSION)
                 .build();
         return event;
@@ -89,9 +87,9 @@ public final class ProjectionTestEnv {
     public static EntityDeleted entityDeleted() {
         EntityDeleted event = EntityDeleted
                 .newBuilder()
-                .setId(historyId(RAW_ID))
+                .setEntity(historyId(RAW_ID))
                 .setWhen(currentTime())
-                .addMessageId(cause())
+                .addSignalId(cause())
                 .setVersion(VERSION)
                 .build();
         return event;
@@ -100,9 +98,9 @@ public final class ProjectionTestEnv {
     public static EntityUnarchived entityExtracted() {
         EntityUnarchived event = EntityUnarchived
                 .newBuilder()
-                .setId(historyId(RAW_ID))
+                .setEntity(historyId(RAW_ID))
                 .setWhen(currentTime())
-                .addMessageId(cause())
+                .addSignalId(cause())
                 .setVersion(VERSION)
                 .build();
         return event;
@@ -111,35 +109,32 @@ public final class ProjectionTestEnv {
     public static EntityRestored entityRestored() {
         EntityRestored event = EntityRestored
                 .newBuilder()
-                .setId(historyId(RAW_ID))
+                .setEntity(historyId(RAW_ID))
                 .setWhen(currentTime())
-                .addMessageId(cause())
+                .addSignalId(cause())
                 .setVersion(VERSION)
                 .build();
         return event;
     }
 
-    private static EntityLogId historyId(String entityId) {
-        EntityId id = EntityId
+    private static MessageId historyId(String entityId) {
+        MessageId historyId = MessageId
                 .newBuilder()
                 .setId(toAny(entityId))
-                .build();
-        EntityLogId historyId = EntityLogId
-                .newBuilder()
-                .setEntityId(id)
                 .setTypeUrl(AGGREGATE_TYPE_URL.value())
-                .build();
+                .vBuild();
         return historyId;
     }
 
-    private static DispatchedMessageId cause() {
+    private static MessageId cause() {
         EventId eventId = EventId
                 .newBuilder()
                 .setValue("Event for test")
                 .build();
-        DispatchedMessageId cause = DispatchedMessageId
+        MessageId cause = MessageId
                 .newBuilder()
-                .setEventId(eventId)
+                .setId(pack(eventId))
+                .setTypeUrl("example.com/example.Event")
                 .build();
         return cause;
     }

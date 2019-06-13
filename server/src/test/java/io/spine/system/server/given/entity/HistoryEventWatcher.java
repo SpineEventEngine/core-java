@@ -21,7 +21,15 @@
 package io.spine.system.server.given.entity;
 
 import io.spine.server.type.EventClass;
-import io.spine.system.server.ModelInfo;
+import io.spine.system.server.event.CommandDispatchedToHandler;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.system.server.event.EntityCreated;
+import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityRestored;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.system.server.event.EntityUnarchived;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
 import java.util.Set;
@@ -33,7 +41,17 @@ public class HistoryEventWatcher extends AbstractEventAccumulator {
 
     @Override
     public Set<EventClass> eventClasses() {
-        return ModelInfo.entityLog()
-                        .domesticEvents();
+        return EventClass.setOf(
+                CommandDispatchedToHandler.class,
+                EntityArchived.class,
+                EntityCreated.class,
+                EntityDeleted.class,
+                EntityRestored.class,
+                EntityStateChanged.class,
+                EntityUnarchived.class,
+                EventDispatchedToReactor.class,
+                EventDispatchedToSubscriber.class,
+                EntityCreated.class
+        );
     }
 }

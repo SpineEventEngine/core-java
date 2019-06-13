@@ -24,8 +24,8 @@ import com.google.common.truth.Truth8;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.Time;
-import io.spine.client.EntityId;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.model.InsufficientVisibilityError;
@@ -40,8 +40,6 @@ import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityLogId;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
@@ -91,10 +89,10 @@ class AbstractEventSubscriberTest {
                 .build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
-                .setId(historyId(Group.class))
+                .setEntity(messageIdWithType(Group.class))
                 .setWhen(Time.currentTime())
                 .setNewState(pack(state))
-                .addMessageId(dispatchedMessageId())
+                .addSignalId(emptyEventId())
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
                              .eventBus()
@@ -120,10 +118,10 @@ class AbstractEventSubscriberTest {
                 .build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
-                .setId(historyId(Organization.class))
+                .setEntity(messageIdWithType(Organization.class))
                 .setWhen(Time.currentTime())
                 .setNewState(pack(state))
-                .addMessageId(dispatchedMessageId())
+                .addSignalId(emptyEventId())
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)
                              .eventBus()
@@ -159,23 +157,20 @@ class AbstractEventSubscriberTest {
         assertThrows(InsufficientVisibilityError.class, HiddenEntitySubscriber::new);
     }
 
-    private static EntityLogId historyId(Class<? extends Message> type) {
-        EntityId entityId = EntityId
+    private static MessageId messageIdWithType(Class<? extends Message> type) {
+        MessageId historyId = MessageId
                 .newBuilder()
                 .setId(pack(Empty.getDefaultInstance()))
-                .build();
-        EntityLogId historyId = EntityLogId
-                .newBuilder()
-                .setEntityId(entityId)
                 .setTypeUrl(TypeUrl.of(type).value())
                 .build();
         return historyId;
     }
 
-    private static DispatchedMessageId dispatchedMessageId() {
-        return DispatchedMessageId
+    private static MessageId emptyEventId() {
+        return MessageId
                 .newBuilder()
-                .setEventId(EventId.getDefaultInstance())
+                .setId(pack(EventId.getDefaultInstance()))
+                .setTypeUrl("example.org/test.Event")
                 .build();
     }
 }

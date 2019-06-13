@@ -76,7 +76,6 @@ public final class SystemContext extends BoundedContext {
 
     private void registerRepositories(CommandLogRepository commandLog) {
         register(commandLog);
-        register(new EntityLogRepository());
         register(new ScheduledCommandRepository());
         register(new MirrorRepository());
     }
