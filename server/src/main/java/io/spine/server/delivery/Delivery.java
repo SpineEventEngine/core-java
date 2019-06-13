@@ -159,7 +159,18 @@ public final class Delivery {
             return;
         }
         ShardProcessingSession session = picked.get();
+        try {
+            Integer deliveredMsgCount = null;
+            while(deliveredMsgCount == null || deliveredMsgCount > 0) {
+                //TODO:2019-06-13:alex.tymchenko: can we detect the same in a more elegant way?
+                deliveredMsgCount = deliverWithSession(index, session);
+            }
+        } finally {
+            session.complete();
+        }
+    }
 
+    private int deliverWithSession(ShardIndex index, ShardProcessingSession session) {
         Timestamp now = Time.currentTime();
         Timestamp deduplicationStart = Timestamps.subtract(now, deduplicationWindow);
         Timestamp whenLastProcessed = session.whenLastMessageProcessed();
@@ -177,48 +188,55 @@ public final class Delivery {
         Optional<ShardedStorage.Page<InboxMessage>> maybePage =
                 Optional.of(inboxStorage.readAll(index, readFrom, readTo));
 
+        int totalMessagesProcessed = 0;
         while (maybePage.isPresent()) {
             ShardedStorage.Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
-            ImmutableList.Builder<InboxMessage> toProcessBuilder = ImmutableList.builder();
-            ImmutableList.Builder<InboxMessage> dedupSourceBuilder = ImmutableList.builder();
-            ImmutableList.Builder<InboxMessage> toRemoveBuilder = ImmutableList.builder();
-            for (InboxMessage message : messages) {
-                Timestamp msgTime = message.getWhenReceived();
+            if(!messages.isEmpty()) {
+                ImmutableList.Builder<InboxMessage> toProcessBuilder = ImmutableList.builder();
+                ImmutableList.Builder<InboxMessage> dedupSourceBuilder = ImmutableList.builder();
+                ImmutableList.Builder<InboxMessage> toRemoveBuilder = ImmutableList.builder();
+                for (InboxMessage message : messages) {
+                    Timestamp msgTime = message.getWhenReceived();
 
-                if (Timestamps.compare(msgTime, deduplicationStart) >= 0) {
+                    if (Timestamps.compare(msgTime, deduplicationStart) >= 0) {
 
-                    // The message was received later than de-duplication start time,
-                    // so it goes to both de-duplication source list and the list to process.
-                    dedupSourceBuilder.add(message);
-                } else {
+                        // The message was received later than de-duplication start time,
+                        // so it goes to both de-duplication source list and the list to process.
+                        dedupSourceBuilder.add(message);
+                    } else {
 
-                    // The message is scheduled to be removed after it's processed.
-                    toRemoveBuilder.add(message);
+                        // The message is scheduled to be removed after it's processed.
+                        toRemoveBuilder.add(message);
+                    }
+                    toProcessBuilder.add(message);
                 }
-                toProcessBuilder.add(message);
+
+                ImmutableList<InboxMessage> messagesToProcess = toProcessBuilder.build();
+                ImmutableList<InboxMessage> dedupSource = dedupSourceBuilder.build();
+
+                Map<String, List<InboxMessage>> messagesByType = groupByTargetType(
+                        messagesToProcess);
+                Map<String, List<InboxMessage>> dedupSourceByType = groupByTargetType(dedupSource);
+
+                for (String typeUrl : messagesByType.keySet()) {
+                    ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
+                    List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
+                    List<InboxMessage> deduplicationPackage = dedupSourceByType.get(typeUrl);
+                    delivery.deliver(deliveryPackage,
+                                     deduplicationPackage ==
+                                             null ? ImmutableList.of() : deduplicationPackage);
+                }
+
+                InboxMessage lastMessage = messages.get(messages.size() - 1);
+                session.updateLastProcessed(lastMessage.getWhenReceived());
+
+                totalMessagesProcessed += messagesToProcess.size();
+                inboxStorage.removeAll(toRemoveBuilder.build());
             }
-
-            ImmutableList<InboxMessage> messagesToProcess = toProcessBuilder.build();
-            ImmutableList<InboxMessage> dedupSource = dedupSourceBuilder.build();
-
-            Map<String, List<InboxMessage>> messagesByType = groupByTargetType(messagesToProcess);
-            Map<String, List<InboxMessage>> dedupSourceByType = groupByTargetType(dedupSource);
-
-            for (String typeUrl : messagesByType.keySet()) {
-                ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
-                List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
-                List<InboxMessage> deduplicationPackage = dedupSourceByType.get(typeUrl);
-                delivery.deliver(deliveryPackage,
-                                 deduplicationPackage ==
-                                         null ? ImmutableList.of() : deduplicationPackage);
-            }
-
-            InboxMessage lastMessage = messages.get(messages.size() - 1);
-            session.updateLastProcessed(lastMessage.getWhenReceived());
-            inboxStorage.removeAll(toRemoveBuilder.build());
             maybePage = currentPage.next();
         }
+        return totalMessagesProcessed;
     }
 
     /**
