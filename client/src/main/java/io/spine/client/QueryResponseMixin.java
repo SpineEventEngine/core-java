@@ -71,7 +71,7 @@ public interface QueryResponseMixin {
      * Obtains entity state at the given index.
      *
      * @throws IndexOutOfBoundsException
-     *         if there is index is out of the range of entities returned by this query response
+     *         if the index is out of the range of entities returned by this query response
      */
     default Message state(int index) {
         EntityStateWithVersion stateWithVersion = getMessageList().get(index);
@@ -83,7 +83,7 @@ public interface QueryResponseMixin {
      * Obtains the version of the entity at the given index.
      *
      * @throws IndexOutOfBoundsException
-     *         if there is index is out of the range of entities returned by this query response
+     *         if the index is out of the range of entities returned by this query response
      */
     default Version version(int index) {
         EntityStateWithVersion stateWithVersion = getMessageList().get(index);

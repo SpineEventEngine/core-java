@@ -132,7 +132,7 @@ public class StandTestEnv {
                     break;
                 case EVENT_UPDATES:
                     newEvent = update.getEventUpdates()
-                                     .getEventsList()
+                                     .getEventList()
                                      .get(0);
                     break;
                 default:

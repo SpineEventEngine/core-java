@@ -31,7 +31,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -589,11 +588,7 @@ class StandTest extends TenantAwareTest {
             @Override
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
-                EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
-                                                            .getUpdateList()
-                                                            .get(0);
-                Any newState = entityStateUpdate.getState();
-                Customer customerInCallback = unpack(newState, Customer.class);
+                Customer customerInCallback = (Customer) update.state(0);
                 callbackStates.add(customerInCallback);
             }
         };
