@@ -217,7 +217,7 @@ class QueryBuilderTest {
 
             TargetFilters entityFilters = target.getFilters();
             IdFilter idFilter = entityFilters.getIdFilter();
-            Collection<Any> idValues = idFilter.getIdsList();
+            Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
                     .map(id -> toObject(id, int.class))
@@ -423,7 +423,7 @@ class QueryBuilderTest {
 
             // Check IDs
             IdFilter idFilter = entityFilters.getIdFilter();
-            Collection<Any> idValues = idFilter.getIdsList();
+            Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
                     .map(id -> toObject(id, int.class))
@@ -500,7 +500,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             TargetFilters filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
-                                               .getIdsList();
+                                               .getIdList();
             Truth.assertThat(entityIds)
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds

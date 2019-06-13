@@ -30,6 +30,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.OrderBy;
@@ -53,6 +54,7 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
@@ -107,7 +109,6 @@ import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.given.Given.StandTestProjection;
 import static io.spine.server.stand.given.StandTestEnv.newStand;
@@ -491,7 +492,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(customerId));
 
             // Check notify action is called with the correct value.
-            Any packedState = pack(customer);
+            Any packedState = AnyPacker.pack(customer);
             assertEquals(packedState, action.newEntityState());
         }
 
@@ -522,7 +523,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(projectId));
 
             // Check notify action is called with the correct value.
-            Any packedState = pack(project);
+            Any packedState = AnyPacker.pack(project);
             assertEquals(packedState, action.newEntityState());
         }
 
@@ -677,7 +678,7 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        Any packedState = pack(customer);
+        Any packedState = AnyPacker.pack(customer);
         for (MemoizeNotifySubscriptionAction action : callbacks) {
             assertEquals(packedState, action.newEntityState());
             verify(action, times(1)).accept(any(SubscriptionUpdate.class));
@@ -1103,7 +1104,7 @@ class StandTest extends TenantAwareTest {
         return argument -> {
             boolean everyElementPresent = true;
             for (Any entityId : argument.getIdFilter()
-                                        .getIdsList()) {
+                                        .getIdList()) {
                 Message rawId = unpack(entityId);
                 if (rawId instanceof ProjectId) {
                     ProjectId convertedProjectId = (ProjectId) rawId;
@@ -1124,8 +1125,8 @@ class StandTest extends TenantAwareTest {
                 input -> {
                     checkNotNull(input);
                     StandTestProjection projection = new StandTestProjection(input);
-                    Any id = pack(projection.id());
-                    Any state = pack(projection.state());
+                    Any id = Identifier.pack(projection.id());
+                    Any state = AnyPacker.pack(projection.state());
                     EntityRecord record = EntityRecord
                             .newBuilder()
                             .setEntityId(id)

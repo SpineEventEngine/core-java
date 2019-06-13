@@ -86,8 +86,8 @@ class AbstractEventSubscriberTest {
                 .newBuilder()
                 .setId(GroupId.generate())
                 .setName("Admins")
-                .addParticipants(UserId.getDefaultInstance())
-                .addParticipants(UserId.getDefaultInstance())
+                .addParticipant(UserId.getDefaultInstance())
+                .addParticipant(UserId.getDefaultInstance())
                 .build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
@@ -115,8 +115,8 @@ class AbstractEventSubscriberTest {
                 .setId(OrganizationId.generate())
                 .setName("Developers")
                 .setHead(UserId.getDefaultInstance())
-                .addMembers(UserId.getDefaultInstance())
-                .addMembers(UserId.getDefaultInstance())
+                .addMember(UserId.getDefaultInstance())
+                .addMember(UserId.getDefaultInstance())
                 .build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()

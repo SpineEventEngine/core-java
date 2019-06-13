@@ -36,6 +36,6 @@ message ReportId {
 
 message Report {
     ReportId id = 1;
-    repeated ProjectId project_ids = 2;
+    repeated ProjectId project_id = 2;
     repeated Task tasks = 3;
 }

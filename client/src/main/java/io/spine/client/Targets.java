@@ -59,8 +59,7 @@ public final class Targets {
      * @throws IllegalArgumentException
      *         if any of IDs have invalid type or are {@code null}
      */
-    public static Target someOf(Class<? extends Message> targetClass,
-                                Set<?> ids) {
+    public static Target someOf(Class<? extends Message> targetClass, Set<?> ids) {
         checkNotNull(targetClass);
         checkNotNull(ids);
 
@@ -110,7 +109,7 @@ public final class Targets {
             builder.setIncludeAll(true);
         } else {
             List<?> idsList = notNullList(ids);
-            IdFilter idFilter = composeIdFilter(idsList);
+            IdFilter idFilter = acceptingOnly(idsList);
 
             List<CompositeFilter> filterList = notNullList(filters);
             TargetFilters targetFilters = targetFilters(filterList, idFilter);
@@ -120,8 +119,11 @@ public final class Targets {
         return builder.build();
     }
 
-    private static IdFilter composeIdFilter(Collection<?> items) {
-        List<Any> ids = items
+    /**
+     * Creates an {@code IdFilter} which accepts only the passed identifiers.
+     */
+    public static IdFilter acceptingOnly(Collection<?> identifiers) {
+        List<Any> ids = identifiers
                 .stream()
                 .distinct()
                 .map(Targets::checkId)
@@ -131,11 +133,32 @@ public final class Targets {
         return filter;
     }
 
+    /**
+     * Creates an {@code IdFilter} which accepts only the passed identifiers.
+     */
+    @SafeVarargs
+    private static <I> IdFilter toIdFilter(I... id) {
+        return acceptingOnly(ImmutableList.copyOf(id));
+    }
+
     private static IdFilter idFilter(List<Any> ids) {
         return IdFilter
                 .newBuilder()
-                .addAllIds(ids)
+                .addAllId(ids)
                 .build();
+    }
+
+    /**
+     * Creates {@code TargetFilters} which accepts only entities with the passed identifiers.
+     */
+    @SafeVarargs
+    public static <I> TargetFilters acceptingOnly(I... id) {
+        IdFilter idFilter = toIdFilter(id);
+        TargetFilters result = TargetFilters
+                .newBuilder()
+                .setIdFilter(idFilter)
+                .build();
+        return result;
     }
 
     /**
