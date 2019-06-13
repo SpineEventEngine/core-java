@@ -23,8 +23,10 @@ package io.spine.system.server;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.grpc.StreamObservers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
  * The default implementation of {@link SystemWriteSide}.
@@ -50,7 +52,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         checkNotNull(systemEvent);
         Event event = event(systemEvent);
         system.eventBus()
-              .post(event, SystemAckObserver.ofResultsOf(event));
+              .post(event, noOpObserver());
     }
 
     private Event event(EventMessage message) {
