@@ -58,7 +58,7 @@ public final class InvalidEntityStateException extends ValidationException {
     private final GeneratedMessageV3 entityState;
 
     /**
-     * The error passed with the exception..
+     * The error passed with the exception.
      */
     private final Error error;
 
