@@ -526,8 +526,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The method loads only the recent history of the aggregate.
      *
      * <p>The current {@link #snapshotTrigger} is used as a read operation
-     * {@linkplain AggregateReadRequest#batchSize()} batch size}, so the method will perform
-     * sub-optimally in case of a {@link #snapshotTrigger} change.
+     * {@linkplain AggregateReadRequest#batchSize()} batch size}, so the method can perform
+     * sub-optimally for some time after a {@link #snapshotTrigger} change.
      *
      * @param id
      *         the ID of the {@code Aggregate} to fetch
