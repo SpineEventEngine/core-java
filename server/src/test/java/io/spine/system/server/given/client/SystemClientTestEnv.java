@@ -21,7 +21,6 @@
 package io.spine.system.server.given.client;
 
 import io.spine.server.BoundedContext;
-import io.spine.server.DefaultRepository;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.MealOrder;
