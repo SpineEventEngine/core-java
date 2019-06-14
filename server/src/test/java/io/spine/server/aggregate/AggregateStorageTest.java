@@ -28,14 +28,18 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.EventMessage;
 import io.spine.base.Time;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.model.Nothing;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -45,6 +49,8 @@ import io.spine.testing.TestValues;
 import io.spine.testing.Tests;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -59,7 +65,6 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.protobuf.Any.pack;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
@@ -85,7 +90,8 @@ public abstract class AggregateStorageTest
                                     AggregateReadRequest<ProjectId>,
                                     AggregateStorage<ProjectId>> {
 
-    private static final Function<AggregateEventRecord, Event> TO_EVENT =
+    @SuppressWarnings("ReturnOfNull") // As declared by the field type.
+    private static final Function<AggregateEventRecord, @Nullable Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
@@ -670,12 +676,25 @@ public abstract class AggregateStorageTest
         @Test
         @DisplayName("for EventContext")
         void forEventContext() {
+            ActorContext context = ActorContext
+                    .newBuilder()
+                    .buildPartial();
+            MessageId messageId = MessageId
+                    .newBuilder()
+                    .setId(AnyPacker.pack(newEventId()))
+                    .setTypeUrl(TypeUrl.of(Nothing.class).value())
+                    .buildPartial();
+            Origin origin = Origin
+                    .newBuilder()
+                    .setActorContext(context)
+                    .setMessage(messageId)
+                    .vBuild();
             EventContext enrichedContext = EventContext
                     .newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())
                     .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
-                    .setCommandContext(GivenCommandContext.withRandomActor())
+                    .setPastMessage(origin)
                     .build();
             Event event = Event
                     .newBuilder()
@@ -691,6 +710,7 @@ public abstract class AggregateStorageTest
             assertTrue(isDefault(loadedContext.getEnrichment()));
         }
 
+        @SuppressWarnings("deprecation") // For backward compatibility.
         @Test
         @DisplayName("for origin of EventContext type")
         void forEventContextOrigin() {
@@ -825,7 +845,7 @@ public abstract class AggregateStorageTest
     private static EventMessage event(Message entityState) {
         return StateImported
                 .newBuilder()
-                .setState(pack(entityState))
-                .build();
+                .setState(Any.pack(entityState))
+                .vBuild();
     }
 }

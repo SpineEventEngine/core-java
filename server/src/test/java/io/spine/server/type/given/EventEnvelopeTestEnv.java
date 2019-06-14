@@ -27,6 +27,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.core.ProjectCreated;
@@ -78,15 +79,23 @@ public class EventEnvelopeTestEnv {
                              .build();
     }
 
+    @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(CommandContext commandContext) {
         return EventContext.newBuilder()
                            .setCommandContext(commandContext)
                            .build();
     }
 
+    @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(EventContext eventContext) {
         return EventContext.newBuilder()
                            .setEventContext(eventContext)
+                           .build();
+    }
+
+    public static EventContext eventContext(Origin previousMessage) {
+        return EventContext.newBuilder()
+                           .setPastMessage(previousMessage)
                            .build();
     }
 

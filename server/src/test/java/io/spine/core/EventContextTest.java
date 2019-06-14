@@ -69,6 +69,7 @@ class EventContextTest {
             assertThrowsFor(event);
         }
 
+        @SuppressWarnings("deprecation") // Required for backward compatibility.
         @Test
         @DisplayName("of the event whose event context has no origin")
         void forEventContextWithoutOrigin() {
@@ -99,7 +100,7 @@ class EventContextTest {
         @DisplayName("actor")
         void actor() {
             assertThat(context.actor())
-                    .isEqualTo(context.getCommandContext()
+                    .isEqualTo(context.getPastMessage()
                                       .getActorContext()
                                       .getActor());
         }

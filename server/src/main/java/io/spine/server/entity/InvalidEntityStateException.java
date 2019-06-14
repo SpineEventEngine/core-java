@@ -31,15 +31,18 @@ import io.spine.server.entity.model.StateClass;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ExceptionFactory;
+import io.spine.validate.ValidationException;
 
+import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.server.entity.EntityStateValidationError.INVALID_ENTITY_STATE;
 
 /**
  * Signals that an entity state does not pass validation.
  */
-public final class InvalidEntityStateException extends RuntimeException {
+public final class InvalidEntityStateException extends ValidationException {
 
     private static final long serialVersionUID = 0L;
 
@@ -55,12 +58,13 @@ public final class InvalidEntityStateException extends RuntimeException {
     private final GeneratedMessageV3 entityState;
 
     /**
-     * The error passed with the exception.
+     * The error passed with the exception..
      */
     private final Error error;
 
-    private InvalidEntityStateException(String messageText, Message entityState, Error error) {
-        super(messageText);
+    private InvalidEntityStateException(Message entityState, Error error) {
+        super(error.getValidationError()
+                   .getConstraintViolationList());
         this.entityState = entityState instanceof GeneratedMessageV3
                            ? (GeneratedMessageV3) entityState
                            : AnyPacker.pack(entityState);
@@ -74,8 +78,8 @@ public final class InvalidEntityStateException extends RuntimeException {
      * @param entityState the invalid entity state
      * @param violations  the constraint violations for the entity state
      */
-    public static InvalidEntityStateException onConstraintViolations(
-            Message entityState, Iterable<ConstraintViolation> violations) {
+    public static InvalidEntityStateException
+    onConstraintViolations(Message entityState, Iterable<ConstraintViolation> violations) {
         Factory factory = new Factory(entityState, violations);
         return factory.newException();
     }
@@ -83,7 +87,7 @@ public final class InvalidEntityStateException extends RuntimeException {
     /**
      * Returns a related event message.
      */
-    public Message getEntityState() {
+    Message entityState() {
         if (entityState instanceof Any) {
             Any any = (Any) entityState;
             Message unpacked = AnyPacker.unpack(any);
@@ -95,7 +99,7 @@ public final class InvalidEntityStateException extends RuntimeException {
     /**
      * Returns an error occurred.
      */
-    public Error getError() {
+    public Error error() {
         return error;
     }
 
@@ -157,9 +161,12 @@ public final class InvalidEntityStateException extends RuntimeException {
         }
 
         @Override
-        protected InvalidEntityStateException createException(
-                String exceptionMsg, Message entityState, Error error) {
-            return new InvalidEntityStateException(exceptionMsg, entityState, error);
+        protected InvalidEntityStateException
+        createException(String exceptionMsg, Message entityState, Error error) {
+            List<ConstraintViolation> violations = error.getValidationError()
+                                                        .getConstraintViolationList();
+            checkArgument(!violations.isEmpty(), "No constraint violations provided.");
+            return new InvalidEntityStateException(entityState, error);
         }
     }
 }

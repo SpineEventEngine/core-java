@@ -49,7 +49,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
  */
 public final class StateSubscriberMethod extends SubscriberMethod implements Logging {
 
-    private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("id.type_url");
+    private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("entity.type_url");
 
     private final BoundedContextName contextOfSubscriber;
     private final Class<? extends Message> stateType;

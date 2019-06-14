@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -34,7 +35,7 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
-import io.spine.core.EventId;
+import io.spine.core.MessageId;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -98,10 +99,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *             purposes.
      */
     @Deprecated
-    private static final EventId STAND_POST_ORIGIN = EventId
+    private static final MessageId STAND_POST_ORIGIN = MessageId
             .newBuilder()
-            .setValue("Stand-received-entity-update")
-            .build();
+            .setId(Identifier.pack("Stand-received-entity-update"))
+            .setTypeUrl(TypeUrl.of(Empty.class).value())
+            .vBuild();
 
     /**
      * Used to return an empty result collection for {@link Query}.
@@ -179,11 +181,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setEntityId(id)
                 .setState(state)
-                .build();
+                .vBuild();
         EntityRecordChange change = EntityRecordChange
                 .newBuilder()
                 .setNewValue(record)
-                .build();
+                .vBuild();
         lifecycle.onStateChanged(change, ImmutableSet.of(STAND_POST_ORIGIN));
     }
 

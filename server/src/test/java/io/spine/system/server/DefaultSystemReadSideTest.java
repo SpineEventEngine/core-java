@@ -32,11 +32,11 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.given.client.ShoppingListAggregate;
-import io.spine.system.server.given.client.ShoppingListRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -155,7 +155,7 @@ class DefaultSystemReadSideTest {
 
         @BeforeEach
         void setUp() {
-            domainContext.register(new ShoppingListRepository());
+            domainContext.register(DefaultRepository.of(ShoppingListAggregate.class));
             aggregateId = ListId
                     .newBuilder()
                     .setId(newUuid())
@@ -187,7 +187,8 @@ class DefaultSystemReadSideTest {
                     .newBuilder()
                     .setId(aggregateId)
                     .build();
-            Command cmd = actorRequestFactory.createCommand(command);
+            Command cmd = actorRequestFactory.command()
+                                             .create(command);
             domainContext.commandBus()
                          .post(cmd, noOpObserver());
         }

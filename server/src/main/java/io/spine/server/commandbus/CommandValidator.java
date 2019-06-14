@@ -50,9 +50,9 @@ import static io.spine.validate.Validate.isDefault;
  * <p>Ensures that:
  * <ol>
  *     <li>The command has a valid tenant ID set in a multi-tenant context, or no tenant in a
- *     single-tenant context.
+ *         single-tenant context.
  *     <li>The command message {@linkplain CommandValidator#inspect(CommandEnvelope) conforms} to
- *     the options specified in the proto declaration of the message.
+ *         the options specified in the proto declaration of the message.
  *     <li>The command ID is populated.
  *     <li>The command context is not blank.
  * </ol>
@@ -147,7 +147,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
                         .add(ConstraintViolation
                                      .newBuilder()
                                      .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY)
-                                     .build())
+                                     .vBuild())
                         .build();
             }
             return violations;
@@ -200,7 +200,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         private void addViolation(String message) {
             result.add(ConstraintViolation.newBuilder()
                                           .setMsgFormat(message)
-                                          .build());
+                                          .vBuild());
         }
     }
 }

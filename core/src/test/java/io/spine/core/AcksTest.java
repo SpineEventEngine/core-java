@@ -45,10 +45,10 @@ class AcksTest extends UtilityClassTest<Acks> {
      * Test environment
      ************************/
 
-    static Ack newAck(MessageId messageId) {
+    static Ack newAck(SignalId signalId) {
         return Ack
                 .newBuilder()
-                .setMessageId(AnyPacker.pack(messageId))
+                .setMessageId(AnyPacker.pack(signalId))
                 .setStatus(newOkStatus())
                 .build();
     }

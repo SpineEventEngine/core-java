@@ -25,14 +25,12 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpRepository;
 import io.spine.server.event.store.EventStore;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
@@ -46,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.TENANT_ID;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.acceptInvitation;
@@ -57,6 +56,7 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.createProjec
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMembers;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
@@ -217,18 +217,10 @@ public class EventRootCommandIdTest {
      * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
-        MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
-
-        TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
-            @Override
-            public void run() {
-                boundedContext.eventBus()
-                              .eventStore()
-                              .read(allEventsQuery(), observer);
-            }
-        };
-        operation.execute();
-
+        MemoizingObserver<Event> observer = memoizingObserver();
+        with(TENANT_ID).run(() -> boundedContext.eventBus()
+                                                .eventStore()
+                                                .read(allEventsQuery(), observer));
         List<Event> results = observer.responses();
         return results;
     }

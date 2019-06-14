@@ -24,8 +24,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
@@ -34,13 +35,9 @@ import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.system.server.CommandTarget;
-import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.command.AssignTargetToCommand;
-import io.spine.system.server.command.DispatchCommandToHandler;
-import io.spine.system.server.command.DispatchEventToReactor;
-import io.spine.system.server.command.DispatchEventToSubscriber;
+import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.CommandHandled;
 import io.spine.system.server.event.CommandRejected;
 import io.spine.system.server.event.EntityArchived;
@@ -49,8 +46,12 @@ import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EntityUnarchived;
+import io.spine.system.server.event.EventDispatchedToReactor;
+import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
+import io.spine.system.server.event.TargetAssignedToCommand;
 import io.spine.type.TypeUrl;
+import io.spine.validate.ValidationError;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -60,8 +61,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.entity.EventFilter.allowAll;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.util.stream.Collectors.toList;
 
 /**
  * The lifecycle callbacks of an {@link Entity}.
@@ -88,14 +87,13 @@ public class EntityLifecycle {
     private final EventFilter eventFilter;
 
     /**
-     * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
-     * {@link Entity}.
+     * The message ID of of the associated {@link Entity} state.
      *
      * <p>Most commands posted by the {@code EntityLifecycle} are handled by
      * the {@code io.spine.system.server.EntityHistoryAggregate}.
      * Thus, storing an ID as a field is convenient.
      */
-    private final EntityHistoryId historyId;
+    private final MessageId entityId;
 
     /**
      * Creates a new instance.
@@ -111,11 +109,18 @@ public class EntityLifecycle {
                               EventFilter eventFilter) {
         this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
-        this.historyId = EntityHistoryIds.wrap(entityId, entityType);
+        this.entityId = MessageId
+                .newBuilder()
+                .setId(Identifier.pack(entityId))
+                .setTypeUrl(entityType.value())
+                .vBuild();
     }
 
     private EntityLifecycle(Builder builder) {
-        this(builder.entityId, builder.entityType, builder.writeSide, builder.eventFilter);
+        this(builder.entityId,
+             builder.entityType,
+             builder.writeSide,
+             builder.eventFilter);
     }
 
     /**
@@ -127,46 +132,51 @@ public class EntityLifecycle {
     public final void onEntityCreated(EntityOption.Kind entityKind) {
         EntityCreated event = EntityCreated
                 .newBuilder()
-                .setId(historyId)
+                .setEntity(entityId)
                 .setKind(entityKind)
-                .build();
+                .vBuild();
         postEvent(event);
     }
 
     /**
-     * Posts the {@link AssignTargetToCommand AssignTargetToCommand}
+     * Posts the {@link TargetAssignedToCommand}
      * system command.
      *
      * @param commandId
      *         the ID of the command which should be handled by the entity
      */
     public final void onTargetAssignedToCommand(CommandId commandId) {
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(this.entityId.getId())
+                .buildPartial();
         CommandTarget target = CommandTarget
                 .newBuilder()
-                .setEntityId(historyId.getEntityId())
-                .setTypeUrl(historyId.getTypeUrl())
-                .build();
-        AssignTargetToCommand command = AssignTargetToCommand
+                .setEntityId(entityId)
+                .setTypeUrl(this.entityId.getTypeUrl())
+                .vBuild();
+        TargetAssignedToCommand event = TargetAssignedToCommand
                 .newBuilder()
                 .setId(commandId)
                 .setTarget(target)
-                .build();
-        postCommand(command);
+                .vBuild();
+        postEvent(event);
     }
 
     /**
-     * Posts the {@link DispatchCommandToHandler} system command.
+     * Posts the {@link io.spine.system.server.event.CommandDispatchedToHandler} system command.
      *
      * @param command
      *         the dispatched command
      */
     public final void onDispatchCommand(Command command) {
-        DispatchCommandToHandler systemCommand = DispatchCommandToHandler
+        CommandDispatchedToHandler systemCommand = CommandDispatchedToHandler
                 .newBuilder()
-                .setReceiver(historyId)
-                .setCommand(command)
-                .build();
-        postCommand(systemCommand);
+                .setReceiver(entityId)
+                .setPayload(command)
+                .setWhenDispatched(currentTime())
+                .vBuild();
+        postEvent(systemCommand);
     }
 
     /**
@@ -179,7 +189,7 @@ public class EntityLifecycle {
         CommandHandled systemEvent = CommandHandled
                 .newBuilder()
                 .setId(command.getId())
-                .build();
+                .vBuild();
         postEvent(systemEvent);
     }
 
@@ -196,52 +206,54 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
-                .build();
+                .vBuild();
         postEvent(systemEvent);
     }
 
     /**
-     * Posts the {@link DispatchEventToSubscriber} system command.
+     * Posts the {@link EventDispatchedToSubscriber} system event.
      *
      * @param event
      *         the dispatched event
      */
     public final void onDispatchEventToSubscriber(Event event) {
-        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
+        EventDispatchedToSubscriber systemCommand = EventDispatchedToSubscriber
                 .newBuilder()
-                .setReceiver(historyId)
-                .setEvent(event)
-                .build();
-        postCommand(systemCommand);
+                .setReceiver(entityId)
+                .setPayload(event)
+                .setWhenDispatched(currentTime())
+                .vBuild();
+        postEvent(systemCommand);
     }
 
     public final void onEventImported(Event event) {
         EventImported systemEvent = EventImported
                 .newBuilder()
-                .setReceiver(historyId)
+                .setReceiver(entityId)
                 .setEventId(event.getId())
                 .setWhenImported(currentTime())
-                .build();
+                .vBuild();
         postEvent(systemEvent);
     }
 
     /**
-     * Posts the {@link DispatchEventToReactor} system command.
+     * Posts the {@link EventDispatchedToReactor} system event.
      *
      * @param event
      *         the dispatched event
      */
     public final void onDispatchEventToReactor(Event event) {
-        DispatchEventToReactor systemCommand = DispatchEventToReactor
+        EventDispatchedToReactor systemCommand = EventDispatchedToReactor
                 .newBuilder()
-                .setReceiver(historyId)
-                .setEvent(event)
-                .build();
-        postCommand(systemCommand);
+                .setReceiver(entityId)
+                .setPayload(event)
+                .setWhenDispatched(currentTime())
+                .vBuild();
+        postEvent(systemCommand);
     }
 
     /**
-     * Posts the {@link EntityStateChanged} system event and the event related to
+     * Posts the {@link EntityStateChanged} system event and the events related to
      * the lifecycle flags.
      *
      * <p>Only the actual changes in the entity attributes result into system events.
@@ -255,17 +267,47 @@ public class EntityLifecycle {
      */
     public final void onStateChanged(EntityRecordChange change,
                                      Set<? extends MessageId> messageIds) {
-        Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
+        postIfChanged(change, messageIds);
+        postIfArchived(change, messageIds);
+        postIfDeleted(change, messageIds);
+        postIfExtracted(change, messageIds);
+        postIfRestored(change, messageIds);
+    }
 
-        postIfChanged(change, dispatchedMessageIds);
-        postIfArchived(change, dispatchedMessageIds);
-        postIfDeleted(change, dispatchedMessageIds);
-        postIfExtracted(change, dispatchedMessageIds);
-        postIfRestored(change, dispatchedMessageIds);
+    /**
+     * Posts the {@link ConstraintViolated} system event.
+     *
+     * @param lastMessage
+     *         the last message handled by the entity
+     * @param root
+     *         the root message of the message chain which led to the violation
+     * @param error
+     *         the description of violation
+     * @param version
+     *         the version of the invalid entity
+     */
+    public final void onInvalidEntity(MessageId lastMessage,
+                                      MessageId root,
+                                      ValidationError error,
+                                      Version version) {
+        MessageId entityId = MessageId
+                .newBuilder()
+                .setId(this.entityId.getId())
+                .setTypeUrl(this.entityId.getTypeUrl())
+                .setVersion(version)
+                .buildPartial();
+        ConstraintViolated event = ConstraintViolated
+                .newBuilder()
+                .setEntity(entityId)
+                .setLastMessage(lastMessage)
+                .setRootMessage(root)
+                .addAllViolation(error.getConstraintViolationList())
+                .vBuild();
+        postEvent(event);
     }
 
     private void postIfChanged(EntityRecordChange change,
-                               Collection<DispatchedMessageId> messageIds) {
+                               Collection<? extends MessageId> messageIds) {
         Any oldState = change.getPreviousValue()
                              .getState();
         Any newState = change.getNewValue()
@@ -275,17 +317,17 @@ public class EntityLifecycle {
                                        .getVersion();
             EntityStateChanged event = EntityStateChanged
                     .newBuilder()
-                    .setId(historyId)
+                    .setEntity(entityId)
                     .setNewState(newState)
-                    .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setNewVersion(newVersion)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
 
     private void postIfArchived(EntityRecordChange change,
-                                Collection<DispatchedMessageId> messageIds) {
+                                Collection<? extends MessageId> messageIds) {
         boolean oldValue = change.getPreviousValue()
                                  .getLifecycleFlags()
                                  .getArchived();
@@ -297,16 +339,16 @@ public class EntityLifecycle {
                                     .getVersion();
             EntityArchived event = EntityArchived
                     .newBuilder()
-                    .setId(historyId)
-                    .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setEntity(entityId)
+                    .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
 
     private void postIfDeleted(EntityRecordChange change,
-                               Collection<DispatchedMessageId> messageIds) {
+                               Collection<? extends MessageId> messageIds) {
         boolean oldValue = change.getPreviousValue()
                                  .getLifecycleFlags()
                                  .getDeleted();
@@ -318,16 +360,16 @@ public class EntityLifecycle {
                                     .getVersion();
             EntityDeleted event = EntityDeleted
                     .newBuilder()
-                    .setId(historyId)
-                    .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setEntity(entityId)
+                    .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
 
     private void postIfExtracted(EntityRecordChange change,
-                                 Collection<DispatchedMessageId> messageIds) {
+                                 Collection<? extends MessageId> messageIds) {
         boolean oldValue = change.getPreviousValue()
                                  .getLifecycleFlags()
                                  .getArchived();
@@ -339,16 +381,16 @@ public class EntityLifecycle {
                                     .getVersion();
             EntityUnarchived event = EntityUnarchived
                     .newBuilder()
-                    .setId(historyId)
-                    .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setEntity(entityId)
+                    .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
 
     private void postIfRestored(EntityRecordChange change,
-                                Collection<DispatchedMessageId> messageIds) {
+                                Collection<? extends MessageId> messageIds) {
         boolean oldValue = change.getPreviousValue()
                                  .getLifecycleFlags()
                                  .getDeleted();
@@ -360,50 +402,17 @@ public class EntityLifecycle {
                                     .getVersion();
             EntityRestored event = EntityRestored
                     .newBuilder()
-                    .setId(historyId)
-                    .addAllMessageId(ImmutableList.copyOf(messageIds))
+                    .setEntity(entityId)
+                    .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .build();
+                    .vBuild();
             postEvent(event);
         }
     }
-    
+
     protected void postEvent(EventMessage event) {
         Optional<? extends EventMessage> filtered = eventFilter.filter(event);
         filtered.ifPresent(systemWriteSide::postEvent);
-    }
-    
-    protected void postCommand(CommandMessage command) {
-        systemWriteSide.postCommand(command);
-    }
-
-    private static Collection<DispatchedMessageId>
-    toDispatched(Collection<? extends MessageId> messageIds) {
-        Collection<DispatchedMessageId> dispatchedMessageIds =
-                messageIds.stream()
-                          .map(EntityLifecycle::dispatchedMessageId)
-                          .collect(toList());
-        return dispatchedMessageIds;
-    }
-
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private static DispatchedMessageId dispatchedMessageId(MessageId messageId) {
-        checkNotNull(messageId);
-        DispatchedMessageId.Builder builder = DispatchedMessageId.newBuilder();
-        if (messageId instanceof EventId) {
-            EventId eventId = (EventId) messageId;
-            return builder.setEventId(eventId)
-                          .build();
-        } else if (messageId instanceof CommandId) {
-            CommandId commandId = (CommandId) messageId;
-            return builder.setCommandId(commandId)
-                          .build();
-        } else {
-            throw newIllegalArgumentException(
-                    "Unexpected message ID of type %s. Expected EventId or CommandId.",
-                    messageId.getClass()
-            );
-        }
     }
 
     /**

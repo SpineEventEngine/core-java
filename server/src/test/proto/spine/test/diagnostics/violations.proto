@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package spine.system.server.test;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server.test";
+option java_outer_classname = "ViolationsProto";
+option java_multiple_files = true;
+
+message WatchId {
+    string uuid = 1;
+}
+
+message InvalidText {
+    option (entity).kind = PROJECTION;
+
+    WatchId id = 1;
+
+    string invalid_text = 2;
+}

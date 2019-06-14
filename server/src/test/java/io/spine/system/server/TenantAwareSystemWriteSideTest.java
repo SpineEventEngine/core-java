@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.TenantId;
 import io.spine.testdata.Sample;
@@ -35,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("TenantAwareSystemWriteSide should")
 class TenantAwareSystemWriteSideTest {
 
-    private static final String POST_COMMANDS = "post system commands";
     private static final String POST_EVENTS = "post system events";
 
     private MemoizingWriteSide delegate;
@@ -49,12 +47,6 @@ class TenantAwareSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             delegate = MemoizingWriteSide.singleTenant();
-        }
-
-        @Test
-        @DisplayName(POST_COMMANDS)
-        void postCommands() {
-            postCommandAndCheck(defaultTenant);
         }
 
         @Test
@@ -80,26 +72,11 @@ class TenantAwareSystemWriteSideTest {
         }
 
         @Test
-        @DisplayName(POST_COMMANDS)
-        void postCommands() {
-            postCommandAndCheck(tenantId);
-            assertEquals(tenantId, delegate.lastSeenCommand().tenant());
-        }
-
-        @Test
         @DisplayName(POST_EVENTS)
         void postEvents() {
             postEventAndCheck(tenantId);
             assertEquals(tenantId, delegate.lastSeenEvent().tenant());
         }
-    }
-
-    private void postCommandAndCheck(TenantId tenantId) {
-        CommandMessage command = Sample.messageOfType(CreateShoppingList.class);
-        SystemWriteSide writeSide = delegatingTo(delegate).get(tenantId);
-        writeSide.postCommand(command);
-
-        assertEquals(command, delegate.lastSeenCommand().message());
     }
 
     private void postEventAndCheck(TenantId tenantId) {

@@ -66,10 +66,6 @@ public final class CommandHandlerMethod
             super(producer, rawMethodResult);
             List<EventMessage> eventMessages = toMessages(rawMethodResult);
             List<EventMessage> filtered = filterIgnored(eventMessages);
-            
-            //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning empty events from `ProcessManager`
-            // in favor of "Expect<...>" construction.
-            // See https://github.com/SpineEventEngine/core-java/issues/790.
             checkState(!filtered.isEmpty(), "Command handling method did not produce events");
             setMessages(filtered);
         }
