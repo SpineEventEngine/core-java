@@ -107,9 +107,12 @@ import static io.spine.validate.Validate.isNotDefault;
  * {@link AggregateRepository} periodically stores aggregate snapshots.
  * See {@link AggregateRepository#setSnapshotTrigger(int)} for details.
  *
- * @param <I> the type for IDs of this class of aggregates
- * @param <S> the type of the state held by the aggregate
- * @param <B> the type of the aggregate state builder
+ * @param <I>
+ *         the type for IDs of this class of aggregates
+ * @param <S>
+ *         the type of the state held by the aggregate
+ * @param <B>
+ *         the type of the aggregate state builder
  */
 @SuppressWarnings("OverlyCoupledClass")
 public abstract class Aggregate<I,
@@ -123,8 +126,6 @@ public abstract class Aggregate<I,
      * the last snapshot.
      *
      * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
-     *
-     * @see AggregateStorage#readEventCountAfterLastSnapshot(Object)
      */
     private int eventCountAfterLastSnapshot = 0;
 
@@ -221,7 +222,8 @@ public abstract class Aggregate<I,
      * <p>Dispatching the commands results in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
-     * @param  command the envelope with the command to dispatch
+     * @param  command
+     *          the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
@@ -238,7 +240,8 @@ public abstract class Aggregate<I,
      * <p>Reacting on a event may result in emitting event messages.
      * All the {@linkplain Empty empty} messages are filtered out from the result.
      *
-     * @param  event the envelope with the event to dispatch
+     * @param  event
+     *          the envelope with the event to dispatch
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change because of the event
      */
@@ -254,7 +257,8 @@ public abstract class Aggregate<I,
     /**
      * Invokes applier method for the passed event message.
      *
-     * @param event the event to apply
+     * @param event
+     *         the event to apply
      */
     void invokeApplier(EventEnvelope event) {
         EventApplier method = thisClass().applierOf(event.messageClass());
@@ -274,7 +278,8 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param  aggregateHistory the aggregate state with events to play
+     * @param  aggregateHistory
+     *          the aggregate state with events to play
      * @throws IllegalStateException
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
@@ -304,7 +309,8 @@ public abstract class Aggregate<I,
      * the {@code events} list is of size 3, the applied events will have versions {@code 43},
      * {@code 44}, and {@code 45}.
      *
-     * @param events the events to apply
+     * @param events
+     *         the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
     List<Event> apply(List<Event> events) {

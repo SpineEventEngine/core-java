@@ -41,5 +41,5 @@ public interface ReadRequest<I> {
      *
      * @return the record ID
      */
-    I getRecordId();
+    I recordId();
 }
