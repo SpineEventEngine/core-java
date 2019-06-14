@@ -25,7 +25,6 @@ import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.client.EntityId;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;

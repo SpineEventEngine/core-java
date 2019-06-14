@@ -23,8 +23,8 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
-import io.spine.core.SignalId;
 import io.spine.core.Signal;
+import io.spine.core.SignalId;
 import io.spine.core.TenantId;
 import io.spine.server.type.MessageEnvelope;
 

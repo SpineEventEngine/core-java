@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
@@ -46,6 +47,9 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 public abstract class AggregateStorage<I>
         extends AbstractStorage<I, AggregateHistory, AggregateReadRequest<I>>
         implements StorageWithLifecycleFlags<I, AggregateHistory, AggregateReadRequest<I>> {
+
+    private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
+            "The specified snapshot index is incorrect";
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -204,4 +208,54 @@ public abstract class AggregateStorage<I>
      */
     protected abstract Iterator<AggregateEventRecord> historyBackward(
             AggregateReadRequest<I> request);
+
+    /**
+     * Truncates the storage, dropping all records which occur before the Nth snapshot for each
+     * entity.
+     *
+     * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
+     * the latest snapshot.
+     *
+     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
+     * entity records remain intact in this case.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotIndex} is negative
+     */
+    @Internal
+    public void truncateOlderThan(int snapshotIndex) {
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
+        truncate(snapshotIndex);
+    }
+
+    /**
+     * Truncates the storage, dropping all records older than {@code date} but not newer than the
+     * Nth snapshot.
+     *
+     * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
+     * the latest snapshot for each entity.
+     *
+     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
+     * records remain intact in this case.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotIndex} is negative
+     */
+    @Internal
+    public void truncateOlderThan(int snapshotIndex, Timestamp date) {
+        checkNotNull(date);
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
+        truncate(snapshotIndex, date);
+    }
+
+    /**
+     * Drops all records which occur before the Nth snapshot for each entity.
+     */
+    protected abstract void truncate(int snapshotIndex);
+
+    /**
+     * Drops all records older than {@code date} but not newer than the Nth snapshot for each
+     * entity.
+     */
+    protected abstract void truncate(int snapshotIndex, Timestamp date);
 }
