@@ -45,13 +45,9 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected InboxMessageId inboxMsgIdFrom(CommandEnvelope envelope) {
-        String rawValue = envelope.id()
-                                  .getUuid();
-        InboxMessageId result = InboxMessageId.newBuilder()
-                                              .setValue(rawValue)
-                                              .build();
-        return result;
+    protected String extractUuidFrom(CommandEnvelope envelope) {
+        return envelope.id()
+                       .getUuid();
     }
 
     @Override
@@ -62,6 +58,14 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     @Override
     protected Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource) {
         return new CommandDispatcher(deduplicationSource);
+    }
+
+    @Override
+    protected InboxMessageStatus getStatus(CommandEnvelope message) {
+        if(message.context().hasSchedule()) {
+            return InboxMessageStatus.SCHEDULED;
+        }
+        return super.getStatus(message);
     }
 
     /**

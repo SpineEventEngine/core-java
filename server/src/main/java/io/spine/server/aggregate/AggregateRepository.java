@@ -60,6 +60,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.Math.max;
 
@@ -289,9 +290,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
-        I target = route(cmd);
-        inbox.send(cmd).toHandler(target);
-        return target;
+        I id = with(cmd.tenantId()).evaluate(() -> {
+            I target = route(cmd);
+            lifecycleOf(target).onDispatchCommand(cmd.command());
+            return target;
+        });
+        inbox.send(cmd).toHandler(id);
+        return id;
     }
 
     private I route(CommandEnvelope cmd) {
@@ -592,5 +597,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     final void onEventImported(I id, Event event) {
         lifecycleOf(id).onEventImported(event);
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        super.close();
+        if(inbox != null) {
+            inbox.unregister();
+        }
     }
 }

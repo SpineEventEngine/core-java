@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Timestamp;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.ReadRequest;
 
@@ -43,14 +42,16 @@ public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadR
     }
 
     /**
-     * Reads the records by the given shard index from the storage
-     * and returns the first page of the results.
+     * Reads the contents of the storage by the given shard index and returns the first page
+     * of the results.
+     *
+     * <p>The older items go first.
      *
      * @param index
      *         the shard index to return the results for
      * @return the first page of the results
      */
-    public abstract Page<M> readAll(ShardIndex index, Timestamp from, Timestamp till);
+    public abstract Page<M> contentsBackwards(ShardIndex index);
 
     public abstract void removeAll(Iterable<M> messages);
 

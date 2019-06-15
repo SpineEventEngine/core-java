@@ -36,4 +36,12 @@ public abstract class InboxStorage
      * @param message a message to write
      */
     public abstract void write(InboxMessage message);
+
+    /**
+     * Marks the messages as {@linkplain InboxMessageStatus#DELIVERED delivered} and writes
+     * the updated messages.
+     *
+     * @param messages the messages to mark as delivered.
+     */
+    public abstract void markDelivered(Iterable<InboxMessage> messages);
 }

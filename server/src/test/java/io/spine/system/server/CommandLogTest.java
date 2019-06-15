@@ -53,6 +53,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -92,6 +93,11 @@ class CommandLogTest {
 
         context.register(DefaultRepository.of(CompanyAggregate.class));
         context.register(new CompanyNameProcmanRepo());
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        context.close();
     }
 
     @DisplayName("produce system events when command")

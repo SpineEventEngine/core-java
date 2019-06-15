@@ -131,7 +131,8 @@ public final class Delivery {
      * right away.
      */
     public static Delivery local() {
-        Delivery delivery = newBuilder().build();
+        Delivery delivery = newBuilder().setDeduplicationWindow(Durations.fromMillis(300))
+                                        .build();
         delivery.subscribe(new LocalDispatchingObserver());
         return delivery;
     }
@@ -161,82 +162,92 @@ public final class Delivery {
         ShardProcessingSession session = picked.get();
         try {
             Integer deliveredMsgCount = null;
-            while(deliveredMsgCount == null || deliveredMsgCount > 0) {
+            while (deliveredMsgCount == null || deliveredMsgCount > 0) {
                 //TODO:2019-06-13:alex.tymchenko: can we detect the same in a more elegant way?
-                deliveredMsgCount = deliverWithSession(index, session);
+                deliveredMsgCount = doDeliver(session);
             }
         } finally {
             session.complete();
         }
     }
 
-    private int deliverWithSession(ShardIndex index, ShardProcessingSession session) {
+    private int doDeliver(ShardProcessingSession session) {
+        ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
-        Timestamp deduplicationStart = Timestamps.subtract(now, deduplicationWindow);
-        Timestamp whenLastProcessed = session.whenLastMessageProcessed();
+        Timestamp idempotenceWndStart = Timestamps.subtract(now, deduplicationWindow);
 
-        Timestamp readTo = Timestamps.subtract(now, ONE_MS);
-        Timestamp readFrom = UNSET;
-        if (!UNSET.equals(whenLastProcessed)) {
-
-            // Take the oldest of two timestamps.
-            readFrom = Timestamps.compare(whenLastProcessed, deduplicationStart) > 0
-                       ? deduplicationStart
-                       : whenLastProcessed;
-        }
-
+        ShardedStorage.Page<InboxMessage> startingPage = inboxStorage.contentsBackwards(index);
         Optional<ShardedStorage.Page<InboxMessage>> maybePage =
-                Optional.of(inboxStorage.readAll(index, readFrom, readTo));
+                Optional.of(startingPage);
 
-        int totalMessagesProcessed = 0;
+        int totalMessagesDelivered = 0;
         while (maybePage.isPresent()) {
             ShardedStorage.Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
-            if(!messages.isEmpty()) {
-                ImmutableList.Builder<InboxMessage> toProcessBuilder = ImmutableList.builder();
-                ImmutableList.Builder<InboxMessage> dedupSourceBuilder = ImmutableList.builder();
-                ImmutableList.Builder<InboxMessage> toRemoveBuilder = ImmutableList.builder();
-                for (InboxMessage message : messages) {
-                    Timestamp msgTime = message.getWhenReceived();
+            if (messages.isEmpty()) {
+                maybePage = currentPage.next();
+                continue;
+            }
+            ImmutableList.Builder<InboxMessage> deliveryBuilder = ImmutableList.builder();
+            ImmutableList.Builder<InboxMessage> idempotenceBuilder = ImmutableList.builder();
+            ImmutableList.Builder<InboxMessage> removalBuilder = ImmutableList.builder();
+            for (InboxMessage message : messages) {
+                Timestamp msgTime = message.getWhenReceived();
+                boolean insideIdempotentWnd =
+                        Timestamps.compare(msgTime, idempotenceWndStart) >= 0;
+                InboxMessageStatus status = message.getStatus();
 
-                    if (Timestamps.compare(msgTime, deduplicationStart) >= 0) {
-
-                        // The message was received later than de-duplication start time,
-                        // so it goes to both de-duplication source list and the list to process.
-                        dedupSourceBuilder.add(message);
-                    } else {
-
-                        // The message is scheduled to be removed after it's processed.
-                        toRemoveBuilder.add(message);
+                if (insideIdempotentWnd) {
+                    if (InboxMessageStatus.TO_DELIVER != status) {
+                        idempotenceBuilder.add(message);
                     }
-                    toProcessBuilder.add(message);
+                } else {
+                    removalBuilder.add(message);
                 }
 
-                ImmutableList<InboxMessage> messagesToProcess = toProcessBuilder.build();
-                ImmutableList<InboxMessage> dedupSource = dedupSourceBuilder.build();
+                if (InboxMessageStatus.TO_DELIVER == status) {
+                    deliveryBuilder.add(message);
+                }
+            }
 
-                Map<String, List<InboxMessage>> messagesByType = groupByTargetType(
-                        messagesToProcess);
-                Map<String, List<InboxMessage>> dedupSourceByType = groupByTargetType(dedupSource);
+            ImmutableList<InboxMessage> toDeliver = deliveryBuilder.build();
+            if (!toDeliver.isEmpty()) {
 
+                Map<String, List<InboxMessage>> messagesByType =
+                        groupByTargetType(toDeliver);
+                Map<String, List<InboxMessage>> idempotenceWndByType =
+                        groupByTargetType(idempotenceBuilder.build());
+
+                ImmutableList.Builder<RuntimeException> exceptionsBuilder = ImmutableList.builder();
                 for (String typeUrl : messagesByType.keySet()) {
-                    ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
+                    ShardedMessageDelivery<InboxMessage> delivery =
+                            inboxDeliveries.get(typeUrl);
                     List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
-                    List<InboxMessage> deduplicationPackage = dedupSourceByType.get(typeUrl);
-                    delivery.deliver(deliveryPackage,
-                                     deduplicationPackage ==
-                                             null ? ImmutableList.of() : deduplicationPackage);
+                    List<InboxMessage> idempotenceWnd = idempotenceWndByType.get(typeUrl);
+                    try {
+                        delivery.deliver(deliveryPackage,
+                                         idempotenceWnd ==
+                                                 null ? ImmutableList.of() : idempotenceWnd);
+                    } catch (RuntimeException e) {
+                        exceptionsBuilder.add(e);
+                    }
                 }
-
-                InboxMessage lastMessage = messages.get(messages.size() - 1);
-                session.updateLastProcessed(lastMessage.getWhenReceived());
-
-                totalMessagesProcessed += messagesToProcess.size();
-                inboxStorage.removeAll(toRemoveBuilder.build());
+                inboxStorage.markDelivered(toDeliver);
+                inboxStorage.removeAll(removalBuilder.build());
+                int deliveredInBatch = toDeliver.size();
+                totalMessagesDelivered += deliveredInBatch;
+                Timestamp lastMsgTimestamp = toDeliver.get(deliveredInBatch - 1)
+                                                      .getWhenReceived();
+                session.updateLastProcessed(lastMsgTimestamp);
+                ImmutableList<RuntimeException> exceptions = exceptionsBuilder.build();
+                if(!exceptions.isEmpty()) {
+                    throw exceptions.iterator()
+                                    .next();
+                }
             }
             maybePage = currentPage.next();
         }
-        return totalMessagesProcessed;
+        return totalMessagesDelivered;
     }
 
     /**
@@ -282,6 +293,11 @@ public final class Delivery {
         inboxDeliveries.put(entityType.value(), inbox.delivery());
     }
 
+    void unregister(Inbox<?> inbox) {
+        TypeUrl entityType = inbox.getEntityStateType();
+        inboxDeliveries.remove(entityType.value());
+    }
+
     private InboxWriter inboxWriter() {
         return new NotifyingWriter(inboxStorage) {
 
@@ -292,7 +308,8 @@ public final class Delivery {
         };
     }
 
-    private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {
+    private static Map<String, List<InboxMessage>> groupByTargetType
+            (List<InboxMessage> messages) {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));
@@ -342,7 +359,8 @@ public final class Delivery {
             return this;
         }
 
-        public Builder setStorageFactorySupplier(Supplier<StorageFactory> storageFactorySupplier) {
+        public Builder setStorageFactorySupplier(
+                Supplier<StorageFactory> storageFactorySupplier) {
             checkNotNull(storageFactorySupplier);
             this.storageFactorySupplier = storageFactorySupplier;
             return this;

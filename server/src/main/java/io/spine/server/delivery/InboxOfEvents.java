@@ -45,13 +45,9 @@ class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
     }
 
     @Override
-    protected InboxMessageId inboxMsgIdFrom(EventEnvelope envelope) {
-        String rawValue = envelope.id()
-                                  .getValue();
-        InboxMessageId result = InboxMessageId.newBuilder()
-                                              .setValue(rawValue)
-                                              .build();
-        return result;
+    protected String extractUuidFrom(EventEnvelope envelope) {
+        return  envelope.id()
+                        .getValue();
     }
 
     @Override

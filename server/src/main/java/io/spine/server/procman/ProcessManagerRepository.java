@@ -63,6 +63,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -293,10 +294,14 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I target = route(command);
-        lifecycleOf(target).onDispatchCommand(command.command());
-        inbox.send(command).toHandler(target);
-        return target;
+        I handlerId = with(command.tenantId()).evaluate(() -> {
+            I target = route(command);
+            lifecycleOf(target).onDispatchCommand(command.command());
+            return target;
+        });
+        inbox.send(command)
+             .toHandler(handlerId);
+        return handlerId;
     }
 
     private I route(CommandEnvelope cmd) {
@@ -395,6 +400,15 @@ public abstract class ProcessManagerRepository<I,
             return Optional.empty();
         }
         return Optional.of(new PmExternalEventDispatcher());
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        super.close();
+        if(inbox != null) {
+            inbox.unregister();
+        }
     }
 
     /**

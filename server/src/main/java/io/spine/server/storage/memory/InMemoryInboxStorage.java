@@ -21,13 +21,22 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.Message;
+import io.spine.base.Identifier;
+import io.spine.core.Command;
+import io.spine.core.Event;
+import io.spine.logging.Logging;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.delivery.Inbox;
+import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
+import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.ShardIndex;
+import io.spine.string.Stringifiers;
+import io.spine.validate.Validated;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -37,7 +46,7 @@ import static com.google.protobuf.util.Timestamps.compare;
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
  */
-public class InMemoryInboxStorage extends InboxStorage {
+public class InMemoryInboxStorage extends InboxStorage implements Logging {
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
@@ -52,22 +61,41 @@ public class InMemoryInboxStorage extends InboxStorage {
     }
 
     @Override
-    public Page<InboxMessage> readAll(ShardIndex index, Timestamp from, Timestamp till) {
+    public Page<InboxMessage> contentsBackwards(ShardIndex index) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         ImmutableList<InboxMessage> filtered =
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
-                       .filter((r) -> compare(r.getWhenReceived(), from) >= 0)
-                       .filter((r) -> compare(r.getWhenReceived(), till) <= 0)
+                       .sorted((m1, m2) -> compare(m2.getWhenReceived(), m1.getWhenReceived()))
                        .collect(ImmutableList.toImmutableList());
+
         return new InMemoryPage(filtered);
+    }
+
+    private static StringBuilder collectionToString(ImmutableList<InboxMessage> messages) {
+        StringBuilder builder = new StringBuilder();
+        for (InboxMessage message : messages) {
+            builder.append("    + ").append(toString(message));
+        }
+        return builder;
     }
 
     @Override
     public void write(InboxMessage message) {
+        _warn("+ Writing {} ", toString(message));
         multitenantStorage.currentSlice()
                           .put(message.getId(), message);
+    }
+
+    @Override
+    public void markDelivered(Iterable<InboxMessage> messages) {
+        for (InboxMessage message : messages) {
+            @Validated InboxMessage updated = message.toBuilder()
+                                                      .setStatus(InboxMessageStatus.DELIVERED)
+                                                      .vBuild();
+            write(updated);
+        }
     }
 
     @Override
@@ -92,7 +120,44 @@ public class InMemoryInboxStorage extends InboxStorage {
     public void removeAll(Iterable<InboxMessage> messages) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         for (InboxMessage message : messages) {
+            _warn("[{}] Removing " + toString(message), Thread.currentThread()
+                                                              .getName());
             storage.remove(message);
+        }
+    }
+
+    private static String toString(InboxMessage message) {
+        StringBuilder result = new StringBuilder();
+        result.append(" in status ");
+        result.append(message.getStatus());
+        result.append(" to [");
+
+        InboxId inboxId = message.getInboxId();
+        String entityType = inboxId.getTypeUrl();
+        result.append(entityType)
+              .append(']');
+        Object entityId = Identifier.unpack(inboxId.getEntityId()
+                                                   .getId());
+
+        result.append(" with ID = ")
+              .append(entityId).append(" received at ").append(message.getWhenReceived());
+        String contents = result.toString()
+                         .replaceAll("[\n\r]", "");
+        if (message.hasEvent()) {
+            Event event = message.getEvent();
+            Message unpacked = AnyPacker.unpack(event.getMessage());
+            result.append(". Contents = ")
+                  .append(Stringifiers.toString(unpacked));
+            return "Event of type " + unpacked.getClass()
+                                              .getSimpleName() + ' ' + contents;
+        } else {
+            Command command = message.getCommand();
+            Message unpacked = AnyPacker.unpack(command.getMessage());
+            result.append(".  Contents = ")
+                  .append(Stringifiers.toString(unpacked));
+            return "Command of type " + unpacked.getClass()
+                                                .getSimpleName() + ' ' + contents;
+
         }
     }
 

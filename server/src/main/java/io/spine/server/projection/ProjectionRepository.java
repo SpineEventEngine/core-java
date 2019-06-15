@@ -339,6 +339,15 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return builder.build();
     }
 
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        super.close();
+        if(inbox != null) {
+            inbox.unregister();
+        }
+    }
+
     /**
      * An implementation of an external message dispatcher feeding external events
      * to {@code Projection} instances.

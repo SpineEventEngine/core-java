@@ -26,6 +26,7 @@ import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -67,9 +68,16 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      */
     protected abstract void setRecordPayload(M envelope, InboxMessage.Builder builder);
 
-    protected abstract InboxMessageId inboxMsgIdFrom(M envelope);
+    /**
+     * Extracts the UUID identifier value from the envelope wrapping the passed object.
+     */
+    protected abstract String extractUuidFrom(M envelope);
 
     protected abstract M asEnvelope(InboxMessage message);
+
+    protected InboxMessageStatus getStatus(M message) {
+        return InboxMessageStatus.TO_DELIVER;
+    }
 
     protected abstract Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource);
 
@@ -80,10 +88,11 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         ShardIndex shardIndex = delivery.whichShardFor(entityId);
         InboxMessage.Builder builder = InboxMessage
                 .newBuilder()
-                .setId(inboxMsgIdFrom(envelope))
+                .setId(inboxMsgIdFrom(envelope, entityId))
                 .setInboxId(inboxId)
                 .setShardIndex(shardIndex)
                 .setLabel(label)
+                .setStatus(getStatus(envelope))
                 .setWhenReceived(Time.currentTime());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
@@ -95,9 +104,13 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                 });
     }
 
-    private MessageEndpoint<I, M> getEndpoint(M envelope, InboxLabel label, InboxId inboxId) {
-        return endpoints.get(label, envelope)
-                        .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
+    private InboxMessageId inboxMsgIdFrom(M envelope, I targetId) {
+        //TODO:2019-06-15:alex.tymchenko: stringified IDs are ugly.
+        String rawValue = extractUuidFrom(envelope) + " @" + Stringifiers.toString(targetId);
+        InboxMessageId result = InboxMessageId.newBuilder()
+                                              .setValue(rawValue)
+                                              .build();
+        return result;
     }
 
     /**
@@ -138,7 +151,9 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
             M envelope = asEnvelope(message);
             InboxLabel label = message.getLabel();
             InboxId inboxId = message.getInboxId();
-            MessageEndpoint<I, M> endpoint = getEndpoint(envelope, label, inboxId);
+            MessageEndpoint<I, M> endpoint =
+                    endpoints.get(label, envelope)
+                             .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
 
             TenantAwareRunner
                     .with(envelope.tenantId())

@@ -29,11 +29,9 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.delivery.InboxLabel.COMMAND_UPON_EVENT;
 import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
 import static io.spine.server.delivery.InboxLabel.IMPORT_EVENT;
 import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
-import static io.spine.server.delivery.InboxLabel.TRANSFORM_COMMAND;
 import static io.spine.server.delivery.InboxLabel.UPDATE_SUBSCRIBER;
 
 /**
@@ -46,16 +44,18 @@ import static io.spine.server.delivery.InboxLabel.UPDATE_SUBSCRIBER;
  * @param <I>
  *         the type of consumer identifiers.
  */
-public class Inbox<I> {
+public class Inbox<I>{
 
     private final TypeUrl entityStateType;
     private final InboxOfCommands<I> commandPart;
     private final InboxOfEvents<I> eventPart;
+    private final Delivery delivery;
 
-    private Inbox(Builder<I> builder) {
+    private Inbox(Builder<I> builder, Delivery delivery) {
         this.entityStateType = builder.entityStateType;
         this.commandPart = new InboxOfCommands<>(builder);
         this.eventPart = new InboxOfEvents<>(builder);
+        this.delivery = delivery;
     }
 
     /**
@@ -100,6 +100,10 @@ public class Inbox<I> {
 
     public ShardedMessageDelivery<InboxMessage> delivery() {
         return new InboxMessageDelivery();
+    }
+
+    public void unregister() {
+        delivery.unregister(this);
     }
 
     /**
@@ -158,7 +162,7 @@ public class Inbox<I> {
             checkNotNull(entityStateType, "Entity state type must be set");
             checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),
                           "There must be at least one event or command endpoint");
-            Inbox<I> inbox = new Inbox<>(this);
+            Inbox<I> inbox = new Inbox<>(this, delivery);
             delivery.register(inbox);
             return inbox;
         }
@@ -199,10 +203,6 @@ public class Inbox<I> {
             eventPart.store(event, entityId, IMPORT_EVENT);
         }
 
-        public void toCommander(I entityId) {
-            eventPart.store(event, entityId, COMMAND_UPON_EVENT);
-        }
-
         public void toSubscriber(I entityId) {
             eventPart.store(event, entityId, UPDATE_SUBSCRIBER);
         }
@@ -221,10 +221,6 @@ public class Inbox<I> {
 
         public void toHandler(I entityId) {
             commandPart.store(command, entityId, HANDLE_COMMAND);
-        }
-
-        public void toCommander(I entityId) {
-            commandPart.store(command, entityId, TRANSFORM_COMMAND);
         }
     }
 

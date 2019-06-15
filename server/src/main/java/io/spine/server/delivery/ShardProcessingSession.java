@@ -47,10 +47,6 @@ public abstract class ShardProcessingSession {
         return index;
     }
 
-    public Timestamp whenLastMessageProcessed() {
-        return whenLastMessageProcessed;
-    }
-
     @OverridingMethodsMustInvokeSuper
     protected void updateLastProcessed(Timestamp timestamp) {
         this.whenLastMessageProcessed = timestamp;

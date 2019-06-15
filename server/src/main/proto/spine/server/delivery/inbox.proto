@@ -50,32 +50,40 @@ message InboxId {
     string type_url = 2;
 }
 
-// A label applied to the message in `Inbox`.
-//
-// Determines what to do with the message once it's time to dispatch it to its target, whether
-// it's an entity or a standalone message handler.
+// A label telling how to dispatch a message, residing in the `Inbox`.
 //
 enum InboxLabel {
 
-    MD_UNKNOWN = 0;
+    IL_UNKNOWN = 0;
 
-    // Pass a command message to an `@Assign`-annotated command handler.
+    // Pass a command message to an `@Assign` or `@Command`-annotated command handler.
     HANDLE_COMMAND = 1;
 
-    // Pass a command message to a `@Command`-annotated commander method.
-    TRANSFORM_COMMAND = 2;
-
-    // Pass an event message to a `@Subscribe`-annotated event subscriber.
+    // Pass an event message to a `@Subscribe`-annotated event handler.
     UPDATE_SUBSCRIBER = 3;
 
-    // Pass an event message to a `@React`-annotated event reactor.
+    // Pass an event message to a `@React` or `@Command`-annotated event handler.
     REACT_UPON_EVENT = 4;
 
-    // Pass an event message to a `@Apply(allowImport = "true")`-annotated event importer.
+    // Pass an event message to a `@Apply(allowImport = "true")`-annotated event handler.
     IMPORT_EVENT = 5;
+}
 
-    // Pass an event message to a `@Command`-annotated commander method.
-    COMMAND_UPON_EVENT = 6;
+// A status of the message in the `Inbox`.
+//
+enum InboxMessageStatus {
+
+    IMS_UNKNOWN = 0;
+
+    // The message is ready to be delivered.
+    TO_DELIVER = 1;
+
+    // The message is scheduled for the delivery.
+    SCHEDULED = 2;
+
+    // The message is already delivered and can be removed once it's no longer needed
+    // for de-duplication.
+    DELIVERED = 3;
 }
 
 message InboxMessageId {
@@ -110,6 +118,8 @@ message InboxMessage {
 
     InboxLabel label = 6 [(required) = true];
 
+    InboxMessageStatus status = 7 [(required) = true];
+
     // A point in time when the message was received by the `Inbox` instance.
-    google.protobuf.Timestamp when_received = 7 [(required) = true];
+    google.protobuf.Timestamp when_received = 8 [(required) = true];
 }
