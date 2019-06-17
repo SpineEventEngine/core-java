@@ -53,7 +53,14 @@ public final class TestProcessManagerRepository
     @Override
     public void onError(CommandEnvelope cmd, RuntimeException exception) {
         this.latestException = exception;
-        super.onError(cmd, exception);
+        try {
+            super.onError(cmd, exception);
+        } catch (Exception e) {
+            //TODO:2019-06-17:alex.tymchenko: Do we need to let the exceptions out at all?
+            logError("Error dispatching command (class: `%s`, ID: `%s`) to entity with state `%s`.",
+                     cmd, exception);
+
+        }
     }
 
     public @Nullable RuntimeException latestException() {

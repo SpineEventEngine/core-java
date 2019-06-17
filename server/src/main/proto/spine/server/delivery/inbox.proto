@@ -86,14 +86,23 @@ enum InboxMessageStatus {
     DELIVERED = 3;
 }
 
+// Identifies the message in the `Inbox`.
 message InboxMessageId {
 
-    // The value of the identifier of the source message, that has been put into the `Inbox`.
+    // UUID-based identifier.
+    string uuid = 1 [(required) = true];
+}
+
+// Identifies the original signal message that is packed inside the `InboxMessage`.
+message InboxSignalId {
+
+    // The value of the identifier of the source signal message, that has been put into the `Inbox`.
     //
     // E.g. if an instance of `Event` is put into the `Inbox`,
     // this field has a value of `Event.id.value`.
     string value = 1 [(required) = true];
 }
+
 
 // A message in the inbox.
 //
@@ -101,25 +110,27 @@ message InboxMessage {
 
     option (is).java_type = "io.spine.server.delivery.ShardedRecord";
 
-    InboxMessageId id = 1;
+    InboxMessageId id = 1 [(required) = true];
+
+    InboxSignalId signal_id = 2 [(required) = true];
 
     // The identifier of the `Inbox` in which this message is stored.
-    InboxId inbox_id = 2 [(required) = true];
+    InboxId inbox_id = 3 [(required) = true];
 
-    spine.server.sharding.ShardIndex shard_index = 3;
+    spine.server.sharding.ShardIndex shard_index = 4 [(required) = true];
 
     // What the message is.
     oneof payload {
 
-        core.Event event = 4;
+        core.Event event = 5;
 
-        core.Command command = 5;
+        core.Command command = 6;
     }
 
-    InboxLabel label = 6 [(required) = true];
+    InboxLabel label = 7 [(required) = true];
 
-    InboxMessageStatus status = 7 [(required) = true];
+    InboxMessageStatus status = 8 [(required) = true];
 
     // A point in time when the message was received by the `Inbox` instance.
-    google.protobuf.Timestamp when_received = 8 [(required) = true];
+    google.protobuf.Timestamp when_received = 9 [(required) = true];
 }

@@ -88,7 +88,8 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         ShardIndex shardIndex = delivery.whichShardFor(entityId);
         InboxMessage.Builder builder = InboxMessage
                 .newBuilder()
-                .setId(inboxMsgIdFrom(envelope, entityId))
+                .setId(InboxMessageId.generate())
+                .setSignalId(signalIdFrom(envelope, entityId))
                 .setInboxId(inboxId)
                 .setShardIndex(shardIndex)
                 .setLabel(label)
@@ -104,12 +105,12 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                 });
     }
 
-    private InboxMessageId inboxMsgIdFrom(M envelope, I targetId) {
+    private InboxSignalId signalIdFrom(M envelope, I targetId) {
         //TODO:2019-06-15:alex.tymchenko: stringified IDs are ugly.
         String rawValue = extractUuidFrom(envelope) + " @" + Stringifiers.toString(targetId);
-        InboxMessageId result = InboxMessageId.newBuilder()
-                                              .setValue(rawValue)
-                                              .build();
+        InboxSignalId result = InboxSignalId.newBuilder()
+                                            .setValue(rawValue)
+                                            .build();
         return result;
     }
 
@@ -139,8 +140,8 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                     deduplicationSource
                             .stream()
                             .filter(filterByType())
-                            .map(InboxMessage::getId)
-                            .map(InboxMessageId::getValue)
+                            .map(InboxMessage::getSignalId)
+                            .map(InboxSignalId::getValue)
                             .collect(Collectors.toCollection((Supplier<Set<String>>) HashSet::new));
         }
 
@@ -188,7 +189,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
          * exception wrapped into a inbox-specific runtime exception for further handling.
          */
         private Optional<? extends RuntimeException> checkDuplicate(InboxMessage message) {
-            String currentId = message.getId()
+            String currentId = message.getSignalId()
                                       .getValue();
             boolean hasDuplicate = rawIds.contains(currentId);
             if (hasDuplicate) {

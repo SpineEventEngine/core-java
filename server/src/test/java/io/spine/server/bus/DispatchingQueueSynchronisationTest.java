@@ -29,7 +29,6 @@ import io.spine.test.bus.Sell;
 import io.spine.test.bus.ShareId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("When posting commands in parallel")
 class DispatchingQueueSynchronisationTest {
 
-    @Disabled("https://github.com/SpineEventEngine/core-java/issues/746")
     @Test
     @DisplayName("Bus should not lock with its system counterpart")
     void deadlock() throws InterruptedException {
@@ -78,7 +76,7 @@ class DispatchingQueueSynchronisationTest {
                     .vBuild();
             context.receivesCommand(sell);
         }));
-        executor.awaitTermination(20, SECONDS);
+        executor.awaitTermination(5, SECONDS);
         assertEquals(shares.size(), executor.getCompletedTaskCount(),
                      "Not all tasks have been executed. Most likely, a dead lock is reached.");
     }

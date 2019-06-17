@@ -131,7 +131,7 @@ public final class Delivery {
      * right away.
      */
     public static Delivery local() {
-        Delivery delivery = newBuilder().setDeduplicationWindow(Durations.fromMillis(300))
+        Delivery delivery = newBuilder().setDeduplicationWindow(Durations.fromMillis(30000))
                                         .build();
         delivery.subscribe(new LocalDispatchingObserver());
         return delivery;
@@ -233,7 +233,8 @@ public final class Delivery {
                     }
                 }
                 inboxStorage.markDelivered(toDeliver);
-                inboxStorage.removeAll(removalBuilder.build());
+                ImmutableList<InboxMessage> toRemove = removalBuilder.build();
+                inboxStorage.removeAll(toRemove);
                 int deliveredInBatch = toDeliver.size();
                 totalMessagesDelivered += deliveredInBatch;
                 Timestamp lastMsgTimestamp = toDeliver.get(deliveredInBatch - 1)
