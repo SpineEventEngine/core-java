@@ -28,7 +28,7 @@ import io.spine.logging.Logging;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
-final class CompositeTracer extends AbstractTracer implements Logging {
+final class CompositeTracer extends AbstractTracer implements UncheckedTracer, Logging {
 
     private final ImmutableList<Tracer> delegates;
 

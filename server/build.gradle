@@ -19,13 +19,24 @@
  */
 
 dependencies {
+    annotationProcessor deps.build.autoService.processor
+    compileOnly deps.build.autoService.annotations
+
     compile project(path: ':client')
 
     implementation deps.grpc.grpcNetty
     implementation deps.grpc.grpcProtobuf
-    
+
+    // TODO:2019-06-17:dmytro.dashenkov: Move to another subproject.
+    implementation "io.opencensus:opencensus-impl:0.23.0"
+    implementation "io.opencensus:opencensus-exporter-trace-stackdriver:0.23.0"
+
+/*
+
     testAnnotationProcessor deps.build.autoService.processor
     testCompileOnly deps.build.autoService.annotations
+*/
+
 
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation project(path: ":core", configuration: 'testArtifacts')

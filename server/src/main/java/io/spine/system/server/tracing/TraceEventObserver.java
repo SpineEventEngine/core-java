@@ -23,9 +23,9 @@ package io.spine.system.server.tracing;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.trace.Tracer;
-import io.spine.server.trace.TracerFactory;
 import io.spine.server.trace.Tracing;
+import io.spine.server.trace.UncheckedTracer;
+import io.spine.server.trace.UncheckedTracerFactory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
@@ -34,7 +34,7 @@ import io.spine.system.server.event.SignalDispatchedMixin;
 
 public final class TraceEventObserver extends AbstractEventSubscriber {
 
-    private final TracerFactory tracing;
+    private final UncheckedTracerFactory tracing;
 
     public TraceEventObserver(BoundedContextName context) {
         this.tracing = Tracing.compositeFactory()
@@ -62,7 +62,8 @@ public final class TraceEventObserver extends AbstractEventSubscriber {
     }
 
     private void trace(SignalDispatchedMixin<?> event) {
-        Tracer tracer = tracing.trace(event.getPayload());
-        tracer.processedBy(event.getReceiver());
+        try (UncheckedTracer tracer = tracing.trace(event.getPayload())) {
+            tracer.processedBy(event.getReceiver());
+        }
     }
 }

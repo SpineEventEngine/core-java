@@ -37,7 +37,7 @@ public final class Tracing {
     private Tracing() {
     }
 
-    public static TracerFactory compositeFactory() {
+    public static UncheckedTracerFactory compositeFactory() {
         return new CompositeFactory(factories);
     }
 }

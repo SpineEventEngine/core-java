@@ -20,12 +20,19 @@
 
 package io.spine.server.trace;
 
-import io.spine.core.MessageId;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 
-public interface Tracer extends AutoCloseable {
+@Immutable
+public interface UncheckedTracerFactory extends TracerFactory {
 
-    Signal<?, ?, ?> signal();
+    @Override
+    UncheckedTracerFactory inContext(BoundedContextName context);
 
-    void processedBy(MessageId receiver);
+    @Override
+    UncheckedTracerFactory outOfContext();
+
+    @Override
+    UncheckedTracer trace(Signal<?, ?, ?> signalMessage);
 }

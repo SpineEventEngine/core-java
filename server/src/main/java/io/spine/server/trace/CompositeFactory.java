@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 @Immutable
-final class CompositeFactory implements TracerFactory {
+final class CompositeFactory implements UncheckedTracerFactory {
 
     private final ImmutableList<TracerFactory> delegateFactories;
 
@@ -38,7 +38,7 @@ final class CompositeFactory implements TracerFactory {
     }
 
     @Override
-    public TracerFactory inContext(BoundedContextName context) {
+    public CompositeFactory inContext(BoundedContextName context) {
         ImmutableList<TracerFactory> factoriesInContext = delegateFactories
                 .stream()
                 .map(factory -> factory.inContext(context))
@@ -47,7 +47,7 @@ final class CompositeFactory implements TracerFactory {
     }
 
     @Override
-    public TracerFactory outOfContext() {
+    public CompositeFactory outOfContext() {
         ImmutableList<TracerFactory> factoriesInContext = delegateFactories
                 .stream()
                 .map(TracerFactory::outOfContext)
@@ -56,7 +56,7 @@ final class CompositeFactory implements TracerFactory {
     }
 
     @Override
-    public Tracer trace(Signal<?, ?, ?> signalMessage) {
+    public CompositeTracer trace(Signal<?, ?, ?> signalMessage) {
         ImmutableList<Tracer> tracers = delegateFactories
                 .stream()
                 .map(factory -> factory.trace(signalMessage))

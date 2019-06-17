@@ -21,12 +21,7 @@
 package io.spine.server.trace;
 
 import io.spine.annotation.SPI;
-import io.spine.core.ActorContext;
-import io.spine.core.MessageId;
 import io.spine.core.Signal;
-import io.spine.core.SignalId;
-
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,19 +35,7 @@ public abstract class AbstractTracer implements Tracer {
     }
 
     @Override
-    public SignalId root() {
-        return signal.rootMessage()
-                     .asSignalId();
-    }
-
-    @Override
-    public Optional<SignalId> parent() {
-        return signal.parent()
-                     .map(MessageId::asSignalId);
-    }
-
-    @Override
-    public ActorContext actor() {
-        return signal.actorContext();
+    public Signal<?, ?, ?> signal() {
+        return signal;
     }
 }

@@ -20,12 +20,8 @@
 
 package io.spine.server.trace;
 
-import io.spine.core.MessageId;
-import io.spine.core.Signal;
+public interface UncheckedTracer extends Tracer {
 
-public interface Tracer extends AutoCloseable {
-
-    Signal<?, ?, ?> signal();
-
-    void processedBy(MessageId receiver);
+    @Override
+    void close();
 }
