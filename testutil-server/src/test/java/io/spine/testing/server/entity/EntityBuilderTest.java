@@ -32,6 +32,7 @@ import io.spine.testing.server.entity.testenv.ebuilder.TestEntity;
 import io.spine.testing.server.entity.testenv.ebuilder.TestEntityBuilder;
 import io.spine.testing.server.entity.testenv.ebuilder.UserAggregate;
 import io.spine.validate.ConstraintViolation;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -117,6 +118,7 @@ class EntityBuilderTest {
     }
 
     @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
+    @Disabled   //TODO:2019-06-17:alex.tymchenko: TBD how to treat exceptions at all. Besides it tests a transaction, not `Builder`.
     @Test
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
