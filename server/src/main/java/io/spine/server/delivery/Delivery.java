@@ -218,11 +218,8 @@ public final class Delivery {
                 inboxStorage.removeAll(toRemove);
                 int deliveredInBatch = toDeliver.size();
                 totalMessagesDelivered += deliveredInBatch;
-                Timestamp lastMsgTimestamp = toDeliver.get(deliveredInBatch - 1)
-                                                      .getWhenReceived();
-                session.updateLastProcessed(lastMsgTimestamp);
                 ImmutableList<RuntimeException> exceptions = exceptionsBuilder.build();
-                if(!exceptions.isEmpty()) {
+                if (!exceptions.isEmpty()) {
                     throw exceptions.iterator()
                                     .next();
                 }
@@ -337,7 +334,7 @@ public final class Delivery {
         }
 
         public Builder setDeduplicationWindow(Duration deduplicationWindow) {
-            this.deduplicationWindow = checkNotNull(deduplicationWindow); ;
+            this.deduplicationWindow = checkNotNull(deduplicationWindow);
             return this;
         }
 

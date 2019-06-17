@@ -62,8 +62,8 @@ message ShardSessionRecord {
     // Unset until a node picks the session.
     NodeId picked_by = 2;
 
-    // When the last message was processed.
+    // When the shard processed within the session was last picked by the node.
     //
-    // This field is unset if no messages were processed
-    google.protobuf.Timestamp when_last_message_processed = 3;
+    // This field is unset no nodes ever picked the session.
+    google.protobuf.Timestamp when_last_picked = 3;
 }

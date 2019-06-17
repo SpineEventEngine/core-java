@@ -21,8 +21,6 @@
 package io.spine.server.delivery.memory;
 
 import com.google.common.collect.Maps;
-import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
@@ -87,18 +85,6 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
 
         private InMemoryShardSession(ShardSessionRecord record) {
             super(record);
-        }
-
-        @Override
-        protected void updateLastProcessed(Timestamp timestamp) {
-            super.updateLastProcessed(timestamp);
-            ShardIndex index = shardIndex();
-            ShardSessionRecord record = workByNode.get(index);
-            ShardSessionRecord updatedRecord =
-                    record.toBuilder()
-                          .setWhenLastMessageProcessed(Time.currentTime())
-                          .vBuild();
-            workByNode.put(index, updatedRecord);
         }
 
         @Override

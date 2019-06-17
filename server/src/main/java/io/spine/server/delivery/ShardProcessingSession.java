@@ -20,10 +20,7 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Timestamp;
 import io.spine.server.NodeId;
-
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * The session of processing the messages, which reside in a shard.
@@ -36,20 +33,16 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 public abstract class ShardProcessingSession {
 
     private final ShardIndex index;
-    private Timestamp whenLastMessageProcessed;
 
     protected ShardProcessingSession(ShardSessionRecord record) {
         this.index = record.getIndex();
-        whenLastMessageProcessed = record.getWhenLastMessageProcessed();
     }
 
+    /**
+     * Returns the index of the shard, to which this session relates to.
+     */
     public ShardIndex shardIndex() {
         return index;
-    }
-
-    @OverridingMethodsMustInvokeSuper
-    protected void updateLastProcessed(Timestamp timestamp) {
-        this.whenLastMessageProcessed = timestamp;
     }
 
     /**
