@@ -230,7 +230,7 @@ public class EntityLifecycle {
         EventImported systemEvent = EventImported
                 .newBuilder()
                 .setReceiver(entityId)
-                .setEventId(event.getId())
+                .setPayload(event)
                 .setWhenImported(currentTime())
                 .vBuild();
         postEvent(systemEvent);

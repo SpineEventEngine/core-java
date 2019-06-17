@@ -24,6 +24,9 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
+import io.spine.validate.Validate;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.validate.Validate.isNotDefault;
@@ -40,20 +43,31 @@ public interface CommandMixin
      */
     @Override
     default TenantId tenant() {
-        return context().getActorContext()
-                        .getTenantId();
+        return actorContext().getTenantId();
     }
 
     @Override
     default Timestamp time() {
-        return context().getActorContext()
-                        .getTimestamp();
+        return actorContext().getTimestamp();
+    }
+
+    @Override
+    default ActorContext actorContext() {
+        return context().getActorContext();
     }
 
     @Override
     default MessageId rootMessage() {
         return context().getOrigin()
                         .root();
+    }
+
+    @Override
+    default Optional<MessageId> parent() {
+        MessageId parent = context().getOrigin()
+                                    .messageId();
+        return Optional.of(parent)
+                       .filter(Validate::isNotDefault);
     }
 
     /**

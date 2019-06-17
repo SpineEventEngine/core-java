@@ -30,6 +30,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeUrl;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -100,7 +102,6 @@ public interface Signal<I extends SignalId,
     }
 
     /**
-     *
      * Obtains the ID of the tenant under which the message was created.
      */
     TenantId tenant();
@@ -109,6 +110,11 @@ public interface Signal<I extends SignalId,
      * Obtains the time when the message was created.
      */
     Timestamp time();
+
+    /**
+     * Obtains the data about the actor who started the message chain.
+     */
+    ActorContext actorContext();
 
     /**
      * Obtains the type URL of the enclosed message.
@@ -184,4 +190,6 @@ public interface Signal<I extends SignalId,
      * message define the tenant and actor of the whole chain.
      */
     MessageId rootMessage();
+
+    Optional<MessageId> parent();
 }
