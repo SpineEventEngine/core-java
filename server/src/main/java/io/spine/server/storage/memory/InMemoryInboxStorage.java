@@ -73,14 +73,6 @@ public class InMemoryInboxStorage extends InboxStorage implements Logging {
         return new InMemoryPage(filtered);
     }
 
-    private static StringBuilder collectionToString(ImmutableList<InboxMessage> messages) {
-        StringBuilder builder = new StringBuilder();
-        for (InboxMessage message : messages) {
-            builder.append("    + ").append(toString(message));
-        }
-        return builder;
-    }
-
     @Override
     public void write(InboxMessage message) {
         _warn("+ Writing {} ", toString(message));

@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
@@ -70,24 +69,6 @@ import static java.util.stream.Collectors.groupingBy;
  * should be created in each of {@code Entity} repositories.
  */
 public final class Delivery {
-
-    /**
-     * The unset value of the {@link Timestamp} values.
-     *
-     * <p>Used to improve the performance of checking if some {@code Timestamp} value is default,
-     * rather than calling {@link io.spine.validate.Validate#isDefault(Message)
-     * Validate.isDefault(Message)}.
-     */
-    private static final Timestamp UNSET = Timestamp.getDefaultInstance();
-
-    /**
-     * Used to calculate the period, which, when passing, guarantees that messages older than it,
-     * are in the past.
-     *
-     * <p>The messages cannot be read up until the current moment, as there may be several messages
-     * in a single millisecond.
-     */
-    private static final Duration ONE_MS = Durations.fromMillis(1);
 
     private final DeliveryStrategy strategy;
 
