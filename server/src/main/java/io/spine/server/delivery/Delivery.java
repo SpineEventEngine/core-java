@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Duration;
@@ -29,6 +30,7 @@ import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.BoundedContextNames;
+import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.groupingBy;
@@ -70,6 +73,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public final class Delivery {
 
+    public static final Duration LOCAL_IDEMPOTENCE_WINDOW = Durations.fromMillis(30000);
     /**
      * The strategy of assigning a shard index for a message that is delivered to a particular
      * target.
@@ -128,12 +132,25 @@ public final class Delivery {
     /**
      * Creates a new instance of {@code Delivery} suitable for local and development environment.
      *
-     * <p>Uses a single-shard splitting. Delivers the sharded messages from their {@code Inbox}es
-     * right away.
+     * <p>Uses a single-shard splitting.
      */
     public static Delivery local() {
-        Delivery delivery = newBuilder().setDeduplicationWindow(Durations.fromMillis(30000))
-                                        .build();
+        return localWithShardsAndWindow(1, LOCAL_IDEMPOTENCE_WINDOW);
+    }
+
+    /**
+     * Creates a new instance of {@code Delivery} suitable for local and development environment
+     * with the given number of shards.
+     */
+    @VisibleForTesting
+    static Delivery localWithShardsAndWindow(int shardCount, Duration idempotenceWindow) {
+        checkArgument(shardCount > 0, "Shard count must be positive");
+        checkNotNull(idempotenceWindow);
+
+        Delivery delivery =
+                newBuilder().setDeduplicationWindow(idempotenceWindow)
+                            .setStrategy(UniformAcrossAllShards.forNumber(shardCount))
+                            .build();
         delivery.subscribe(new LocalDispatchingObserver());
         return delivery;
     }
@@ -154,9 +171,10 @@ public final class Delivery {
      *         the shard index to deliver the messages from.
      */
     public void deliverMessagesFrom(ShardIndex index) {
+        NodeId currentNode = ServerEnvironment.getInstance()
+                                              .getNodeId();
         Optional<ShardProcessingSession> picked =
-                workRegistry.pickUp(index, ServerEnvironment.getInstance()
-                                                            .getNodeId());
+                workRegistry.pickUp(index, currentNode);
         if (!picked.isPresent()) {
             return;
         }
@@ -195,7 +213,7 @@ public final class Delivery {
             for (InboxMessage message : messages) {
                 Timestamp msgTime = message.getWhenReceived();
                 boolean insideIdempotentWnd =
-                        Timestamps.compare(msgTime, idempotenceWndStart) >= 0;
+                        Timestamps.compare(msgTime, idempotenceWndStart) > 0;
                 InboxMessageStatus status = message.getStatus();
 
                 if (insideIdempotentWnd) {
@@ -234,8 +252,7 @@ public final class Delivery {
                     }
                 }
                 inboxStorage.markDelivered(toDeliver);
-                ImmutableList<InboxMessage> toRemove = removalBuilder.build();
-                inboxStorage.removeAll(toRemove);
+
                 int deliveredInBatch = toDeliver.size();
                 totalMessagesDelivered += deliveredInBatch;
                 ImmutableList<RuntimeException> exceptions = exceptionsBuilder.build();
@@ -244,6 +261,10 @@ public final class Delivery {
                                     .next();
                 }
             }
+
+            ImmutableList<InboxMessage> toRemove = removalBuilder.build();
+            inboxStorage.removeAll(toRemove);
+
             maybePage = currentPage.next();
         }
         return totalMessagesDelivered;
@@ -295,6 +316,16 @@ public final class Delivery {
     void unregister(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
         inboxDeliveries.remove(entityType.value());
+    }
+
+    @VisibleForTesting
+    InboxStorage storage() {
+        return inboxStorage;
+    }
+
+    @VisibleForTesting
+    int shardCount() {
+        return strategy.getShardCount();
     }
 
     private InboxWriter inboxWriter() {

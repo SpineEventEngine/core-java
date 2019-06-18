@@ -21,21 +21,14 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
-import io.spine.base.Identifier;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.logging.Logging;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.delivery.Inbox;
-import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.string.Stringifiers;
 import io.spine.validate.Validated;
 
 import java.util.Iterator;
@@ -75,7 +68,6 @@ public class InMemoryInboxStorage extends InboxStorage implements Logging {
 
     @Override
     public void write(InboxMessage message) {
-        _warn("+ Writing {} ", toString(message));
         multitenantStorage.currentSlice()
                           .put(message.getId(), message);
     }
@@ -112,44 +104,7 @@ public class InMemoryInboxStorage extends InboxStorage implements Logging {
     public void removeAll(Iterable<InboxMessage> messages) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         for (InboxMessage message : messages) {
-            _warn("[{}] Removing " + toString(message), Thread.currentThread()
-                                                              .getName());
             storage.remove(message);
-        }
-    }
-
-    private static String toString(InboxMessage message) {
-        StringBuilder result = new StringBuilder();
-        result.append(" in status ");
-        result.append(message.getStatus());
-        result.append(" to [");
-
-        InboxId inboxId = message.getInboxId();
-        String entityType = inboxId.getTypeUrl();
-        result.append(entityType)
-              .append(']');
-        Object entityId = Identifier.unpack(inboxId.getEntityId()
-                                                   .getId());
-
-        result.append(" with ID = ")
-              .append(entityId).append(" received at ").append(message.getWhenReceived());
-        String contents = result.toString()
-                         .replaceAll("[\n\r]", "");
-        if (message.hasEvent()) {
-            Event event = message.getEvent();
-            Message unpacked = AnyPacker.unpack(event.getMessage());
-            result.append(". Contents = ")
-                  .append(Stringifiers.toString(unpacked));
-            return "Event of type " + unpacked.getClass()
-                                              .getSimpleName() + ' ' + contents;
-        } else {
-            Command command = message.getCommand();
-            Message unpacked = AnyPacker.unpack(command.getMessage());
-            result.append(".  Contents = ")
-                  .append(Stringifiers.toString(unpacked));
-            return "Command of type " + unpacked.getClass()
-                                                .getSimpleName() + ' ' + contents;
-
         }
     }
 
