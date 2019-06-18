@@ -127,7 +127,7 @@ class AggregatePartTest {
         boundedContext.stand()
                       .execute(query, observer);
         return observer.firstResponse()
-                       .getMessagesList()
+                       .getMessageList()
                        .stream()
                        .map(state -> unpack(state.getState()))
                        .collect(toList());

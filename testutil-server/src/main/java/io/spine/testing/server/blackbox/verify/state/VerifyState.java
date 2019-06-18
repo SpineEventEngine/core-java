@@ -21,20 +21,17 @@
 package io.spine.testing.server.blackbox.verify.state;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.QueryService;
 
 import java.util.Collection;
+import java.util.List;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,11 +60,7 @@ public abstract class VerifyState {
         queryService.read(query, observer);
         assertTrue(observer.isCompleted());
         QueryResponse response = observer.firstResponse();
-        ImmutableList<? extends Message> entities = response.getMessagesList()
-                                                            .stream()
-                                                            .map(EntityStateWithVersion::getState)
-                                                            .map(AnyPacker::unpack)
-                                                            .collect(toImmutableList());
+        List<? extends Message> entities = response.states();
         verify(entities);
     }
 

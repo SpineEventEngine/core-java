@@ -422,7 +422,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         private TargetFilters createIdFilters(List<Any> ids) {
             IdFilter filter = IdFilter
                     .newBuilder()
-                    .addAllIds(ids)
+                    .addAllId(ids)
                     .build();
             TargetFilters filters = TargetFilters
                     .newBuilder()

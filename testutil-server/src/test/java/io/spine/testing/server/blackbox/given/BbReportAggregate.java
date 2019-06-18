@@ -56,11 +56,11 @@ final class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReport.B
     @Apply
     private void on(BbReportCreated event) {
         builder().setId(event.getReportId())
-                 .addAllProjectIds(event.getProjectIdList());
+                 .addAllProjectId(event.getProjectIdList());
     }
 
     @Apply
     private void on(BbTaskAddedToReport event) {
-        builder().addTasks(event.getTask());
+        builder().addTask(event.getTask());
     }
 }

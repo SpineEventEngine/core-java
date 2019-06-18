@@ -20,7 +20,7 @@
 
 package io.spine.testing.client.grpc;
 
-import com.google.common.truth.Truth;
+import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Optional;
 
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.core.Responses.statusOk;
 import static io.spine.testing.client.grpc.TableSide.LEFT;
 import static io.spine.testing.client.grpc.TableSide.RIGHT;
@@ -98,14 +98,14 @@ class TestClientTest {
 
         // Query the state of the Game Process Manager, which has Timestamp as its state.
         QueryResponse response = client.queryAll(Table.class);
-        Truth.assertThat(response.getMessagesList())
-             .isNotEmpty();
+        assertFalse(response.isEmpty());
     }
 
     @Test
     void shutdown() throws InterruptedException {
         // Ensure that the client is operational.
-        assertThat(ping(RIGHT)).isPresent();
+        Truth8.assertThat(ping(RIGHT))
+              .isPresent();
 
         assertFalse(client.isShutdown());
         client.shutdown();
@@ -117,7 +117,7 @@ class TestClientTest {
     private static void assertOk(Optional<Ack> optional) {
         assertTrue(optional.isPresent());
         Ack ack = optional.get();
-        Truth.assertThat(ack.getStatus())
+        assertThat(ack.getStatus())
              .isEqualTo(statusOk());
     }
 }

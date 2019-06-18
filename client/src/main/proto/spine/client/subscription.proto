@@ -69,13 +69,11 @@ message Topic {
     core.ActorContext context = 4 [(required) = true,
                                    (validate) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
-
-    // Reserved for utility fields.
-    reserved 5 to 10;
 }
 
 // Wrapped collection of read-side entity updates on a topic with the specific subscription ID.
 message SubscriptionUpdate {
+    option (is).java_type = "SubscriptionUpdateMixin";
 
     // The subscription in which scope this update is propagated.
     Subscription subscription = 1 [(required) = true];
@@ -115,7 +113,7 @@ message SubscriptionUpdate {
 message EntityUpdates {
 
     // The entity state update list.
-    repeated EntityStateUpdate updates = 1 [(validate) = true];
+    repeated EntityStateUpdate update = 1 [(validate) = true];
 }
 
 // The pair of the entity ID and the entity state both packed as Any.
@@ -135,7 +133,7 @@ message EntityStateUpdate {
 message EventUpdates {
 
     // The event list.
-    repeated core.Event events = 1 [(validate) = true];
+    repeated core.Event event = 1 [(validate) = true];
 }
 
 // Subscription identifier.
@@ -163,9 +161,6 @@ message Subscription {
 
     // Represents the original topic for this subscription.
     Topic topic = 2 [(required) = true, (validate) = true, (if_invalid).msg_format = "Invalid topic"];
-
-    // Reserved for subscription attributes.
-    reserved 3 to 10;
 }
 
 // Enumeration of possible technical error reasons occurred in topic validation.

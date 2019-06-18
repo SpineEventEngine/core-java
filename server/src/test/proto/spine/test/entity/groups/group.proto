@@ -20,16 +20,13 @@ message Group {
     option (entity).visibility = SUBSCRIBE;
 
     GroupId id = 1;
-
     string name = 2;
-
-    repeated spine.core.UserId participants = 3;
+    repeated spine.core.UserId participant = 3;
 }
 
 message GroupName {
     option (entity).kind = PROJECTION;
 
     GroupId id = 1;
-
     string name = 2;
 }

@@ -149,7 +149,7 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         Any entityId = AnyPacker.pack(someGenericId);
         IdFilter idFilter = IdFilter
                 .newBuilder()
-                .addIds(entityId)
+                .addId(entityId)
                 .build();
         BoolValue archived = BoolValue
                 .newBuilder()
