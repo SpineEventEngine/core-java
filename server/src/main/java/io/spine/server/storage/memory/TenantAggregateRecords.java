@@ -21,8 +21,10 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
@@ -37,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static io.spine.util.Exceptions.unsupported;
 import static io.spine.validate.Validate.isDefault;
@@ -80,7 +83,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      *
      * @return immutable list
      */
-    List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
+    List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         I id = request.getRecordId();
         return ImmutableList.copyOf(records.get(id));
     }
@@ -93,7 +96,7 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      * @param id the ID of the aggregate
      * @return the number of events stored for the aggregate or zero
      */
-    int getEventCount(I id) {
+    int eventCount(I id) {
         Integer count = eventCounts.get(id);
         if (count == null) {
             return 0;
@@ -134,6 +137,50 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     @Override
     public boolean isEmpty() {
         return records.isEmpty();
+    }
+
+    /**
+     * Drops all records that are older than the Nth snapshot for each entity.
+     *
+     * @see io.spine.server.aggregate.AggregateStorage#truncateOlderThan(int)
+     */
+    void truncateOlderThan(int snapshotIndex) {
+        truncate(snapshotIndex, record -> true);
+    }
+
+    /**
+     * Drops all records older than {@code date} but not newer than the Nth snapshot for each
+     * entity.
+     *
+     * @see io.spine.server.aggregate.AggregateStorage#truncateOlderThan(int, Timestamp)
+     */
+    void truncateOlderThan(int snapshotIndex, Timestamp date) {
+        Predicate<AggregateEventRecord> isOlder =
+                record -> Timestamps.compare(date, record.getTimestamp()) > 0;
+        truncate(snapshotIndex, isOlder);
+    }
+
+    /**
+     * Drops the records that are preceding the specified snapshot and match the specified
+     * {@code Predicate}.
+     */
+    private void truncate(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
+        ImmutableSet.copyOf(records.keySet())
+                    .forEach(id -> truncate(id, snapshotIndex, predicate));
+    }
+
+    private void
+    truncate(I id, int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
+        ImmutableList<AggregateEventRecord> recordsCopy = ImmutableList.copyOf(records.get(id));
+        int snapshotsHit = 0;
+        for (AggregateEventRecord record : recordsCopy) {
+            if (snapshotsHit > snapshotIndex && predicate.test(record)) {
+                this.records.remove(id, record);
+            }
+            if (AggregateStorageRecordReverseComparator.isSnapshot(record)) {
+                snapshotsHit++;
+            }
+        }
     }
 
     /** Used for sorting keys by the key hash codes. */
