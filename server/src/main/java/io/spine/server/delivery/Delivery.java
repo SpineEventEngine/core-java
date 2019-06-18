@@ -70,8 +70,16 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public final class Delivery {
 
+    /**
+     * The strategy of assigning a shard index for a message that is delivered to a particular
+     * target.
+     */
     private final DeliveryStrategy strategy;
 
+    /**
+     * For how long we keep previously delivered message per-target to ensure the new messages
+     * aren't duplicates.
+     */
     private final Duration deduplicationWindow;
 
     /**
@@ -85,8 +93,20 @@ public final class Delivery {
      * which resides as a Protobuf {@code string} inside an incoming message.
      */
     private final Map<String, ShardedMessageDelivery<InboxMessage>> inboxDeliveries;
+
+    /**
+     * The observers that are notified when a message is written into a particular shard.
+     */
     private final List<ShardObserver> shardObservers;
+
+    /**
+     * The registry keeping track of which shards are processed by which application nodes.
+     */
     private final ShardedWorkRegistry workRegistry;
+
+    /**
+     * The storage of messages to deliver.
+     */
     private final InboxStorage inboxStorage;
 
     private Delivery(Builder builder) {
