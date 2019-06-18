@@ -457,7 +457,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>The default value is defined in {@link #DEFAULT_SNAPSHOT_TRIGGER}.
      *
-     * <p>Please <b>NOTE</b>: repository read operations are optimized around the current snapshot
+     * <p><b>NOTE</b>: repository read operations are optimized around the current snapshot
      * trigger. Setting the snapshot trigger to a new value may cause read operations to perform
      * sub-optimally, until a new snapshot is created. This doesn't apply to newly created
      * repositories.

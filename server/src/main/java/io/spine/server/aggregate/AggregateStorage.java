@@ -85,7 +85,7 @@ public abstract class AggregateStorage<I>
     /**
      * Writes events into the storage.
      *
-     * <p>NOTE: does not rewrite any events. Several events can be associated with one
+     * <p><b>NOTE</b>: does not rewrite any events. Several events can be associated with one
      * aggregate ID.
      *
      * @param id
