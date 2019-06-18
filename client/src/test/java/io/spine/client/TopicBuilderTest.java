@@ -142,7 +142,7 @@ class TopicBuilderTest {
 
             TargetFilters entityFilters = target.getFilters();
             IdFilter idFilter = entityFilters.getIdFilter();
-            Collection<Any> idValues = idFilter.getIdsList();
+            Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
                     .map(id -> toObject(id, int.class))
@@ -338,7 +338,7 @@ class TopicBuilderTest {
 
             // Check IDs
             IdFilter idFilter = targetFilters.getIdFilter();
-            Collection<Any> idValues = idFilter.getIdsList();
+            Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
                     .map(id -> toObject(id, int.class))
@@ -393,7 +393,7 @@ class TopicBuilderTest {
             Target target = topic.getTarget();
             TargetFilters filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
-                                               .getIdsList();
+                                               .getIdList();
             Truth.assertThat(entityIds)
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds

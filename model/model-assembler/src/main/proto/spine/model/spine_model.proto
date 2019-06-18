@@ -29,17 +29,15 @@ option java_multiple_files = true;
 option java_outer_classname = "CommandHandlersProto";
 option java_package = "io.spine.model";
 
+option (internal_all) = true;
+
 // The command handling types of a project.
-//
 message CommandHandlers {
 
     // All the command handling types of a Spine project.
     //
-    // Each type is represented with its Java FQN.
+    // Each type is represented with its Java fully-qualified class name.
+    // These types include `Aggregate`s, `ProcessManager`s, and `CommandHandler`s.
     //
-    // These types include `Aggregate`s, `ProcessManager`s and `CommandHandler`s.
-    //
-    repeated string command_handling_types = 1;
-
-    reserved 2 to 5;
+    repeated string command_handling_type = 1;
 }

@@ -63,9 +63,6 @@ message TargetFilters {
 
     // Match objects by the values of their fields.
     repeated CompositeFilter filter = 2;
-
-    // Reserved for more filter types
-    reserved 3 to 40;
 }
 
 // The filter grouping a number of simple filters with a specified logical operator.
@@ -134,8 +131,9 @@ message Filter {
 //
 // Used to filter out all objects with identifiers not included into the filter. SQL equivalent is
 // "... where row.id IN (...)".
+//
 message IdFilter {
 
     // The collection of IDs.
-    repeated google.protobuf.Any ids = 1;
+    repeated google.protobuf.Any id = 1;
 }

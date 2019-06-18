@@ -37,8 +37,8 @@ public final class GroupProjection extends Projection<GroupId, Group, Group.Buil
         Timestamp updateTime = systemContext.getTimestamp();
         builder().setId(id())
                  .setName(organization.getName() + updateTime)
-                 .addAllParticipants(organization.getMembersList())
-                 .addParticipants(organization.getHead());
+                 .addAllParticipant(organization.getMemberList())
+                 .addParticipant(organization.getHead());
     }
 
     public static final class Repository

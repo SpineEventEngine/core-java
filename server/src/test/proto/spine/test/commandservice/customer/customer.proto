@@ -50,5 +50,5 @@ message Customer {
     people.PersonName name = 2;
 
     // The list of customer's nicknames.
-    repeated people.PersonName nicknames = 3;
+    repeated people.PersonName nickname = 3;
 }

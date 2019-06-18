@@ -91,7 +91,7 @@ public class QueryFactoryTestEnv {
         assertNotNull(filters);
         IdFilter idFilter = filters.getIdFilter();
         assertNotNull(idFilter);
-        List<Any> actualListOfIds = idFilter.getIdsList();
+        List<Any> actualListOfIds = idFilter.getIdList();
         for (TestEntityId testEntityId : expectedIds) {
             Any expectedEntityId = AnyPacker.pack(testEntityId);
             assertTrue(actualListOfIds.contains(expectedEntityId));
@@ -162,8 +162,8 @@ public class QueryFactoryTestEnv {
         // Everything except ID filter is the same
         assertEquals(stripIdFilter(factoryFilters), stripIdFilter(builderFilters));
 
-        Collection<Any> factoryEntityIds = factoryIdFilter.getIdsList();
-        Collection<Any> builderEntityIds = builderIdFilter.getIdsList();
+        Collection<Any> factoryEntityIds = factoryIdFilter.getIdList();
+        Collection<Any> builderEntityIds = builderIdFilter.getIdList();
 
         // Order may differ but all the elements are the same
         assertThat(builderEntityIds).hasSize(factoryEntityIds.size());
