@@ -22,7 +22,6 @@ package io.spine.system.server.tracing;
 
 import io.spine.core.BoundedContextName;
 import io.spine.core.Subscribe;
-import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
