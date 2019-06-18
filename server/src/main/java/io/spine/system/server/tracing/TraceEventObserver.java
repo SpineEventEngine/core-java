@@ -20,12 +20,11 @@
 
 package io.spine.system.server.tracing;
 
-import io.spine.core.BoundedContextName;
 import io.spine.core.Subscribe;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.trace.Tracing;
-import io.spine.server.trace.UncheckedTracer;
-import io.spine.server.trace.UncheckedTracerFactory;
+import io.spine.server.trace.Tracer;
+import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EventDispatchedToReactor;
 import io.spine.system.server.event.EventDispatchedToSubscriber;
@@ -34,11 +33,12 @@ import io.spine.system.server.event.SignalDispatchedMixin;
 
 public final class TraceEventObserver extends AbstractEventSubscriber {
 
-    private final UncheckedTracerFactory tracing;
+    private final TracerFactory tracing;
 
-    public TraceEventObserver(BoundedContextName context) {
-        this.tracing = Tracing.compositeFactory()
-                              .inContext(context);
+    public TraceEventObserver(BoundedContext context) {
+        super();
+        this.tracing = context.tracing()
+                              .inContext(context.name());
     }
 
     @Subscribe
@@ -62,8 +62,10 @@ public final class TraceEventObserver extends AbstractEventSubscriber {
     }
 
     private void trace(SignalDispatchedMixin<?> event) {
-        try (UncheckedTracer tracer = tracing.trace(event.getPayload())) {
+        try (Tracer tracer = tracing.trace(event.getPayload())) {
             tracer.processedBy(event.getReceiver());
+        } catch (Exception e) {
+            _error(e, "Error during trace construction on event {}.", event.getPayload().typeUrl());
         }
     }
 }

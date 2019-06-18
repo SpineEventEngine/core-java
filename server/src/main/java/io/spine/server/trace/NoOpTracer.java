@@ -20,24 +20,22 @@
 
 package io.spine.server.trace;
 
-import com.google.common.collect.ImmutableList;
-import io.spine.annotation.Internal;
+import io.spine.core.MessageId;
+import io.spine.core.Signal;
 
-import static java.util.ServiceLoader.load;
+final class NoOpTracer extends AbstractTracer {
 
-@Internal
-public final class Tracing {
-
-    private static final ImmutableList<TracerFactory> factories =
-            ImmutableList.copyOf(load(TracerFactory.class));
-
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private Tracing() {
+    NoOpTracer(Signal<?, ?, ?> signal) {
+        super(signal);
     }
 
-    public static UncheckedTracerFactory compositeFactory() {
-        return new CompositeFactory(factories);
+    @Override
+    public void processedBy(MessageId receiver) {
+        // NoOp.
+    }
+
+    @Override
+    public void close() {
+        // NoOp.
     }
 }

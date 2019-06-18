@@ -92,7 +92,7 @@ abstract class AggregateEndpoint<I,
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "unused"}) // see Javadoc.
     protected void onDispatched(A aggregate, M envelope, List<Event> producedEvents) {
-        // No op. by default.
+        // NoOp by default.
     }
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
