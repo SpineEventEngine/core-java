@@ -48,13 +48,13 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.trace.NoOpTracerFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -111,6 +111,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
+    private final Supplier<@Nullable TracerFactory> tracerFactory;
 
     private final TenantIndex tenantIndex;
 
@@ -129,8 +130,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
         this.name = builder.name();
         this.multitenant = builder.isMultitenant();
-        this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
-                                                   .get());
+        this.storageFactory = memoize(builder.buildStorageFactorySupplier()::get);
+        this.tracerFactory = memoize(builder.buildTracerFactorySupplier()::get);
         this.eventBus = builder.buildEventBus();
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
@@ -442,8 +443,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return storageFactory.get();
     }
 
-    public TracerFactory tracing() {
-        return NoOpTracerFactory.INSTANCE;
+    /**
+     * Obtains {@link TracerFactory} associated with this {@code BoundedContext}.
+     */
+    public Optional<TracerFactory> tracing() {
+        return Optional.ofNullable(tracerFactory.get());
     }
 
     /**

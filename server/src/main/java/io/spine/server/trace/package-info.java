@@ -18,6 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This package defines the Spine Trace API.
+ *
+ * <p>The API allows users integrate with various tracing systems in order to monitor the message
+ * flow in their systems.
+ *
+ * <p>The API is invoked via system events which occur when a message is processed by an entity.
+ *
+ * <p>Currently, Trace API does not support monitoring standalone commanders, reactors,
+ * and subscribers. It is only applicable to entities, such as
+ * {@link io.spine.server.aggregate.Aggregate Aggregates},
+ * {@link io.spine.server.procman.ProcessManager ProcessManagers},
+ * and {@link io.spine.server.projection.Projection Projections}.
+ *
+ * <p>The entry point to integrating a third-party tracing system with a Spine-based application is
+ * {@link io.spine.server.trace.TracerFactory}. A single {@code TracerFactory} can be used in one or
+ * more bounded contexts.
+ *
+ * @see io.spine.server.trace.TracerFactory
+ * @see io.spine.server.trace.Tracer
+ * @see io.spine.server.BoundedContext#tracing()
+ */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.trace;

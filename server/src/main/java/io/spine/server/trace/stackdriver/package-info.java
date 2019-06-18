@@ -20,6 +20,13 @@
 
 // TODO:2019-06-17:dmytro.dashenkov: Move to another module.
 
+/**
+ * This package contains the implementation of Spine Tracing API based on the Stackdriver Trace.
+ *
+ * @see <a href="https://cloud.google.com/trace/docs/">API doc</a>
+ */
+
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.trace.stackdriver;

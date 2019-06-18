@@ -20,6 +20,7 @@
 
 package io.spine.system.server.tracing;
 
+import io.spine.core.BoundedContextName;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.AbstractEventSubscriber;
@@ -35,10 +36,9 @@ public final class TraceEventObserver extends AbstractEventSubscriber {
 
     private final TracerFactory tracing;
 
-    public TraceEventObserver(BoundedContext context) {
+    public TraceEventObserver(BoundedContextName contextName, TracerFactory tracing) {
         super();
-        this.tracing = context.tracing()
-                              .inContext(context.name());
+        this.tracing = tracing.inContext(contextName);
     }
 
     @Subscribe

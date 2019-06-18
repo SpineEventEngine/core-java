@@ -31,11 +31,13 @@ import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemClient;
@@ -43,6 +45,7 @@ import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
+import io.spine.system.server.tracing.TraceEventObserver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -71,6 +74,7 @@ public final class BoundedContextBuilder implements Logging {
     private boolean multitenant;
     private TenantIndex tenantIndex;
     private @Nullable Supplier<StorageFactory> storageFactorySupplier;
+    private @Nullable Supplier<TracerFactory> tracerFactorySupplier;
 
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
@@ -165,6 +169,23 @@ public final class BoundedContextBuilder implements Logging {
     Supplier<StorageFactory> buildStorageFactorySupplier() {
         checkState(storageFactorySupplier != null);
         return storageFactorySupplier;
+    }
+
+    @CanIgnoreReturnValue
+    public
+    BoundedContextBuilder setTracerFactorySupplier(@Nullable Supplier<TracerFactory> supplier) {
+        this.tracerFactorySupplier = supplier;
+        return this;
+    }
+
+    public Optional<Supplier<TracerFactory>> tracerFactorySupplier() {
+        return Optional.ofNullable(tracerFactorySupplier);
+    }
+
+    Supplier<@Nullable TracerFactory> buildTracerFactorySupplier() {
+        @SuppressWarnings("ReturnOfNull")
+        Supplier<TracerFactory> defaultSupplier = () -> null;
+        return tracerFactorySupplier().orElse(defaultSupplier);
     }
 
     @CanIgnoreReturnValue
@@ -341,7 +362,15 @@ public final class BoundedContextBuilder implements Logging {
         log().debug("{} created.", result.nameForLogging());
 
         registerRepositories(result);
+        registerTracing(result, system);
         return result;
+    }
+
+    private static void registerTracing(BoundedContext domain, BoundedContext system) {
+        domain.tracing().ifPresent(tracing -> {
+            EventDispatcher<?> observer = new TraceEventObserver(domain.name(), tracing);
+            system.registerEventDispatcher(observer);
+        });
     }
 
     private void registerRepositories(BoundedContext result) {
