@@ -256,13 +256,13 @@ public abstract class Aggregate<I,
      *
      * @param event the event to apply
      */
-    void invokeApplier(EventEnvelope event) {
+    final void invokeApplier(EventEnvelope event) {
         Applier method = thisClass().applierOf(event.messageClass());
         method.invoke(this, event);
     }
 
     @Override
-    public void play(Iterable<Event> events) {
+    public final void play(Iterable<Event> events) {
         EventPlayer.forTransactionOf(this)
                    .play(events);
     }
@@ -279,7 +279,7 @@ public abstract class Aggregate<I,
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    void play(AggregateHistory aggregateHistory) {
+    final void play(AggregateHistory aggregateHistory) {
         Snapshot snapshot = aggregateHistory.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
@@ -307,7 +307,7 @@ public abstract class Aggregate<I,
      * @param events the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
-    List<Event> apply(List<Event> events) {
+    final List<Event> apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
         play(versionedEvents);
@@ -326,7 +326,7 @@ public abstract class Aggregate<I,
      *
      * @param snapshot the snapshot with the state to restore
      */
-    void restore(Snapshot snapshot) {
+    final void restore(Snapshot snapshot) {
         @SuppressWarnings("unchecked") /* The cast is safe since the snapshot is created
             with the state of this aggregate, which is bound by the type <S>. */
         S stateToRestore = (S) unpack(snapshot.getState());
@@ -347,7 +347,7 @@ public abstract class Aggregate<I,
      * {@linkplain #remember Remembers} the uncommitted events as
      * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
      */
-    void commitEvents() {
+    final void commitEvents() {
         List<Event> recentEvents = uncommittedEvents.list();
         remember(recentEvents);
         uncommittedEvents = UncommittedEvents.ofNone();
@@ -357,7 +357,7 @@ public abstract class Aggregate<I,
      * Instructs to modify the state of an aggregate only within an event applier method.
      */
     @Override
-    protected String missingTxMessage() {
+    protected final String missingTxMessage() {
         return "Modification of aggregate state or its lifecycle flags is not available this way." +
                 " Make sure to modify those only from an event applier method.";
     }
@@ -367,7 +367,7 @@ public abstract class Aggregate<I,
      *
      * @return new snapshot
      */
-    Snapshot toSnapshot() {
+    final Snapshot toSnapshot() {
         Any state = AnyPacker.pack(state());
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
@@ -383,7 +383,7 @@ public abstract class Aggregate<I,
      * <p>Opens the method for the repository.
      */
     @Override
-    protected void clearRecentHistory() {
+    protected final void clearRecentHistory() {
         super.clearRecentHistory();
     }
 
@@ -396,7 +396,7 @@ public abstract class Aggregate<I,
      *
      * @return new iterator instance
      */
-    protected Iterator<Event> historyBackward() {
+    protected final Iterator<Event> historyBackward() {
         return recentHistory().iterator();
     }
 
@@ -424,14 +424,14 @@ public abstract class Aggregate<I,
     /**
      * Obtains the number of events stored in the associated storage since last snapshot.
      */
-    int eventCountAfterLastSnapshot() {
+    final int eventCountAfterLastSnapshot() {
         return eventCountAfterLastSnapshot;
     }
 
     /**
      * Updates the number of events stores in the associated storage since last snapshot.
      */
-    void setEventCountAfterLastSnapshot(int count) {
+    final void setEventCountAfterLastSnapshot(int count) {
         checkArgument(count >= 0, "Event count cannot be negative.");
         this.eventCountAfterLastSnapshot = count;
     }
