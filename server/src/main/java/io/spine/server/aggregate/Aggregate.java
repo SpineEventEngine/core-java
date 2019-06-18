@@ -31,7 +31,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.aggregate.model.EventApplier;
+import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
@@ -257,7 +257,7 @@ public abstract class Aggregate<I,
      * @param event the event to apply
      */
     void invokeApplier(EventEnvelope event) {
-        EventApplier method = thisClass().applierOf(event.messageClass());
+        Applier method = thisClass().applierOf(event.messageClass());
         method.invoke(this, event);
     }
 
