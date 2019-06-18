@@ -48,6 +48,8 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.trace.NoOpTracerFactory;
+import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
@@ -440,6 +442,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return storageFactory.get();
     }
 
+    public TracerFactory tracing() {
+        return NoOpTracerFactory.INSTANCE;
+    }
+
     /**
      * Returns {@code true} if the Bounded Context is designed to serve more than one tenant of
      * the application, {@code false} otherwise.
@@ -465,7 +471,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     @Internal
     public abstract SystemClient systemClient();
-
     @Internal
     public AggregateRootDirectory aggregateRootDirectory() {
         return aggregateRootDirectory;

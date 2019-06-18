@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.trace;
+// TODO:2019-06-17:dmytro.dashenkov: Move to another module.
 
-public interface UncheckedTracer extends Tracer {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.trace.stackdriver;
 
-    @Override
-    void close();
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;
