@@ -19,7 +19,7 @@
  */
 
 /**
- * This package is devoted to message delivery from {@code System} bounded context.
+ * This package is devoted to message delivery mechanism.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
