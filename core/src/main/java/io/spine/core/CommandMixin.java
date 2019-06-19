@@ -58,8 +58,11 @@ public interface CommandMixin
 
     @Override
     default MessageId rootMessage() {
-        return context().getOrigin()
-                        .root();
+        MessageId rootId = context().getOrigin()
+                                    .root();
+        return isNotDefault(rootId)
+               ? rootId
+               : messageId();
     }
 
     @Override
