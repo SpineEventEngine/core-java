@@ -161,10 +161,18 @@ public final class Delivery {
      * a particular shard. Therefore, in scope of this delivery, an approach based on pessimistic
      * locking per-{@code ShardIndex} is applied.
      *
-     * //TODO:2019-06-03:alex.tymchenko: this is not a behavior I'd expect.
-     * <p>In case the given shard is not available for delivery, this method does nothing.
+     * <p>In case the given shard is already processed by some node, this method does nothing.
      *
-     * //TODO:2019-06-06:alex.tymchenko: descibe per-page reading.
+     * <p>The content of the shard is read and delivered on page-by-page basis. The runtime
+     * exceptions occurring while a page is being delivered are accumulated and then the first
+     * exception is rethrown, if any.
+     *
+     * <p>After all the pages are read, the delivery process is launched again for the same shard.
+     * It is required in order to handle the messages, that may have been put to the same shard
+     * as an outcome of the first-wave messages.
+     *
+     * <p>Once the shard has no more messages to deliver, the delivery process ends, releasing
+     * the lock for the respective {@code ShardIndex}.
      *
      * @param index
      *         the shard index to deliver the messages from.
@@ -181,7 +189,6 @@ public final class Delivery {
         try {
             Integer deliveredMsgCount = null;
             while (deliveredMsgCount == null || deliveredMsgCount > 0) {
-                //TODO:2019-06-13:alex.tymchenko: can we detect the same in a more elegant way?
                 deliveredMsgCount = doDeliver(session);
             }
         } finally {
@@ -206,68 +213,53 @@ public final class Delivery {
                 continue;
             }
 
-            ImmutableList.Builder<InboxMessage> deliveryBuilder = ImmutableList.builder();
-            ImmutableList.Builder<InboxMessage> idempotenceBuilder = ImmutableList.builder();
-            ImmutableList.Builder<InboxMessage> removalBuilder = ImmutableList.builder();
+            Classifier classifier = Classifier.of(idempotenceWndStart, messages);
 
-            for (InboxMessage message : messages) {
-                Timestamp msgTime = message.getWhenReceived();
-                boolean insideIdempotentWnd =
-                        Timestamps.compare(msgTime, idempotenceWndStart) > 0;
-                InboxMessageStatus status = message.getStatus();
-
-                if (insideIdempotentWnd) {
-                    if (InboxMessageStatus.TO_DELIVER != status) {
-                        idempotenceBuilder.add(message);
-                    }
-                } else {
-                    removalBuilder.add(message);
-                }
-
-                if (InboxMessageStatus.TO_DELIVER == status) {
-                    deliveryBuilder.add(message);
-                }
-            }
-
-            ImmutableList<InboxMessage> toDeliver = deliveryBuilder.build();
+            ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
             if (!toDeliver.isEmpty()) {
+                ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
 
-                Map<String, List<InboxMessage>> messagesByType =
-                        groupByTargetType(toDeliver);
-                Map<String, List<InboxMessage>> idempotenceWndByType =
-                        groupByTargetType(idempotenceBuilder.build());
+                ImmutableList<RuntimeException> observedExceptions =
+                        deliverByType(toDeliver, idempotenceSource);
 
-                ImmutableList.Builder<RuntimeException> exceptionsBuilder = ImmutableList.builder();
-                for (String typeUrl : messagesByType.keySet()) {
-                    ShardedMessageDelivery<InboxMessage> delivery =
-                            inboxDeliveries.get(typeUrl);
-                    List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
-                    List<InboxMessage> idempotenceWnd = idempotenceWndByType.get(typeUrl);
-                    try {
-                        delivery.deliver(deliveryPackage,
-                                         idempotenceWnd ==
-                                                 null ? ImmutableList.of() : idempotenceWnd);
-                    } catch (RuntimeException e) {
-                        exceptionsBuilder.add(e);
-                    }
-                }
-                inboxStorage.markDelivered(toDeliver);
                 int deliveredInBatch = toDeliver.size();
                 totalMessagesDelivered += deliveredInBatch;
 
-                ImmutableList<RuntimeException> exceptions = exceptionsBuilder.build();
-                if (!exceptions.isEmpty()) {
-                    throw exceptions.iterator()
+                if (!observedExceptions.isEmpty()) {
+                    throw observedExceptions.iterator()
                                     .next();
                 }
             }
 
-            ImmutableList<InboxMessage> toRemove = removalBuilder.build();
+            ImmutableList<InboxMessage> toRemove = classifier.removals();
             inboxStorage.removeAll(toRemove);
 
             maybePage = currentPage.next();
         }
         return totalMessagesDelivered;
+    }
+
+    private ImmutableList<RuntimeException>
+    deliverByType(ImmutableList<InboxMessage> toDeliver, ImmutableList<InboxMessage> idmptSource) {
+
+        Map<String, List<InboxMessage>> messagesByType = groupByTargetType(toDeliver);
+        Map<String, List<InboxMessage>> idmptSourceByType = groupByTargetType(idmptSource);
+
+        ImmutableList.Builder<RuntimeException> exceptionsAccumulator = ImmutableList.builder();
+        for (String typeUrl : messagesByType.keySet()) {
+            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
+            List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
+            List<InboxMessage> idempotenceWnd = idmptSourceByType.getOrDefault(typeUrl,
+                                                                               ImmutableList.of());
+            try {
+                delivery.deliver(deliveryPackage, idempotenceWnd);
+            } catch (RuntimeException e) {
+                exceptionsAccumulator.add(e);
+            }
+        }
+        ImmutableList<RuntimeException> exceptions = exceptionsAccumulator.build();
+        inboxStorage.markDelivered(toDeliver);
+        return exceptions;
     }
 
     /**
@@ -309,11 +301,21 @@ public final class Delivery {
         shardObservers.add(observer);
     }
 
+    /**
+     * Registers the passed {@code Inbox} and puts its {@linkplain Inbox#delivery() delivery
+     * callbacks} into the list of those to be called, when the previously sharded messages
+     * are dispatched to their targets.
+     */
+
     void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
         inboxDeliveries.put(entityType.value(), inbox.delivery());
     }
 
+    /**
+     * Unregisters the given {@code Inbox} and removes all the {@linkplain Inbox#delivery()
+     * delivery callbacks} previously registered by this {@code Inbox}.
+     */
     void unregister(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
         inboxDeliveries.remove(entityType.value());
@@ -357,6 +359,72 @@ public final class Delivery {
 
     ShardIndex whichShardFor(Object msgDestinationId) {
         return strategy.getIndexFor(msgDestinationId);
+    }
+
+    /**
+     * Classifies the {@code InboxMessage}s messages by their type.
+     */
+    private static class Classifier {
+
+        private final ImmutableList<InboxMessage> delivery;
+        private final ImmutableList<InboxMessage> idempotence;
+        private final ImmutableList<InboxMessage> removal;
+
+        private Classifier(
+                ImmutableList<InboxMessage> delivery,
+                ImmutableList<InboxMessage> idempotence,
+                ImmutableList<InboxMessage> removal) {
+            this.delivery = delivery;
+            this.idempotence = idempotence;
+            this.removal = removal;
+        }
+
+        /**
+         * Classifies the messages taking the idempotence window start into the account,
+         * and returns the instance of the {@code Classifier}.
+         */
+        private static Classifier of(Timestamp idempotenceWndStart,
+                                     ImmutableList<InboxMessage> messages) {
+
+            ImmutableList.Builder<InboxMessage> deliveryBuilder = ImmutableList.builder();
+            ImmutableList.Builder<InboxMessage> idempotenceBuilder = ImmutableList.builder();
+            ImmutableList.Builder<InboxMessage> removalBuilder = ImmutableList.builder();
+
+            for (InboxMessage message : messages) {
+                Timestamp msgTime = message.getWhenReceived();
+                boolean insideIdempotentWnd =
+                        Timestamps.compare(msgTime, idempotenceWndStart) > 0;
+                InboxMessageStatus status = message.getStatus();
+
+                if (insideIdempotentWnd) {
+                    if (InboxMessageStatus.TO_DELIVER != status) {
+                        idempotenceBuilder.add(message);
+                    }
+                } else {
+                    removalBuilder.add(message);
+                }
+
+                if (InboxMessageStatus.TO_DELIVER == status) {
+                    deliveryBuilder.add(message);
+                }
+            }
+
+            return new Classifier(deliveryBuilder.build(),
+                                  idempotenceBuilder.build(),
+                                  removalBuilder.build());
+        }
+
+        public ImmutableList<InboxMessage> toDeliver() {
+            return delivery;
+        }
+
+        public ImmutableList<InboxMessage> idempotenceSource() {
+            return idempotence;
+        }
+
+        public ImmutableList<InboxMessage> removals() {
+            return removal;
+        }
     }
 
     /**
