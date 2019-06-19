@@ -20,18 +20,9 @@
 
 package io.spine.client.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.client.IdFilter;
-import io.spine.client.TargetFilters;
 import io.spine.test.queries.TaskId;
 
-import java.util.List;
-
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.AnyPacker.pack;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 
 public class TargetsTestEnv {
 
@@ -39,28 +30,9 @@ public class TargetsTestEnv {
     private TargetsTestEnv() {
     }
 
-    public static TargetFilters filtersForIds(Message... ids) {
-        List<Message> idsList = asList(ids);
-        List<Any> packedIds = idsList
-                .stream()
-                .map(TargetsTestEnv::newId)
-                .collect(toList());
-        IdFilter idFilter = IdFilter
-                .newBuilder()
-                .addAllIds(packedIds)
-                .build();
-        return TargetFilters.newBuilder()
-                                    .setIdFilter(idFilter)
-                                    .build();
-    }
-
-    private static Any newId(Message item) {
-        return pack(item);
-    }
-
     public static TaskId newTaskId() {
         return TaskId.newBuilder()
-                             .setValue(newUuid())
-                             .build();
+                     .setValue(newUuid())
+                     .build();
     }
 }

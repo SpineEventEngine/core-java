@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
@@ -47,6 +48,9 @@ public abstract class AggregateStorage<I>
         extends AbstractStorage<I, AggregateHistory, AggregateReadRequest<I>>
         implements StorageWithLifecycleFlags<I, AggregateHistory, AggregateReadRequest<I>> {
 
+    private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
+            "The specified snapshot index is incorrect";
+
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
     }
@@ -65,7 +69,8 @@ public abstract class AggregateStorage<I>
      * Forms and returns an {@link AggregateHistory} based on the
      * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
-     * @param request the aggregate read request based on which to form a record
+     * @param request
+     *         the aggregate read request based on which to form a record
      * @return the record instance or {@code Optional.empty()} if the
      *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
@@ -80,9 +85,11 @@ public abstract class AggregateStorage<I>
     /**
      * Writes events into the storage.
      *
-     * <p>NOTE: does not rewrite any events. Several events can be associated with one aggregate ID.
+     * <p><b>NOTE</b>: does not rewrite any events. Several events can be associated with one
+     * aggregate ID.
      *
-     * @param id     the ID for the record
+     * @param id
+     *         the ID for the record
      * @param events non empty aggregate state record to store
      */
     @Override
@@ -107,8 +114,10 @@ public abstract class AggregateStorage<I>
      * <p>Before the storing, {@linkplain io.spine.core.Event#clearEnrichments() enrichments}
      * will be removed from the event.
      *
-     * @param id    the aggregate ID
-     * @param event the event to write
+     * @param id
+     *         the aggregate ID
+     * @param event
+     *         the event to write
      */
     void writeEvent(I id, Event event) {
         checkNotClosedAndArguments(id, event);
@@ -121,8 +130,10 @@ public abstract class AggregateStorage<I>
     /**
      * Writes a {@code snapshot} by an {@code aggregateId} to the storage.
      *
-     * @param aggregateId an ID of an aggregate of which the snapshot is made
-     * @param snapshot    the snapshot of the aggregate
+     * @param aggregateId
+     *         an ID of an aggregate of which the snapshot is made
+     * @param snapshot
+     *         the snapshot of the aggregate
      */
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosedAndArguments(aggregateId, snapshot);
@@ -162,34 +173,15 @@ public abstract class AggregateStorage<I>
                                    .build();
     }
 
-    /**
-     * Reads a count of events which were saved to the storage after
-     * the last snapshot was created,
-     * <strong>or</strong> a count of all events if there were no snapshots yet.
-     *
-     * @param id an ID of an aggregate
-     * @return an even count after the last snapshot
-     */
-    protected abstract int readEventCountAfterLastSnapshot(I id);
-
-    /**
-     * Writes a count of events which were saved to the storage after
-     * the last snapshot was created, or a count of all events if there
-     * were no snapshots yet.
-     *
-     * @param id         an ID of an aggregate
-     * @param eventCount an even count after the last snapshot
-     * @throws IllegalStateException if the storage is closed
-     */
-    protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
-
     // Storage implementation API.
 
     /**
      * Writes the passed record into the storage.
      *
-     * @param id     the aggregate ID
-     * @param record the record to write
+     * @param id
+     *         the aggregate ID
+     * @param record
+     *         the record to write
      */
     protected abstract void writeRecord(I id, AggregateEventRecord record);
 
@@ -199,9 +191,60 @@ public abstract class AggregateStorage<I>
      * <p>Records are sorted by timestamp descending (from newer to older).
      * The iterator is empty if there's no history for the aggregate with passed ID.
      *
-     * @param request the read request
+     * @param request
+     *         the read request
      * @return new iterator instance
      */
     protected abstract Iterator<AggregateEventRecord> historyBackward(
             AggregateReadRequest<I> request);
+
+    /**
+     * Truncates the storage, dropping all records which occur before the Nth snapshot for each
+     * entity.
+     *
+     * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
+     * the latest snapshot.
+     *
+     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
+     * entity records remain intact in this case.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotIndex} is negative
+     */
+    @Internal
+    public void truncateOlderThan(int snapshotIndex) {
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
+        truncate(snapshotIndex);
+    }
+
+    /**
+     * Truncates the storage, dropping all records older than {@code date} but not newer than the
+     * Nth snapshot.
+     *
+     * <p>The snapshot index is counted from the latest to earliest, with {@code 0} representing
+     * the latest snapshot for each entity.
+     *
+     * <p>The snapshot index higher than the overall snapshot count of the entity is allowed, the
+     * records remain intact in this case.
+     *
+     * @throws IllegalArgumentException
+     *         if the {@code snapshotIndex} is negative
+     */
+    @Internal
+    public void truncateOlderThan(int snapshotIndex, Timestamp date) {
+        checkNotNull(date);
+        checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE);
+        truncate(snapshotIndex, date);
+    }
+
+    /**
+     * Drops all records which occur before the Nth snapshot for each entity.
+     */
+    protected abstract void truncate(int snapshotIndex);
+
+    /**
+     * Drops all records older than {@code date} but not newer than the Nth snapshot for each
+     * entity.
+     */
+    protected abstract void truncate(int snapshotIndex, Timestamp date);
 }

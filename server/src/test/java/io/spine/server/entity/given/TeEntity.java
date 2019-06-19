@@ -29,4 +29,8 @@ public class TeEntity
     public TeEntity(Long id) {
         super(id);
     }
+
+    public void turnToDeleted() {
+        setDeleted(true);
+    }
 }

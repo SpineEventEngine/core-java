@@ -113,9 +113,9 @@ class ModelVerifierTest {
         String procManTypeName = RenameProcMan.class.getName();
         CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
-                .addCommandHandlingTypes(commandHandlerTypeName)
-                .addCommandHandlingTypes(aggregateTypeName)
-                .addCommandHandlingTypes(procManTypeName)
+                .addCommandHandlingType(commandHandlerTypeName)
+                .addCommandHandlingType(aggregateTypeName)
+                .addCommandHandlingType(procManTypeName)
                 .build();
         verifier.verify(spineModel);
     }
@@ -127,7 +127,7 @@ class ModelVerifierTest {
         ModelVerifier verifier = new ModelVerifier(project);
         CommandHandlers model = CommandHandlers
                 .newBuilder()
-                .addCommandHandlingTypes(badHandlerName)
+                .addCommandHandlingType(badHandlerName)
                 .build();
         assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
     }
@@ -147,8 +147,8 @@ class ModelVerifierTest {
 
         CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
-                .addCommandHandlingTypes(firstType)
-                .addCommandHandlingTypes(secondType)
+                .addCommandHandlingType(firstType)
+                .addCommandHandlingType(secondType)
                 .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
@@ -160,7 +160,7 @@ class ModelVerifierTest {
         Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging();
         CommandHandlers model = CommandHandlers
                 .newBuilder()
-                .addCommandHandlingTypes(InvalidRestoreAggregate.class.getName())
+                .addCommandHandlingType(InvalidRestoreAggregate.class.getName())
                 .build();
         verifier.verify(model);
         assertEquals(1, loggedMessages.size());
@@ -182,7 +182,7 @@ class ModelVerifierTest {
         String invalidClassname = "non.existing.class.Name";
         CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
-                .addCommandHandlingTypes(invalidClassname)
+                .addCommandHandlingType(invalidClassname)
                 .build();
         new ModelVerifier(project).verify(spineModel);
     }
@@ -193,7 +193,7 @@ class ModelVerifierTest {
         String invalidClassname = ModelVerifierTest.class.getName();
         CommandHandlers spineModel = CommandHandlers
                 .newBuilder()
-                .addCommandHandlingTypes(invalidClassname)
+                .addCommandHandlingType(invalidClassname)
                 .build();
         assertThrows(IllegalArgumentException.class,
                      () -> new ModelVerifier(project).verify(spineModel));

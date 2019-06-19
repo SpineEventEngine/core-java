@@ -110,7 +110,7 @@ public abstract class Projection<I,
         ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
-        return projection.isChanged();
+        return projection.changed();
     }
 
     void apply(EventEnvelope event) {

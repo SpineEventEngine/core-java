@@ -59,7 +59,7 @@ public class AggregateTransaction<I,
      * and test utilities.
      */
     @Override
-    protected void commit() {
+    protected final void commit() {
         super.commit();
     }
 

@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Timestamp;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
@@ -66,13 +67,6 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected int readEventCountAfterLastSnapshot(I id) {
-        checkNotClosed();
-        int result = getStorage().getEventCount(id);
-        return result;
-    }
-
-    @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
         checkNotClosed();
         Optional<LifecycleFlags> result = getStorage().getStatus(id);
@@ -86,12 +80,6 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
-        checkNotClosed();
-        getStorage().putEventCount(id, eventCount);
-    }
-
-    @Override
     protected void writeRecord(I id, AggregateEventRecord record) {
         getStorage().put(id, record);
     }
@@ -99,7 +87,17 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         checkNotNull(request);
-        List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
+        List<AggregateEventRecord> records = getStorage().historyBackward(request);
         return records.iterator();
+    }
+
+    @Override
+    protected void truncate(int snapshotIndex) {
+        getStorage().truncateOlderThan(snapshotIndex);
+    }
+
+    @Override
+    protected void truncate(int snapshotIndex, Timestamp date) {
+        getStorage().truncateOlderThan(snapshotIndex, date);
     }
 }

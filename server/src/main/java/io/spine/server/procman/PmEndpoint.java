@@ -44,7 +44,7 @@ abstract class PmEndpoint<I,
 
     @Override
     protected boolean isModified(P processManager) {
-        boolean result = processManager.isChanged();
+        boolean result = processManager.changed();
         return result;
     }
 

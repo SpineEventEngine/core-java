@@ -35,9 +35,9 @@ import java.lang.reflect.Method;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
- * The signature of the {@link EventApplier} method.
+ * The signature of the {@link Applier} method.
  */
-class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope> {
+class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
 
     EventApplierSignature() {
         super(Apply.class);
@@ -49,8 +49,8 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     @Override
-    public EventApplier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventApplier(method, parameterSpec);
+    public Applier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        return new Applier(method, parameterSpec);
     }
 
     @Override
@@ -64,7 +64,7 @@ class EventApplierSignature extends MethodSignature<EventApplier, EventEnvelope>
     }
 
     /**
-     * Allowed combinations of parameters for {@link EventApplier} methods.
+     * Allowed combinations of parameters for {@link Applier} methods.
      */
     @VisibleForTesting
     @Immutable

@@ -22,8 +22,8 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.SignalId;
 import io.spine.core.Signal;
+import io.spine.core.SignalId;
 import io.spine.server.command.DispatchCommand;
 
 import java.util.List;

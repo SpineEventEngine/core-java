@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.SignalId;
 import io.spine.core.Signal;
+import io.spine.core.SignalId;
 
 /**
  * An atomic entity state change which advances the entity version.
@@ -51,8 +51,8 @@ public abstract class Phase<I, R> {
 
     private boolean successful = false;
 
-    Phase(VersionIncrement versionIncrement) {
-        this.versionIncrement = versionIncrement;
+    Phase(VersionIncrement increment) {
+        this.versionIncrement = increment;
     }
 
     /**

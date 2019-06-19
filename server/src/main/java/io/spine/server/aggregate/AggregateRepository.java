@@ -62,7 +62,6 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.Math.max;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -458,7 +457,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>The default value is defined in {@link #DEFAULT_SNAPSHOT_TRIGGER}.
      *
-     * @param snapshotTrigger a positive number of the snapshot trigger
+     * <p><b>NOTE</b>: repository read operations are optimized around the current snapshot
+     * trigger. Setting the snapshot trigger to a new value may cause read operations to perform
+     * sub-optimally, until a new snapshot is created. This doesn't apply to newly created
+     * repositories.
+     *
+     * @param snapshotTrigger
+     *         a positive number of the snapshot trigger
      */
     protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
@@ -480,7 +485,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads or creates an aggregate by the passed ID.
      *
-     * @param  id the ID of the aggregate
+     * @param  id
+     *          the ID of the aggregate
      * @return loaded or created aggregate instance
      */
     final A loadOrCreate(I id) {
@@ -503,7 +509,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@linkplain #loadHistory fetched} from the storage. Then the {@code Aggregate} is
      * {@linkplain #play restored} from its state history.
      *
-     * @param id the ID of the aggregate
+     * @param id
+     *         the ID of the aggregate
      * @return the loaded instance or {@code Optional.empty()} if there is no {@code Aggregate}
      *         with the ID
      */
@@ -517,28 +524,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Loads the history of the {@code Aggregate} with the given ID.
      *
      * <p>The method loads only the recent history of the aggregate.
-     * The maximum depth of the read operation is defined as the greater number between
-     * the {@linkplain AggregateStorage#readEventCountAfterLastSnapshot(Object) event count after
-     * the last snapshot} and the {@linkplain #snapshotTrigger() snapshot trigger}, plus one.
-     * This way, we secure the read operation from:
-     * <ol>
-     *     <li>snapshot trigger decrease;
-     *     <li>eventual consistency in the event count field.
-     * </ol>
      *
-     * <p>The extra one unit of depth is added in order to be sure to include the last snapshot
-     * itself.
+     * <p>The current {@link #snapshotTrigger} is used as a read operation
+     * {@linkplain AggregateReadRequest#batchSize()} batch size}, so the method can perform
+     * sub-optimally for some time after a {@link #snapshotTrigger} change.
      *
-     * @param id the ID of the {@code Aggregate} to fetch
+     * @param id
+     *         the ID of the {@code Aggregate} to fetch
      * @return the {@link AggregateHistory} for the {@code Aggregate} or
      *         {@code Optional.empty()} if there is no record with the ID
      */
     private Optional<AggregateHistory> loadHistory(I id) {
         AggregateStorage<I> storage = aggregateStorage();
-
-        int eventsAfterLastSnapshot = storage.readEventCountAfterLastSnapshot(id);
-        int batchSize = max(snapshotTrigger, eventsAfterLastSnapshot) + 1;
-
+        int batchSize = snapshotTrigger + 1;
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, batchSize);
         Optional<AggregateHistory> result = storage.read(request);
         return result;
@@ -548,8 +546,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Plays the given {@linkplain AggregateHistory Aggregate history} for an instance
      * of {@link Aggregate} with the given ID.
      *
-     * @param id      the ID of the {@code Aggregate} to load
-     * @param history the state record of the {@code Aggregate} to load
+     * @param id
+     *         the ID of the {@code Aggregate} to load
+     * @param history
+     *         the state record of the {@code Aggregate} to load
      * @return an instance of {@link Aggregate}
      */
     protected A play(I id, AggregateHistory history) {
@@ -568,7 +568,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * or {@link io.spine.server.entity.Entity#isDeleted() deleted} lifecycle
      * attribute, or both of them, are set to {@code true}.
      *
-     * @param  id the ID of the aggregate to load
+     * @param  id
+     *          the ID of the aggregate to load
      * @return the aggregate instance, or {@link Optional#empty() empty()} if there is no
      *         aggregate with such ID
      */

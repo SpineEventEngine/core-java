@@ -55,7 +55,7 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
         Event eventObject = event.outerObject();
         EventUpdates result = EventUpdates
                 .newBuilder()
-                .addEvents(eventObject)
+                .addEvent(eventObject)
                 .build();
         return result;
     }

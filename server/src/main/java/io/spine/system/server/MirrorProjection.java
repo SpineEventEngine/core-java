@@ -153,7 +153,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
         }
         List<Any> domainIds = target.getFilters()
                                     .getIdFilter()
-                                    .getIdsList();
+                                    .getIdList();
         if (domainIds.isEmpty()) {
             return IdFilter.getDefaultInstance();
         }
@@ -169,7 +169,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
                 .collect(toList());
         IdFilter idFilter = IdFilter
                 .newBuilder()
-                .addAllIds(mirrorIds)
+                .addAllId(mirrorIds)
                 .build();
         return idFilter;
     }

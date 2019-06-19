@@ -100,7 +100,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -198,7 +197,7 @@ public class AggregateRepositoryTest {
     }
 
     @Nested
-    @DisplayName("manage snapshots and event count properly")
+    @DisplayName("manage snapshots properly")
     class ManageSnapshots {
 
         @Test
@@ -290,8 +289,8 @@ public class AggregateRepositoryTest {
             verify(storageSpy).read(requestCaptor.capture());
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-            assertEquals(id, passedRequest.getRecordId());
-            assertEquals(repositorySpy.snapshotTrigger() + 1, passedRequest.getBatchSize());
+            assertEquals(id, passedRequest.recordId());
+            assertEquals(repositorySpy.snapshotTrigger() + 1, passedRequest.batchSize());
         }
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
@@ -313,41 +312,31 @@ public class AggregateRepositoryTest {
             verify(storageSpy).read(requestCaptor.capture());
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-            assertEquals(id, passedRequest.getRecordId());
-            assertEquals(nonDefaultSnapshotTrigger + 1, passedRequest.getBatchSize());
+            assertEquals(id, passedRequest.recordId());
+            assertEquals(nonDefaultSnapshotTrigger + 1, passedRequest.batchSize());
         }
     }
 
-    @Nested
-    @DisplayName("pass event count after last snapshot + 1 to AggregateReadRequest")
-    class PassEventCount {
+    @Test
+    @DisplayName("pass snapshot trigger + 1 to `AggregateReadRequest`")
+    void useSnapshotTriggerForRead() {
+        AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
+        AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
+        when(repositorySpy.aggregateStorage())
+                .thenReturn(storageSpy);
+        int snapshotTrigger = repositorySpy.snapshotTrigger();
 
-        @SuppressWarnings("CheckReturnValue")
-            // Calling `AggregateRepository.loadOrCreate` for the side effect.
-        @Test
-        @DisplayName("when the count is greater than the snapshot trigger")
-        void whenGreaterThanTrigger() {
-            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
-            AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
-            when(repositorySpy.aggregateStorage())
-                    .thenReturn(storageSpy);
-            int snapshotTrigger = repositorySpy.snapshotTrigger();
-            int eventCount = snapshotTrigger * 2;
-            when(storageSpy.readEventCountAfterLastSnapshot(any(ProjectId.class)))
-                    .thenReturn(eventCount);
+        ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.loadOrCreate(id);
 
-            ProjectId id = Sample.messageOfType(ProjectId.class);
-            repositorySpy.loadOrCreate(id);
+        @SuppressWarnings("unchecked") // Reflective mock creation.
+                ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
+                ArgumentCaptor.forClass(AggregateReadRequest.class);
+        verify(storageSpy).read(requestCaptor.capture());
 
-            @SuppressWarnings("unchecked") // Reflective mock creation.
-            ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
-                    ArgumentCaptor.forClass(AggregateReadRequest.class);
-            verify(storageSpy).read(requestCaptor.capture());
-
-            AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
-            assertEquals(id, passedRequest.getRecordId());
-            assertEquals(eventCount + 1, passedRequest.getBatchSize());
-        }
+        AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
+        assertEquals(id, passedRequest.recordId());
+        assertEquals(snapshotTrigger + 1, passedRequest.batchSize());
     }
 
     @Nested

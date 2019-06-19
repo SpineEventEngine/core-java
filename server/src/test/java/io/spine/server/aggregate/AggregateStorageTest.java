@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -63,7 +64,9 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
@@ -481,41 +484,6 @@ public abstract class AggregateStorageTest
         }
     }
 
-    @Nested
-    @DisplayName("properly read event count")
-    class ReadEventCount {
-
-        @Test
-        @DisplayName("set to default zero value")
-        void zeroByDefault() {
-            assertEquals(0, storage.readEventCountAfterLastSnapshot(id));
-        }
-
-        @Test
-        @DisplayName("set to specified value")
-        void setToSpecifiedValue() {
-            int expectedCount = 32;
-            storage.writeEventCountAfterLastSnapshot(id, expectedCount);
-
-            int actualCount = storage.readEventCountAfterLastSnapshot(id);
-
-            assertEquals(expectedCount, actualCount);
-        }
-
-        @Test
-        @DisplayName("updated to specified value")
-        void updated() {
-            int primaryValue = 16;
-            storage.writeEventCountAfterLastSnapshot(id, primaryValue);
-            int expectedValue = 32;
-            storage.writeEventCountAfterLastSnapshot(id, expectedValue);
-
-            int actualCount = storage.readEventCountAfterLastSnapshot(id);
-
-            assertEquals(expectedValue, actualCount);
-        }
-    }
-
     @Test
     @DisplayName("continue reading history if snapshot was not found in first batch")
     void continueReadHistoryIfSnapshotNotFound() {
@@ -525,8 +493,8 @@ public abstract class AggregateStorageTest
                                     .build();
         storage.writeSnapshot(id, snapshot);
 
-        int eventCountAfterSnapshot = 10;
-        for (int i = 0; i < eventCountAfterSnapshot; i++) {
+        int eventsAfterSnapshot = 10;
+        for (int i = 0; i < eventsAfterSnapshot; i++) {
             currentVersion = increment(currentVersion);
             Project state = Project.getDefaultInstance();
             Event event = eventFactory.createEvent(event(state), currentVersion);
@@ -540,7 +508,130 @@ public abstract class AggregateStorageTest
         assertTrue(optionalStateRecord.isPresent());
         AggregateHistory stateRecord = optionalStateRecord.get();
         assertEquals(snapshot, stateRecord.getSnapshot());
-        assertEquals(eventCountAfterSnapshot, stateRecord.getEventCount());
+        assertEquals(eventsAfterSnapshot, stateRecord.getEventCount());
+    }
+
+    @Nested
+    @DisplayName("truncate itself")
+    class Truncate {
+
+        private Version currentVersion;
+
+        @BeforeEach
+        void setUp() {
+            currentVersion = zero();
+        }
+
+        @Test
+        @DisplayName("to the Nth latest snapshot")
+        void toTheNthSnapshot() {
+            writeSnapshot();
+            writeEvent();
+            Snapshot latestSnapshot = writeSnapshot();
+
+            int snapshotIndex = 0;
+            storage.truncateOlderThan(snapshotIndex);
+
+            List<AggregateEventRecord> records = newArrayList(historyBackward());
+            assertThat(records)
+                    .hasSize(1);
+            assertThat(records.get(0).getSnapshot())
+                    .isEqualTo(latestSnapshot);
+        }
+
+        @Test
+        @DisplayName("by date")
+        void byDate() {
+            Duration delta = seconds(10);
+            Timestamp now = currentTime();
+            Timestamp before = subtract(now, delta);
+            Timestamp after = add(now, delta);
+
+            writeSnapshot(before);
+            writeEvent(before);
+            Event latestEvent = writeEvent(after);
+            Snapshot latestSnapshot = writeSnapshot(after);
+
+            int snapshotIndex = 0;
+            storage.truncateOlderThan(snapshotIndex, now);
+
+            List<AggregateEventRecord> records = newArrayList(historyBackward());
+            assertThat(records)
+                    .hasSize(2);
+            assertThat(records.get(0).getSnapshot())
+                    .isEqualTo(latestSnapshot);
+            assertThat(records.get(1).getEvent())
+                    .isEqualTo(latestEvent);
+        }
+
+        @Test
+        @DisplayName("by date preserving at least the Nth latest snapshot")
+        void byDateAndSnapshot() {
+            Duration delta = seconds(10);
+            Timestamp now = currentTime();
+            Timestamp before = subtract(now, delta);
+            Timestamp after = add(now, delta);
+
+            writeEvent(before);
+            Snapshot snapshot1 = writeSnapshot(before);
+            Event event1 = writeEvent(before);
+            Event event2 = writeEvent(after);
+            Snapshot snapshot2 = writeSnapshot(after);
+
+            int snapshotIndex = 1;
+            storage.truncateOlderThan(snapshotIndex, now);
+
+            // The `event1` should be preserved event though it occurred before the specified date.
+            List<AggregateEventRecord> records = newArrayList(historyBackward());
+            assertThat(records).hasSize(4);
+            assertThat(records.get(0).getSnapshot())
+                    .isEqualTo(snapshot2);
+            assertThat(records.get(1).getEvent())
+                    .isEqualTo(event2);
+            assertThat(records.get(2).getEvent())
+                    .isEqualTo(event1);
+            assertThat(records.get(3).getSnapshot())
+                    .isEqualTo(snapshot1);
+        }
+
+        @CanIgnoreReturnValue
+        private Snapshot writeSnapshot() {
+            return writeSnapshot(Timestamp.getDefaultInstance());
+        }
+
+        @CanIgnoreReturnValue
+        private Snapshot writeSnapshot(Timestamp atTime) {
+            currentVersion = increment(currentVersion);
+            Snapshot snapshot = Snapshot
+                    .newBuilder()
+                    .setTimestamp(atTime)
+                    .setVersion(currentVersion)
+                    .build();
+            storage.writeSnapshot(id, snapshot);
+            return snapshot;
+        }
+
+        @CanIgnoreReturnValue
+        private Event writeEvent() {
+            return writeEvent(Timestamp.getDefaultInstance());
+        }
+
+        @CanIgnoreReturnValue
+        private Event writeEvent(Timestamp atTime) {
+            currentVersion = increment(currentVersion);
+            Project state = Project.getDefaultInstance();
+            Event event = eventFactory.createEvent(event(state), currentVersion, atTime);
+            storage.writeEvent(id, event);
+            return event;
+        }
+    }
+
+    @Test
+    @DisplayName("throw IAE when the incorrect snapshot index is specified for truncate operation")
+    void throwIaeOnInvalidTruncate() {
+        assertThrows(IllegalArgumentException.class, () -> storage.truncateOlderThan(-1));
+        assertThrows(IllegalArgumentException.class,
+                     () -> storage.truncateOlderThan(-2, Timestamp.getDefaultInstance()));
     }
 
     @Nested
@@ -622,28 +713,6 @@ public abstract class AggregateStorageTest
         return optional.get();
     }
 
-    @Nested
-    @DisplayName("being closed, not allow")
-    class BeingClosedThrow {
-
-        @Test
-        @DisplayName("writing event count")
-        void onWritingEventCount() {
-            close(storage);
-
-            assertThrows(IllegalStateException.class,
-                         () -> storage.writeEventCountAfterLastSnapshot(id, 5));
-        }
-
-        @Test
-        @DisplayName("reading event count")
-        void onReadingEventCount() {
-            close(storage);
-
-            assertThrows(IllegalStateException.class,
-                         () -> storage.readEventCountAfterLastSnapshot(id));
-        }
-    }
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
         Event expectedEvent = eventFactory.createEvent(event(Time.currentTime()));

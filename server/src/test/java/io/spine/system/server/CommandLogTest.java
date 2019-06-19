@@ -35,6 +35,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
@@ -60,7 +61,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -214,7 +214,7 @@ class CommandLogTest {
             Command command = Command
                     .newBuilder()
                     .setId(CommandId.generate())
-                    .setMessage(pack(invalidCommand))
+                    .setMessage(AnyPacker.pack(invalidCommand))
                     .setContext(context)
                     .build();
             return command;

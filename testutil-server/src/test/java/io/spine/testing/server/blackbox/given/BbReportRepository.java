@@ -66,7 +66,7 @@ public final class BbReportRepository extends AggregateRepository<BbReportId, Bb
 
     private static boolean reportContainsProject(BbReportAggregate report, BbProjectId projectId) {
         return report.state()
-                     .getProjectIdsList()
+                     .getProjectIdList()
                      .contains(projectId);
     }
 }

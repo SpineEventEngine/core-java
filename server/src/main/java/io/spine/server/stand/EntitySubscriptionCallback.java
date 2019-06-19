@@ -61,16 +61,16 @@ final class EntitySubscriptionCallback extends SubscriptionCallback {
         EntityId entityId = EntityId.newBuilder()
                                     .setId(event.getEntity().getId())
                                     .build();
-        Any packedEntityId = Identifier.pack(entityId);
-        Any packedEntityState = event.getNewState();
+        Any packedId = Identifier.pack(entityId);
+        Any packedState = event.getNewState();
         EntityStateUpdate stateUpdate = EntityStateUpdate
                 .newBuilder()
-                .setId(packedEntityId)
-                .setState(packedEntityState)
+                .setId(packedId)
+                .setState(packedState)
                 .vBuild();
         EntityUpdates result = EntityUpdates
                 .newBuilder()
-                .addUpdates(stateUpdate)
+                .addUpdate(stateUpdate)
                 .vBuild();
         return result;
     }

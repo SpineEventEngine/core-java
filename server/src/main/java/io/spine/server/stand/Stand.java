@@ -402,7 +402,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 Collection<EntityStateWithVersion> readResult = queryProcessor.process(query());
                 QueryResponse response = QueryResponse
                         .newBuilder()
-                        .addAllMessages(readResult)
+                        .addAllMessage(readResult)
                         .setResponse(Responses.ok())
                         .build();
                 responseObserver.onNext(response);

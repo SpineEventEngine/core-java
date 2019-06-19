@@ -28,8 +28,8 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
-import io.spine.client.IdFilter;
 import io.spine.client.TargetFilters;
+import io.spine.client.Targets;
 import io.spine.core.Version;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
@@ -52,7 +52,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Identifier.pack;
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.eq;
@@ -212,14 +211,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         // Prepare the query
         Any entityId = TypeConverter.toAny(idMatching);
-        IdFilter idFilter = IdFilter
-                .newBuilder()
-                .addIds(entityId)
-                .build();
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .setIdFilter(idFilter)
-                .build();
+        TargetFilters filters = Targets.acceptingOnly(entityId);
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
 
         // Perform the query
@@ -281,16 +273,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
-        IdFilter idFilter = IdFilter
-                .newBuilder()
-                .addIds(pack(activeId))
-                .addIds(pack(archivedId))
-                .addIds(pack(deletedId))
-                .build();
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .setIdFilter(idFilter)
-                .build();
+        TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
         EntityQuery<ProjectId> query = newEntityQuery(emptyFilters(), storage);
 
         Iterator<EntityRecord> read = storage.readAll(query);
@@ -322,16 +305,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
-        IdFilter idFilter = IdFilter
-                .newBuilder()
-                .addIds(pack(activeId))
-                .addIds(pack(archivedId))
-                .addIds(pack(deletedId))
-                .build();
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .setIdFilter(idFilter)
-                .build();
+        TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
                 .withActiveLifecycle(storage);
 
@@ -364,16 +338,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(activeId, create(activeRecord, activeEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
-        IdFilter idFilter = IdFilter
-                .newBuilder()
-                .addIds(pack(activeId))
-                .addIds(pack(archivedId))
-                .addIds(pack(deletedId))
-                .build();
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .setIdFilter(idFilter)
-                .build();
+        TargetFilters filters = Targets.acceptingOnly(activeId, archivedId, deletedId);
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage);
 
         Iterator<EntityRecord> read = storage.readAll(query);
@@ -496,16 +461,12 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         write(noMatchIdEntity);
         write(deletedEntity);
 
-        IdFilter idFilter = IdFilter
-                .newBuilder()
-                .addIds(pack(targetId))
-                .build();
         CompositeFilter filter = all(eq("projectStatusValue", CANCELLED.getNumber()));
-        TargetFilters filters = TargetFilters
-                .newBuilder()
-                .setIdFilter(idFilter)
-                .addFilter(filter)
-                .build();
+        TargetFilters filters =
+                Targets.acceptingOnly(targetId)
+                       .toBuilder()
+                       .addFilter(filter)
+                       .build();
         RecordStorage<ProjectId> storage = storage();
         EntityQuery<ProjectId> query = newEntityQuery(filters, storage)
                 .withActiveLifecycle(storage);

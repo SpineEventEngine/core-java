@@ -84,7 +84,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected boolean isModified(P projection) {
-        boolean result = projection.isChanged();
+        boolean result = projection.changed();
         return result;
     }
 

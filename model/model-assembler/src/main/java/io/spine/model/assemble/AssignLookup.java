@@ -81,7 +81,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
         TypeElement enclosingTypeElement = (TypeElement) element.getEnclosingElement();
         String typeName = enclosingTypeElement.getQualifiedName()
                                               .toString();
-        commandHandlers.addCommandHandlingTypes(typeName);
+        commandHandlers.addCommandHandlingType(typeName);
     }
 
     @Override
@@ -145,10 +145,10 @@ public class AssignLookup extends SpineAnnotationProcessor {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void removeDuplicates() {
-        ProtocolStringList list = commandHandlers.getCommandHandlingTypesList();
+        ProtocolStringList list = commandHandlers.getCommandHandlingTypeList();
         Set<String> types = newTreeSet(list);
-        commandHandlers.clearCommandHandlingTypes()
-                       .addAllCommandHandlingTypes(types);
+        commandHandlers.clearCommandHandlingType()
+                       .addAllCommandHandlingType(types);
     }
 
     /**
