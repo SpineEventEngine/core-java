@@ -35,16 +35,16 @@ public abstract class NotifyingWriter implements InboxWriter {
     }
 
     /**
-     * Serves as an observer of the updates made to the shard with the specified index.
+     * Serves as an observer of the updates made to the shard.
      *
-     * @param index
-     *         the index of the shard, to which the message was written.
+     * @param message
+     *         the message which was written to the shard
      */
-    protected abstract void onUpdated(ShardIndex index);
+    protected abstract void onShardUpdated(InboxMessage message);
 
     @Override
     public void write(InboxMessage message) {
         storage.write(message);
-        onUpdated(message.getShardIndex());
+        onShardUpdated(message);
     }
 }

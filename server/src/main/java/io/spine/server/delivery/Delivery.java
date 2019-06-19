@@ -27,7 +27,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.NodeId;
@@ -272,14 +271,15 @@ public final class Delivery {
     }
 
     /**
-     * Notifies that the shard with the given index has been updated with some message(s).
+     * Notifies that the contents of the shard with the given index have been updated
+     * with some message.
      *
-     * @param shardIndex
-     *         an index of the shard
+     * @param message
+     *         a message that was written into the shard
      */
-    private void notify(ShardIndex shardIndex) {
-        for (StreamObserver<ShardIndex> observer : shardObservers) {
-            observer.onNext(shardIndex);
+    private void onNewMessage(InboxMessage message) {
+        for (ShardObserver observer : shardObservers) {
+            observer.onMessage(message);
         }
     }
 
@@ -333,8 +333,8 @@ public final class Delivery {
         return new NotifyingWriter(inboxStorage) {
 
             @Override
-            protected void onUpdated(ShardIndex index) {
-                Delivery.this.notify(index);
+            protected void onShardUpdated(InboxMessage message) {
+                Delivery.this.onNewMessage(message);
             }
         };
     }

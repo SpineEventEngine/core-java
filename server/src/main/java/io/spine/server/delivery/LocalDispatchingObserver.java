@@ -28,12 +28,13 @@ import io.spine.server.ServerEnvironment;
  *
  * <p>Suitable for the local and development environment.
  */
-public class LocalDispatchingObserver extends ShardObserver {
+public class LocalDispatchingObserver implements ShardObserver {
 
     @Override
-    public void onNext(ShardIndex value) {
+    public void onMessage(InboxMessage update) {
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
-        delivery.deliverMessagesFrom(value);
+        delivery.deliverMessagesFrom(update.getShardIndex());
+
     }
 }

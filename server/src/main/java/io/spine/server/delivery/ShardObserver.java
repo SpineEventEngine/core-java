@@ -20,20 +20,19 @@
 
 package io.spine.server.delivery;
 
-import io.grpc.stub.StreamObserver;
-
 /**
  * An abstract base for observers of the updates made to the contents of shards.
  */
-public abstract class ShardObserver implements StreamObserver<ShardIndex> {
+public interface ShardObserver {
 
-    @Override
-    public final void onError(Throwable t) {
-        // do nothing.
-    }
-
-    @Override
-    public final void onCompleted() {
-        // do nothing.
-    }
+    /**
+     * A callback executed once the message was written into the shard.
+     *
+     * <p>Allows the descendants to react upon this update. E.g. by scheduling a delivery from
+     * the shard with the specified index.
+     *
+     * @param update
+     *         the message with which some shard was updated
+     */
+    void onMessage(InboxMessage update);
 }

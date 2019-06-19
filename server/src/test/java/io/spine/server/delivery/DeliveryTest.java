@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@DisplayName("Delivery of message to entities should deliver messages via")
+@DisplayName("Delivery of messages to entities should deliver those via")
 public class DeliveryTest {
 
     private Delivery originalDelivery;
@@ -72,7 +72,7 @@ public class DeliveryTest {
     }
 
     @Test
-    @DisplayName("single shard to a single target in a multi-threaded env")
+    @DisplayName("a single shard to a single target in a multi-threaded env")
     public void singleTarget_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
@@ -80,7 +80,7 @@ public class DeliveryTest {
     }
 
     @Test
-    @DisplayName("single shard to multiple targets in a multi-threaded env")
+    @DisplayName("a single shard to multiple targets in a multi-threaded env")
     public void manyTargets_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(7);
@@ -112,7 +112,7 @@ public class DeliveryTest {
     }
 
     @Test
-    @DisplayName("single shard to a single target in a single-threaded env")
+    @DisplayName("a single shard to a single target in a single-threaded env")
     public void singleTarget_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
@@ -120,7 +120,7 @@ public class DeliveryTest {
     }
 
     @Test
-    @DisplayName("single shard to mutiple targets in a single-threaded env")
+    @DisplayName("a single shard to mutiple targets in a single-threaded env")
     public void manyTargets_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);
