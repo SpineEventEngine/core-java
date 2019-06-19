@@ -28,7 +28,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.NonValidated;
 
 import java.util.List;
