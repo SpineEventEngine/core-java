@@ -1,5 +1,9 @@
 version: "{branch} {build}"
 
+# Do not build feature branch on additional commits with open Pull Requests.
+# See: https://help.appveyor.com/discussions/questions/18437-skip_branch_with_pr-setting-doesnt-work
+skip_branch_with_pr: true
+
 build:
   verbosity: detailed
 
