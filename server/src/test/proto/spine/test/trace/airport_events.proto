@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package spine.test.trace;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.trace";
+option java_outer_classname = "AirportEventsProto";
+option java_multiple_files = true;
+
+import "spine/time/time.proto";
+import "spine/test/trace/airport.proto";
+
+message FlightScheduled {
+
+    FlightId id = 1;
+
+    Airport from = 2;
+
+    Airport to = 3;
+
+    time.ZonedDateTime scheduled_departure = 4;
+
+    time.ZonedDateTime scheduled_arrival = 5;
+}
+
+message FlightRescheduled {
+
+    FlightId id = 1;
+
+    time.ZonedDateTime scheduled_departure = 2;
+
+    time.ZonedDateTime scheduled_arrival = 3;
+}
+
+message BoardingStarted {
+    FlightId id = 1;
+
+    time.ZonedDateTime when = 2;
+}
+
+message BoardingCompleted {
+    FlightId id = 1;
+
+    time.ZonedDateTime when = 2;
+}
+
+message BoardingCanceled {
+    FlightId id = 1;
+
+    time.ZonedDateTime when = 2;
+}
+
+message FlightCanceled {
+    FlightId id = 1;
+
+    time.ZonedDateTime when = 2;
+}
