@@ -33,7 +33,6 @@ import io.spine.test.delivery.Calc;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.validate.Validated;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +52,8 @@ import java.util.stream.IntStream;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @DisplayName("Delivery of message to entities should deliver messages via")
 public class DeliveryTest extends TenantAwareTest {
@@ -206,11 +207,10 @@ public class DeliveryTest extends TenantAwareTest {
 
             for (ShardIndex index : shardedItems.keySet()) {
                 Page<InboxMessage> page = shardedItems.get(index);
-                Assert.assertTrue(page.contents()
-                                      .isEmpty());
-                Assert.assertFalse(page.next()
-                                       .isPresent());
-
+                assertTrue(page.contents()
+                               .isEmpty());
+                assertFalse(page.next()
+                                .isPresent());
             }
         }
 
