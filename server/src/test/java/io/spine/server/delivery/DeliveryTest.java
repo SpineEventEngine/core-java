@@ -23,8 +23,11 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import com.google.protobuf.Any;
 import com.google.protobuf.util.Durations;
+import io.spine.base.CommandMessage;
 import io.spine.core.TenantId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
@@ -169,6 +172,8 @@ public class DeliveryTest {
                     BlackBoxBoundedContext.singleTenant()
                                           .with(DefaultRepository.of(CalcAggregate.class));
 
+            ImmutableSet.Builder<CommandMessage> observedCommands = subscribeToDelivered();
+
             int streamSize = targets.size() * 30;
             IntStream ints = new SecureRandom().ints(streamSize, 42, 200);
             Iterator<String> targetsIterator = Iterators.cycle(targets);
@@ -184,8 +189,13 @@ public class DeliveryTest {
                     commands.stream()
                             .collect(groupingBy(AddNumber::getCalculatorId));
 
+            ImmutableSet<CommandMessage> receivedCommands = observedCommands.build();
+
             for (String calcId : commandsPerTarget.keySet()) {
+
                 List<AddNumber> targetCommands = commandsPerTarget.get(calcId);
+                assertTrue(receivedCommands.containsAll(targetCommands));
+
                 Integer sumForTarget = targetCommands.stream()
                                                      .map(AddNumber::getValue)
                                                      .reduce(0, (n1, n2) -> n1 + n2);
@@ -199,6 +209,22 @@ public class DeliveryTest {
 
             }
             ensureInboxesEmpty();
+        }
+
+        private static ImmutableSet.Builder<CommandMessage> subscribeToDelivered() {
+            ImmutableSet.Builder<CommandMessage> observedMessages = ImmutableSet.builder();
+            ServerEnvironment.getInstance()
+                             .delivery()
+                             .subscribe(update -> {
+                                 if (update.hasCommand()) {
+                                     Any packed = update.getCommand()
+                                                        .getMessage();
+                                     CommandMessage cmdMessage = (CommandMessage) AnyPacker.unpack(
+                                             packed);
+                                     observedMessages.add(cmdMessage);
+                                 }
+                             });
+            return observedMessages;
         }
 
         private static void ensureInboxesEmpty() {
