@@ -66,9 +66,8 @@ public interface CommandMixin
     }
 
     @Override
-    default Optional<MessageId> parent() {
-        MessageId parent = context().getOrigin()
-                                    .messageId();
+    default Optional<Origin> origin() {
+        Origin parent = context().getOrigin();
         return Optional.of(parent)
                        .filter(Validate::isNotDefault);
     }

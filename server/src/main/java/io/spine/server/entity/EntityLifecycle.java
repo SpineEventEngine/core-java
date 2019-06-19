@@ -282,8 +282,9 @@ public class EntityLifecycle {
      *         {@link EventId EventId}s or {@link CommandId}s
      */
     public final void onStateChanged(EntityRecordChange change,
-                                     Set<? extends MessageId> messageIds) {
-        postIfChanged(change, messageIds);
+                                     Set<? extends MessageId> messageIds,
+                                     Origin origin) {
+        postIfChanged(change, messageIds, origin);
         postIfArchived(change, messageIds);
         postIfDeleted(change, messageIds);
         postIfExtracted(change, messageIds);
@@ -323,7 +324,8 @@ public class EntityLifecycle {
     }
 
     private void postIfChanged(EntityRecordChange change,
-                               Collection<? extends MessageId> messageIds) {
+                               Collection<? extends MessageId> messageIds,
+                               Origin origin) {
         Any oldState = change.getPreviousValue()
                              .getState();
         Any newState = change.getNewValue()
@@ -338,7 +340,7 @@ public class EntityLifecycle {
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setNewVersion(newVersion)
                     .vBuild();
-            postEvent(event);
+            postEvent(event, origin);
         }
     }
 

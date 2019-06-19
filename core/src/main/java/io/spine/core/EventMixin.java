@@ -60,10 +60,9 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext> 
     }
 
     @Override
-    default Optional<MessageId> parent() {
-        MessageId messageId = context().getPastMessage()
-                                       .messageId();
-        return Optional.of(messageId)
+    default Optional<Origin> origin() {
+        Origin parent = context().getPastMessage();
+        return Optional.of(parent)
                        .filter(Validate::isNotDefault);
     }
 

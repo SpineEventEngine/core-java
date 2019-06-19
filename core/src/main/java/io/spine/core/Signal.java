@@ -183,6 +183,23 @@ public interface Signal<I extends SignalId,
                 .vBuild();
     }
 
+    default Origin asMessageOrigin() {
+        MessageId commandQualifier = MessageId
+                .newBuilder()
+                .setId(pack(id()))
+                .setTypeUrl(typeUrl().value())
+                .buildPartial();
+        Origin origin = Origin
+                .newBuilder()
+                .setActorContext(actorContext())
+                .setMessage(commandQualifier)
+                .setGrandOrigin(origin().orElse(Origin.getDefaultInstance()))
+                .vBuild();
+        return origin;
+    }
+
+    Optional<Origin> origin();
+
     /**
      * Obtains the ID of the first message in the chain.
      *
@@ -191,5 +208,7 @@ public interface Signal<I extends SignalId,
      */
     MessageId rootMessage();
 
-    Optional<MessageId> parent();
+    default Optional<MessageId> parent() {
+        return origin().map(Origin::messageId);
+    }
 }

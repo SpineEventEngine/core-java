@@ -57,8 +57,6 @@ import static com.google.common.base.Preconditions.checkState;
 @Internal
 public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, Logging {
 
-    private static final MessageId UNKNOWN_MESSAGE = MessageId.getDefaultInstance();
-
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessages;
     private final I entityId;
@@ -119,8 +117,12 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onAfterCommit(EntityRecordChange change) {
         Set<MessageId> signalIds = ImmutableSet.copyOf(acknowledgedMessages);
-        repository.lifecycleOf(entityId)
-                  .onStateChanged(change, signalIds);
+        if (lastMessage != null) {
+            // If lastMessage is null, then no messages have been applied, hence no changes
+            // performed.
+            repository.lifecycleOf(entityId)
+                      .onStateChanged(change, signalIds, lastMessage.asMessageOrigin());
+        }
     }
 
     /**
@@ -133,15 +135,9 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
         Throwable cause = Throwables.getRootCause(t);
         if (cause instanceof ValidationException) {
             ValidationError error = ((ValidationException) cause).asValidationError();
-            MessageId causeMessage;
-            MessageId rootMessage;
-            if (lastMessage != null) {
-                causeMessage = lastMessage.messageId();
-                rootMessage = lastMessage.rootMessage();
-            } else {
-                causeMessage = UNKNOWN_MESSAGE;
-                rootMessage = UNKNOWN_MESSAGE;
-            }
+            checkState(lastMessage != null, "Transaction failed but no messages were propagated.");
+            MessageId causeMessage = lastMessage.messageId();
+            MessageId rootMessage = lastMessage.rootMessage();
             repository.lifecycleOf(entityId)
                       .onInvalidEntity(causeMessage,
                                        rootMessage,

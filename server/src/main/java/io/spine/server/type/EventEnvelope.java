@@ -28,7 +28,6 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
@@ -39,7 +38,6 @@ import io.spine.type.TypeName;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -107,18 +105,7 @@ public final class EventEnvelope
 
     @Override
     public Origin asEventOrigin() {
-        MessageId eventQualifier = MessageId
-                .newBuilder()
-                .setId(pack(id()))
-                .setTypeUrl(outerObject().typeUrl().value())
-                .buildPartial();
-        Origin origin = Origin
-                .newBuilder()
-                .setMessage(eventQualifier)
-                .setGrandOrigin(context().getPastMessage())
-                .setActorContext(actorContext())
-                .vBuild();
-        return origin;
+        return outerObject().asMessageOrigin();
     }
 
     /**

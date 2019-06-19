@@ -25,13 +25,11 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The holder of a {@code Command} which provides convenient access to its properties.
@@ -105,18 +103,7 @@ public final class CommandEnvelope
 
     @Override
     public Origin asEventOrigin() {
-        MessageId commandQualifier = MessageId
-                .newBuilder()
-                .setId(pack(id()))
-                .setTypeUrl(outerObject().typeUrl().value())
-                .buildPartial();
-        Origin origin = Origin
-                .newBuilder()
-                .setActorContext(context().getActorContext())
-                .setMessage(commandQualifier)
-                .setGrandOrigin(context().getOrigin())
-                .vBuild();
-        return origin;
+        return command().asMessageOrigin();
     }
 
     /**

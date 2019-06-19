@@ -21,7 +21,6 @@
 package io.spine.server.type;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
 import io.spine.core.Origin;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
