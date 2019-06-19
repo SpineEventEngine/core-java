@@ -18,19 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.given;
+package io.spine.server.entity;
 
-import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.test.shared.EmptyEntity;
+import io.spine.validate.NonValidated;
 
-public class TeEntity
-        extends TransactionalEntity<Long, EmptyEntity, EmptyEntity.Builder> {
+/**
+ * An implementation of a {@code TransactionListener} which does not set any behavior for its
+ * callbacks.
+ */
+final class SilentWitness<I> implements TransactionListener<I> {
 
-    public TeEntity(Long id) {
-        super(id);
+    @Override
+    public void onBeforePhase(Phase<I, ?> phase) {
+        // Do nothing.
     }
 
-    public void turnToDeleted() {
-        setDeleted(true);
+    @Override
+    public void onAfterPhase(Phase<I, ?> phase) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onTransactionFailed(Throwable t, EntityRecord record) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onAfterCommit(EntityRecordChange change) {
+        // Do nothing.
     }
 }
