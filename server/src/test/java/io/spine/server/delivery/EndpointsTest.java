@@ -72,7 +72,7 @@ public class EndpointsTest {
     }
 
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked in the previous statement.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked via the Truth API statement.
     private static void checkContains(Endpoints<String, CommandEnvelope> endpoints,
                                       InboxLabel label,
                                       MessageEndpoint<String, CommandEnvelope> endpoint) {
@@ -99,7 +99,7 @@ public class EndpointsTest {
 
             @Override
             public void onError(CommandEnvelope envelope, RuntimeException exception) {
-
+                // do nothing.
             }
         };
     }
