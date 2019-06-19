@@ -20,8 +20,6 @@
 
 package io.spine.server.trace.stackdriver;
 
-import com.google.api.gax.rpc.ApiCallContext;
-import com.google.api.gax.rpc.ClientContext;
 import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
 import com.google.devtools.cloudtrace.v2.AttributeValue;
 import com.google.devtools.cloudtrace.v2.BatchWriteSpansRequest;

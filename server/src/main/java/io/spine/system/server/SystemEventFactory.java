@@ -20,27 +20,30 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
-import io.spine.server.aggregate.ImportOrigin;
+import io.spine.core.Origin;
 import io.spine.server.event.EventFactory;
+import io.spine.server.event.EventOrigin;
 import io.spine.server.route.EventRoute;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.system.server.SystemCommandFactory.requestFactory;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Creates events that will be imported into system aggregates.
  */
 final class SystemEventFactory extends EventFactory {
 
-    private SystemEventFactory(Message aggregateId, boolean multitenant) {
-        super(newOrigin(multitenant), Identifier.pack(aggregateId));
+    private SystemEventFactory(EventOrigin origin, Any producerId) {
+        super(origin, producerId);
     }
 
     /**
@@ -48,14 +51,21 @@ final class SystemEventFactory extends EventFactory {
      *
      * @param message
      *         the system event message
-     * @param multitenant
-     *         {@code true} if the current context environment is multitenant,
-     *         {@code false} otherwise
+     * @param origin
+     *         the origin of this message
      * @return new instance of {@code SystemEventFactory}
      */
-    static SystemEventFactory forMessage(EventMessage message, boolean multitenant) {
+    static SystemEventFactory forMessage(EventMessage message, Origin origin, boolean multitenant) {
         Message aggregateId = aggregateIdFrom(message);
-        return new SystemEventFactory(aggregateId, multitenant);
+        Any producerId = Identifier.pack(aggregateId);
+        EventOrigin eventOrigin;
+        if (isNotDefault(origin)) {
+            eventOrigin = EventOrigin.from(origin);
+        } else {
+            ActorContext importContext = requestFactory(multitenant).newActorContext();
+            eventOrigin = EventOrigin.forImport(importContext);
+        }
+        return new SystemEventFactory(eventOrigin, producerId);
     }
 
     private static Message aggregateIdFrom(EventMessage systemEvent) {
@@ -68,10 +78,5 @@ final class SystemEventFactory extends EventFactory {
                               .next();
         checkArgument(id instanceof Message, "System aggregate ID must be a `Message`.");
         return (Message) id;
-    }
-
-    private static ImportOrigin newOrigin(boolean multitenant) {
-        ActorContext actorContext = requestFactory(multitenant).newActorContext();
-        return ImportOrigin.newInstance(actorContext);
     }
 }

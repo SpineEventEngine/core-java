@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -169,6 +170,7 @@ public class CommandBus extends UnicastBus<Command,
                 .newBuilder()
                 .setDelegate(wrappedSource)
                 .setTenantId(tenant)
+                .setPostedCommands(ImmutableSet.copyOf(commands))
                 .setSystemWriteSide(systemWriteSide)
                 .build();
         return result;

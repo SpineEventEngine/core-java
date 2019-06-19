@@ -32,8 +32,12 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
+import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.SystemWriteSide;
@@ -176,7 +180,9 @@ public class EntityLifecycle {
                 .setPayload(command)
                 .setWhenDispatched(currentTime())
                 .vBuild();
-        postEvent(systemCommand);
+        Origin systemEventOrigin = CommandEnvelope.of(command)
+                                                  .asEventOrigin();
+        postEvent(systemCommand, systemEventOrigin);
     }
 
     /**
@@ -190,7 +196,9 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setId(command.getId())
                 .vBuild();
-        postEvent(systemEvent);
+        Origin systemEventOrigin = CommandEnvelope.of(command)
+                                                  .asEventOrigin();
+        postEvent(systemEvent, systemEventOrigin);
     }
 
     /**
@@ -207,7 +215,9 @@ public class EntityLifecycle {
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .vBuild();
-        postEvent(systemEvent);
+        Origin systemEventOrigin = RejectionEnvelope.from(EventEnvelope.of(rejection))
+                                                    .asEventOrigin();
+        postEvent(systemEvent, systemEventOrigin);
     }
 
     /**
@@ -223,7 +233,9 @@ public class EntityLifecycle {
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
                 .vBuild();
-        postEvent(systemCommand);
+        Origin systemEventOrigin = EventEnvelope.of(event)
+                                                .asEventOrigin();
+        postEvent(systemCommand, systemEventOrigin);
     }
 
     public final void onEventImported(Event event) {
@@ -233,7 +245,9 @@ public class EntityLifecycle {
                 .setPayload(event)
                 .setWhenImported(currentTime())
                 .vBuild();
-        postEvent(systemEvent);
+        Origin systemEventOrigin = EventEnvelope.of(event)
+                                                .asEventOrigin();
+        postEvent(systemEvent, systemEventOrigin);
     }
 
     /**
@@ -249,7 +263,9 @@ public class EntityLifecycle {
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
                 .vBuild();
-        postEvent(systemCommand);
+        Origin systemEventOrigin = EventEnvelope.of(event)
+                                                .asEventOrigin();
+        postEvent(systemCommand, systemEventOrigin);
     }
 
     /**
@@ -408,6 +424,11 @@ public class EntityLifecycle {
                     .vBuild();
             postEvent(event);
         }
+    }
+
+    protected void postEvent(EventMessage event, Origin explicitOrigin) {
+        Optional<? extends EventMessage> filtered = eventFilter.filter(event);
+        filtered.ifPresent(systemEvent -> systemWriteSide.postEvent(systemEvent, explicitOrigin));
     }
 
     protected void postEvent(EventMessage event) {

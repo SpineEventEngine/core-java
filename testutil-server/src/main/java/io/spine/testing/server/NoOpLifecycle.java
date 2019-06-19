@@ -22,6 +22,7 @@ package io.spine.testing.server;
 
 import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
+import io.spine.core.Origin;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventFilter;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -44,6 +45,11 @@ public final class NoOpLifecycle extends EntityLifecycle {
 
     public static NoOpLifecycle instance() {
         return INSTANCE;
+    }
+
+    @Override
+    protected void postEvent(EventMessage event, Origin explicitOrigin) {
+        // NoOp.
     }
 
     @Override

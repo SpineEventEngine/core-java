@@ -105,22 +105,8 @@ public final class EventEnvelope
         return outerObject().actorContext();
     }
 
-    /**
-     * Sets the origin fields of the event context being built using the data of the enclosed
-     * event.
-     *
-     * <p>In particular:
-     * <ul>
-     *     <li>the root command identifier replicates the one defined in the enclosed event;
-     *     <li>the context of the enclosed event is set as the origin.
-     * </ul>
-     *
-     * @param builder
-     *         event context builder into which the origin related fields are set
-     */
-    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
-    public void setOriginFields(EventContext.Builder builder) {
+    public Origin asEventOrigin() {
         MessageId eventQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
@@ -132,7 +118,7 @@ public final class EventEnvelope
                 .setGrandOrigin(context().getPastMessage())
                 .setActorContext(actorContext())
                 .vBuild();
-        builder.setPastMessage(origin);
+        return origin;
     }
 
     /**

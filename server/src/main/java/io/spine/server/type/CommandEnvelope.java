@@ -25,7 +25,6 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
@@ -104,21 +103,8 @@ public final class CommandEnvelope
         return context().getActorContext();
     }
 
-    /**
-     * Sets the origin fields of the event context being built using the data of the enclosed
-     * command.
-     *
-     * <p>In particular:
-     * <ul>
-     *     <li>the command identifier is set as the root command identifier;</li>
-     *     <li>the context of the enclosed command is set as the origin.</li>
-     * </ul>
-     *
-     * @param builder
-     *         event context builder into which the origin related fields are set
-     */
     @Override
-    public void setOriginFields(EventContext.Builder builder) {
+    public Origin asEventOrigin() {
         MessageId commandQualifier = MessageId
                 .newBuilder()
                 .setId(pack(id()))
@@ -130,7 +116,7 @@ public final class CommandEnvelope
                 .setMessage(commandQualifier)
                 .setGrandOrigin(context().getOrigin())
                 .vBuild();
-        builder.setPastMessage(origin);
+        return origin;
     }
 
     /**
