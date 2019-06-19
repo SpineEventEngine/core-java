@@ -44,8 +44,7 @@ final class SilentWitness<I> implements TransactionListener<I> {
     }
 
     @Override
-    public void onTransactionFailed(Throwable t,
-                                    EntityRecord record) {
+    public void onTransactionFailed(Throwable t, EntityRecord record) {
         // Do nothing.
     }
 
