@@ -186,5 +186,9 @@ public final class PmDispatcher {
         TestPmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
             super(processManager, state, version);
         }
+
+        void doCommit() {
+            commit();
+        }
     }
 }

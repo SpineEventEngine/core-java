@@ -61,6 +61,6 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
     @Override
     protected void setState(P result, S state, Version version) {
         TestPmTransaction transaction = new TestPmTransaction<>(result, state, version);
-        transaction.commit();
+        transaction.doCommit();
     }
 }
