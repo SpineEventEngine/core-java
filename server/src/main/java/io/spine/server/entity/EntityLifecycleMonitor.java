@@ -37,6 +37,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
@@ -132,7 +133,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onTransactionFailed(Throwable t, EntityRecord entityRecord) {
-        Throwable cause = Throwables.getRootCause(t);
+        Throwable cause = getRootCause(t);
         if (cause instanceof ValidationException) {
             ValidationError error = ((ValidationException) cause).asValidationError();
             checkState(lastMessage != null, "Transaction failed but no messages were propagated.");
