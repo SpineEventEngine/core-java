@@ -274,17 +274,18 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param  aggregateHistory the aggregate state with events to play
+     * @param history
+     *         the aggregate state with events to play
      * @throws IllegalStateException
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    final void play(AggregateHistory aggregateHistory) {
-        Snapshot snapshot = aggregateHistory.getSnapshot();
+    final void play(AggregateHistory history) {
+        Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        List<Event> events = aggregateHistory.getEventList();
+        List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
         play(events);
         remember(events);
