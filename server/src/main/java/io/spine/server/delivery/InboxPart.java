@@ -20,8 +20,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Any;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -162,11 +160,8 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                         if (duplicationException.isPresent()) {
                             endpoint.onError(envelope, duplicationException.get());
                         } else {
-                            Any entityId = message.getInboxId()
-                                                  .getEntityId()
-                                                  .getId();
                             @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-                                    I unpackedId = (I) Identifier.unpack(entityId);
+                                    I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
                             endpoint.dispatchTo(unpackedId);
                         }
                     });
