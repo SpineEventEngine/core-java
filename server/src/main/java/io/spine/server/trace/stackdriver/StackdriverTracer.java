@@ -80,17 +80,14 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     private Span newSpan(String name, Timestamp whenStarted, Timestamp whenFinished) {
-        String spanId = spanId(signal().id());
+        String spanId = spanId();
         Span.Builder span = Span
                 .newBuilder()
-                .setName(spanName())
+                .setName(spanName(spanId))
                 .setSpanId(spanId)
                 .setDisplayName(truncatable(name))
                 .setStartTime(whenStarted)
                 .setEndTime(whenFinished);
-        signal().parent()
-                .map(parent -> spanId(parent.asSignalId()))
-                .ifPresent(span::setParentSpanId);
         if (context != null) {
             AttributeValue attributeValue = AttributeValue
                     .newBuilder()
@@ -110,7 +107,7 @@ final class StackdriverTracer extends AbstractTracer {
                 .addAllSpans(spans)
                 .build();
         service.batchWriteSpansCallable()
-            .call(request);
+               .call(request);
         service.close();
     }
 
@@ -122,23 +119,27 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     /**
-     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API doc</a>
+     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API
+     *         doc</a>
      */
-    private String spanName() {
-        String traceId = traceId(signal().rootMessage().asSignalId());
-        String spanId = spanId(signal().id());
+    private String spanName(String spanId) {
+        String traceId = traceId(signal().rootMessage()
+                                         .asSignalId());
         return format("projects/%s/traces/%s/spans/%s", projectId, traceId, spanId);
     }
 
     /**
-     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API doc</a>
+     * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API
+     *         doc</a>
      */
     private String projectName() {
         return format("projects/%s", projectId);
     }
 
-    private static String spanId(SignalId signalId) {
-        return hexOfLength(signalId, 16);
+    private static String spanId() {
+        long bits = UUID.randomUUID()
+                        .getLeastSignificantBits();
+        return shorten(toHexString(bits), 16);
     }
 
     private static String traceId(SignalId rootMessage) {
@@ -151,6 +152,11 @@ final class StackdriverTracer extends AbstractTracer {
         long leastSignificantBits = UUID.fromString(id.value())
                                         .getLeastSignificantBits();
         String result = toHexString(mostSignificantBits) + toHexString(leastSignificantBits);
+        return shorten(result, resultLength);
+    }
+
+    private static String hexOfLength(MessageId id, int resultLength) {
+        String result = toHexString(id.hashCode());
         return shorten(result, resultLength);
     }
 
