@@ -28,6 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.protobuf.AnyPacker;
 import io.spine.system.server.MemoizedSystemMessage;
 import io.spine.system.server.MemoizingWriteSide;
@@ -116,7 +117,9 @@ class EntityLifecycleTest {
                 .setId(AnyPacker.pack(causeEventId))
                 .setTypeUrl("example.com/test.Event")
                 .buildPartial();
-        lifecycle.onStateChanged(change, ImmutableSet.of(causeMessage));
+        lifecycle.onStateChanged(change,
+                                 ImmutableSet.of(causeMessage),
+                                 Origin.getDefaultInstance());
         assertSame(lastSeenEvent, writeSide.lastSeenEvent());
     }
 }

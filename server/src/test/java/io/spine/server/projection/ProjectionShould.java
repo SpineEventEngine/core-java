@@ -124,7 +124,8 @@ class ProjectionShould {
                 .newBuilder()
                 .setValue(newUuid())
                 .build();
-        dispatch(projection, stringEvent, EventContext.getDefaultInstance());
+        Event strEvt = eventFactory.createEvent(stringEvent);
+        dispatch(projection, stringEvent, strEvt.context());
         assertTrue(projection.state()
                              .getValue()
                              .contains(stringEvent.getValue()));
@@ -134,7 +135,8 @@ class ProjectionShould {
                 .newBuilder()
                 .setValue(42)
                 .build();
-        dispatch(projection, integerEvent, EventContext.getDefaultInstance());
+        Event intEvt = eventFactory.createEvent(integerEvent);
+        dispatch(projection, integerEvent, intEvt.context());
         assertTrue(projection.state()
                              .getValue()
                              .contains(String.valueOf(integerEvent.getValue())));
