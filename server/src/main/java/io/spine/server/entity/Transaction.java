@@ -321,6 +321,7 @@ public abstract class Transaction<I,
     /**
      * Turns the transaction into inactive state.
      */
+    @VisibleForTesting
     final void deactivate() {
         this.active = false;
     }
