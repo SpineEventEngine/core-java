@@ -57,7 +57,6 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     );
 
     private final Map<I, LifecycleFlags> statuses = new HashMap<>();
-    private final Map<I, Integer> eventCounts = new HashMap<>();
 
     @Override
     public Iterator<I> index() {
@@ -84,24 +83,8 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
      * @return immutable list
      */
     List<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
-        I id = request.getRecordId();
+        I id = request.recordId();
         return ImmutableList.copyOf(records.get(id));
-    }
-
-    /**
-     * Obtains a count of events stored for the aggregate with the passed ID.
-     *
-     * <p>If no events were stored, the method returns zero.
-     *
-     * @param id the ID of the aggregate
-     * @return the number of events stored for the aggregate or zero
-     */
-    int eventCount(I id) {
-        Integer count = eventCounts.get(id);
-        if (count == null) {
-            return 0;
-        }
-        return count;
     }
 
     /**
@@ -117,17 +100,6 @@ final class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEvent
     @Override
     public void put(I id, AggregateEventRecord record) {
         records.put(id, record);
-    }
-
-    /**
-     * Stores the number of the aggregate events occurred since the last snapshot
-     * of the aggregate with the passed ID.
-     *
-     * @param id the aggregate ID
-     * @param eventCount the number of events
-     */
-    void putEventCount(I id, int eventCount) {
-        eventCounts.put(id, eventCount);
     }
 
     void putStatus(I id, LifecycleFlags status) {

@@ -89,7 +89,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
         return this.multitenant;
     }
 
-    /** NOTE: the parameter is unused. */
+    /** <b>NOTE</b>: the parameter is unused. */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(
             Class<? extends Aggregate<I, ?, ?>> unused) {

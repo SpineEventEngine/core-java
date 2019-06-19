@@ -206,7 +206,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?, ?>,
      * Match the method against the {@linkplain MatchCriterion criteria} and obtain a collection
      * of mismatches, if any.
      *
-     * <p>NOTE: this method does not test the presence of annotation.
+     * <p><b>NOTE</b>: this method does not test the presence of annotation.
      *
      * @param method
      *         the method to match.
