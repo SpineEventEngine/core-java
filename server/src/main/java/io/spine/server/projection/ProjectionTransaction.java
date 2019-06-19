@@ -61,7 +61,7 @@ public class ProjectionTransaction<I,
      * utilities.
      */
     @Override
-    protected void commit() {
+    protected final void commit() {
         super.commit();
     }
 

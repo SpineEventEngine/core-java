@@ -57,7 +57,7 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
     @Override
     protected void setState(A result, S state, Version version) {
         TestAggregateTransaction tx = new TestAggregateTransaction(result, state, version);
-        tx.commit();
+        tx.doCommit();
     }
 
     /**
@@ -74,9 +74,8 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
             super(aggregate, state, version);
         }
 
-        @Override
-        protected void commit() {
-            super.commit();
+        private void doCommit() {
+            commit();
         }
     }
 }
