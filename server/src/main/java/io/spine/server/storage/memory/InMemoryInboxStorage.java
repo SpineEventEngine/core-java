@@ -92,7 +92,7 @@ public class InMemoryInboxStorage extends InboxStorage implements Logging {
     @Override
     public Optional<InboxMessage> read(InboxReadRequest request) {
         return multitenantStorage.currentSlice()
-                                 .get(request.getRecordId());
+                                 .get(request.recordId());
     }
 
     @Override

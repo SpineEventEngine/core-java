@@ -34,7 +34,7 @@ public class InboxReadRequest implements ReadRequest<InboxMessageId> {
     }
 
     @Override
-    public InboxMessageId getRecordId() {
+    public InboxMessageId recordId() {
         return messageId;
     }
 }
