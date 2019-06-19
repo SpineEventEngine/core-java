@@ -492,6 +492,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
+     *     <li>Closes {@link TracerFactory} if it is present.
      *     <li>Closes all registered {@linkplain Repository repositories}.
      * </ol>
      *
@@ -506,7 +507,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         integrationBus.close();
         stand.close();
         importBus.close();
-
+        TracerFactory factory = tracerFactory.get();
+        if (factory != null) {
+            factory.close();
+        }
         shutDownRepositories();
 
         log().debug(closed(nameForLogging()));
