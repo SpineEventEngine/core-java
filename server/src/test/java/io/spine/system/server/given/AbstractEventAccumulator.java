@@ -20,11 +20,11 @@
 
 package io.spine.system.server.given;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.EventClass;
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -43,6 +44,7 @@ import static java.util.stream.Collectors.joining;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -53,9 +55,8 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
 
     private final String id = getClass().getName();
 
-    private final List<Message> events = newLinkedList();
-
-    private @Nullable Iterator<? extends Message> eventIterator;
+    private final List<EventMessage> events = newArrayList();
+    private final List<EventMessage> nonCheckedEvents = newArrayList();
 
     /**
      * {@inheritDoc}
@@ -102,24 +103,26 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
 
     public void forgetEvents() {
         events.clear();
-        eventIterator = null;
+        nonCheckedEvents.clear();
     }
 
     @CanIgnoreReturnValue
-    public <E extends Message> E assertNextEventIs(Class<E> eventType) {
-        if (eventIterator == null) {
-            eventIterator = ImmutableList.copyOf(events).iterator();
-        }
-        assertTrue(eventIterator.hasNext(), errorMessage());
-        Message next = eventIterator.next();
-        assertThat(next, instanceOf(eventType));
+    public <E extends Message> E assertExistEvent(Class<E> eventType) {
+        assertFalse(nonCheckedEvents.isEmpty(), errorMessage());
+        EventMessage event = nonCheckedEvents
+                .stream()
+                .filter(eventType::isInstance)
+                .findFirst()
+                .orElseGet(() -> fail(errorMessage()));
+        nonCheckedEvents.remove(event);
         @SuppressWarnings("unchecked")
-        E result = (E) next;
+        E result = (E) event;
         return result;
     }
 
-    private void remember(Message event) {
+    private void remember(EventMessage event) {
         events.add(event);
+        nonCheckedEvents.add(event);
     }
 
     private String errorMessage() {
