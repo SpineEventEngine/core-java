@@ -74,6 +74,11 @@ public final class GivenEvent {
         return withMessage(message());
     }
 
+    public static Event withVersion(Version version) {
+        Event event = eventFactory.createEvent(message(), version);
+        return event;
+    }
+
     public static Event withDisabledEnrichmentOf(EventMessage message) {
         Event event = withMessage(message);
         Event.Builder builder =

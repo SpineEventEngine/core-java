@@ -218,26 +218,26 @@ public abstract class Transaction<I,
      * @return {@code true} if the transaction is active, {@code false} otherwise
      */
     @VisibleForTesting
-    public boolean isActive() {
+    final boolean isActive() {
         return active;
     }
 
-    LifecycleFlags lifecycleFlags() {
+    final LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
     }
 
-    protected E entity() {
+    protected final E entity() {
         return entity;
     }
 
     /**
      * Returns the version of the entity, modified within this transaction.
      */
-    Version version() {
+    final Version version() {
         return version;
     }
 
-    List<Phase<I, ?>> phases() {
+    final List<Phase<I, ?>> phases() {
         return ImmutableList.copyOf(phases);
     }
 
@@ -254,7 +254,7 @@ public abstract class Transaction<I,
      * @return the phase propagation result
      */
     @CanIgnoreReturnValue
-    protected <R> R propagate(Phase<I, R> phase) {
+    protected final <R> R propagate(Phase<I, R> phase) {
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
         try {
@@ -319,6 +319,13 @@ public abstract class Transaction<I,
     }
 
     /**
+     * Turns the transaction into inactive state.
+     */
+    final void deactivate() {
+        this.active = false;
+    }
+
+    /**
      * Commits this transaction skipping the entity state update.
      *
      * <p>This method is called when none of the transaction phases has changed the entity state.
@@ -364,7 +371,7 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    void rollback(Throwable cause) {
+    final void rollback(Throwable cause) {
         beforeRollback(cause);
         TransactionListener<I> listener = listener();
         @NonValidated EntityRecord record = EntityRecord
@@ -375,7 +382,7 @@ public abstract class Transaction<I,
                 .setLifecycleFlags(lifecycleFlags())
                 .buildPartial();
         listener.onTransactionFailed(cause, record);
-        this.active = false;
+        deactivate();
         entity.releaseTransaction();
     }
 
@@ -413,19 +420,19 @@ public abstract class Transaction<I,
     }
 
     private void releaseTx() {
-        this.active = false;
+        deactivate();
         entity.releaseTransaction();
     }
 
     /**
      * Applies lifecycle flag modifications to the entity under transaction.
      */
-    protected void commitAttributeChanges() {
+    protected final void commitAttributeChanges() {
         entity.setLifecycleFlags(lifecycleFlags());
         entity.updateStateChanged();
     }
 
-    void initAll(S state, Version version) {
+    final void initAll(S state, Version version) {
         B builder = builder();
         builder.clear();
         builder.mergeFrom(state);
@@ -435,18 +442,19 @@ public abstract class Transaction<I,
     /**
      * Obtains the builder for the current transaction.
      */
-    B builder() {
+    final B builder() {
         return builder;
     }
 
     /**
      * Allows to determine, whether this transaction is active or not.
      */
-    boolean isStateChanged() {
+    final boolean stateChanged() {
         return stateChanged;
     }
 
-    private void markStateChanged() {
+    @VisibleForTesting
+    final void markStateChanged() {
         this.stateChanged = true;
     }
 
@@ -460,7 +468,7 @@ public abstract class Transaction<I,
         entity.injectTransaction(tx);
     }
 
-    void setVersion(Version version) {
+    final void setVersion(Version version) {
         checkNotNull(version);
         this.version = version;
     }
@@ -508,18 +516,24 @@ public abstract class Transaction<I,
      * @param listener
      *         the listener to use in this transaction
      */
-    public void setListener(TransactionListener<I> listener) {
+    public final void setListener(TransactionListener<I> listener) {
         checkNotNull(listener);
         this.transactionListener = listener;
     }
 
-    public void setArchived(boolean archived) {
+    /**
+     * Set {@code archived} lifecycle flag to the passed value.
+     */
+    protected final void setArchived(boolean archived) {
         lifecycleFlags = lifecycleFlags.toBuilder()
                                        .setArchived(archived)
                                        .build();
     }
 
-    public void setDeleted(boolean deleted) {
+    /**
+     * Set {@code deleted} lifecycle flag to the passed value.
+     */
+    protected final void setDeleted(boolean deleted) {
         lifecycleFlags = lifecycleFlags.toBuilder()
                                        .setDeleted(deleted)
                                        .build();

@@ -101,11 +101,11 @@ public abstract class TransactionalEntity<I,
      * @return {@code true} if the state or flags have been modified, {@code false} otherwise.
      */
     @Internal
-    public boolean isChanged() {
+    public final boolean changed() {
         boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
         Transaction<?, ?, ?, ?> tx = this.transaction;
         boolean stateChanged = tx != null
-                               ? tx.isStateChanged()
+                               ? tx.stateChanged()
                                : this.stateChanged;
         return stateChanged || lifecycleFlagsChanged;
     }
@@ -200,7 +200,7 @@ public abstract class TransactionalEntity<I,
      * Updates own {@code stateChanged} flag from the underlying transaction.
      */
     final void updateStateChanged() {
-        this.stateChanged = tx().isStateChanged();
+        this.stateChanged = tx().stateChanged();
     }
 
     /**

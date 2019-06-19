@@ -21,20 +21,23 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
+import io.spine.core.Version;
 import io.spine.server.test.shared.StringEntity;
 import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.Versions.increment;
+import static io.spine.core.Versions.zero;
 import static io.spine.server.type.given.GivenEvent.arbitrary;
+import static io.spine.server.type.given.GivenEvent.withVersion;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("TransactionalEventPlayer should")
 class TransactionalEventPlayerTest {
@@ -52,8 +55,9 @@ class TransactionalEventPlayerTest {
         TxPlayingEntity entity = entityWithActiveTx(false);
         EventPlayingTransaction txMock = (EventPlayingTransaction) entity.transaction();
         assertNotNull(txMock);
-        Event firstEvent = arbitrary();
-        Event secondEvent = arbitrary();
+        Version v1 = increment(zero());
+        Event firstEvent = withVersion(v1);
+        Event secondEvent = withVersion(increment(v1));
 
         entity.play(newArrayList(firstEvent, secondEvent));
 
@@ -64,19 +68,19 @@ class TransactionalEventPlayerTest {
     @SuppressWarnings("unchecked")  // OK for the test.
     private static TxPlayingEntity entityWithActiveTx(boolean txChanged) {
         TxPlayingEntity entity = new TxPlayingEntity();
-        EventPlayingTransaction tx = spy(mock(EventPlayingTransaction.class));
-        when(tx.isActive()).thenReturn(true);
-        when(tx.isStateChanged()).thenReturn(txChanged);
-        when(tx.entity()).thenReturn(entity);
-
+        EventPlayingTransaction tx = new StubTransaction(entity, true, txChanged);
         entity.injectTransaction(tx);
         return entity;
     }
 
     private static void verifyEventApplied(EventPlayingTransaction txMock, Event event) {
-        verify(txMock).play(eq(EventEnvelope.of(event)));
+        StubTransaction tx = (StubTransaction) txMock;
+        assertTrue(tx.dispatched(event));
     }
 
+    /**
+     * Stub implementation of {@code TransactionalEntity}.
+     */
     private static class TxPlayingEntity
             extends TransactionalEntity<Long, StringEntity, StringEntity.Builder>
             implements EventPlayer {
@@ -88,6 +92,39 @@ class TransactionalEventPlayerTest {
         @Override
         public void play(Iterable<Event> events) {
             EventPlayer.forTransactionOf(this).play(events);
+        }
+    }
+
+    /**
+     * Stub implementation of {@code Transaction} which behaves as told in the passed parameters.
+     */
+    private static class StubTransaction extends EventPlayingTransaction {
+
+        private final List<Event> dispatchedEvents = new ArrayList<>();
+
+        @SuppressWarnings("unchecked") // Generic parameters are not used by this stub impl.
+        private StubTransaction(TransactionalEntity entity, boolean active, boolean stateChanged) {
+            super(entity);
+            if (!active) {
+                deactivate();
+            }
+            if (stateChanged) {
+                markStateChanged();
+            }
+        }
+
+        @Override
+        protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+            dispatchedEvents.add(event.outerObject());
+        }
+
+        @Override
+        protected VersionIncrement createVersionIncrement(EventEnvelope event) {
+            return new IncrementFromEvent(this, event);
+        }
+
+        private boolean dispatched(Event event) {
+            return dispatchedEvents.contains(event);
         }
     }
 }
