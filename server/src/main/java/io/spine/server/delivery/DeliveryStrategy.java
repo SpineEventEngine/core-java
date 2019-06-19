@@ -29,12 +29,6 @@ package io.spine.server.delivery;
  */
 public interface DeliveryStrategy {
 
-    int MAX_SHARD_COUNT = 100;
-
-    default int getMaxShardCount() {
-        return MAX_SHARD_COUNT;
-    }
-
     ShardIndex getIndexFor(Object entityId);
 
     int getShardCount();
