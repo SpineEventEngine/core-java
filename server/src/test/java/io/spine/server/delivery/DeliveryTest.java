@@ -31,7 +31,6 @@ import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.validate.Validated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +55,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @DisplayName("Delivery of message to entities should deliver messages via")
-public class DeliveryTest extends TenantAwareTest {
+public class DeliveryTest {
 
     private Delivery originalDelivery;
 
