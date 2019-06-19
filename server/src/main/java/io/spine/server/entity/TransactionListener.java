@@ -77,5 +77,4 @@ public interface TransactionListener<I> {
      *         the change of the entity under transaction
      */
     void onAfterCommit(EntityRecordChange change);
-
 }
