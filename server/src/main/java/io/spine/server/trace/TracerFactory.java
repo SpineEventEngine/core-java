@@ -27,7 +27,7 @@ import io.spine.core.Signal;
 
 @Immutable
 @SPI
-public interface TracerFactory {
+public interface TracerFactory extends AutoCloseable {
 
     TracerFactory inContext(BoundedContextName context);
 

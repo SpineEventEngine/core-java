@@ -21,12 +21,18 @@
 package io.spine.server.trace.stackdriver;
 
 import com.google.api.gax.grpc.GrpcCallContext;
+import com.google.api.gax.rpc.ClientContext;
+import com.google.cloud.trace.v2.stub.GrpcTraceServiceStub;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,11 +41,14 @@ public class StackdriverTracerFactory implements TracerFactory {
 
     private final @Nullable BoundedContextName context;
     @SuppressWarnings("Immutable") // Not annotated but in fact immutable.
+    private final GrpcTraceServiceStub service;
+    @SuppressWarnings("Immutable") // Not annotated but in fact immutable.
     private final GrpcCallContext callContext;
     private final String gcpProjectName;
 
     private StackdriverTracerFactory(Builder builder) {
         this.context = builder.context;
+        this.service = builder.buildService();
         this.callContext = builder.callContext;
         this.gcpProjectName = builder.gcpProjectName;
     }
@@ -58,12 +67,13 @@ public class StackdriverTracerFactory implements TracerFactory {
 
     @Override
     public Tracer trace(Signal<?, ?, ?> signalMessage) {
-        return new StackdriverTracer(signalMessage, callContext, gcpProjectName, context);
+        return new StackdriverTracer(signalMessage, service, gcpProjectName, context);
     }
 
     private Builder toBuilder() {
         return newBuilder()
                 .setContext(context)
+                .setService(service)
                 .setCallContext(callContext)
                 .setGcpProjectName(gcpProjectName);
     }
@@ -77,6 +87,11 @@ public class StackdriverTracerFactory implements TracerFactory {
         return new Builder();
     }
 
+    @Override
+    public void close() throws Exception {
+        service.close();
+    }
+
     /**
      * A builder for the {@code StackdriverTracerFactory} instances.
      */
@@ -85,6 +100,7 @@ public class StackdriverTracerFactory implements TracerFactory {
         private @Nullable BoundedContextName context;
         private GrpcCallContext callContext;
         private String gcpProjectName;
+        private @MonotonicNonNull GrpcTraceServiceStub service;
 
         /**
          * Prevents direct instantiation.
@@ -92,13 +108,20 @@ public class StackdriverTracerFactory implements TracerFactory {
         private Builder() {
         }
 
+        @Internal
         public Builder setContext(@Nullable BoundedContextName context) {
             this.context = context;
             return this;
         }
 
+        @Internal
         public Builder clearContext() {
             return setContext(null);
+        }
+
+        private Builder setService(GrpcTraceServiceStub service) {
+            this.service = checkNotNull(service);
+            return this;
         }
 
         public Builder setCallContext(GrpcCallContext callContext) {
@@ -118,6 +141,19 @@ public class StackdriverTracerFactory implements TracerFactory {
          */
         public StackdriverTracerFactory build() {
             return new StackdriverTracerFactory(this);
+        }
+
+        public GrpcTraceServiceStub buildService() {
+            ClientContext clientContext = ClientContext
+                    .newBuilder()
+                    .setDefaultCallContext(callContext)
+                    .build();
+            try {
+                this.service = GrpcTraceServiceStub.create(clientContext);
+                return service;
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 }

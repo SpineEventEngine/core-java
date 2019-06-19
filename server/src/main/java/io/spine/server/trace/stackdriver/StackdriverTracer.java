@@ -34,12 +34,16 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.server.trace.AbstractTracer;
+import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.api.client.util.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Long.toHexString;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
 
@@ -47,17 +51,17 @@ final class StackdriverTracer extends AbstractTracer {
 
     private final @Nullable BoundedContextName context;
     private final List<Span> spans;
-    private final ApiCallContext callContext;
+    private final GrpcTraceServiceStub service;
     private final String projectId;
 
     StackdriverTracer(Signal<?, ?, ?> signal,
-                      ApiCallContext callContext,
+                      GrpcTraceServiceStub service,
                       String gcpProjectId,
                       @Nullable BoundedContextName context) {
         super(signal);
+        this.service = service;
         this.projectId = gcpProjectId;
-        this.context = context;
-        this.callContext = checkNotNull(callContext);
+        this.context = checkNotNull(context);
         this.spans = synchronizedList(newArrayList());
     }
 
@@ -65,8 +69,16 @@ final class StackdriverTracer extends AbstractTracer {
     public void processedBy(MessageId receiver) {
         Timestamp whenStarted = signal().time();
         Timestamp whenFinished = Time.currentTime();
-        Span span = newSpan(receiver.getTypeUrl(), whenStarted, whenFinished);
+        Span span = newSpan(displayName(receiver), whenStarted, whenFinished);
         spans.add(span);
+    }
+
+    private String displayName(MessageId receiver) {
+        TypeName signalType = signal().typeUrl()
+                                      .toTypeName();
+        TypeName receiverType = TypeUrl.parse(receiver.getTypeUrl())
+                                       .toTypeName();
+        return format("%s processes %s", receiverType, signalType);
     }
 
     private Span newSpan(String name, Timestamp whenStarted, Timestamp whenFinished) {
@@ -93,17 +105,15 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     @Override
-    public void close() throws Exception {
-        GrpcTraceServiceStub stub = GrpcTraceServiceStub.create(ClientContext.newBuilder()
-                                                                             .build());
+    public void close() {
         BatchWriteSpansRequest request = BatchWriteSpansRequest
                 .newBuilder()
                 .setName(projectName())
                 .addAllSpans(spans)
                 .build();
-        stub.batchWriteSpansCallable()
-            .call(request, callContext);
-        stub.close();
+        service.batchWriteSpansCallable()
+            .call(request);
+        service.close();
     }
 
     private static TruncatableString truncatable(String initial) {
@@ -117,9 +127,7 @@ final class StackdriverTracer extends AbstractTracer {
      * @see <a href="https://cloud.google.com/trace/docs/reference/v2/rpc/google.devtools.cloudtrace.v2#google.devtools.cloudtrace.v2.BatchWriteSpansRequest">API doc</a>
      */
     private String spanName() {
-        String traceId = signal().rootMessage()
-                                 .asSignalId()
-                                 .value();
+        String traceId = traceId(signal().rootMessage().asSignalId());
         String spanId = spanId(signal().id());
         return format("projects/%s/traces/%s/spans/%s", projectId, traceId, spanId);
     }
@@ -132,7 +140,26 @@ final class StackdriverTracer extends AbstractTracer {
     }
 
     private static String spanId(SignalId signalId) {
-        return signalId.value();
+        return hexOfLength(signalId, 16);
+    }
+
+    private static String traceId(SignalId rootMessage) {
+        return hexOfLength(rootMessage, 32);
+    }
+
+    private static String hexOfLength(SignalId id, int resultLength) {
+        long mostSignificantBits = UUID.fromString(id.value())
+                                       .getMostSignificantBits();
+        long leastSignificantBits = UUID.fromString(id.value())
+                                        .getLeastSignificantBits();
+        String result = toHexString(mostSignificantBits) + toHexString(leastSignificantBits);
+        return shorten(result, resultLength);
+    }
+
+    private static String shorten(String value, int length) {
+        return value.length() > length
+               ? value.substring(0, length)
+               : value;
     }
 
     private enum Attribute {
@@ -142,7 +169,7 @@ final class StackdriverTracer extends AbstractTracer {
         private static final String ATTRIBUTE_PREFIX = "spine.io";
 
         private String qualifiedName() {
-            return ATTRIBUTE_PREFIX + "/" + name();
+            return ATTRIBUTE_PREFIX + '/' + name();
         }
     }
 }
