@@ -82,7 +82,7 @@ public interface TransactionListener<I> {
      * An implementation of a {@code TransactionListener} which does not set any behavior for its
      * callbacks.
      */
-    class SilentWitness<I> implements TransactionListener<I> {
+    final class SilentWitness<I> implements TransactionListener<I> {
 
         @Override
         public void onBeforePhase(Phase<I, ?> phase) {
