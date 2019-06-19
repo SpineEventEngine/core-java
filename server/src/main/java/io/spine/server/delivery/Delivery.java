@@ -195,21 +195,22 @@ public final class Delivery {
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, deduplicationWindow);
 
-        ShardedStorage.Page<InboxMessage> startingPage = inboxStorage.contentsBackwards(index);
-        Optional<ShardedStorage.Page<InboxMessage>> maybePage =
-                Optional.of(startingPage);
+        Page<InboxMessage> startingPage = inboxStorage.contentsBackwards(index);
+        Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;
         while (maybePage.isPresent()) {
-            ShardedStorage.Page<InboxMessage> currentPage = maybePage.get();
+            Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (messages.isEmpty()) {
                 maybePage = currentPage.next();
                 continue;
             }
+
             ImmutableList.Builder<InboxMessage> deliveryBuilder = ImmutableList.builder();
             ImmutableList.Builder<InboxMessage> idempotenceBuilder = ImmutableList.builder();
             ImmutableList.Builder<InboxMessage> removalBuilder = ImmutableList.builder();
+
             for (InboxMessage message : messages) {
                 Timestamp msgTime = message.getWhenReceived();
                 boolean insideIdempotentWnd =
@@ -252,9 +253,9 @@ public final class Delivery {
                     }
                 }
                 inboxStorage.markDelivered(toDeliver);
-
                 int deliveredInBatch = toDeliver.size();
                 totalMessagesDelivered += deliveredInBatch;
+
                 ImmutableList<RuntimeException> exceptions = exceptionsBuilder.build();
                 if (!exceptions.isEmpty()) {
                     throw exceptions.iterator()

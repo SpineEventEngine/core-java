@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.util.Durations;
@@ -201,24 +202,15 @@ public class DeliveryTest extends TenantAwareTest {
         }
 
         private static void ensureInboxesEmpty() {
-            Delivery delivery = ServerEnvironment.getInstance()
-                                                 .delivery();
-            InboxStorage storage = delivery.storage();
-            int shardCount = delivery.shardCount();
-            for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
-                @Validated ShardIndex index =
-                        ShardIndex.newBuilder()
-                                  .setIndex(shardIndex)
-                                  .setOfTotal(shardCount)
-                                  .vBuild();
-                ShardedStorage.Page<InboxMessage> page =
-                        with(TenantId.getDefaultInstance())
-                                .evaluate(() -> storage.contentsBackwards(index));
+            ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = inboxContent();
 
+            for (ShardIndex index : shardedItems.keySet()) {
+                Page<InboxMessage> page = shardedItems.get(index);
                 Assert.assertTrue(page.contents()
                                       .isEmpty());
                 Assert.assertFalse(page.next()
                                        .isPresent());
+
             }
         }
 
@@ -239,5 +231,28 @@ public class DeliveryTest extends TenantAwareTest {
                 executorService.shutdown();
             }
         }
+    }
+
+    private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContent() {
+        Delivery delivery = ServerEnvironment.getInstance()
+                                             .delivery();
+        InboxStorage storage = delivery.storage();
+        int shardCount = delivery.shardCount();
+        ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
+                ImmutableMap.builder();
+        for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
+            @Validated ShardIndex index =
+                    ShardIndex.newBuilder()
+                              .setIndex(shardIndex)
+                              .setOfTotal(shardCount)
+                              .vBuild();
+            Page<InboxMessage> page =
+                    with(TenantId.getDefaultInstance())
+                            .evaluate(() -> storage.contentsBackwards(index));
+
+            builder.put(index, page);
+        }
+
+        return builder.build();
     }
 }

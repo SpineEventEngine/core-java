@@ -28,6 +28,7 @@ import io.spine.server.delivery.InboxMessageId;
 import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
+import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.validate.Validated;
 

@@ -20,36 +20,37 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.storage.AbstractStorage;
-import io.spine.server.storage.ReadRequest;
+import com.google.common.collect.ImmutableList;
+
+import java.util.Optional;
 
 /**
- * An abstract class for the {@link io.spine.server.storage.RecordStorage RecordStorage}s, which
- * spread their records across shards.
+ * A page of messages obtained from a sharded storage in a read operation.
  *
  * @param <M>
  *         the type of the messages stored
- * @author Alex Tymchenko
  */
-public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadRequest<I>>
-        extends AbstractStorage<I, M, R> {
-
-    protected ShardedStorage(boolean multitenant) {
-        super(multitenant);
-    }
+public interface Page<M extends ShardedRecord> {
 
     /**
-     * Reads the contents of the storage by the given shard index and returns the first page
-     * of the results.
+     * Obtains the messages of this page.
      *
-     * <p>The older items go first.
-     *
-     * @param index
-     *         the shard index to return the results for
-     * @return the first page of the results
+     * @return the list of page contents
      */
-    public abstract Page<M> contentsBackwards(ShardIndex index);
+    ImmutableList<M> contents();
 
-    public abstract void removeAll(Iterable<M> messages);
+    /**
+     * Obtains the size of this page.
+     *
+     * @return non-negative number of items in this page
+     */
+    int size();
 
+    /**
+     * Obtains the next page.
+     *
+     * @return the next page wrapped into {@code Optional}, or {@code Optional.empty()} if
+     *         this page is the last one
+     */
+    Optional<Page<M>> next();
 }
