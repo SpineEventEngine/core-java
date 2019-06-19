@@ -106,7 +106,7 @@ public abstract class RecordStorage<I>
         checkNotClosed();
         checkNotNull(request);
 
-        Optional<EntityRecord> record = readRecord(request.getRecordId());
+        Optional<EntityRecord> record = readRecord(request.recordId());
         return record;
     }
 

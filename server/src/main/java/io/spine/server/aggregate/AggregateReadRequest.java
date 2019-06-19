@@ -36,8 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * the batch size for event reading to be set. Typically that would be a number of
  * event records to read to encounter the most recent snapshot.
  *
- * <p>Two requests with the same {@linkplain #getRecordId() record ID} are considered equal.
- * {@linkplain #getBatchSize() Batch size} is not taken into account, because it should affect only
+ * <p>Two requests with the same {@linkplain #recordId() record ID} are considered equal.
+ * {@linkplain #batchSize() Batch size} is not taken into account, because it should affect only
  * process of reading, but resulting records should be the same.
  *
  * @param <I> the type of the record ID
@@ -55,7 +55,7 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
     }
 
     @Override
-    public I getRecordId() {
+    public I recordId() {
         return recordId;
     }
 
@@ -64,7 +64,7 @@ public final class AggregateReadRequest<I> implements ReadRequest<I> {
      *
      * @return the events batch size
      */
-    public int getBatchSize() {
+    public int batchSize() {
         return batchSize;
     }
 

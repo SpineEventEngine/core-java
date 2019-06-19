@@ -484,41 +484,6 @@ public abstract class AggregateStorageTest
         }
     }
 
-    @Nested
-    @DisplayName("properly read event count")
-    class ReadEventCount {
-
-        @Test
-        @DisplayName("set to default zero value")
-        void zeroByDefault() {
-            assertEquals(0, storage.readEventCountAfterLastSnapshot(id));
-        }
-
-        @Test
-        @DisplayName("set to specified value")
-        void setToSpecifiedValue() {
-            int expectedCount = 32;
-            storage.writeEventCountAfterLastSnapshot(id, expectedCount);
-
-            int actualCount = storage.readEventCountAfterLastSnapshot(id);
-
-            assertEquals(expectedCount, actualCount);
-        }
-
-        @Test
-        @DisplayName("updated to specified value")
-        void updated() {
-            int primaryValue = 16;
-            storage.writeEventCountAfterLastSnapshot(id, primaryValue);
-            int expectedValue = 32;
-            storage.writeEventCountAfterLastSnapshot(id, expectedValue);
-
-            int actualCount = storage.readEventCountAfterLastSnapshot(id);
-
-            assertEquals(expectedValue, actualCount);
-        }
-    }
-
     @Test
     @DisplayName("continue reading history if snapshot was not found in first batch")
     void continueReadHistoryIfSnapshotNotFound() {
@@ -528,8 +493,8 @@ public abstract class AggregateStorageTest
                                     .build();
         storage.writeSnapshot(id, snapshot);
 
-        int eventCountAfterSnapshot = 10;
-        for (int i = 0; i < eventCountAfterSnapshot; i++) {
+        int eventsAfterSnapshot = 10;
+        for (int i = 0; i < eventsAfterSnapshot; i++) {
             currentVersion = increment(currentVersion);
             Project state = Project.getDefaultInstance();
             Event event = eventFactory.createEvent(event(state), currentVersion);
@@ -543,7 +508,7 @@ public abstract class AggregateStorageTest
         assertTrue(optionalStateRecord.isPresent());
         AggregateHistory stateRecord = optionalStateRecord.get();
         assertEquals(snapshot, stateRecord.getSnapshot());
-        assertEquals(eventCountAfterSnapshot, stateRecord.getEventCount());
+        assertEquals(eventsAfterSnapshot, stateRecord.getEventCount());
     }
 
     @Nested
@@ -748,28 +713,6 @@ public abstract class AggregateStorageTest
         return optional.get();
     }
 
-    @Nested
-    @DisplayName("being closed, not allow")
-    class BeingClosedThrow {
-
-        @Test
-        @DisplayName("writing event count")
-        void onWritingEventCount() {
-            close(storage);
-
-            assertThrows(IllegalStateException.class,
-                         () -> storage.writeEventCountAfterLastSnapshot(id, 5));
-        }
-
-        @Test
-        @DisplayName("reading event count")
-        void onReadingEventCount() {
-            close(storage);
-
-            assertThrows(IllegalStateException.class,
-                         () -> storage.readEventCountAfterLastSnapshot(id));
-        }
-    }
 
     private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
         Event expectedEvent = eventFactory.createEvent(event(Time.currentTime()));
