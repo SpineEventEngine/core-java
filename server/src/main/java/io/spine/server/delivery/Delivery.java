@@ -348,15 +348,6 @@ public final class Delivery {
                                                  .getTypeUrl()));
     }
 
-    /**
-     * Tells whether the delivery is enabled.
-     *
-     * <p>If there is just a single shard configured, the delivery is considered disabled.
-     */
-    public boolean enabled() {
-        return strategy.getShardCount() > 1;
-    }
-
     ShardIndex whichShardFor(Object msgDestinationId) {
         return strategy.getIndexFor(msgDestinationId);
     }
@@ -436,7 +427,7 @@ public final class Delivery {
         private Supplier<StorageFactory> storageFactorySupplier;
         private DeliveryStrategy strategy;
         private ShardedWorkRegistry workRegistry;
-        private Duration deduplicationWindow = Duration.getDefaultInstance();
+        private Duration deduplicationWindow;
 
         /**
          * Prevents a direct instantiation of this class.
@@ -471,8 +462,11 @@ public final class Delivery {
                 strategy = UniformAcrossAllShards.singleShard();
             }
 
-            StorageFactory storageFactory = initStorageFactory();
+            if(deduplicationWindow == null) {
+                deduplicationWindow = Duration.getDefaultInstance();
+            }
 
+            StorageFactory storageFactory = initStorageFactory();
             inboxStorage = storageFactory.createInboxStorage();
 
             if (workRegistry == null) {
