@@ -23,6 +23,7 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
@@ -35,12 +36,13 @@ import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -365,11 +367,11 @@ public final class Delivery {
      */
     public static class Builder {
 
-        private InboxStorage inboxStorage;
-        private Supplier<StorageFactory> storageFactorySupplier;
-        private DeliveryStrategy strategy;
-        private ShardedWorkRegistry workRegistry;
-        private Duration deduplicationWindow;
+        private @MonotonicNonNull InboxStorage inboxStorage;
+        private @Nullable StorageFactory storageFactory;
+        private @Nullable DeliveryStrategy strategy;
+        private @Nullable ShardedWorkRegistry workRegistry;
+        private @Nullable Duration deduplicationWindow;
 
         /**
          * Prevents a direct instantiation of this class.
@@ -377,23 +379,44 @@ public final class Delivery {
         private Builder() {
         }
 
-        public void setWorkRegistry(ShardedWorkRegistry workRegistry) {
-            this.workRegistry = checkNotNull(workRegistry);
+        public Optional<StorageFactory> storageFactory() {
+            return Optional.ofNullable(storageFactory);
         }
 
+        public Optional<DeliveryStrategy> strategy() {
+            return Optional.ofNullable(strategy);
+        }
+
+        public Optional<ShardedWorkRegistry> workRegistry() {
+            return Optional.ofNullable(workRegistry);
+        }
+
+        public Optional<Duration> deduplicationWindow() {
+            return Optional.ofNullable(deduplicationWindow);
+        }
+
+        @CanIgnoreReturnValue
+        public Builder setWorkRegistry(ShardedWorkRegistry workRegistry) {
+            this.workRegistry = checkNotNull(workRegistry);
+            return this;
+        }
+
+        @CanIgnoreReturnValue
         public Builder setStrategy(DeliveryStrategy strategy) {
             this.strategy = checkNotNull(strategy);
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder setDeduplicationWindow(Duration deduplicationWindow) {
             this.deduplicationWindow = checkNotNull(deduplicationWindow);
             return this;
         }
 
-        public Builder setStorageFactorySupplier(Supplier<StorageFactory> storageFactorySupplier) {
-            checkNotNull(storageFactorySupplier);
-            this.storageFactorySupplier = storageFactorySupplier;
+        @CanIgnoreReturnValue
+        public Builder setStorageFactory(StorageFactory storageFactory) {
+            checkNotNull(storageFactory);
+            this.storageFactory = storageFactory;
             return this;
         }
 
@@ -419,11 +442,11 @@ public final class Delivery {
 
         private StorageFactory initStorageFactory() {
             StorageFactory storageFactory;
-            if (storageFactorySupplier == null) {
+            if (this.storageFactory == null) {
                 storageFactory = InMemoryStorageFactory.newInstance(
                         BoundedContextNames.newName("Delivery"), true);
             } else {
-                storageFactory = storageFactorySupplier.get();
+                storageFactory = this.storageFactory;
             }
             return storageFactory;
         }
