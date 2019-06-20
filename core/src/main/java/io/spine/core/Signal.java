@@ -183,6 +183,11 @@ public interface Signal<I extends SignalId,
                 .vBuild();
     }
 
+    /**
+     * Obtains this signal as an origin of other signals.
+     *
+     * <p>This origin is assigned to any signal message produced as a reaction to this one..
+     */
     default Origin asMessageOrigin() {
         MessageId commandQualifier = MessageId
                 .newBuilder()
@@ -198,6 +203,12 @@ public interface Signal<I extends SignalId,
         return origin;
     }
 
+    /**
+     * Obtains the origin of this signal.
+     *
+     * @return origin of this signal or {@code Optional.empty()} if this signal is posted directly
+     *         by an actor
+     */
     Optional<Origin> origin();
 
     /**
