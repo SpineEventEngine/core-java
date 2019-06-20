@@ -23,13 +23,6 @@ dependencies {
 
     implementation deps.grpc.grpcNetty
     implementation deps.grpc.grpcProtobuf
-
-    // TODO:2019-06-17:dmytro.dashenkov: Move to another subproject.
-    api "com.google.cloud:google-cloud-trace:0.96.0-beta"
-//    implementation "com.google.api.grpc:proto-google-cloud-trace-v2:0.3.0"
-//    implementation "com.google.api:gax-grpc:1.45.0"
-//    implementation "io.opencensus:opencensus-impl:0.23.0"
-//    implementation "io.opencensus:opencensus-exporter-trace-stackdriver:0.23.0"
     
     testAnnotationProcessor deps.build.autoService.processor
     testCompileOnly deps.build.autoService.annotations
