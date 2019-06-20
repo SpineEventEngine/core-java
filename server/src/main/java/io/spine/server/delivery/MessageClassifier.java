@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 
 /**
- * Classifies the {@code InboxMessage}s messages by their type.
+ * Classifies the {@code InboxMessage}s messages by their purpose.
  */
 class MessageClassifier {
 
@@ -46,7 +46,15 @@ class MessageClassifier {
      * Classifies the messages taking into the account the idempotence window start and
      * the {@linkplain InboxMessage#getStatus() status} of each message.
      *
-     * @return the instance of the {@code Classifier}.
+     * <p>The messages received after the idempotence window start are classified as those
+     * to use for de-duplication.
+     *
+     * <p>The messages in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER} status are
+     * classified as those to be delivered right away.
+     *
+     * <p>The rest of the messages aren't useful by any means and are classified as those to remove.
+     *
+     * @return the instance of the {@code MessageClassifier}.
      */
     static MessageClassifier of(ImmutableList<InboxMessage> messages,
                                 Timestamp idempotenceWndStart) {
