@@ -26,36 +26,26 @@ import io.spine.server.BoundedContext;
 import io.spine.server.trace.given.FakeTracer;
 import io.spine.server.trace.given.FakeTracerFactory;
 import io.spine.server.trace.given.airport.AirportContext;
-import io.spine.test.trace.Airport;
-import io.spine.test.trace.AirportId;
-import io.spine.test.trace.Boarding;
 import io.spine.test.trace.BoardingCanceled;
 import io.spine.test.trace.BoardingStarted;
 import io.spine.test.trace.CancelBoarding;
 import io.spine.test.trace.CancelFlight;
-import io.spine.test.trace.Flight;
 import io.spine.test.trace.FlightCanceled;
-import io.spine.test.trace.FlightId;
 import io.spine.test.trace.FlightScheduled;
 import io.spine.test.trace.ScheduleFlight;
-import io.spine.test.trace.Timetable;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.time.LocalDateTime;
-import io.spine.time.LocalDateTimes;
-import io.spine.time.LocalDates;
-import io.spine.time.LocalTimes;
-import io.spine.time.Month;
-import io.spine.time.ZoneId;
-import io.spine.time.ZoneIds;
-import io.spine.time.ZonedDateTime;
-import io.spine.time.ZonedDateTimes;
-import io.spine.type.TypeUrl;
-import io.spine.validate.Validated;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.trace.given.TracingTestEnv.BOARDING_TYPE;
+import static io.spine.server.trace.given.TracingTestEnv.FLIGHT;
+import static io.spine.server.trace.given.TracingTestEnv.FLIGHT_TYPE;
+import static io.spine.server.trace.given.TracingTestEnv.FROM;
+import static io.spine.server.trace.given.TracingTestEnv.TIMETABLE_TYPE;
+import static io.spine.server.trace.given.TracingTestEnv.cancelFlight;
+import static io.spine.server.trace.given.TracingTestEnv.scheduleFlight;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Message tracing should")
@@ -63,32 +53,6 @@ class TracingTest {
 
     private static final TestActorRequestFactory requests =
             new TestActorRequestFactory(TracingTest.class);
-
-    private static final AirportId FROM = AirportId
-            .newBuilder()
-            .setCode("KBP")
-            .vBuild();
-    private static final Airport FROM_AIRPORT = Airport
-            .newBuilder()
-            .setId(FROM)
-            .setCity("Kyiv")
-            .setCountry("Ukraine")
-            .vBuild();
-    private static final AirportId TO = AirportId
-            .newBuilder()
-            .setCode("HRK")
-            .vBuild();
-    private static final Airport TO_AIRPORT = Airport
-            .newBuilder()
-            .setId(TO)
-            .setCity("Kharkiv")
-            .setCountry("Ukraine")
-            .vBuild();
-    private static final ZoneId ZONE = ZoneIds.of(java.time.ZoneId.systemDefault());
-    private static final FlightId FLIGHT = FlightId.generate();
-    private static final TypeUrl FLIGHT_TYPE = TypeUrl.of(Flight.class);
-    private static final TypeUrl BOARDING_TYPE = TypeUrl.of(Boarding.class);
-    private static final TypeUrl TIMETABLE_TYPE = TypeUrl.of(Timetable.class);
 
     private FakeTracerFactory tracing;
     private BoundedContext context;
@@ -126,34 +90,6 @@ class TracingTest {
         tracing.tracer(FlightCanceled.class).isReceiver(FLIGHT, BOARDING_TYPE);
         tracing.tracer(CancelBoarding.class).isReceiver(FLIGHT, BOARDING_TYPE);
         tracing.tracer(BoardingCanceled.class).isReceiver(FLIGHT, BOARDING_TYPE);
-    }
-
-    private static ScheduleFlight scheduleFlight() {
-        LocalDateTime localDepartureTime = LocalDateTimes.of(
-                LocalDates.of(2019, Month.JUNE, 20),
-                LocalTimes.of(7, 30, 0)
-        );
-        LocalDateTime.Builder builder = localDepartureTime.toBuilder();
-        builder.getTimeBuilder()
-               .setHour(8);
-        LocalDateTime localArrivalTime = builder.vBuild();
-        ZonedDateTime departureTime = ZonedDateTimes.of(localDepartureTime, ZONE);
-        ZonedDateTime arrivalTime = ZonedDateTimes.of(localArrivalTime, ZONE);
-        return ScheduleFlight
-                .newBuilder()
-                .setFrom(FROM_AIRPORT)
-                .setTo(TO_AIRPORT)
-                .setId(FLIGHT)
-                .setScheduledDeparture(departureTime)
-                .setScheduledArrival(arrivalTime)
-                .vBuild();
-    }
-
-    private static CancelFlight cancelFlight() {
-        return CancelFlight
-                .newBuilder()
-                .setId(FLIGHT)
-                .vBuild();
     }
 
     private void post(CommandMessage command) {
