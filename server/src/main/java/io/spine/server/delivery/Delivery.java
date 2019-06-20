@@ -213,7 +213,7 @@ public final class Delivery {
                 continue;
             }
 
-            Classifier classifier = Classifier.of(idempotenceWndStart, messages);
+            MessageClassifier classifier = MessageClassifier.of(messages, idempotenceWndStart);
 
             ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
             if (!toDeliver.isEmpty()) {
@@ -358,72 +358,6 @@ public final class Delivery {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));
-    }
-
-    /**
-     * Classifies the {@code InboxMessage}s messages by their type.
-     */
-    private static class Classifier {
-
-        private final ImmutableList<InboxMessage> delivery;
-        private final ImmutableList<InboxMessage> idempotence;
-        private final ImmutableList<InboxMessage> removal;
-
-        private Classifier(
-                ImmutableList<InboxMessage> delivery,
-                ImmutableList<InboxMessage> idempotence,
-                ImmutableList<InboxMessage> removal) {
-            this.delivery = delivery;
-            this.idempotence = idempotence;
-            this.removal = removal;
-        }
-
-        /**
-         * Classifies the messages taking the idempotence window start into the account,
-         * and returns the instance of the {@code Classifier}.
-         */
-        private static Classifier of(Timestamp idempotenceWndStart,
-                                     ImmutableList<InboxMessage> messages) {
-
-            ImmutableList.Builder<InboxMessage> deliveryBuilder = ImmutableList.builder();
-            ImmutableList.Builder<InboxMessage> idempotenceBuilder = ImmutableList.builder();
-            ImmutableList.Builder<InboxMessage> removalBuilder = ImmutableList.builder();
-
-            for (InboxMessage message : messages) {
-                Timestamp msgTime = message.getWhenReceived();
-                boolean insideIdempotentWnd =
-                        Timestamps.compare(msgTime, idempotenceWndStart) > 0;
-                InboxMessageStatus status = message.getStatus();
-
-                if (insideIdempotentWnd) {
-                    if (InboxMessageStatus.TO_DELIVER != status) {
-                        idempotenceBuilder.add(message);
-                    }
-                } else {
-                    removalBuilder.add(message);
-                }
-
-                if (InboxMessageStatus.TO_DELIVER == status) {
-                    deliveryBuilder.add(message);
-                }
-            }
-
-            return new Classifier(deliveryBuilder.build(),
-                                  idempotenceBuilder.build(),
-                                  removalBuilder.build());
-        }
-
-        public ImmutableList<InboxMessage> toDeliver() {
-            return delivery;
-        }
-
-        public ImmutableList<InboxMessage> idempotenceSource() {
-            return idempotence;
-        }
-
-        public ImmutableList<InboxMessage> removals() {
-            return removal;
-        }
     }
 
     /**
