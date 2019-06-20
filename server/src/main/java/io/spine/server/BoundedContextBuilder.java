@@ -45,7 +45,7 @@ import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.tracing.TraceEventObserver;
+import io.spine.system.server.TraceEventObserver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;

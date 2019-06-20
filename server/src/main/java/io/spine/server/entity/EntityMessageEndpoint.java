@@ -76,6 +76,9 @@ public abstract class EntityMessageEndpoint<I,
         }
     }
 
+    /**
+     * The callback invoked after the message is dispatched to an entity with the given ID.
+     */
     protected abstract void afterDispatched(I entityId);
 
     /**

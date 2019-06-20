@@ -20,9 +20,10 @@
 
 package io.spine.system.server.event;
 
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 
-@Internal
-public interface EventDispatchedMixin extends SignalDispatchedMixin<Event> {
+/**
+ * A common interface for system events which state that an event has been dispatched.
+ */
+interface EventDispatchedMixin extends SignalDispatchedMixin<Event> {
 }

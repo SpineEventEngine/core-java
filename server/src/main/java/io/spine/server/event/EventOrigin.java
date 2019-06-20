@@ -29,6 +29,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Origin of an event.
+ *
+ * <p>An event may originate from:
+ * <ol>
+ *     <li>another signal, command or event;
+ *     <li>actor in the case of an import.
+ * </ol>
+ */
 @Internal
 public final class EventOrigin {
 
@@ -41,23 +50,47 @@ public final class EventOrigin {
         this.importOrigin = importOrigin;
     }
 
+    /**
+     * Creates an {@code EventOrigin} from the given message.
+     *
+     * @param envelope
+     *         the parent message
+     */
     public static EventOrigin fromAnotherMessage(MessageEnvelope<?, ?, ?> envelope) {
         checkNotNull(envelope);
         Origin origin = envelope.asEventOrigin();
         return new EventOrigin(origin, null);
     }
 
+    /**
+     * Creates an {@code EventOrigin} from a pre-assembled {@link Origin}.
+     */
     public static EventOrigin from(Origin origin) {
         checkNotNull(origin);
         return new EventOrigin(origin,null);
     }
 
+    /**
+     * Creates an {@code EventOrigin} for the case of an event import.
+     *
+     * @param actor
+     *         the context the actor importing the event
+     */
     public static EventOrigin forImport(ActorContext actor) {
         checkNotNull(actor);
         return new EventOrigin(null, actor);
     }
 
-    public EventContext.Builder contextBuilder() {
+    /**
+     * Creates a new {@link EventContext.Builder} with this origin.
+     *
+     * <p>For a parent message origin, the {@code past_message} attribute is populated.
+     *
+     * <p>For an import origin, the {@code import_context} attribute is populated.
+     *
+     * @return new {@code EventContext} builder
+     */
+    EventContext.Builder contextBuilder() {
         EventContext.Builder builder = EventContext.newBuilder();
         if (otherMessage != null) {
             builder.setPastMessage(otherMessage);

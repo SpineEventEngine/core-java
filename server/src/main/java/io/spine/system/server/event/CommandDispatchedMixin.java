@@ -20,9 +20,10 @@
 
 package io.spine.system.server.event;
 
-import io.spine.annotation.Internal;
 import io.spine.core.Command;
 
-@Internal
-public interface CommandDispatchedMixin extends SignalDispatchedMixin<Command> {
+/**
+ * A common interface for system events which state that a command has been dispatched.
+ */
+interface CommandDispatchedMixin extends SignalDispatchedMixin<Command> {
 }

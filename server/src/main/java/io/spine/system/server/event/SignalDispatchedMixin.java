@@ -25,10 +25,23 @@ import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 
+/**
+ * A common interface for system events which state that a signal has been dispatched.
+ *
+ * @param <S>
+ *         the type of the signal
+ */
 @Internal
+@SuppressWarnings("override") // Overridden in generated code.
 public interface SignalDispatchedMixin<S extends Signal<?, ?, ?>> extends Message {
 
+    /**
+     * Obtains the dispatched signal.
+     */
     S getPayload();
 
+    /**
+     * Obtains the dispatching target.
+     */
     MessageId getReceiver();
 }

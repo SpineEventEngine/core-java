@@ -18,8 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server.tracing;
+package io.spine.system.server;
 
+import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
@@ -31,12 +32,19 @@ import io.spine.system.server.event.EventDispatchedToSubscriber;
 import io.spine.system.server.event.EventImported;
 import io.spine.system.server.event.SignalDispatchedMixin;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * An event subscriber which listens to {@linkplain SignalDispatchedMixin dispatching events}.
+ */
+@Internal
 public final class TraceEventObserver extends AbstractEventSubscriber {
 
     private final TracerFactory tracing;
 
     public TraceEventObserver(BoundedContextName contextName, TracerFactory tracing) {
         super();
+        checkNotNull(contextName);
         this.tracing = tracing.inContext(contextName);
     }
 
