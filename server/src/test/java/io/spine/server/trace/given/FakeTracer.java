@@ -28,8 +28,8 @@ import io.spine.type.TypeUrl;
 
 import java.util.Set;
 
-import static com.google.api.client.util.Sets.newHashSet;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.base.Identifier.pack;
 
 public final class FakeTracer extends AbstractTracer {
