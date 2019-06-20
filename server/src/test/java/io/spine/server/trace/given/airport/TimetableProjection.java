@@ -33,6 +33,7 @@ import io.spine.time.ZonedDateTime;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 final class TimetableProjection extends Projection<AirportId, Timetable, Timetable.Builder> {
@@ -58,8 +59,10 @@ final class TimetableProjection extends Projection<AirportId, Timetable, Timetab
 
     @Subscribe
     void on(FlightCanceled event) {
-        builder().getScheduledFlightList()
-                 .removeIf(schedule -> schedule.getFlight().equals(event.getId()));
+        List<Schedule> schedules = newArrayList(builder().getScheduledFlightList());
+        schedules.removeIf(schedule -> schedule.getFlight().equals(event.getId()));
+        builder().clearScheduledFlight()
+                 .addAllScheduledFlight(schedules);
     }
 
     private Schedule.Builder findFlight(FlightId id) {

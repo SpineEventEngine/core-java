@@ -24,30 +24,40 @@ import com.google.protobuf.Message;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.trace.AbstractTracer;
+import io.spine.type.TypeUrl;
 
 import java.util.Set;
 
 import static com.google.api.client.util.Sets.newHashSet;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.base.Identifier.pack;
 
 public final class FakeTracer extends AbstractTracer {
 
-    private final Set<Message> receivers = newHashSet();
+    private final Set<MessageId> receivers = newHashSet();
 
     FakeTracer(Signal<?, ?, ?> signal) {
         super(signal);
     }
 
-    public boolean isReceiver(Message entityId) {
+    public boolean isReceiver(Message entityId, TypeUrl entityStateType) {
         checkNotNull(entityId);
-        return receivers.contains(entityId);
+        MessageId id = MessageId
+                .newBuilder()
+                .setId(pack(entityId))
+                .setTypeUrl(entityStateType.value())
+                .vBuild();
+        return receivers.contains(id);
     }
 
     @Override
     public void processedBy(MessageId receiver) {
         checkNotNull(receiver);
-        receivers.add(unpack(receiver.getId()));
+        MessageId idWithoutVersion = receiver
+                .toBuilder()
+                .clearVersion()
+                .vBuild();
+        receivers.add(idWithoutVersion);
     }
 
     @Override
