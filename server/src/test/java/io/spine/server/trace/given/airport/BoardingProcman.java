@@ -20,11 +20,19 @@
 
 package io.spine.server.trace.given.airport;
 
+import io.spine.core.CommandContext;
+import io.spine.server.command.Assign;
+import io.spine.server.command.Command;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.trace.Boarding;
+import io.spine.test.trace.BoardingCanceled;
+import io.spine.test.trace.BoardingCompleted;
 import io.spine.test.trace.BoardingStarted;
+import io.spine.test.trace.CancelBoarding;
+import io.spine.test.trace.CompleteBoarding;
+import io.spine.test.trace.FlightCanceled;
 import io.spine.test.trace.FlightId;
 import io.spine.test.trace.FlightScheduled;
 import io.spine.time.Now;
@@ -54,14 +62,55 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
         return BoardingStarted
                 .newBuilder()
                 .setId(id())
-                .setWhen(Now.get(scheduledDeparture.getZone()).asZonedDateTime())
+                .setWhen(Now.get(scheduledDeparture.getZone())
+                            .asZonedDateTime())
                 .vBuild();
     }
 
     @React
-    Nothing on(BoardingStarted event) {
+    Nothing to(BoardingStarted event) {
         builder().setWhenStarted(event.getWhen())
                  .setStatus(STARTED);
         return nothing();
+    }
+
+    @Assign
+    BoardingCompleted handle(CompleteBoarding command, CommandContext context) {
+        ZonedDateTime whenCompleted = now(context);
+        builder().setWhenEnded(whenCompleted);
+        return BoardingCompleted
+                .newBuilder()
+                .setId(command.getId())
+                .setWhen(whenCompleted)
+                .vBuild();
+    }
+
+    @Command
+    CancelBoarding handle(FlightCanceled event) {
+        return CancelBoarding
+                .newBuilder()
+                .setId(event.getId())
+                .vBuild();
+    }
+
+    @Assign
+    BoardingCanceled handle(CancelBoarding command, CommandContext context) {
+        ZonedDateTime whenCanceled = now(context);
+        return BoardingCanceled
+                .newBuilder()
+                .setId(command.getId())
+                .setWhen(whenCanceled)
+                .vBuild();
+    }
+
+    @React
+    Nothing on(BoardingCanceled event) {
+        builder().setWhenEnded(event.getWhen());
+        return nothing();
+    }
+
+    private static ZonedDateTime now(CommandContext context) {
+        return Now.get(context.getActorContext().getZoneId())
+                  .asZonedDateTime();
     }
 }
