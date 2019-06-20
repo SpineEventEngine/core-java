@@ -20,12 +20,13 @@
 
 package io.spine.server.trace;
 
-import io.spine.annotation.SPI;
 import io.spine.core.Signal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-@SPI
+/**
+ * The implementation base for {@link Tracer}s.
+ */
 public abstract class AbstractTracer implements Tracer {
 
     private final Signal<?, ?, ?> signal;

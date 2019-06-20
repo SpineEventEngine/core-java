@@ -23,8 +23,8 @@ package io.spine.server.trace;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
-import io.spine.server.trace.given.FakeTracer;
-import io.spine.server.trace.given.FakeTracerFactory;
+import io.spine.server.trace.given.MemoizingTracer;
+import io.spine.server.trace.given.MemoizingTracerFactory;
 import io.spine.server.trace.given.airport.AirportContext;
 import io.spine.test.trace.BoardingCanceled;
 import io.spine.test.trace.BoardingStarted;
@@ -54,12 +54,12 @@ class TracingTest {
     private static final TestActorRequestFactory requests =
             new TestActorRequestFactory(TracingTest.class);
 
-    private FakeTracerFactory tracing;
+    private MemoizingTracerFactory tracing;
     private BoundedContext context;
 
     @BeforeEach
     void setUp() {
-        tracing = new FakeTracerFactory();
+        tracing = new MemoizingTracerFactory();
         context = AirportContext
                 .builder()
                 .setTracerFactorySupplier(() -> tracing)
@@ -70,7 +70,7 @@ class TracingTest {
     @DisplayName("trace actor commands")
     void traceCommands() {
         post(scheduleFlight());
-        FakeTracer tracer = tracing.tracer(ScheduleFlight.class);
+        MemoizingTracer tracer = tracing.tracer(ScheduleFlight.class);
         assertTrue(tracer.isReceiver(FLIGHT, FLIGHT_TYPE));
     }
 

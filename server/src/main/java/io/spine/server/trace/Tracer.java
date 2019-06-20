@@ -23,9 +23,26 @@ package io.spine.server.trace;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 
+/**
+ * A tracer of a single signal.
+ *
+ * <p>Implementations may choose to generate traces on {@link #processedBy} or on {@code close()}
+ * for bulk processing.
+ */
 public interface Tracer extends AutoCloseable {
 
+    /**
+     * Obtains the traced signal message.
+     */
     Signal<?, ?, ?> signal();
 
+    /**
+     * Marks the message to be processed by an entity with the given {@link MessageId}.
+     *
+     * <p>This method is invoked after the message is processed.
+     *
+     * @param receiver
+     *         the entity handling the signal
+     */
     void processedBy(MessageId receiver);
 }

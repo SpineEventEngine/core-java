@@ -32,11 +32,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.base.Identifier.pack;
 
-public final class FakeTracer extends AbstractTracer {
+/**
+ * An implementation of {@link io.spine.server.trace.Tracer} which memoizes the entities which
+ * process the given message.
+ */
+public final class MemoizingTracer extends AbstractTracer {
 
     private final Set<MessageId> receivers = newHashSet();
 
-    FakeTracer(Signal<?, ?, ?> signal) {
+    MemoizingTracer(Signal<?, ?, ?> signal) {
         super(signal);
     }
 

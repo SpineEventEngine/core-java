@@ -31,10 +31,12 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SuppressWarnings("Immutable")
-public final class FakeTracerFactory implements TracerFactory {
+/**
+ * An implementation of {@link TracerFactory} which stores the tracing data in memory.
+ */
+public final class MemoizingTracerFactory implements TracerFactory {
 
-    private final Map<Class<? extends Message>, FakeTracer> tracers = newHashMap();
+    private final Map<Class<? extends Message>, MemoizingTracer> tracers = newHashMap();
     private boolean closed = false;
 
     @Override
@@ -43,16 +45,11 @@ public final class FakeTracerFactory implements TracerFactory {
     }
 
     @Override
-    public TracerFactory outOfContext() {
-        return this;
-    }
-
-    @Override
     public Tracer trace(Signal<?, ?, ?> signalMessage) {
         Class<? extends Message> messageType = signalMessage.enclosedMessage()
                                                             .getClass();
-        FakeTracer tracer = tracers.computeIfAbsent(messageType,
-                                                    cls -> new FakeTracer(signalMessage));
+        MemoizingTracer tracer = tracers.computeIfAbsent(messageType,
+                                                    cls -> new MemoizingTracer(signalMessage));
         return tracer;
     }
 
@@ -66,8 +63,8 @@ public final class FakeTracerFactory implements TracerFactory {
         return closed;
     }
 
-    public FakeTracer tracer(Class<? extends Message> messageType) {
-        FakeTracer tracer = tracers.get(messageType);
+    public MemoizingTracer tracer(Class<? extends Message> messageType) {
+        MemoizingTracer tracer = tracers.get(messageType);
         assertNotNull(tracer);
         return tracer;
     }
