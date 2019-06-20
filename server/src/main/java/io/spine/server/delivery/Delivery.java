@@ -227,7 +227,7 @@ public final class Delivery {
 
                 if (!observedExceptions.isEmpty()) {
                     throw observedExceptions.iterator()
-                                    .next();
+                                            .next();
                 }
             }
 
@@ -313,6 +313,18 @@ public final class Delivery {
     }
 
     /**
+     * Determines the shard index for the message, judging on the identifier of the entity,
+     * to which this message is dispatched.
+     *
+     * @param entityId
+     *         the ID of the entity, to which the message is heading
+     * @return the index of the shard for the message
+     */
+    ShardIndex whichShardFor(Object entityId) {
+        return strategy.getIndexFor(entityId);
+    }
+
+    /**
      * Unregisters the given {@code Inbox} and removes all the {@linkplain Inbox#delivery()
      * delivery callbacks} previously registered by this {@code Inbox}.
      */
@@ -346,10 +358,6 @@ public final class Delivery {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));
-    }
-
-    ShardIndex whichShardFor(Object msgDestinationId) {
-        return strategy.getIndexFor(msgDestinationId);
     }
 
     /**
@@ -449,20 +457,18 @@ public final class Delivery {
             return this;
         }
 
-        public Builder setStorageFactorySupplier(
-                Supplier<StorageFactory> storageFactorySupplier) {
+        public Builder setStorageFactorySupplier(Supplier<StorageFactory> storageFactorySupplier) {
             checkNotNull(storageFactorySupplier);
             this.storageFactorySupplier = storageFactorySupplier;
             return this;
         }
 
-        //TODO:2019-05-22:alex.tymchenko: set the work registry using the storage factory.
         public Delivery build() {
             if (strategy == null) {
                 strategy = UniformAcrossAllShards.singleShard();
             }
 
-            if(deduplicationWindow == null) {
+            if (deduplicationWindow == null) {
                 deduplicationWindow = Duration.getDefaultInstance();
             }
 
