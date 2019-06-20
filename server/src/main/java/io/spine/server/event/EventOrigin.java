@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>An event may originate from:
  * <ol>
- *     <li>another signal, command or event;
+ *     <li>another signal, a command or an event;
  *     <li>actor in the case of an import.
  * </ol>
  */
