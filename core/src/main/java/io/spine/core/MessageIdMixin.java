@@ -75,18 +75,4 @@ interface MessageIdMixin extends MessageIdOrBuilder {
         checkState(isCommand(), "%s is not a command ID.", getId().getTypeUrl());
         return unpack(getId(), CommandId.class);
     }
-
-    /**
-     * Checks if the associated message is an entity.
-     */
-    default boolean isEntity() {
-        return !isCommand() && !isEvent();
-    }
-
-    default SignalId asSignalId() {
-        checkState(!isEntity(),
-                   "%s is neither a command ID nor an event ID.",
-                   getId().getTypeUrl());
-        return (SignalId) unpack(getId());
-    }
 }
