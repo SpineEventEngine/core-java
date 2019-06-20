@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package spine.test.diagnostics;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.diagnostics";
+option java_outer_classname = "VerificationProto";
+option java_multiple_files = true;
+
+import "spine/core/user_id.proto";
+import "spine/net/email_address.proto";
+
+message Verification {
+    option (entity) = {kind: PROCESS_MANAGER visibility: FULL};
+
+    core.UserId user_id = 1;
+
+    net.EmailAddress email = 2 [(required) = true, (validate) = true];
+
+    Status status = 3 [(required) = true];
+
+    enum Status {
+
+        UNVERIFIED = 0;
+        EMAIL_SENT = 1;
+        VERIFIED = 2;
+        FAILED = 3;
+    }
+}
