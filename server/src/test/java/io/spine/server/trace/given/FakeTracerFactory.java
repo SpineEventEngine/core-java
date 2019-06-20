@@ -20,21 +20,21 @@
 
 package io.spine.server.trace.given;
 
+import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
-import io.spine.core.SignalId;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
 
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("Immutable")
-public class FakeTracerFactory implements TracerFactory {
+public final class FakeTracerFactory implements TracerFactory {
 
-    private final Map<SignalId, FakeTracer> tracers = newHashMap();
+    private final Map<Class<? extends Message>, FakeTracer> tracers = newHashMap();
     private boolean closed = false;
 
     @Override
@@ -49,23 +49,26 @@ public class FakeTracerFactory implements TracerFactory {
 
     @Override
     public Tracer trace(Signal<?, ?, ?> signalMessage) {
-        FakeTracer tracer = new FakeTracer(signalMessage);
-        tracers.put(signalMessage.id(), tracer);
+        Class<? extends Message> messageType = signalMessage.enclosedMessage()
+                                                            .getClass();
+        FakeTracer tracer = tracers.computeIfAbsent(messageType,
+                                                    cls -> new FakeTracer(signalMessage));
         return tracer;
     }
 
     @Override
     public void close() {
         closed = true;
+        tracers.clear();
     }
 
     public boolean closed() {
         return closed;
     }
 
-    public FakeTracer tracer(SignalId message) {
-        FakeTracer tracer = tracers.get(message);
-        assertThat(tracer).isNotNull();
+    public FakeTracer tracer(Class<? extends Message> messageType) {
+        FakeTracer tracer = tracers.get(messageType);
+        assertNotNull(tracer);
         return tracer;
     }
 }

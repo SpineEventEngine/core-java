@@ -51,6 +51,7 @@ public final class AirportContext {
                 .setEnricher(enricher);
         return BoundedContext
                 .newBuilder()
+                .setName("Airport")
                 .add(flights)
                 .add(new TimetableRepository())
                 .add(DefaultRepository.of(BoardingProcman.class))
