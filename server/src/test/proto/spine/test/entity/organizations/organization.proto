@@ -26,5 +26,5 @@ message Organization {
 
     core.UserId head = 3;
 
-    repeated core.UserId members = 4;
+    repeated core.UserId member = 4;
 }

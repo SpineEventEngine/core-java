@@ -96,7 +96,7 @@ abstract class SubscriptionMatcher implements Predicate<EventEnvelope> {
         if (!idFilterSet) {
             return true;
         }
-        boolean result = idFilter.getIdsList()
+        boolean result = idFilter.getIdList()
                                  .contains(id);
         return result;
     }

@@ -67,13 +67,6 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected int readEventCountAfterLastSnapshot(I id) {
-        checkNotClosed();
-        int result = getStorage().eventCount(id);
-        return result;
-    }
-
-    @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
         checkNotClosed();
         Optional<LifecycleFlags> result = getStorage().getStatus(id);
@@ -84,12 +77,6 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     public void writeLifecycleFlags(I id, LifecycleFlags status) {
         checkNotClosed();
         getStorage().putStatus(id, status);
-    }
-
-    @Override
-    protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
-        checkNotClosed();
-        getStorage().putEventCount(id, eventCount);
     }
 
     @Override

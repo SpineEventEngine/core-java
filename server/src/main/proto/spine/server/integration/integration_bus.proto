@@ -58,7 +58,7 @@ message ExternalMessage {
 message RequestForExternalMessages {
 
     // Multiple types may be requested at a time.
-    repeated ExternalMessageType requested_message_types = 1;
+    repeated ExternalMessageType requested_message_type = 1;
 }
 
 // The type of message requested by some part of the system.

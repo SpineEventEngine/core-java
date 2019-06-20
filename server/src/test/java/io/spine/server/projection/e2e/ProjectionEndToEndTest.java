@@ -138,7 +138,7 @@ class ProjectionEndToEndTest {
                 .newBuilder()
                 .setHead(organizationHead)
                 .setName(organizationName)
-                .addMembers(UserId.getDefaultInstance())
+                .addMember(UserId.getDefaultInstance())
                 .build();
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
@@ -170,8 +170,8 @@ class ProjectionEndToEndTest {
 
         Group actualGroup = singleGroup.state();
         assertEquals(actualGroup.getName(), organizationName + producedAt);
-        IterableSubject assertParticipants = assertThat(actualGroup.getParticipantsList());
-        assertParticipants.containsAtLeastElementsIn(newState.getMembersList());
+        IterableSubject assertParticipants = assertThat(actualGroup.getParticipantList());
+        assertParticipants.containsAtLeastElementsIn(newState.getMemberList());
         assertParticipants.contains(organizationHead);
 
         groups.close();

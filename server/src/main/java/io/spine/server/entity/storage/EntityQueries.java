@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
@@ -29,7 +30,6 @@ import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
-import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
@@ -41,7 +41,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.primitives.Primitives.wrap;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static java.lang.String.format;
@@ -99,7 +99,7 @@ public final class EntityQueries {
         checkNotNull(columns);
 
         QueryParameters queryParams = toQueryParams(orderBy, filters, pagination, columns);
-        Collection<I> ids = toGenericIdValues(filters);
+        List<I> ids = toIdentifiers(filters);
 
         EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
@@ -179,14 +179,15 @@ public final class EntityQueries {
                       filterValue);
     }
 
-    private static <I> Collection<I> toGenericIdValues(TargetFilters filters) {
-        IdFilter idFilter = filters.getIdFilter();
-        Collection<I> ids = newArrayList();
-        for (Any entityId : idFilter.getIdsList()) {
-            @SuppressWarnings("unchecked" /* The caller is responsible to pass the proper IDs. */)
-            I unpackedId = (I) Identifier.unpack(entityId);
-            ids.add(unpackedId);
-        }
-        return ids;
+    @SuppressWarnings("unchecked" /* The caller is responsible to pass the proper IDs. */)
+    private static <I> List<I> toIdentifiers(TargetFilters filters) {
+        ImmutableList<I> result =
+                filters.getIdFilter()
+                       .getIdList()
+                       .stream()
+                       .map(Identifier::unpack)
+                       .map(i -> (I) i)
+                       .collect(toImmutableList());
+        return result;
     }
 }

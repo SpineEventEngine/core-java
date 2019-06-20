@@ -187,9 +187,8 @@ public final class PmDispatcher {
             super(processManager, state, version);
         }
 
-        @Override
-        protected void commit() {
-            super.commit();
+        void doCommit() {
+            commit();
         }
     }
 }

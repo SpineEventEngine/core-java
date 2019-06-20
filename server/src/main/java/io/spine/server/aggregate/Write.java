@@ -123,7 +123,6 @@ final class Write<I> {
 
     private void commit(int eventCount) {
         aggregate.commitEvents();
-        storage.writeEventCountAfterLastSnapshot(id, eventCount);
         aggregate.setEventCountAfterLastSnapshot(eventCount);
         if (aggregate.lifecycleFlagsChanged()) {
             storage.writeLifecycleFlags(aggregate.id(), aggregate.lifecycleFlags());

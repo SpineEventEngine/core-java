@@ -7,7 +7,7 @@
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -38,7 +38,7 @@
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -82,7 +82,7 @@
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -120,7 +120,7 @@
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -180,7 +180,7 @@
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -255,7 +255,7 @@
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -434,7 +434,7 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:51 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -469,7 +469,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -513,7 +513,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -573,7 +573,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -648,7 +648,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -827,7 +827,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:52 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -835,57 +835,12 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 # Dependencies of `io.spine.tools:spine-model-assembler:1.0.0-SNAPSHOT`
 
 ## Runtime
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -915,15 +870,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -943,24 +890,6 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
@@ -969,15 +898,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1047,36 +968,13 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 2.8.0
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -1090,22 +988,11 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **POM License: MIT License** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
 ## Compile, tests and tooling
 1. **Group:** com.beust **Name:** jcommander **Version:** 1.72
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM Project URL:** [http://jcommander.org](http://jcommander.org)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.github.kevinstern **Name:** software-and-algorithms **Version:** 1.0
      * **POM Project URL:** [https://www.github.com/KevinStern/software-and-algorithms](https://www.github.com/KevinStern/software-and-algorithms)
@@ -1119,55 +1006,15 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.auto **Name:** auto-common **Version:** 0.10
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.auto.value **Name:** auto-value-annotations **Version:** 1.6.3
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jFormatString **Version:** 3.0.0
      * **POM Project URL:** [http://findbugs.sourceforge.net/](http://findbugs.sourceforge.net/)
@@ -1219,15 +1066,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1269,28 +1108,10 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
@@ -1300,15 +1121,7 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1382,23 +1195,13 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.12
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -1431,23 +1234,10 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
      * **POM License: The BSD License** - [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
 
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.8.1
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
@@ -1573,18 +1363,12 @@ This report was generated on **Thu Jun 20 13:04:16 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **POM License: MIT License** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
     
         
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:52 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1596,57 +1380,12 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://aopalliance.sourceforge.net](http://aopalliance.sourceforge.net)
      * **POM License: Public Domain**
 
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -1680,15 +1419,7 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1716,28 +1447,10 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
@@ -1747,15 +1460,7 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1825,23 +1530,13 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** javax.annotation **Name:** jsr250-api **Version:** 1.0
      * **POM Project URL:** [http://jcp.org/aboutJava/communityprocess/final/jsr250/index.html](http://jcp.org/aboutJava/communityprocess/final/jsr250/index.html)
@@ -1857,19 +1552,6 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
 1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.4.0.Final
      * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.apache.maven **Name:** maven-artifact **Version:** 3.2.1
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1926,12 +1608,6 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
 ## Compile, tests and tooling
 1. **Group:** aopalliance **Name:** aopalliance **Version:** 1.0
      * **POM Project URL:** [http://aopalliance.sourceforge.net](http://aopalliance.sourceforge.net)
@@ -1941,11 +1617,6 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM Project URL:** [http://jcommander.org](http://jcommander.org)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.github.kevinstern **Name:** software-and-algorithms **Version:** 1.0
      * **POM Project URL:** [https://www.github.com/KevinStern/software-and-algorithms](https://www.github.com/KevinStern/software-and-algorithms)
@@ -1959,55 +1630,15 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.auto **Name:** auto-common **Version:** 0.10
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.auto.value **Name:** auto-value-annotations **Version:** 1.6.3
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jFormatString **Version:** 3.0.0
      * **POM Project URL:** [http://findbugs.sourceforge.net/](http://findbugs.sourceforge.net/)
@@ -2063,15 +1694,7 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2121,11 +1744,6 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2136,19 +1754,6 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
@@ -2157,15 +1762,7 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2239,23 +1836,13 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** javax.annotation **Name:** jsr250-api **Version:** 1.0
      * **POM Project URL:** [http://jcp.org/aboutJava/communityprocess/final/jsr250/index.html](http://jcp.org/aboutJava/communityprocess/final/jsr250/index.html)
@@ -2303,23 +1890,10 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
      * **POM License: The BSD License** - [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
 
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.8.1
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.apache.maven **Name:** maven-artifact **Version:** 3.2.1
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2492,18 +2066,12 @@ This report was generated on **Thu Jun 20 13:04:17 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
     
         
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:53 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2511,57 +2079,12 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
 # Dependencies of `io.spine:spine-server:1.0.0-SNAPSHOT`
 
 ## Runtime
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -2591,15 +2114,7 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2619,24 +2134,6 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
@@ -2645,15 +2142,7 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2723,36 +2212,13 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.checkerframework **Name:** checker-qual **Version:** 2.8.0
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -2766,22 +2232,11 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **POM License: MIT License** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
 ## Compile, tests and tooling
 1. **Group:** com.beust **Name:** jcommander **Version:** 1.72
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM Project URL:** [http://jcommander.org](http://jcommander.org)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.github.kevinstern **Name:** software-and-algorithms **Version:** 1.0
      * **POM Project URL:** [https://www.github.com/KevinStern/software-and-algorithms](https://www.github.com/KevinStern/software-and-algorithms)
@@ -2795,37 +2250,9 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.auto **Name:** auto-common **Version:** 0.10
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2839,18 +2266,6 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.auto.value **Name:** auto-value-annotations **Version:** 1.6.3
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** com.google.code.findbugs **Name:** jFormatString **Version:** 3.0.0
      * **POM Project URL:** [http://findbugs.sourceforge.net/](http://findbugs.sourceforge.net/)
      * **POM License: GNU Lesser Public License** - [http://www.gnu.org/licenses/lgpl.html](http://www.gnu.org/licenses/lgpl.html)
@@ -2901,15 +2316,7 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2951,28 +2358,10 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
@@ -2982,15 +2371,7 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -3064,7 +2445,7 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3072,17 +2453,7 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.1
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
      * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
      * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
      * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
@@ -3119,23 +2490,10 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
      * **POM License: The BSD License** - [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
 
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.8.1
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
@@ -3261,18 +2619,12 @@ This report was generated on **Thu Jun 20 13:04:18 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **POM License: MIT License** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
     
         
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:54 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3284,7 +2636,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3321,7 +2673,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3382,7 +2734,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3472,7 +2824,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3532,7 +2884,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3607,7 +2959,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3780,7 +3132,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:54 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3792,7 +3144,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3829,7 +3181,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3890,7 +3242,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3988,7 +3340,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4048,7 +3400,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4123,7 +3475,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4296,7 +3648,7 @@ This report was generated on **Thu Jun 20 13:04:19 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:54 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -4304,61 +3656,16 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
 # Dependencies of `io.spine:spine-testutil-server:1.0.0-SNAPSHOT`
 
 ## Runtime
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.auto.value **Name:** auto-value-annotations **Version:** 1.6.3
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4390,15 +3697,7 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4435,24 +3734,6 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
@@ -4461,15 +3742,7 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -4539,23 +3812,13 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.12
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -4568,19 +3831,6 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
 1. **Group:** net.bytebuddy **Name:** byte-buddy-agent **Version:** 1.7.9
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
@@ -4634,22 +3884,11 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **POM License: MIT License** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
 ## Compile, tests and tooling
 1. **Group:** com.beust **Name:** jcommander **Version:** 1.72
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM Project URL:** [http://jcommander.org](http://jcommander.org)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-1. **Group:** com.fasterxml.jackson.core **Name:** jackson-core **Version:** 2.9.6
-     * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.github.kevinstern **Name:** software-and-algorithms **Version:** 1.0
      * **POM Project URL:** [https://www.github.com/KevinStern/software-and-algorithms](https://www.github.com/KevinStern/software-and-algorithms)
@@ -4663,55 +3902,15 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://source.android.com/](http://source.android.com/)
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** com.google.api **Name:** api-common **Version:** 1.7.0
-     * **POM Project URL:** [https://github.com/googleapis](https://github.com/googleapis)
-     * **POM License: BSD** - [https://github.com/googleapis/api-common-java/blob/master/LICENSE](https://github.com/googleapis/api-common-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api **Name:** gax-grpc **Version:** 1.45.0
-     * **POM Project URL:** [https://github.com/googleapis/gax-java](https://github.com/googleapis/gax-java)
-     * **POM License: BSD** - [https://github.com/googleapis/gax-java/blob/master/LICENSE](https://github.com/googleapis/gax-java/blob/master/LICENSE)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v1 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-cloud-trace-v2 **Version:** 0.61.0
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.14.0
+1. **Group:** com.google.api.grpc **Name:** proto-google-common-protos **Version:** 1.12.0
      * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
      * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.api.grpc **Name:** proto-google-iam-v1 **Version:** 0.12.0
-     * **POM Project URL:** [https://github.com/googleapis/api-client-staging](https://github.com/googleapis/api-client-staging)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-credentials **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
-
-1. **Group:** com.google.auth **Name:** google-auth-library-oauth2-http **Version:** 0.13.0
-     * **POM License: BSD New license** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.auto **Name:** auto-common **Version:** 0.10
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.auto.value **Name:** auto-value-annotations **Version:** 1.6.3
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-core-grpc **Version:** 1.78.0
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-core-grpc)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.cloud **Name:** google-cloud-trace **Version:** 0.96.0-beta
-     * **POM Project URL:** [https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace](https://github.com/googleapis/google-cloud-java/tree/master/google-cloud-clients/google-cloud-trace)
-     * **POM License: Apache-2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** com.google.code.findbugs **Name:** jFormatString **Version:** 3.0.0
      * **POM Project URL:** [http://findbugs.sourceforge.net/](http://findbugs.sourceforge.net/)
@@ -4763,15 +3962,7 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
 1. **Group:** com.google.guava **Name:** listenablefuture **Version:** 9999.0-empty-to-avoid-conflict-with-guava
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** com.google.http-client **Name:** google-http-client **Version:** 1.30.1
-     * **Manifest Project URL:** [http://www.google.com/](http://www.google.com/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.http-client **Name:** google-http-client-jackson2 **Version:** 1.28.0
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
+1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.1
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4813,28 +4004,10 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
 1. **Group:** com.squareup.okio **Name:** okio **Version:** 1.13.0
      * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** commons-codec **Name:** commons-codec **Version:** 1.11
-     * **Project URL:** [http://commons.apache.org/proper/commons-codec/](http://commons.apache.org/proper/commons-codec/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** commons-logging **Name:** commons-logging **Version:** 1.2
-     * **Project URL:** [http://commons.apache.org/proper/commons-logging/](http://commons.apache.org/proper/commons-logging/)
-     * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.grpc **Name:** grpc-alts **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-auth **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
 1. **Group:** io.grpc **Name:** grpc-context **Version:** 1.20.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
@@ -4844,15 +4017,7 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** grpc-grpclb **Version:** 1.21.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
 1. **Group:** io.grpc **Name:** grpc-netty **Version:** 1.20.0
-     * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
-     * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
-
-1. **Group:** io.grpc **Name:** grpc-netty-shaded **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -4926,23 +4091,13 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
      * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.21.0
+1. **Group:** io.opencensus **Name:** opencensus-api **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.opencensus **Name:** opencensus-contrib-grpc-metrics **Version:** 0.19.2
      * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** io.opencensus **Name:** opencensus-contrib-http-util **Version:** 0.21.0
-     * **POM Project URL:** [https://github.com/census-instrumentation/opencensus-java](https://github.com/census-instrumentation/opencensus-java)
-     * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
-     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
-     * **Manifest license URL:** [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
-     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
-     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.12
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -4975,23 +4130,10 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
      * **POM License: The BSD License** - [http://www.antlr.org/license.html](http://www.antlr.org/license.html)
 
-1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.5
-     * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1. **Group:** org.apache.commons **Name:** commons-lang3 **Version:** 3.8.1
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
      * **Manifest license URL:** [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpclient **Version:** 4.5.8
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-client](http://hc.apache.org/httpcomponents-client)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1. **Group:** org.apache.httpcomponents **Name:** httpcore **Version:** 4.4.11
-     * **POM Project URL:** [http://hc.apache.org/httpcomponents-core-ga](http://hc.apache.org/httpcomponents-core-ga)
-     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** org.apiguardian **Name:** apiguardian-api **Version:** 1.0.0
      * **POM Project URL:** [https://github.com/apiguardian-team/apiguardian](https://github.com/apiguardian-team/apiguardian)
@@ -5117,15 +4259,9 @@ This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://www.slf4j.org](http://www.slf4j.org)
      * **POM License: MIT License** - [http://www.opensource.org/licenses/mit-license.php](http://www.opensource.org/licenses/mit-license.php)
 
-1. **Group:** org.threeten **Name:** threetenbp **Version:** 1.3.3
-     * **Manifest Project URL:** [http://www.threeten.org](http://www.threeten.org)
-     * **Manifest license URL:** [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-     * **POM Project URL:** [https://www.threeten.org/threetenbp](https://www.threeten.org/threetenbp)
-     * **POM License: BSD 3-clause** - [https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt](https://raw.githubusercontent.com/ThreeTen/threetenbp/master/LICENSE.txt)
-
     
         
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Jun 20 13:04:20 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Jun 19 16:38:55 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

@@ -77,37 +77,4 @@ public interface TransactionListener<I> {
      *         the change of the entity under transaction
      */
     void onAfterCommit(EntityRecordChange change);
-
-    /**
-     * An implementation of a {@code TransactionListener} which does not set any behavior for its
-     * callbacks.
-     */
-    class SilentWitness<I> implements TransactionListener<I> {
-
-        @Override
-        public void onBeforePhase(Phase<I, ?> phase) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onAfterPhase(Phase<I, ?> phase) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onTransactionFailed(Throwable t,
-                                        EntityRecord record) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onAfterCommit(EntityRecordChange change) {
-            // Do nothing.
-        }
-    }
 }

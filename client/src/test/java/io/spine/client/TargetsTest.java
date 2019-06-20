@@ -30,9 +30,9 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.Targets.acceptingOnly;
 import static io.spine.client.Targets.allOf;
 import static io.spine.client.Targets.someOf;
-import static io.spine.client.given.TargetsTestEnv.filtersForIds;
 import static io.spine.client.given.TargetsTestEnv.newTaskId;
 import static io.spine.type.TypeUrl.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,7 +65,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        TargetFilters expected = filtersForIds(taskId);
+        TargetFilters expected = acceptingOnly(taskId);
         assertEquals(expected, target.getFilters());
     }
 
@@ -80,7 +80,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        TargetFilters expected = filtersForIds(StringValue.of(firstId),
+        TargetFilters expected = acceptingOnly(StringValue.of(firstId),
                                                StringValue.of(secondId),
                                                StringValue.of(thirdId));
         assertEquals(expected, target.getFilters());
@@ -97,7 +97,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        TargetFilters expected = filtersForIds(Int32Value.of(firstId),
+        TargetFilters expected = acceptingOnly(Int32Value.of(firstId),
                                                Int32Value.of(secondId),
                                                Int32Value.of(thirdId));
         assertEquals(expected, target.getFilters());
@@ -114,7 +114,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
 
         assertUrl(target);
 
-        TargetFilters expected = filtersForIds(Int64Value.of(firstId),
+        TargetFilters expected = acceptingOnly(Int64Value.of(firstId),
                                                Int64Value.of(secondId),
                                                Int64Value.of(thirdId));
         assertEquals(expected, target.getFilters());

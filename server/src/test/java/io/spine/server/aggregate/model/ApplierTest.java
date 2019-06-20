@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EventApplierMethod should")
-class EventApplierTest {
+class ApplierTest {
 
     private final EventApplierSignature signature = new EventApplierSignature();
 
@@ -61,7 +61,7 @@ class EventApplierTest {
         new NullPointerTester()
                 .setDefault(CommandContext.class, CommandContext.getDefaultInstance())
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .testAllPublicStaticMethods(EventApplier.class);
+                .testAllPublicStaticMethods(Applier.class);
     }
 
     @Test
@@ -70,10 +70,10 @@ class EventApplierTest {
         Method method = new ValidApplier().getMethod();
 
 
-        Optional<EventApplier> actual = signature.create(method);
+        Optional<Applier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
-        EventApplier expected = new EventApplier(method, EventApplierParams.MESSAGE);
+        Applier expected = new Applier(method, EventApplierParams.MESSAGE);
         assertEquals(expected, actual.get());
     }
 
@@ -81,9 +81,9 @@ class EventApplierTest {
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<EventApplier> method = signature.create(applierObject.getMethod());
+        Optional<Applier> method = signature.create(applierObject.getMethod());
         assertTrue(method.isPresent());
-        EventApplier applier = method.get();
+        Applier applier = method.get();
         RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
         Event event = Event
                 .newBuilder()

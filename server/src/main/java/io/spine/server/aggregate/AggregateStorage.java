@@ -69,7 +69,8 @@ public abstract class AggregateStorage<I>
      * Forms and returns an {@link AggregateHistory} based on the
      * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
-     * @param request the aggregate read request based on which to form a record
+     * @param request
+     *         the aggregate read request based on which to form a record
      * @return the record instance or {@code Optional.empty()} if the
      *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
@@ -84,9 +85,11 @@ public abstract class AggregateStorage<I>
     /**
      * Writes events into the storage.
      *
-     * <p>NOTE: does not rewrite any events. Several events can be associated with one aggregate ID.
+     * <p><b>NOTE</b>: does not rewrite any events. Several events can be associated with one
+     * aggregate ID.
      *
-     * @param id     the ID for the record
+     * @param id
+     *         the ID for the record
      * @param events non empty aggregate state record to store
      */
     @Override
@@ -111,8 +114,10 @@ public abstract class AggregateStorage<I>
      * <p>Before the storing, {@linkplain io.spine.core.Event#clearEnrichments() enrichments}
      * will be removed from the event.
      *
-     * @param id    the aggregate ID
-     * @param event the event to write
+     * @param id
+     *         the aggregate ID
+     * @param event
+     *         the event to write
      */
     void writeEvent(I id, Event event) {
         checkNotClosedAndArguments(id, event);
@@ -125,8 +130,10 @@ public abstract class AggregateStorage<I>
     /**
      * Writes a {@code snapshot} by an {@code aggregateId} to the storage.
      *
-     * @param aggregateId an ID of an aggregate of which the snapshot is made
-     * @param snapshot    the snapshot of the aggregate
+     * @param aggregateId
+     *         an ID of an aggregate of which the snapshot is made
+     * @param snapshot
+     *         the snapshot of the aggregate
      */
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosedAndArguments(aggregateId, snapshot);
@@ -166,34 +173,15 @@ public abstract class AggregateStorage<I>
                                    .build();
     }
 
-    /**
-     * Reads a count of events which were saved to the storage after
-     * the last snapshot was created,
-     * <strong>or</strong> a count of all events if there were no snapshots yet.
-     *
-     * @param id an ID of an aggregate
-     * @return an even count after the last snapshot
-     */
-    protected abstract int readEventCountAfterLastSnapshot(I id);
-
-    /**
-     * Writes a count of events which were saved to the storage after
-     * the last snapshot was created, or a count of all events if there
-     * were no snapshots yet.
-     *
-     * @param id         an ID of an aggregate
-     * @param eventCount an even count after the last snapshot
-     * @throws IllegalStateException if the storage is closed
-     */
-    protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
-
     // Storage implementation API.
 
     /**
      * Writes the passed record into the storage.
      *
-     * @param id     the aggregate ID
-     * @param record the record to write
+     * @param id
+     *         the aggregate ID
+     * @param record
+     *         the record to write
      */
     protected abstract void writeRecord(I id, AggregateEventRecord record);
 
@@ -203,7 +191,8 @@ public abstract class AggregateStorage<I>
      * <p>Records are sorted by timestamp descending (from newer to older).
      * The iterator is empty if there's no history for the aggregate with passed ID.
      *
-     * @param request the read request
+     * @param request
+     *         the read request
      * @return new iterator instance
      */
     protected abstract Iterator<AggregateEventRecord> historyBackward(

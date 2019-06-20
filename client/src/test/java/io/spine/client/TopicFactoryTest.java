@@ -72,7 +72,7 @@ class TopicFactoryTest {
             assertEquals(0, topic.getTarget()
                                  .getFilters()
                                  .getIdFilter()
-                                 .getIdsCount());
+                                 .getIdCount());
         }
 
         @Test
@@ -88,7 +88,7 @@ class TopicFactoryTest {
             List<Any> actualIds = topic.getTarget()
                                        .getFilters()
                                        .getIdFilter()
-                                       .getIdsList();
+                                       .getIdList();
             assertEquals(ids.size(), actualIds.size());
             for (Any actualId : actualIds) {
                 TestEntityId unpackedId = unpack(actualId, TestEntityId.class);

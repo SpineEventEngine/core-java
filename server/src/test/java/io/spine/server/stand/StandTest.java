@@ -30,8 +30,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
@@ -55,6 +55,7 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
@@ -109,7 +110,6 @@ import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.given.Given.StandTestProjection;
 import static io.spine.server.stand.given.StandTestEnv.newStand;
@@ -388,7 +388,7 @@ class StandTest extends TenantAwareTest {
                 @Override
                 public void onNext(QueryResponse value) {
                     super.onNext(value);
-                    List<EntityStateWithVersion> messages = value.getMessagesList();
+                    List<EntityStateWithVersion> messages = value.getMessageList();
                     assertThat(messages).hasSize(ids.size());
                     for (EntityStateWithVersion stateWithVersion : messages) {
                         Any state = stateWithVersion.getState();
@@ -397,7 +397,8 @@ class StandTest extends TenantAwareTest {
                         assertMatchesMask(project, fieldMask);
 
                         Version version = stateWithVersion.getVersion();
-                        assertEquals(projectVersion, version.getNumber());
+                        assertThat(version.getNumber())
+                                .isEqualTo(projectVersion);
                     }
                 }
             };
@@ -492,7 +493,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(customerId));
 
             // Check notify action is called with the correct value.
-            Any packedState = pack(customer);
+            Any packedState = AnyPacker.pack(customer);
             assertEquals(packedState, action.newEntityState());
         }
 
@@ -523,7 +524,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(projectId));
 
             // Check notify action is called with the correct value.
-            Any packedState = pack(project);
+            Any packedState = AnyPacker.pack(project);
             assertEquals(packedState, action.newEntityState());
         }
 
@@ -593,11 +594,7 @@ class StandTest extends TenantAwareTest {
             @Override
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
-                EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
-                                                            .getUpdatesList()
-                                                            .get(0);
-                Any newState = entityStateUpdate.getState();
-                Customer customerInCallback = unpack(newState, Customer.class);
+                Customer customerInCallback = (Customer) update.state(0);
                 callbackStates.add(customerInCallback);
             }
         };
@@ -686,7 +683,7 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        Any packedState = pack(customer);
+        Any packedState = AnyPacker.pack(customer);
         for (MemoizeNotifySubscriptionAction action : callbacks) {
             assertEquals(packedState, action.newEntityState());
             verify(action, times(1)).accept(any(SubscriptionUpdate.class));
@@ -813,26 +810,24 @@ class StandTest extends TenantAwareTest {
                                     .allWithMask(Project.class, paths);
         MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
-            public void onNext(QueryResponse value) {
-                super.onNext(value);
-                List<EntityStateWithVersion> messages = value.getMessagesList();
-                assertFalse(messages.isEmpty());
+            public void onNext(QueryResponse response) {
+                super.onNext(response);
+                assertFalse(response.isEmpty());
 
-                EntityStateWithVersion stateWithVersion = messages.get(0);
-                Any state = stateWithVersion.getState();
-                Project project = unpack(state, Project.class);
+                Project project = (Project) response.state(0);
 
                 assertNotNull(project);
 
                 assertFalse(project.hasId());
-                assertTrue(project.getName()
-                                  .isEmpty());
+                assertThat(project.getName())
+                        .isEmpty();
                 assertEquals(UNDEFINED, project.getStatus());
-                assertTrue(project.getTaskList()
-                                  .isEmpty());
+                assertThat(project.getTaskList())
+                        .isEmpty();
 
-                Version version = stateWithVersion.getVersion();
-                assertEquals(projectVersion, version.getNumber());
+                Version version = response.version(0);
+                assertThat(version.getNumber())
+                        .isEqualTo(projectVersion);
             }
         };
         stand.execute(query, observer);
@@ -1114,7 +1109,7 @@ class StandTest extends TenantAwareTest {
         return argument -> {
             boolean everyElementPresent = true;
             for (Any entityId : argument.getIdFilter()
-                                        .getIdsList()) {
+                                        .getIdList()) {
                 Message rawId = unpack(entityId);
                 if (rawId instanceof ProjectId) {
                     ProjectId convertedProjectId = (ProjectId) rawId;
@@ -1135,8 +1130,8 @@ class StandTest extends TenantAwareTest {
                 input -> {
                     checkNotNull(input);
                     StandTestProjection projection = new StandTestProjection(input);
-                    Any id = pack(projection.id());
-                    Any state = pack(projection.state());
+                    Any id = Identifier.pack(projection.id());
+                    Any state = AnyPacker.pack(projection.state());
                     EntityRecord record = EntityRecord
                             .newBuilder()
                             .setEntityId(id)
@@ -1195,7 +1190,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
-        List<EntityStateWithVersion> messages = response.getMessagesList();
+        List<EntityStateWithVersion> messages = response.getMessageList();
         assertNotNull(messages, "Query response has null message list");
         return messages;
     }

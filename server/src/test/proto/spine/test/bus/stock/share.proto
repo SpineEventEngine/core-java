@@ -23,5 +23,5 @@ message Share {
 
 message Price {
 
-    float usd = 2 [(digits).fraction_max = 2];
+    float usd = 2;
 }

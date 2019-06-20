@@ -53,8 +53,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,
-        P extends MessageClass<?>,
-        H extends HandlerMethod<?, M, ?, P, ?>>
+                                     P extends MessageClass<?>,
+                                     H extends HandlerMethod<?, M, ?, P, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;

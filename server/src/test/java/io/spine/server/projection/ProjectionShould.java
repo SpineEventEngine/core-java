@@ -129,7 +129,7 @@ class ProjectionShould {
         assertTrue(projection.state()
                              .getValue()
                              .contains(stringEvent.getValue()));
-        assertTrue(projection.isChanged());
+        assertTrue(projection.changed());
 
         Int32Imported integerEvent = Int32Imported
                 .newBuilder()
@@ -140,7 +140,7 @@ class ProjectionShould {
         assertTrue(projection.state()
                              .getValue()
                              .contains(String.valueOf(integerEvent.getValue())));
-        assertTrue(projection.isChanged());
+        assertTrue(projection.changed());
     }
 
     @Test

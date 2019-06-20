@@ -31,7 +31,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.aggregate.model.EventApplier;
+import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
@@ -107,9 +107,12 @@ import static io.spine.validate.Validate.isNotDefault;
  * {@link AggregateRepository} periodically stores aggregate snapshots.
  * See {@link AggregateRepository#setSnapshotTrigger(int)} for details.
  *
- * @param <I> the type for IDs of this class of aggregates
- * @param <S> the type of the state held by the aggregate
- * @param <B> the type of the aggregate state builder
+ * @param <I>
+ *         the type for IDs of this class of aggregates
+ * @param <S>
+ *         the type of the state held by the aggregate
+ * @param <B>
+ *         the type of the aggregate state builder
  */
 @SuppressWarnings("OverlyCoupledClass")
 public abstract class Aggregate<I,
@@ -123,8 +126,6 @@ public abstract class Aggregate<I,
      * the last snapshot.
      *
      * <p>This field is set in {@link #play(AggregateHistory)} and is effectively final.
-     *
-     * @see AggregateStorage#readEventCountAfterLastSnapshot(Object)
      */
     private int eventCountAfterLastSnapshot = 0;
 
@@ -221,7 +222,8 @@ public abstract class Aggregate<I,
      * <p>Dispatching the commands results in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
-     * @param  command the envelope with the command to dispatch
+     * @param  command
+     *          the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
@@ -238,7 +240,8 @@ public abstract class Aggregate<I,
      * <p>Reacting on a event may result in emitting event messages.
      * All the {@linkplain Empty empty} messages are filtered out from the result.
      *
-     * @param  event the envelope with the event to dispatch
+     * @param  event
+     *          the envelope with the event to dispatch
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change because of the event
      */
@@ -254,15 +257,16 @@ public abstract class Aggregate<I,
     /**
      * Invokes applier method for the passed event message.
      *
-     * @param event the event to apply
+     * @param event
+     *         the event to apply
      */
-    void invokeApplier(EventEnvelope event) {
-        EventApplier method = thisClass().applierOf(event.messageClass());
+    final void invokeApplier(EventEnvelope event) {
+        Applier method = thisClass().applierOf(event.messageClass());
         method.invoke(this, event);
     }
 
     @Override
-    public void play(Iterable<Event> events) {
+    public final void play(Iterable<Event> events) {
         EventPlayer.forTransactionOf(this)
                    .play(events);
     }
@@ -274,17 +278,18 @@ public abstract class Aggregate<I,
      * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param  aggregateHistory the aggregate state with events to play
+     * @param history
+     *         the aggregate state with events to play
      * @throws IllegalStateException
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    void play(AggregateHistory aggregateHistory) {
-        Snapshot snapshot = aggregateHistory.getSnapshot();
+    final void play(AggregateHistory history) {
+        Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        List<Event> events = aggregateHistory.getEventList();
+        List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
         play(events);
         remember(events);
@@ -304,10 +309,11 @@ public abstract class Aggregate<I,
      * the {@code events} list is of size 3, the applied events will have versions {@code 43},
      * {@code 44}, and {@code 45}.
      *
-     * @param events the events to apply
+     * @param events
+     *         the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
-    List<Event> apply(List<Event> events) {
+    final List<Event> apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
         play(versionedEvents);
@@ -326,7 +332,7 @@ public abstract class Aggregate<I,
      *
      * @param snapshot the snapshot with the state to restore
      */
-    void restore(Snapshot snapshot) {
+    final void restore(Snapshot snapshot) {
         @SuppressWarnings("unchecked") /* The cast is safe since the snapshot is created
             with the state of this aggregate, which is bound by the type <S>. */
         S stateToRestore = (S) unpack(snapshot.getState());
@@ -347,7 +353,7 @@ public abstract class Aggregate<I,
      * {@linkplain #remember Remembers} the uncommitted events as
      * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
      */
-    void commitEvents() {
+    final void commitEvents() {
         List<Event> recentEvents = uncommittedEvents.list();
         remember(recentEvents);
         uncommittedEvents = UncommittedEvents.ofNone();
@@ -357,7 +363,7 @@ public abstract class Aggregate<I,
      * Instructs to modify the state of an aggregate only within an event applier method.
      */
     @Override
-    protected String missingTxMessage() {
+    protected final String missingTxMessage() {
         return "Modification of aggregate state or its lifecycle flags is not available this way." +
                 " Make sure to modify those only from an event applier method.";
     }
@@ -367,7 +373,7 @@ public abstract class Aggregate<I,
      *
      * @return new snapshot
      */
-    Snapshot toSnapshot() {
+    final Snapshot toSnapshot() {
         Any state = AnyPacker.pack(state());
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
@@ -383,7 +389,7 @@ public abstract class Aggregate<I,
      * <p>Opens the method for the repository.
      */
     @Override
-    protected void clearRecentHistory() {
+    protected final void clearRecentHistory() {
         super.clearRecentHistory();
     }
 
@@ -396,7 +402,7 @@ public abstract class Aggregate<I,
      *
      * @return new iterator instance
      */
-    protected Iterator<Event> historyBackward() {
+    protected final Iterator<Event> historyBackward() {
         return recentHistory().iterator();
     }
 
@@ -424,14 +430,14 @@ public abstract class Aggregate<I,
     /**
      * Obtains the number of events stored in the associated storage since last snapshot.
      */
-    int eventCountAfterLastSnapshot() {
+    final int eventCountAfterLastSnapshot() {
         return eventCountAfterLastSnapshot;
     }
 
     /**
      * Updates the number of events stores in the associated storage since last snapshot.
      */
-    void setEventCountAfterLastSnapshot(int count) {
+    final void setEventCountAfterLastSnapshot(int count) {
         checkArgument(count >= 0, "Event count cannot be negative.");
         this.eventCountAfterLastSnapshot = count;
     }

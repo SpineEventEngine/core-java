@@ -51,8 +51,8 @@ public abstract class Phase<I, R> {
 
     private boolean successful = false;
 
-    Phase(VersionIncrement versionIncrement) {
-        this.versionIncrement = versionIncrement;
+    Phase(VersionIncrement increment) {
+        this.versionIncrement = increment;
     }
 
     /**

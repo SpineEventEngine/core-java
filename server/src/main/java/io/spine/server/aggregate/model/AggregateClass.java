@@ -47,7 +47,7 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EmptyClass, EventApplier> stateEvents;
+    private final MessageHandlerMap<EventClass, EmptyClass, Applier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
@@ -55,7 +55,7 @@ public class AggregateClass<A extends Aggregate>
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
         this.stateEvents = MessageHandlerMap.create(cls, new EventApplierSignature());
-        this.importableEvents = stateEvents.messageClasses(EventApplier::allowsImport);
+        this.importableEvents = stateEvents.messageClasses(Applier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }
 
@@ -135,7 +135,7 @@ public class AggregateClass<A extends Aggregate>
     /**
      * Obtains event applier method for the passed class of events.
      */
-    public final EventApplier applierOf(EventClass eventClass) {
+    public final Applier applierOf(EventClass eventClass) {
         return stateEvents.handlerOf(eventClass);
     }
 }

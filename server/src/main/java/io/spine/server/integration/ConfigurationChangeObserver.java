@@ -62,8 +62,8 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
         RequestForExternalMessages request = unpack(value.getOriginalMessage(),
                                                     RequestForExternalMessages.class);
         BoundedContextName origin = value.getBoundedContextName();
-        addNewSubscriptions(request.getRequestedMessageTypesList(), origin);
-        clearStaleSubscriptions(request.getRequestedMessageTypesList(), origin);
+        addNewSubscriptions(request.getRequestedMessageTypeList(), origin);
+        clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,

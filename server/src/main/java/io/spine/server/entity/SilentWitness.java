@@ -17,27 +17,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.model;
+package io.spine.server.entity;
 
-import "spine/options.proto";
+import io.spine.validate.NonValidated;
 
-option (type_url_prefix) = "type.spine.io";
-option java_generate_equals_and_hash = false;
-option java_multiple_files = true;
-option java_outer_classname = "CommandHandlersProto";
-option java_package = "io.spine.model";
+/**
+ * An implementation of a {@code TransactionListener} which does not set any behavior for its
+ * callbacks.
+ */
+final class SilentWitness<I> implements TransactionListener<I> {
 
-option (internal_all) = true;
+    @Override
+    public void onBeforePhase(Phase<I, ?> phase) {
+        // Do nothing.
+    }
 
-// The command handling types of a project.
-message CommandHandlers {
+    @Override
+    public void onAfterPhase(Phase<I, ?> phase) {
+        // Do nothing.
+    }
 
-    // All the command handling types of a Spine project.
-    //
-    // Each type is represented with its Java fully-qualified class name.
-    // These types include `Aggregate`s, `ProcessManager`s, and `CommandHandler`s.
-    //
-    repeated string command_handling_type = 1;
+    @Override
+    public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onTransactionFailed(Throwable t, EntityRecord record) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onAfterCommit(EntityRecordChange change) {
+        // Do nothing.
+    }
 }

@@ -274,7 +274,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         RequestForExternalMessages.Builder resultBuilder = RequestForExternalMessages.newBuilder();
         for (ChannelId channelId : currentlyRequested) {
             ExternalMessageType type = fromId(channelId);
-            resultBuilder.addRequestedMessageTypes(type);
+            resultBuilder.addRequestedMessageType(type);
         }
         RequestForExternalMessages result = resultBuilder.build();
         ExternalMessage externalMessage = ExternalMessages.of(result, boundedContextName);
