@@ -30,7 +30,7 @@ import io.spine.core.Signal;
  * <p>Each tracer is created for a single signal and should not be reused.
  *
  * <p>Implementations may choose to perform I/O operations (i.e. send traces via network) on
- * {@code close()}. It is expected nin general that each call to {@link #trace} results in some
+ * {@code close()}. It is expected in general that each call to {@link #trace} results in some
  * tracing data produced, however, implementations may ignore some signals.
  */
 @SPI
