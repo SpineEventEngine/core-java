@@ -36,7 +36,7 @@ import io.spine.server.event.EventDispatch;
  *         the type of the event dispatch result
  */
 @Internal
-public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
+public final class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
         extends Phase<I, R> {
 
     private final EventDispatch<I, E, R> dispatch;

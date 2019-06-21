@@ -40,7 +40,7 @@ public abstract class VersionIncrement {
     /**
      * Advances the version of the entity in transaction.
      */
-    void apply() {
+    final void apply() {
         Version nextVersion = nextVersion();
         checkIsIncrement(transaction.version(), nextVersion);
         transaction.setVersion(nextVersion);
@@ -49,7 +49,7 @@ public abstract class VersionIncrement {
     /**
      * Returns the transaction on which the {@code VersionIncrement} operates.
      */
-    Transaction transaction() {
+    final Transaction transaction() {
         return transaction;
     }
 

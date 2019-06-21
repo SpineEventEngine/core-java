@@ -60,14 +60,14 @@ public abstract class Phase<I, R> {
      *
      * @return the result of the task execution
      */
-    R propagate() {
+    final R propagate() {
         R result = performDispatch();
         versionIncrement.apply();
         markSuccessful();
         return result;
     }
 
-    boolean isSuccessful() {
+    final boolean isSuccessful() {
         return successful;
     }
 
