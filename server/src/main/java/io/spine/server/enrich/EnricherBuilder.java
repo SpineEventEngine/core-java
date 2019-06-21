@@ -116,16 +116,18 @@ public abstract class EnricherBuilder<M extends Message,
         Class<? extends Message> sourceInterface = key.sourceClass();
         Class<? extends Message> enrichmentClass = key.enrichmentClass();
         functions.forEach((k, v) -> {
-            Class<? extends Message> entryCls = k.sourceClass();
+            Class<? extends Message> entrySourceCls = k.sourceClass();
+            Class<? extends Message> entryEnrichmentCls = k.enrichmentClass();
             checkArgument(
-                    !sourceInterface.isAssignableFrom(entryCls),
+                    !sourceInterface.isAssignableFrom(entrySourceCls)
+                    || !enrichmentClass.equals(entryEnrichmentCls),
                     "Unable to add a function which produces enrichments of the class `%s`" +
                     " via the interface `%s`. There is already a function which does" +
                     " this via the class `%s` which implements this interface." +
                     SUGGEST_REMOVAL,
                     enrichmentClass.getCanonicalName(),
                     sourceInterface.getCanonicalName(),
-                    entryCls.getCanonicalName()
+                    entrySourceCls.getCanonicalName()
             );
         });
     }
