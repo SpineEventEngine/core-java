@@ -34,7 +34,6 @@ import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.validate.Validated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +50,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
+import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
+import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -138,21 +139,15 @@ public class DeliveryTest {
         new DeliveryTester(1).run(targets);
     }
 
-    private static ImmutableSet<String> manyTargets(int size) {
-        return new SecureRandom().ints(size)
-                                 .mapToObj((i) -> "calc-" + i)
-                                 .collect(ImmutableSet.toImmutableSet());
-    }
-
-    private static ImmutableSet<String> singleTarget() {
-        return ImmutableSet.of("the-calculator");
-    }
-
-    private static void changeShardCountTo(int shards) {
-        Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
-        ServerEnvironment.getInstance()
-                         .setDelivery(newDelivery);
-    }
+    /*
+     * Test environment.
+     *
+     * <p>Accesses the {@linkplain Delivery Delivery API} which has been made
+     * package-private and marked as visible for testing. Therefore the test environment routines
+     * aren't moved to a separate {@code ...TestEnv} class. Otherwise the test-only API
+     * of {@code Delivery} must have been made {@code public}, which wouldn't be
+     * a good API design move.
+     ******************************************************************************/
 
     /**
      * Posts addendum commands to instances of {@link CalcAggregate} in a selected number of threads
@@ -162,7 +157,7 @@ public class DeliveryTest {
 
         private final int threadCount;
 
-        protected DeliveryTester(int threadCount) {
+        private DeliveryTester(int threadCount) {
             this.threadCount = threadCount;
         }
 
@@ -258,6 +253,12 @@ public class DeliveryTest {
         }
     }
 
+    private static void changeShardCountTo(int shards) {
+        Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
+        ServerEnvironment.getInstance()
+                         .setDelivery(newDelivery);
+    }
+
     private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContent() {
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
@@ -266,7 +267,7 @@ public class DeliveryTest {
         ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
                 ImmutableMap.builder();
         for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
-            @Validated ShardIndex index =
+            ShardIndex index =
                     ShardIndex.newBuilder()
                               .setIndex(shardIndex)
                               .setOfTotal(shardCount)
