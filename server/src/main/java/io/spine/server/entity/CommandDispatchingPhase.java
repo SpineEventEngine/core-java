@@ -42,9 +42,8 @@ public final class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
 
     private final DispatchCommand<I> dispatch;
 
-    public CommandDispatchingPhase(DispatchCommand<I> dispatch,
-                                   VersionIncrement versionIncrement) {
-        super(versionIncrement);
+    public CommandDispatchingPhase(DispatchCommand<I> dispatch, VersionIncrement vi) {
+        super(vi);
         this.dispatch = dispatch;
     }
 

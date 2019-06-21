@@ -110,11 +110,24 @@ public class PmTransaction<I,
      */
     final List<Event> dispatchEvent(EventEnvelope event) {
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, entity(), event),
+                createDispatch(event),
                 createVersionIncrement()
         );
         List<Event> events = doPropagate(phase);
         return events;
+    }
+
+    private EventDispatch<I, ProcessManager<I, S, B>, List<Event>>
+    createDispatch(EventEnvelope event) {
+        return new EventDispatch<>(this::dispatch, entity(), event);
+    }
+
+    private List<Event> dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
+        return pm.dispatchEvent(event);
+    }
+
+    private VersionIncrement createVersionIncrement() {
+        return new AutoIncrement(this);
     }
 
     /**
@@ -164,10 +177,6 @@ public class PmTransaction<I,
         return tx;
     }
 
-    private List<Event> dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
-        return pm.dispatchEvent(event);
-    }
-
     /**
      * Updates the process lifecycle based on a successful phase propagation result.
      */
@@ -193,9 +202,5 @@ public class PmTransaction<I,
             setDeleted(true);
         }
         commitAttributeChanges();
-    }
-
-    private VersionIncrement createVersionIncrement() {
-        return new AutoIncrement(this);
     }
 }
