@@ -57,7 +57,7 @@ public final class BoundedContextNames {
      */
     public static BoundedContextName newName(String name) {
         checkNotNull(name);
-        checkArgument(!name.isEmpty());
+        checkArgument(!name.isEmpty(), "Empty context name is not allowed.");
         BoundedContextName result = BoundedContextName
                 .newBuilder()
                 .setValue(name)
