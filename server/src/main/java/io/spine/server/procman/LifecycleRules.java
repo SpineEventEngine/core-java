@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EventMessage;
 import io.spine.base.ThrowableMessage;
@@ -42,7 +41,7 @@ import static java.util.Arrays.asList;
  * {@linkplain LifecycleFlags#getArchived()} archive} or {@linkplain LifecycleFlags#getDeleted()}
  * delete} entities when certain events or rejections occur.
  */
-public final class LifecycleRules {
+final class LifecycleRules {
 
     /**
      * Event/rejection classes which will cause the entity to become archived.
@@ -54,8 +53,7 @@ public final class LifecycleRules {
      */
     private final Set<Class<? extends EventMessage>> deleteOn;
 
-    @VisibleForTesting
-    public LifecycleRules() {
+    LifecycleRules() {
         this.archiveOn = new HashSet<>();
         this.deleteOn = new HashSet<>();
     }
