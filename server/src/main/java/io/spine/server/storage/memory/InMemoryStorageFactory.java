@@ -111,7 +111,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        ContextSpec multitenantSpec = ContextSpec.multitenant(context.name().getValue());
+        ContextSpec multitenantSpec = ContextSpec.singleTenant(context.name().getValue());
         return newInstance(multitenantSpec);
     }
 }

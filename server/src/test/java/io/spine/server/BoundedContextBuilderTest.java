@@ -102,7 +102,7 @@ class BoundedContextBuilderTest {
             assertEquals(mock, builder.setStorage(spec -> mock)
                                       .storage()
                                       .get()
-                                      .apply(ContextSpec.singleTenant("")));
+                                      .apply(ContextSpec.singleTenant("Test")));
         }
 
         @Test
