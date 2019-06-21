@@ -107,7 +107,7 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
     }
 
     @CanIgnoreReturnValue
-    public <E extends Message> E assertExistEvent(Class<E> eventType) {
+    public <E extends Message> E assertReceivedEvent(Class<E> eventType) {
         assertFalse(nonCheckedEvents.isEmpty(), errorMessage());
         EventMessage event = nonCheckedEvents
                 .stream()

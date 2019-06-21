@@ -149,9 +149,9 @@ class CommandLogTest {
             CommandId commandId = postCommand(rejectedCommand);
             checkReceived(rejectedCommand);
 
-            eventAccumulator.assertExistEvent(CommandAcknowledged.class);
-            eventAccumulator.assertExistEvent(CommandDispatched.class);
-            eventAccumulator.assertExistEvent(TargetAssignedToCommand.class);
+            eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
+            eventAccumulator.assertReceivedEvent(CommandDispatched.class);
+            eventAccumulator.assertReceivedEvent(TargetAssignedToCommand.class);
 
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
         }
@@ -215,24 +215,24 @@ class CommandLogTest {
         }
 
         private void checkReceived(Message expectedCommand) {
-            CommandReceived received = eventAccumulator.assertExistEvent(CommandReceived.class);
+            CommandReceived received = eventAccumulator.assertReceivedEvent(CommandReceived.class);
             Message actualCommand = unpack(received.getPayload().getMessage());
             assertEquals(expectedCommand, actualCommand);
         }
 
         private void checkAcknowledged(CommandId commandId) {
-            CommandAcknowledged acknowledged = eventAccumulator.assertExistEvent(CommandAcknowledged.class);
+            CommandAcknowledged acknowledged = eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
             assertEquals(commandId, acknowledged.getId());
         }
 
         private void checkDispatched(CommandId commandId) {
-            CommandDispatched dispatched = eventAccumulator.assertExistEvent(CommandDispatched.class);
+            CommandDispatched dispatched = eventAccumulator.assertReceivedEvent(CommandDispatched.class);
             assertEquals(commandId, dispatched.getId());
         }
 
         private void checkTargetAssigned(CommandId commandId, TypeUrl entityType) {
             TargetAssignedToCommand assigned =
-                    eventAccumulator.assertExistEvent(TargetAssignedToCommand.class);
+                    eventAccumulator.assertReceivedEvent(TargetAssignedToCommand.class);
             CommandTarget target = assigned.getTarget();
             Any actualId = target.getEntityId().getId();
             assertEquals(commandId, assigned.getId());
@@ -241,20 +241,20 @@ class CommandLogTest {
         }
 
         private void checkHandled(CommandId commandId) {
-            CommandHandled handled = eventAccumulator.assertExistEvent(CommandHandled.class);
+            CommandHandled handled = eventAccumulator.assertReceivedEvent(CommandHandled.class);
             assertEquals(commandId, handled.getId());
         }
 
         @CanIgnoreReturnValue
         private Error checkErrored(CommandId commandId) {
-            CommandErrored errored = eventAccumulator.assertExistEvent(CommandErrored.class);
+            CommandErrored errored = eventAccumulator.assertReceivedEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
             return errored.getError();
         }
 
         private void checkRejected(CommandId commandId,
                                    Class<? extends Message> expectedRejectionClass) {
-            CommandRejected rejected = eventAccumulator.assertExistEvent(CommandRejected.class);
+            CommandRejected rejected = eventAccumulator.assertReceivedEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
             TypeUrl rejectionType = rejectionEvent.typeUrl();
