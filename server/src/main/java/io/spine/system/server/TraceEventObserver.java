@@ -45,7 +45,7 @@ public final class TraceEventObserver extends AbstractEventSubscriber {
     public TraceEventObserver(BoundedContextName contextName, TracerFactory tracing) {
         super();
         checkNotNull(contextName);
-        this.tracing = tracing.inContext(contextName);
+        this.tracing = checkNotNull(tracing);
     }
 
     @Subscribe

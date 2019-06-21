@@ -21,7 +21,6 @@
 package io.spine.server.trace;
 
 import io.spine.annotation.SPI;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 
 /**
@@ -35,19 +34,6 @@ import io.spine.core.Signal;
  */
 @SPI
 public interface TracerFactory extends AutoCloseable {
-
-    /**
-     * Creates a new factory for tracing signals of the given bounded context.
-     *
-     * <p>The method may return a new factory with the same behaviour as this one but suited for
-     * the given context, or simply this instance. The method may NOT change the state of this
-     * instance to suite the given context.
-     *
-     * @param context
-     *         the name of the context to trace
-     * @return new instance
-     */
-    TracerFactory inContext(BoundedContextName context);
 
     /**
      * Creates a new instance of {@link Tracer} for the given signal.

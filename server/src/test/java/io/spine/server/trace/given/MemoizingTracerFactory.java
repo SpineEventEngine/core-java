@@ -40,16 +40,11 @@ public final class MemoizingTracerFactory implements TracerFactory {
     private boolean closed = false;
 
     @Override
-    public TracerFactory inContext(BoundedContextName context) {
-        return this;
-    }
-
-    @Override
     public Tracer trace(Signal<?, ?, ?> signalMessage) {
         Class<? extends Message> messageType = signalMessage.enclosedMessage()
                                                             .getClass();
         MemoizingTracer tracer = tracers.computeIfAbsent(messageType,
-                                                    cls -> new MemoizingTracer(signalMessage));
+                                                         cls -> new MemoizingTracer(signalMessage));
         return tracer;
     }
 
