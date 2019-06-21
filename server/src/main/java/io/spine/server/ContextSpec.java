@@ -26,6 +26,9 @@ import io.spine.core.BoundedContextName;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
 
+/**
+ * Properties of a bounded context.
+ */
 public final class ContextSpec {
 
     private final BoundedContextName name;
@@ -36,10 +39,16 @@ public final class ContextSpec {
         this.multitenant = multitenant;
     }
 
+    /**
+     * Creates a spec of a single tenant context with the given name.
+     */
     public static ContextSpec singleTenant(String name) {
         return create(name, false);
     }
 
+    /**
+     * Creates a spec of a multitenant context with the given name.
+     */
     public static ContextSpec multitenant(String name) {
         return create(name, true);
     }
@@ -50,10 +59,16 @@ public final class ContextSpec {
         return new ContextSpec(contextName, multitenant);
     }
 
+    /**
+     * Obtains the context name.
+     */
     public BoundedContextName name() {
         return name;
     }
 
+    /**
+     * Checks if the context is multitenant or not.
+     */
     public boolean isMultitenant() {
         return multitenant;
     }
