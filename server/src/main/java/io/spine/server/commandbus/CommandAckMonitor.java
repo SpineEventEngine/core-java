@@ -62,7 +62,8 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
     private CommandAckMonitor(Builder builder) {
         super(builder.delegate);
         this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
-        this.commands = builder.commands
+        this.commands = builder
+                .commands
                 .stream()
                 .collect(toImmutableMap(Command::id, c -> c));
     }
