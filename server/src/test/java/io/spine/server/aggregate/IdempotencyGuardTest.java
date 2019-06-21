@@ -25,6 +25,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
@@ -61,7 +62,7 @@ class IdempotencyGuardTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContext.newBuilder().build();
+        boundedContext = BoundedContextBuilder.assumingTests().build();
         repository = new IgTestAggregateRepository();
         boundedContext.register(repository);
         projectId = newProjectId();

@@ -66,8 +66,7 @@ class QueryServiceTest {
         responseObserver = memoizingObserver();
         // Create Projects Bounded Context with one repository and one projection.
         BoundedContext projectsContext = BoundedContext
-                .newBuilder()
-                .setName(PROJECTS_CONTEXT_NAME)
+                .singleTenant(PROJECTS_CONTEXT_NAME)
                 .build();
         Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
@@ -78,8 +77,7 @@ class QueryServiceTest {
 
         // Create Customers Bounded Context with one repository.
         BoundedContext customersContext = BoundedContext
-                .newBuilder()
-                .setName("Customers")
+                .singleTenant("Customers")
                 .build();
         Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
@@ -120,11 +118,8 @@ class QueryServiceTest {
     @Test
     @DisplayName("fail to create with Bounded Context removed from builder")
     void notCreateWithRemovedBc() {
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .build();
-
+        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
         QueryService.Builder builder = QueryService.newBuilder();
-
         assertThrows(IllegalStateException.class, () -> builder.add(boundedContext)
                                                                .remove(boundedContext)
                                                                .build());

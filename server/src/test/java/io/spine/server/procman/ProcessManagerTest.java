@@ -28,6 +28,7 @@ import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -133,9 +134,8 @@ class ProcessManagerTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        context = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
+        context = BoundedContextBuilder
+                .assumingTests(true)
                 .build();
         StorageFactory storageFactory = context.storageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);

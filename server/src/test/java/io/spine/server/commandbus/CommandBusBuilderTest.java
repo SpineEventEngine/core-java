@@ -21,6 +21,7 @@
 package io.spine.server.commandbus;
 
 import io.spine.core.Command;
+import io.spine.server.ContextSpec;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.server.tenant.TenantAwareTest.createTenantIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,9 +67,9 @@ class CommandBusBuilderTest
     @BeforeEach
     void setUp() {
         boolean multitenant = true;
+        String name = getClass().getSimpleName();
         InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
-                                                   multitenant);
+                InMemoryStorageFactory.newInstance(ContextSpec.multitenant(name));
         tenantIndex = createTenantIndex(multitenant, storageFactory);
         eventBus = EventBus
                 .newBuilder()

@@ -31,6 +31,7 @@ import io.spine.client.QueryFactory;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.system.server.IncompleteAudio;
@@ -82,7 +83,7 @@ class MirrorRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContext domainContext = BoundedContext.newBuilder().build();
+        BoundedContext domainContext = BoundedContextBuilder.assumingTests(false).build();
         BoundedContext systemContext = systemOf(domainContext);
         repository = (MirrorRepository) systemContext
                 .findRepository(Mirror.class)

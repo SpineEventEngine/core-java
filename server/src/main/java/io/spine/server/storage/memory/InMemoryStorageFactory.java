@@ -21,7 +21,7 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextName;
+import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -33,7 +33,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.BoundedContextNames.checkValid;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
@@ -42,51 +41,27 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  */
 public final class InMemoryStorageFactory implements StorageFactory {
 
-    private final BoundedContextName context;
-    private final boolean multitenant;
+    private final ContextSpec context;
 
     /**
-     * Creates new instance of the factory which would serve the context with the passed name.
+     * Creates new instance of the factory which would serve the specified context.
      *
-     * @param context
-     *         the name of the context
-     * @param multitenant
-     *         if {@code true} the storage is multi-tenant and single-tenant otherwise
+     * @param spec
+     *         the context specification
      * @return new instance of the factory
      */
-    public static
-    InMemoryStorageFactory newInstance(BoundedContextName context, boolean multitenant) {
-        checkValid(context);
-        return new InMemoryStorageFactory(context, multitenant);
+    public static InMemoryStorageFactory newInstance(ContextSpec spec) {
+        checkNotNull(spec);
+        return new InMemoryStorageFactory(spec);
     }
 
-    /**
-     * Creates new instance of the factory which would serve the context with the passed name.
-     *
-     * @param boundedContextName
-     *         the name of the context
-     * @param multitenant
-     *         if {@code true} the storage is multi-tenant and single-tenant otherwise
-     * @return new instance of the factory
-     */
-    public static
-    InMemoryStorageFactory newInstance(String boundedContextName, boolean multitenant) {
-        checkValid(boundedContextName);
-        BoundedContextName name = BoundedContextName
-                .newBuilder()
-                .setValue(boundedContextName)
-                .build();
-        return newInstance(name, multitenant);
-    }
-
-    private InMemoryStorageFactory(BoundedContextName context, boolean multitenant) {
+    private InMemoryStorageFactory(ContextSpec context) {
         this.context = context;
-        this.multitenant = multitenant;
     }
 
     @Override
     public boolean isMultitenant() {
-        return this.multitenant;
+        return context.isMultitenant();
     }
 
     /** <b>NOTE</b>: the parameter is unused. */
@@ -122,7 +97,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.idClass();
         TypeUrl stateUrl = TypeUrl.of(stateClass);
-        StorageSpec<I> result = StorageSpec.of(context, stateUrl, idClass);
+        StorageSpec<I> result = StorageSpec.of(context.name(), stateUrl, idClass);
         return result;
     }
 
@@ -136,12 +111,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return newInstance(context, false);
-    }
-
-    @Override
-    public StorageFactory copyFor(BoundedContextName name, boolean multitenant) {
-        checkNotNull(name);
-        return newInstance(name, multitenant);
+        ContextSpec multitenantSpec = ContextSpec.multitenant(context.name().getValue());
+        return newInstance(multitenantSpec);
     }
 }

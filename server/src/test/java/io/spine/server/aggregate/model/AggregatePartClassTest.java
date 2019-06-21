@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.part.AnAggregatePart;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.WrongAggregatePart;
@@ -47,9 +48,7 @@ class AggregatePartClassTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext boundedContext = BoundedContext
-                .newBuilder()
-                .build();
+        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
         ProjectId projectId = ProjectId
                 .newBuilder()
                 .setId(newUuid())

@@ -25,13 +25,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.MessageId;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityCreated;
@@ -58,7 +59,6 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,14 +76,9 @@ class EntityEventsTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContextName contextName = BoundedContextName
-                .newBuilder()
-                .setValue(EntityEventsTest.class.getSimpleName())
-                .build();
-        context = BoundedContext
-                .newBuilder()
-                .setName(contextName)
-                .setStorageFactorySupplier(() -> newInstance(contextName.getValue(), false))
+        context = BoundedContextBuilder
+                .assumingTests(false)
+                .setStorage(InMemoryStorageFactory::newInstance)
                 .build();
         BoundedContext system = systemOf(context);
 

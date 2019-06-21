@@ -27,6 +27,7 @@ import io.spine.client.CommandFactory;
 import io.spine.core.UserId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
@@ -62,8 +63,10 @@ class AbstractCommanderTest {
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
     private final EventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-    private final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                                .build();
+    private final BoundedContext boundedContext = BoundedContextBuilder
+            .assumingTests()
+            .build();
+
     private CommandInterceptor interceptor;
 
     @BeforeEach

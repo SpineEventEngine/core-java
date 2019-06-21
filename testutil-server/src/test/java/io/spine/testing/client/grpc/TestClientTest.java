@@ -54,8 +54,7 @@ class TestClientTest {
     @BeforeEach
     void setUpAll() throws IOException {
         BoundedContextBuilder context = BoundedContext
-                .newBuilder()
-                .setName("Tennis")
+                .singleTenant("Tennis")
                 .add(new GameRepository());
         server = Server
                 .newBuilder()

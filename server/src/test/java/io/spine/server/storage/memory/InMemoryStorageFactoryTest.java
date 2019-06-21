@@ -20,30 +20,29 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.core.BoundedContextName;
+import io.spine.server.ContextSpec;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.BoundedContextNames.newName;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("InMemoryStorageFactory should")
 class InMemoryStorageFactoryTest {
 
-    private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
-
     @Test
     @DisplayName("have single tenant instance")
     void haveSingleTenantInstance() {
-        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
+        ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
+        assertFalse(InMemoryStorageFactory.newInstance(spec)
                                           .isMultitenant());
     }
 
     @Test
     @DisplayName("have multitenant instance")
     void haveMultitenantInstance() {
-        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
+        ContextSpec spec = ContextSpec.multitenant(getClass().getSimpleName());
+        assertTrue(InMemoryStorageFactory.newInstance(spec)
                                          .isMultitenant());
     }
 }

@@ -66,10 +66,7 @@ class CommandRoutingRejectionTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .setName("Railway Station")
-                                       .setMultitenant(false)
-                                       .build();
+        boundedContext = BoundedContext.singleTenant("Railway Station").build();
         boundedContext.register(new SwitchmanBureau());
         switchmanObserver = new SwitchmanObserver();
         boundedContext.eventBus()

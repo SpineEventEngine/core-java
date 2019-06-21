@@ -27,11 +27,11 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
-import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
@@ -52,8 +52,10 @@ import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,8 +73,8 @@ class DefaultSystemReadSideTest {
 
     @BeforeEach
     void setUp() {
-        domainContext = BoundedContext
-                .newBuilder()
+        domainContext = BoundedContextBuilder
+                .assumingTests()
                 .build();
         systemReadSide = domainContext.systemClient().readSide();
     }
@@ -86,7 +88,7 @@ class DefaultSystemReadSideTest {
     @DisplayName("not allow nulls on construction")
     void notAllowNullsOnConstruction() {
         InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(BoundedContextNames.assumingTests(), false);
+                InMemoryStorageFactory.newInstance(singleTenant(assumingTestsValue()));
         new NullPointerTester()
                 .setDefault(EventBus.class, EventBus
                         .newBuilder()

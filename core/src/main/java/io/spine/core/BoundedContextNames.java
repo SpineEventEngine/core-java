@@ -99,6 +99,15 @@ public final class BoundedContextNames {
      */
     @Internal
     @VisibleForTesting
+    public static String assumingTestsValue() {
+        return ASSUMING_TESTS.getValue();
+    }
+
+    /**
+     * Obtains the name for a Bounded Context, which will be used when no name was specified.
+     */
+    @Internal
+    @VisibleForTesting
     public static BoundedContextName assumingTests() {
         return ASSUMING_TESTS;
     }

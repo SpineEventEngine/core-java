@@ -62,7 +62,7 @@ class TracingTest {
         tracing = new MemoizingTracerFactory();
         context = AirportContext
                 .builder()
-                .setTracerFactorySupplier(() -> tracing)
+                .setTracerFactorySupplier(spec -> tracing)
                 .build();
     }
 

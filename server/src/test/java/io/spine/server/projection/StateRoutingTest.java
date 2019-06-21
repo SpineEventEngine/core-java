@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.route.given.sur.ArtistMood;
 import io.spine.server.route.given.sur.ArtistMoodRepo;
@@ -55,8 +55,9 @@ class StateRoutingTest {
     @BeforeEach
     void setupContext() {
         context = BlackBoxBoundedContext.from(
-                BoundedContext.newBuilder()
-                              .add(DefaultRepository.of(MagazineAggregate.class)));
+                BoundedContextBuilder
+                        .assumingTests()
+                        .add(DefaultRepository.of(MagazineAggregate.class)));
     }
 
     @Test

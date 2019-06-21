@@ -23,7 +23,6 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -34,11 +33,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
-import static io.spine.core.BoundedContextNames.assumingTests;
 
 /**
  * Exposes one or more Bounded Contexts using {@link io.spine.server.CommandService CommandService}
@@ -147,7 +145,7 @@ public final class Server implements Logging {
 
         private int port = DEFAULT_CLIENT_SERVICE_PORT;
         private final Set<BoundedContextBuilder> contextBuilders = new HashSet<>();
-        private @MonotonicNonNull StorageFactory storageFactory;
+        private @MonotonicNonNull Function<ContextSpec, StorageFactory> storageFactory;
 
         private final Set<BoundedContext> contexts = new HashSet<>();
 
@@ -178,7 +176,7 @@ public final class Server implements Logging {
          * Assigns default {@code StorageFactory} for the server.
          */
         @CanIgnoreReturnValue
-        public Builder setStorageFactory(StorageFactory storageFactory) {
+        public Builder setStorageFactory(Function<ContextSpec, StorageFactory> storageFactory) {
             checkNotNull(storageFactory);
             this.storageFactory = storageFactory;
             return this;
@@ -209,13 +207,9 @@ public final class Server implements Logging {
          * Bounded Context to be built and assigns its supplier.
          */
         private void ensureStorageFactory(BoundedContextBuilder builder) {
-            Optional<Supplier<StorageFactory>> supplier = builder.storageFactorySupplier();
+            Optional<Function<ContextSpec, StorageFactory>> supplier = builder.storage();
             if (!supplier.isPresent()) {
-                boolean multitenant = builder.isMultitenant();
-                BoundedContextName name = builder.name();
-
-                StorageFactory newFactory = storageFactory.copyFor(name, multitenant);
-                builder.setStorageFactorySupplier(() -> newFactory);
+                builder.setStorage(storageFactory);
             }
         }
 
@@ -225,15 +219,10 @@ public final class Server implements Logging {
          *
          * <p>If {@code StorageFactory} was not directly set to the builder, an instance of
          * {@code InMemoryStorageFactory} will be used.
-         *
-         * @implNote  Even though the instance of {@code InMemoryStorageFactory} is created as
-         * single-tenant, a multi-tenant copy of the factory would be {@linkplain
-         * io.spine.server.storage.memory.InMemoryStorageFactory#copyFor(io.spine.core.BoundedContextName, boolean)
-         * created} for a multi-tenant Bounded Context.
          */
         private void ensureStorageFactory() {
             if (storageFactory == null) {
-                this.storageFactory = InMemoryStorageFactory.newInstance(assumingTests(), false);
+                this.storageFactory = InMemoryStorageFactory::newInstance;
             }
         }
     }

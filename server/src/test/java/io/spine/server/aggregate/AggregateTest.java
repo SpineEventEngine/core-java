@@ -32,6 +32,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.aggregate.given.aggregate.AggregateWithMissingApplier;
 import io.spine.server.aggregate.given.aggregate.AmishAggregate;
@@ -163,10 +164,7 @@ public class AggregateTest {
         ModelTests.dropAllModels();
         aggregate = newAggregate(ID);
         amishAggregate = newAmishAggregate(ID);
-        boundedContext = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
-                .build();
+        boundedContext = BoundedContextBuilder.assumingTests(true).build();
         repository = new TestAggregateRepository();
         boundedContext.register(repository);
     }
