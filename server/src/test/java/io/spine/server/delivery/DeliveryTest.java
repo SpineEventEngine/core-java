@@ -110,7 +110,7 @@ public class DeliveryTest {
     @DisplayName("multiple shards to multiple targets in a multi-threaded env")
     public void manyTargets_manyShards_manyThreads() {
         changeShardCountTo(2004);
-        ImmutableSet<String> targets = manyTargets(32);
+        ImmutableSet<String> targets = manyTargets(13);
         new DeliveryTester(19).run(targets);
     }
 
@@ -158,7 +158,7 @@ public class DeliveryTest {
         ServerEnvironment.getInstance()
                          .setDelivery(newDelivery);
 
-        ImmutableSet<String> targets = manyTargets(45);
+        ImmutableSet<String> targets = manyTargets(7);
         new DeliveryTester(5, false).run(targets);
 
         ImmutableSet<ShardIndex> shards = memoizer.shards();
