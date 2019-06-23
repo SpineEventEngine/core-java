@@ -73,8 +73,11 @@ public class DeliveryTestEnv {
 
     /**
      * An observer of the messages delivered to shards, which remembers all the delivered messages.
+     *
+     * <p>Unpacks {@linkplain InboxMessage#getPayloadCase() the payload} of each
+     * {@code InboxMessage} observed.
      */
-    public static class MessageMemoizer implements ShardObserver {
+    public static class SignalMemoizer implements ShardObserver {
 
         private final ImmutableSet.Builder<SerializableMessage>
                 observedMessages = ImmutableSet.builder();
@@ -102,12 +105,30 @@ public class DeliveryTestEnv {
     }
 
     /**
+     * An observer of the messages delivered to shards, which remembers all the delivered messages.
+     *
+     * <p>Memoizes the observed {@code InboxMessage}s as-is.
+     */
+    public static class RawMessageMemoizer implements ShardObserver {
+
+        private final ImmutableSet.Builder<InboxMessage> rawMessages = ImmutableSet.builder();
+
+        @Override
+        public void onMessage(InboxMessage update) {
+            rawMessages.add(update);
+        }
+
+        public ImmutableSet<InboxMessage> messages() {
+            return rawMessages.build();
+        }
+    }
+
+    /**
      * An observer of the messages delivered to shards, which remembers all the shards involved.
      */
     public static class ShardIndexMemoizer implements ShardObserver {
 
-        private final ImmutableSet.Builder<ShardIndex>
-                observedShards = ImmutableSet.builder();
+        private final ImmutableSet.Builder<ShardIndex> observedShards = ImmutableSet.builder();
 
         @Override
         public void onMessage(InboxMessage update) {

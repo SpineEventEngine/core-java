@@ -37,12 +37,18 @@ public class FixedShardStrategy implements DeliveryStrategy, Serializable {
     private final int shardCount;
     private final ShardIndex nonEmptyShard;
 
-    public FixedShardStrategy(int count) {
-        checkArgument(count > 0);
-        shardCount = count;
+    /**
+     * Creates a strategy with the specified number of shards.
+     *
+     * @param shardCount
+     *         the number of shards
+     */
+    public FixedShardStrategy(int shardCount) {
+        checkArgument(shardCount > 0);
+        this.shardCount = shardCount;
         nonEmptyShard = ShardIndex.newBuilder()
                                   .setIndex(0)
-                                  .setOfTotal(shardCount)
+                                  .setOfTotal(this.shardCount)
                                   .vBuild();
     }
 

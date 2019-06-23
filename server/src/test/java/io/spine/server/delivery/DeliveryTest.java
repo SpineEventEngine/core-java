@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
@@ -30,8 +31,9 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.server.delivery.given.CalculatorSignal;
 import io.spine.server.delivery.given.DeliveryTestEnv.CalculatorRepository;
-import io.spine.server.delivery.given.DeliveryTestEnv.MessageMemoizer;
+import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
+import io.spine.server.delivery.given.DeliveryTestEnv.SignalMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
@@ -169,6 +171,63 @@ public class DeliveryTest {
                 .isEqualTo(strategy.nonEmptyShard());
     }
 
+    @Test
+    @DisplayName("multiple shards " +
+            "keep them as `TO_DELIVER` right after they are written to `Inbox`, " +
+            "and mark every as `DELIVERED` after they are actually delivered.")
+    @SuppressWarnings("MethodWithMultipleLoops")    // Traversing over the storage.
+    public void mark_delivered() {
+
+        FixedShardStrategy strategy = new FixedShardStrategy(3);
+
+        // Set a very long window to keep the messages non-deleted from the `InboxStorage`.
+        Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.fromDays(1));
+        RawMessageMemoizer memoizer = new RawMessageMemoizer();
+        newDelivery.subscribe(memoizer);
+        ServerEnvironment.getInstance()
+                         .setDelivery(newDelivery);
+
+        ImmutableSet<String> targets = manyTargets(6);
+        new DeliveryTester(3, false).run(targets);
+
+        // Check that each message is in `TO_DELIVER` status upon writing to the storage.
+        ImmutableSet<InboxMessage> rawMessages = memoizer.messages();
+        for (InboxMessage message : rawMessages) {
+            assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
+        }
+
+        ImmutableMap<ShardIndex, Page<InboxMessage>> contents = inboxContents();
+        for (Page<InboxMessage> page : contents.values()) {
+            ImmutableList<InboxMessage> messages = page.contents();
+            for (InboxMessage message : messages) {
+                assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.DELIVERED);
+            }
+        }
+    }
+
+    private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContents() {
+        Delivery delivery = ServerEnvironment.getInstance()
+                                             .delivery();
+        InboxStorage storage = delivery.storage();
+        int shardCount = delivery.shardCount();
+        ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
+                ImmutableMap.builder();
+        for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
+            ShardIndex index =
+                    ShardIndex.newBuilder()
+                              .setIndex(shardIndex)
+                              .setOfTotal(shardCount)
+                              .vBuild();
+            Page<InboxMessage> page =
+                    with(TenantId.getDefaultInstance())
+                            .evaluate(() -> storage.contentsBackwards(index));
+
+            builder.put(index, page);
+        }
+
+        return builder.build();
+    }
+
     /*
      * Test environment.
      *
@@ -209,7 +268,7 @@ public class DeliveryTest {
                     BlackBoxBoundedContext.singleTenant()
                                           .with(new CalculatorRepository());
 
-            MessageMemoizer memoizer = subscribeToDelivered();
+            SignalMemoizer memoizer = subscribeToDelivered();
 
             int streamSize = targets.size() * 30;
 
@@ -281,8 +340,8 @@ public class DeliveryTest {
                        .collect(toList());
         }
 
-        private static MessageMemoizer subscribeToDelivered() {
-            MessageMemoizer observer = new MessageMemoizer();
+        private static SignalMemoizer subscribeToDelivered() {
+            SignalMemoizer observer = new SignalMemoizer();
             ServerEnvironment.getInstance()
                              .delivery()
                              .subscribe(observer);
@@ -291,7 +350,7 @@ public class DeliveryTest {
 
         private void ensureInboxesEmpty() {
             if (shouldInboxBeEmpty) {
-                ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = inboxContent();
+                ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = inboxContents();
 
                 for (ShardIndex index : shardedItems.keySet()) {
                     Page<InboxMessage> page = shardedItems.get(index);
@@ -301,29 +360,6 @@ public class DeliveryTest {
                                     .isPresent());
                 }
             }
-        }
-
-        private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContent() {
-            Delivery delivery = ServerEnvironment.getInstance()
-                                                 .delivery();
-            InboxStorage storage = delivery.storage();
-            int shardCount = delivery.shardCount();
-            ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
-                    ImmutableMap.builder();
-            for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
-                ShardIndex index =
-                        ShardIndex.newBuilder()
-                                  .setIndex(shardIndex)
-                                  .setOfTotal(shardCount)
-                                  .vBuild();
-                Page<InboxMessage> page =
-                        with(TenantId.getDefaultInstance())
-                                .evaluate(() -> storage.contentsBackwards(index));
-
-                builder.put(index, page);
-            }
-
-            return builder.build();
         }
 
         private void postAsync(BlackBoxBoundedContext context,
