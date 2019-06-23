@@ -89,7 +89,7 @@ public class DeliveryTest {
     public void singleTarget_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
-        new DeliveryTester(42).run(aTarget);
+        new ThreadSimulator(42).runWith(aTarget);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class DeliveryTest {
     public void manyTargets_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(7);
-        new DeliveryTester(10).run(targets);
+        new ThreadSimulator(10).runWith(targets);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class DeliveryTest {
     public void singleTarget_manyShards_manyThreads() {
         changeShardCountTo(1986);
         ImmutableSet<String> targets = singleTarget();
-        new DeliveryTester(15).run(targets);
+        new ThreadSimulator(15).runWith(targets);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class DeliveryTest {
     public void manyTargets_manyShards_manyThreads() {
         changeShardCountTo(2004);
         ImmutableSet<String> targets = manyTargets(13);
-        new DeliveryTester(19).run(targets);
+        new ThreadSimulator(19).runWith(targets);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class DeliveryTest {
     public void singleTarget_manyShards_singleThread() {
         changeShardCountTo(12);
         ImmutableSet<String> aTarget = singleTarget();
-        new DeliveryTester(1).run(aTarget);
+        new ThreadSimulator(1).runWith(aTarget);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class DeliveryTest {
     public void singleTarget_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
-        new DeliveryTester(1).run(aTarget);
+        new ThreadSimulator(1).runWith(aTarget);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class DeliveryTest {
     public void manyTargets_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);
-        new DeliveryTester(1).run(targets);
+        new ThreadSimulator(1).runWith(targets);
     }
 
     @Test
@@ -145,7 +145,7 @@ public class DeliveryTest {
     public void manyTargets_manyShards_singleThread() {
         changeShardCountTo(2019);
         ImmutableSet<String> targets = manyTargets(13);
-        new DeliveryTester(1).run(targets);
+        new ThreadSimulator(1).runWith(targets);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class DeliveryTest {
                          .setDelivery(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(7);
-        new DeliveryTester(5, false).run(targets);
+        new ThreadSimulator(5, false).runWith(targets);
 
         ImmutableSet<ShardIndex> shards = memoizer.shards();
         assertThat(shards.size())
@@ -188,7 +188,7 @@ public class DeliveryTest {
                          .setDelivery(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(6);
-        new DeliveryTester(3, false).run(targets);
+        new ThreadSimulator(3, false).runWith(targets);
 
         // Check that each message is in `TO_DELIVER` status upon writing to the storage.
         ImmutableSet<InboxMessage> rawMessages = memoizer.messages();
@@ -242,16 +242,16 @@ public class DeliveryTest {
      * Posts addendum commands to instances of {@link CalcAggregate} in a selected number of threads
      * and verifies that each of the targets calculated a proper sum.
      */
-    private static class DeliveryTester {
+    private static class ThreadSimulator {
 
         private final int threadCount;
         private final boolean shouldInboxBeEmpty;
 
-        private DeliveryTester(int threadCount) {
+        private ThreadSimulator(int threadCount) {
             this(threadCount, true);
         }
 
-        private DeliveryTester(int threadCount, boolean shouldInboxBeEmpty) {
+        private ThreadSimulator(int threadCount, boolean shouldInboxBeEmpty) {
             this.threadCount = threadCount;
             this.shouldInboxBeEmpty = shouldInboxBeEmpty;
         }
@@ -263,7 +263,7 @@ public class DeliveryTest {
          * @param targets
          *         the identifiers of target entities
          */
-        private void run(Set<String> targets) {
+        private void runWith(Set<String> targets) {
             BlackBoxBoundedContext context =
                     BlackBoxBoundedContext.singleTenant()
                                           .with(new CalculatorRepository());
