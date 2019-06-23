@@ -23,17 +23,16 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Any;
 import com.google.protobuf.util.Durations;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
 import io.spine.base.SerializableMessage;
 import io.spine.core.TenantId;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.server.delivery.given.CalculatorSignal;
 import io.spine.server.delivery.given.DeliveryTestEnv.CalculatorRepository;
+import io.spine.server.delivery.given.DeliveryTestEnv.MessageMemoizer;
+import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
+import io.spine.server.delivery.given.FixedShardStrategy;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
@@ -57,6 +56,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Streams.concat;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -146,6 +146,29 @@ public class DeliveryTest {
         new DeliveryTester(1).run(targets);
     }
 
+    @Test
+    @DisplayName("multiple shards to multiple targets " +
+            "in a multi-threaded env with the custom strategy")
+    public void with_custom_strategy() {
+
+        FixedShardStrategy strategy = new FixedShardStrategy(13);
+        Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.ZERO);
+        ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
+        newDelivery.subscribe(memoizer);
+        ServerEnvironment.getInstance()
+                         .setDelivery(newDelivery);
+
+        ImmutableSet<String> targets = manyTargets(45);
+        new DeliveryTester(5, false).run(targets);
+
+        ImmutableSet<ShardIndex> shards = memoizer.shards();
+        assertThat(shards.size())
+                .isEqualTo(1);
+        assertThat(shards.iterator()
+                         .next())
+                .isEqualTo(strategy.nonEmptyShard());
+    }
+
     /*
      * Test environment.
      *
@@ -163,18 +186,30 @@ public class DeliveryTest {
     private static class DeliveryTester {
 
         private final int threadCount;
+        private final boolean shouldInboxBeEmpty;
 
         private DeliveryTester(int threadCount) {
-            this.threadCount = threadCount;
+            this(threadCount, true);
         }
 
-        private void run(Set<String> targets) {
+        private DeliveryTester(int threadCount, boolean shouldInboxBeEmpty) {
+            this.threadCount = threadCount;
+            this.shouldInboxBeEmpty = shouldInboxBeEmpty;
+        }
 
+        /**
+         * Generates some number of commands and events and delivers them to the specified
+         * {@linkplain CalcAggregate target entities} via the selected number of threads.
+         *
+         * @param targets
+         *         the identifiers of target entities
+         */
+        private void run(Set<String> targets) {
             BlackBoxBoundedContext context =
                     BlackBoxBoundedContext.singleTenant()
                                           .with(new CalculatorRepository());
 
-            ImmutableSet.Builder<SerializableMessage> observedMessages = subscribeToDelivered();
+            MessageMemoizer memoizer = subscribeToDelivered();
 
             int streamSize = targets.size() * 30;
 
@@ -192,7 +227,7 @@ public class DeliveryTest {
             Map<String, List<CalculatorSignal>> signalsPerTarget =
                     signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
-            ImmutableSet<SerializableMessage> receivedMessages = observedMessages.build();
+            ImmutableSet<SerializableMessage> receivedMessages = memoizer.messages();
 
             for (String calcId : signalsPerTarget.keySet()) {
 
@@ -246,38 +281,49 @@ public class DeliveryTest {
                        .collect(toList());
         }
 
-        private static ImmutableSet.Builder<SerializableMessage> subscribeToDelivered() {
-            ImmutableSet.Builder<SerializableMessage> observedMessages = ImmutableSet.builder();
+        private static MessageMemoizer subscribeToDelivered() {
+            MessageMemoizer observer = new MessageMemoizer();
             ServerEnvironment.getInstance()
                              .delivery()
-                             .subscribe(update -> {
-                                 if (update.hasCommand()) {
-                                     Any packed = update.getCommand()
-                                                        .getMessage();
-                                     CommandMessage cmdMessage =
-                                             (CommandMessage) AnyPacker.unpack(packed);
-                                     observedMessages.add(cmdMessage);
-                                 } else {
-                                     Any packed = update.getEvent()
-                                                        .getMessage();
-                                     EventMessage eventMessage =
-                                             (EventMessage) AnyPacker.unpack(packed);
-                                     observedMessages.add(eventMessage);
-                                 }
-                             });
-            return observedMessages;
+                             .subscribe(observer);
+            return observer;
         }
 
-        private static void ensureInboxesEmpty() {
-            ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = inboxContent();
+        private void ensureInboxesEmpty() {
+            if (shouldInboxBeEmpty) {
+                ImmutableMap<ShardIndex, Page<InboxMessage>> shardedItems = inboxContent();
 
-            for (ShardIndex index : shardedItems.keySet()) {
-                Page<InboxMessage> page = shardedItems.get(index);
-                assertTrue(page.contents()
-                               .isEmpty());
-                assertFalse(page.next()
-                                .isPresent());
+                for (ShardIndex index : shardedItems.keySet()) {
+                    Page<InboxMessage> page = shardedItems.get(index);
+                    assertTrue(page.contents()
+                                   .isEmpty());
+                    assertFalse(page.next()
+                                    .isPresent());
+                }
             }
+        }
+
+        private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContent() {
+            Delivery delivery = ServerEnvironment.getInstance()
+                                                 .delivery();
+            InboxStorage storage = delivery.storage();
+            int shardCount = delivery.shardCount();
+            ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
+                    ImmutableMap.builder();
+            for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
+                ShardIndex index =
+                        ShardIndex.newBuilder()
+                                  .setIndex(shardIndex)
+                                  .setOfTotal(shardCount)
+                                  .vBuild();
+                Page<InboxMessage> page =
+                        with(TenantId.getDefaultInstance())
+                                .evaluate(() -> storage.contentsBackwards(index));
+
+                builder.put(index, page);
+            }
+
+            return builder.build();
         }
 
         private void postAsync(BlackBoxBoundedContext context,
@@ -334,28 +380,5 @@ public class DeliveryTest {
         Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
         ServerEnvironment.getInstance()
                          .setDelivery(newDelivery);
-    }
-
-    private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContent() {
-        Delivery delivery = ServerEnvironment.getInstance()
-                                             .delivery();
-        InboxStorage storage = delivery.storage();
-        int shardCount = delivery.shardCount();
-        ImmutableMap.Builder<ShardIndex, Page<InboxMessage>> builder =
-                ImmutableMap.builder();
-        for (int shardIndex = 0; shardIndex < shardCount; shardIndex++) {
-            ShardIndex index =
-                    ShardIndex.newBuilder()
-                              .setIndex(shardIndex)
-                              .setOfTotal(shardCount)
-                              .vBuild();
-            Page<InboxMessage> page =
-                    with(TenantId.getDefaultInstance())
-                            .evaluate(() -> storage.contentsBackwards(index));
-
-            builder.put(index, page);
-        }
-
-        return builder.build();
     }
 }

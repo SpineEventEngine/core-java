@@ -148,9 +148,16 @@ public final class Delivery {
         checkArgument(shardCount > 0, "Shard count must be positive");
         checkNotNull(idempotenceWindow);
 
+        DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(shardCount);
+        return localWithStrategyAndWindow(strategy, idempotenceWindow);
+    }
+
+    @VisibleForTesting
+    static Delivery localWithStrategyAndWindow(DeliveryStrategy strategy,
+                                               Duration idempotenceWindow) {
         Delivery delivery =
                 newBuilder().setDeduplicationWindow(idempotenceWindow)
-                            .setStrategy(UniformAcrossAllShards.forNumber(shardCount))
+                            .setStrategy(strategy)
                             .build();
         delivery.subscribe(new LocalDispatchingObserver());
         return delivery;

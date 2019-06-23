@@ -21,7 +21,15 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.base.SerializableMessage;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.ShardIndex;
+import io.spine.server.delivery.ShardObserver;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
@@ -60,6 +68,54 @@ public class DeliveryTestEnv {
 
         private static void routeByFirstField(EventRouting<String> routing) {
             routing.replaceDefault(EventRoute.byFirstMessageField(String.class));
+        }
+    }
+
+    /**
+     * An observer of the messages delivered to shards, which remembers all the delivered messages.
+     */
+    public static class MessageMemoizer implements ShardObserver {
+
+        private final ImmutableSet.Builder<SerializableMessage>
+                observedMessages = ImmutableSet.builder();
+
+        @Override
+        public void onMessage(InboxMessage update) {
+            if (update.hasCommand()) {
+                Any packed = update.getCommand()
+                                   .getMessage();
+                CommandMessage cmdMessage =
+                        (CommandMessage) AnyPacker.unpack(packed);
+                observedMessages.add(cmdMessage);
+            } else {
+                Any packed = update.getEvent()
+                                   .getMessage();
+                EventMessage eventMessage =
+                        (EventMessage) AnyPacker.unpack(packed);
+                observedMessages.add(eventMessage);
+            }
+        }
+
+        public ImmutableSet<SerializableMessage> messages() {
+            return observedMessages.build();
+        }
+    }
+
+    /**
+     * An observer of the messages delivered to shards, which remembers all the shards involved.
+     */
+    public static class ShardIndexMemoizer implements ShardObserver {
+
+        private final ImmutableSet.Builder<ShardIndex>
+                observedShards = ImmutableSet.builder();
+
+        @Override
+        public void onMessage(InboxMessage update) {
+            observedShards.add(update.getShardIndex());
+        }
+
+        public ImmutableSet<ShardIndex> shards() {
+            return observedShards.build();
         }
     }
 }
