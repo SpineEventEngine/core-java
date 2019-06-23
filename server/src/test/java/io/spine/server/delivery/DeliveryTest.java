@@ -172,7 +172,7 @@ public class DeliveryTest {
     }
 
     @Test
-    @DisplayName("multiple shards " +
+    @DisplayName("multiple shards and " +
             "keep them as `TO_DELIVER` right after they are written to `Inbox`, " +
             "and mark every as `DELIVERED` after they are actually delivered.")
     @SuppressWarnings("MethodWithMultipleLoops")    // Traversing over the storage.
