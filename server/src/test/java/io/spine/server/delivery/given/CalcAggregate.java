@@ -23,9 +23,12 @@ package io.spine.server.delivery.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberAdded;
+import io.spine.test.delivery.NumberImported;
+import io.spine.test.delivery.NumberReacted;
 
 /**
  * A calculator that is only capable of adding integer numbers.
@@ -35,12 +38,29 @@ public class CalcAggregate extends Aggregate<String, Calc, Calc.Builder> {
     @Assign
     NumberAdded handle(AddNumber command) {
         int value = command.getValue();
-        return NumberAdded.newBuilder().setValue(value).vBuild();
+        return NumberAdded.newBuilder()
+                          .setValue(value)
+                          .vBuild();
     }
 
     @Apply
     private void on(NumberAdded event) {
         int currentSum = builder().getSum();
         builder().setSum(currentSum + event.getValue());
+    }
+
+    @Apply(allowImport = true)
+    private void on(NumberImported event) {
+        int currentSum = builder().getSum();
+        builder().setSum(currentSum + event.getValue());
+    }
+
+    @React
+    NumberAdded on(NumberReacted event) {
+        return NumberAdded
+                .newBuilder()
+                .setCalculatorId(event.getCalculatorId())
+                .setValue(event.getValue())
+                .vBuild();
     }
 }

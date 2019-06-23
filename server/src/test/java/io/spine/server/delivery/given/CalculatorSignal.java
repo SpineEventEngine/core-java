@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environment classes for testing {@code io.spine.server.delivery} package.
- */
-
-@CheckReturnValue
-@ParametersAreNonnullByDefault
 package io.spine.server.delivery.given;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+/**
+ * A common interface for signals used in {@link Delivery} tests.
+ */
+public interface CalculatorSignal {
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    String getCalculatorId();
+
+    int getValue();
+}

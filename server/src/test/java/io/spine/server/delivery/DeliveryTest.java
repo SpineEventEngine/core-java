@@ -26,13 +26,18 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.base.SerializableMessage;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
+import io.spine.server.delivery.given.CalculatorSignal;
+import io.spine.server.delivery.given.DeliveryTestEnv.CalculatorRepository;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
+import io.spine.test.delivery.NumberImported;
+import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +54,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static com.google.common.collect.Streams.concat;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -165,35 +172,36 @@ public class DeliveryTest {
 
             BlackBoxBoundedContext context =
                     BlackBoxBoundedContext.singleTenant()
-                                          .with(DefaultRepository.of(CalcAggregate.class));
+                                          .with(new CalculatorRepository());
 
-            ImmutableSet.Builder<CommandMessage> observedCommands = subscribeToDelivered();
+            ImmutableSet.Builder<SerializableMessage> observedMessages = subscribeToDelivered();
 
             int streamSize = targets.size() * 30;
-            IntStream ints = new SecureRandom().ints(streamSize, 42, 200);
+
             Iterator<String> targetsIterator = Iterators.cycle(targets);
-            List<AddNumber> commands =
-                    ints.mapToObj((value) -> AddNumber.newBuilder()
-                                                      .setCalculatorId(targetsIterator.next())
-                                                      .setValue(value)
-                                                      .vBuild())
-                        .collect(toList());
-            postAsync(context, commands);
+            List<AddNumber> commands = commands(streamSize, targetsIterator);
+            List<NumberImported> importEvents = eventsToImport(streamSize, targetsIterator);
+            List<NumberReacted> reactEvents = eventsToReact(streamSize, targetsIterator);
 
-            Map<String, List<AddNumber>> commandsPerTarget =
-                    commands.stream()
-                            .collect(groupingBy(AddNumber::getCalculatorId));
+            postAsync(context, commands, importEvents, reactEvents);
 
-            ImmutableSet<CommandMessage> receivedCommands = observedCommands.build();
+            Stream<CalculatorSignal> signals = concat(commands.stream(),
+                                                      importEvents.stream(),
+                                                      reactEvents.stream());
 
-            for (String calcId : commandsPerTarget.keySet()) {
+            Map<String, List<CalculatorSignal>> signalsPerTarget =
+                    signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
-                List<AddNumber> targetCommands = commandsPerTarget.get(calcId);
-                assertTrue(receivedCommands.containsAll(targetCommands));
+            ImmutableSet<SerializableMessage> receivedMessages = observedMessages.build();
 
-                Integer sumForTarget = targetCommands.stream()
-                                                     .map(AddNumber::getValue)
-                                                     .reduce(0, (n1, n2) -> n1 + n2);
+            for (String calcId : signalsPerTarget.keySet()) {
+
+                List<CalculatorSignal> targetSignals = signalsPerTarget.get(calcId);
+                assertTrue(receivedMessages.containsAll(targetSignals));
+
+                Integer sumForTarget = targetSignals.stream()
+                                                    .map(CalculatorSignal::getValue)
+                                                    .reduce(0, (n1, n2) -> n1 + n2);
                 Calc expectedState = Calc.newBuilder()
                                          .setSum(sumForTarget)
                                          .build();
@@ -206,17 +214,55 @@ public class DeliveryTest {
             ensureInboxesEmpty();
         }
 
-        private static ImmutableSet.Builder<CommandMessage> subscribeToDelivered() {
-            ImmutableSet.Builder<CommandMessage> observedMessages = ImmutableSet.builder();
+        private static List<NumberReacted> eventsToReact(int streamSize,
+                                                         Iterator<String> targetsIterator) {
+            IntStream ints = new SecureRandom().ints(streamSize, 3, 500);
+            return ints.mapToObj((value) ->
+                                         NumberReacted.newBuilder()
+                                                      .setCalculatorId(targetsIterator.next())
+                                                      .setValue(value)
+                                                      .vBuild())
+                       .collect(toList());
+        }
+
+        private static List<NumberImported> eventsToImport(int streamSize,
+                                                           Iterator<String> targetsIterator) {
+            IntStream ints = new SecureRandom().ints(streamSize, 18, 100);
+            return ints.mapToObj((value) ->
+                                         NumberImported.newBuilder()
+                                                       .setCalculatorId(targetsIterator.next())
+                                                       .setValue(value)
+                                                       .vBuild())
+                       .collect(toList());
+        }
+
+        private static List<AddNumber> commands(int streamSize, Iterator<String> targetsIterator) {
+            IntStream ints = new SecureRandom().ints(streamSize, 42, 200);
+            return ints.mapToObj((value) ->
+                                         AddNumber.newBuilder()
+                                                  .setCalculatorId(targetsIterator.next())
+                                                  .setValue(value)
+                                                  .vBuild())
+                       .collect(toList());
+        }
+
+        private static ImmutableSet.Builder<SerializableMessage> subscribeToDelivered() {
+            ImmutableSet.Builder<SerializableMessage> observedMessages = ImmutableSet.builder();
             ServerEnvironment.getInstance()
                              .delivery()
                              .subscribe(update -> {
                                  if (update.hasCommand()) {
                                      Any packed = update.getCommand()
                                                         .getMessage();
-                                     CommandMessage cmdMessage = (CommandMessage) AnyPacker.unpack(
-                                             packed);
+                                     CommandMessage cmdMessage =
+                                             (CommandMessage) AnyPacker.unpack(packed);
                                      observedMessages.add(cmdMessage);
+                                 } else {
+                                     Any packed = update.getEvent()
+                                                        .getMessage();
+                                     EventMessage eventMessage =
+                                             (EventMessage) AnyPacker.unpack(packed);
+                                     observedMessages.add(eventMessage);
                                  }
                              });
             return observedMessages;
@@ -234,22 +280,53 @@ public class DeliveryTest {
             }
         }
 
-        private void postAsync(BlackBoxBoundedContext context, List<AddNumber> commands) {
-            Collection<Callable<Object>> collect =
-                    commands.stream()
-                            .map((c) -> (Callable<Object>) () -> {
-                                context.receivesCommand(c);
-                                return new Object();
-                            })
-                            .collect(toList());
+        private void postAsync(BlackBoxBoundedContext context,
+                               List<AddNumber> commands,
+                               List<NumberImported> eventsToImport,
+                               List<NumberReacted> eventsToReact) {
+
+            Stream<Callable<Object>> signalStream =
+                    concat(
+                            commandCallables(context, commands),
+                            importEventCallables(context, eventsToImport),
+                            reactEventsCallables(context, eventsToReact)
+                    );
+            Collection<Callable<Object>> signals = signalStream.collect(toList());
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
             try {
-                executorService.invokeAll(collect);
+                executorService.invokeAll(signals);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } finally {
                 executorService.shutdown();
             }
+        }
+
+        private static Stream<Callable<Object>> commandCallables(BlackBoxBoundedContext context,
+                                                                 List<AddNumber> commands) {
+            return commands.stream()
+                           .map((c) -> () -> {
+                               context.receivesCommand(c);
+                               return new Object();
+                           });
+        }
+
+        private static Stream<Callable<Object>> importEventCallables(BlackBoxBoundedContext context,
+                                                                     List<NumberImported> events) {
+            return events.stream()
+                         .map((e) -> () -> {
+                             context.importsEvent(e);
+                             return new Object();
+                         });
+        }
+
+        private static Stream<Callable<Object>> reactEventsCallables(BlackBoxBoundedContext context,
+                                                                     List<NumberReacted> events) {
+            return events.stream()
+                         .map((e) -> () -> {
+                             context.receivesEvent(e);
+                             return new Object();
+                         });
         }
     }
 

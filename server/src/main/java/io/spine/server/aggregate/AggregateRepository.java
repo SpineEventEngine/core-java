@@ -223,7 +223,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * code below:
      *
      * <pre>{@code
-     * routing.replaceDefault(EventRoute.fromFirstMessageField());
+     * routing.replaceDefault(EventRoute.byFirstMessageField(SomeId.class));
      * }</pre>
      *
      * @param routing

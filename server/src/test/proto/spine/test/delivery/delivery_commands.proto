@@ -10,6 +10,7 @@ option java_outer_classname = "DeliveryTestCommandsProto";
 option java_multiple_files = true;
 
 message AddNumber {
+    option (is).java_type = "io.spine.server.delivery.given.CalculatorSignal";
 
     string calculator_id = 1;
 

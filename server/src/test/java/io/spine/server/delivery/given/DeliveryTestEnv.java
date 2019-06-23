@@ -21,6 +21,9 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.route.EventRoute;
+import io.spine.server.route.EventRouting;
 
 import java.security.SecureRandom;
 
@@ -41,5 +44,22 @@ public class DeliveryTestEnv {
 
     public static ImmutableSet<String> singleTarget() {
         return ImmutableSet.of("the-calculator");
+    }
+
+    public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
+
+        @Override
+        protected void setupImportRouting(EventRouting<String> routing) {
+            routeByFirstField(routing);
+        }
+
+        @Override
+        protected void setupEventRouting(EventRouting<String> routing) {
+            routeByFirstField(routing);
+        }
+
+        private static void routeByFirstField(EventRouting<String> routing) {
+            routing.replaceDefault(EventRoute.byFirstMessageField(String.class));
+        }
     }
 }
