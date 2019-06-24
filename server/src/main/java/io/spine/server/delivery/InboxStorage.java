@@ -20,9 +20,12 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.SPI;
+
 /**
  * Abstract base for the storage of {@link Inbox} messages.
  */
+@SPI
 public abstract class InboxStorage
         extends ShardedStorage<InboxMessageId, InboxMessage, InboxReadRequest> {
 

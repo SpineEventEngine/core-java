@@ -28,7 +28,7 @@ import io.spine.server.ServerEnvironment;
  *
  * <p>Suitable for the local and development environment.
  */
-public class LocalDispatchingObserver implements ShardObserver {
+final class LocalDispatchingObserver implements ShardObserver {
 
     @Override
     public void onMessage(InboxMessage update) {

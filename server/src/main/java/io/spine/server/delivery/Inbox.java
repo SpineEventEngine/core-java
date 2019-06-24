@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -44,7 +45,8 @@ import static io.spine.server.delivery.InboxLabel.UPDATE_SUBSCRIBER;
  * @param <I>
  *         the type of consumer identifiers.
  */
-public class Inbox<I>{
+@Internal
+public final class Inbox<I>{
 
     private final TypeUrl entityStateType;
     private final InboxOfCommands<I> commandPart;

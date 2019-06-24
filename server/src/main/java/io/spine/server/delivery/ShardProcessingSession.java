@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
 
 /**
@@ -30,6 +31,7 @@ import io.spine.server.NodeId;
  *
  * @author Alex Tymchenko
  */
+@SPI
 public abstract class ShardProcessingSession {
 
     private final ShardIndex index;

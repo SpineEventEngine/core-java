@@ -27,7 +27,7 @@ import com.google.protobuf.util.Timestamps;
 /**
  * Classifies the {@code InboxMessage}s messages by their purpose.
  */
-class MessageClassifier {
+final class MessageClassifier {
 
     private final ImmutableList<InboxMessage> delivery;
     private final ImmutableList<InboxMessage> idempotence;

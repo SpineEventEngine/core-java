@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
 import io.spine.string.Stringifiers;
 
 import static java.lang.String.format;
@@ -28,6 +29,7 @@ import static java.lang.String.format;
  * Thrown if there is an attempt to mark a message put to {@code Inbox} with a label, which was
  * not added for the {@code Inbox} instance.
  */
+@Internal
 public class LabelNotFoundException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -36,7 +38,7 @@ public class LabelNotFoundException extends RuntimeException {
     private final InboxId inboxId;
 
     /**
-     * Creates an instance for the given {@code Inbox} ID and the label
+     * Creates an instance for the given {@code Inbox} ID and the label.
      */
     LabelNotFoundException(InboxId id, InboxLabel label) {
         super();

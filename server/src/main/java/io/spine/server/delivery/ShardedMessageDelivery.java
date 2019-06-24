@@ -29,7 +29,7 @@ import java.util.List;
  *         the type of sharded messages
  * @author Alex Tymchenko
  */
-public interface ShardedMessageDelivery<M extends ShardedRecord> {
+interface ShardedMessageDelivery<M extends ShardedRecord> {
 
     /**
      * Delivers the previously sharded messages to their targets.

@@ -20,12 +20,15 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
+
 /**
  * A writer of {@link Inbox Inbox} messages.
  *
  * <p>After writing a message to the storage, notifies of the index of the shard,
  * to which the message has been written.
  */
+@Internal
 public abstract class NotifyingWriter implements InboxWriter {
 
     private final InboxStorage storage;

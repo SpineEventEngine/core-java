@@ -45,7 +45,7 @@ final class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     /**
      * Obtains the message endpoint for the given label and the envelope.
      *
-     * Returns {@code Optional.empty()} if there is no such label configured.
+     * Returns {@code Optional.empty()} if there were no such label added previously.
      */
     Optional<MessageEndpoint<I, M>> get(InboxLabel label, M envelope) {
         if (!endpoints.containsKey(label)) {

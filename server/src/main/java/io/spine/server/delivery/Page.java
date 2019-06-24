@@ -21,6 +21,7 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
+import io.spine.annotation.SPI;
 
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ import java.util.Optional;
  * @param <M>
  *         the type of the messages stored
  */
+@SPI
 public interface Page<M extends ShardedRecord> {
 
     /**

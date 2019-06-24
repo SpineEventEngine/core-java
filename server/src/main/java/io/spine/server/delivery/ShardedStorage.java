@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.SPI;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.ReadRequest;
 
@@ -31,6 +32,7 @@ import io.spine.server.storage.ReadRequest;
  *         the type of the messages stored
  * @author Alex Tymchenko
  */
+@SPI
 public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadRequest<I>>
         extends AbstractStorage<I, M, R> {
 

@@ -20,9 +20,12 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.SPI;
+
 /**
  * An abstract base for observers of the updates made to the contents of shards.
  */
+@SPI
 public interface ShardObserver {
 
     /**
