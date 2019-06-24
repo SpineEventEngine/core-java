@@ -106,6 +106,7 @@ public final class Delivery {
      * <p>Selected to be pretty big to avoid dispatching duplicates to any entities.
      */
     private static final Duration LOCAL_IDEMPOTENCE_WINDOW = Durations.fromSeconds(30);
+
     /**
      * The strategy of assigning a shard index for a message that is delivered to a particular
      * target.
