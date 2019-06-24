@@ -361,7 +361,7 @@ public final class Delivery {
      * @return the index of the shard for the message
      */
     ShardIndex whichShardFor(Object entityId) {
-        return strategy.getIndexFor(entityId);
+        return strategy.indexFor(entityId);
     }
 
     /**
@@ -380,7 +380,7 @@ public final class Delivery {
 
     @VisibleForTesting
     int shardCount() {
-        return strategy.getShardCount();
+        return strategy.shardCount();
     }
 
     private InboxWriter inboxWriter() {

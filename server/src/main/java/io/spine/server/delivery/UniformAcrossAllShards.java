@@ -52,19 +52,19 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
     }
 
     @Override
-    public ShardIndex getIndexFor(Object entityId) {
+    public ShardIndex indexFor(Object entityId) {
         if (1 == numberOfShards) {
             return newIndex(0, 1);
         }
         int hashValue = entityId.hashCode();
-        int totalShards = getShardCount();
+        int totalShards = shardCount();
         int indexValue = abs(hashValue % totalShards);
         ShardIndex result = newIndex(indexValue, totalShards);
         return result;
     }
 
     @Override
-    public int getShardCount() {
+    public int shardCount() {
         return numberOfShards;
     }
 

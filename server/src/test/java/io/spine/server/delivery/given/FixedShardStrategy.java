@@ -53,7 +53,7 @@ public class FixedShardStrategy implements DeliveryStrategy, Serializable {
     }
 
     @Override
-    public ShardIndex getIndexFor(Object entityId) {
+    public ShardIndex indexFor(Object entityId) {
         return nonEmptyShard;
     }
 
@@ -62,7 +62,7 @@ public class FixedShardStrategy implements DeliveryStrategy, Serializable {
     }
 
     @Override
-    public int getShardCount() {
+    public int shardCount() {
         return shardCount;
     }
 }

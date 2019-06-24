@@ -33,7 +33,7 @@ public class UniformStrategyTest {
     @DisplayName("return single shard strategy")
     public void singleShard() {
         DeliveryStrategy strategy = UniformAcrossAllShards.singleShard();
-        assertThat(strategy.getShardCount())
+        assertThat(strategy.shardCount())
                 .isEqualTo(1);
     }
 
@@ -42,7 +42,7 @@ public class UniformStrategyTest {
     public void customShardNumber() {
         int shards = 42;
         DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(shards);
-        assertThat(strategy.getShardCount())
+        assertThat(strategy.shardCount())
                 .isEqualTo(shards);
     }
 
