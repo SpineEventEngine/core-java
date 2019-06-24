@@ -30,7 +30,6 @@ import io.spine.server.storage.ReadRequest;
  *
  * @param <M>
  *         the type of the messages stored
- * @author Alex Tymchenko
  */
 @SPI
 public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadRequest<I>>
