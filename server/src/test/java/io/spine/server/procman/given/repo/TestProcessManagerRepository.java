@@ -57,6 +57,7 @@ public final class TestProcessManagerRepository
             super.onError(cmd, exception);
         } catch (Exception e) {
             //TODO:2019-06-17:alex.tymchenko: Do we need to let the exceptions out at all?
+            // see https://github.com/SpineEventEngine/core-java/issues/1094
             logError("Error dispatching command (class: `%s`, ID: `%s`) to entity with state `%s`.",
                      cmd, exception);
 

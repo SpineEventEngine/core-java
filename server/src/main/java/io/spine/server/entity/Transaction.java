@@ -307,7 +307,7 @@ public abstract class Transaction<I,
         } catch (InvalidEntityStateException e) {
             /* New state of the entity does not pass validation. */
             rollback(e);
-            //TODO:2019-06-16:alex.tymchenko: do we need to throw InvalidEntityStateException?
+            //TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1094
             //throw e;
         } catch (RuntimeException e) {
             /* Exception occurred during execution of a handler method. */

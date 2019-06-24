@@ -384,6 +384,7 @@ public abstract class TransactionTest<I,
             applyEvent(tx, event);
 
             //TODO:2019-06-16:alex.tymchenko: do we need to throw InvalidEntityStateException?
+            // see https://github.com/SpineEventEngine/core-java/issues/1094
             //assertThrows(InvalidEntityStateException.class, tx::commit);
             tx.commit();
             checkRollback(entity, originalState, originalVersion);
