@@ -34,6 +34,7 @@ import io.spine.server.storage.ReadRequest;
 public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadRequest<I>>
         extends AbstractStorage<I, M, R> {
 
+    @SuppressWarnings("WeakerAccess")   // A part of the API for extensions.
     protected ShardedStorage(boolean multitenant) {
         super(multitenant);
     }
@@ -50,6 +51,13 @@ public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadR
      */
     public abstract Page<M> contentsBackwards(ShardIndex index);
 
+    /**
+     * Removes the passed messages from the storage.
+     *
+     * <p>Does nothing for messages that aren't in the storage already.
+     *
+     * @param messages
+     *         the messages to remove
+     */
     public abstract void removeAll(Iterable<M> messages);
-
 }
