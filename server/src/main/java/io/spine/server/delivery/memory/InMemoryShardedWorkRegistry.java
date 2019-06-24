@@ -66,7 +66,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
     private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
                                               @Nullable NodeId nodeId) {
         ShardSessionRecord.Builder builder = record.toBuilder();
-        if(nodeId == null) {
+        if (nodeId == null) {
             builder.clearPickedBy();
         } else {
             builder.setPickedBy(nodeId);
