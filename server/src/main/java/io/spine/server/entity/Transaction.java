@@ -262,11 +262,24 @@ public abstract class Transaction<I,
             return result;
         } catch (Throwable t) {
             rollback(t);
-            throw illegalStateWithCauseOf(t);
+            throw propagate(t);
         } finally {
             phases.add(phase);
             listener.onAfterPhase(phase);
         }
+    }
+
+    /**
+     * Rethrows the passed {@code Throwable} wrapped into {@code IllegalStateException},
+     * if it's not an instacen of {@code InvalidEntityStateException}.
+     *
+     * <p>{@code InvalidEntityStateException} is rethrown as is.
+     */
+    private static RuntimeException propagate(Throwable t) {
+        if (t instanceof InvalidEntityStateException) {
+            throw (InvalidEntityStateException) t;
+        }
+        throw illegalStateWithCauseOf(t);
     }
 
     /**
@@ -327,14 +340,9 @@ public abstract class Transaction<I,
             commitAttributeChanges();
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
-        } catch (InvalidEntityStateException e) {
-            /* New state of the entity does not pass validation. */
-            rollback(e);
-            throw e;
         } catch (RuntimeException e) {
-            /* Exception occurred during execution of a handler method. */
             rollback(e);
-            throw illegalStateWithCauseOf(e);
+            throw propagate(e);
         } finally {
             releaseTx();
         }

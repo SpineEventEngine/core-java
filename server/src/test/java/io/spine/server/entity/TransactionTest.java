@@ -22,6 +22,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
@@ -70,7 +71,7 @@ public abstract class TransactionTest<I,
      */
     protected final Id id() {
         return Id.newBuilder()
-                 .setId(getClass().getSimpleName())
+                 .setId(getClass().getSimpleName() + '-' +  Identifier.newUuid())
                  .build();
     }
 
@@ -206,7 +207,7 @@ public abstract class TransactionTest<I,
     }
 
     @Test
-    @DisplayName("propagate changes to entity applier methods")
+    @DisplayName("deliver events to handler methods")
     void propagateChangesToAppliers() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -218,7 +219,7 @@ public abstract class TransactionTest<I,
     }
 
     @Test
-    @DisplayName("create phase for applied event")
+    @DisplayName("create phase for each dispatched message")
     void createPhaseForAppliedEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -235,25 +236,25 @@ public abstract class TransactionTest<I,
     }
 
     @Test
-    @DisplayName("propagate changes to entity upon commit")
+    @DisplayName("propagate changes to entity when phase is propagated")
     void propagateChangesToEntityOnCommit() {
         E entity = createEntity();
 
-        Transaction<I, E, S, B> tx = createTx(entity);
+        S stateBeforePhase = entity.state();
+        Version versionBeforePhase = entity.version();
 
+        Transaction<I, E, S, B> tx = createTx(entity);
         Event event = withMessage(createEventMessage());
+
         applyEvent(tx, event);
-        S stateBeforeCommit = entity.state();
-        Version versionBeforeCommit = entity.version();
-        tx.commit();
 
         S modifiedState = entity.state();
         Version modifiedVersion = entity.version();
 
         assertThat(modifiedState)
-                .isNotEqualTo(stateBeforeCommit);
+                .isNotEqualTo(stateBeforePhase);
         assertThat(modifiedVersion)
-                .isNotEqualTo(versionBeforeCommit);
+                .isNotEqualTo(versionBeforePhase);
     }
 
     @Test
@@ -347,9 +348,8 @@ public abstract class TransactionTest<I,
             E entity = createEntity();
             Transaction<I, E, S, B> tx = createTx(entity);
             Event event = withMessage(failingStateTransition());
-            applyEvent(tx, event);
 
-            assertThrows(InvalidEntityStateException.class, tx::commit);
+            assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
         }
     }
 
@@ -358,7 +358,7 @@ public abstract class TransactionTest<I,
     class RollbackAutomatically {
 
         @Test
-        @DisplayName("on violation at phase")
+        @DisplayName("on violation in message handler")
         void ifPhaseFailed() {
             E entity = createEntity();
             S originalState = entity.state();
@@ -372,7 +372,7 @@ public abstract class TransactionTest<I,
         }
 
         @Test
-        @DisplayName("on violation at commit")
+        @DisplayName("on violation at state transition")
         void ifCommitFailed() {
             E entity = createAndModify();
             S originalState = entity.state();
@@ -381,9 +381,8 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
             Version nextVersion = Versions.increment(entity.version());
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
-            applyEvent(tx, event);
 
-            assertThrows(InvalidEntityStateException.class, tx::commit);
+            assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
             checkRollback(entity, originalState, originalVersion);
         }
 
