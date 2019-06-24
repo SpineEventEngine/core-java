@@ -21,6 +21,7 @@
 package io.spine.server.delivery.memory;
 
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
@@ -61,6 +62,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")      // `Builder` methods called in `if-else`.
+    @CanIgnoreReturnValue
     private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
                                               @Nullable NodeId nodeId) {
         ShardSessionRecord.Builder builder = record.toBuilder();
