@@ -66,7 +66,7 @@ import static java.util.stream.Collectors.groupingBy;
  * <p>{@linkplain Builder#setIdempotenceWindow(Duration) Provides} the time-based de-duplication
  * capabilities to eliminate the messages, which may have been already delivered to their targets.
  * The duplicates will be detected among the messages, which are not older, than
- * {@code now - [de-duplication window]}.
+ * {@code now - [idempotence window]}.
  *
  * <p>Delegates the message dispatching and low-level handling of message duplicates to
  * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
