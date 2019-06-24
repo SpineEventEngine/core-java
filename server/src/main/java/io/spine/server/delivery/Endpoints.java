@@ -35,10 +35,18 @@ class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     private final Map<InboxLabel, LazyEndpoint<I, M>> endpoints =
             new EnumMap<>(InboxLabel.class);
 
+    /**
+     * Adds a lazy-initializable endpoint with a respective label.
+     */
     void add(InboxLabel label, LazyEndpoint<I, M> lazyEndpoint) {
         endpoints.put(label, lazyEndpoint);
     }
 
+    /**
+     * Obtains the message endpoint for the given label and the envelope.
+     *
+     * Returns {@code Optional.empty()} if there is no such label configured.
+     */
     Optional<MessageEndpoint<I, M>> get(InboxLabel label, M envelope) {
         if (!endpoints.containsKey(label)) {
             return Optional.empty();
@@ -47,6 +55,9 @@ class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                                     .apply(envelope));
     }
 
+    /**
+     * Tells if there are any endpoints configured.
+     */
     boolean isEmpty() {
         return endpoints.isEmpty();
     }
