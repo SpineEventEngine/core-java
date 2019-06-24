@@ -219,7 +219,7 @@ public class DeliveryTest {
                               .setOfTotal(shardCount)
                               .vBuild();
             Page<InboxMessage> page = with(TenantId.getDefaultInstance())
-                    .evaluate(() -> storage.contentsBackwards(index));
+                    .evaluate(() -> storage.readAll(index));
 
             builder.put(index, page);
         }

@@ -248,7 +248,7 @@ public final class Delivery {
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
 
-        Page<InboxMessage> startingPage = inboxStorage.contentsBackwards(index);
+        Page<InboxMessage> startingPage = inboxStorage.readAll(index);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;

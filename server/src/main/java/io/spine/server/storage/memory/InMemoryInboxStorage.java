@@ -55,7 +55,7 @@ public class InMemoryInboxStorage extends InboxStorage implements Logging {
     }
 
     @Override
-    public Page<InboxMessage> contentsBackwards(ShardIndex index) {
+    public Page<InboxMessage> readAll(ShardIndex index) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
         ImmutableList<InboxMessage> filtered =
                 storage.readAll()

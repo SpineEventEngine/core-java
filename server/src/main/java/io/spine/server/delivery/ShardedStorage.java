@@ -51,7 +51,7 @@ public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadR
      *         the shard index to return the results for
      * @return the first page of the results
      */
-    public abstract Page<M> contentsBackwards(ShardIndex index);
+    public abstract Page<M> readAll(ShardIndex index);
 
     /**
      * Removes the passed messages from the storage.
