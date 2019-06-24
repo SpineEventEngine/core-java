@@ -79,6 +79,7 @@ public abstract class VersionIncrement {
         private final EventEnvelope event;
 
         private IncrementFromEvent(EventEnvelope event) {
+            super();
             this.event = event;
         }
 
@@ -98,6 +99,7 @@ public abstract class VersionIncrement {
         private final Transaction transaction;
 
         private AutoIncrement(Transaction transaction) {
+            super();
             this.transaction = checkNotNull(transaction);
         }
 
