@@ -44,7 +44,7 @@ public class InMemoryInboxStorage extends InboxStorage implements Logging {
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
-    InMemoryInboxStorage(boolean multitenant) {
+    public InMemoryInboxStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantInboxRecords>(multitenant) {
             @Override

@@ -22,12 +22,9 @@ package io.spine.server.delivery;
 
 import com.google.protobuf.Duration;
 import io.spine.protobuf.Durations2;
-import io.spine.server.ContextSpec;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.memory.InMemoryInboxStorage;
 import io.spine.testing.Tests;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,16 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Delivery Builder should")
 public class DeliveryBuilderTest {
 
-    private StorageFactory storageFactory;
-
     private static Delivery.Builder builder() {
         return Delivery.newBuilder();
-    }
-
-    @BeforeEach
-    public void setUp() {
-        storageFactory = InMemoryStorageFactory.newInstance(
-                ContextSpec.multitenant(DeliveryBuilderTest.class.getName()));
     }
 
     @Nested
@@ -62,10 +51,10 @@ public class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("StorageFactory")
-        void storageFactory() {
+        @DisplayName("Inbox storage")
+        void inboxStorage() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setStorageFactory(Tests.nullRef()));
+                         () -> builder().setInboxStorage(Tests.nullRef()));
         }
 
         @Test
@@ -98,11 +87,12 @@ public class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("StorageFactory")
-        void storageFactory() {
-            assertEquals(storageFactory, builder().setStorageFactory(storageFactory)
-                                                  .storageFactory()
-                                                  .get());
+        @DisplayName("Inbox storage")
+        void inboxStorage() {
+            InMemoryInboxStorage storage = new InMemoryInboxStorage(false);
+            assertEquals(storage, builder().setInboxStorage(storage)
+                                           .inboxStorage()
+                                           .get());
         }
 
         @Test
@@ -123,5 +113,4 @@ public class DeliveryBuilderTest {
                                             .get());
         }
     }
-
 }

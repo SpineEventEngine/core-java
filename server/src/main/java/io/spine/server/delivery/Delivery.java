@@ -29,14 +29,11 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
-import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.memory.InMemoryInboxStorage;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -57,6 +54,10 @@ import static java.util.stream.Collectors.groupingBy;
  * application server node serves the messages from the given shard at a time, thus preventing
  * any concurrent modifications of entity state.
  *
+ * <p>Delegates the message dispatching and low-level handling of message duplicates to
+ * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
+ * should be created in each of {@code Entity} repositories.
+ *
  * <b>Configuration</b>
  *
  * <p>By default, a shard is assigned according to the identifier of the target entity. The messages
@@ -68,9 +69,9 @@ import static java.util.stream.Collectors.groupingBy;
  * The duplicates will be detected among the messages, which are not older, than
  * {@code now - [idempotence window]}.
  *
- * <p>Delegates the message dispatching and low-level handling of message duplicates to
- * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
- * should be created in each of {@code Entity} repositories.
+ * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
+ * registered. Framework users should {@linkplain Builder#setInboxStorage(InboxStorage)
+ * configure} the storage, taking into account that it is typically multi-tenant.
  *
  * <p>Once a message is written to the {@code Inbox},
  * the {@linkplain Delivery#subscribe(ShardObserver) pre-configured shard observers} are
@@ -404,8 +405,7 @@ public final class Delivery {
      */
     public static class Builder {
 
-        private @MonotonicNonNull InboxStorage inboxStorage;
-        private @Nullable StorageFactory storageFactory;
+        private @Nullable InboxStorage inboxStorage;
         private @Nullable DeliveryStrategy strategy;
         private @Nullable ShardedWorkRegistry workRegistry;
         private @Nullable Duration idempotenceWindow;
@@ -416,8 +416,8 @@ public final class Delivery {
         private Builder() {
         }
 
-        public Optional<StorageFactory> storageFactory() {
-            return Optional.ofNullable(storageFactory);
+        public Optional<InboxStorage> inboxStorage() {
+            return Optional.ofNullable(inboxStorage);
         }
 
         public Optional<DeliveryStrategy> strategy() {
@@ -451,9 +451,9 @@ public final class Delivery {
         }
 
         @CanIgnoreReturnValue
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            checkNotNull(storageFactory);
-            this.storageFactory = storageFactory;
+        public Builder setInboxStorage(InboxStorage inboxStorage) {
+            checkNotNull(inboxStorage);
+            this.inboxStorage = inboxStorage;
             return this;
         }
 
@@ -466,8 +466,9 @@ public final class Delivery {
                 idempotenceWindow = Duration.getDefaultInstance();
             }
 
-            StorageFactory storageFactory = initStorageFactory();
-            inboxStorage = storageFactory.createInboxStorage();
+            if (this.inboxStorage == null) {
+                this.inboxStorage = new InMemoryInboxStorage(true);
+            }
 
             if (workRegistry == null) {
                 workRegistry = new InMemoryShardedWorkRegistry();
@@ -475,17 +476,6 @@ public final class Delivery {
 
             Delivery delivery = new Delivery(this);
             return delivery;
-        }
-
-        private StorageFactory initStorageFactory() {
-            StorageFactory storageFactory;
-            if (this.storageFactory == null) {
-                ContextSpec spec = ContextSpec.multitenant("Delivery");
-                storageFactory = InMemoryStorageFactory.newInstance(spec);
-            } else {
-                storageFactory = this.storageFactory;
-            }
-            return storageFactory;
         }
     }
 }

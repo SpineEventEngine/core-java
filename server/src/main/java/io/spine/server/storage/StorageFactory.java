@@ -22,7 +22,6 @@ package io.spine.server.storage;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.projection.Projection;
@@ -68,11 +67,6 @@ public interface StorageFactory extends AutoCloseable {
      */
     <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass);
-
-    /**
-     * Creates a new {@link InboxStorage InboxStorage} instance.
-     */
-    InboxStorage createInboxStorage();
 
     /**
      * Creates a single-tenant version of the factory.
