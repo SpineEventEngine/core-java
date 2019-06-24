@@ -34,7 +34,7 @@ public interface DeliveryStrategy {
      * identifier.
      *
      * @param entityId
-     *         the identifier of the entity, to which the messages are dispatched.
+     *         the identifier of the entity, to which the messages are dispatched
      * @return the shard index
      */
     ShardIndex getIndexFor(Object entityId);
