@@ -120,7 +120,7 @@ class TransactionalEventPlayerTest {
 
         @Override
         protected VersionIncrement createVersionIncrement(EventEnvelope event) {
-            return new IncrementFromEvent(this, event);
+            return VersionIncrement.fromEvent(event);
         }
 
         private boolean dispatched(Event event) {

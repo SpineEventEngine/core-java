@@ -41,8 +41,10 @@ public final class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, 
 
     private final EventDispatch<I, E, R> dispatch;
 
-    public EventDispatchingPhase(EventDispatch<I, E, R> dispatch, VersionIncrement increment) {
-        super(increment);
+    public EventDispatchingPhase(Transaction<I, ?, ?, ?> transaction,
+                                 EventDispatch<I, E, R> dispatch,
+                                 VersionIncrement increment) {
+        super(transaction, increment);
         this.dispatch = dispatch;
     }
 

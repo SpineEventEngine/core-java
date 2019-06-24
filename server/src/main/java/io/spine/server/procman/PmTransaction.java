@@ -27,7 +27,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
-import io.spine.server.entity.AutoIncrement;
 import io.spine.server.entity.CommandDispatchingPhase;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
@@ -95,7 +94,7 @@ public class PmTransaction<I,
      */
     final List<Event> perform(DispatchCommand<I> dispatch) {
         VersionIncrement vi = createVersionIncrement();
-        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, vi);
+        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
         List<Event> events = doPropagate(phase);
         return events;
     }
@@ -110,6 +109,7 @@ public class PmTransaction<I,
      */
     final List<Event> dispatchEvent(EventEnvelope event) {
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
+                this,
                 createDispatch(event),
                 createVersionIncrement()
         );
@@ -127,7 +127,7 @@ public class PmTransaction<I,
     }
 
     private VersionIncrement createVersionIncrement() {
-        return new AutoIncrement(this);
+        return VersionIncrement.sequentially(this);
     }
 
     /**

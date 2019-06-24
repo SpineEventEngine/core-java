@@ -34,6 +34,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
@@ -83,15 +84,15 @@ public abstract class Transaction<I,
     private final S initialState;
 
     /**
-     * The builder for the entity state.
+     * The builder for the entity state at the current phase of the transaction.
      *
      * <p>All the state changes made within the transaction go to this {@code Builder},
      * and not to the {@code Entity} itself.
      *
-     * <p>The state of the builder is merged to the entity state
-     * upon the {@linkplain #commit() commit()}.
+     * @see #propagate(Phase)
+     * @see #commit()
      */
-    private final B builder;
+    private B builder;
 
     /**
      * The {@link EntityRecord} containing the entity data and meta-info before the transaction
@@ -257,7 +258,8 @@ public abstract class Transaction<I,
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
         try {
-            return phase.propagate();
+            R result = phase.propagate();
+            return result;
         } catch (Throwable t) {
             rollback(t);
             throw illegalStateWithCauseOf(t);
@@ -265,6 +267,27 @@ public abstract class Transaction<I,
             phases.add(phase);
             listener.onAfterPhase(phase);
         }
+    }
+
+    /**
+     * Advances the state and the version of the entity being build by the transaction after
+     * the message was successfully dispatched.
+     *
+     * <p>This is needed for the cases of dispatching more than one message during a transaction.
+     * After the state is propagated to the entity, its message handler which is invoked during
+     * the next step would “see” the {@linkplain Entity#state() state of the entity}.
+     *
+     * @param increment
+     *         the strategy for incrementing the version
+     */
+    @SuppressWarnings("unchecked")
+    void incrementStateAndVersion(VersionIncrement increment) {
+        Version nextVersion = increment.nextVersion();
+        checkIsIncrement(version(), nextVersion);
+        setVersion(nextVersion);
+        S newState = builder().build();
+        builder = (B) newState.toBuilder();
+        entity().updateState(newState, nextVersion);
     }
 
     /**
