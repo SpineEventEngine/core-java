@@ -29,7 +29,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
-import io.spine.core.BoundedContextNames;
+import io.spine.server.ContextSpec;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
@@ -96,7 +96,6 @@ import static java.util.stream.Collectors.groupingBy;
  * an {@linkplain InMemoryShardedWorkRegistry} is used. It operates on top of the
  * {@code synchronized} in-memory data structures and prevents several threads from picking up the
  * same shard.
- *
  */
 public final class Delivery {
 
@@ -481,8 +480,8 @@ public final class Delivery {
         private StorageFactory initStorageFactory() {
             StorageFactory storageFactory;
             if (this.storageFactory == null) {
-                storageFactory = InMemoryStorageFactory.newInstance(
-                        BoundedContextNames.newName("Delivery"), true);
+                ContextSpec spec = ContextSpec.multitenant("Delivery");
+                storageFactory = InMemoryStorageFactory.newInstance(spec);
             } else {
                 storageFactory = this.storageFactory;
             }

@@ -21,8 +21,8 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Duration;
-import io.spine.core.BoundedContextNames;
 import io.spine.protobuf.Durations2;
+import io.spine.server.ContextSpec;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -47,7 +47,7 @@ public class DeliveryBuilderTest {
     @BeforeEach
     public void setUp() {
         storageFactory = InMemoryStorageFactory.newInstance(
-                BoundedContextNames.newName(DeliveryBuilderTest.class.getName()), true);
+                ContextSpec.multitenant(DeliveryBuilderTest.class.getName()));
     }
 
     @Nested
