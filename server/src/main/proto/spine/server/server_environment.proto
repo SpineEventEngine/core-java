@@ -26,18 +26,9 @@ enum DeploymentType {
     APPENGINE_CLOUD = 2;
 }
 
-// An identifier of the application.
-//
-message ApplicationId {
-
-    string value = 1 [(required) = true];
-}
-
 // An identifier of a server node of the application.
 //
 message NodeId {
 
-    spine.server.ApplicationId app_id = 1 [(required) = true];
-
-    string value = 2 [(required) = true];
+    string value = 1 [(required) = true];
 }

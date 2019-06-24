@@ -75,11 +75,7 @@ public final class ServerEnvironment {
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
         delivery = Delivery.local();
-        ApplicationId applicationId = ApplicationId.newBuilder()
-                                                   .setValue("Spine server application")
-                                                   .vBuild();
         nodeId = NodeId.newBuilder()
-                       .setAppId(applicationId)
                        .setValue(Identifier.newUuid())
                        .vBuild();
     }
@@ -140,7 +136,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * Obtains the identifier of the application node, on which this code is running at the moment.
+     * Obtains the identifier of the server node, on which this code is running at the moment.
      *
      * <p>At the moment, the node identifier is always UUID-generated. In future versions of the
      * framework it is expected to become configurable.
