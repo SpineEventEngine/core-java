@@ -41,4 +41,3 @@ message NodeId {
 
     string value = 2 [(required) = true];
 }
-
