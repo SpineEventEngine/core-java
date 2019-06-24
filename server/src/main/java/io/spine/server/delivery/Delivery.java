@@ -164,7 +164,7 @@ public final class Delivery {
     /**
      * Creates a new instance of {@code Delivery} suitable for local and development environment.
      *
-     * <p>Uses a single-shard splitting.
+     * <p>Uses a {@linkplain UniformAcrossAllShards#singleShard() single-shard} splitting.
      */
     public static Delivery local() {
         return localWithShardsAndWindow(1, LOCAL_IDEMPOTENCE_WINDOW);
@@ -217,6 +217,7 @@ public final class Delivery {
      * @param index
      *         the shard index to deliver the messages from.
      */
+    @SuppressWarnings("WeakerAccess")   // a part of the public API.
     public void deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.getInstance()
                                               .getNodeId();
@@ -346,7 +347,6 @@ public final class Delivery {
      * callbacks} into the list of those to be called, when the previously sharded messages
      * are dispatched to their targets.
      */
-
     void register(Inbox<?> inbox) {
         TypeUrl entityType = inbox.getEntityStateType();
         inboxDeliveries.put(entityType.value(), inbox.delivery());
