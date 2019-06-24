@@ -63,7 +63,7 @@ import static java.util.stream.Collectors.groupingBy;
  * heading to a single entity will always reside in a single shard. However, the framework users
  * may {@linkplain Builder#setStrategy(DeliveryStrategy) customize} this behavior.
  *
- * <p>{@linkplain Builder#setDeduplicationWindow(Duration) Provides} the time-based de-duplication
+ * <p>{@linkplain Builder#setIdempotenceWindow(Duration) Provides} the time-based de-duplication
  * capabilities to eliminate the messages, which may have been already delivered to their targets.
  * The duplicates will be detected among the messages, which are not older, than
  * {@code now - [de-duplication window]}.
@@ -74,7 +74,12 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public final class Delivery {
 
-    public static final Duration LOCAL_IDEMPOTENCE_WINDOW = Durations.fromMillis(30000);
+    /**
+     * The width of the idempotence window in a local environment.
+     *
+     * <p>Selected to be pretty big to avoid dispatching duplicates to any entities.
+     */
+    private static final Duration LOCAL_IDEMPOTENCE_WINDOW = Durations.fromSeconds(30);
     /**
      * The strategy of assigning a shard index for a message that is delivered to a particular
      * target.
@@ -85,7 +90,7 @@ public final class Delivery {
      * For how long we keep previously delivered message per-target to ensure the new messages
      * aren't duplicates.
      */
-    private final Duration deduplicationWindow;
+    private final Duration idempotenceWindow;
 
     /**
      * The delivery strategies to use for the postponed message dispatching.
@@ -117,7 +122,7 @@ public final class Delivery {
     private Delivery(Builder builder) {
         this.strategy = builder.strategy;
         this.workRegistry = builder.workRegistry;
-        this.deduplicationWindow = builder.deduplicationWindow;
+        this.idempotenceWindow = builder.idempotenceWindow;
         this.inboxStorage = builder.inboxStorage;
         this.inboxDeliveries = Maps.newConcurrentMap();
         this.shardObservers = synchronizedList(new ArrayList<>());
@@ -156,7 +161,7 @@ public final class Delivery {
     static Delivery localWithStrategyAndWindow(DeliveryStrategy strategy,
                                                Duration idempotenceWindow) {
         Delivery delivery =
-                newBuilder().setDeduplicationWindow(idempotenceWindow)
+                newBuilder().setIdempotenceWindow(idempotenceWindow)
                             .setStrategy(strategy)
                             .build();
         delivery.subscribe(new LocalDispatchingObserver());
@@ -208,7 +213,7 @@ public final class Delivery {
     private int doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
-        Timestamp idempotenceWndStart = Timestamps.subtract(now, deduplicationWindow);
+        Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
 
         Page<InboxMessage> startingPage = inboxStorage.contentsBackwards(index);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
@@ -378,7 +383,7 @@ public final class Delivery {
         private @Nullable StorageFactory storageFactory;
         private @Nullable DeliveryStrategy strategy;
         private @Nullable ShardedWorkRegistry workRegistry;
-        private @Nullable Duration deduplicationWindow;
+        private @Nullable Duration idempotenceWindow;
 
         /**
          * Prevents a direct instantiation of this class.
@@ -398,8 +403,8 @@ public final class Delivery {
             return Optional.ofNullable(workRegistry);
         }
 
-        public Optional<Duration> deduplicationWindow() {
-            return Optional.ofNullable(deduplicationWindow);
+        public Optional<Duration> idempotenceWindow() {
+            return Optional.ofNullable(idempotenceWindow);
         }
 
         @CanIgnoreReturnValue
@@ -415,8 +420,8 @@ public final class Delivery {
         }
 
         @CanIgnoreReturnValue
-        public Builder setDeduplicationWindow(Duration deduplicationWindow) {
-            this.deduplicationWindow = checkNotNull(deduplicationWindow);
+        public Builder setIdempotenceWindow(Duration idempotenceWindow) {
+            this.idempotenceWindow = checkNotNull(idempotenceWindow);
             return this;
         }
 
@@ -432,8 +437,8 @@ public final class Delivery {
                 strategy = UniformAcrossAllShards.singleShard();
             }
 
-            if (deduplicationWindow == null) {
-                deduplicationWindow = Duration.getDefaultInstance();
+            if (idempotenceWindow == null) {
+                idempotenceWindow = Duration.getDefaultInstance();
             }
 
             StorageFactory storageFactory = initStorageFactory();

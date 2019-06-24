@@ -76,14 +76,14 @@ public class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("de-duplication window")
-        void deduplicationWindow() {
+        @DisplayName("idempotence window")
+        void idempotenceWindow() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setDeduplicationWindow(Tests.nullRef()));
+                         () -> builder().setIdempotenceWindow(Tests.nullRef()));
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings("OptionalGetWithoutIsPresent")    // testing `Builder` getters.
     @Nested
     @DisplayName("return set")
     class ReturnSet {
@@ -115,11 +115,11 @@ public class DeliveryBuilderTest {
         }
 
         @Test
-        @DisplayName("de-duplication window")
-        void deduplicationWindow() {
+        @DisplayName("idempotence window")
+        void idempotenceWindow() {
             Duration duration = Durations2.fromMinutes(123);
-            assertEquals(duration, builder().setDeduplicationWindow(duration)
-                                            .deduplicationWindow()
+            assertEquals(duration, builder().setIdempotenceWindow(duration)
+                                            .idempotenceWindow()
                                             .get());
         }
     }
