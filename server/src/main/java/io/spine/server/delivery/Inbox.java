@@ -99,7 +99,7 @@ public final class Inbox<I> {
     /**
      * Returns the state type of entities served by this {@code Inbox}.
      */
-    public TypeUrl getEntityStateType() {
+    public TypeUrl entityStateType() {
         return entityStateType;
     }
 

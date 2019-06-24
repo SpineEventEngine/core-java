@@ -348,7 +348,7 @@ public final class Delivery {
      * are dispatched to their targets.
      */
     void register(Inbox<?> inbox) {
-        TypeUrl entityType = inbox.getEntityStateType();
+        TypeUrl entityType = inbox.entityStateType();
         inboxDeliveries.put(entityType.value(), inbox.delivery());
     }
 
@@ -369,7 +369,7 @@ public final class Delivery {
      * delivery callbacks} previously registered by this {@code Inbox}.
      */
     void unregister(Inbox<?> inbox) {
-        TypeUrl entityType = inbox.getEntityStateType();
+        TypeUrl entityType = inbox.entityStateType();
         inboxDeliveries.remove(entityType.value());
     }
 
