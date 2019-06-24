@@ -313,8 +313,10 @@ public abstract class Transaction<I,
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = builder();
-
-        S newState = builder.buildPartial();
+        // If the transaction is running with phases, the entity already got its state.
+        S newState = withPhases()
+                     ? entity.state()
+                     : builder.buildPartial();
         if (initialState.equals(newState)) {
             commitUnchangedState();
         } else {
@@ -322,6 +324,9 @@ public abstract class Transaction<I,
         }
     }
 
+    private boolean withPhases() {
+        return !phases.isEmpty();
+    }
     /**
      * Commits this transaction and sets the new state to the entity.
      *
