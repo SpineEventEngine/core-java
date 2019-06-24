@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
-import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.type.TypeUrl;
@@ -31,8 +30,7 @@ import static io.spine.base.Identifier.pack;
 /**
  * Utilities for working with {@linkplain io.spine.server.delivery.InboxId inbox identifiers}.
  */
-@Internal
-public final class InboxIds {
+final class InboxIds {
 
     /** Prevents instantiation of this utility class. */
     private InboxIds() {
@@ -49,7 +47,7 @@ public final class InboxIds {
      *         the type of the ID class
      * @return the {@link InboxId}
      */
-    public static <T> InboxId wrap(T id, TypeUrl entityType) {
+    static <T> InboxId wrap(T id, TypeUrl entityType) {
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(id))
@@ -69,7 +67,7 @@ public final class InboxIds {
      *         the ID of the inbox
      * @return the extracted entity ID
      */
-    public static Object unwrap(InboxId inboxId) {
+    static Object unwrap(InboxId inboxId) {
         Any idValue = inboxId.getEntityId()
                              .getId();
         Object unpackedId = Identifier.unpack(idValue);
