@@ -27,7 +27,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
 
 /**
- * Properties of a bounded context.
+ * Specification of a bounded context.
+ *
+ * <p>The spec includes the values required to build a {@link BoundedContext}.
  */
 public final class ContextSpec {
 
