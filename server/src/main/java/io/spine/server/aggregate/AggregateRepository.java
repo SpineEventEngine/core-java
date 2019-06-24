@@ -149,7 +149,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .register(EventImportDispatcher.of(this));
         }
         this.commandErrorHandler = context.createCommandErrorHandler();
+        initInbox();
+    }
 
+    /**
+     * Initializes the {@code Inbox}.
+     */
+    private void initInbox() {
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
         inbox = delivery

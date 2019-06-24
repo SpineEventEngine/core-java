@@ -168,6 +168,13 @@ public abstract class ProcessManagerRepository<I,
 
         this.commandErrorHandler = context.createCommandErrorHandler();
 
+        initInbox();
+    }
+
+    /**
+     * Initializes the {@code Inbox}.
+     */
+    private void initInbox() {
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
         inbox = delivery

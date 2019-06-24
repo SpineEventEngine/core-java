@@ -103,6 +103,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected void init(BoundedContext context) throws IllegalStateException {
         super.init(context);
         ensureDispatchesEvents();
+        initInbox();
+    }
+
+    /**
+     * Initializes the {@code Inbox}.
+     */
+    private void initInbox() {
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
         inbox = delivery
