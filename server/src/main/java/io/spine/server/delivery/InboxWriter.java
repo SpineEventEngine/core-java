@@ -21,9 +21,13 @@
 package io.spine.server.delivery;
 
 /**
- * Writes messages into the inbox storage.
+ * A common contract for the routines that would want to write the messages to the {@code Inbox}
+ * storage.
  */
 public interface InboxWriter {
 
+    /**
+     * Writes the passed message to the storage.
+     */
     void write(InboxMessage message);
 }
