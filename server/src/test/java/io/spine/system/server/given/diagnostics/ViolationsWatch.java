@@ -45,12 +45,13 @@ import static io.spine.server.route.EventRoute.withId;
 public final class ViolationsWatch extends Projection<WatchId, InvalidText, InvalidText.Builder> {
 
     public static final WatchId DEFAULT = WatchId.generate();
+    private static final String LAST_MESSAGE_TYPE_PATH = "last_message.type_url";
 
     @Subscribe(filter = @ByField(
-            path = "last_message.type_url",
+            path = LAST_MESSAGE_TYPE_PATH,
             value = "type.spine.io/spine.system.server.test.TextValidated"
     ))
-    void on(ConstraintViolated event) {
+    void onInvalidText(ConstraintViolated event) {
         List<ConstraintViolation> violations = event.getViolationList();
         checkArgument(violations.size() == 1);
         ConstraintViolation violation = violations.get(0);
@@ -59,6 +60,17 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
         @SuppressWarnings("OverlyStrongTypeCast") // OrBuilder
         String stringValue = ((StringValue) value).getValue();
         builder().setInvalidText(stringValue);
+    }
+
+    @Subscribe(filter = @ByField(
+            path = LAST_MESSAGE_TYPE_PATH,
+            value = "type.spine.io/spine.system.server.test.StartVerification"
+    ))
+    void onInvalidVerification(ConstraintViolated event) {
+        List<ConstraintViolation> violations = event.getViolationList();
+        checkArgument(violations.size() == 1);
+        ConstraintViolation violation = violations.get(0);
+        builder().setErrorMessage(violation.getMsgFormat());
     }
 
     public static final class Repository

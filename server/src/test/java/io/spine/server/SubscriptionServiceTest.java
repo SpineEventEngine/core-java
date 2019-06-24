@@ -75,10 +75,7 @@ class SubscriptionServiceTest {
 
     /** Creates a new multi-tenant BoundedContext with the passed name. */
     private static BoundedContext ctx(String name) {
-        return BoundedContext.newBuilder()
-                             .setName(name)
-                             .setMultitenant(true)
-                             .build();
+        return BoundedContext.multitenant(name).build();
     }
 
     @BeforeEach
@@ -476,8 +473,8 @@ class SubscriptionServiceTest {
     }
 
     private static BoundedContext boundedContextWith(ProjectAggregateRepository repository) {
-        BoundedContext boundedContext = BoundedContext
-                .newBuilder()
+        BoundedContext boundedContext = BoundedContextBuilder
+                .assumingTests()
                 .setStand(Stand.newBuilder())
                 .build();
         boundedContext.register(repository);

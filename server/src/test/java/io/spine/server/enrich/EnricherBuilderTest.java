@@ -74,6 +74,17 @@ class EnricherBuilderTest {
         }
     }
 
+    @Test
+    @DisplayName("allow multiple enrichment classes per source class")
+    void allowMultipleEnrichments() {
+        builder.add(EbtOrderCreated.class, StringValue.class,
+                    (e, c) -> StringValue.getDefaultInstance())
+               .add(EbtOrderCreated.class, BoolValue.class,
+                    (e, c) -> BoolValue.of(true));
+        EventEnricher enricher = builder.build();
+        assertThat(enricher).isNotNull();
+    }
+
     @Nested
     @DisplayName("not allow duplicating entries")
     class DupEntries {

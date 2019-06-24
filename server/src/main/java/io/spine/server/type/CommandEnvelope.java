@@ -25,14 +25,11 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.EventContext;
-import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The holder of a {@code Command} which provides convenient access to its properties.
@@ -104,33 +101,9 @@ public final class CommandEnvelope
         return context().getActorContext();
     }
 
-    /**
-     * Sets the origin fields of the event context being built using the data of the enclosed
-     * command.
-     *
-     * <p>In particular:
-     * <ul>
-     *     <li>the command identifier is set as the root command identifier;</li>
-     *     <li>the context of the enclosed command is set as the origin.</li>
-     * </ul>
-     *
-     * @param builder
-     *         event context builder into which the origin related fields are set
-     */
     @Override
-    public void setOriginFields(EventContext.Builder builder) {
-        MessageId commandQualifier = MessageId
-                .newBuilder()
-                .setId(pack(id()))
-                .setTypeUrl(outerObject().typeUrl().value())
-                .buildPartial();
-        Origin origin = Origin
-                .newBuilder()
-                .setActorContext(context().getActorContext())
-                .setMessage(commandQualifier)
-                .setGrandOrigin(context().getOrigin())
-                .vBuild();
-        builder.setPastMessage(origin);
+    public Origin asEventOrigin() {
+        return command().asMessageOrigin();
     }
 
     /**

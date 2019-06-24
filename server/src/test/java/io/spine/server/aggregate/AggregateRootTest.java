@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.AggregateRootTestEnv;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.ProjectDefinitionRepository;
@@ -50,8 +51,7 @@ class AggregateRootTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
+        boundedContext = BoundedContextBuilder.assumingTests().build();
         ProjectId projectId = ProjectId.newBuilder()
                                        .setId(newUuid())
                                        .build();

@@ -153,7 +153,7 @@ public final class CommandErrorHandler implements Logging {
                 .setId(commandId)
                 .setError(error)
                 .build();
-        postSystem(systemEvent);
+        postSystem(systemEvent, command);
     }
 
     private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
@@ -164,10 +164,10 @@ public final class CommandErrorHandler implements Logging {
                 .setId(commandId)
                 .setRejectionEvent(rejection.outerObject())
                 .build();
-        postSystem(systemEvent);
+        postSystem(systemEvent, command);
     }
 
-    private void postSystem(EventMessage systemEvent) {
-        systemWriteSide.postEvent(systemEvent);
+    private void postSystem(EventMessage systemEvent, CommandEnvelope origin) {
+        systemWriteSide.postEvent(systemEvent, origin.asEventOrigin());
     }
 }

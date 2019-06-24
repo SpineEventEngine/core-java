@@ -29,6 +29,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
@@ -295,7 +296,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected void dispatchTo(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToSubscriber(event);
         EventEnvelope envelope = EventEnvelope.of(event);
         ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
         endpoint.dispatchTo(id);
@@ -324,6 +324,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 .setAfter(timestamp)
                 .addAllFilter(eventFilters);
         return builder.build();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose the method into current package.
+     */
+    @Override
+    protected EntityLifecycle lifecycleOf(I id) {
+        return super.lifecycleOf(id);
     }
 
     /**

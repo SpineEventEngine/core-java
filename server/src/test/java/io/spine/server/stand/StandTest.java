@@ -57,6 +57,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityRecord;
@@ -196,9 +197,9 @@ class StandTest extends TenantAwareTest {
         @DisplayName("projection repositories")
         void projectionRepositories() {
             boolean multitenant = isMultitenant();
-            BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                          .setMultitenant(multitenant)
-                                                          .build();
+            BoundedContext boundedContext = BoundedContextBuilder
+                    .assumingTests(multitenant)
+                    .build();
             Stand stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
@@ -222,8 +223,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("aggregate repositories")
         void aggregateRepositories() {
-            BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                          .build();
+            BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
             Stand stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
@@ -248,10 +248,10 @@ class StandTest extends TenantAwareTest {
     @DisplayName("use provided executor upon update of watched type")
     void useProvidedExecutor() {
         Executor executor = mock(Executor.class);
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setStand(Stand.newBuilder()
-                                                                     .setCallbackExecutor(executor))
-                                                      .build();
+        BoundedContext boundedContext = BoundedContextBuilder
+                .assumingTests()
+                .setStand(Stand.newBuilder().setCallbackExecutor(executor))
+                .build();
         Stand stand = boundedContext.stand();
 
         StandTestProjectionRepository repository = new StandTestProjectionRepository();

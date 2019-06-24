@@ -9,6 +9,8 @@ option java_package = "io.spine.system.server.test";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
+import "spine/core/user_id.proto";
+import "spine/net/email_address.proto";
 import "spine/test/diagnostics/validated.proto";
 
 message TextValidated {
@@ -16,4 +18,11 @@ message TextValidated {
     spine.system.server.test.ValidatedId id = 1;
 
     string valid_text = 2;
+}
+
+message VerificationEmailSent {
+
+    core.UserId user_id = 1;
+
+    net.EmailAddress address = 2;
 }

@@ -21,8 +21,8 @@ package io.spine.testing.server;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextSpec;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.storage.StorageFactory;
@@ -30,7 +30,10 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.function.Supplier;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static io.spine.core.BoundedContextNames.newName;
 
 /**
  * A bounded context used for unit testing.
@@ -38,9 +41,9 @@ import java.util.function.Supplier;
 @CheckReturnValue
 public final class TestBoundedContext {
 
-    private static final boolean MULTITENANT = false;
+    private static final BusFilter<CommandEnvelope> NOP_FILTER = envelope -> Optional.empty();
 
-    private static final BoundedContextName NAME = BoundedContextNames.newName("TestBoundedContext");
+    private static final BoundedContextName NAME = newName("TestBoundedContext");
 
     /**
      * Prevents the utility class instantiation.
@@ -54,47 +57,28 @@ public final class TestBoundedContext {
      * @return {@code BoundedContext} instance
      */
     public static BoundedContext create() {
-        StorageFactorySwitch storageFactorySwitch =
-                StorageFactorySwitch.newInstance(NAME, MULTITENANT);
-        Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
-        StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
-                                                                  factorySupplier);
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setName(NAME.getValue())
-                                                      .setStorageFactorySupplier(supplier)
-                                                      .build();
-        return boundedContext;
+        return create(NOP_FILTER);
     }
 
     /**
      * Creates a new instance of the test bounded context with the given command filter.
      *
-     * @param commandFilter a command filter
+     * @param commandFilter
+     *         a command filter
      * @return {@link BoundedContext} instance
      */
     public static BoundedContext create(BusFilter<CommandEnvelope> commandFilter) {
-        StorageFactorySwitch storageFactorySwitch =
-                StorageFactorySwitch.newInstance(NAME, MULTITENANT);
-        Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
-        StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
-                                                                  factorySupplier);
+        StorageFactorySwitch storageFactorySwitch = new StorageFactorySwitch();
+        Function<ContextSpec, StorageFactory> storage = InMemoryStorageFactory::newInstance;
+        StorageFactorySwitch supplier = storageFactorySwitch.init(storage, storage);
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()
                 .appendFilter(commandFilter);
         BoundedContext boundedContext = BoundedContext
-                .newBuilder()
-                .setName(NAME.getValue())
-                .setStorageFactorySupplier(supplier)
+                .singleTenant(NAME.getValue())
+                .setStorage(supplier)
                 .setCommandBus(commandBus)
                 .build();
         return boundedContext;
-    }
-
-    private static class StorageFactorySupplier implements Supplier<StorageFactory> {
-
-        @Override
-        public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(NAME, MULTITENANT);
-        }
     }
 }

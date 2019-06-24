@@ -24,6 +24,7 @@ import com.google.common.testing.SerializableTester;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,8 +40,7 @@ class DefaultConverterTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .build();
+        BoundedContext bc = BoundedContextBuilder.assumingTests().build();
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 

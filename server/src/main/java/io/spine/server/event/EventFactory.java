@@ -41,6 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.event.EventOrigin.fromAnotherMessage;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -49,9 +50,9 @@ import static io.spine.validate.Validate.checkValid;
 public class EventFactory {
 
     private final Any producerId;
-    private final MessageEnvelope<?, ?, ?> origin;
+    private final EventOrigin origin;
 
-    protected EventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId) {
+    protected EventFactory(EventOrigin origin, Any producerId) {
         this.origin = origin;
         this.producerId = producerId;
     }
@@ -68,7 +69,8 @@ public class EventFactory {
     public static EventFactory on(MessageEnvelope origin, Any producerId) {
         checkNotNull(origin);
         checkNotNull(producerId);
-        return new EventFactory(origin, producerId);
+        EventOrigin eventOrigin = fromAnotherMessage(origin);
+        return new EventFactory(eventOrigin, producerId);
     }
 
     /**
@@ -186,11 +188,10 @@ public class EventFactory {
     @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext.Builder newContext(@Nullable Version version) {
         Timestamp timestamp = currentTime();
-        EventContext.Builder builder = EventContext
-                .newBuilder()
+        EventContext.Builder builder = origin
+                .contextBuilder()
                 .setTimestamp(timestamp)
                 .setProducerId(producerId);
-        origin.setOriginFields(builder);
         if (version != null) {
             builder.setVersion(version);
         }

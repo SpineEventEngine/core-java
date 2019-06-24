@@ -20,7 +20,6 @@
 
 package io.spine.system.server.given;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -29,21 +28,17 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -53,9 +48,8 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
 
     private final String id = getClass().getName();
 
-    private final List<Message> events = newLinkedList();
-
-    private @Nullable Iterator<? extends Message> eventIterator;
+    private final List<EventMessage> events = newArrayList();
+    private final List<EventMessage> nonCheckedEvents = newArrayList();
 
     /**
      * {@inheritDoc}
@@ -102,24 +96,40 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
 
     public void forgetEvents() {
         events.clear();
-        eventIterator = null;
+        nonCheckedEvents.clear();
     }
 
+    /**
+     * Checks that an event with the given type was accumulated.
+     *
+     * <p>If the event is found, it is removed from the accumulated events, so that it is never
+     * found twice.
+     *
+     * <p>Throws an assertion error if the event is not found.
+     *
+     * @param eventType
+     *         the class of the event
+     * @param <E>
+     *         the type of the event
+     * @return the found event
+     */
     @CanIgnoreReturnValue
-    public <E extends Message> E assertNextEventIs(Class<E> eventType) {
-        if (eventIterator == null) {
-            eventIterator = ImmutableList.copyOf(events).iterator();
-        }
-        assertTrue(eventIterator.hasNext(), errorMessage());
-        Message next = eventIterator.next();
-        assertThat(next, instanceOf(eventType));
+    public <E extends Message> E assertReceivedEvent(Class<E> eventType) {
+        assertFalse(nonCheckedEvents.isEmpty(), errorMessage());
+        EventMessage event = nonCheckedEvents
+                .stream()
+                .filter(eventType::isInstance)
+                .findFirst()
+                .orElseGet(() -> fail(errorMessage()));
+        nonCheckedEvents.remove(event);
         @SuppressWarnings("unchecked")
-        E result = (E) next;
+        E result = (E) event;
         return result;
     }
 
-    private void remember(Message event) {
+    private void remember(EventMessage event) {
         events.add(event);
+        nonCheckedEvents.add(event);
     }
 
     private String errorMessage() {

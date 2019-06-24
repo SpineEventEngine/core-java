@@ -67,17 +67,13 @@ class CommandServiceTest {
     void setUp() {
         ModelTests.dropAllModels();
         // Create Projects Bounded Context with one repository.
-        projectsContext = BoundedContext.newBuilder()
-                                        .setMultitenant(true)
-                                        .build();
+        projectsContext = BoundedContext.multitenant("Projects").build();
         Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        customersContext = BoundedContext.newBuilder()
-                                         .setMultitenant(true)
-                                         .build();
+        customersContext = BoundedContext.multitenant("Customers").build();
         Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);

@@ -35,8 +35,7 @@ public final class TasksContext {
 
     public static BoundedContext newInstance() {
         BoundedContext result = BoundedContext
-                .newBuilder()
-                .setName("Tasks")
+                .singleTenant("Tasks")
                 .build();
         result.register(new TaskRepository());
         CommandBus commandBus = result.commandBus();

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import io.spine.core.UserId;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -390,24 +389,25 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         private final Set<TypeName> types = toTypes(repositories);
 
         private BlackBoxBoundedContext<?> blackBox;
-        private BoundedContextBuilder builder;
         private EventEnricher enricher;
+        private EventBus.Builder eventBus;
 
         @BeforeEach
         void setUp() {
             enricher = EventEnricher
                     .newBuilder()
                     .build();
-            builder = BoundedContext
+            eventBus = EventBus
                     .newBuilder()
-                    .setEventBus(EventBus.newBuilder()
-                                         .setEnricher(enricher));
-            repositories.forEach(builder::add);
+                    .setEnricher(enricher);
         }
 
         @Test
         void singleTenant() {
-            builder.setMultitenant(false);
+            BoundedContextBuilder builder = BoundedContextBuilder
+                    .assumingTests(false)
+                    .setEventBus(eventBus);
+            repositories.forEach(builder::add);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
@@ -425,7 +425,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         @Test
         void multiTenant() {
-            builder.setMultitenant(true);
+            BoundedContextBuilder builder = BoundedContextBuilder
+                    .assumingTests(true)
+                    .setEventBus(eventBus);
+            repositories.forEach(builder::add);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);

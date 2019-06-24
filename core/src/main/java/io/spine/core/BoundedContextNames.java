@@ -57,7 +57,7 @@ public final class BoundedContextNames {
      */
     public static BoundedContextName newName(String name) {
         checkNotNull(name);
-        checkArgument(!name.isEmpty());
+        checkArgument(!name.isEmpty(), "Empty context name is not allowed.");
         BoundedContextName result = BoundedContextName
                 .newBuilder()
                 .setValue(name)
@@ -92,6 +92,15 @@ public final class BoundedContextNames {
                 boundedContextName,
                 "A Bounded Context name cannot be empty or blank."
         );
+    }
+
+    /**
+     * Obtains the name for a Bounded Context, which will be used when no name was specified.
+     */
+    @Internal
+    @VisibleForTesting
+    public static String assumingTestsValue() {
+        return ASSUMING_TESTS.getValue();
     }
 
     /**

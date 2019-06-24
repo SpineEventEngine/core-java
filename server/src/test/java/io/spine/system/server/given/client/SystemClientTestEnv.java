@@ -21,6 +21,7 @@
 package io.spine.system.server.given.client;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.MealOrder;
@@ -39,7 +40,7 @@ public class SystemClientTestEnv {
     }
 
     public static BoundedContext contextWithSystemProjection() {
-        BoundedContext context = BoundedContext.newBuilder().build();
+        BoundedContext context = BoundedContextBuilder.assumingTests().build();
         BoundedContext systemContext = systemOf(context);
         systemContext.register(new MealOrderRepository());
         return context;

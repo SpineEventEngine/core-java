@@ -23,6 +23,7 @@ package io.spine.server.tenant;
 import com.google.protobuf.Timestamp;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class TenantRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContext bc = BoundedContext.newBuilder().build();
+        BoundedContext bc = BoundedContextBuilder.assumingTests().build();
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
         impl.initStorage(bc.storageFactory());
         repository = spy(impl);

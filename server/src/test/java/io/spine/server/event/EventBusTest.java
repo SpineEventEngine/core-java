@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
@@ -63,9 +64,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.bus.EventBusTestEnv.command;
@@ -93,11 +94,10 @@ public class EventBusTest {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
-        bc = BoundedContext.newBuilder()
-                           .setEventBus(eventBusBuilder)
-                           .setMultitenant(true)
-                           .build();
-
+        bc = BoundedContextBuilder
+                .assumingTests(true)
+                .setEventBus(eventBusBuilder)
+                .build();
         ProjectRepository projectRepository = new ProjectRepository();
         bc.register(projectRepository);
 
@@ -467,9 +467,7 @@ public class EventBusTest {
                                            .setValue(42)
                                            .build()))
                 .build();
-        StorageFactory storageFactory =
-                StorageFactorySwitch.newInstance(newName("baz"), false)
-                                    .get();
+        StorageFactory storageFactory = new StorageFactorySwitch().apply(singleTenant("baz"));
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {

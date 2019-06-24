@@ -34,6 +34,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.ContextSpec;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
@@ -58,7 +59,6 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -161,8 +161,11 @@ abstract class AbstractCommandBusTestSuite {
     void setUp() {
         ModelTests.dropAllModels();
         Class<? extends AbstractCommandBusTestSuite> cls = getClass();
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
+        String name = cls.getSimpleName();
+        ContextSpec spec = multitenant
+                           ? ContextSpec.multitenant(name)
+                           : ContextSpec.singleTenant(name);
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance(spec);
         tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
