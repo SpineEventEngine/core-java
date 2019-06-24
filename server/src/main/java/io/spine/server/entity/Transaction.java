@@ -294,7 +294,7 @@ public abstract class Transaction<I,
      *         the strategy for incrementing the version
      */
     @SuppressWarnings("unchecked")
-    void incrementStateAndVersion(VersionIncrement increment) {
+    final void incrementStateAndVersion(VersionIncrement increment) {
         Version nextVersion = increment.nextVersion();
         checkIsIncrement(version(), nextVersion);
         setVersion(nextVersion);
