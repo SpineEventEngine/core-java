@@ -29,7 +29,20 @@ package io.spine.server.delivery;
  */
 public interface DeliveryStrategy {
 
+    /**
+     * Determines the shard index for the messages heading to the entity with the specified target
+     * identifier.
+     *
+     * @param entityId
+     *         the identifier of the entity, to which the messages are dispatched.
+     * @return the shard index
+     */
     ShardIndex getIndexFor(Object entityId);
 
+    /**
+     * Tells how many shards there are according to this strategy.
+     *
+     * @return total count of shards
+     */
     int getShardCount();
 }
