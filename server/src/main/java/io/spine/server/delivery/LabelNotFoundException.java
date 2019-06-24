@@ -35,10 +35,13 @@ public class LabelNotFoundException extends RuntimeException {
     private final InboxLabel label;
     private final InboxId inboxId;
 
-    public LabelNotFoundException(InboxId id, InboxLabel label) {
+    /**
+     * Creates an instance for the given {@code Inbox} ID and the label
+     */
+    LabelNotFoundException(InboxId id, InboxLabel label) {
         super();
         this.label = label;
-        inboxId = id;
+        this.inboxId = id;
     }
 
     @Override
