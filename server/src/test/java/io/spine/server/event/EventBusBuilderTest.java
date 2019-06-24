@@ -23,6 +23,7 @@ package io.spine.server.event;
 import io.spine.core.Event;
 import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
@@ -60,9 +61,8 @@ class EventBusBuilderTest
 
     @BeforeEach
     void setUp() {
-        BoundedContext bc = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
+        BoundedContext bc = BoundedContextBuilder
+                .assumingTests(true)
                 .build();
         this.storageFactory = bc.storageFactory();
     }

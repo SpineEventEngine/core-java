@@ -34,6 +34,7 @@ import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
@@ -207,9 +208,9 @@ class ProcessManagerRepositoryTest
     protected void setUp() {
         super.setUp();
         setCurrentTenant(requestFactory.tenantId());
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
+        boundedContext = BoundedContextBuilder
+                .assumingTests(true)
+                .build();
         boundedContext.register(repository());
         TestProcessManager.clearMessageDeliveryHistory();
     }
@@ -523,13 +524,10 @@ class ProcessManagerRepositoryTest
     @DisplayName("check that its `ProcessManager` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
-        BoundedContext context = BoundedContext
-                .newBuilder()
-                .setMultitenant(false)
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
                 .build();
-
-        assertThrows(IllegalStateException.class, () ->
-                repo.setContext(context));
+        assertThrows(IllegalStateException.class, () -> repo.setContext(context));
     }
 
     @Test
@@ -550,7 +548,8 @@ class ProcessManagerRepositoryTest
         Any newState = pack(currentTime());
         MessageId entityId = MessageId
                 .newBuilder()
-                .setTypeUrl(TypeUrl.ofEnclosed(newState).value())
+                .setTypeUrl(TypeUrl.ofEnclosed(newState)
+                                   .value())
                 .setId(pack(projectId))
                 .vBuild();
         EventMessage discardedEvent = EntityStateChanged

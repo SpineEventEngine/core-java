@@ -64,13 +64,11 @@ class AbstractEventSubscriberTest {
     void setUp() {
         InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
         groupsContext = BoundedContext
-                .newBuilder()
-                .setName("Groups")
+                .singleTenant("Groups")
                 .setTransportFactory(transport)
                 .build();
         organizationsContext = BoundedContext
-                .newBuilder()
-                .setName("Organizations")
+                .singleTenant("Organizations")
                 .setTransportFactory(transport)
                 .build();
         subscriber = new TestSubscriber();

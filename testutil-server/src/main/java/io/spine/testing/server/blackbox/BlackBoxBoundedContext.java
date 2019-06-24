@@ -153,9 +153,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                 .newBuilder()
                 .addListener(events)
                 .setEnricher(enricher);
-        this.boundedContext = BoundedContext
-                .newBuilder()
-                .setMultitenant(multitenant)
+        this.boundedContext = BoundedContextBuilder
+                .assumingTests(multitenant)
                 .setCommandBus(commandBus)
                 .setTransportFactory(transportFactory)
                 .setEventBus(eventBus)

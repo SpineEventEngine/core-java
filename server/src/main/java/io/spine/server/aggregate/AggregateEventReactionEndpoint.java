@@ -40,8 +40,13 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
-        repository().onDispatchEvent(aggregate.id(), event.outerObject());
         return aggregate.reactOn(event);
+    }
+
+    @Override
+    protected void afterDispatched(I entityId) {
+        repository().lifecycleOf(entityId)
+                    .onDispatchEventToReactor(envelope().outerObject());
     }
 
     @Override

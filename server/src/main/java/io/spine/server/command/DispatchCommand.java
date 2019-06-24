@@ -68,12 +68,10 @@ public final class DispatchCommand<I> {
     /**
      * Performs the operation.
      *
-     * <p>First, the {@link EntityLifecycle#onDispatchCommand(Command)} callback is triggered.
-     *
-     * <p>Then, the command is {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope)
+     * <p>First, the command is {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      * passed} to the entity.
      *
-     * <p>Lastly, depending on the command handling result, either
+     * <p>Then, depending on the command handling result, either
      * {@link EntityLifecycle#onCommandHandled EntityLifecycle.onCommandHandled(...)} or
      * {@link EntityLifecycle#onCommandRejected EntityLifecycle.onCommandRejected(...)} callback
      * is triggered.

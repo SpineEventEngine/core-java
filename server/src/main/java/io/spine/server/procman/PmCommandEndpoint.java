@@ -52,6 +52,12 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
+    protected void afterDispatched(I entityId) {
+        repository().lifecycleOf(entityId)
+                    .onDispatchCommand(envelope().command());
+    }
+
+    @Override
     protected List<Event> invokeDispatcher(P processManager, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(processManager.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);

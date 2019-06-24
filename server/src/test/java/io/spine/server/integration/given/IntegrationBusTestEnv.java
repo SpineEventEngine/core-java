@@ -67,8 +67,7 @@ public class IntegrationBusTestEnv {
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
         BoundedContext result = BoundedContext
-                .newBuilder()
-                .setName(newUuid())
+                .singleTenant(newUuid())
                 .setTransportFactory(transportFactory)
                 .build();
         return result;

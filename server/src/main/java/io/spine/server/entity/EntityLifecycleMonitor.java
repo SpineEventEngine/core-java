@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import io.spine.annotation.Internal;
@@ -37,6 +36,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
@@ -56,8 +56,6 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Internal
 public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, Logging {
-
-    private static final MessageId UNKNOWN_MESSAGE = MessageId.getDefaultInstance();
 
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessages;
@@ -119,8 +117,12 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onAfterCommit(EntityRecordChange change) {
         Set<MessageId> signalIds = ImmutableSet.copyOf(acknowledgedMessages);
-        repository.lifecycleOf(entityId)
-                  .onStateChanged(change, signalIds);
+        if (lastMessage != null) {
+            // If lastMessage is null, then no messages have been applied, hence no changes
+            // performed.
+            repository.lifecycleOf(entityId)
+                      .onStateChanged(change, signalIds, lastMessage.asMessageOrigin());
+        }
     }
 
     /**
@@ -130,18 +132,12 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onTransactionFailed(Throwable t, EntityRecord entityRecord) {
-        Throwable cause = Throwables.getRootCause(t);
+        Throwable cause = getRootCause(t);
         if (cause instanceof ValidationException) {
             ValidationError error = ((ValidationException) cause).asValidationError();
-            MessageId causeMessage;
-            MessageId rootMessage;
-            if (lastMessage != null) {
-                causeMessage = lastMessage.messageId();
-                rootMessage = lastMessage.rootMessage();
-            } else {
-                causeMessage = UNKNOWN_MESSAGE;
-                rootMessage = UNKNOWN_MESSAGE;
-            }
+            checkState(lastMessage != null, "Transaction failed but no messages were propagated.");
+            MessageId causeMessage = lastMessage.messageId();
+            MessageId rootMessage = lastMessage.rootMessage();
             repository.lifecycleOf(entityId)
                       .onInvalidEntity(causeMessage,
                                        rootMessage,

@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.given.repository.ProjectEntity;
 import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.repository.TestRepo;
@@ -64,9 +65,9 @@ class RepositoryTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
+        boundedContext = BoundedContextBuilder
+                .assumingTests(true)
+                .build();
         repository = new TestRepo();
         storageFactory = boundedContext.storageFactory();
         tenantId = newUuid();
@@ -140,12 +141,10 @@ class RepositoryTest {
         @BeforeEach
         void createContexts() {
             ctx1 = BoundedContext
-                    .newBuilder()
-                    .setName("Context-1")
+                    .singleTenant("Context-1")
                     .build();
             ctx2 = BoundedContext
-                    .newBuilder()
-                    .setName("Context-2")
+                    .singleTenant("Context-2")
                     .build();
         }
 

@@ -29,6 +29,7 @@ import io.spine.client.QueryResponse;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
@@ -61,9 +62,8 @@ public class StandTestEnv {
                 .setMultitenant(multitenant)
                 .setCallbackExecutor(executor)
                 .setSystemReadSide(NoOpSystemReadSide.INSTANCE);
-        BoundedContext boundedContext = BoundedContext
-                .newBuilder()
-                .setMultitenant(multitenant)
+        BoundedContext boundedContext = BoundedContextBuilder
+                .assumingTests(multitenant)
                 .setStand(standBuilder)
                 .build();
         Stand stand = boundedContext.stand();

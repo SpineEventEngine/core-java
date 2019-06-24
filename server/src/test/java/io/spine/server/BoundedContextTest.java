@@ -109,10 +109,7 @@ class BoundedContextTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        context = BoundedContext
-                .newBuilder()
-                .setMultitenant(true)
-                .build();
+        context = BoundedContextBuilder.assumingTests(true).build();
     }
 
     @AfterEach
@@ -157,10 +154,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("multitenancy state")
         void ifSetMultitenant() {
-            BoundedContext bc = BoundedContext
-                    .newBuilder()
-                    .setMultitenant(true)
-                    .build();
+            BoundedContext bc = BoundedContextBuilder.assumingTests(true).build();
             assertTrue(bc.isMultitenant());
         }
     }
@@ -247,8 +241,7 @@ class BoundedContextTest {
     @Test
     @DisplayName("propagate registered repositories to Stand")
     void propagateRepositoriesToStand() {
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .build();
+        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
         Stand stand = boundedContext.stand();
         assertTrue(stand.getExposedTypes().isEmpty());
         Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
@@ -263,9 +256,10 @@ class BoundedContextTest {
         EventBus eventBusMock = mock(EventBus.class);
         EventBus.Builder builderMock = mock(EventBus.Builder.class);
         when(builderMock.build()).thenReturn(eventBusMock);
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setEventBus(builderMock)
-                                                      .build();
+        BoundedContext boundedContext = BoundedContextBuilder
+                .assumingTests()
+                .setEventBus(builderMock)
+                .build();
         boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
         verify(eventBusMock, times(1))
                 .register(eq(boundedContext.stand()));
@@ -337,8 +331,8 @@ class BoundedContextTest {
     @Test
     @DisplayName("allow custom EventBus")
     void setEventBusStorageFactory() {
-        BoundedContext bc = BoundedContext
-                .newBuilder()
+        BoundedContext bc = BoundedContextBuilder
+                .assumingTests()
                 .setEventBus(EventBus.newBuilder())
                 .build();
         assertNotNull(bc.eventBus());
@@ -348,10 +342,10 @@ class BoundedContextTest {
     @DisplayName("not overwrite EventStore if already set in EventBus.Builder")
     void useEventStoreIfSet() {
         EventStore eventStore = eventStore();
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setEventBus(EventBus.newBuilder()
-                                                               .setEventStore(eventStore))
-                                          .build();
+        BoundedContext bc = BoundedContextBuilder
+                .assumingTests()
+                .setEventBus(EventBus.newBuilder().setEventStore(eventStore))
+                .build();
         assertEquals(eventStore, bc.eventBus()
                                    .eventStore());
     }
@@ -366,10 +360,10 @@ class BoundedContextTest {
             CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                       .setMultitenant(false);
             assertThrows(IllegalStateException.class,
-                         () -> BoundedContext.newBuilder()
-                                             .setMultitenant(true)
-                                             .setCommandBus(commandBus)
-                                             .build());
+                         () -> BoundedContextBuilder
+                                 .assumingTests(true)
+                                 .setCommandBus(commandBus)
+                                 .build());
         }
 
         @Test
@@ -378,10 +372,10 @@ class BoundedContextTest {
             Stand.Builder stand = Stand.newBuilder()
                                        .setMultitenant(false);
             assertThrows(IllegalStateException.class,
-                         () -> BoundedContext.newBuilder()
-                                             .setMultitenant(true)
-                                             .setStand(stand)
-                                             .build());
+                         () -> BoundedContextBuilder
+                                 .assumingTests(true)
+                                 .setStand(stand)
+                                 .build());
         }
     }
 
@@ -419,16 +413,14 @@ class BoundedContextTest {
         }
 
         private BoundedContext multiTenant() {
-            return BoundedContext
-                    .newBuilder()
-                    .setMultitenant(true)
+            return BoundedContextBuilder
+                    .assumingTests(true)
                     .build();
         }
 
         private BoundedContext singleTenant() {
-            return BoundedContext
-                    .newBuilder()
-                    .setMultitenant(false)
+            return BoundedContextBuilder
+                    .assumingTests(false)
                     .build();
         }
     }
@@ -477,7 +469,7 @@ class BoundedContextTest {
         assertThrows(
                 IllegalStateException.class,
                 () ->
-                new BoundedContext(BoundedContext.newBuilder()) {
+                new BoundedContext(BoundedContextBuilder.assumingTests()) {
                     @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
                     @Internal
                     @Override
@@ -493,10 +485,7 @@ class BoundedContextTest {
     void closeSystemWhenDomainIsClosed() throws Exception {
         BoundedContextName contextName = BoundedContextNames.newName("TestDomain");
         BoundedContextName systemContextName = BoundedContextNames.system(contextName);
-        BoundedContext context = BoundedContext
-                .newBuilder()
-                .setName(contextName)
-                .build();
+        BoundedContext context = BoundedContext.singleTenant(contextName.getValue()).build();
         Queue<SubstituteLoggingEvent> log = new ArrayDeque<>();
         Logging.redirect((SubstituteLogger) Logging.get(DomainContext.class), log);
         Logging.redirect((SubstituteLogger) Logging.get(SystemContext.class), log);
@@ -519,8 +508,7 @@ class BoundedContextTest {
     void stringForm() {
         String name = randomString();
 
-        assertThat(BoundedContext.newBuilder()
-                                 .setName(name)
+        assertThat(BoundedContext.singleTenant(name)
                                  .build()
                                  .toString())
                 .isEqualTo(name);

@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import io.spine.server.storage.StorageFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,7 @@ public class InMemoryAggregateStorageTruncationTest extends AggregateStorageTrun
 
     @Override
     protected StorageFactory storageFactory() {
-        return InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
+        ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
+        return InMemoryStorageFactory.newInstance(spec);
     }
 }

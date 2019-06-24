@@ -21,12 +21,12 @@
 package io.spine.server.tenant;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 @DisplayName("TenantIndex should")
@@ -35,8 +35,8 @@ class TenantIndexTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
+        ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance(spec);
         new NullPointerTester()
                 .setDefault(StorageFactory.class, storageFactory)
                 .testAllPublicStaticMethods(TenantIndex.class);

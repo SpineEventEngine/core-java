@@ -36,6 +36,7 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
 import io.spine.core.MessageId;
+import io.spine.core.Origin;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
@@ -186,7 +187,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setNewValue(record)
                 .vBuild();
-        lifecycle.onStateChanged(change, ImmutableSet.of(STAND_POST_ORIGIN));
+        lifecycle.onStateChanged(change,
+                                 ImmutableSet.of(STAND_POST_ORIGIN),
+                                 Origin.getDefaultInstance());
     }
 
     /**

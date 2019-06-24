@@ -33,8 +33,7 @@ public final class OrdersContext {
 
     public static BoundedContext newInstance() {
         BoundedContext result = BoundedContext
-                .newBuilder()
-                .setName("Orders")
+                .singleTenant("Orders")
                 .build();
         result.register(DefaultRepository.of(OrderAggregate.class));
         return result;

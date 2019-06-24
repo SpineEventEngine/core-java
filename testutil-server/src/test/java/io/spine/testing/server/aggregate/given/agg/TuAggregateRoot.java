@@ -21,6 +21,7 @@
 package io.spine.testing.server.aggregate.given.agg;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.testing.server.given.entity.TuTaskId;
 
@@ -31,8 +32,7 @@ public class TuAggregateRoot extends AggregateRoot<TuTaskId> {
     }
 
     public static TuAggregateRoot newInstance(TuTaskId id) {
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .build();
+        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
         return new TuAggregateRoot(boundedContext, id);
     }
 }

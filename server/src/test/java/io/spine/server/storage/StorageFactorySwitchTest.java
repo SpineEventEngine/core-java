@@ -22,6 +22,7 @@ package io.spine.server.storage;
 
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -30,9 +31,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.ContextSpec.singleTenant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,9 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("StorageFactorySwitch should")
 class StorageFactorySwitchTest {
@@ -57,19 +56,10 @@ class StorageFactorySwitchTest {
 
     private boolean multitenant;
     private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
+    private final ContextSpec contextSpec = singleTenant(boundedContextName.getValue());
 
-    private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
-        @Override
-        public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
-        }
-    };
-    private final Supplier<StorageFactory> productionSupplier = new Supplier<StorageFactory>() {
-        @Override
-        public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
-        }
-    };
+    private final Function<ContextSpec, StorageFactory> storage =
+            InMemoryStorageFactory::newInstance;
 
     private StorageFactorySwitch storageFactorySwitch;
 
@@ -97,7 +87,7 @@ class StorageFactorySwitchTest {
 
     @BeforeEach
     void setUp() {
-        storageFactorySwitch = StorageFactorySwitch.newInstance(boundedContextName, multitenant);
+        storageFactorySwitch = new StorageFactorySwitch();
     }
 
     @AfterEach
@@ -117,7 +107,11 @@ class StorageFactorySwitchTest {
     @Test
     @DisplayName("return InMemoryStorageFactory in tests if test supplier was not set")
     void returnInMemoryByDefault() {
-        StorageFactory storageFactory = storageFactorySwitch.get();
+        String name = boundedContextName.getValue();
+        ContextSpec spec = multitenant
+                           ? ContextSpec.multitenant(name)
+                           : singleTenant(name);
+        StorageFactory storageFactory = storageFactorySwitch.apply(spec);
 
         assertNotNull(storageFactory);
         assertTrue(storageFactory instanceof InMemoryStorageFactory);
@@ -135,7 +129,7 @@ class StorageFactorySwitchTest {
 
         StorageFactory custom = mock(StorageFactory.class);
 
-        storageFactorySwitch.init(testsSupplier, () -> custom);
+        storageFactorySwitch.init(storage, (spec) -> custom);
 
         // These calls ensure that we're under the testing mode and we get the supplier for tests.
         assertTrue(Environment.getInstance()
@@ -144,7 +138,7 @@ class StorageFactorySwitchTest {
                                        .isPresent());
 
         // Get the StorageFactory from the switch.
-        StorageFactory obtained = storageFactorySwitch.get();
+        StorageFactory obtained = storageFactorySwitch.apply(contextSpec);
 
         assertEquals(custom, obtained);
     }
@@ -162,47 +156,13 @@ class StorageFactorySwitchTest {
         assertFalse(storageFactorySwitch.productionSupplier()
                                         .isPresent());
 
-        assertThrows(IllegalStateException.class, () -> storageFactorySwitch.get());
-    }
-
-    @SuppressWarnings("CheckReturnValue") // ignore value of get() since we tests caching
-    @Test
-    @DisplayName("cache instance of StorageFactory in tests")
-    void cacheInTest() {
-        Supplier<StorageFactory> testingSupplier = spy(testsSupplier);
-
-        storageFactorySwitch.init(productionSupplier, testingSupplier);
-
-        Environment.getInstance()
-                   .setToTests();
-
-        storageFactorySwitch.get();
-        storageFactorySwitch.get();
-
-        verify(testingSupplier, times(1)).get();
-    }
-
-    @SuppressWarnings("CheckReturnValue") // ignore value of get() since we tests caching
-    @Test
-    @DisplayName("cache instance of StorageFactory in production")
-    void cacheInProduction() {
-        Supplier<StorageFactory> prodSupplier = spy(productionSupplier);
-
-        storageFactorySwitch.init(prodSupplier, testsSupplier);
-
-        Environment.getInstance()
-                   .setToProduction();
-
-        storageFactorySwitch.get();
-        storageFactorySwitch.get();
-
-        verify(prodSupplier, times(1)).get();
+        assertThrows(IllegalStateException.class, () -> storageFactorySwitch.apply(contextSpec));
     }
 
     @Test
     @DisplayName("return itself on init")
     void returnItselfOnInit() {
-        StorageFactorySwitch result = storageFactorySwitch.init(testsSupplier, testsSupplier);
+        StorageFactorySwitch result = storageFactorySwitch.init(storage, storage);
         assertSame(storageFactorySwitch, result);
     }
 }

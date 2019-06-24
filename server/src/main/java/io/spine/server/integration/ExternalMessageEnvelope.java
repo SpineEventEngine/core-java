@@ -22,7 +22,7 @@ package io.spine.server.integration;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
+import io.spine.core.Origin;
 import io.spine.server.type.AbstractMessageEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
@@ -127,16 +127,15 @@ public final class ExternalMessageEnvelope
     /**
      * This method is not supported and always throws {@link UnsupportedOperationException}.
      *
-     * <p> This should never happen as no event is caused directly by an {@code ExternalMessage}.
+     * <p>This should never happen as no event is caused directly by an {@code ExternalMessage}.
      *
-     * <p> Instead, the external messages are consumed by an anti-corruption layer such as
+     * <p>Instead, the external messages are consumed by an anti-corruption layer such as
      * external reactor or subscriber methods in the destination Bounded Context.
-     * 
-     * @param builder not used
+     *
      * @throws UnsupportedOperationException always
      */
     @Override
-    public void setOriginFields(EventContext.Builder builder) {
+    public Origin asEventOrigin() {
         throw newIllegalStateException(
                 "An external message like this (%s) may not be a direct origin of any event.",
                 this

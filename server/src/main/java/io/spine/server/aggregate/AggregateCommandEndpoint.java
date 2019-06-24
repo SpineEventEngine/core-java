@@ -52,6 +52,12 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
+    protected void afterDispatched(I entityId) {
+        repository().lifecycleOf(entityId)
+                    .onDispatchCommand(envelope().command());
+    }
+
+    @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         repository().onError(envelope, exception);
     }

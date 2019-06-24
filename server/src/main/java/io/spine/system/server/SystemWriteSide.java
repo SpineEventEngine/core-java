@@ -22,6 +22,8 @@ package io.spine.system.server;
 
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.core.Origin;
+import io.spine.server.tenant.TenantAwareOperation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -34,15 +36,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface SystemWriteSide {
 
     /**
-     * Posts a system event.
+     * Posts a system event with the given origin.
      *
      * <p>If the associated bounded context is
      * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the event is
      * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
      *
-     * @param systemEvent event to post
+     * @param systemEvent
+     *         event to post
+     * @param origin
+     *         the origin of the event
      */
-    void postEvent(EventMessage systemEvent);
+    void postEvent(EventMessage systemEvent, Origin origin);
+
+    /**
+     * Posts a system event.
+     *
+     * <p>If the associated bounded context is
+     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the event is
+     * posted for the {@linkplain TenantAwareOperation current tenant}.
+     *
+     * @param systemEvent
+     *         event to post
+     * @see #postEvent(EventMessage, Origin)
+     */
+    default void postEvent(EventMessage systemEvent) {
+        postEvent(systemEvent, Origin.getDefaultInstance());
+    }
 
     /**
      * Creates new instance of the {@code SystemWriteSide} which serves the passed system context.

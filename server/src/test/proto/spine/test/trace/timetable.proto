@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package spine.test.trace;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.trace";
+option java_outer_classname = "TimetableProto";
+option java_multiple_files = true;
+
+import "spine/time/time.proto";
+import "spine/test/trace/airport.proto";
+
+message Timetable {
+    option (entity).kind = PROJECTION;
+
+    AirportId id = 1;
+
+    repeated Schedule scheduled_flight = 2;
+
+    message Schedule {
+
+        FlightId flight = 1;
+
+        AirportId destination = 2;
+
+        time.ZonedDateTime scheduled_departure = 3;
+
+        enum Status {
+
+            TS_UNKNOWN = 0;
+            CHECK_IN = 1;
+            BOARDING = 2;
+            DEPARTURE = 3;
+            CANCELED = 4;
+        }
+    }
+}

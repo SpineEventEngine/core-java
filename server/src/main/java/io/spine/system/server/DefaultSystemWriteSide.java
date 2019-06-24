@@ -22,10 +22,12 @@ package io.spine.system.server;
 
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
+import io.spine.core.Origin;
 import io.spine.core.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.system.server.SystemEventFactory.forMessage;
 
 /**
  * The default implementation of {@link SystemWriteSide}.
@@ -47,15 +49,16 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     }
 
     @Override
-    public void postEvent(EventMessage systemEvent) {
+    public void postEvent(EventMessage systemEvent, Origin origin) {
         checkNotNull(systemEvent);
-        Event event = event(systemEvent);
+        checkNotNull(origin);
+        Event event = event(systemEvent, origin);
         system.eventBus()
               .post(event, noOpObserver());
     }
 
-    private Event event(EventMessage message) {
-        SystemEventFactory factory = SystemEventFactory.forMessage(message, system.isMultitenant());
+    private Event event(EventMessage message, Origin origin) {
+        SystemEventFactory factory = forMessage(message, origin, system.isMultitenant());
         Event event = factory.createEvent(message, null);
         return event;
     }

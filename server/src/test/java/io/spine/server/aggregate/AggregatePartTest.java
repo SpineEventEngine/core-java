@@ -27,6 +27,7 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
 import io.spine.server.aggregate.given.part.TaskCommentsPart;
 import io.spine.server.aggregate.given.part.TaskCommentsRepository;
@@ -74,8 +75,7 @@ class AggregatePartTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
+        boundedContext = BoundedContextBuilder.assumingTests().build();
         root = new TaskRoot(boundedContext, ID);
         taskPart = new TaskPart(root);
         taskCommentsPart = new TaskCommentsPart(root);

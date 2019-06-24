@@ -57,14 +57,10 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
         return ImmutableList.of(event.outerObject());
     }
 
-    /**
-     * {@linkplain AggregateRepository#onEventImported(Object, Event) Notifies} the repository
-     * on successful completion of the event import.
-     */
     @Override
-    protected void onDispatched(A aggregate, EventEnvelope event, List<Event> producedEvents) {
-        super.onDispatched(aggregate, event, producedEvents);
-        repository().onEventImported(aggregate.id(), event.outerObject());
+    protected void afterDispatched(I entityId) {
+        repository().lifecycleOf(entityId)
+                    .onEventImported(envelope().outerObject());
     }
 
     @Override

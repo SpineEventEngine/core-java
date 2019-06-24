@@ -25,6 +25,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.ExposedRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.HiddenRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.SubscribableRepository;
@@ -59,8 +60,7 @@ class VisibilityGuardTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
+        boundedContext = BoundedContextBuilder.assumingTests().build();
         repositories = Lists.newArrayList();
 
         guard = VisibilityGuard.newInstance();

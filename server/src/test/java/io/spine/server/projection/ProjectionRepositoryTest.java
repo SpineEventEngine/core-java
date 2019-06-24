@@ -30,6 +30,7 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.event.DuplicateEventException;
@@ -212,14 +213,10 @@ class ProjectionRepositoryTest
     @BeforeEach
     protected void setUp() {
         boundedContext = BoundedContext
-                .newBuilder()
-                .setName(getClass().getSimpleName())
-                .setMultitenant(true)
+                .multitenant(getClass().getSimpleName())
                 .build();
         super.setUp();
-
         boundedContext.register(this.repository());
-
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -348,7 +345,7 @@ class ProjectionRepositoryTest
                     .build();
             EntitySubscriberProjection.Repository repository =
                     new EntitySubscriberProjection.Repository();
-            BoundedContext context = BoundedContext.newBuilder().build();
+            BoundedContext context = BoundedContextBuilder.assumingTests().build();
             context.register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
             Set<ProjectId> targets = repository.dispatch(envelope);
@@ -547,9 +544,8 @@ class ProjectionRepositoryTest
     @DisplayName("check that its `Projection` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
-        BoundedContext context = BoundedContext
-                .newBuilder()
-                .setMultitenant(false)
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
                 .build();
 
         assertThrows(IllegalStateException.class, () ->

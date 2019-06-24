@@ -296,7 +296,6 @@ public abstract class ProcessManagerRepository<I,
         checkNotNull(command);
         I handlerId = with(command.tenantId()).evaluate(() -> {
             I target = route(command);
-            lifecycleOf(target).onDispatchCommand(command.command());
             return target;
         });
         inbox.send(command)
@@ -330,7 +329,6 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
         inbox.send(EventEnvelope.of(event)).toReactor(id);
     }
 

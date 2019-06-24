@@ -52,8 +52,7 @@ class BoundedContextBuilderTest {
 
     @BeforeEach
     void setUp() {
-        builder = BoundedContext.newBuilder()
-                                .setMultitenant(true);
+        builder = BoundedContextBuilder.assumingTests(true);
     }
 
     @Test
@@ -71,8 +70,9 @@ class BoundedContextBuilderTest {
         @DisplayName("CommandBus Builder")
         void commandBusBuilder() {
             CommandBus.Builder expected = CommandBus.newBuilder();
-            builder = BoundedContext.newBuilder()
-                                    .setCommandBus(expected);
+            builder = BoundedContextBuilder
+                    .assumingTests()
+                    .setCommandBus(expected);
             assertEquals(expected, builder.commandBus()
                                           .get());
         }
@@ -90,8 +90,7 @@ class BoundedContextBuilderTest {
         @DisplayName("name if it was set")
         void name() {
             String nameString = getClass().getName();
-            assertEquals(nameString, BoundedContext.newBuilder()
-                                                   .setName(nameString)
+            assertEquals(nameString, BoundedContext.singleTenant(nameString)
                                                    .name()
                                                    .getValue());
         }
@@ -100,10 +99,10 @@ class BoundedContextBuilderTest {
         @DisplayName("StorageFactory supplier if it was set")
         void storageFactorySupplier() {
             StorageFactory mock = mock(StorageFactory.class);
-            assertEquals(mock, builder.setStorageFactorySupplier(() -> mock)
-                                      .storageFactorySupplier()
+            assertEquals(mock, builder.setStorage(spec -> mock)
+                                      .storage()
                                       .get()
-                                      .get());
+                                      .apply(ContextSpec.singleTenant("Test")));
         }
 
         @Test
@@ -129,7 +128,7 @@ class BoundedContextBuilderTest {
     @DisplayName("allow clearing storage factory supplier")
     void clearStorageFactorySupplier() {
         assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
-                           .storageFactorySupplier()
+                           .storage()
                            .isPresent());
     }
 
@@ -140,10 +139,9 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("TenantIndex")
         void tenantIndex() {
-            assertNotNull(BoundedContext.newBuilder()
-                                        .setMultitenant(true)
-                                        .build()
-                                        .tenantIndex());
+            assertNotNull(BoundedContextBuilder.assumingTests(true)
+                                               .build()
+                                               .tenantIndex());
         }
 
         @Test
@@ -159,8 +157,7 @@ class BoundedContextBuilderTest {
         @DisplayName("EventBus")
         void eventBus() {
             // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
-            BoundedContext boundedContext = builder.setMultitenant(true)
-                                                   .setCommandBus(CommandBus.newBuilder())
+            BoundedContext boundedContext = builder.setCommandBus(CommandBus.newBuilder())
                                                    .build();
             assertNotNull(boundedContext.eventBus());
         }
@@ -182,16 +179,9 @@ class BoundedContextBuilderTest {
     }
 
     @Test
-    @DisplayName("be single tenant by default")
-    void beSingleTenantByDefault() {
-        assertFalse(BoundedContext.newBuilder()
-                                  .isMultitenant());
-    }
-
-    @Test
     @DisplayName("support multitenancy")
     void supportMultitenancy() {
-        builder.setMultitenant(true);
+        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(true);
         assertTrue(builder.isMultitenant());
     }
 
@@ -199,10 +189,11 @@ class BoundedContextBuilderTest {
     @DisplayName("allow TenantIndex configuration")
     void setTenantIndex() {
         TenantIndex tenantIndex = mock(TenantIndex.class);
-        assertEquals(tenantIndex, BoundedContext.newBuilder()
-                                                .setTenantIndex(tenantIndex)
-                                                .tenantIndex()
-                                                .get());
+        assertEquals(tenantIndex, BoundedContextBuilder
+                .assumingTests()
+                .setTenantIndex(tenantIndex)
+                .tenantIndex()
+                .get());
     }
 
     @Test
@@ -210,10 +201,10 @@ class BoundedContextBuilderTest {
     void matchCommandBusMultitenancy() {
         CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                   .setMultitenant(true);
-        assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
-                                                                      .setMultitenant(false)
-                                                                      .setCommandBus(commandBus)
-                                                                      .build());
+        assertThrows(IllegalStateException.class,
+                     () -> BoundedContextBuilder.assumingTests(false)
+                                                .setCommandBus(commandBus)
+                                                .build());
     }
 
     @Nested
@@ -224,7 +215,7 @@ class BoundedContextBuilderTest {
 
         @BeforeEach
         void setUp() {
-            this.builder = BoundedContext.newBuilder();
+            this.builder = BoundedContextBuilder.assumingTests();
             repository = DefaultRepository.of(ProjectAggregate.class);
         }
 

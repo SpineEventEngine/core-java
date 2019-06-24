@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -30,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A {@link SystemWriteSide} which works for a specified tenant.
  *
- * <p>A system event is {@linkplain #postEvent(EventMessage) posted} within
+ * <p>A system event is {@linkplain SystemWriteSide#postEvent(EventMessage, Origin) posted} within
  * a {@link TenantAwareOperation} with the given tenant set.
  *
  * <p>Any call to this {@code TenantAwareSystemWriteSide} is delegated to another instance
@@ -61,7 +62,7 @@ final class TenantAwareSystemWriteSide implements SystemWriteSide {
      * <p>Posts the given system event under the context of the specified tenant.
      */
     @Override
-    public void postEvent(EventMessage systemEvent) {
-        runner.run(() -> delegate.postEvent(systemEvent));
+    public void postEvent(EventMessage systemEvent, Origin origin) {
+        runner.run(() -> delegate.postEvent(systemEvent, origin));
     }
 }

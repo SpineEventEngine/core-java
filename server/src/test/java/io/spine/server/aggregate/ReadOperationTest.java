@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.server.aggregate.given.ReadOperationTestEnv.TestAggregate;
 import io.spine.server.storage.StorageFactory;
@@ -33,6 +32,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.BoundedContextNames.assumingTestsValue;
+import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.aggregate.given.ReadOperationTestEnv.events;
 import static io.spine.server.aggregate.given.ReadOperationTestEnv.snapshot;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,7 +44,7 @@ class ReadOperationTest {
 
     private static final String ID = "test-aggregate-ID";
     private static final StorageFactory storageFactory =
-            InMemoryStorageFactory.newInstance(BoundedContextNames.assumingTests(), false);
+            InMemoryStorageFactory.newInstance(singleTenant(assumingTestsValue()));
 
     private AggregateStorage<String> storage;
 

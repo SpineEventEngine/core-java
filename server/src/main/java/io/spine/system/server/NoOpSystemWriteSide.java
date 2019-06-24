@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.core.Origin;
 
 /**
  * An implementation of {@link SystemWriteSide} which never performs an operation.
@@ -35,7 +36,7 @@ public enum NoOpSystemWriteSide implements SystemWriteSide {
     INSTANCE;
 
     @Override
-    public void postEvent(EventMessage systemEvent) {
+    public void postEvent(EventMessage systemEvent, Origin origin) {
         // NOP.
     }
 }

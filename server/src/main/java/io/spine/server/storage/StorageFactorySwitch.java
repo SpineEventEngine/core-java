@@ -23,11 +23,12 @@ package io.spine.server.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Environment;
-import io.spine.core.BoundedContextName;
+import io.spine.server.ContextSpec;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,62 +40,42 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p><b>Test mode.</b>
  * Under tests this class returns {@link InMemoryStorageFactory} if
- * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
+ * a {@code Supplier} for tests was not set via {@link #init}.
  *
  * <p><b>Production mode.</b>
  * In the production mode this class obtains the instance provided by the {@code Supplier} passed
- * via {@link #init(Supplier, Supplier)}. If the production {@code Supplier} was not initialized,
+ * via {@link #init}. If the production {@code Supplier} was not initialized,
  * {@code IllegalStateException} will be thrown.
  *
  * <p><b>Remembering {@code StorageFactory} obtained from suppliers.</b>
  * In both modes the reference to the {@code StorageFactory} obtained from a {@code Supplier}
  * will be stored. This means that a call to {@link Supplier#get()} method of
- * the suppliers passed via {@link #init(Supplier, Supplier)} will be made only once.
+ * the suppliers passed via {@link #init} will be made only once.
  *
  * @see Environment#isTests()
  */
-public final class StorageFactorySwitch implements Supplier<StorageFactory> {
+public final class StorageFactorySwitch implements Function<ContextSpec, StorageFactory> {
 
-    /** The name of the BoundedContext where this switch works. */
-    private final BoundedContextName boundedContextName;
+    private @Nullable Function<ContextSpec, StorageFactory> productionSupplier;
 
-    private @Nullable Supplier<StorageFactory> productionSupplier;
-
-    private @Nullable Supplier<StorageFactory> testsSupplier;
+    private @Nullable Function<ContextSpec, StorageFactory> testsSupplier;
 
     /** Cached instance of the StorageFactory supplied by one of the suppliers. */
     private @Nullable StorageFactory storageFactory;
 
-    private final boolean multitenant;
-
-    private StorageFactorySwitch(BoundedContextName boundedContextName, boolean multitenant) {
-        this.boundedContextName = boundedContextName;
-        this.multitenant = multitenant;
-    }
-
-    /**
-     * Obtains the instance of the switch that corresponds to multi-tenancy mode.
-     *
-     * @param boundedContextName the name of the Bounded Context in which this switch works
-     * @param multitenant        if {@code true} the switch is requested for the multi-tenant
-     *                           execution context, {@code false} for the single-tenant context
-     */
-    public static StorageFactorySwitch newInstance(BoundedContextName boundedContextName,
-                                                   boolean multitenant) {
-        return new StorageFactorySwitch(boundedContextName, multitenant);
-    }
-
     /**
      * Initializes the current singleton instance with the suppliers.
      *
-     * @param productionSupplier the supplier for the production mode
-     * @param testsSupplier the supplier for the tests mode.
-     *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
+     * @param productionSupplier
+     *         the supplier for the production mode
+     * @param testsSupplier
+     *         the supplier for the tests mode.
+     *         If {@code null} is passed {@link InMemoryStorageFactory} will be used
      * @return this
      */
     @CanIgnoreReturnValue
-    public StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
-                                     @Nullable Supplier<StorageFactory> testsSupplier) {
+    public StorageFactorySwitch init(Function<ContextSpec, StorageFactory> productionSupplier,
+                           @Nullable Function<ContextSpec, StorageFactory> testsSupplier) {
         this.productionSupplier = checkNotNull(productionSupplier);
         this.testsSupplier = testsSupplier;
         return this;
@@ -114,7 +95,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * Obtains production supplier. Required for tests.
      */
     @VisibleForTesting
-    Optional<Supplier<StorageFactory>> productionSupplier() {
+    Optional<Function<ContextSpec, StorageFactory>> productionSupplier() {
         return Optional.ofNullable(productionSupplier);
     }
 
@@ -122,7 +103,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * Obtains tests supplier. Required for tests.
      */
     @VisibleForTesting
-    Optional<Supplier<StorageFactory>> testsSupplier() {
+    Optional<Function<ContextSpec, StorageFactory>> testsSupplier() {
         return Optional.ofNullable(testsSupplier);
     }
 
@@ -130,30 +111,29 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * Obtains {@code StorageFactory} for the current execution mode.
      *
      * @return {@code StorageFactory} instance
-     * @throws IllegalStateException if production {@code Supplier} was not set via
-     *                               {@link #init(Supplier, Supplier)}
+     * @throws IllegalStateException if production {@code Supplier} was not set via {@link #init}
      */
     @Override
-    public StorageFactory get() {
+    public StorageFactory apply(ContextSpec spec) {
         if (storageFactory != null) {
             return storageFactory;
         }
 
-        if (Environment.getInstance()
-                       .isTests()) {
+        boolean inTests = Environment.getInstance()
+                                     .isTests();
+        if (inTests) {
             storageFactory = testsSupplier != null
-                             ? testsSupplier.get()
-                             : InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
+                             ? testsSupplier.apply(spec)
+                             : InMemoryStorageFactory.newInstance(spec);
         } else {
             if (productionSupplier == null) {
                 throw newIllegalStateException(
                         "A supplier of a production StorageFactory is not set " +
                                 "but the code runs in the production mode. " +
-                        "Please call %s.init().", getClass().getSimpleName());
+                                "Please call %s.init().", getClass().getSimpleName());
             }
-            storageFactory = productionSupplier.get();
+            storageFactory = productionSupplier.apply(spec);
         }
-
         return storageFactory;
     }
 }

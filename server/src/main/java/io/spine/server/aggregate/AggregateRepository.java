@@ -291,7 +291,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         checkNotNull(cmd);
         I id = with(cmd.tenantId()).evaluate(() -> {
             I target = route(cmd);
-            lifecycleOf(target).onDispatchCommand(cmd.command());
             return target;
         });
         inbox.send(cmd).toHandler(id);
@@ -588,16 +587,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return super.lifecycleOf(id);
     }
 
-    final void onDispatchEvent(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
     private void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
-    }
-
-    final void onEventImported(I id, Event event) {
-        lifecycleOf(id).onEventImported(event);
     }
 
     @OverridingMethodsMustInvokeSuper

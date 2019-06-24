@@ -24,6 +24,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.repo.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.repo.RepoOfAggregateWithLifecycle;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -52,8 +53,9 @@ class AggregateRepositoryViewsTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .build();
+        boundedContext = BoundedContextBuilder
+                .assumingTests()
+                .build();
         repository = new RepoOfAggregateWithLifecycle();
         boundedContext.register(repository);
 

@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package spine.test.trace;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.trace";
+option java_outer_classname = "BoardingProto";
+option java_multiple_files = true;
+
+import "spine/time/time.proto";
+import "spine/test/trace/airport.proto";
+
+message Boarding {
+    option (entity).kind = PROCESS_MANAGER;
+
+    FlightId flight = 1;
+
+    time.ZonedDateTime scheduled_start = 2;
+    time.ZonedDateTime when_started = 3;
+
+    time.ZonedDateTime scheduled_end = 4;
+    time.ZonedDateTime when_ended = 5;
+
+    Status status = 6;
+
+    enum Status {
+        BS_UNKNOWN = 0;
+        NOT_STARTED = 1;
+        STARTED = 2;
+        DELAYED = 3;
+        CANCELED = 4;
+    }
+}

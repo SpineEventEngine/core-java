@@ -47,6 +47,12 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
+    protected void afterDispatched(I entityId) {
+        repository().lifecycleOf(entityId)
+                    .onDispatchEventToReactor(envelope().outerObject());
+    }
+
+    @Override
     protected List<Event> invokeDispatcher(P processManager, EventEnvelope event) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         List<Event> events = tx.dispatchEvent(event);
