@@ -29,7 +29,7 @@ public class InboxReadRequest implements ReadRequest<InboxMessageId> {
 
     private final InboxMessageId messageId;
 
-    InboxReadRequest(InboxMessageId id) {
+    protected InboxReadRequest(InboxMessageId id) {
         messageId = id;
     }
 

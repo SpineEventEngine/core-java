@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  * @param <I>
  *         the type of identifier or inbox target entities
  */
-class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
+final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
     InboxOfCommands(Inbox.Builder<I> builder) {
         super(builder, builder.getCommandEndpoints());
@@ -61,11 +61,11 @@ class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
     }
 
     @Override
-    protected InboxMessageStatus getStatus(CommandEnvelope message) {
+    protected InboxMessageStatus determineStatus(CommandEnvelope message) {
         if(message.context().hasSchedule()) {
             return InboxMessageStatus.SCHEDULED;
         }
-        return super.getStatus(message);
+        return super.determineStatus(message);
     }
 
     /**

@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
 
 import java.util.Optional;
@@ -30,6 +31,7 @@ import java.util.Optional;
  *
  * @author Alex Tymchenko
  */
+@SPI
 public interface ShardedWorkRegistry {
 
     /**

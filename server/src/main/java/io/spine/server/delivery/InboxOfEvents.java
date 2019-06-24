@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  * @param <I>
  *         the type of identifier or inbox target entities
  */
-class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
+final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     InboxOfEvents(Inbox.Builder<I> builder) {
         super(builder, builder.getEventEndpoints());

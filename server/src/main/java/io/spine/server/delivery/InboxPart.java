@@ -81,7 +81,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     /**
      * Determines the status of the message.
      */
-    protected InboxMessageStatus getStatus(M message) {
+    protected InboxMessageStatus determineStatus(M message) {
         return InboxMessageStatus.TO_DELIVER;
     }
 
@@ -102,7 +102,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                 .setInboxId(inboxId)
                 .setShardIndex(shardIndex)
                 .setLabel(label)
-                .setStatus(getStatus(envelope))
+                .setStatus(determineStatus(envelope))
                 .setWhenReceived(Time.currentTime());
         setRecordPayload(envelope, builder);
         InboxMessage message = builder.vBuild();
