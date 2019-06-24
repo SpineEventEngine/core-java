@@ -173,7 +173,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards and " +
-            "keep them as `TO_DELIVER` right after they are written to `Inbox`, " +
+            "keep them as `TO_DELIVER` right after they are written to `InboxStorage`, " +
             "and mark every as `DELIVERED` after they are actually delivered.")
     @SuppressWarnings("MethodWithMultipleLoops")    // Traversing over the storage.
     public void mark_delivered() {
@@ -190,7 +190,7 @@ public class DeliveryTest {
         ImmutableSet<String> targets = manyTargets(6);
         new ThreadSimulator(3, false).runWith(targets);
 
-        // Check that each message is in `TO_DELIVER` status upon writing to the storage.
+        // Check that each message was in `TO_DELIVER` status upon writing to the storage.
         ImmutableSet<InboxMessage> rawMessages = memoizer.messages();
         for (InboxMessage message : rawMessages) {
             assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
@@ -218,9 +218,8 @@ public class DeliveryTest {
                               .setIndex(shardIndex)
                               .setOfTotal(shardCount)
                               .vBuild();
-            Page<InboxMessage> page =
-                    with(TenantId.getDefaultInstance())
-                            .evaluate(() -> storage.contentsBackwards(index));
+            Page<InboxMessage> page = with(TenantId.getDefaultInstance())
+                    .evaluate(() -> storage.contentsBackwards(index));
 
             builder.put(index, page);
         }
