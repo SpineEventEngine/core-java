@@ -169,6 +169,10 @@ public class Inbox<I>{
             return this;
         }
 
+        /**
+         * Creates an instance of {@code Inbox} and registers it in the
+         * server-wide {@code Delivery}.
+         */
         public Inbox<I> build() {
             Delivery delivery = ServerEnvironment.getInstance()
                                                  .delivery();
@@ -208,14 +212,23 @@ public class Inbox<I>{
             this.event = event;
         }
 
+        /**
+         * Sends to the reacting handler of the entity with the specified ID.
+         */
         public void toReactor(I entityId) {
             eventPart.store(event, entityId, REACT_UPON_EVENT);
         }
 
+        /**
+         * Sends to the event-importing handler of the entity with the specified ID.
+         */
         public void toImporter(I entityId) {
             eventPart.store(event, entityId, IMPORT_EVENT);
         }
 
+        /**
+         * Sends to the event-subscribing handler of the entity with the specified ID.
+         */
         public void toSubscriber(I entityId) {
             eventPart.store(event, entityId, UPDATE_SUBSCRIBER);
         }
@@ -232,6 +245,9 @@ public class Inbox<I>{
             this.command = command;
         }
 
+        /**
+         * Sends to the command handling method of the entity with the specified ID.
+         */
         public void toHandler(I entityId) {
             commandPart.store(command, entityId, HANDLE_COMMAND);
         }
