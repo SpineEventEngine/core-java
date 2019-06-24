@@ -33,6 +33,9 @@ import io.spine.time.ZonedDateTime;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.util.Exceptions.newIllegalStateException;
+
 final class TimetableProjection extends Projection<AirportId, Timetable, Timetable.Builder> {
 
     @Subscribe
