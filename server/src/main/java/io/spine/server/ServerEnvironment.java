@@ -57,12 +57,10 @@ public final class ServerEnvironment {
     private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
     /**
-     * The identifier of the application.
-     */
-    private final ApplicationId applicationId;
-
-    /**
      * The identifier of the server instance running in scope of this application.
+     *
+     * <p>It is currently impossible to set the node identifier directly. This is a subject
+     * to change in the future framework versions.
      */
     private final NodeId nodeId;
 
@@ -77,8 +75,13 @@ public final class ServerEnvironment {
     /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
         delivery = Delivery.local();
-        applicationId = ApplicationId.newBuilder().setValue("Application").build();
-        nodeId = NodeId.newBuilder().setAppId(applicationId).setValue(Identifier.newUuid()).build();
+        ApplicationId applicationId = ApplicationId.newBuilder()
+                                                   .setValue("Spine server application")
+                                                   .vBuild();
+        nodeId = NodeId.newBuilder()
+                       .setAppId(applicationId)
+                       .setValue(Identifier.newUuid())
+                       .vBuild();
     }
 
     /**
@@ -128,20 +131,21 @@ public final class ServerEnvironment {
 
     /**
      * Returns the delivery mechanism specific to this environment.
+     *
+     * <p>Unless {@linkplain #setDelivery(Delivery) updated manually}, returns
+     * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public Delivery delivery() {
         return delivery;
     }
 
     /**
-     * Obtains the current application identifier.
-     */
-    public ApplicationId getApplicationId() {
-        return applicationId;
-    }
-
-    /**
      * Obtains the identifier of the application node, on which this code is running at the moment.
+     *
+     * <p>At the moment, the node identifier is always UUID-generated. In future versions of the
+     * framework it is expected to become configurable.
+     *
+     * //TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1095
      */
     public NodeId getNodeId() {
         return nodeId;
