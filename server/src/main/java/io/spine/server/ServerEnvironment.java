@@ -145,7 +145,7 @@ public final class ServerEnvironment {
      * <p>At the moment, the node identifier is always UUID-generated. In future versions of the
      * framework it is expected to become configurable.
      *
-     * //TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1095
+     * TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1095
      */
     public NodeId getNodeId() {
         return nodeId;
