@@ -301,19 +301,19 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I handlerId = with(command.tenantId()).evaluate(() -> {
-            I target = route(command);
-            return target;
-        });
+        I id = route(command);
         inbox.send(command)
-             .toHandler(handlerId);
-        return handlerId;
+             .toHandler(id);
+        return id;
     }
 
     private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = commandRouting();
         I target = routing.apply(cmd.message(), cmd.context());
-        lifecycleOf(target).onTargetAssignedToCommand(cmd.id());
+
+        // We need to have a tenant set in order the callbacks could post the system events.
+        with(cmd.tenantId())
+                .run(() -> lifecycleOf(target).onTargetAssignedToCommand(cmd.id()));
         return target;
     }
 

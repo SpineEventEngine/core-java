@@ -295,10 +295,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
-        I id = with(cmd.tenantId()).evaluate(() -> {
-            I target = route(cmd);
-            return target;
-        });
+        I id = route(cmd);
         inbox.send(cmd).toHandler(id);
         return id;
     }
@@ -306,7 +303,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = commandRouting();
         I target = routing.apply(cmd.message(), cmd.context());
-        onCommandTargetSet(target, cmd.id());
+
+        // We need to have a tenant set in order the callbacks could post the system events.
+        with(cmd.tenantId()).run(() -> onCommandTargetSet(target, cmd.id()));
         return target;
     }
 
