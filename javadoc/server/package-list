@@ -19,6 +19,7 @@ io.spine.server.stand
 io.spine.server.storage
 io.spine.server.storage.memory
 io.spine.server.tenant
+io.spine.server.trace
 io.spine.server.transport
 io.spine.server.transport.memory
 io.spine.server.tuple
