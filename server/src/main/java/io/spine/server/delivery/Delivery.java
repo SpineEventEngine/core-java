@@ -76,7 +76,7 @@ import static java.util.stream.Collectors.groupingBy;
  * <p>Once a message is written to the {@code Inbox},
  * the {@linkplain Delivery#subscribe(ShardObserver) pre-configured shard observers} are
  * {@linkplain ShardObserver#onMessage(InboxMessage) notified}. In this way any third-party
- * environment planners, load balancers and schedulers may plug into the delivery and perform
+ * environment planners, load balancers, and schedulers may plug into the delivery and perform
  * various routines to enable the further processing of the sharded messages. In a distributed
  * environment a message queue may be used to notify the node cluster of a shard that has some
  * messages pending for the delivery.
