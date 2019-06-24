@@ -69,14 +69,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A logical and structural boundary of a model.
  *
  * <p>Logically, a Bounded Context represents a sub-system built to be described with the same
- * Ubiquitous Language. Any term within a single bounded context has a single meaning and
- * may or may not map to another term in the language of another Bounded Context.
+ * Ubiquitous Language. Any term within a single bounded context has a single meaning and may or
+ * may not map to another term in the language of another Bounded Context.
  *
  * <p>The Ubiquitous Language of a Bounded Context is represented by such concepts as the entity
- * state, event,
- * and command types, entity types, and others. An entity and its adjacent types belong to the
- * Bounded
- * Context which the entity {@link Repository} is
+ * state, event, and command types, entity types, and others. An entity and its adjacent types
+ * belong to the Bounded Context which the entity {@link Repository} is
  * {@linkplain BoundedContext#register(Repository) registered} in.
  *
  * <p>Structurally, a Bounded Context brings together all the infrastructure required for
@@ -113,9 +111,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @throws IllegalStateException
      *         if called from a derived class, which is not a part of the framework
-     * @apiNote This constructor is for internal use of the framework. Application
-     *         developers
-     *         should not create classes derived from {@code BoundedContext}.
+     * @apiNote
+     * This constructor is for internal use of the framework. Application developers should not
+     * create classes derived from {@code BoundedContext}.
      */
     @Internal
     protected BoundedContext(BoundedContextBuilder builder) {
