@@ -113,7 +113,7 @@ public final class Delivery {
     private final DeliveryStrategy strategy;
 
     /**
-     * For how long we keep previously delivered message per-target to ensure the new messages
+     * For how long we keep the previously delivered message per-target to ensure the new messages
      * aren't duplicates.
      */
     private final Duration idempotenceWindow;
