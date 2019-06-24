@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.errorprone.annotations.Immutable;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -102,22 +101,5 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
     @SuppressWarnings("WeakerAccess")   // a part of the public API.
     public static DeliveryStrategy singleShard() {
         return SingleShard.INSTANCE.strategy;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        UniformAcrossAllShards shards = (UniformAcrossAllShards) o;
-        return numberOfShards == shards.numberOfShards;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(numberOfShards);
     }
 }
