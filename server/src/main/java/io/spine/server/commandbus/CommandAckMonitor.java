@@ -20,20 +20,27 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.Origin;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.DelegatingObserver;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -50,10 +57,15 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 final class CommandAckMonitor extends DelegatingObserver<Ack> {
 
     private final SystemWriteSide writeSide;
+    private final ImmutableMap<CommandId, Command> commands;
 
     private CommandAckMonitor(Builder builder) {
         super(builder.delegate);
         this.writeSide = delegatingTo(builder.systemWriteSide).get(builder.tenantId);
+        this.commands = builder
+                .commands
+                .stream()
+                .collect(toImmutableMap(Command::id, c -> c));
     }
 
     /**
@@ -74,7 +86,11 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
         Status status = ack.getStatus();
         CommandId commandId = commandIdFrom(ack);
         EventMessage systemEvent = systemEventFor(status, commandId);
-        writeSide.postEvent(systemEvent);
+        Command command = commands.get(commandId);
+        checkState(command != null, "Unknown command ID encountered: %s", commandId.value());
+        Origin systemEventOrigin = CommandEnvelope.of(command)
+                                                  .asEventOrigin();
+        writeSide.postEvent(systemEvent, systemEventOrigin);
     }
 
     private static CommandId commandIdFrom(Ack ack) {
@@ -117,6 +133,7 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
         private StreamObserver<Ack> delegate;
         private TenantId tenantId;
         private SystemWriteSide systemWriteSide;
+        private ImmutableSet<Command> commands;
 
         /**
          * Prevents direct instantiation.
@@ -149,6 +166,16 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
         }
 
         /**
+         * Sets the commands being posted into the command bus.
+         *
+         * <p>The resulting monitor is able to observe only outcomes of these commands.
+         */
+        Builder setPostedCommands(ImmutableSet<Command> commands) {
+            this.commands = checkNotNull(commands);
+            return this;
+        }
+
+        /**
          * Creates a new instance of {@code CommandAckMonitor}.
          *
          * @return new instance of {@code CommandAckMonitor}
@@ -157,6 +184,7 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
             checkNotNull(delegate);
             checkNotNull(tenantId);
             checkNotNull(systemWriteSide);
+            checkNotNull(commands);
 
             return new CommandAckMonitor(this);
         }

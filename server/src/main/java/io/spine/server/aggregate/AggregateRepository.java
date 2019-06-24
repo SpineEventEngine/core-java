@@ -273,7 +273,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private I doDispatch(CommandEnvelope cmd) {
         I target = route(cmd);
-        lifecycleOf(target).onDispatchCommand(cmd.command());
         dispatchTo(target, cmd);
         return target;
     }
@@ -588,15 +587,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return super.lifecycleOf(id);
     }
 
-    final void onDispatchEvent(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
     private void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
-    }
-
-    final void onEventImported(I id, Event event) {
-        lifecycleOf(id).onEventImported(event);
     }
 }

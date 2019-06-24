@@ -25,6 +25,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.AbstractEventSubscriber;
@@ -58,9 +59,7 @@ class AggregateCommandEndpointTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(false)
-                                       .build();
+        boundedContext = BoundedContextBuilder.assumingTests().build();
         projectId = ProjectId.newBuilder()
                              .setId(Identifier.newUuid())
                              .build();

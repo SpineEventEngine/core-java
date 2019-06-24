@@ -30,6 +30,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.time.TimestampTemporal;
 import io.spine.type.TypeUrl;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -100,7 +102,6 @@ public interface Signal<I extends SignalId,
     }
 
     /**
-     *
      * Obtains the ID of the tenant under which the message was created.
      */
     TenantId tenant();
@@ -109,6 +110,11 @@ public interface Signal<I extends SignalId,
      * Obtains the time when the message was created.
      */
     Timestamp time();
+
+    /**
+     * Obtains the data about the actor who started the message chain.
+     */
+    ActorContext actorContext();
 
     /**
      * Obtains the type URL of the enclosed message.
@@ -178,10 +184,42 @@ public interface Signal<I extends SignalId,
     }
 
     /**
+     * Obtains this signal as an origin of other signals.
+     *
+     * <p>This origin is assigned to any signal message produced as a reaction to this one..
+     */
+    default Origin asMessageOrigin() {
+        MessageId commandQualifier = MessageId
+                .newBuilder()
+                .setId(pack(id()))
+                .setTypeUrl(typeUrl().value())
+                .buildPartial();
+        Origin origin = Origin
+                .newBuilder()
+                .setActorContext(actorContext())
+                .setMessage(commandQualifier)
+                .setGrandOrigin(origin().orElse(Origin.getDefaultInstance()))
+                .vBuild();
+        return origin;
+    }
+
+    /**
+     * Obtains the origin of this signal.
+     *
+     * @return origin of this signal or {@code Optional.empty()} if this signal is posted directly
+     *         by an actor
+     */
+    Optional<Origin> origin();
+
+    /**
      * Obtains the ID of the first message in the chain.
      *
      * <p>The root message is always produced by an actor directly. Tenant and actor of the root
      * message define the tenant and actor of the whole chain.
      */
     MessageId rootMessage();
+
+    default Optional<MessageId> parent() {
+        return origin().map(Origin::messageId);
+    }
 }

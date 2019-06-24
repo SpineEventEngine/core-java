@@ -70,10 +70,16 @@ public abstract class EntityMessageEndpoint<I,
         checkNotNull(entityId);
         try {
             dispatchInTx(entityId);
+            afterDispatched(entityId);
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
         }
     }
+
+    /**
+     * The callback invoked after the message is dispatched to an entity with the given ID.
+     */
+    protected abstract void afterDispatched(I entityId);
 
     /**
      * Dispatches the message to the entity with the passed ID, providing transactional work

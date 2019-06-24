@@ -48,11 +48,13 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -61,19 +63,18 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A logical and structural boundary of a model.
  *
  * <p>Logically, a Bounded Context represents a sub-system built to be described with the same
- * Ubiquitous Language. Any term within a single bounded context has a single meaning and
- * may or may not map to another term in the language of another Bounded Context.
+ * Ubiquitous Language. Any term within a single bounded context has a single meaning and may or
+ * may not map to another term in the language of another Bounded Context.
  *
- * <p>The Ubiquitous Language of a Bounded Context is represented by such concepts as the entity state, event,
- * and command types, entity types, and others. An entity and its adjacent types belong to the Bounded
- * Context which the entity {@link Repository} is
+ * <p>The Ubiquitous Language of a Bounded Context is represented by such concepts as the entity
+ * state, event, and command types, entity types, and others. An entity and its adjacent types
+ * belong to the Bounded Context which the entity {@link Repository} is
  * {@linkplain BoundedContext#register(Repository) registered} in.
  *
  * <p>Structurally, a Bounded Context brings together all the infrastructure required for
@@ -83,20 +84,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * the model elements which belong to it.
  *
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- *     Martin Fowler on Bounded Contexts</a>
+ *         Martin Fowler on Bounded Contexts</a>
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
 public abstract class BoundedContext implements AutoCloseable, Logging {
 
-    /**
-     * The name of the bounded context which is used to distinguish the context in an application
-     * with several bounded contexts.
-     */
-    private final BoundedContextName name;
-
-    /** If {@code true}, the Bounded Context serves many tenants. */
-    private final boolean multitenant;
-
+    private final ContextSpec spec;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final IntegrationBus integrationBus;
@@ -108,7 +101,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private final AggregateRootDirectory aggregateRootDirectory;
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
-    private final Supplier<StorageFactory> storageFactory;
+    private final StorageFactory storageFactory;
+    private final @Nullable TracerFactory tracerFactory;
 
     private final TenantIndex tenantIndex;
 
@@ -117,24 +111,26 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @throws IllegalStateException
      *         if called from a derived class, which is not a part of the framework
-     * @apiNote This constructor is for internal use of the framework. Application developers
-     *          should not create classes derived from {@code BoundedContext}.
+     * @apiNote
+     * This constructor is for internal use of the framework. Application developers should not
+     * create classes derived from {@code BoundedContext}.
      */
     @Internal
     protected BoundedContext(BoundedContextBuilder builder) {
         super();
         checkInheritance();
 
-        this.name = builder.name();
-        this.multitenant = builder.isMultitenant();
-        this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
-                                                   .get());
+        this.spec = builder.spec();
+        this.storageFactory = builder.buildStorage()
+                                     .apply(spec);
+        this.tracerFactory = builder.buildTracerFactorySupplier()
+                                    .apply(spec);
         this.eventBus = builder.buildEventBus();
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
         this.commandBus = buildCommandBus(builder, eventBus);
-        this.integrationBus = buildIntegrationBus(builder, eventBus, name);
+        this.integrationBus = buildIntegrationBus(builder, eventBus, spec.name());
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
@@ -194,12 +190,29 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Creates a new builder for {@code BoundedContext}.
+     * Creates a new builder for a single tenant {@code BoundedContext}.
      *
+     * @param name
+     *         the name of the built context
      * @return new builder instance
      */
-    public static BoundedContextBuilder newBuilder() {
-        return new BoundedContextBuilder();
+    public static BoundedContextBuilder singleTenant(String name) {
+        checkNotNull(name);
+        ContextSpec spec = ContextSpec.singleTenant(name);
+        return new BoundedContextBuilder(spec);
+    }
+
+    /**
+     * Creates a new builder for a multitenant {@code BoundedContext}.
+     *
+     * @param name
+     *         the name of the built context
+     * @return new builder instance
+     */
+    public static BoundedContextBuilder multitenant(String name) {
+        checkNotNull(name);
+        ContextSpec spec = ContextSpec.multitenant(name);
+        return new BoundedContextBuilder(spec);
     }
 
     /**
@@ -308,8 +321,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
      * delegates do not provide an external message dispatcher.
      */
-    private static
-    Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
+    private static Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
         return () -> newIllegalStateException(
                 "No external dispatcher provided by `%s`.", dispatcher);
     }
@@ -430,14 +442,21 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * @return the ID of this {@code BoundedContext}
      */
     public BoundedContextName name() {
-        return name;
+        return spec.name();
     }
 
     /**
      * Obtains {@link StorageFactory} associated with this {@code BoundedContext}.
      */
     public StorageFactory storageFactory() {
-        return storageFactory.get();
+        return storageFactory;
+    }
+
+    /**
+     * Obtains {@link TracerFactory} associated with this {@code BoundedContext}.
+     */
+    public Optional<TracerFactory> tracing() {
+        return Optional.ofNullable(tracerFactory);
     }
 
     /**
@@ -445,7 +464,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * the application, {@code false} otherwise.
      */
     public boolean isMultitenant() {
-        return multitenant;
+        return spec.isMultitenant();
     }
 
     /**
@@ -483,21 +502,24 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
+     *     <li>Closes {@link TracerFactory} if it is present.
      *     <li>Closes all registered {@linkplain Repository repositories}.
      * </ol>
      *
-     * @throws Exception caused by closing one of the components
+     * @throws Exception
+     *         caused by closing one of the components
      */
     @Override
     public void close() throws Exception {
-        storageFactory.get()
-                      .close();
+        storageFactory.close();
         commandBus.close();
         eventBus.close();
         integrationBus.close();
         stand.close();
         importBus.close();
-
+        if (tracerFactory != null) {
+            tracerFactory.close();
+        }
         shutDownRepositories();
 
         log().debug(closed(nameForLogging()));
@@ -530,6 +552,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     @Override
     public String toString() {
-        return name.getValue();
+        return spec.name()
+                   .getValue();
     }
 }

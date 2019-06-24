@@ -39,6 +39,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandDispatched;
 import io.spine.system.server.event.CommandErrored;
@@ -61,7 +62,6 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.command.CompanyNameProcman.FAULTY_NAME;
 import static io.spine.validate.Validate.isNotDefault;
@@ -84,9 +84,8 @@ class CommandLogTest {
                 .setValue(EntityEventsTest.class.getSimpleName())
                 .build();
         context = BoundedContext
-                .newBuilder()
-                .setName(contextName)
-                .setStorageFactorySupplier(() -> newInstance(contextName, false))
+                .singleTenant(contextName.getValue())
+                .setStorage(InMemoryStorageFactory::newInstance)
                 .build();
         system = systemOf(context);
 
@@ -149,9 +148,9 @@ class CommandLogTest {
             CommandId commandId = postCommand(rejectedCommand);
             checkReceived(rejectedCommand);
 
-            eventAccumulator.assertNextEventIs(CommandAcknowledged.class);
-            eventAccumulator.assertNextEventIs(CommandDispatched.class);
-            eventAccumulator.assertNextEventIs(TargetAssignedToCommand.class);
+            eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
+            eventAccumulator.assertReceivedEvent(CommandDispatched.class);
+            eventAccumulator.assertReceivedEvent(TargetAssignedToCommand.class);
 
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
         }
@@ -215,24 +214,24 @@ class CommandLogTest {
         }
 
         private void checkReceived(Message expectedCommand) {
-            CommandReceived received = eventAccumulator.assertNextEventIs(CommandReceived.class);
+            CommandReceived received = eventAccumulator.assertReceivedEvent(CommandReceived.class);
             Message actualCommand = unpack(received.getPayload().getMessage());
             assertEquals(expectedCommand, actualCommand);
         }
 
         private void checkAcknowledged(CommandId commandId) {
-            CommandAcknowledged acknowledged = eventAccumulator.assertNextEventIs(CommandAcknowledged.class);
+            CommandAcknowledged acknowledged = eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
             assertEquals(commandId, acknowledged.getId());
         }
 
         private void checkDispatched(CommandId commandId) {
-            CommandDispatched dispatched = eventAccumulator.assertNextEventIs(CommandDispatched.class);
+            CommandDispatched dispatched = eventAccumulator.assertReceivedEvent(CommandDispatched.class);
             assertEquals(commandId, dispatched.getId());
         }
 
         private void checkTargetAssigned(CommandId commandId, TypeUrl entityType) {
             TargetAssignedToCommand assigned =
-                    eventAccumulator.assertNextEventIs(TargetAssignedToCommand.class);
+                    eventAccumulator.assertReceivedEvent(TargetAssignedToCommand.class);
             CommandTarget target = assigned.getTarget();
             Any actualId = target.getEntityId().getId();
             assertEquals(commandId, assigned.getId());
@@ -241,20 +240,20 @@ class CommandLogTest {
         }
 
         private void checkHandled(CommandId commandId) {
-            CommandHandled handled = eventAccumulator.assertNextEventIs(CommandHandled.class);
+            CommandHandled handled = eventAccumulator.assertReceivedEvent(CommandHandled.class);
             assertEquals(commandId, handled.getId());
         }
 
         @CanIgnoreReturnValue
         private Error checkErrored(CommandId commandId) {
-            CommandErrored errored = eventAccumulator.assertNextEventIs(CommandErrored.class);
+            CommandErrored errored = eventAccumulator.assertReceivedEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
             return errored.getError();
         }
 
         private void checkRejected(CommandId commandId,
                                    Class<? extends Message> expectedRejectionClass) {
-            CommandRejected rejected = eventAccumulator.assertNextEventIs(CommandRejected.class);
+            CommandRejected rejected = eventAccumulator.assertReceivedEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Event rejectionEvent = rejected.getRejectionEvent();
             TypeUrl rejectionType = rejectionEvent.typeUrl();

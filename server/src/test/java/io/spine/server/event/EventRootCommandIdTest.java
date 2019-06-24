@@ -26,6 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregateRepository;
 import io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationRepository;
@@ -65,9 +66,9 @@ public class EventRootCommandIdTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContext.newBuilder()
-                                       .setMultitenant(true)
-                                       .build();
+        boundedContext = BoundedContextBuilder
+                .assumingTests(true)
+                .build();
         ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
         TeamAggregateRepository teamRepository = new TeamAggregateRepository();
         TeamCreationRepository teamCreationRepository = new TeamCreationRepository();

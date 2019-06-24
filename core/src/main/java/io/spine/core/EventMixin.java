@@ -24,6 +24,9 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.validate.Validate;
+
+import java.util.Optional;
 
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
@@ -40,8 +43,7 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext> 
      */
     @Override
     default TenantId tenant() {
-        return context().actorContext()
-                        .getTenantId();
+        return actorContext().getTenantId();
     }
 
     @Override
@@ -55,6 +57,13 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext> 
         return origin == PAST_MESSAGE
                ? context().getPastMessage().root()
                : messageId();
+    }
+
+    @Override
+    default Optional<Origin> origin() {
+        Origin parent = context().getPastMessage();
+        return Optional.of(parent)
+                       .filter(Validate::isNotDefault);
     }
 
     /**
@@ -134,6 +143,7 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext> 
      *
      * @return the actor context of the wrapped event
      */
+    @Override
     @Internal
     default ActorContext actorContext() {
         EventContext eventContext = context();

@@ -25,13 +25,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.MessageId;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityCreated;
@@ -58,7 +59,6 @@ import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,14 +76,9 @@ class EntityEventsTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContextName contextName = BoundedContextName
-                .newBuilder()
-                .setValue(EntityEventsTest.class.getSimpleName())
-                .build();
-        context = BoundedContext
-                .newBuilder()
-                .setName(contextName)
-                .setStorageFactorySupplier(() -> newInstance(contextName.getValue(), false))
+        context = BoundedContextBuilder
+                .assumingTests(false)
+                .setStorage(InMemoryStorageFactory::newInstance)
                 .build();
         BoundedContext system = systemOf(context);
 
@@ -123,13 +118,13 @@ class EntityEventsTest {
         hidePerson();
         eventAccumulator.assertEventCount(6);
 
-        eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
-        eventAccumulator.assertNextEventIs(EntityCreated.class);
+        eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
+        eventAccumulator.assertReceivedEvent(EntityCreated.class);
 
         checkEntityArchived();
 
-        eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
-        eventAccumulator.assertNextEventIs(EntityCreated.class);
+        eventAccumulator.assertReceivedEvent(EventDispatchedToSubscriber.class);
+        eventAccumulator.assertReceivedEvent(EntityCreated.class);
 
         checkEntityDeleted();
     }
@@ -148,11 +143,11 @@ class EntityEventsTest {
 
         eventAccumulator.assertEventCount(4);
 
-        eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+        eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
 
         checkEntityExtracted();
 
-        eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
+        eventAccumulator.assertReceivedEvent(EventDispatchedToSubscriber.class);
 
         checkEntityRestored();
     }
@@ -184,10 +179,10 @@ class EntityEventsTest {
                 .build();
         postCommand(startCommand);
 
-        eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+        eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
         checkEntityCreated(PROCESS_MANAGER, PersonProcman.TYPE);
         EntityStateChanged stateChanged =
-                eventAccumulator.assertNextEventIs(EntityStateChanged.class);
+                eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(stateChanged.getEntity());
         PersonCreation startedState = unpack(stateChanged.getNewState(),
                                              PersonCreation.class);
@@ -200,8 +195,8 @@ class EntityEventsTest {
                 .build();
         postCommand(domainCommand);
 
-        eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
-        EntityStateChanged stateChangedAgain = eventAccumulator.assertNextEventIs(
+        eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
+        EntityStateChanged stateChangedAgain = eventAccumulator.assertReceivedEvent(
                 EntityStateChanged.class);
         assertId(stateChangedAgain.getEntity());
         PersonCreation completedState = unpack(stateChangedAgain.getNewState(),
@@ -214,12 +209,12 @@ class EntityEventsTest {
     void eventToReactorInProcman() {
         createPersonName();
 
-        eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
-        eventAccumulator.assertNextEventIs(EntityCreated.class);
-        eventAccumulator.assertNextEventIs(EntityStateChanged.class);
+        eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
+        eventAccumulator.assertReceivedEvent(EntityCreated.class);
+        eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
 
         EventDispatchedToReactor dispatchedToReactor =
-                eventAccumulator.assertNextEventIs(EventDispatchedToReactor.class);
+                eventAccumulator.assertReceivedEvent(EventDispatchedToReactor.class);
         assertId(dispatchedToReactor.getReceiver());
 
         TypeUrl expectedType = TypeUrl.of(PersonNameCreated.class);
@@ -229,7 +224,7 @@ class EntityEventsTest {
 
         checkEntityCreated(PROCESS_MANAGER, PersonProcman.TYPE);
 
-        EntityStateChanged stateChanged = eventAccumulator.assertNextEventIs(
+        EntityStateChanged stateChanged = eventAccumulator.assertReceivedEvent(
                 EntityStateChanged.class);
         PersonCreation processState = unpack(stateChanged.getNewState(),
                                              PersonCreation.class);
@@ -251,11 +246,11 @@ class EntityEventsTest {
                 .build();
         postCommand(domainCommand);
 
-        eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
-        eventAccumulator.assertNextEventIs(EntityStateChanged.class);
+        eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
+        eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
 
         EventDispatchedToReactor dispatched =
-                eventAccumulator.assertNextEventIs(EventDispatchedToReactor.class);
+                eventAccumulator.assertReceivedEvent(EventDispatchedToReactor.class);
         assertId(dispatched.getReceiver());
         TypeUrl expectedType = TypeUrl.of(PersonRenamed.class);
         TypeUrl actualType = TypeUrl.ofEnclosed(dispatched.getPayload()
@@ -294,7 +289,7 @@ class EntityEventsTest {
 
     private void assertCommandDispatched(Message command) {
         CommandDispatchedToHandler event =
-                eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+                eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
         assertId(event.getReceiver());
         Message commandMessage = event.getPayload()
                                       .enclosedMessage();
@@ -303,7 +298,7 @@ class EntityEventsTest {
 
     private void checkEntityCreated(EntityOption.Kind entityKind,
                                     TypeUrl entityType) {
-        EntityCreated event = eventAccumulator.assertNextEventIs(EntityCreated.class);
+        EntityCreated event = eventAccumulator.assertReceivedEvent(EntityCreated.class);
         MessageId entityId = event.getEntity();
         assertId(entityId);
         assertEquals(entityType.value(), entityId.getTypeUrl());
@@ -312,7 +307,7 @@ class EntityEventsTest {
 
     private void checkEventDispatchedToSubscriber() {
         EventDispatchedToSubscriber event =
-                eventAccumulator.assertNextEventIs(EventDispatchedToSubscriber.class);
+                eventAccumulator.assertReceivedEvent(EventDispatchedToSubscriber.class);
         MessageId receiver = event.getReceiver();
         PersonCreated payload = (PersonCreated) event.getPayload()
                                                      .enclosedMessage();
@@ -322,7 +317,7 @@ class EntityEventsTest {
     }
 
     private void checkEntityStateChanged(Message state) {
-        EntityStateChanged event = eventAccumulator.assertNextEventIs(EntityStateChanged.class);
+        EntityStateChanged event = eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(event.getEntity());
         assertEquals(state, unpack(event.getNewState()));
         assertFalse(event.getSignalIdList()
@@ -331,7 +326,7 @@ class EntityEventsTest {
 
     private void checkCommandDispatchedToAggregateHandler() {
         CommandDispatchedToHandler commandDispatchedEvent =
-                eventAccumulator.assertNextEventIs(CommandDispatchedToHandler.class);
+                eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
         MessageId receiver = commandDispatchedEvent.getReceiver();
         CreatePerson payload = (CreatePerson)
                 commandDispatchedEvent.getPayload()
@@ -342,7 +337,7 @@ class EntityEventsTest {
     }
 
     private void checkEntityArchived() {
-        EntityArchived event = eventAccumulator.assertNextEventIs(EntityArchived.class);
+        EntityArchived event = eventAccumulator.assertReceivedEvent(EntityArchived.class);
         MessageId entityId = event.getEntity();
         assertEquals(PersonAggregate.TYPE.value(),
                      entityId.getTypeUrl());
@@ -350,7 +345,7 @@ class EntityEventsTest {
     }
 
     private void checkEntityDeleted() {
-        EntityDeleted event = eventAccumulator.assertNextEventIs(EntityDeleted.class);
+        EntityDeleted event = eventAccumulator.assertReceivedEvent(EntityDeleted.class);
         MessageId entityId = event.getEntity();
         assertEquals(PersonProjection.TYPE.value(),
                      entityId.getTypeUrl());
@@ -359,7 +354,7 @@ class EntityEventsTest {
 
     private void checkEntityExtracted() {
         EntityUnarchived event =
-                eventAccumulator.assertNextEventIs(EntityUnarchived.class);
+                eventAccumulator.assertReceivedEvent(EntityUnarchived.class);
         MessageId entityId = event.getEntity();
         assertEquals(PersonAggregate.TYPE.value(),
                      entityId.getTypeUrl());
@@ -367,7 +362,7 @@ class EntityEventsTest {
     }
 
     private void checkEntityRestored() {
-        EntityRestored event = eventAccumulator.assertNextEventIs(EntityRestored.class);
+        EntityRestored event = eventAccumulator.assertReceivedEvent(EntityRestored.class);
         MessageId entityId = event.getEntity();
         assertEquals(PersonProjection.TYPE.value(),
                      entityId.getTypeUrl());

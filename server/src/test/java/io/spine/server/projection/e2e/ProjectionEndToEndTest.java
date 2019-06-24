@@ -30,6 +30,7 @@ import io.spine.core.Events;
 import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.given.groups.Group;
 import io.spine.server.given.groups.GroupId;
 import io.spine.server.given.groups.GroupName;
@@ -123,8 +124,8 @@ class ProjectionEndToEndTest {
     @DisplayName("receive entity state updates along with system event context")
     void receiveEntityStateUpdatesAndEventContext() throws Exception {
         GroupProjection.Repository repository = new GroupProjection.Repository();
-        BoundedContext groups = BoundedContext
-                .newBuilder()
+        BoundedContext groups = BoundedContextBuilder
+                .assumingTests()
                 .build();
         groups.register(repository);
         UserId organizationHead = GivenUserId.newUuid();

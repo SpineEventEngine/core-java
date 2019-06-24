@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.given.repo;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.test.aggregate.ProjectId;
@@ -91,8 +92,7 @@ public class AggregateRepositoryTestEnv {
     }
 
     private static BoundedContext newBoundedContext() {
-        BoundedContext context = BoundedContext.newBuilder()
-                                               .build();
+        BoundedContext context = BoundedContextBuilder.assumingTests().build();
         return context;
     }
 

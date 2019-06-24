@@ -28,7 +28,6 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
-import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
@@ -39,7 +38,6 @@ import io.spine.type.TypeName;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -105,34 +103,9 @@ public final class EventEnvelope
         return outerObject().actorContext();
     }
 
-    /**
-     * Sets the origin fields of the event context being built using the data of the enclosed
-     * event.
-     *
-     * <p>In particular:
-     * <ul>
-     *     <li>the root command identifier replicates the one defined in the enclosed event;
-     *     <li>the context of the enclosed event is set as the origin.
-     * </ul>
-     *
-     * @param builder
-     *         event context builder into which the origin related fields are set
-     */
-    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
-    public void setOriginFields(EventContext.Builder builder) {
-        MessageId eventQualifier = MessageId
-                .newBuilder()
-                .setId(pack(id()))
-                .setTypeUrl(outerObject().typeUrl().value())
-                .buildPartial();
-        Origin origin = Origin
-                .newBuilder()
-                .setMessage(eventQualifier)
-                .setGrandOrigin(context().getPastMessage())
-                .setActorContext(actorContext())
-                .vBuild();
-        builder.setPastMessage(origin);
+    public Origin asEventOrigin() {
+        return outerObject().asMessageOrigin();
     }
 
     /**

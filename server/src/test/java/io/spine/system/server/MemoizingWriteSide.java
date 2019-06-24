@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -45,7 +46,8 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     }
 
     /**
-     * Creates a new instance of {@code MemoizingWriteSide} for a single-tenant execution environment.
+     * Creates a new instance of {@code MemoizingWriteSide} for a single-tenant execution
+     * environment.
      *
      * @return new {@code MemoizingWriteSide}
      */
@@ -70,7 +72,7 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      * @see #lastSeenEvent()
      */
     @Override
-    public void postEvent(EventMessage systemEvent) {
+    public void postEvent(EventMessage systemEvent, Origin origin) {
         TenantId tenantId = currentTenant();
         lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
     }

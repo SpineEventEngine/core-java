@@ -65,6 +65,12 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         store(projection);
     }
 
+    @Override
+    protected void afterDispatched(I entityId) {
+        repository().lifecycleOf(entityId)
+                    .onDispatchEventToSubscriber(envelope().outerObject());
+    }
+
     @SuppressWarnings("unchecked") // Simplify massive generic args.
     protected void runTransactionFor(P projection) {
         ProjectionTransaction<I, ?, ?> tx = start((Projection<I, ?, ?>) projection);

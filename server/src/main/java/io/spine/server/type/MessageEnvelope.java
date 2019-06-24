@@ -21,7 +21,7 @@
 package io.spine.server.type;
 
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
+import io.spine.core.Origin;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
@@ -70,10 +70,7 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
     C context();
 
     /**
-     * Sets the origin fields of the event context being built using the data of the enclosed 
-     * message.
-     *
-     * @param builder event context builder into which the origin related fields are set
+     * Packs this message as an {@link Origin} of an event.
      */
-    void setOriginFields(EventContext.Builder builder);
+    Origin asEventOrigin();
 }

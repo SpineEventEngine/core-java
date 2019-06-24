@@ -19,4 +19,6 @@ message InvalidText {
     WatchId id = 1;
 
     string invalid_text = 2;
+
+    string error_message = 3;
 }

@@ -31,6 +31,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.type.AbstractMessageEnvelope;
@@ -182,8 +183,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public void setOriginFields(EventContext.Builder builder) {
-        event.setOriginFields(builder);
+    public Origin asEventOrigin() {
+        return event.asEventOrigin();
     }
 
     @VisibleForTesting

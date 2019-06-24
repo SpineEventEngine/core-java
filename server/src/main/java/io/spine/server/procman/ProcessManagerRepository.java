@@ -280,7 +280,6 @@ public abstract class ProcessManagerRepository<I,
 
     private I doDispatch(CommandEnvelope command) {
         I target = route(command);
-        lifecycleOf(target).onDispatchCommand(command.command());
         PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
         endpoint.dispatchTo(target);
         return target;
@@ -300,7 +299,6 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
         EventEnvelope envelope = EventEnvelope.of(event);
         PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, envelope);
         endpoint.dispatchTo(id);

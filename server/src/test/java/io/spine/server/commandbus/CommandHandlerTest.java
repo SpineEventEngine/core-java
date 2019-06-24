@@ -27,6 +27,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.EventCatcher;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
 import io.spine.server.event.EventBus;
@@ -67,9 +68,9 @@ class CommandHandlerTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                      .setMultitenant(true)
-                                                      .build();
+        BoundedContext boundedContext = BoundedContextBuilder
+                .assumingTests(true)
+                .build();
         commandBus = boundedContext.commandBus();
         eventBus = boundedContext.eventBus();
         handler = new TestCommandHandler(eventBus);

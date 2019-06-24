@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
-import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
@@ -52,7 +51,7 @@ final class CommandFlowWatcher {
                 .newBuilder()
                 .setId(command.id())
                 .build();
-        postSystemEvent(systemEvent, command.tenantId());
+        postSystemEvent(systemEvent, command);
     }
 
     /**
@@ -63,16 +62,16 @@ final class CommandFlowWatcher {
     void onScheduled(CommandEnvelope command) {
         CommandContext context = command.context();
         CommandContext.Schedule schedule = context.getSchedule();
-        CommandScheduled systemCommand = CommandScheduled
+        CommandScheduled systemEvent = CommandScheduled
                 .newBuilder()
                 .setId(command.id())
                 .setSchedule(schedule)
                 .build();
-        postSystemEvent(systemCommand, command.tenantId());
+        postSystemEvent(systemEvent, command);
     }
 
-    private void postSystemEvent(EventMessage systemEvent, TenantId tenantId) {
-        SystemWriteSide writeSide = function.get(tenantId);
-        writeSide.postEvent(systemEvent);
+    private void postSystemEvent(EventMessage systemEvent, CommandEnvelope cmd) {
+        SystemWriteSide writeSide = function.get(cmd.tenantId());
+        writeSide.postEvent(systemEvent, cmd.asEventOrigin());
     }
 }

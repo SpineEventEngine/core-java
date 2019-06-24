@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -42,6 +43,7 @@ import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandErrored;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,6 +51,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,6 +61,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("CommandAckMonitor should")
 class CommandAckMonitorTest {
+
+    private CommandId commandId;
+    private Command mockCommand;
+
+    @BeforeEach
+    void setUp() {
+        TestActorRequestFactory requests =
+                new TestActorRequestFactory(CommandAckMonitorTest.class);
+        CmdBusStartProject command = CmdBusStartProject
+                .newBuilder()
+                .setProjectId(ProjectId.newBuilder().setId(newUuid()))
+                .vBuild();
+        mockCommand = requests.command()
+                              .create(command);
+        commandId = mockCommand.id();
+    }
 
     @Test
     @DisplayName("not accept null arguments in Builder")
@@ -114,8 +133,6 @@ class CommandAckMonitorTest {
         private CommandAckMonitor monitor;
         private MemoizingWriteSide writeSide;
 
-        private CommandId commandId;
-
         @BeforeEach
         void setUp() {
             writeSide = MemoizingWriteSide.singleTenant();
@@ -124,8 +141,8 @@ class CommandAckMonitorTest {
                     .setDelegate(noOpObserver())
                     .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
+                    .setPostedCommands(ImmutableSet.of(mockCommand))
                     .build();
-            commandId = CommandId.generate();
         }
 
         @Test
@@ -175,7 +192,6 @@ class CommandAckMonitorTest {
 
         private MemoizingObserver<Ack> delegate;
         private CommandAckMonitor monitor;
-        private CommandId commandId;
 
         @BeforeEach
         void setUp() {
@@ -185,8 +201,8 @@ class CommandAckMonitorTest {
                     .setTenantId(TenantId.getDefaultInstance())
                     .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                     .setDelegate(delegate)
+                    .setPostedCommands(ImmutableSet.of(mockCommand))
                     .build();
-            commandId = CommandId.generate();
         }
 
         @Test

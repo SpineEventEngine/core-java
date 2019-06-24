@@ -30,6 +30,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
+import io.spine.server.event.EventOrigin;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -45,7 +46,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 public class TestEventFactory extends EventFactory {
 
     private TestEventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId) {
-        super(origin, producerId);
+        super(EventOrigin.fromAnotherMessage(origin), producerId);
     }
 
     private static Any toAny(Message producerId) {
