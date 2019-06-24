@@ -71,6 +71,32 @@ import static java.util.stream.Collectors.groupingBy;
  * <p>Delegates the message dispatching and low-level handling of message duplicates to
  * {@link #newInbox(TypeUrl) Inbox}es of each target entity. The respective {@code Inbox} instances
  * should be created in each of {@code Entity} repositories.
+ *
+ * <p>Once a message is written to the {@code Inbox},
+ * the {@linkplain Delivery#subscribe(ShardObserver) pre-configured shard observers} are
+ * {@linkplain ShardObserver#onMessage(InboxMessage) notified}. In this way any third-party
+ * environment planners, load balancers and schedulers may plug into the delivery and perform
+ * various routines to enable the further processing of the sharded messages. In a distributed
+ * environment a message queue may be used to notify the node cluster of a shard that has some
+ * messages pending for the delivery.
+ *
+ * <p>Once an application node picks the shard to deliver the messages from it,
+ * it registers itself in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard
+ * that only allows to pick a shard to a single node at a time.
+ *
+ * <b>Local environment</b>
+ *
+ * <p>By default, the delivery is configured to {@linkplain Delivery#local() run locally}. It
+ * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the messages
+ * from the observed shard once a message is passed to its
+ * {@link LocalDispatchingObserver#onMessage(InboxMessage) onMessage(InboxMessage)} method. This
+ * process is synchronous.
+ *
+ * <p>To deal with the multi-threaded access in a local mode,
+ * an {@linkplain InMemoryShardedWorkRegistry} is used. It operates on top of the
+ * {@code synchronized} in-memory data structures and prevents several threads from picking up the
+ * same shard.
+ *
  */
 public final class Delivery {
 
