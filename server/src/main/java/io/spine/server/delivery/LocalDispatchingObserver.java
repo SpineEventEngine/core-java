@@ -35,6 +35,5 @@ public class LocalDispatchingObserver implements ShardObserver {
         Delivery delivery = ServerEnvironment.getInstance()
                                              .delivery();
         delivery.deliverMessagesFrom(update.getShardIndex());
-
     }
 }
