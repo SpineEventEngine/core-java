@@ -36,5 +36,4 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface LazyEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>>
         extends Function<M, MessageEndpoint<I, M>> {
-
 }
