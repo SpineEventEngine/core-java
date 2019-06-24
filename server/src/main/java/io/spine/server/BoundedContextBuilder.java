@@ -142,7 +142,7 @@ public final class BoundedContextBuilder implements Logging {
      * {@link StorageFactorySwitch} will be used during the construction of
      * a {@code BoundedContext} instance.
      *
-     * @deprecated Use {@link #setStorage)} instead
+     * @deprecated Use {@link #setStorage} instead
      */
     @CanIgnoreReturnValue
     @Deprecated
