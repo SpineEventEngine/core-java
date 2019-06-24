@@ -174,7 +174,7 @@ public class Inbox<I>{
          * server-wide {@code Delivery}.
          */
         public Inbox<I> build() {
-            Delivery delivery = ServerEnvironment.getInstance()
+            Delivery delivery = ServerEnvironment.instance()
                                                  .delivery();
             checkNotNull(entityStateType, "Entity state type must be set");
             checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),

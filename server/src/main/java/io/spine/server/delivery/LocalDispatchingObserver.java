@@ -32,7 +32,7 @@ public class LocalDispatchingObserver implements ShardObserver {
 
     @Override
     public void onMessage(InboxMessage update) {
-        Delivery delivery = ServerEnvironment.getInstance()
+        Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         delivery.deliverMessagesFrom(update.getShardIndex());
     }

@@ -92,7 +92,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     void store(M envelope, I entityId, InboxLabel label) {
         InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
-        Delivery delivery = ServerEnvironment.getInstance()
+        Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         ShardIndex shardIndex = delivery.whichShardFor(entityId);
         InboxMessage.Builder builder = InboxMessage

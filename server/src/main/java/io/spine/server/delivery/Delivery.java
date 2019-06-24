@@ -219,8 +219,8 @@ public final class Delivery {
      */
     @SuppressWarnings("WeakerAccess")   // a part of the public API.
     public void deliverMessagesFrom(ShardIndex index) {
-        NodeId currentNode = ServerEnvironment.getInstance()
-                                              .getNodeId();
+        NodeId currentNode = ServerEnvironment.instance()
+                                              .nodeId();
         Optional<ShardProcessingSession> picked =
                 workRegistry.pickUp(index, currentNode);
         if (!picked.isPresent()) {

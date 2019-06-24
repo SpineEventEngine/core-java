@@ -110,7 +110,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Initializes the {@code Inbox}.
      */
     private void initInbox() {
-        Delivery delivery = ServerEnvironment.getInstance()
+        Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())

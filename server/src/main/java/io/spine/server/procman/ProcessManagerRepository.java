@@ -175,7 +175,7 @@ public abstract class ProcessManagerRepository<I,
      * Initializes the {@code Inbox}.
      */
     private void initInbox() {
-        Delivery delivery = ServerEnvironment.getInstance()
+        Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())

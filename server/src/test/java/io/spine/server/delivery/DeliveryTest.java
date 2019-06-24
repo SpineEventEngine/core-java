@@ -74,14 +74,14 @@ public class DeliveryTest {
 
     @BeforeEach
     public void setUp() {
-        this.originalDelivery = ServerEnvironment.getInstance()
+        this.originalDelivery = ServerEnvironment.instance()
                                                  .delivery();
     }
 
     @AfterEach
     public void tearDown() {
-        ServerEnvironment.getInstance()
-                         .setDelivery(originalDelivery);
+        ServerEnvironment.instance()
+                         .configureDelivery(originalDelivery);
     }
 
     @Test
@@ -157,8 +157,8 @@ public class DeliveryTest {
         Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.ZERO);
         ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
         newDelivery.subscribe(memoizer);
-        ServerEnvironment.getInstance()
-                         .setDelivery(newDelivery);
+        ServerEnvironment.instance()
+                         .configureDelivery(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(7);
         new ThreadSimulator(5, false).runWith(targets);
@@ -184,8 +184,8 @@ public class DeliveryTest {
         Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.fromDays(1));
         RawMessageMemoizer memoizer = new RawMessageMemoizer();
         newDelivery.subscribe(memoizer);
-        ServerEnvironment.getInstance()
-                         .setDelivery(newDelivery);
+        ServerEnvironment.instance()
+                         .configureDelivery(newDelivery);
 
         ImmutableSet<String> targets = manyTargets(6);
         new ThreadSimulator(3, false).runWith(targets);
@@ -206,7 +206,7 @@ public class DeliveryTest {
     }
 
     private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContents() {
-        Delivery delivery = ServerEnvironment.getInstance()
+        Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         InboxStorage storage = delivery.storage();
         int shardCount = delivery.shardCount();
@@ -341,7 +341,7 @@ public class DeliveryTest {
 
         private static SignalMemoizer subscribeToDelivered() {
             SignalMemoizer observer = new SignalMemoizer();
-            ServerEnvironment.getInstance()
+            ServerEnvironment.instance()
                              .delivery()
                              .subscribe(observer);
             return observer;
@@ -413,7 +413,7 @@ public class DeliveryTest {
 
     private static void changeShardCountTo(int shards) {
         Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
-        ServerEnvironment.getInstance()
-                         .setDelivery(newDelivery);
+        ServerEnvironment.instance()
+                         .configureDelivery(newDelivery);
     }
 }

@@ -51,7 +51,7 @@ public final class ServerEnvironment {
      * The deployment detector is instantiated with a system {@link DeploymentDetector} and
      * can be reassigned the value using {@link #configureDeployment(Supplier)}.
      *
-     * <p>Value from this supplier are used to {@linkplain #getDeploymentType() get the deployment
+     * <p>Value from this supplier are used to {@linkplain #deploymentType() get the deployment
      * type}.
      */
     private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
@@ -87,7 +87,7 @@ public final class ServerEnvironment {
     /**
      * Returns a singleton instance.
      */
-    public static ServerEnvironment getInstance() {
+    public static ServerEnvironment instance() {
         return INSTANCE;
     }
 
@@ -95,7 +95,7 @@ public final class ServerEnvironment {
      * Returns {@code true} if the code is running on the Google App Engine,
      * {@code false} otherwise.
      *
-     * @deprecated this method will be removed in 1.0, please verify {@linkplain #getDeploymentType()
+     * @deprecated this method will be removed in 1.0, please verify {@linkplain #deploymentType()
      *         deployment type} to match any of
      *         {@link DeploymentType#APPENGINE_EMULATOR APPENGINE_EMULATOR} or
      *         {@link DeploymentType#APPENGINE_CLOUD APPENGINE_CLOUD} instead.
@@ -124,7 +124,7 @@ public final class ServerEnvironment {
      * even dangerous to update the delivery mechanism later when the message delivery
      * process may have been already used by various {@code BoundedContext}s.
      */
-    public void setDelivery(Delivery delivery) {
+    public void configureDelivery(Delivery delivery) {
         checkNotNull(delivery);
         this.delivery = delivery;
     }
@@ -132,7 +132,7 @@ public final class ServerEnvironment {
     /**
      * Returns the delivery mechanism specific to this environment.
      *
-     * <p>Unless {@linkplain #setDelivery(Delivery) updated manually}, returns
+     * <p>Unless {@linkplain #configureDelivery(Delivery) updated manually}, returns
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public Delivery delivery() {
@@ -147,14 +147,14 @@ public final class ServerEnvironment {
      *
      * TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1095
      */
-    public NodeId getNodeId() {
+    public NodeId nodeId() {
         return nodeId;
     }
 
     /**
      * The type of the environment application is deployed to.
      */
-    public static DeploymentType getDeploymentType() {
+    public static DeploymentType deploymentType() {
         return deploymentDetector.get();
     }
 
@@ -169,7 +169,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * Makes the {@link #getDeploymentType()} return the values from the provided supplier.
+     * Makes the {@link #deploymentType()} return the values from the provided supplier.
      *
      * <p>When supplying your own deployment type in tests, remember to
      * {@linkplain #resetDeploymentType() reset it} during tear down.
