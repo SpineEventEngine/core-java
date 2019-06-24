@@ -94,14 +94,27 @@ public class Inbox<I>{
         return new CommandDestinations(command);
     }
 
+    /**
+     * Returns the state type of entities served by this {@code Inbox}.
+     */
     public TypeUrl getEntityStateType() {
         return entityStateType;
     }
 
+    /**
+     * Returns an {@code Inbox}-specific mechanism of delivery the previously sharded messages
+     * to the endpoints configured for this {@code Inbox} instance.
+     */
     public ShardedMessageDelivery<InboxMessage> delivery() {
         return new InboxMessageDelivery();
     }
 
+    /**
+     * Unregisters this {@code Inbox} instance in the JVM-wide {@code Delivery}.
+     *
+     * After this call the messages residing in the sharded storage will not be delivered to the
+     * entities served by this {@code Inbox}.
+     */
     public void unregister() {
         delivery.unregister(this);
     }
