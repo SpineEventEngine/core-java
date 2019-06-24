@@ -43,6 +43,8 @@ import java.util.stream.Collectors;
  * taken in case of some runtime issues (e.g. duplication). Therefore the inbox is split into
  * parts, specific to each of the message types.
  *
+ * <p>Descendants define the behaviour specific to the signal type.
+ *
  * @param <I>
  *         the type of identifier or inbox target entities
  * @param <M>
@@ -71,12 +73,21 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      */
     protected abstract String extractUuidFrom(M envelope);
 
+    /**
+     * Extracts the message object passed inside the {@code InboxMessage} as an envelope.
+     */
     protected abstract M asEnvelope(InboxMessage message);
 
+    /**
+     * Determines the status of the message.
+     */
     protected InboxMessageStatus getStatus(M message) {
         return InboxMessageStatus.TO_DELIVER;
     }
 
+    /**
+     * Creates an instance of dispatcher along with the de-duplication source messages.
+     */
     protected abstract Dispatcher dispatcherWith(Collection<InboxMessage> deduplicationSource);
 
     void store(M envelope, I entityId, InboxLabel label) {
@@ -104,7 +115,6 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     }
 
     private InboxSignalId signalIdFrom(M envelope, I targetId) {
-        //TODO:2019-06-15:alex.tymchenko: stringified IDs are ugly.
         String rawValue = extractUuidFrom(envelope) + " @" + Stringifiers.toString(targetId);
         InboxSignalId result = InboxSignalId.newBuilder()
                                             .setValue(rawValue)
