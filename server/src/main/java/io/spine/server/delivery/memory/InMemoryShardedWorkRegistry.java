@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * An in-memory implementation of {@link ShardedWorkRegistry
- * ShardedWorKRegistry}.
+ * An in-memory implementation of {@link ShardedWorkRegistry ShardedWorkRegistry}.
  */
 public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
 
@@ -61,6 +60,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         return Optional.of(asSession(record));
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")      // `Builder` methods called in `if-else`.
     private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
                                               @Nullable NodeId nodeId) {
         ShardSessionRecord.Builder builder = record.toBuilder();
