@@ -30,7 +30,7 @@ import java.util.Optional;
  * The {@linkplain LazyEndpoint endpoints} configured as destinations for
  * a certain {@linkplain io.spine.server.delivery.InboxLabel label}.
  */
-class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+final class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
     private final Map<InboxLabel, LazyEndpoint<I, M>> endpoints =
             new EnumMap<>(InboxLabel.class);
