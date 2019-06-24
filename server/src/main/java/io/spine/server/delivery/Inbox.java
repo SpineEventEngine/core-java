@@ -46,7 +46,7 @@ import static io.spine.server.delivery.InboxLabel.UPDATE_SUBSCRIBER;
  *         the type of consumer identifiers.
  */
 @Internal
-public final class Inbox<I>{
+public final class Inbox<I> {
 
     private final TypeUrl entityStateType;
     private final InboxOfCommands<I> commandPart;
@@ -108,7 +108,7 @@ public final class Inbox<I>{
      * to the endpoints configured for this {@code Inbox} instance.
      */
     public ShardedMessageDelivery<InboxMessage> delivery() {
-        return new InboxMessageDelivery();
+        return new TargetDelivery();
     }
 
     /**
@@ -127,7 +127,7 @@ public final class Inbox<I>{
      * @param <I>
      *         the type of identifier of the objects, for which the {@code Inbox} is built
      */
-    public static class Builder<I> {
+    public static final class Builder<I> {
 
         private final TypeUrl entityStateType;
         private final InboxWriter writer;
@@ -206,7 +206,7 @@ public final class Inbox<I>{
     /**
      * The available destinations for the {@code Event}s sent via this inbox.
      */
-    public class EventDestinations {
+    public final class EventDestinations {
 
         private final EventEnvelope event;
 
@@ -239,7 +239,7 @@ public final class Inbox<I>{
     /**
      * The available destinations for the {@code Commands}s sent via this inbox.
      */
-    public class CommandDestinations {
+    public final class CommandDestinations {
 
         private final CommandEnvelope command;
 
@@ -261,7 +261,13 @@ public final class Inbox<I>{
      *
      * <p>Source messages for the de-duplication are supplied separately.
      */
-    public class InboxMessageDelivery implements ShardedMessageDelivery<InboxMessage> {
+    final class TargetDelivery implements ShardedMessageDelivery<InboxMessage> {
+
+        /**
+         * Prevents the utility class instantiation.
+         */
+        private TargetDelivery() {
+        }
 
         @Override
         public void deliver(List<InboxMessage> incoming,
