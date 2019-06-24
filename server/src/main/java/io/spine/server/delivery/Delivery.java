@@ -229,15 +229,20 @@ public final class Delivery {
         }
         ShardProcessingSession session = picked.get();
         try {
-            Integer deliveredMsgCount = null;
-            while (deliveredMsgCount == null || deliveredMsgCount > 0) {
+            int deliveredMsgCount;
+            do {
                 deliveredMsgCount = doDeliver(session);
-            }
+            } while (deliveredMsgCount > 0);
         } finally {
             session.complete();
         }
     }
 
+    /**
+     * Runs the delivery for the shard, which session is passed.
+     *
+     * Returns the number of delivered messages.
+     */
     private int doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
@@ -254,24 +259,9 @@ public final class Delivery {
                 maybePage = currentPage.next();
                 continue;
             }
-
             MessageClassifier classifier = MessageClassifier.of(messages, idempotenceWndStart);
-
-            ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
-            if (!toDeliver.isEmpty()) {
-                ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
-
-                ImmutableList<RuntimeException> observedExceptions =
-                        deliverByType(toDeliver, idempotenceSource);
-
-                int deliveredInBatch = toDeliver.size();
-                totalMessagesDelivered += deliveredInBatch;
-
-                if (!observedExceptions.isEmpty()) {
-                    throw observedExceptions.iterator()
-                                            .next();
-                }
-            }
+            int deliveredInBatch = deliverClassified(classifier);
+            totalMessagesDelivered += deliveredInBatch;
 
             ImmutableList<InboxMessage> toRemove = classifier.removals();
             inboxStorage.removeAll(toRemove);
@@ -279,6 +269,30 @@ public final class Delivery {
             maybePage = currentPage.next();
         }
         return totalMessagesDelivered;
+    }
+
+    /**
+     * Takes the messages classified as those to deliver and performs the actual delivery.
+     *
+     * Returns the number of messages delivered.
+     */
+    private int deliverClassified(MessageClassifier classifier) {
+        ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
+        int deliveredInBatch = 0;
+        if (!toDeliver.isEmpty()) {
+            ImmutableList<InboxMessage> idempotenceSource = classifier.idempotenceSource();
+
+            ImmutableList<RuntimeException> observedExceptions =
+                    deliverByType(toDeliver, idempotenceSource);
+
+            deliveredInBatch = toDeliver.size();
+
+            if (!observedExceptions.isEmpty()) {
+                throw observedExceptions.iterator()
+                                        .next();
+            }
+        }
+        return deliveredInBatch;
     }
 
     private ImmutableList<RuntimeException>
