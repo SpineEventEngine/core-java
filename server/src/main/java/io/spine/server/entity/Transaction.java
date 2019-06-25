@@ -271,7 +271,7 @@ public abstract class Transaction<I,
 
     /**
      * Rethrows the passed {@code Throwable} wrapped into {@code IllegalStateException},
-     * if it's not an instacen of {@code InvalidEntityStateException}.
+     * if it's not an instance of {@code InvalidEntityStateException}.
      *
      * <p>{@code InvalidEntityStateException} is rethrown as is.
      */

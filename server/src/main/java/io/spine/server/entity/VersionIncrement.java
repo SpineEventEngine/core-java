@@ -43,7 +43,7 @@ public abstract class VersionIncrement {
     /**
      * Creates a version increment which sets the new version from the given event.
      *
-     * <p>Such increment strategy is applied to the {@link Entity} types which represent
+     * <p>Such an increment strategy is applied to the {@link Entity} types which represent
      * a sequence of events.
      *
      * <p>One example of such entity is {@link io.spine.server.aggregate.Aggregate Aggregate}.
@@ -59,8 +59,8 @@ public abstract class VersionIncrement {
     /**
      * Creates a version increment which always advances the given entity version by 1.
      *
-     * <p>Such increment strategy is applied to the {@link Entity} types which cannot use the event
-     * versions, such as {@link io.spine.server.projection.Projection Projection}s.
+     * <p>Such an increment strategy is applied to the {@link Entity} types which cannot use
+     * the event versions, such as {@link io.spine.server.projection.Projection Projection}s.
      *
      * <p>A {@code Projection} represents an arbitrary cast of data in a specific moment in
      * time. The events applied to a {@code Projection} are produced by different {@code Entities}
@@ -72,7 +72,7 @@ public abstract class VersionIncrement {
     }
 
     /**
-     * Increments version from a passed event.
+     * Takes the version from a passed event.
      */
     private static final class IncrementFromEvent extends VersionIncrement {
 
@@ -84,7 +84,7 @@ public abstract class VersionIncrement {
         }
 
         @Override
-        public Version nextVersion() {
+        protected Version nextVersion() {
             Version result = event.context()
                                   .getVersion();
             return result;
@@ -104,7 +104,7 @@ public abstract class VersionIncrement {
         }
 
         @Override
-        public Version nextVersion() {
+        protected Version nextVersion() {
             Version current = transaction.version();
             Version result = Versions.increment(current);
             return result;
