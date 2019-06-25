@@ -23,6 +23,8 @@ import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.type.EventEnvelope;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A utility class providing various test-only methods, which in production mode are allowed
  * with the transactions only.
@@ -110,13 +112,15 @@ public class TestTransaction {
 
     private static class NoIncrement extends VersionIncrement {
 
+        private final Transaction transaction;
+
         private NoIncrement(Transaction transaction) {
-            super(transaction);
+            this.transaction = checkNotNull(transaction);
         }
 
         @Override
-        protected Version nextVersion() {
-            return transaction().version();
+        public Version nextVersion() {
+            return transaction.version();
         }
     }
 }

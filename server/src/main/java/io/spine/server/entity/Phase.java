@@ -24,6 +24,8 @@ import io.spine.annotation.Internal;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * An atomic entity state change which advances the entity version.
  *
@@ -47,12 +49,14 @@ import io.spine.core.SignalId;
 @Internal
 public abstract class Phase<I, R> {
 
+    private final Transaction<I, ?, ?, ?> transaction;
     private final VersionIncrement versionIncrement;
 
     private boolean successful = false;
 
-    Phase(VersionIncrement increment) {
-        this.versionIncrement = increment;
+    Phase(Transaction<I, ?, ?, ?> transaction, VersionIncrement increment) {
+        this.transaction = checkNotNull(transaction);
+        this.versionIncrement = checkNotNull(increment);
     }
 
     /**
@@ -60,14 +64,14 @@ public abstract class Phase<I, R> {
      *
      * @return the result of the task execution
      */
-    R propagate() {
+    final R propagate() {
         R result = performDispatch();
-        versionIncrement.apply();
+        transaction.incrementStateAndVersion(versionIncrement);
         markSuccessful();
         return result;
     }
 
-    boolean isSuccessful() {
+    final boolean isSuccessful() {
         return successful;
     }
 

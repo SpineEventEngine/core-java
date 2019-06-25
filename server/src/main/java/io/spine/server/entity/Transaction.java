@@ -34,6 +34,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
@@ -83,15 +84,15 @@ public abstract class Transaction<I,
     private final S initialState;
 
     /**
-     * The builder for the entity state.
+     * The builder for the entity state at the current phase of the transaction.
      *
      * <p>All the state changes made within the transaction go to this {@code Builder},
      * and not to the {@code Entity} itself.
      *
-     * <p>The state of the builder is merged to the entity state
-     * upon the {@linkplain #commit() commit()}.
+     * @see #propagate(Phase)
+     * @see #commit()
      */
-    private final B builder;
+    private B builder;
 
     /**
      * The {@link EntityRecord} containing the entity data and meta-info before the transaction
@@ -257,14 +258,49 @@ public abstract class Transaction<I,
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
         try {
-            return phase.propagate();
+            R result = phase.propagate();
+            return result;
         } catch (Throwable t) {
             rollback(t);
-            throw illegalStateWithCauseOf(t);
+            throw propagate(t);
         } finally {
             phases.add(phase);
             listener.onAfterPhase(phase);
         }
+    }
+
+    /**
+     * Rethrows the passed {@code Throwable} wrapped into {@code IllegalStateException},
+     * if it's not an instance of {@code InvalidEntityStateException}.
+     *
+     * <p>{@code InvalidEntityStateException} is rethrown as is.
+     */
+    private static RuntimeException propagate(Throwable t) {
+        if (t instanceof InvalidEntityStateException) {
+            throw (InvalidEntityStateException) t;
+        }
+        throw illegalStateWithCauseOf(t);
+    }
+
+    /**
+     * Advances the state and the version of the entity being build by the transaction after
+     * the message was successfully dispatched.
+     *
+     * <p>This is needed for the cases of dispatching more than one message during a transaction.
+     * After the state is propagated to the entity, its message handler which is invoked during
+     * the next step would “see” the {@linkplain Entity#state() state of the entity}.
+     *
+     * @param increment
+     *         the strategy for incrementing the version
+     */
+    @SuppressWarnings("unchecked")
+    final void incrementStateAndVersion(VersionIncrement increment) {
+        Version nextVersion = increment.nextVersion();
+        checkIsIncrement(version(), nextVersion);
+        setVersion(nextVersion);
+        S newState = builder().build();
+        builder = (B) newState.toBuilder();
+        entity().updateState(newState, nextVersion);
     }
 
     /**
@@ -277,8 +313,10 @@ public abstract class Transaction<I,
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = builder();
-
-        S newState = builder.buildPartial();
+        // If the transaction is running with phases, the entity already got its state.
+        S newState = withPhases()
+                     ? entity.state()
+                     : builder.buildPartial();
         if (initialState.equals(newState)) {
             commitUnchangedState();
         } else {
@@ -286,6 +324,9 @@ public abstract class Transaction<I,
         }
     }
 
+    private boolean withPhases() {
+        return !phases.isEmpty();
+    }
     /**
      * Commits this transaction and sets the new state to the entity.
      *
@@ -304,14 +345,9 @@ public abstract class Transaction<I,
             commitAttributeChanges();
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
-        } catch (InvalidEntityStateException e) {
-            /* New state of the entity does not pass validation. */
-            rollback(e);
-            throw e;
         } catch (RuntimeException e) {
-            /* Exception occurred during execution of a handler method. */
             rollback(e);
-            throw illegalStateWithCauseOf(e);
+            throw propagate(e);
         } finally {
             releaseTx();
         }
