@@ -264,7 +264,7 @@ public abstract class Transaction<I,
             rollback(t);
             //TODO:2019-06-24:alex.tymchenko:
             // https://github.com/SpineEventEngine/core-java/issues/1094
-            //throw propagate(t);
+            throw propagate(t);
         } finally {
             phases.add(phase);
             listener.onAfterPhase(phase);
