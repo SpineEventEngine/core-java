@@ -27,7 +27,6 @@ import java.util.List;
  *
  * @param <M>
  *         the type of sharded messages
- * @author Alex Tymchenko
  */
 interface ShardedMessageDelivery<M extends ShardedRecord> {
 

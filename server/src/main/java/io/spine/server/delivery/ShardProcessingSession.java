@@ -28,8 +28,6 @@ import io.spine.server.NodeId;
  *
  * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex, NodeId)} picking up}
  * the shard to process.
- *
- * @author Alex Tymchenko
  */
 @SPI
 public abstract class ShardProcessingSession {

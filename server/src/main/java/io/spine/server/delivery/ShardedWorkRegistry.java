@@ -28,8 +28,6 @@ import java.util.Optional;
 /**
  * The registry of the shard indexes along with the identifiers of the nodes, which
  * process the messages corresponding to each index.
- *
- * @author Alex Tymchenko
  */
 @SPI
 public interface ShardedWorkRegistry {
