@@ -405,8 +405,7 @@ public final class Delivery {
         };
     }
 
-    private static Map<String, List<InboxMessage>> groupByTargetType
-            (List<InboxMessage> messages) {
+    private static Map<String, List<InboxMessage>> groupByTargetType(List<InboxMessage> messages) {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));
