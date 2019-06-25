@@ -241,7 +241,7 @@ public final class Delivery {
     /**
      * Runs the delivery for the shard, which session is passed.
      *
-     * Returns the number of delivered messages.
+     * @return the number of messages delivered
      */
     private int doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
@@ -274,7 +274,7 @@ public final class Delivery {
     /**
      * Takes the messages classified as those to deliver and performs the actual delivery.
      *
-     * Returns the number of messages delivered.
+     * @return the number of messages delivered
      */
     private int deliverClassified(MessageClassifier classifier) {
         ImmutableList<InboxMessage> toDeliver = classifier.toDeliver();
