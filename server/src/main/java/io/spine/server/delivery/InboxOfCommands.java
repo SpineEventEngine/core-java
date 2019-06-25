@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
     InboxOfCommands(Inbox.Builder<I> builder) {
-        super(builder, builder.getCommandEndpoints());
+        super(builder, builder.commandEndpoints());
     }
 
     @Override

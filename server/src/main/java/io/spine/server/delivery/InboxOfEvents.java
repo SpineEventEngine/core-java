@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     InboxOfEvents(Inbox.Builder<I> builder) {
-        super(builder, builder.getEventEndpoints());
+        super(builder, builder.eventEndpoints());
     }
 
     @Override

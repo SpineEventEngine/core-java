@@ -59,7 +59,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     InboxPart(Inbox.Builder<I> builder, Endpoints<I, M> endpoints) {
         this.endpoints = endpoints;
         this.writer = builder.writer();
-        this.entityStateType = builder.getEntityStateType();
+        this.entityStateType = builder.entityStateType();
     }
 
     /**

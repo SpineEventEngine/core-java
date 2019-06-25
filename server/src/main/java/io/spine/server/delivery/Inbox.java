@@ -186,11 +186,11 @@ public final class Inbox<I> {
             return inbox;
         }
 
-        Endpoints<I, EventEnvelope> getEventEndpoints() {
+        Endpoints<I, EventEnvelope> eventEndpoints() {
             return eventEndpoints;
         }
 
-        Endpoints<I, CommandEnvelope> getCommandEndpoints() {
+        Endpoints<I, CommandEnvelope> commandEndpoints() {
             return commandEndpoints;
         }
 
@@ -198,7 +198,7 @@ public final class Inbox<I> {
             return writer;
         }
 
-        TypeUrl getEntityStateType() {
+        TypeUrl entityStateType() {
             return entityStateType;
         }
     }
