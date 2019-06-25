@@ -266,7 +266,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
         Class<P> projectionClass = entityClass();
-        ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
+        ProjectionStorage<I> projectionStorage =
+                factory.createProjectionStorage(context().spec(), projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
     }

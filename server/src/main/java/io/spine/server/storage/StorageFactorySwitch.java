@@ -124,7 +124,7 @@ public final class StorageFactorySwitch implements Function<ContextSpec, Storage
         if (inTests) {
             storageFactory = testsSupplier != null
                              ? testsSupplier.apply(spec)
-                             : InMemoryStorageFactory.newInstance(spec);
+                             : InMemoryStorageFactory.newInstance();
         } else {
             if (productionSupplier == null) {
                 throw newIllegalStateException(

@@ -31,6 +31,6 @@ public class InMemoryAggregateStorageTruncationTest extends AggregateStorageTrun
     @Override
     protected StorageFactory storageFactory() {
         ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
-        return InMemoryStorageFactory.newInstance(spec);
+        return InMemoryStorageFactory.newInstance();
     }
 }

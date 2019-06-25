@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import io.spine.core.Command;
-import io.spine.server.ContextSpec;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -67,9 +66,7 @@ class CommandBusBuilderTest
     @BeforeEach
     void setUp() {
         boolean multitenant = true;
-        String name = getClass().getSimpleName();
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(ContextSpec.multitenant(name));
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         tenantIndex = createTenantIndex(multitenant, storageFactory);
         eventBus = EventBus
                 .newBuilder()
@@ -80,11 +77,12 @@ class CommandBusBuilderTest
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        CommandBus commandBus = CommandBus.newBuilder()
-                                          .injectTenantIndex(tenantIndex)
-                                          .injectSystem(SYSTEM_WRITE_SIDE)
-                                          .injectEventBus(eventBus)
-                                          .build();
+        CommandBus commandBus = CommandBus
+                .newBuilder()
+                .injectTenantIndex(tenantIndex)
+                .injectSystem(SYSTEM_WRITE_SIDE)
+                .injectEventBus(eventBus)
+                .build();
         assertNotNull(commandBus);
     }
 

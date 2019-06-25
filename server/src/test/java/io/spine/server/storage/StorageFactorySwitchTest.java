@@ -59,7 +59,7 @@ class StorageFactorySwitchTest {
     private final ContextSpec contextSpec = singleTenant(boundedContextName.getValue());
 
     private final Function<ContextSpec, StorageFactory> storage =
-            InMemoryStorageFactory::newInstance;
+            spec -> InMemoryStorageFactory.newInstance();
 
     private StorageFactorySwitch storageFactorySwitch;
 

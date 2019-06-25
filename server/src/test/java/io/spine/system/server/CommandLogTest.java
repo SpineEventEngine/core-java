@@ -86,7 +86,7 @@ class CommandLogTest {
                 .build();
         context = BoundedContext
                 .singleTenant(contextName.getValue())
-                .setStorage(InMemoryStorageFactory::newInstance)
+                .setStorage((spec) -> InMemoryStorageFactory.newInstance())
                 .build();
         system = systemOf(context);
 

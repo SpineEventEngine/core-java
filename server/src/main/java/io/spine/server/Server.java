@@ -79,6 +79,7 @@ public final class Server implements Logging {
     /**
      * Waits for the server to become terminated.
      */
+    @SuppressWarnings("unused")
     public void awaitTermination() {
         grpcContainer.awaitTermination();
     }
@@ -222,7 +223,7 @@ public final class Server implements Logging {
          */
         private void ensureStorageFactory() {
             if (storageFactory == null) {
-                this.storageFactory = InMemoryStorageFactory::newInstance;
+                this.storageFactory = (spec) -> InMemoryStorageFactory.newInstance();
             }
         }
     }

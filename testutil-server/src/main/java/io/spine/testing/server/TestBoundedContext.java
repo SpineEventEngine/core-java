@@ -69,7 +69,8 @@ public final class TestBoundedContext {
      */
     public static BoundedContext create(BusFilter<CommandEnvelope> commandFilter) {
         StorageFactorySwitch storageFactorySwitch = new StorageFactorySwitch();
-        Function<ContextSpec, StorageFactory> storage = InMemoryStorageFactory::newInstance;
+        Function<ContextSpec, StorageFactory> storage =
+                (spec) -> InMemoryStorageFactory.newInstance();
         StorageFactorySwitch supplier = storageFactorySwitch.init(storage, storage);
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()

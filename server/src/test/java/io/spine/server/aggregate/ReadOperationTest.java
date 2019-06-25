@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.core.Event;
+import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.given.ReadOperationTestEnv.TestAggregate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -43,14 +44,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ReadOperationTest {
 
     private static final String ID = "test-aggregate-ID";
-    private static final StorageFactory storageFactory =
-            InMemoryStorageFactory.newInstance(singleTenant(assumingTestsValue()));
+    protected static final ContextSpec spec = singleTenant(assumingTestsValue());
+    private static final StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
 
     private AggregateStorage<String> storage;
 
     @BeforeEach
     void setUp() {
-        storage = storageFactory.createAggregateStorage(TestAggregate.class);
+        storage = storageFactory.createAggregateStorage(spec, TestAggregate.class);
     }
 
     @Test

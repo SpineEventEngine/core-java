@@ -24,8 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantRepository.Entity;
@@ -47,8 +49,10 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
     @Override
-    public void initStorage(StorageFactory factory) {
-        super.initStorage(factory.toSingleTenant());
+    protected RecordStorage<TenantId> createStorage(StorageFactory factory) {
+        ContextSpec singleTenant = ContextSpec.singleTenant(context().spec().name().getValue());
+        RecordStorage<TenantId> result = factory.createRecordStorage(singleTenant, entityClass());
+        return result;
     }
 
     /**

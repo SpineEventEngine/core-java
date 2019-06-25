@@ -446,6 +446,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
+     * Obtains specification of this context.
+     */
+    public ContextSpec spec() {
+        return spec;
+    }
+
+    /**
      * Obtains {@link StorageFactory} associated with this {@code BoundedContext}.
      */
     public StorageFactory storageFactory() {

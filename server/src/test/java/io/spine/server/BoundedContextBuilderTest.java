@@ -125,9 +125,9 @@ class BoundedContextBuilderTest {
     }
 
     @Test
-    @DisplayName("allow clearing storage factory supplier")
+    @DisplayName("allow clearing storage factory")
     void clearStorageFactorySupplier() {
-        assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
+        assertFalse(builder.setStorage(Tests.nullRef())
                            .storage()
                            .isPresent());
     }

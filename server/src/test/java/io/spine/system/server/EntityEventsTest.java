@@ -78,7 +78,7 @@ class EntityEventsTest {
     void setUp() {
         context = BoundedContextBuilder
                 .assumingTests(false)
-                .setStorage(InMemoryStorageFactory::newInstance)
+                .setStorage(spec -> InMemoryStorageFactory.newInstance())
                 .build();
         BoundedContext system = systemOf(context);
 

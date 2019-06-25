@@ -165,7 +165,7 @@ abstract class AbstractCommandBusTestSuite {
         ContextSpec spec = multitenant
                            ? ContextSpec.multitenant(name)
                            : ContextSpec.singleTenant(name);
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance(spec);
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;

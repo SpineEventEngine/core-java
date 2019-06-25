@@ -51,13 +51,7 @@ public interface TenantIndex extends AutoCloseable {
     void close();
 
     /**
-     * Creates default implementation of {@code TenantIndex} for multi-tenant context.
-     *
-     * <p>Storage of {@code TenantIndex} data is performed in single-tenant context, and a
-     * {@linkplain StorageFactory#toSingleTenant() single-tenant} version of the passed storage
-     * factory. Therefore, it is safe to pass both single-tenant and multi-tenant storage
-     * factories to this method as long as the passed factory implements
-     * {@link StorageFactory#toSingleTenant()}.
+     * Creates default implementation of {@code TenantIndex} for a multi-tenant context.
      */
     static TenantIndex createDefault(StorageFactory storageFactory) {
         checkNotNull(storageFactory);
@@ -69,6 +63,9 @@ public interface TenantIndex extends AutoCloseable {
 
     /**
      * Obtains a {@code TenantIndex} to be used in single-tenant context.
+     *
+     * <p>This rudimentary implementation always returns pre-defined constant {@code TenantId}
+     * value, which a single-tenant application does not need to use.
      */
     static TenantIndex singleTenant() {
         return SingleTenantIndex.INSTANCE;

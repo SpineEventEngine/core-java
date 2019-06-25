@@ -20,6 +20,7 @@
 
 package io.spine.server.storage;
 
+import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
@@ -35,47 +36,44 @@ import io.spine.server.projection.ProjectionStorage;
 public interface StorageFactory extends AutoCloseable {
 
     /**
-     * Verifies if the storage factory is configured to serve a multi-tenant application.
+     * Creates a new {@link AggregateStorage}.
      *
-     * @return {@code true} if the factory produces multi-tenant storages,
-     *         {@code false} otherwise
+     * @param <I>
+     *         the type of aggregate IDs
+     * @param context
+     *         specification of the Bounded Context {@code AggregateRepository} of which
+     *         requests the creation of the storage
+     * @param aggregateClass
+     *         the class of {@code Aggregate}s to be stored
      */
-    boolean isMultitenant();
+    <I> AggregateStorage<I>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> aggregateClass);
 
     /**
-     * Creates a new {@link AggregateStorage} instance.
-     *
-     * @param <I>            the type of aggregate IDs
-     * @param aggregateClass the class of aggregates to store
+     * Creates a new {@link RecordStorage}.
+     *  @param <I>
+     *         the type of entity IDs
+     * @param context
+     *         specification of the Bounded Context {@code RecordBasedRepository} of which
+     *         requests the creation of the storage
+     * @param entityClass
+     *         the class of entities to be stored
      */
-    <I> AggregateStorage<I> createAggregateStorage(
-            Class<? extends Aggregate<I, ?, ?>> aggregateClass);
+    <I> RecordStorage<I>
+    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass);
 
     /**
-     * Creates a new {@link RecordStorage} instance.
+     * Creates a new {@link ProjectionStorage}.
      *
-     * @param <I>         the type of entity IDs
-     * @param entityClass the class of entities to store
+     * @param <I>
+     *         the type of stream projection IDs
+     * @param context
+     *         specification of the Bounded Context {@code ProjectionRepository} of which
+     *         requests the creation of the storage
+     * @param projectionClass
+     *         the class of {@code Projection}s to be stored
      */
-    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass);
-
-    /**
-     * Creates a new {@link ProjectionStorage} instance.
-     *
-     * @param <I>             the type of stream projection IDs
-     * @param projectionClass the class of projections to be stored
-     */
-    <I> ProjectionStorage<I> createProjectionStorage(
-            Class<? extends Projection<I, ?, ?>> projectionClass);
-
-    /**
-     * Creates a single-tenant version of the factory.
-     *
-     * <p>This method is needed for creating single-tenant storages using
-     * a multi-tenant instance of a {@code StorageFactory}.
-     *
-     * @return a single-tenant version of the factory, or {@code this}
-     *         if the factory is single-tenant
-     */
-    StorageFactory toSingleTenant();
+    <I> ProjectionStorage<I>
+    createProjectionStorage(ContextSpec context,
+                            Class<? extends Projection<I, ?, ?>> projectionClass);
 }
