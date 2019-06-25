@@ -39,6 +39,7 @@ import "spine/server/server_environment.proto";
 //
 // A value type used across the application. To be potentially used in JavaScript, Go, C++ and
 // other client and server environments, that are split into shards.
+//
 message ShardIndex {
 
     // The zero-based index of the shard.
@@ -50,20 +51,20 @@ message ShardIndex {
 
 
 // A record describing the session in scope of which sharded messages are being processed.
-//
 message ShardSessionRecord {
 
     // The index of a shard processed in this session.
-    //
     ShardIndex index = 1 [(required) = true];
 
     // The identifier of an application node, which picked up the index and processes it.
     //
     // Unset until a node picks the session.
+    //
     NodeId picked_by = 2;
 
     // When the shard processed within the session was last picked by the node.
     //
     // This field is unset no nodes ever picked the session.
+    //
     google.protobuf.Timestamp when_last_picked = 3;
 }
