@@ -72,7 +72,6 @@ public final class ServerEnvironment {
      */
     private Delivery delivery;
 
-    /** Prevents instantiation of this utility class. */
     private ServerEnvironment() {
         delivery = Delivery.local();
         nodeId = NodeId.newBuilder()
