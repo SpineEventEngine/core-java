@@ -198,7 +198,7 @@
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -259,7 +259,7 @@
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -442,7 +442,7 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:08 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:24 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -595,7 +595,7 @@ This report was generated on **Mon Jun 24 11:42:08 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -656,7 +656,7 @@ This report was generated on **Mon Jun 24 11:42:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -839,7 +839,7 @@ This report was generated on **Mon Jun 24 11:42:08 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:24 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1096,7 +1096,7 @@ This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1161,7 +1161,7 @@ This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -1388,7 +1388,7 @@ This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:25 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1736,7 +1736,7 @@ This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1810,7 +1810,7 @@ This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2099,7 +2099,7 @@ This report was generated on **Mon Jun 24 11:42:09 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:10 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:25 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2362,7 +2362,7 @@ This report was generated on **Mon Jun 24 11:42:10 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2427,7 +2427,7 @@ This report was generated on **Mon Jun 24 11:42:10 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -2660,7 +2660,7 @@ This report was generated on **Mon Jun 24 11:42:10 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:25 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2938,7 +2938,7 @@ This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2999,7 +2999,7 @@ This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -3176,7 +3176,7 @@ This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:26 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3462,7 +3462,7 @@ This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3523,7 +3523,7 @@ This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -3700,7 +3700,7 @@ This report was generated on **Mon Jun 24 11:42:11 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:12 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:26 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -4032,7 +4032,7 @@ This report was generated on **Mon Jun 24 11:42:12 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.7.1
+1. **Group:** com.google.protobuf **Name:** protoc **Version:** 3.8.0
      * **POM Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4097,7 +4097,7 @@ This report was generated on **Mon Jun 24 11:42:12 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.20.0
+1. **Group:** io.grpc **Name:** protoc-gen-grpc-java **Version:** 1.21.0
      * **POM Project URL:** [https://github.com/grpc/grpc-java](https://github.com/grpc/grpc-java)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
@@ -4324,4 +4324,4 @@ This report was generated on **Mon Jun 24 11:42:12 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Mon Jun 24 11:42:12 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Tue Jun 25 12:06:26 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
