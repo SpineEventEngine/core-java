@@ -26,6 +26,7 @@ import io.spine.core.Versions;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
+import io.spine.server.entity.VersionIncrement;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.ProjectionState;
 import io.spine.server.entity.given.tx.TxProjection;
@@ -119,9 +120,9 @@ class ProjectionTransactionTest
      * Tests the version advancement strategy for the {@link Projection}s.
      *
      * <p>The versioning strategy for {@link Projection} is
-     * {@link io.spine.server.entity.AutoIncrement}. This test case substitutes
+     * {@link VersionIncrement.AutoIncrement}. This test case substitutes
      * {@link #advanceVersionFromEvent()}, which tested the behavior of
-     * {@link io.spine.server.entity.IncrementFromEvent} strategy.
+     * {@link VersionIncrement.IncrementFromEvent} strategy.
      */
     @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
     // Can ignore value of play() in this test.

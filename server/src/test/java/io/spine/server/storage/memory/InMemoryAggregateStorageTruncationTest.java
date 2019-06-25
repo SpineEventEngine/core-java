@@ -25,8 +25,6 @@ import io.spine.server.aggregate.AggregateStorageTruncationTest;
 import io.spine.server.storage.StorageFactory;
 import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.core.BoundedContextNames.newName;
-
 @DisplayName("InMemoryAggregateStorage after truncation should")
 public class InMemoryAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
 

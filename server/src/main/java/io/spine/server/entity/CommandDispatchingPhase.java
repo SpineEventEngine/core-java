@@ -38,13 +38,14 @@ import java.util.List;
  *         the type of entity ID
  */
 @Internal
-public class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
+public final class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
 
     private final DispatchCommand<I> dispatch;
 
-    public CommandDispatchingPhase(DispatchCommand<I> dispatch,
-                                   VersionIncrement versionIncrement) {
-        super(versionIncrement);
+    public CommandDispatchingPhase(Transaction<I, ?, ?, ?> transaction,
+                                   DispatchCommand<I> dispatch,
+                                   VersionIncrement vi) {
+        super(transaction, vi);
         this.dispatch = dispatch;
     }
 
