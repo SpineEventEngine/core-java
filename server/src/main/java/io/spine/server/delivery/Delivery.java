@@ -255,17 +255,14 @@ public final class Delivery {
         while (maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
-            if (messages.isEmpty()) {
-                maybePage = currentPage.next();
-                continue;
+            if (!messages.isEmpty()) {
+                MessageClassifier classifier = MessageClassifier.of(messages, idempotenceWndStart);
+                int deliveredInBatch = deliverClassified(classifier);
+                totalMessagesDelivered += deliveredInBatch;
+
+                ImmutableList<InboxMessage> toRemove = classifier.removals();
+                inboxStorage.removeAll(toRemove);
             }
-            MessageClassifier classifier = MessageClassifier.of(messages, idempotenceWndStart);
-            int deliveredInBatch = deliverClassified(classifier);
-            totalMessagesDelivered += deliveredInBatch;
-
-            ImmutableList<InboxMessage> toRemove = classifier.removals();
-            inboxStorage.removeAll(toRemove);
-
             maybePage = currentPage.next();
         }
         return totalMessagesDelivered;
