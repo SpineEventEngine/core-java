@@ -77,7 +77,6 @@ import io.spine.testing.server.entity.given.Given;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -311,8 +310,6 @@ class ProcessManagerRepositoryTest
              .isEqualTo(ID);
     }
 
-    @Disabled("Until Inbox implements the feature: " +
-            "https://github.com/SpineEventEngine/core-java/issues/1086")
     @Nested
     @MuteLogging
     @DisplayName("not dispatch duplicate")

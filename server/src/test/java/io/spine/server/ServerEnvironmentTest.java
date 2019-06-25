@@ -20,6 +20,8 @@
 
 package io.spine.server;
 
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.UniformAcrossAllShards;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,11 +37,11 @@ import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.server.ServerEnvironment.resetDeploymentType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SuppressWarnings("deprecation") // Need to test deprecated API of `ServerEnvironment`.
-@DisplayName("ServerEnvironment should")
+@DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 
     @Test
@@ -52,23 +54,39 @@ class ServerEnvironmentTest {
     @DisplayName("tell when not running under AppEngine")
     void tellIfNotInAppEngine() {
         // Tests are not run by AppEngine by default.
-        assertFalse(ServerEnvironment.getInstance().isAppEngine());
+        assertFalse(ServerEnvironment.instance()
+                                     .isAppEngine());
     }
 
     @Test
     @DisplayName("obtain AppEngine version as optional string")
     void getAppEngineVersion() {
         // By default we're not running under AppEngine.
-        assertFalse(ServerEnvironment.getInstance()
+        assertFalse(ServerEnvironment.instance()
                                      .appEngineVersion()
                                      .isPresent());
+    }
+
+    @Test
+    @DisplayName("allow to customize delivery mechanism")
+    void allowToCustomizeDeliveryStrategy() {
+        Delivery newDelivery = Delivery.newBuilder()
+                                       .setStrategy(UniformAcrossAllShards.forNumber(42))
+                                       .build();
+        ServerEnvironment environment = ServerEnvironment.instance();
+        Delivery defaultValue = environment.delivery();
+        environment.configureDelivery(newDelivery);
+        assertEquals(newDelivery, environment.delivery());
+
+        // Restore the default value.
+        environment.configureDelivery(defaultValue);
     }
 
     @Test
     @DisplayName("tell when not running without any specific server environment")
     void tellIfStandalone() {
         // Tests are not run by AppEngine by default.
-        assertEquals(STANDALONE, ServerEnvironment.getDeploymentType());
+        assertEquals(STANDALONE, ServerEnvironment.deploymentType());
     }
 
     @Nested
@@ -82,15 +100,15 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
         void receivesCloudEnvironment() {
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.deploymentType());
         }
 
         @Test
         @DisplayName("cache the property value")
         void cachesValue() {
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.deploymentType());
             setGaeEnvironment("Unrecognized Value");
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.getDeploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.deploymentType());
         }
     }
 
@@ -105,7 +123,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE local dev server environment")
         void receivesEmulatorEnvironment() {
-            assertEquals(APPENGINE_EMULATOR, ServerEnvironment.getDeploymentType());
+            assertEquals(APPENGINE_EMULATOR, ServerEnvironment.deploymentType());
         }
     }
 
@@ -120,7 +138,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("receive STANDALONE deployment type")
         void receivesStandalone() {
-            assertEquals(STANDALONE, ServerEnvironment.getDeploymentType());
+            assertEquals(STANDALONE, ServerEnvironment.deploymentType());
         }
     }
 

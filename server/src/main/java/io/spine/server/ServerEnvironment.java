@@ -21,6 +21,8 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.Identifier;
+import io.spine.server.delivery.Delivery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -49,19 +51,38 @@ public final class ServerEnvironment {
      * The deployment detector is instantiated with a system {@link DeploymentDetector} and
      * can be reassigned the value using {@link #configureDeployment(Supplier)}.
      *
-     * <p>Value from this supplier are used to {@linkplain #getDeploymentType() get the deployment
+     * <p>Value from this supplier are used to {@linkplain #deploymentType() get the deployment
      * type}.
      */
     private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
-    /** Prevents instantiation of this utility class. */
+    /**
+     * The identifier of the server instance running in scope of this application.
+     *
+     * <p>It is currently impossible to set the node identifier directly. This is a subject
+     * to change in the future framework versions.
+     */
+    private final NodeId nodeId;
+
+    /**
+     * A strategy of delivering the messages received by entity repositories
+     * to the entity instances.
+     *
+     * <p>By default, initialized with the {@linkplain Delivery#local() local} delivery.
+     */
+    private Delivery delivery;
+
     private ServerEnvironment() {
+        delivery = Delivery.local();
+        nodeId = NodeId.newBuilder()
+                       .setValue(Identifier.newUuid())
+                       .vBuild();
     }
 
     /**
      * Returns a singleton instance.
      */
-    public static ServerEnvironment getInstance() {
+    public static ServerEnvironment instance() {
         return INSTANCE;
     }
 
@@ -69,7 +90,7 @@ public final class ServerEnvironment {
      * Returns {@code true} if the code is running on the Google App Engine,
      * {@code false} otherwise.
      *
-     * @deprecated this method will be removed in 1.0, please verify {@linkplain #getDeploymentType()
+     * @deprecated this method will be removed in 1.0, please verify {@linkplain #deploymentType()
      *         deployment type} to match any of
      *         {@link DeploymentType#APPENGINE_EMULATOR APPENGINE_EMULATOR} or
      *         {@link DeploymentType#APPENGINE_CLOUD APPENGINE_CLOUD} instead.
@@ -92,9 +113,43 @@ public final class ServerEnvironment {
     }
 
     /**
+     * Updates the delivery for this environment.
+     *
+     * <p>This method is most typically used upon an application start. It's very uncommon and
+     * even dangerous to update the delivery mechanism later when the message delivery
+     * process may have been already used by various {@code BoundedContext}s.
+     */
+    public void configureDelivery(Delivery delivery) {
+        checkNotNull(delivery);
+        this.delivery = delivery;
+    }
+
+    /**
+     * Returns the delivery mechanism specific to this environment.
+     *
+     * <p>Unless {@linkplain #configureDelivery(Delivery) updated manually}, returns
+     * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
+     */
+    public Delivery delivery() {
+        return delivery;
+    }
+
+    /**
+     * Obtains the identifier of the server node, on which this code is running at the moment.
+     *
+     * <p>At the moment, the node identifier is always UUID-generated. In future versions of the
+     * framework it is expected to become configurable.
+     *
+     * TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1095
+     */
+    public NodeId nodeId() {
+        return nodeId;
+    }
+
+    /**
      * The type of the environment application is deployed to.
      */
-    public static DeploymentType getDeploymentType() {
+    public static DeploymentType deploymentType() {
         return deploymentDetector.get();
     }
 
@@ -109,7 +164,7 @@ public final class ServerEnvironment {
     }
 
     /**
-     * Makes the {@link #getDeploymentType()} return the values from the provided supplier.
+     * Makes the {@link #deploymentType()} return the values from the provided supplier.
      *
      * <p>When supplying your own deployment type in tests, remember to
      * {@linkplain #resetDeploymentType() reset it} during tear down.

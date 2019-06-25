@@ -28,10 +28,14 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.Inbox;
+import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -89,6 +93,12 @@ public abstract class ProcessManagerRepository<I,
      * method.
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
+
+    /**
+     * The {@link Inbox} for the messages, which are sent to the instances managed by this
+     * repository.
+     */
+    private @MonotonicNonNull Inbox<I> inbox;
 
     /**
      * The configurable lifecycle rules of the repository.
@@ -157,6 +167,23 @@ public abstract class ProcessManagerRepository<I,
         context.registerCommandDispatcher(this);
 
         this.commandErrorHandler = context.createCommandErrorHandler();
+
+        initInbox();
+    }
+
+    /**
+     * Initializes the {@code Inbox}.
+     */
+    private void initInbox() {
+        Delivery delivery = ServerEnvironment.instance()
+                                             .delivery();
+        inbox = delivery
+                .<I>newInbox(entityStateType())
+                .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
+                                  e -> PmEventEndpoint.of(this, e))
+                .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
+                                    c -> PmCommandEndpoint.of(this, c))
+                .build();
     }
 
     /**
@@ -274,34 +301,30 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I target = with(command.tenantId()).evaluate(() -> doDispatch(command));
-        return target;
-    }
-
-    private I doDispatch(CommandEnvelope command) {
-        I target = route(command);
-        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
-        endpoint.dispatchTo(target);
-        return target;
+        I id = route(command);
+        inbox.send(command)
+             .toHandler(id);
+        return id;
     }
 
     private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = commandRouting();
         I target = routing.apply(cmd.message(), cmd.context());
-        lifecycleOf(target).onTargetAssignedToCommand(cmd.id());
+
+        // We need to have a tenant set in order the callbacks could post the system events.
+        with(cmd.tenantId())
+                .run(() -> lifecycleOf(target).onTargetAssignedToCommand(cmd.id()));
         return target;
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Sends a system command to dispatch the given event to a reactor.
+     * <p>Sends the given event to the {@code Inbox} of this repository.
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        EventEnvelope envelope = EventEnvelope.of(event);
-        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, envelope);
-        endpoint.dispatchTo(id);
+        inbox.send(EventEnvelope.of(event)).toReactor(id);
     }
 
     @Override
@@ -370,6 +393,15 @@ public abstract class ProcessManagerRepository<I,
             return Optional.empty();
         }
         return Optional.of(new PmExternalEventDispatcher());
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        super.close();
+        if(inbox != null) {
+            inbox.unregister();
+        }
     }
 
     /**

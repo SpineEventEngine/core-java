@@ -1,0 +1,133 @@
+//
+// Copyright 2019, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+syntax = "proto3";
+
+package spine.server.inbox;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+
+option java_package = "io.spine.server.delivery";
+option java_outer_classname = "InboxProto";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+import "spine/client/entities.proto";
+import "spine/core/event.proto";
+import "spine/core/command.proto";
+import "spine/server/delivery/delivery.proto";
+
+
+// An identifier of an entity inbox.
+message InboxId {
+
+    // The ID of the entity.
+    spine.client.EntityId entity_id = 1;
+
+    // The type URL of the entity state.
+    string type_url = 2;
+}
+
+// A label telling how to dispatch a message, residing in the `Inbox`.
+enum InboxLabel {
+
+    IL_UNKNOWN = 0;
+
+    // Pass a command message to an `@Assign` or `@Command`-annotated command handler.
+    HANDLE_COMMAND = 1;
+
+    // Pass an event message to a `@Subscribe`-annotated event handler.
+    UPDATE_SUBSCRIBER = 3;
+
+    // Pass an event message to a `@React` or `@Command`-annotated event handler.
+    REACT_UPON_EVENT = 4;
+
+    // Pass an event message to a `@Apply(allowImport = "true")`-annotated event handler.
+    IMPORT_EVENT = 5;
+}
+
+// A status of the message in the `Inbox`.
+enum InboxMessageStatus {
+
+    IMS_UNKNOWN = 0;
+
+    // The message is ready to be delivered.
+    TO_DELIVER = 1;
+
+    // The message is scheduled for the delivery.
+    SCHEDULED = 2;
+
+    // The message is already delivered and can be removed once it's no longer needed
+    // for de-duplication.
+    DELIVERED = 3;
+}
+
+// Identifies the message in the `Inbox`.
+message InboxMessageId {
+
+    // UUID-based identifier.
+    string uuid = 1 [(required) = true];
+}
+
+// Identifies the original signal message that is packed inside the `InboxMessage`.
+message InboxSignalId {
+
+    // The value of the identifier of the source signal message, that has been put into the `Inbox`.
+    //
+    // E.g. if an instance of `Event` is put into the `Inbox`,
+    // this field has a value of `Event.id.value`.
+    //
+    string value = 1 [(required) = true];
+}
+
+
+// A message in the inbox.
+message InboxMessage {
+
+    option (is).java_type = "io.spine.server.delivery.ShardedRecord";
+
+    InboxMessageId id = 1 [(required) = true];
+
+    InboxSignalId signal_id = 2 [(required) = true];
+
+    // The identifier of the `Inbox` in which this message is stored.
+    InboxId inbox_id = 3 [(required) = true];
+
+    spine.server.sharding.ShardIndex shard_index = 4 [(required) = true];
+
+    // What the message is.
+    oneof payload {
+
+        core.Event event = 5;
+
+        core.Command command = 6;
+    }
+
+    InboxLabel label = 7 [(required) = true];
+
+    InboxMessageStatus status = 8 [(required) = true];
+
+    // A point in time when the message was received by the `Inbox` instance.
+    google.protobuf.Timestamp when_received = 9 [(required) = true];
+}

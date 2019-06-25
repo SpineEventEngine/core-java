@@ -29,6 +29,10 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.Inbox;
+import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.model.StateClass;
@@ -48,6 +52,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -73,6 +78,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
 
+    private @MonotonicNonNull Inbox<I> inbox;
+
     /**
      * Initializes the repository.
      *
@@ -96,6 +103,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected void init(BoundedContext context) throws IllegalStateException {
         super.init(context);
         ensureDispatchesEvents();
+        initInbox();
+    }
+
+    /**
+     * Initializes the {@code Inbox}.
+     */
+    private void initInbox() {
+        Delivery delivery = ServerEnvironment.instance()
+                                             .delivery();
+        inbox = delivery
+                .<I>newInbox(entityStateType())
+                .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
+                                  e -> ProjectionEndpoint.of(this, e))
+                .build();
     }
 
     @Override
@@ -296,9 +317,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected void dispatchTo(I id, Event event) {
-        EventEnvelope envelope = EventEnvelope.of(event);
-        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
-        endpoint.dispatchTo(id);
+        inbox.send(EventEnvelope.of(event))
+             .toSubscriber(id);
     }
 
     @Internal
@@ -324,6 +344,15 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 .setAfter(timestamp)
                 .addAllFilter(eventFilters);
         return builder.build();
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        super.close();
+        if (inbox != null) {
+            inbox.unregister();
+        }
     }
 
     /**

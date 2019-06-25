@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.List;
@@ -42,7 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
-                                            M extends ActorMessageEnvelope<?, ?, ?>> {
+                                            M extends ActorMessageEnvelope<?, ?, ?>>
+        implements MessageEndpoint<I, M> {
 
     /** The repository which created this endpoint. */
     private final Repository<I, E> repository;
@@ -66,6 +68,7 @@ public abstract class EntityMessageEndpoint<I,
      * @param entityId
      *         the ID of the entity which to dispatch the message to
      */
+    @Override
     public final void dispatchTo(I entityId) {
         checkNotNull(entityId);
         try {
@@ -127,11 +130,6 @@ public abstract class EntityMessageEndpoint<I,
      * the entity in response to the message.
      */
     protected abstract void onEmptyResult(E entity, M envelope);
-
-    /**
-     * Processes the exception thrown during dispatching the message.
-     */
-    protected abstract void onError(M envelope, RuntimeException exception);
 
     /**
      * Obtains the envelope of the message processed by this endpoint.

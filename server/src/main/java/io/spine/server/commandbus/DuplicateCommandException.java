@@ -35,7 +35,7 @@ import static java.lang.String.format;
  * Reports an attempt to dispatch a duplicate command.
  *
  * <p>A command is considered a duplicate when its ID matches the ID of a command which was
- * already dispatched emitting events in a target aggregate.
+ * already dispatched emitting events in a target entity.
  */
 public class DuplicateCommandException extends CommandException implements MessageInvalid {
 
