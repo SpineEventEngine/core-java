@@ -178,9 +178,9 @@ public final class Inbox<I> {
         public Inbox<I> build() {
             Delivery delivery = ServerEnvironment.instance()
                                                  .delivery();
-            checkNotNull(entityStateType, "Entity state type must be set");
+            checkNotNull(entityStateType, "Entity state type must be set.");
             checkArgument(!eventEndpoints.isEmpty() || !commandEndpoints.isEmpty(),
-                          "There must be at least one event or command endpoint");
+                          "There must be at least one event or command endpoint.");
             Inbox<I> inbox = new Inbox<>(this, delivery);
             delivery.register(inbox);
             return inbox;
