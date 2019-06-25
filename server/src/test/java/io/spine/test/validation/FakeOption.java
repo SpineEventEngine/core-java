@@ -22,7 +22,6 @@ package io.spine.test.validation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import io.spine.option.OptionsProto;
 import io.spine.validate.FieldValue;
@@ -66,7 +65,7 @@ public final class FakeOption extends FieldValidatingOption<Void, Object> {
     }
 
     @Override
-    public boolean shouldValidate(FieldDescriptor field) {
+    public boolean shouldValidate(FieldValue<Object> value) {
         return true;
     }
 }
