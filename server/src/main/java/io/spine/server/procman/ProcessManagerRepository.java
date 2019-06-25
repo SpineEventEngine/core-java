@@ -318,18 +318,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Dispatches the given command to the {@link ProcessManager} with the given ID.
-     *
-     * @param id
-     *         the target entity ID
-     * @param command
-     *         the command to dispatch
-     */
-    void dispatchNowTo(I id, CommandEnvelope command) {
-        inbox.send(command).toHandler(id);
-    }
-
-    /**
      * {@inheritDoc}
      *
      * <p>Sends the given event to the {@code Inbox} of this repository.
