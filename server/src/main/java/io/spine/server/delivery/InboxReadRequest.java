@@ -25,11 +25,11 @@ import io.spine.server.storage.ReadRequest;
 /**
  * A request to read a certain {@link InboxMessage} by its ID.
  */
-public class InboxReadRequest implements ReadRequest<InboxMessageId> {
+public final class InboxReadRequest implements ReadRequest<InboxMessageId> {
 
     private final InboxMessageId messageId;
 
-    protected InboxReadRequest(InboxMessageId id) {
+    private InboxReadRequest(InboxMessageId id) {
         messageId = id;
     }
 
