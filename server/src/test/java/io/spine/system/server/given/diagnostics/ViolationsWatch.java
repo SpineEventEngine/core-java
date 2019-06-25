@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
-import io.spine.net.EmailAddress;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;

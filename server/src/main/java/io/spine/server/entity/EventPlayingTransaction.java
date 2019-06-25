@@ -64,7 +64,7 @@ class EventPlayingTransaction<I,
     public void play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
         EventDispatch<I, E, Nothing> dsp = new EventDispatch<>(this::dispatch, entity(), event);
-        Phase<I, Nothing> phase = new EventDispatchingPhase<>(dsp, increment);
+        Phase<I, Nothing> phase = new EventDispatchingPhase<>(this, dsp, increment);
         propagate(phase);
     }
 

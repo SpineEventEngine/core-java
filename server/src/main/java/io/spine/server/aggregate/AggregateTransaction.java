@@ -25,7 +25,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EventPlayingTransaction;
-import io.spine.server.entity.IncrementFromEvent;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
 
@@ -82,6 +81,6 @@ public class AggregateTransaction<I,
 
     @Override
     protected VersionIncrement createVersionIncrement(EventEnvelope event) {
-        return new IncrementFromEvent(this, event);
+        return VersionIncrement.fromEvent(event);
     }
 }

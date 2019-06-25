@@ -235,6 +235,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         if the passed state is not {@linkplain #validate(Message) valid}
      */
     final void updateState(S state) {
+        checkNotNull(state);
         validate(state);
         setState(state);
     }
@@ -423,7 +424,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *         if the passed version has the number which is greater than the current
      *         version of the entity
      */
-    void updateState(S state, Version version) {
+    final void updateState(S state, Version version) {
         updateState(state);
         updateVersion(version);
     }

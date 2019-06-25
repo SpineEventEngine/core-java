@@ -36,13 +36,15 @@ import io.spine.server.event.EventDispatch;
  *         the type of the event dispatch result
  */
 @Internal
-public class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
+public final class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
         extends Phase<I, R> {
 
     private final EventDispatch<I, E, R> dispatch;
 
-    public EventDispatchingPhase(EventDispatch<I, E, R> dispatch, VersionIncrement increment) {
-        super(increment);
+    public EventDispatchingPhase(Transaction<I, ?, ?, ?> transaction,
+                                 EventDispatch<I, E, R> dispatch,
+                                 VersionIncrement increment) {
+        super(transaction, increment);
         this.dispatch = dispatch;
     }
 

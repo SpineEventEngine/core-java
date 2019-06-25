@@ -21,7 +21,6 @@
 package io.spine.server.trace.given;
 
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Signal;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;

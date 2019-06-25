@@ -27,7 +27,6 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
-import io.spine.server.entity.AutoIncrement;
 import io.spine.server.entity.CommandDispatchingPhase;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
@@ -93,9 +92,9 @@ public class PmTransaction<I,
      * @return the events generated from the command dispatch
      * @see ProcessManager#dispatchCommand(CommandEnvelope)
      */
-    List<Event> perform(DispatchCommand<I> dispatch) {
-        VersionIncrement versionIncrement = createVersionIncrement();
-        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(dispatch, versionIncrement);
+    final List<Event> perform(DispatchCommand<I> dispatch) {
+        VersionIncrement vi = createVersionIncrement();
+        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
         List<Event> events = doPropagate(phase);
         return events;
     }
@@ -108,14 +107,27 @@ public class PmTransaction<I,
      * @return the events generated from the event dispatch
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
-    List<Event> dispatchEvent(EventEnvelope event) {
-        VersionIncrement versionIncrement = createVersionIncrement();
+    final List<Event> dispatchEvent(EventEnvelope event) {
         Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
-                new EventDispatch<>(this::dispatch, entity(), event),
-                versionIncrement
+                this,
+                createDispatch(event),
+                createVersionIncrement()
         );
         List<Event> events = doPropagate(phase);
         return events;
+    }
+
+    private EventDispatch<I, ProcessManager<I, S, B>, List<Event>>
+    createDispatch(EventEnvelope event) {
+        return new EventDispatch<>(this::dispatch, entity(), event);
+    }
+
+    private List<Event> dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
+        return pm.dispatchEvent(event);
+    }
+
+    private VersionIncrement createVersionIncrement() {
+        return VersionIncrement.sequentially(this);
     }
 
     /**
@@ -153,22 +165,16 @@ public class PmTransaction<I,
     /**
      * Creates a new transaction for a given {@code ProcessManager}.
      *
-     * @param processManager
+     * @param pm
      *         the {@code ProcessManager} instance to start the transaction for
-     * @param lifecycleRules
+     * @param rules
      *         the lifecycle rules to apply to the entity
      * @return the new transaction instance
      */
-    static <I,
-            S extends Message,
-            B extends ValidatingBuilder<S>>
-    PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager, LifecycleRules lifecycleRules) {
-        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, lifecycleRules);
+    static <I, S extends Message, B extends ValidatingBuilder<S>>
+    PmTransaction<I, S, B> start(ProcessManager<I, S, B> pm, LifecycleRules rules) {
+        PmTransaction<I, S, B> tx = new PmTransaction<>(pm, rules);
         return tx;
-    }
-
-    private List<Event> dispatch(ProcessManager<I, S, B> processManager, EventEnvelope event) {
-        return processManager.dispatchEvent(event);
     }
 
     /**
@@ -196,9 +202,5 @@ public class PmTransaction<I,
             setDeleted(true);
         }
         commitAttributeChanges();
-    }
-
-    private VersionIncrement createVersionIncrement() {
-        return new AutoIncrement(this);
     }
 }
