@@ -368,9 +368,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Set<I> dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
         Set<I> targets = route(event);
-        for (I target : targets) {
-            inbox.send(event).toReactor(target);
-        }
+        targets.forEach((id) -> inbox.send(event).toReactor(id));
         return targets;
     }
 
