@@ -46,12 +46,9 @@ import static java.util.Optional.empty;
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
-    // TODO:2018-07-27:dmytro.dashenkov: Refactor command scheduling - move to System BC.
-    // todo https://github.com/SpineEventEngine/core-java/issues/799
-
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
-    private boolean isActive = true;
+    private boolean active = true;
 
     private @Nullable CommandBus commandBus;
 
@@ -102,7 +99,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      *         if the scheduler is shut down
      */
     public void schedule(Command command) {
-        checkState(isActive, "Scheduler is shut down.");
+        checkState(active, "Scheduler is shut down.");
         if (isScheduledAlready(command)) {
             return;
         }
@@ -169,7 +166,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * <p>Invocation has no effect if the scheduler is already shut down.
      */
     public void shutdown() {
-        isActive = false;
+        active = false;
     }
 
     /**
