@@ -22,8 +22,9 @@ package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.aggregate.AggregateRootDirectory;
+import io.spine.server.bc.given.Given.NoopCommandDispatcher;
+import io.spine.server.bc.given.Given.NoopEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
-import io.spine.server.bc.given.ProjectCreationProcman;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
@@ -266,13 +267,13 @@ class BoundedContextBuilderTest {
     @Nested
     class CommandDispatchers {
 
-        private CommandDispatcher<?> dispatcher;
         private BoundedContextBuilder builder;
+        private CommandDispatcher<?> dispatcher;
 
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
-            dispatcher = (CommandDispatcher<?>) DefaultRepository.of(ProjectAggregate.class);
+            dispatcher = new NoopCommandDispatcher();
         }
 
         @Test
@@ -298,13 +299,14 @@ class BoundedContextBuilderTest {
 
     @Nested
     class EventDispatchers {
-        private EventDispatcher<?> dispatcher;
+
         private BoundedContextBuilder builder;
+        private EventDispatcher<?> dispatcher;
 
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
-            dispatcher = (EventDispatcher<?>) DefaultRepository.of(ProjectCreationProcman.class);
+            dispatcher = new NoopEventDispatcher();
         }
 
         @Test
