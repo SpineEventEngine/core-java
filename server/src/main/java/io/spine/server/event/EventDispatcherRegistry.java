@@ -67,6 +67,17 @@ class EventDispatcherRegistry
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to
+     * {@link EventBus#registeredEventClasses() EventBus}.
+     */
+    @Override
+    protected Set<EventClass> registeredMessageClasses() {
+        return super.registeredMessageClasses();
+    }
+
+    /**
      * Ensures that the dispatcher forwards at least one event.
      *
      * @throws IllegalArgumentException if the dispatcher returns empty set of event classes

@@ -307,28 +307,6 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Adds the passed command dispatcher to the registration list which will be processed after
-     * the Bounded Context is created.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder add(CommandDispatcher<?> commandDispatcher) {
-        checkNotNull(commandDispatcher);
-        commandDispatchers.add(commandDispatcher);
-        return this;
-    }
-
-    /**
-     * Adds the passed event dispatcher to the registration list which will be processed after
-     * the Bounded Context is created.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder add(EventDispatcher<?> eventDispatcher) {
-        checkNotNull(eventDispatcher);
-        eventDispatchers.add(eventDispatcher);
-        return this;
-    }
-
-    /**
      * Removes the passed repository from the registration list.
      */
     @CanIgnoreReturnValue
@@ -346,26 +324,6 @@ public final class BoundedContextBuilder implements Logging {
         checkNotNull(entityClass);
         repositories.removeIf(repository -> repository.entityClass()
                                                       .equals(entityClass));
-        return this;
-    }
-
-    /**
-     * Removes the passed command dispatcher from the registration list.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder remove(CommandDispatcher<?> commandDispatcher) {
-        checkNotNull(commandDispatcher);
-        commandDispatchers.remove(commandDispatcher);
-        return this;
-    }
-
-    /**
-     * Removes the passed event dispatcher from the registration list.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder remove(EventDispatcher<?> eventDispatcher) {
-        checkNotNull(eventDispatcher);
-        eventDispatchers.remove(eventDispatcher);
         return this;
     }
 
@@ -392,6 +350,48 @@ public final class BoundedContextBuilder implements Logging {
                             .anyMatch(repository -> repository.entityClass()
                                                               .equals(entityClass));
         return result;
+    }
+
+    /**
+     * Adds the passed command dispatcher to the registration list which will be processed after
+     * the Bounded Context is created.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        commandDispatchers.add(commandDispatcher);
+        return this;
+    }
+
+    /**
+     * Adds the passed event dispatcher to the registration list which will be processed after
+     * the Bounded Context is created.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        eventDispatchers.add(eventDispatcher);
+        return this;
+    }
+
+    /**
+     * Removes the passed command dispatcher from the registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        commandDispatchers.remove(commandDispatcher);
+        return this;
+    }
+
+    /**
+     * Removes the passed event dispatcher from the registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        eventDispatchers.remove(eventDispatcher);
+        return this;
     }
 
     /**

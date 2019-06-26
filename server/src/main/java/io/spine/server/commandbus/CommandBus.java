@@ -208,14 +208,12 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     /**
-     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
+     * Obtains a view {@code Set} of commands that are known to this {@code CommandBus}.
      *
      * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
-     *
-     * @return a set of classes of supported commands
      */
-    public Set<CommandClass> getRegisteredCommandClasses() {
-        return registry().getRegisteredMessageClasses();
+    public Set<CommandClass> registeredCommandClasses() {
+        return registry().registeredMessageClasses();
     }
 
     @Override

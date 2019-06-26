@@ -85,7 +85,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     /**
      * Obtains message classes from all registered dispatchers.
      */
-    protected Set<C> getRegisteredMessageClasses() {
+    protected Set<C> registeredMessageClasses() {
         return dispatchers.keySet();
     }
 

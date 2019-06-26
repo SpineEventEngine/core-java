@@ -23,9 +23,12 @@ package io.spine.server;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.bc.given.ProjectAggregate;
+import io.spine.server.bc.given.ProjectCreationProcman;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
@@ -263,32 +266,65 @@ class BoundedContextBuilderTest {
     @Nested
     class CommandDispatchers {
 
+        private CommandDispatcher<?> dispatcher;
+        private BoundedContextBuilder builder;
+
         @BeforeEach
         void setUp() {
+            builder = BoundedContextBuilder.assumingTests();
+            dispatcher = (CommandDispatcher<?>) DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test
         @DisplayName("add command dispatcher")
         void addDispatcher() {
+            assertFalse(builder.hasCommandDispatcher(dispatcher));
+
+            builder.addCommandDispatcher(dispatcher);
+
+            assertTrue(builder.hasCommandDispatcher(dispatcher));
         }
 
         @Test
         @DisplayName("remove command dispatcher")
         void removeDispatcher() {
+            builder.addCommandDispatcher(dispatcher);
+            assertTrue(builder.hasCommandDispatcher(dispatcher));
+
+            builder.removeCommandDispatcher(dispatcher);
+            assertFalse(builder.hasCommandDispatcher(dispatcher));
         }
     }
 
     @Nested
     class EventDispatchers {
+        private EventDispatcher<?> dispatcher;
+        private BoundedContextBuilder builder;
+
+        @BeforeEach
+        void setUp() {
+            builder = BoundedContextBuilder.assumingTests();
+            dispatcher = (EventDispatcher<?>) DefaultRepository.of(ProjectCreationProcman.class);
+        }
 
         @Test
         @DisplayName("add event dispatcher")
         void addDispatcher() {
+            assertFalse(builder.hasEventDispatcher(dispatcher));
+
+            builder.addEventDispatcher(dispatcher);
+
+            assertTrue(builder.hasEventDispatcher(dispatcher));
         }
 
         @Test
         @DisplayName("remove event dispatcher")
         void removeDispatcher() {
+            builder.addEventDispatcher(dispatcher);
+            assertTrue(builder.hasEventDispatcher(dispatcher));
+
+            builder.removeEventDispatcher(dispatcher);
+            assertFalse(builder.hasEventDispatcher(dispatcher));
         }
     }
 }

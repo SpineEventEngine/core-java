@@ -84,6 +84,7 @@ import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 /**
  * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
@@ -385,6 +386,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 new BbProjectRepository(),
                 DefaultRepository.of(BbProjectViewProjection.class)
         );
+        private final CommandClass commandClass =
+                CommandClass.from(BbRegisterCommandDispatcher.class);
+        private CommandDispatcher<?> commandDispatcher;
+        private EventDispatcher<?> eventDispatcher;
 
         private final Set<TypeName> types = toTypes(repositories);
 
@@ -400,6 +405,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             eventBus = EventBus
                     .newBuilder()
                     .setEnricher(enricher);
+
+            EventBus someEventBus = mock(EventBus.class);
+            commandDispatcher = new BbCommandDispatcher(someEventBus, commandClass);
+            eventDispatcher = new BbEventDispatcher();
         }
 
         @Test
@@ -408,15 +417,24 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .assumingTests(false)
                     .setEventBus(eventBus);
             repositories.forEach(builder::add);
+            builder.addCommandDispatcher(commandDispatcher);
+            builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
             assertEntityTypes();
+            assertDispatchers();
             assertEnricher();
         }
 
         private void assertEntityTypes() {
             assertThat(blackBox.allStateTypes()).containsAtLeastElementsIn(types);
+        }
+
+        private void assertDispatchers() {
+            assertThat(blackBox.commandBus().registeredCommandClasses()).contains(commandClass);
+            assertThat(blackBox.eventBus().registeredEventClasses())
+                    .containsAtLeastElementsIn(eventDispatcher.eventClasses());
         }
 
         private void assertEnricher() {
@@ -429,10 +447,13 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .assumingTests(true)
                     .setEventBus(eventBus);
             repositories.forEach(builder::add);
+            builder.addCommandDispatcher(commandDispatcher);
+            builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
             assertEntityTypes();
+            assertDispatchers();
             assertEnricher();
         }
     }

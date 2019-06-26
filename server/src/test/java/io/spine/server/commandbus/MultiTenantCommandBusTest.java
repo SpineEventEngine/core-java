@@ -204,7 +204,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
+        Set<CommandClass> cmdClasses = commandBus.registeredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.from(CmdBusCreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.from(CmdBusAddTask.class)));
