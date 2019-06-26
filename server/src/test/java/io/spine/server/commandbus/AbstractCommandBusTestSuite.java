@@ -237,7 +237,7 @@ abstract class AbstractCommandBusTestSuite {
     /**
      * A sample command handler that tells whether a handler was invoked.
      */
-    class CreateProjectHandler extends AbstractCommandHandler {
+    final class CreateProjectHandler extends AbstractCommandHandler {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
