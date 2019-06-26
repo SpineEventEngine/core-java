@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of IDs of aggregates managed by this storage
  *
  */
-final class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final MultitenantStorage<TenantAggregateRecords<I>> multitenantStorage;
 
