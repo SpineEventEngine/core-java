@@ -40,7 +40,7 @@ import java.util.Optional;
  * @param <I>
  *         the type of entity IDs
  */
-public class InMemoryRecordStorage<I> extends RecordStorage<I> {
+public final class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;

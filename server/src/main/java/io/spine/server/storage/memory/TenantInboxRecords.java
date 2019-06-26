@@ -40,7 +40,7 @@ import java.util.SortedSet;
  * The memory-based storage for {@link io.spine.server.inbox.InboxMessage InboxMessage}s
  * that represents all storage operations available for inbox data of a single tenant.
  */
-class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMessage> {
+final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMessage> {
 
     private final Map<InboxMessageId, InboxMessage> records = Maps.newConcurrentMap();
 
