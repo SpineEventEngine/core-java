@@ -149,6 +149,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      *
      * <p>This set is changed when event dispatchers or handlers are registered or un-registered.
      */
+    @Internal
     public Set<EventClass> registeredEventClasses() {
         return registry().registeredMessageClasses();
     }

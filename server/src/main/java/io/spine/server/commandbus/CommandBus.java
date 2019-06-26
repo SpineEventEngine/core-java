@@ -212,6 +212,7 @@ public class CommandBus extends UnicastBus<Command,
      *
      * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
      */
+    @Internal
     public Set<CommandClass> registeredCommandClasses() {
         return registry().registeredMessageClasses();
     }
