@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
@@ -31,7 +30,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.BusBuilder;
@@ -41,7 +39,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -51,6 +48,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
@@ -71,7 +69,6 @@ public class CommandBus extends UnicastBus<Command,
                                            CommandDispatcher<?>> {
 
     private final CommandScheduler scheduler;
-    private final EventBus eventBus;
     private final SystemWriteSide systemWriteSide;
     private final TenantIndex tenantIndex;
     private final CommandErrorHandler errorHandler;
@@ -107,13 +104,12 @@ public class CommandBus extends UnicastBus<Command,
                            ? builder.multitenant
                            : false;
         this.scheduler = builder.commandScheduler;
-        this.eventBus = builder.eventBus;
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
         this.tenantIndex = builder.tenantIndex()
                                   .orElseThrow(tenantIndexNotSet());
         this.deadCommandHandler = new DeadCommandHandler();
-        this.errorHandler = CommandErrorHandler.with(systemWriteSide);
+        this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
         this.flowWatcher = builder.flowWatcher;
     }
 
@@ -126,18 +122,18 @@ public class CommandBus extends UnicastBus<Command,
 
     @Internal
     @VisibleForTesting
-    public boolean isMultitenant() {
+    public final boolean isMultitenant() {
         return multitenant;
     }
 
     @VisibleForTesting
-    CommandScheduler scheduler() {
+    final CommandScheduler scheduler() {
         return scheduler;
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
-    protected Collection<BusFilter<CommandEnvelope>> filterChainTail() {
+    protected final Collection<BusFilter<CommandEnvelope>> filterChainTail() {
         return ImmutableList.of(scheduler);
     }
 
@@ -177,13 +173,15 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     private static TenantId tenantOf(Iterable<Command> commands) {
-        return Streams.stream(commands)
-                      .map(Command::tenant)
-                      .findAny()
-                      .orElse(TenantId.getDefaultInstance());
+        Iterator<Command> iterator = commands.iterator();
+        if (!iterator.hasNext()) {
+            return TenantId.getDefaultInstance();
+        }
+        TenantId result = iterator.next().tenant();
+        return result;
     }
 
-    SystemWriteSide systemFor(TenantId tenantId) {
+    final SystemWriteSide systemFor(TenantId tenantId) {
         checkNotNull(tenantId);
         SystemWriteSide result = delegatingTo(systemWriteSide).get(tenantId);
         return result;
@@ -196,15 +194,8 @@ public class CommandBus extends UnicastBus<Command,
         try {
             dispatcher.dispatch(envelope);
         } catch (RuntimeException exception) {
-            onError(envelope, exception);
+            errorHandler.handleAndPostIfRejection(envelope, exception);
         }
-    }
-
-    private void onError(CommandEnvelope envelope, RuntimeException exception) {
-        Optional<Event> rejection = errorHandler.handle(envelope, exception)
-                                                .asRejection()
-                                                .map(RejectionEnvelope::outerObject);
-        rejection.ifPresent(eventBus::post);
     }
 
     /**
@@ -214,7 +205,7 @@ public class CommandBus extends UnicastBus<Command,
      *
      * @return a set of classes of supported commands
      */
-    public Set<CommandClass> getRegisteredCommandClasses() {
+    public final Set<CommandClass> registeredCommandClasses() {
         return registry().getRegisteredMessageClasses();
     }
 

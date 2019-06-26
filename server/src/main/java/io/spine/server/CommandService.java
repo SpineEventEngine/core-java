@@ -147,7 +147,7 @@ public class CommandService
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
             CommandBus commandBus = boundedContext.commandBus();
-            Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
+            Set<CommandClass> cmdClasses = commandBus.registeredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
                 builder.put(commandClass, boundedContext);
             }

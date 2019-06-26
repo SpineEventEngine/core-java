@@ -114,7 +114,7 @@ public abstract class CommandHandlerTest<I,
     private RejectionEnvelope rejection(RuntimeException wrapped) {
         Command command = createCommand(message());
         CommandEnvelope envelope = CommandEnvelope.of(command);
-        CaughtError error = CommandErrorHandler.with(NoOpSystemWriteSide.INSTANCE)
+        CaughtError error = CommandErrorHandler.with(NoOpSystemWriteSide.INSTANCE, null)
                                                .handle(envelope, wrapped);
         Optional<RejectionEnvelope> rejectionEnvelope = error.asRejection();
         if (rejectionEnvelope.isPresent()) {

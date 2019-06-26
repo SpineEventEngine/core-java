@@ -346,7 +346,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public CommandErrorHandler createCommandErrorHandler() {
         SystemWriteSide systemWriteSide = systemClient().writeSide();
-        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
+        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide, this::eventBus);
         return result;
     }
 
