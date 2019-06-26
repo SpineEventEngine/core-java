@@ -31,14 +31,10 @@ import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.commandbus.CommandDispatcherDelegate;
-import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -322,17 +318,6 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Adds the passed command dispatcher delegate to the registration list which will be processed
-     * after the Bounded Context is created.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder add(CommandDispatcherDelegate<?> commandDispatcher) {
-        checkNotNull(commandDispatcher);
-        commandDispatchers.add(DelegatingCommandDispatcher.of(commandDispatcher));
-        return this;
-    }
-
-    /**
      * Adds the passed event dispatcher to the registration list which will be processed after
      * the Bounded Context is created.
      */
@@ -340,17 +325,6 @@ public final class BoundedContextBuilder implements Logging {
     public BoundedContextBuilder add(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
         eventDispatchers.add(eventDispatcher);
-        return this;
-    }
-
-    /**
-     * Adds the passed event dispatcher delegate to the registration list which will be processed
-     * after the Bounded Context is created.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder add(EventDispatcherDelegate<?> eventDispatcher) {
-        checkNotNull(eventDispatcher);
-        eventDispatchers.add(DelegatingEventDispatcher.of(eventDispatcher));
         return this;
     }
 

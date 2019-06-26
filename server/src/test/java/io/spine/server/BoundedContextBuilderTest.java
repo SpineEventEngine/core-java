@@ -273,11 +273,6 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("add command dispatcher delegate")
-        void addDelegate() {
-        }
-
-        @Test
         @DisplayName("remove command dispatcher")
         void removeDispatcher() {
         }
@@ -289,11 +284,6 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("add event dispatcher")
         void addDispatcher() {
-        }
-
-        @Test
-        @DisplayName("add event dispatcher delegate")
-        void addDelegate() {
         }
 
         @Test
