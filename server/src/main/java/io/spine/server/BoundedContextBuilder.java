@@ -298,7 +298,7 @@ public final class BoundedContextBuilder implements Logging {
 
     /**
      * Adds the {@linkplain DefaultRepository default repository} for the passed entity class to
-     * the registration list which will be processed after the Bounded Context is created.
+     * the repository registration list.
      */
     @CanIgnoreReturnValue
     public <I, E extends Entity<I, ?>> BoundedContextBuilder add(Class<E> entityClass) {
@@ -353,8 +353,8 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Adds the passed command dispatcher to the registration list which will be processed after
-     * the Bounded Context is created.
+     * Adds the passed command dispatcher to the dispatcher registration list which will be
+     * processed after the Bounded Context is created.
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
@@ -364,8 +364,8 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Adds the passed event dispatcher to the registration list which will be processed after
-     * the Bounded Context is created.
+     * Adds the passed event dispatcher to the dispatcher registration list which will be processed
+     * after the Bounded Context is created.
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
