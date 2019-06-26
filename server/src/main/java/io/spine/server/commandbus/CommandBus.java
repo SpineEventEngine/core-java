@@ -70,12 +70,17 @@ public class CommandBus extends UnicastBus<Command,
                                            CommandClass,
                                            CommandDispatcher<?>> {
 
-    private final CommandScheduler scheduler;
-    private final SystemWriteSide systemWriteSide;
     /** Consumes tenant IDs from incoming commands. */
     private final Consumer<TenantId> tenantConsumer;
+
+    /** Consumes commands dispatched by this bus. */
+    private final Consumer<CommandEnvelope> commandConsumer;
+
+    /** Callback for handling commands that failed. */
     private final CommandErrorHandler errorHandler;
-    private final CommandFlowWatcher flowWatcher;
+
+    private final CommandScheduler scheduler;
+    private final SystemWriteSide systemWriteSide;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -86,7 +91,7 @@ public class CommandBus extends UnicastBus<Command,
      */
     private final boolean multitenant;
 
-    private final DeadCommandHandler deadCommandHandler;
+    private final DeadCommandHandler deadCommandHandler = new DeadCommandHandler();
 
     /**
      * Tha validator for the commands posted into this bus.
@@ -106,15 +111,12 @@ public class CommandBus extends UnicastBus<Command,
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
-        this.scheduler = builder.commandScheduler;
+        this.scheduler = checkNotNull(builder.commandScheduler);
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
-        TenantIndex tenantIndex = builder.tenantIndex()
-                                   .orElseThrow(tenantIndexNotSet());
-        this.tenantConsumer = tenantIndex::keep;
-        this.deadCommandHandler = new DeadCommandHandler();
+        this.tenantConsumer = checkNotNull(builder.tenantConsumer);
         this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
-        this.flowWatcher = builder.flowWatcher;
+        this.commandConsumer = checkNotNull(builder.commandConsumer);
     }
 
     /**
@@ -128,11 +130,6 @@ public class CommandBus extends UnicastBus<Command,
     @VisibleForTesting
     public final boolean isMultitenant() {
         return multitenant;
-    }
-
-    @VisibleForTesting
-    final CommandScheduler scheduler() {
-        return scheduler;
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
@@ -192,13 +189,13 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     @Override
-    protected void dispatch(CommandEnvelope envelope) {
-        CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        flowWatcher.onDispatchCommand(envelope);
+    protected void dispatch(CommandEnvelope command) {
+        CommandDispatcher<?> dispatcher = dispatcherOf(command);
+        commandConsumer.accept(command);
         try {
-            dispatcher.dispatch(envelope);
+            dispatcher.dispatch(command);
         } catch (RuntimeException exception) {
-            errorHandler.handleAndPostIfRejection(envelope, exception);
+            errorHandler.handleAndPostIfRejection(command, exception);
         }
     }
 
@@ -259,7 +256,6 @@ public class CommandBus extends UnicastBus<Command,
                                                    CommandEnvelope,
                                                    CommandClass,
                                                    CommandDispatcher<?>> {
-
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
          *
@@ -271,15 +267,10 @@ public class CommandBus extends UnicastBus<Command,
          * {@code BoundedContext}.
          */
         private @Nullable Boolean multitenant;
-
-        /**
-         * Optional field for the {@code CommandBus}.
-         *
-         * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
-         */
+        private Consumer<CommandEnvelope> commandConsumer;
+        private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
         private EventBus eventBus;
-        private CommandFlowWatcher flowWatcher;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -299,12 +290,6 @@ public class CommandBus extends UnicastBus<Command,
         @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
-            return this;
-        }
-
-        public Builder setCommandScheduler(CommandScheduler commandScheduler) {
-            checkNotNull(commandScheduler);
-            this.commandScheduler = commandScheduler;
             return this;
         }
 
@@ -345,18 +330,26 @@ public class CommandBus extends UnicastBus<Command,
             checkFieldsSet();
             commandScheduler = ServerEnvironment.instance()
                                                 .newCommandScheduler();
-            flowWatcher = new CommandFlowWatcher((tenantId) -> {
-                @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
-                SystemWriteSide writeSide = system().get();
-                SystemWriteSide result = delegatingTo(writeSide).get(tenantId);
-                return result;
-            });
-            commandScheduler.setFlowWatcher(flowWatcher);
+            CommandFlowWatcher flowWatcher = createFlowWatcher();
+            commandScheduler.setCommandConsumer(flowWatcher::onScheduled);
+            commandConsumer = flowWatcher::onDispatchCommand;
+
+            TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
+            tenantConsumer = tenantIndex::keep;
 
             CommandBus commandBus = createCommandBus();
             commandScheduler.setCommandBus(commandBus);
 
             return commandBus;
+        }
+
+        private CommandFlowWatcher createFlowWatcher() {
+            return new CommandFlowWatcher((tenantId) -> {
+                @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
+                        SystemWriteSide writeSide = system().get();
+                SystemWriteSide result = delegatingTo(writeSide).get(tenantId);
+                return result;
+            });
         }
 
         @Override

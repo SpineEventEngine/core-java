@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -52,7 +53,8 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     private @Nullable CommandBus commandBus;
 
-    private @Nullable CommandFlowWatcher flowWatcher;
+    /** Consumes commands when they are scheduled by this instance. */
+    private @Nullable Consumer<CommandEnvelope> commandConsumer;
 
     protected CommandScheduler() {
     }
@@ -66,11 +68,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     /**
-     * Assigns the {@code CommandFlowWatcher} to the scheduler during {@code CommandBus}
-     * {@linkplain CommandBus.Builder#build() construction}.
+     * Assigns consumer for command scheduled by this instance.
      */
-    void setFlowWatcher(CommandFlowWatcher flowWatcher) {
-        this.flowWatcher = flowWatcher;
+    void setCommandConsumer(Consumer<CommandEnvelope> consumer) {
+        this.commandConsumer = consumer;
     }
 
     @Override
@@ -108,7 +109,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         rememberAsScheduled(commandUpdated);
 
         CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
-        flowWatcher().onScheduled(updatedCommandEnvelope);
+        consumer().accept(updatedCommandEnvelope);
     }
 
     /**
@@ -123,9 +124,12 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         return commandBus;
     }
 
-    private CommandFlowWatcher flowWatcher() {
-        checkState(flowWatcher != null, "CommandFlowWatcher is not initialized.");
-        return flowWatcher;
+    private Consumer<CommandEnvelope> consumer() {
+        checkState(
+                commandConsumer != null,
+                "Consumer of scheduled commands is not initialised. Please call `setConsumer()`."
+        );
+        return commandConsumer;
     }
 
     /**
