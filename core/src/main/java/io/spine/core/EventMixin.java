@@ -28,7 +28,6 @@ import io.spine.validate.Validate;
 
 import java.util.Optional;
 
-import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.core.EventContext.OriginCase.PAST_MESSAGE;
 import static io.spine.validate.Validate.isDefault;
 
@@ -117,7 +116,7 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext> 
         EventContext.OriginCase originCase = context.getOriginCase();
         EventContext.Builder resultContext = context.toBuilder()
                                                     .clearEnrichment();
-        if (originCase == EVENT_CONTEXT) {
+        if (originCase == EventContext.OriginCase.EVENT_CONTEXT) {
             resultContext.setEventContext(context.getEventContext()
                                                  .toBuilder()
                                                  .clearEnrichment()
