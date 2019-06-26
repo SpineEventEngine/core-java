@@ -69,8 +69,7 @@ class EventDispatcherRegistry
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to expose the method to
-     * {@link EventBus#registeredEventClasses() EventBus}.
+     * <p>Overrides to expose the method to {@link EventBus#registeredEventClasses() EventBus}.
      */
     @Override
     protected Set<EventClass> registeredMessageClasses() {
