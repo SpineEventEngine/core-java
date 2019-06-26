@@ -32,6 +32,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
@@ -301,10 +302,6 @@ public class CommandBus extends UnicastBus<Command,
             return this;
         }
 
-        public Optional<CommandScheduler> commandScheduler() {
-            return ofNullable(commandScheduler);
-        }
-
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
@@ -346,10 +343,8 @@ public class CommandBus extends UnicastBus<Command,
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();
-
-            if (commandScheduler == null) {
-                commandScheduler = new ExecutorCommandScheduler();
-            }
+            commandScheduler = ServerEnvironment.instance()
+                                                .newCommandScheduler();
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
                 @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
                 SystemWriteSide writeSide = system().get();

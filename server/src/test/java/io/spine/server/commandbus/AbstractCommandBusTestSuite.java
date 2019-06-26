@@ -82,7 +82,6 @@ abstract class AbstractCommandBusTestSuite {
 
     protected CommandBus commandBus;
     protected EventBus eventBus;
-    protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
     protected TenantIndex tenantIndex;
@@ -161,14 +160,12 @@ abstract class AbstractCommandBusTestSuite {
         BoundedContext context = createContext();
 
         tenantIndex = context.tenantIndex();
-        scheduler = spy(new ExecutorCommandScheduler());
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
 
         eventBus = context.eventBus();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
-                .setCommandScheduler(scheduler)
                 .injectContext(context)
                 .injectEventBus(context.eventBus())
                 .injectSystem(systemWriteSide)

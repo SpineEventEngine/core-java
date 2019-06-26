@@ -22,6 +22,8 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Identifier;
+import io.spine.server.commandbus.CommandScheduler;
+import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -72,11 +74,17 @@ public final class ServerEnvironment {
      */
     private Delivery delivery;
 
+    /**
+     * Provides schedulers used by all {@code CommandBus} instances of this environment.
+     */
+    private Supplier<CommandScheduler> commandScheduler;
+
     private ServerEnvironment() {
         delivery = Delivery.local();
         nodeId = NodeId.newBuilder()
                        .setValue(Identifier.newUuid())
                        .vBuild();
+        commandScheduler = ExecutorCommandScheduler::new;
     }
 
     /**
@@ -132,6 +140,24 @@ public final class ServerEnvironment {
      */
     public Delivery delivery() {
         return delivery;
+    }
+
+    /**
+     * Obtains command scheduling mechanism used by {@code CommandBus} in this environment.
+     */
+    public CommandScheduler newCommandScheduler() {
+        return commandScheduler.get();
+    }
+
+    /**
+     * Assigns command scheduling mechanism used at this environment by all
+     * {@code CommandBus} instances.
+     *
+     * <p>If not configured, {@link ExecutorCommandScheduler} is used.
+     */
+    public void scheduleCommandsUsing(Supplier<CommandScheduler> commandScheduler) {
+        checkNotNull(commandScheduler);
+        this.commandScheduler = commandScheduler;
     }
 
     /**

@@ -117,25 +117,6 @@ class CommandBusBuilderTest
     class AllowToSpecify {
 
         @Test
-        @DisplayName("CommandScheduler")
-        void commandScheduler() {
-            CommandScheduler expectedScheduler = mock(CommandScheduler.class);
-
-            CommandBus.Builder builder = builder().setCommandScheduler(expectedScheduler);
-
-            assertTrue(builder.commandScheduler()
-                              .isPresent());
-            assertEquals(expectedScheduler, builder.commandScheduler()
-                                                   .get());
-
-            CommandBus commandBus = builder.build();
-            assertNotNull(commandBus);
-
-            CommandScheduler actualScheduler = commandBus.scheduler();
-            assertEquals(expectedScheduler, actualScheduler);
-        }
-
-        @Test
         @DisplayName("EventBus")
         void eventBus() {
             EventBus expectedEventBus = mock(EventBus.class);
