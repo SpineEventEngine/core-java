@@ -29,6 +29,7 @@ import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
+import io.spine.system.server.EntityTypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -154,6 +155,13 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     public final EntityVisibility visibility() {
         return visibility;
+    }
+
+    public final EntityTypeName typeName() {
+        return EntityTypeName
+                .newBuilder()
+                .setJavaClassName(value().getCanonicalName())
+                .vBuild();
     }
 
     /**
