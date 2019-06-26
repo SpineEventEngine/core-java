@@ -223,6 +223,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
         builder.repositories()
                .forEach(result::with);
+        builder.commandDispatchers()
+               .forEach(result::withHandlers);
+        builder.eventDispatchers()
+               .forEach(result::withEventDispatchers);
 
         return result;
     }

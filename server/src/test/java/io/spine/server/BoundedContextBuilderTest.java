@@ -259,4 +259,46 @@ class BoundedContextBuilderTest {
             assertFalse(builder.hasRepository(repository));
         }
     }
+
+    @Nested
+    class CommandDispatchers {
+
+        @BeforeEach
+        void setUp() {
+        }
+
+        @Test
+        @DisplayName("add command dispatcher")
+        void addDispatcher() {
+        }
+
+        @Test
+        @DisplayName("add command dispatcher delegate")
+        void addDelegate() {
+        }
+
+        @Test
+        @DisplayName("remove command dispatcher")
+        void removeDispatcher() {
+        }
+    }
+
+    @Nested
+    class EventDispatchers {
+
+        @Test
+        @DisplayName("add event dispatcher")
+        void addDispatcher() {
+        }
+
+        @Test
+        @DisplayName("add event dispatcher delegate")
+        void addDelegate() {
+        }
+
+        @Test
+        @DisplayName("remove event dispatcher")
+        void removeDispatcher() {
+        }
+    }
 }
