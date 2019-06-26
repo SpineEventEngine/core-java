@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -45,6 +47,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -82,7 +85,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
      * initialized} or the repository was {@linkplain #close() closed}.
      */
-    private @Nullable Storage<I, ?, ?> storage;
+    private @Nullable Supplier<Storage<I, ?, ?>> storageSupplier;
 
     /**
      * Creates the repository.
@@ -133,7 +136,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Obtains model class for the entities managed by this repository.
      */
-    protected EntityClass<E> entityModelClass() {
+    @Internal
+    public EntityClass<E> entityModelClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
             Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
@@ -210,7 +214,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         }
 
         this.context = context;
-        if (!isStorageAssigned()) {
+        if (!storageAssigned()) {
             initStorage(context.storageFactory());
         }
         init(context);
@@ -231,8 +235,25 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @OverridingMethodsMustInvokeSuper
     protected void init(BoundedContext context) {
-        context.stand()
-               .registerTypeSupplier(this);
+        if (isTypeSupplier()) {
+            context.stand()
+                   .registerTypeSupplier(this);
+        }
+    }
+
+    /**
+     * Tells if this repository should be registered as a type supplier with a {@code Stand}
+     * of the {@code BoundedContext} to which this repository belongs.
+     *
+     * <p>Normally repositories are type suppliers. Some types of internal repositories are
+     * not type suppliers because data of their entities should not be exposed.
+     * Those classes of repositories should overwrite this method returning {@code false}.
+     *
+     * @return true by default
+     */
+    @Internal
+    protected boolean isTypeSupplier() {
+        return true;
     }
 
     /**
@@ -273,31 +294,35 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @param factory the storage factory
      * @throws IllegalStateException if the repository already has storage initialized
      */
-    public void initStorage(StorageFactory factory) {
-        if (this.storage != null) {
+    public final void initStorage(StorageFactory factory) {
+        if (this.storageSupplier != null) {
             throw newIllegalStateException(
                     "The repository `%s` already has storage `%s`.",
-                    this, this.storage);
+                    this, this.storageSupplier);
         }
-        this.storage = createStorage(factory);
+        this.storageSupplier = Suppliers.memoize(() -> createStorage(factory));
     }
 
     /**
      * Returns the storage assigned to this repository.
      *
-     * <p>To verify if the storage is assigned, use {@link #isStorageAssigned()}.
+     * <p>To verify if the storage is assigned, use {@link #storageAssigned()}.
      *
      * @throws IllegalStateException if the storage is not assigned
      */
     protected final Storage<I, ?, ?> storage() {
-        return checkStorage(this.storage);
+        Storage<I, ?, ?> storage = this.storageSupplier != null
+                ? this.storageSupplier.get()
+                : null;
+        return checkStorage(storage);
     }
 
     /**
      * Returns {@code true} if the storage is assigned, {@code false} otherwise.
      */
-    public final boolean isStorageAssigned() {
-        return this.storage != null;
+    @VisibleForTesting
+    public final boolean storageAssigned() {
+        return this.storageSupplier != null;
     }
 
     /**
@@ -330,9 +355,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @Override
     @OverridingMethodsMustInvokeSuper
     public void close() {
-        if (this.storage != null) {
-            this.storage.close();
-            this.storage = null;
+        if (this.storageSupplier != null) {
+            storage().close();
+            this.storageSupplier = null;
         }
         this.context = null;
     }
@@ -341,7 +366,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Verifies if the repository is open.
      */
     public final boolean isOpen() {
-        return storage != null;
+        return storageSupplier != null;
     }
 
     /**

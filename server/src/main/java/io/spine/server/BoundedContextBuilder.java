@@ -371,7 +371,6 @@ public final class BoundedContextBuilder implements Logging {
 
         registerRepositories(result);
         registerTracing(result, system);
-        result.init();
         return result;
     }
 

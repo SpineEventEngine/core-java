@@ -34,16 +34,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent",
@@ -178,45 +175,6 @@ class EventBusBuilderTest
             EventBus.Builder builder = builder().setEventStore(eventStore);
             assertThrows(IllegalStateException.class,
                          () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
-        }
-    }
-
-    @Nested
-    @DisplayName("use executor")
-    class UseExecutor {
-
-        @Test
-        @DisplayName("which is direct if no custom one was passed")
-        void direct() {
-            EventBus build = builder()
-                    .setStorageFactory(storageFactory)
-                    .build();
-            Executor streamExecutor = build.eventStore()
-                                           .getStreamExecutor();
-            ensureExecutorDirect(streamExecutor);
-        }
-
-        @Test
-        @DisplayName("which was passed to Builder")
-        void passed() {
-            CountDownLatch executorUsageLatch = new CountDownLatch(1);
-
-            // Decrease the counter to ensure this method has been called.
-            Executor simpleExecutor = command -> executorUsageLatch.countDown();
-            EventBus.Builder builder = builder().setStorageFactory(storageFactory)
-                                                .setEventStoreStreamExecutor(simpleExecutor);
-            EventBus build = builder.build();
-            Executor streamExecutor = build.eventStore()
-                                           .getStreamExecutor();
-            streamExecutor.execute(mock(Runnable.class));
-            try {
-            /* The executor configured to operate synchronously,
-               so the latch should already be zero at this point.
-             */
-                executorUsageLatch.await(0, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                fail("The specified executor was not used.");
-            }
         }
     }
 

@@ -62,6 +62,7 @@ public final class SystemContext extends BoundedContext {
         BoundedContextBuilder preparedBuilder = prepareEnricher(builder, commandLog);
         SystemContext result = new SystemContext(preparedBuilder);
         result.registerRepositories(commandLog);
+        result.init();
         return result;
     }
 

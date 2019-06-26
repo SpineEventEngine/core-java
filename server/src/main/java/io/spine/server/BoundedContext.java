@@ -35,7 +35,6 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
@@ -135,7 +134,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
-    final void init() {
+    protected final void init() {
         eventBus.init(this);
         tenantIndex.registerWith(this);
     }
@@ -540,6 +539,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         shutDownRepositories();
 
         log().debug(closed(nameForLogging()));
+    }
+
+    @VisibleForTesting
+    public boolean isClosed() {
+        return guard.isClosed();
     }
 
     String nameForLogging() {

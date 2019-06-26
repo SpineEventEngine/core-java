@@ -65,6 +65,11 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
         return result;
     }
 
+    @Override
+    protected boolean isTypeSupplier() {
+        return false;
+    }
+
     /**
      * Returns comparator which compares events by their timestamp in chronological order.
      */

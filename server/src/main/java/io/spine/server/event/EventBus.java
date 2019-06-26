@@ -436,8 +436,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             if (eventStore == null) {
                 eventStore = EventStore
                         .newBuilder()
-                        .injectContext(context())
-                        .setStreamExecutor(eventStoreStreamExecutor)
                         .setStorageFactory(storageFactory)
                         .withDefaultLogger()
                         .build();

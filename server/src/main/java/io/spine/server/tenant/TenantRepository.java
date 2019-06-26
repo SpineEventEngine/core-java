@@ -62,6 +62,11 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
         context.register(this);
     }
 
+    @Override
+    protected final boolean isTypeSupplier() {
+        return false;
+    }
+
     /**
      * {@inheritDoc}
      *

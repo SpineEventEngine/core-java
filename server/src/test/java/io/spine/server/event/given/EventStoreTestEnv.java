@@ -21,7 +21,6 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
@@ -56,7 +55,6 @@ public class EventStoreTestEnv {
         BoundedContext bc = BoundedContextBuilder.assumingTests().build();
         return EventStore.newBuilder()
                          .setStorageFactory(bc.storageFactory())
-                         .setStreamExecutor(MoreExecutors.directExecutor())
                          .withDefaultLogger()
                          .build();
     }

@@ -144,21 +144,21 @@ public class SubscriptionService
     }
 
     public static class Builder {
-        private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+        private final Set<BoundedContext> contexts = Sets.newHashSet();
 
-        public Builder add(BoundedContext boundedContext) {
+        public Builder add(BoundedContext context) {
             // Save it to a temporary set so that it is easy to remove it if needed.
-            boundedContexts.add(boundedContext);
+            contexts.add(context);
             return this;
         }
 
-        public Builder remove(BoundedContext boundedContext) {
-            boundedContexts.remove(boundedContext);
+        public Builder remove(BoundedContext context) {
+            contexts.remove(context);
             return this;
         }
 
-        public ImmutableList<BoundedContext> getBoundedContexts() {
-            return ImmutableList.copyOf(boundedContexts);
+        public ImmutableList<BoundedContext> contexts() {
+            return ImmutableList.copyOf(contexts);
         }
 
         /**
@@ -167,7 +167,7 @@ public class SubscriptionService
          * @throws IllegalStateException if no Bounded Contexts were added.
          */
         public SubscriptionService build() throws IllegalStateException {
-            if (boundedContexts.isEmpty()) {
+            if (contexts.isEmpty()) {
                 throw new IllegalStateException(
                         "Subscription service must have at least one Bounded Context.");
             }
@@ -178,16 +178,16 @@ public class SubscriptionService
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
             ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
-            for (BoundedContext boundedContext : boundedContexts) {
-                putIntoMap(boundedContext, builder);
+            for (BoundedContext context : contexts) {
+                putIntoMap(context, builder);
             }
             return builder.build();
         }
 
-        private static void putIntoMap(BoundedContext boundedContext,
+        private static void putIntoMap(BoundedContext context,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-            Stand stand = boundedContext.stand();
-            Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, boundedContext);
+            Stand stand = context.stand();
+            Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, context);
             stand.exposedTypes()
                  .forEach(putIntoMap);
             stand.exposedEventTypes()

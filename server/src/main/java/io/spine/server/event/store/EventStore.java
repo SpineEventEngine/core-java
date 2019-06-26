@@ -19,7 +19,6 @@
  */
 package io.spine.server.event.store;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
@@ -39,7 +38,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,7 +54,6 @@ public final class EventStore implements AutoCloseable {
                     "Observed tenants are: %s.";
 
     private final ERepository storage;
-    private final Executor streamExecutor;
     private final Log log;
 
     /**
@@ -74,7 +71,6 @@ public final class EventStore implements AutoCloseable {
     private EventStore(Builder builder) {
         super();
         this.storage = new ERepository();
-        this.streamExecutor = builder.streamExecutor();
         this.log = new Log(builder.logger());
     }
 
@@ -154,23 +150,14 @@ public final class EventStore implements AutoCloseable {
 
         log.readingStart(request, responseObserver);
 
-        streamExecutor.execute(() -> {
-            Iterator<Event> eventRecords = storage.iterator(request);
-            while (eventRecords.hasNext()) {
-                Event event = eventRecords.next();
-                responseObserver.onNext(event);
-            }
-            responseObserver.onCompleted();
-            log.readingComplete(responseObserver);
-        });
-    }
+        Iterator<Event> eventRecords = storage.iterator(request);
+        while (eventRecords.hasNext()) {
+            Event event = eventRecords.next();
+            responseObserver.onNext(event);
+        }
+        responseObserver.onCompleted();
 
-    /**
-     * Obtains stream executor used by the store.
-     */
-    @VisibleForTesting
-    public Executor getStreamExecutor() {
-        return streamExecutor;
+        log.readingComplete(responseObserver);
     }
 
     /**
@@ -193,7 +180,6 @@ public final class EventStore implements AutoCloseable {
      */
     public static final class Builder {
 
-        private Executor streamExecutor;
         private StorageFactory storageFactory;
         private @Nullable Logger logger;
 
@@ -206,18 +192,7 @@ public final class EventStore implements AutoCloseable {
          * verify that all required parameters are set.
          */
         private void checkState() {
-            checkNotNull(streamExecutor(), "streamExecutor must be set");
             checkNotNull(storageFactory(), "eventStorage must be set");
-        }
-
-        public Executor streamExecutor() {
-            return streamExecutor;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setStreamExecutor(Executor executor) {
-            this.streamExecutor = checkNotNull(executor);
-            return this;
         }
 
         public StorageFactory storageFactory() {
@@ -254,14 +229,6 @@ public final class EventStore implements AutoCloseable {
         /** Returns default logger for this class. */
         private static Logger defaultLogger() {
             return Logging.get(EventStore.class);
-        }
-
-        /**
-         * Assigns BoundedContext for the {@code EventStore} to be built.
-         */
-        @Internal
-        public Builder injectContext(BoundedContext context) {
-            return this;
         }
 
         /**
