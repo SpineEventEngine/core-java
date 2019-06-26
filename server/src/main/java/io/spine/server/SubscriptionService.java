@@ -188,9 +188,9 @@ public class SubscriptionService
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
             Stand stand = boundedContext.stand();
             Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, boundedContext);
-            stand.getExposedTypes()
+            stand.exposedTypes()
                  .forEach(putIntoMap);
-            stand.getExposedEventTypes()
+            stand.exposedEventTypes()
                  .forEach(putIntoMap);
         }
     }

@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.protobuf.Timestamp;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -28,12 +27,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @DisplayName("TenantRepository should")
 class TenantRepositoryTest {
@@ -43,9 +42,8 @@ class TenantRepositoryTest {
     @BeforeEach
     void setUp() {
         BoundedContext bc = BoundedContextBuilder.assumingTests().build();
-        TenantRepository<?, ?> impl = new TenantRepositoryImpl();
-        impl.initStorage(bc.storageFactory());
-        repository = spy(impl);
+        repository = new TenantRepositoryImpl();
+        bc.register(repository);
     }
 
     @Test
@@ -54,9 +52,12 @@ class TenantRepositoryTest {
         TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
-        repository.keep(tenantId);
 
-        verify(repository, times(1)).find(tenantId);
+        Optional<?> optional = repository.find(tenantId);
+
+        assertThat(optional).isPresent();
+
+        assertTrue(repository.cached(tenantId));
     }
 
     @Test
@@ -82,6 +83,6 @@ class TenantRepositoryTest {
     }
 
     private static class TenantRepositoryImpl
-            extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
+            extends TenantRepository<Tenant, DefaultTenantRepository.Entity> {
     }
 }

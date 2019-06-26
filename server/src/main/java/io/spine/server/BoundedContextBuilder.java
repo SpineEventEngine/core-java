@@ -232,7 +232,9 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(eventBus);
     }
 
-    EventBus buildEventBus() {
+    EventBus buildEventBus(BoundedContext context) {
+        checkNotNull(context);
+        eventBus.injectContext(context);
         return eventBus.build();
     }
 
@@ -369,6 +371,7 @@ public final class BoundedContextBuilder implements Logging {
 
         registerRepositories(result);
         registerTracing(result, system);
+        result.init();
         return result;
     }
 
@@ -395,11 +398,11 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem(TransportFactory transport) {
-        BoundedContextName name = BoundedContextNames.system(spec.name());
+        String name = BoundedContextNames.system(spec.name()).getValue();
         boolean multitenant = isMultitenant();
         BoundedContextBuilder system = multitenant
-                                       ? BoundedContext.multitenant(name.getValue())
-                                       : BoundedContext.singleTenant(name.getValue());
+                                       ? BoundedContext.multitenant(name)
+                                       : BoundedContext.singleTenant(name);
         Optional<? extends Function<ContextSpec, StorageFactory>> storage = storage();
         storage.ifPresent(system::setStorage);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();

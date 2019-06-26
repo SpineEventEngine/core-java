@@ -23,9 +23,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -51,7 +53,7 @@ public final class EventStore implements AutoCloseable {
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
                     System.lineSeparator() +
-                    "Observed tenants are: %s";
+                    "Observed tenants are: %s.";
 
     private final ERepository storage;
     private final Executor streamExecutor;
@@ -66,30 +68,19 @@ public final class EventStore implements AutoCloseable {
         return new Builder();
     }
 
-    private static void ensureSameTenant(Iterable<Event> events) {
-        checkNotNull(events);
-        Set<TenantId> tenants = Streams.stream(events)
-                                       .map(Event::tenant)
-                                       .collect(toSet());
-        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
+    /**
+     * Constructs new instance taking arguments from the passed builder.
+     */
+    private EventStore(Builder builder) {
+        super();
+        this.storage = new ERepository();
+        this.streamExecutor = builder.streamExecutor();
+        this.log = new Log(builder.logger());
     }
 
-    /**
-     * Constructs an instance with the passed executor for returning streams.
-     *
-     * @param streamExecutor the executor for updating new subscribers
-     * @param storageFactory the storage factory for creating underlying storage
-     * @param logger         debug logger instance
-     */
-    private EventStore(Executor streamExecutor,
-                       StorageFactory storageFactory,
-                       @Nullable Logger logger) {
-        super();
-        ERepository eventRepository = new ERepository();
-        eventRepository.initStorage(storageFactory);
-        this.storage = eventRepository;
-        this.streamExecutor = streamExecutor;
-        this.log = new Log(logger);
+    @Internal
+    public void init(BoundedContext context) {
+        context.register(storage);
     }
 
     /**
@@ -141,6 +132,14 @@ public final class EventStore implements AutoCloseable {
         op.execute();
 
         log.stored(events);
+    }
+
+    private static void ensureSameTenant(Iterable<Event> events) {
+        checkNotNull(events);
+        Set<TenantId> tenants = Streams.stream(events)
+                                       .map(Event::tenant)
+                                       .collect(toSet());
+        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
     /**
@@ -252,18 +251,26 @@ public final class EventStore implements AutoCloseable {
             return this;
         }
 
+        /** Returns default logger for this class. */
+        private static Logger defaultLogger() {
+            return Logging.get(EventStore.class);
+        }
+
+        /**
+         * Assigns BoundedContext for the {@code EventStore} to be built.
+         */
+        @Internal
+        public Builder injectContext(BoundedContext context) {
+            return this;
+        }
+
         /**
          * Creates new {@code EventStore} instance.
          */
         public EventStore build() {
             checkState();
-            EventStore result = new EventStore(streamExecutor(), storageFactory(), logger());
+            EventStore result = new EventStore(this);
             return result;
-        }
-
-        /** Returns default logger for this class. */
-        private static Logger defaultLogger() {
-            return Logging.get(EventStore.class);
         }
     }
 }

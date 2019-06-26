@@ -125,7 +125,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                                      .apply(spec);
         this.tracerFactory = builder.buildTracerFactorySupplier()
                                     .apply(spec);
-        this.eventBus = builder.buildEventBus();
+        this.eventBus = buildEventBus(builder);
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
@@ -135,6 +135,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
+    final void init() {
+        eventBus.init(this);
+        tenantIndex.registerWith(this);
+    }
+    
     /**
      * Prevents 3rd party code from creating classes extending from {@code BoundedContext}.
      */
@@ -147,6 +152,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                 "The class `BoundedContext` is not designed for " +
                         "inheritance by the framework users."
         );
+    }
+
+    private EventBus buildEventBus(BoundedContextBuilder builder) {
+        EventBus result = builder.buildEventBus(this);
+        return result;
     }
 
     private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {

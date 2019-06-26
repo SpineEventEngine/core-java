@@ -21,6 +21,7 @@
 package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Set;
@@ -33,6 +34,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface TenantIndex extends AutoCloseable {
 
     /**
+     * Assigns the context to this tenant index.
+     *
+     * <p>This method can be called only once. Subsequent calls would result
+     * in {@code RuntimeException}.
+     */
+    void registerWith(BoundedContext context);
+
+    /**
      * Stores the passed tenant ID in the index.
      */
     void keep(TenantId id);
@@ -40,7 +49,7 @@ public interface TenantIndex extends AutoCloseable {
     /**
      * Obtains the set of all stored tenant IDs.
      */
-    Set<TenantId> getAll();
+    Set<TenantId> all();
 
     /**
      * Closes the index for further read or write operations.
@@ -57,7 +66,6 @@ public interface TenantIndex extends AutoCloseable {
         checkNotNull(storageFactory);
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
         DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
-        tenantRepo.initStorage(storageFactory);
         return tenantRepo;
     }
 

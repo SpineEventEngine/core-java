@@ -141,17 +141,17 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     private Stand(Builder builder) {
         super();
-        this.callbackExecutor = builder.getCallbackExecutor();
+        this.callbackExecutor = builder.callbackExecutor();
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
-        this.subscriptionRegistry = builder.getSubscriptionRegistry();
-        this.typeRegistry = builder.getTypeRegistry();
-        this.eventRegistry = builder.getEventRegistry();
-        this.topicValidator = builder.getTopicValidator();
-        this.queryValidator = builder.getQueryValidator();
-        this.subscriptionValidator = builder.getSubscriptionValidator();
-        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.getSystemReadSide());
+        this.subscriptionRegistry = builder.subscriptionRegistry();
+        this.typeRegistry = builder.typeRegistry();
+        this.eventRegistry = builder.eventRegistry();
+        this.topicValidator = builder.topicValidator();
+        this.queryValidator = builder.queryValidator();
+        this.subscriptionValidator = builder.subscriptionValidator();
+        this.aggregateQueryProcessor = new AggregateQueryProcessor(builder.systemReadSide());
     }
 
     public static Builder newBuilder() {
@@ -349,11 +349,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
      *
-     * <p>The result includes all values from {@link #getExposedAggregateTypes()} as well.
+     * <p>The result includes all values from {@link #exposedAggregateTypes()} as well.
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    public ImmutableSet<TypeUrl> getExposedTypes() {
+    public ImmutableSet<TypeUrl> exposedTypes() {
         return typeRegistry.allTypes();
     }
 
@@ -362,7 +362,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    public ImmutableSet<TypeUrl> getExposedEventTypes() {
+    public ImmutableSet<TypeUrl> exposedEventTypes() {
         return eventRegistry.typeSet();
     }
 
@@ -374,7 +374,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *
      * @return the set of types as {@link TypeUrl} instances
      */
-    public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
+    public ImmutableSet<TypeUrl> exposedAggregateTypes() {
         return typeRegistry.aggregateTypes();
     }
 
@@ -467,7 +467,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         if (foundRepository.isPresent()) {
             RecordBasedRepository<?, ?, ?> repository = foundRepository.get();
             return new EntityQueryProcessor(repository);
-        } else if (getExposedAggregateTypes().contains(type)) {
+        } else if (exposedAggregateTypes().contains(type)) {
             return aggregateProcessor();
         } else {
             return NOOP_PROCESSOR;
@@ -502,7 +502,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private SubscriptionValidator subscriptionValidator;
         private SystemReadSide systemReadSide;
 
-        public Executor getCallbackExecutor() {
+        public Executor callbackExecutor() {
             return callbackExecutor;
         }
 
@@ -538,31 +538,31 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             return multitenant;
         }
 
-        private SubscriptionRegistry getSubscriptionRegistry() {
+        private SubscriptionRegistry subscriptionRegistry() {
             return subscriptionRegistry;
         }
 
-        private TopicValidator getTopicValidator() {
+        private TopicValidator topicValidator() {
             return topicValidator;
         }
 
-        private QueryValidator getQueryValidator() {
+        private QueryValidator queryValidator() {
             return queryValidator;
         }
 
-        private SubscriptionValidator getSubscriptionValidator() {
+        private SubscriptionValidator subscriptionValidator() {
             return subscriptionValidator;
         }
 
-        private TypeRegistry getTypeRegistry() {
+        private TypeRegistry typeRegistry() {
             return typeRegistry;
         }
 
-        public EventRegistry getEventRegistry() {
+        public EventRegistry eventRegistry() {
             return eventRegistry;
         }
 
-        private SystemReadSide getSystemReadSide() {
+        private SystemReadSide systemReadSide() {
             return systemReadSide;
         }
 

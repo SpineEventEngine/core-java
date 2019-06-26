@@ -34,7 +34,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.ContextSpec;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
@@ -46,7 +46,6 @@ import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.test.commandbus.event.CmdBusProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -160,22 +159,22 @@ abstract class AbstractCommandBusTestSuite {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
-        String name = cls.getSimpleName();
-        ContextSpec spec = multitenant
-                           ? ContextSpec.multitenant(name)
-                           : ContextSpec.singleTenant(name);
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
-        tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
+        BoundedContext context = createContext();
+
+        tenantIndex = context.tenantIndex();
         scheduler = spy(new ExecutorCommandScheduler());
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
+
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         eventBus = EventBus.newBuilder()
+                           .injectContext(context)
                            .setStorageFactory(storageFactory)
                            .build();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
+                .injectContext(context)
                 .injectEventBus(eventBus)
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
@@ -186,6 +185,15 @@ abstract class AbstractCommandBusTestSuite {
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
+    }
+
+    private BoundedContext createContext() {
+        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
+        String name = cls.getSimpleName();
+        return (multitenant
+         ? BoundedContext.multitenant(name)
+         : BoundedContext.singleTenant(name))
+                .build();
     }
 
     @AfterEach

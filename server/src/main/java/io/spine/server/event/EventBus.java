@@ -34,6 +34,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
+import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
@@ -242,6 +243,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         return (EventDispatcherRegistry) super.registry();
     }
 
+    @Internal
+    public void init(BoundedContext context) {
+        eventStore.init(context);
+    }
+
     /** The {@code Builder} for {@code EventBus}. */
     @CanIgnoreReturnValue
     public static class Builder
@@ -430,6 +436,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             if (eventStore == null) {
                 eventStore = EventStore
                         .newBuilder()
+                        .injectContext(context())
                         .setStreamExecutor(eventStoreStreamExecutor)
                         .setStorageFactory(storageFactory)
                         .withDefaultLogger()

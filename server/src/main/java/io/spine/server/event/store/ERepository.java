@@ -77,7 +77,8 @@ final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, E
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
         TargetFilters filters = QueryToFilters.convert(query);
-        return find(filters, OrderBy.getDefaultInstance(),
+        return find(filters,
+                    OrderBy.getDefaultInstance(),
                     Pagination.getDefaultInstance(),
                     FieldMask.getDefaultInstance());
     }

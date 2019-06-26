@@ -207,9 +207,9 @@ class StandTest extends TenantAwareTest {
             StandTestProjectionRepository standTestProjectionRepo =
                     new StandTestProjectionRepository();
             stand.registerTypeSupplier(standTestProjectionRepo);
-            checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
+            checkHasExactlyOne(stand.exposedTypes(), Project.getDescriptor());
 
-            ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
+            ImmutableSet<TypeUrl> knownAggregateTypes = stand.exposedAggregateTypes();
             // As we registered a projection repo, known aggregate types should be still empty.
             assertTrue(knownAggregateTypes.isEmpty(),
                        "For some reason an aggregate type was registered");
@@ -217,7 +217,7 @@ class StandTest extends TenantAwareTest {
             StandTestProjectionRepository anotherTestProjectionRepo =
                     new StandTestProjectionRepository();
             stand.registerTypeSupplier(anotherTestProjectionRepo);
-            checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
+            checkHasExactlyOne(stand.exposedTypes(), Project.getDescriptor());
         }
 
         @Test
@@ -232,15 +232,15 @@ class StandTest extends TenantAwareTest {
             stand.registerTypeSupplier(customerAggregateRepo);
 
             Descriptor customerEntityDescriptor = Customer.getDescriptor();
-            checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
-            checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
+            checkHasExactlyOne(stand.exposedTypes(), customerEntityDescriptor);
+            checkHasExactlyOne(stand.exposedAggregateTypes(), customerEntityDescriptor);
 
             @SuppressWarnings("LocalVariableNamingConvention")
             CustomerAggregateRepository anotherCustomerAggregateRepo =
                     new CustomerAggregateRepository();
             stand.registerTypeSupplier(anotherCustomerAggregateRepo);
-            checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
-            checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
+            checkHasExactlyOne(stand.exposedTypes(), customerEntityDescriptor);
+            checkHasExactlyOne(stand.exposedAggregateTypes(), customerEntityDescriptor);
         }
     }
 
@@ -1196,9 +1196,9 @@ class StandTest extends TenantAwareTest {
     }
 
     private static void checkTypesEmpty(Stand stand) {
-        assertTrue(stand.getExposedTypes()
+        assertTrue(stand.exposedTypes()
                         .isEmpty());
-        assertTrue(stand.getExposedAggregateTypes()
+        assertTrue(stand.exposedAggregateTypes()
                         .isEmpty());
     }
 

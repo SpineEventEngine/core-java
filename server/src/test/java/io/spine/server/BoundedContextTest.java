@@ -52,6 +52,7 @@ import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -241,13 +242,19 @@ class BoundedContextTest {
     @Test
     @DisplayName("propagate registered repositories to Stand")
     void propagateRepositoriesToStand() {
-        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
-        Stand stand = boundedContext.stand();
-        assertTrue(stand.getExposedTypes().isEmpty());
+        BoundedContext context = BoundedContextBuilder.assumingTests().build();
+        Stand stand = context.stand();
+
         Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
-        boundedContext.register(repo);
-        assertThat(stand.getExposedTypes())
-                .containsExactly(repo.entityStateType());
+        TypeUrl stateType = repo.entityStateType();
+
+        assertThat(stand.exposedTypes())
+                .doesNotContain(stateType);
+
+        context.register(repo);
+
+        assertThat(stand.exposedTypes())
+                .contains(stateType);
     }
 
     @Test

@@ -21,15 +21,16 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
+import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Deque;
+import java.util.Optional;
+import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import static com.google.common.truth.Truth.assertThat;
 
 /**
  * The abstract test suite for the tests of the builders of buses.
@@ -47,25 +48,61 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     @Test
     @DisplayName("allow adding filter")
     void allowAddingFilter() {
-        @SuppressWarnings("unchecked") BusFilter<E> filter = mock(BusFilter.class);
+        BusFilter<E> filter = new MockFilter<>();
 
-        assertTrue(builder().appendFilter(filter)
-                            .filters()
-                            .contains(filter));
+        assertThat(builder().appendFilter(filter)
+                            .filters())
+                .contains(filter);
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Test
     @DisplayName("preserve filters order")
     void preserveFiltersOrder() {
-        @SuppressWarnings("unchecked") BusFilter<E> first = mock(BusFilter.class);
-        @SuppressWarnings("unchecked") BusFilter<E> second = mock(BusFilter.class);
+        BusFilter<E> first = new MockFilter<>();
+        BusFilter<E> second = new MockFilter<>();
 
         B builder = builder();
         builder.appendFilter(first)
                .appendFilter(second);
         Deque<BusFilter<E>> filters = builder.filters();
-        assertEquals(first, filters.pop());
-        assertEquals(second, filters.pop());
+
+        assertThat(filters.pop())
+                .isEqualTo(first);
+        assertThat(filters.pop())
+                .isEqualTo(second);
+    }
+
+    @Test
+    @DisplayName("add listener")
+    void addingListener() {
+        Consumer<E> listener = (e) -> {};
+
+        assertThat(builder().addListener(listener)
+                            .listeners())
+                .contains(listener);
+    }
+
+    @Test
+    @DisplayName("remove listener")
+    void removingListener() {
+        Consumer<E> listener = (e) -> {};
+
+        assertThat(builder().addListener(listener)
+                            .removeListener(listener)
+                            .listeners())
+                .doesNotContain(listener);
+    }
+
+    /**
+     * Mock implementation of {@code BusFilter}.
+     */
+    private static final class MockFilter<E extends MessageEnvelope<?, ?, ?>>
+            implements BusFilter<E> {
+
+        @Override
+        public Optional<Ack> accept(E envelope) {
+            return Optional.empty();
+        }
     }
 }
