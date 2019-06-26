@@ -38,7 +38,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
@@ -165,20 +164,17 @@ abstract class AbstractCommandBusTestSuite {
         scheduler = spy(new ExecutorCommandScheduler());
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
 
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
-        eventBus = EventBus.newBuilder()
-                           .injectContext(context)
-                           .setStorageFactory(storageFactory)
-                           .build();
+        eventBus = context.eventBus();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
                 .injectContext(context)
-                .injectEventBus(eventBus)
+                .injectEventBus(context.eventBus())
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
+
         requestFactory =
                 multitenant
                 ? new TestActorRequestFactory(getClass(), newUuid())

@@ -51,6 +51,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -70,7 +71,8 @@ public class CommandBus extends UnicastBus<Command,
 
     private final CommandScheduler scheduler;
     private final SystemWriteSide systemWriteSide;
-    private final TenantIndex tenantIndex;
+    /** Consumes tenant IDs from incoming commands. */
+    private final Consumer<TenantId> tenantConsumer;
     private final CommandErrorHandler errorHandler;
     private final CommandFlowWatcher flowWatcher;
 
@@ -106,8 +108,9 @@ public class CommandBus extends UnicastBus<Command,
         this.scheduler = builder.commandScheduler;
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
-        this.tenantIndex = builder.tenantIndex()
-                                  .orElseThrow(tenantIndexNotSet());
+        TenantIndex tenantIndex = builder.tenantIndex()
+                                   .orElseThrow(tenantIndexNotSet());
+        this.tenantConsumer = tenantIndex::keep;
         this.deadCommandHandler = new DeadCommandHandler();
         this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
         this.flowWatcher = builder.flowWatcher;
@@ -233,7 +236,7 @@ public class CommandBus extends UnicastBus<Command,
     @Override
     protected void store(Iterable<Command> commands) {
         TenantId tenantId = tenantOf(commands);
-        tenantIndex.keep(tenantId);
+        tenantConsumer.accept(tenantId);
     }
 
     /**
