@@ -67,7 +67,7 @@ public class Given {
         }
     }
 
-    public static class NoopCommandDispatcher implements CommandDispatcher<ProjectId> {
+    public static class NoOpCommandDispatcher implements CommandDispatcher<ProjectId> {
 
         private final CommandClass commandClass = CommandClass.from(BcCreateProject.class);
 
@@ -88,7 +88,7 @@ public class Given {
         }
     }
 
-    public static class NoopEventDispatcher implements EventDispatcher<ProjectId> {
+    public static class NoOpEventDispatcher implements EventDispatcher<ProjectId> {
 
         private final EventClass eventClass = EventClass.from(BcProjectCreated.class);
 

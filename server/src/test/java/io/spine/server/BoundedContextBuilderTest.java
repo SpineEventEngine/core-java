@@ -22,8 +22,8 @@ package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.aggregate.AggregateRootDirectory;
-import io.spine.server.bc.given.Given.NoopCommandDispatcher;
-import io.spine.server.bc.given.Given.NoopEventDispatcher;
+import io.spine.server.bc.given.Given.NoOpCommandDispatcher;
+import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -273,7 +273,7 @@ class BoundedContextBuilderTest {
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
-            dispatcher = new NoopCommandDispatcher();
+            dispatcher = new NoOpCommandDispatcher();
         }
 
         @Test
@@ -306,7 +306,7 @@ class BoundedContextBuilderTest {
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
-            dispatcher = new NoopEventDispatcher();
+            dispatcher = new NoOpEventDispatcher();
         }
 
         @Test
