@@ -238,5 +238,25 @@ class BoundedContextBuilderTest {
             builder.remove(repository);
             assertFalse(builder.hasRepository(repository));
         }
+
+        @Test
+        @DisplayName("add default repository for entity class")
+        void addByEntityClass() {
+            assertFalse(builder.hasRepository(repository));
+
+            builder.add(repository.entityClass());
+
+            assertTrue(builder.hasRepository(repository.entityClass()));
+        }
+
+        @Test
+        @DisplayName("remove repository by entity class")
+        void removeByEntityClass() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.remove(repository.entityClass());
+            assertFalse(builder.hasRepository(repository));
+        }
     }
 }

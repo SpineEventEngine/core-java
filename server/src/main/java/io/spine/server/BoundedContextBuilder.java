@@ -30,6 +30,7 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -282,12 +283,33 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Adds the {@linkplain DefaultRepository default repository} for the passed entity class to
+     * the registration list which will be processed after the Bounded Context is created.
+     */
+    @CanIgnoreReturnValue
+    public <I, E extends Entity<I, ?>> BoundedContextBuilder add(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        return add(DefaultRepository.of(entityClass));
+    }
+
+    /**
      * Removes the passed repository from the registration list.
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder remove(Repository<?, ?> repository) {
         checkNotNull(repository);
         repositories.remove(repository);
+        return this;
+    }
+
+    /**
+     * Removes the repository from the registration list by the passed entity class.
+     */
+    @CanIgnoreReturnValue
+    public <I, E extends Entity<I, ?>> BoundedContextBuilder remove(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        repositories.removeIf(repository -> repository.entityClass()
+                                                      .equals(entityClass));
         return this;
     }
 
@@ -299,6 +321,20 @@ public final class BoundedContextBuilder implements Logging {
     boolean hasRepository(Repository<?, ?> repository) {
         checkNotNull(repository);
         boolean result = repositories.contains(repository);
+        return result;
+    }
+
+    /**
+     * Verifies if the repository with a passed entity class was previously added into the
+     * registration list of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    <I, E extends Entity<I, ?>> boolean hasRepository(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        boolean result =
+                repositories.stream()
+                            .anyMatch(repository -> repository.entityClass()
+                                                              .equals(entityClass));
         return result;
     }
 
