@@ -136,7 +136,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
 
     @VisibleForTesting
     Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
-        return registry().getDispatchersForType(eventClass);
+        return registry().dispatchersOf(eventClass);
     }
 
     @VisibleForTesting

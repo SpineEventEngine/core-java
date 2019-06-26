@@ -85,7 +85,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
     /**
      * Obtains message classes from all registered dispatchers.
      */
-    protected Set<C> getRegisteredMessageClasses() {
+    protected Set<C> registeredMessageClasses() {
         return dispatchers.keySet();
     }
 
@@ -96,7 +96,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      *         the message envelope to find dispatchers for
      * @return a set of dispatchers or an empty set if no dispatchers are registered
      */
-    protected Set<D> getDispatchers(E envelope) {
+    protected Set<D> dispatchersOf(E envelope) {
         checkNotNull(envelope);
         C messageClass = classOf(envelope);
         Set<D> dispatchers = this.dispatchers
@@ -116,9 +116,9 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      *         if more than one dispatcher is found
      * @apiNote This method must be called only for serving {@link UnicastBus}es.
      */
-    protected Optional<? extends D> getDispatcher(E envelope) {
+    protected Optional<? extends D> dispatcherOf(E envelope) {
         checkNotNull(envelope);
-        Set<D> dispatchers = getDispatchers(envelope);
+        Set<D> dispatchers = dispatchersOf(envelope);
         checkNotMoreThanOne(dispatchers, classOf(envelope));
         Optional<D> result = dispatchers.stream()
                                         .findFirst();
@@ -132,7 +132,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      *         the target message class
      * @return all the registered dispatchers of the given class
      */
-    protected Set<D> getDispatchersForType(C messageClass) {
+    protected Set<D> dispatchersOf(C messageClass) {
         checkNotNull(messageClass);
         Collection<D> dispatchersForType = dispatchers.get(messageClass);
         return ImmutableSet.copyOf(dispatchersForType);

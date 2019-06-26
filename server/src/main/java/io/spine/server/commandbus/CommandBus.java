@@ -206,7 +206,7 @@ public class CommandBus extends UnicastBus<Command,
      * @return a set of classes of supported commands
      */
     public final Set<CommandClass> registeredCommandClasses() {
-        return registry().getRegisteredMessageClasses();
+        return registry().registeredMessageClasses();
     }
 
     @Override

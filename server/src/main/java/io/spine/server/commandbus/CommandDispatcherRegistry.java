@@ -125,8 +125,8 @@ class CommandDispatcherRegistry
      * {@link CommandBus#registeredCommandClasses() CommandBus}.
      */
     @Override
-    protected Set<CommandClass> getRegisteredMessageClasses() {
-        return super.getRegisteredMessageClasses();
+    protected Set<CommandClass> registeredMessageClasses() {
+        return super.registeredMessageClasses();
     }
 
     /**
