@@ -207,11 +207,11 @@ public final class EventStore implements AutoCloseable {
          * verify that all required parameters are set.
          */
         private void checkState() {
-            checkNotNull(getStreamExecutor(), "streamExecutor must be set");
-            checkNotNull(getStorageFactory(), "eventStorage must be set");
+            checkNotNull(streamExecutor(), "streamExecutor must be set");
+            checkNotNull(storageFactory(), "eventStorage must be set");
         }
 
-        public Executor getStreamExecutor() {
+        public Executor streamExecutor() {
             return streamExecutor;
         }
 
@@ -221,7 +221,7 @@ public final class EventStore implements AutoCloseable {
             return this;
         }
 
-        public StorageFactory getStorageFactory() {
+        public StorageFactory storageFactory() {
             return storageFactory;
         }
 
@@ -231,7 +231,7 @@ public final class EventStore implements AutoCloseable {
             return this;
         }
 
-        public @Nullable Logger getLogger() {
+        public @Nullable Logger logger() {
             return logger;
         }
 
@@ -257,8 +257,7 @@ public final class EventStore implements AutoCloseable {
          */
         public EventStore build() {
             checkState();
-            EventStore result =
-                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
+            EventStore result = new EventStore(streamExecutor(), storageFactory(), logger());
             return result;
         }
 
