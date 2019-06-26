@@ -307,7 +307,7 @@ public class CommandBus extends UnicastBus<Command,
             return this;
         }
 
-        public Optional<CommandScheduler> getCommandScheduler() {
+        public Optional<CommandScheduler> commandScheduler() {
             return ofNullable(commandScheduler);
         }
 
@@ -331,7 +331,7 @@ public class CommandBus extends UnicastBus<Command,
             return this;
         }
 
-        Optional<EventBus> getEventBus() {
+        Optional<EventBus> eventBus() {
             return ofNullable(eventBus);
         }
 

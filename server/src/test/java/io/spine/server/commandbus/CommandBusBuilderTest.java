@@ -123,9 +123,9 @@ class CommandBusBuilderTest
 
             CommandBus.Builder builder = builder().setCommandScheduler(expectedScheduler);
 
-            assertTrue(builder.getCommandScheduler()
+            assertTrue(builder.commandScheduler()
                               .isPresent());
-            assertEquals(expectedScheduler, builder.getCommandScheduler()
+            assertEquals(expectedScheduler, builder.commandScheduler()
                                                    .get());
 
             CommandBus commandBus = builder.build();
@@ -141,9 +141,9 @@ class CommandBusBuilderTest
             EventBus expectedEventBus = mock(EventBus.class);
 
             CommandBus.Builder builder = builder().injectEventBus(expectedEventBus);
-            assertTrue(builder.getEventBus()
+            assertTrue(builder.eventBus()
                               .isPresent());
-            assertEquals(expectedEventBus, builder.getEventBus()
+            assertEquals(expectedEventBus, builder.eventBus()
                                                   .get());
         }
 

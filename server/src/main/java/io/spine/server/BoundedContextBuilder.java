@@ -189,7 +189,6 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     Function<ContextSpec, @Nullable TracerFactory> buildTracerFactorySupplier() {
-        @SuppressWarnings("ReturnOfNull")
         Function<ContextSpec, @Nullable TracerFactory> defaultSupplier = spec -> null;
         return tracerFactory().orElse(defaultSupplier);
     }
