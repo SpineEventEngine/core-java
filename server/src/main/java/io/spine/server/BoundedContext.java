@@ -134,6 +134,12 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
+    /**
+     * Performs post-creation initialization of the instance.
+     *
+     * <p>This method must be called shortly after the constructor so that the instance can
+     * perform dependency injections steps that cannot be performed in the constructor.
+     */
     protected final void init() {
         eventBus.init(this);
         tenantIndex.registerWith(this);
@@ -541,12 +547,18 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         log().debug(closed(nameForLogging()));
     }
 
+    /**
+     * Tells if the context is closed.
+     *
+     * <p>This is a test-only method which is needed for the tests that forcibly close a context,
+     * so that cleanup methods do not call it again.
+     */
     @VisibleForTesting
     public boolean isClosed() {
         return guard.isClosed();
     }
 
-    String nameForLogging() {
+    final String nameForLogging() {
         return BoundedContext.class.getSimpleName() + ' ' + name().getValue();
     }
 
