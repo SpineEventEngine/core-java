@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
+import io.spine.system.server.EntityTypeName;
 
 /**
  * A common interface for system events which state that a signal has been dispatched.
@@ -44,4 +45,9 @@ public interface SignalDispatchedMixin<S extends Signal<?, ?, ?>> extends Messag
      * Obtains the dispatching target.
      */
     MessageId getReceiver();
+
+    /**
+     * Obtains the name of the entity class in the implementation language.
+     */
+    EntityTypeName getEntityType();
 }

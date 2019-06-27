@@ -35,11 +35,13 @@ import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Version;
 import io.spine.option.EntityOption;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
+import io.spine.system.server.EntityTypeName;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.CommandHandled;
@@ -99,6 +101,8 @@ public class EntityLifecycle {
      */
     private final MessageId entityId;
 
+    private final EntityTypeName typeName;
+
     /**
      * Creates a new instance.
      *
@@ -110,9 +114,11 @@ public class EntityLifecycle {
     protected EntityLifecycle(Object entityId,
                               TypeUrl entityType,
                               SystemWriteSide writeSide,
-                              EventFilter eventFilter) {
+                              EventFilter eventFilter,
+                              EntityTypeName typeName) {
         this.systemWriteSide = checkNotNull(writeSide);
         this.eventFilter = checkNotNull(eventFilter);
+        this.typeName = checkNotNull(typeName);
         this.entityId = MessageId
                 .newBuilder()
                 .setId(Identifier.pack(entityId))
@@ -122,9 +128,10 @@ public class EntityLifecycle {
 
     private EntityLifecycle(Builder builder) {
         this(builder.entityId,
-             builder.entityType,
+             builder.entityType.stateType(),
              builder.writeSide,
-             builder.eventFilter);
+             builder.eventFilter,
+             builder.entityType.typeName());
     }
 
     /**
@@ -179,6 +186,7 @@ public class EntityLifecycle {
                 .setReceiver(entityId)
                 .setPayload(command)
                 .setWhenDispatched(currentTime())
+                .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = CommandEnvelope.of(command)
                                                   .asEventOrigin();
@@ -232,6 +240,7 @@ public class EntityLifecycle {
                 .setReceiver(entityId)
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
+                .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
                                                 .asEventOrigin();
@@ -244,6 +253,7 @@ public class EntityLifecycle {
                 .setReceiver(entityId)
                 .setPayload(event)
                 .setWhenImported(currentTime())
+                .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
                                                 .asEventOrigin();
@@ -262,6 +272,7 @@ public class EntityLifecycle {
                 .setReceiver(entityId)
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
+                .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
                                                 .asEventOrigin();
@@ -453,7 +464,7 @@ public class EntityLifecycle {
     static final class Builder {
 
         private Object entityId;
-        private TypeUrl entityType;
+        private EntityClass<?> entityType;
         private SystemWriteSide writeSide;
         private EventFilter eventFilter;
 
@@ -468,7 +479,7 @@ public class EntityLifecycle {
             return this;
         }
 
-        Builder setEntityType(TypeUrl entityType) {
+        Builder setEntityType(EntityClass<?> entityType) {
             this.entityType = checkNotNull(entityType);
             return this;
         }
