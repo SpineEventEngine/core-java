@@ -290,7 +290,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private void registerWithIntegrationBus(ExternalDispatcherFactory<?> dispatcher) {
         ExternalMessageDispatcher<?> externalDispatcher =
                 dispatcher.createExternalDispatcher()
-                          .orElseThrow(notExternalDispatcherFrom(dispatcher));
+                          .orElseThrow(missingExternalDispatcherFrom(dispatcher));
 
         integrationBus().register(externalDispatcher);
     }
@@ -332,7 +332,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
      * delegates do not provide an external message dispatcher.
      */
-    private static Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
+    private static
+    Supplier<IllegalStateException> missingExternalDispatcherFrom(Object dispatcher) {
         return () -> newIllegalStateException(
                 "No external dispatcher provided by `%s`.", dispatcher);
     }
