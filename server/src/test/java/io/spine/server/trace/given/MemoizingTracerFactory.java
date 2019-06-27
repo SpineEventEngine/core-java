@@ -58,7 +58,8 @@ public final class MemoizingTracerFactory implements TracerFactory {
         return closed;
     }
 
-    public MemoizingTracer tracer(Class<? extends Message> messageType) {
+    public MemoizingTracer tracer(@SuppressWarnings("unused") ContextSpec unused,
+                                  Class<? extends Message> messageType) {
         MemoizingTracer tracer = tracers.get(messageType);
         assertNotNull(tracer);
         return tracer;
