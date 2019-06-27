@@ -99,8 +99,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
     private final AggregateRootDirectory aggregateRootDirectory;
 
-    /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
-    private final StorageFactory storageFactory;
     private final @Nullable TracerFactory tracerFactory;
 
     private final TenantIndex tenantIndex;
@@ -120,8 +118,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkInheritance();
 
         this.spec = builder.spec();
-        this.storageFactory = builder.buildStorage()
-                                     .apply(spec);
         this.tracerFactory = builder.buildTracerFactorySupplier()
                                     .apply(spec);
         this.eventBus = buildEventBus(builder);
@@ -526,7 +522,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     @Override
     public void close() throws Exception {
-        storageFactory.close();
         commandBus.close();
         eventBus.close();
         integrationBus.close();

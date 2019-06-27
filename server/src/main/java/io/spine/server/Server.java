@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -195,22 +194,7 @@ public final class Server implements Logging {
 
         private void buildContexts() {
             for (BoundedContextBuilder builder : contextBuilders) {
-                ensureStorageFactory(builder);
                 contexts.add(builder.build());
-            }
-        }
-
-        /**
-         * Ensures that the passed BoundedContext builder has a supplier of
-         * a storage factory supplier.
-         *
-         * <p>If no supplier assigned, creates a storage factory for the
-         * Bounded Context to be built and assigns its supplier.
-         */
-        private void ensureStorageFactory(BoundedContextBuilder builder) {
-            Optional<Function<ContextSpec, StorageFactory>> supplier = builder.storage();
-            if (!supplier.isPresent()) {
-                builder.setStorage(storageFactory);
             }
         }
 

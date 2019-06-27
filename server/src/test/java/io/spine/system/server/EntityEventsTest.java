@@ -32,7 +32,6 @@ import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityCreated;
@@ -76,10 +75,8 @@ class EntityEventsTest {
 
     @BeforeEach
     void setUp() {
-        context = BoundedContextBuilder
-                .assumingTests(false)
-                .setStorage(spec -> InMemoryStorageFactory.newInstance())
-                .build();
+        context = BoundedContextBuilder.assumingTests(false)
+                                       .build();
         BoundedContext system = systemOf(context);
 
         context.register(DefaultRepository.of(PersonAggregate.class));

@@ -26,11 +26,9 @@ import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -96,16 +94,6 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("StorageFactory supplier if it was set")
-        void storageFactorySupplier() {
-            StorageFactory mock = mock(StorageFactory.class);
-            assertEquals(mock, builder.setStorage(spec -> mock)
-                                      .storage()
-                                      .get()
-                                      .apply(ContextSpec.singleTenant("Test")));
-        }
-
-        @Test
         @DisplayName("TransportFactory if it was set")
         void transportFactory() {
             TransportFactory factory = InMemoryTransportFactory.newInstance();
@@ -122,14 +110,6 @@ class BoundedContextBuilderTest {
             builder.setAggregateRootDirectory(() -> directory);
             assertEquals(directory, builder.aggregateRootDirectory());
         }
-    }
-
-    @Test
-    @DisplayName("allow clearing storage factory")
-    void clearStorageFactorySupplier() {
-        assertFalse(builder.setStorage(Tests.nullRef())
-                           .storage()
-                           .isPresent());
     }
 
     @Nested
