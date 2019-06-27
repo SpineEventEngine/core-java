@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -30,12 +29,14 @@ import io.spine.core.EventId;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.entity.given.entity.TestAggregate;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.system.server.MemoizedSystemMessage;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.EntityCreated;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -52,11 +53,14 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 @DisplayName("EntityLifecycle should")
 class EntityLifecycleTest {
 
+    private static final EntityClass<?> TEST_ENTITY_CLASS =
+            AggregateClass.asAggregateClass(TestAggregate.class);
+
     @Test
     @DisplayName("not allow nulls in Builder")
     void nullTolerance() {
         new NullPointerTester()
-                .setDefault(TypeUrl.class, TypeUrl.of(Empty.class))
+                .setDefault(EntityClass.class, TEST_ENTITY_CLASS)
                 .setDefault(Object.class, 42)
                 .testInstanceMethods(EntityLifecycle.newBuilder(), PACKAGE);
     }
@@ -67,7 +71,7 @@ class EntityLifecycleTest {
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
                 .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
-                .setEntityType(TypeUrl.of(Empty.class))
+                .setEntityType(TEST_ENTITY_CLASS)
                 .setEntityId("sample-id")
                 .build();
         assertNotNull(lifecycle);
@@ -87,7 +91,7 @@ class EntityLifecycleTest {
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
                 .setEntityId(entityId)
-                .setEntityType(TypeUrl.of(Timestamp.class))
+                .setEntityType(TEST_ENTITY_CLASS)
                 .setSystemWriteSide(writeSide)
                 .setEventFilter(filter)
                 .build();

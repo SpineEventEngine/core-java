@@ -38,6 +38,7 @@ import "spine/core/diagnostics.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/core/version.proto";
+import "spine/system/server/entity_type.proto";
 
 // An entity was created.
 message EntityCreated {
@@ -68,6 +69,9 @@ message EventDispatchedToSubscriber {
     // dispatching may not be the same as the time of creation.
     //
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
+
+    // The fully qualified name of the subscribing entity.
+    EntityTypeName entity_type = 4 [(required) = true];
 }
 
 // An event was dispatched to a reactor.
@@ -89,6 +93,9 @@ message EventDispatchedToReactor {
     // dispatching may not be the same as the time of creation.
     //
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
+
+    // The fully qualified name of the reacting entity.
+    EntityTypeName entity_type = 4 [(required) = true];
 }
 
 // A command was dispatched to a command handler.
@@ -110,6 +117,9 @@ message CommandDispatchedToHandler {
     // dispatching may not be the same as the time of creation.
     //
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
+
+    // The fully qualified name of the handling entity.
+    EntityTypeName entity_type = 4 [(required) = true];
 }
 
 // An event was imported into an aggregate.
@@ -124,6 +134,9 @@ message EventImported {
 
     // The time when the event was imported.
     google.protobuf.Timestamp when_imported = 3 [(required) = true, (validate) = true];
+
+    // The fully qualified name of the receiver aggregate.
+    EntityTypeName entity_type = 4 [(required) = true];
 }
 
 // A state of an entity changed.
