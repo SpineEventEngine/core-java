@@ -35,6 +35,7 @@ import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
@@ -183,11 +184,11 @@ abstract class AbstractCommandBusTestSuite {
     private BoundedContext createContext() {
         Class<? extends AbstractCommandBusTestSuite> cls = getClass();
         String name = cls.getSimpleName();
-        BoundedContext result =
-                (multitenant
-                 ? BoundedContext.multitenant(name)
-                 : BoundedContext.singleTenant(name)).build();
-        return result;
+        BoundedContextBuilder builder =
+                multitenant
+                ? BoundedContext.multitenant(name)
+                : BoundedContext.singleTenant(name);
+        return builder.build();
     }
 
     @AfterEach
