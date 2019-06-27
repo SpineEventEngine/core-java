@@ -329,7 +329,11 @@ public class CommandBus extends UnicastBus<Command,
             commandScheduler =
                     ServerEnvironment.instance()
                                      .newCommandScheduler();
-            flowWatcher = createFlowWatcher();
+            @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
+            SystemWriteSide writeSide = system().get();
+            flowWatcher = new CommandFlowWatcher(
+                    (tenantId) -> delegatingTo(writeSide).get(tenantId)
+            );
             commandScheduler.setWatcher(flowWatcher);
 
             TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
@@ -340,15 +344,6 @@ public class CommandBus extends UnicastBus<Command,
             commandScheduler.setCommandBus(commandBus);
 
             return commandBus;
-        }
-
-        private CommandFlowWatcher createFlowWatcher() {
-            return new CommandFlowWatcher((tenantId) -> {
-                @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
-                        SystemWriteSide writeSide = system().get();
-                SystemWriteSide result = delegatingTo(writeSide).get(tenantId);
-                return result;
-            });
         }
 
         @Override
