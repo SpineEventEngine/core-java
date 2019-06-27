@@ -290,7 +290,8 @@ public final class BoundedContextBuilder implements Logging {
      * Adds the passed command dispatcher to the dispatcher registration list which will be
      * processed after the Bounded Context is created.
      *
-     * <p>Repositories are registered separately to the other command dispatchers.
+     * <p>This method should also be used for registering repositories of {@code CommandDispatcher}
+     * type, e.g. {@link io.spine.server.aggregate.AggregateRepository}.
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder add(CommandDispatcher<?> commandDispatcher) {
@@ -306,7 +307,8 @@ public final class BoundedContextBuilder implements Logging {
      * Adds the passed event dispatcher to the dispatcher registration list which will be processed
      * after the Bounded Context is created.
      *
-     * <p>Repositories are registered separately to the other event dispatchers.
+     * <p>This method should also be used for registering repositories of {@code EventDispatcher}
+     * type, e.g. {@link io.spine.server.projection.ProjectionRepository}.
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder add(EventDispatcher<?> eventDispatcher) {
