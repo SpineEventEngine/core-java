@@ -27,9 +27,13 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.Inbox;
+import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -42,6 +46,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -95,6 +100,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private CommandErrorHandler commandErrorHandler;
 
+    /**
+     * The {@link Inbox} for the messages, which are sent to the instances managed by this
+     * repository.
+     */
+    private @MonotonicNonNull Inbox<I> inbox;
+
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
@@ -138,6 +149,24 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .register(EventImportDispatcher.of(this));
         }
         this.commandErrorHandler = context.createCommandErrorHandler();
+        initInbox();
+    }
+
+    /**
+     * Initializes the {@code Inbox}.
+     */
+    private void initInbox() {
+        Delivery delivery = ServerEnvironment.instance()
+                                             .delivery();
+        inbox = delivery
+                .<I>newInbox(entityStateType())
+                .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
+                                  e -> new AggregateEventReactionEndpoint<>(this, e))
+                .addEventEndpoint(InboxLabel.IMPORT_EVENT,
+                                  e ->  new EventImportEndpoint<>(this, e))
+                .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
+                                    c -> new AggregateCommandEndpoint<>(this, c))
+                .build();
     }
 
     /**
@@ -200,7 +229,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * code below:
      *
      * <pre>{@code
-     * routing.replaceDefault(EventRoute.fromFirstMessageField());
+     * routing.replaceDefault(EventRoute.byFirstMessageField(SomeId.class));
      * }</pre>
      *
      * @param routing
@@ -266,27 +295,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
-        I target = with(cmd.tenantId())
-                .evaluate(() -> doDispatch(cmd));
-        return target;
-    }
-
-    private I doDispatch(CommandEnvelope cmd) {
-        I target = route(cmd);
-        dispatchTo(target, cmd);
-        return target;
+        I id = route(cmd);
+        inbox.send(cmd).toHandler(id);
+        return id;
     }
 
     private I route(CommandEnvelope cmd) {
         CommandRouting<I> routing = commandRouting();
         I target = routing.apply(cmd.message(), cmd.context());
-        onCommandTargetSet(target, cmd.id());
-        return target;
-    }
 
-    private void dispatchTo(I id, CommandEnvelope cmd) {
-        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, cmd);
-        endpoint.dispatchTo(id);
+        // We need to have a tenant set in order the callbacks could post the system events.
+        with(cmd.tenantId()).run(() -> onCommandTargetSet(target, cmd.id()));
+        return target;
     }
 
     /**
@@ -347,14 +367,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
-        Set<I> targets = with(event.tenantId())
-                .evaluate(() -> doDispatch(event));
-        return targets;
-    }
-
-    private Set<I> doDispatch(EventEnvelope event) {
         Set<I> targets = route(event);
-        targets.forEach(id -> dispatchTo(id, event));
+        targets.forEach((id) -> inbox.send(event).toReactor(id));
         return targets;
     }
 
@@ -364,24 +378,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return targets;
     }
 
-    private void dispatchTo(I id, EventEnvelope event) {
-        AggregateEventEndpoint<I, A> endpoint = new AggregateEventReactionEndpoint<>(this, event);
-        endpoint.dispatchTo(id);
-    }
-
     /**
      * Imports the passed event into one of the aggregates.
      */
     final I importEvent(EventEnvelope event) {
         checkNotNull(event);
-        I target = with(event.tenantId()).evaluate(() -> doImport(event));
-        return target;
-    }
-
-    private I doImport(EventEnvelope event) {
         I target = routeImport(event);
-        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, event);
-        endpoint.dispatchTo(target);
+        inbox.send(event).toImporter(target);
         return target;
     }
 
@@ -589,5 +592,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        super.close();
+        if(inbox != null) {
+            inbox.unregister();
+        }
     }
 }

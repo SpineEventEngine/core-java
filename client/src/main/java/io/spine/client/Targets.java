@@ -108,10 +108,10 @@ public final class Targets {
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
-            List<?> idsList = notNullList(ids);
+            List<?> idsList = nonNullList(ids);
             IdFilter idFilter = acceptingOnly(idsList);
 
-            List<CompositeFilter> filterList = notNullList(filters);
+            List<CompositeFilter> filterList = nonNullList(filters);
             TargetFilters targetFilters = targetFilters(filterList, idFilter);
             builder.setFilters(targetFilters);
         }
@@ -189,7 +189,7 @@ public final class Targets {
      *
      * @return a new {@link List} instance
      */
-    private static <T> ImmutableList<T> notNullList(@Nullable Iterable<T> input) {
+    private static <T> ImmutableList<T> nonNullList(@Nullable Iterable<T> input) {
         if (input == null) {
             return ImmutableList.of();
         }

@@ -1,0 +1,70 @@
+//
+// Copyright 2019, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+syntax = "proto3";
+
+package spine.server.sharding;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+
+option java_package = "io.spine.server.delivery";
+option java_outer_classname = "DeliveryProto";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+import "spine/server/server_environment.proto";
+
+// An index of a shard.
+//
+// A value type used across the application. To be potentially used in JavaScript, Go, C++ and
+// other client and server environments, that are split into shards.
+//
+message ShardIndex {
+
+    // The zero-based index of the shard.
+    int32 index = 1 [(min).value = "0"];
+
+    // Total number of shards.
+    int32 of_total = 2 [(min).value = "1"];
+}
+
+
+// A record describing the session in scope of which sharded messages are being processed.
+message ShardSessionRecord {
+
+    // The index of a shard processed in this session.
+    ShardIndex index = 1 [(required) = true];
+
+    // The identifier of an application node, which picked up the index and processes it.
+    //
+    // Unset until a node picks the session.
+    //
+    NodeId picked_by = 2;
+
+    // When the shard processed within the session was last picked by the node.
+    //
+    // This field is unset no nodes ever picked the session.
+    //
+    google.protobuf.Timestamp when_last_picked = 3;
+}

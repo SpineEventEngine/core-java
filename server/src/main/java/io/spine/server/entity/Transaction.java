@@ -262,6 +262,8 @@ public abstract class Transaction<I,
             return result;
         } catch (Throwable t) {
             rollback(t);
+            //TODO:2019-06-24:alex.tymchenko:
+            // https://github.com/SpineEventEngine/core-java/issues/1094
             throw propagate(t);
         } finally {
             phases.add(phase);

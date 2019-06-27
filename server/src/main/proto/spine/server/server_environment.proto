@@ -10,7 +10,6 @@ option java_outer_classname = "ServerEnvironmentProto";
 option java_multiple_files = true;
 
 // A type of the environment system is deployed to.
-//
 enum DeploymentType {
 
     // Running in a standalone mode.
@@ -24,4 +23,10 @@ enum DeploymentType {
 
     // Running on an App Engine cloud infrastructure.
     APPENGINE_CLOUD = 2;
+}
+
+// An identifier of a server node of the application.
+message NodeId {
+
+    string value = 1 [(required) = true];
 }

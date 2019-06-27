@@ -328,6 +328,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>The reference to the storage becomes null after this call.
      */
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void close() {
         if (this.storage != null) {
             this.storage.close();

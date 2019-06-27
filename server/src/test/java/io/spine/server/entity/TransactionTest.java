@@ -382,7 +382,10 @@ public abstract class TransactionTest<I,
             Version nextVersion = Versions.increment(entity.version());
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
 
+            //TODO:2019-06-16:alex.tymchenko:
+            // see https://github.com/SpineEventEngine/core-java/issues/1094
             assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
+
             checkRollback(entity, originalState, originalVersion);
         }
 
