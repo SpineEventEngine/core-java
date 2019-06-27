@@ -22,6 +22,7 @@ package io.spine.server.trace;
 
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
+import io.spine.system.server.EntityTypeName;
 
 /**
  * A tracer of a single signal.
@@ -43,6 +44,8 @@ public interface Tracer extends AutoCloseable {
      *
      * @param receiver
      *         the entity handling the signal
+     * @param receiverType
+     *         the class of the entity handling the signal
      */
-    void processedBy(MessageId receiver);
+    void processedBy(MessageId receiver, EntityTypeName receiverType);
 }
