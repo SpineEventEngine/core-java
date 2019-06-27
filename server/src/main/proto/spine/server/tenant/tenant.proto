@@ -35,7 +35,7 @@ import "spine/core/tenant_id.proto";
 // The state of entities implementing default Tenant Index.
 message Tenant {
     option (internal_type) = true;
-    option (entity) = { kind: ENTITY visibility: QUERY};
+    option (entity) = { kind: ENTITY visibility: QUERY };
 
     spine.core.TenantId id = 1;
 
