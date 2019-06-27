@@ -30,7 +30,7 @@ import io.spine.client.Query;
  * <p>Used to define a processing result for {@link Query} which does not hit any of
  * exposed state objects.
  */
-class NoopQueryProcessor implements QueryProcessor {
+class NoOpQueryProcessor implements QueryProcessor {
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         return ImmutableList.of();

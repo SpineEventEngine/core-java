@@ -57,7 +57,7 @@ class StateRoutingTest {
         context = BlackBoxBoundedContext.from(
                 BoundedContextBuilder
                         .assumingTests()
-                        .add(DefaultRepository.of(MagazineAggregate.class)));
+                        .add(MagazineAggregate.class));
     }
 
     @Test

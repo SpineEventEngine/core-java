@@ -109,7 +109,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     /**
      * Used to return an empty result collection for {@link Query}.
      */
-    private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
+    private static final QueryProcessor NO_OP_PROCESSOR = new NoOpQueryProcessor();
 
     /**
      * Manages the subscriptions for this instance of {@code Stand}.
@@ -470,7 +470,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         } else if (exposedAggregateTypes().contains(type)) {
             return aggregateProcessor();
         } else {
-            return NOOP_PROCESSOR;
+            return NO_OP_PROCESSOR;
         }
     }
 

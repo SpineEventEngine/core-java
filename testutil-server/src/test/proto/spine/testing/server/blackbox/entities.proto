@@ -76,6 +76,14 @@ message BbTask {
     string description = 3;
 }
 
+message BbTaskView {
+    option (entity).kind = PROJECTION;
+
+    BbTaskId task_id = 1;
+    string title = 2;
+    string description = 3;
+}
+
 message BbInit {
     option (entity) = {kind: PROCESS_MANAGER visibility: FULL};
 

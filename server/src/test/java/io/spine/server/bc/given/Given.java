@@ -20,10 +20,23 @@
 
 package io.spine.server.bc.given;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.bc.ProjectId;
+import io.spine.test.bc.command.BcCreateProject;
 import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
+
+import java.util.Optional;
+import java.util.Set;
 
 public class Given {
 
@@ -51,6 +64,58 @@ public class Given {
             return BcProjectStarted.newBuilder()
                                    .setProjectId(id)
                                    .build();
+        }
+    }
+
+    public static class NoOpCommandDispatcher implements CommandDispatcher<ProjectId> {
+
+        private final CommandClass commandClass = CommandClass.from(BcCreateProject.class);
+
+        @Override
+        public Set<CommandClass> messageClasses() {
+            return ImmutableSet.of(commandClass);
+        }
+
+        @CanIgnoreReturnValue
+        @Override
+        public ProjectId dispatch(CommandEnvelope envelope) {
+            return ProjectId.getDefaultInstance();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            // NO-OP.
+        }
+    }
+
+    public static class NoOpEventDispatcher implements EventDispatcher<ProjectId> {
+
+        private final EventClass eventClass = EventClass.from(BcProjectCreated.class);
+
+        @Override
+        public Set<EventClass> externalEventClasses() {
+            return ImmutableSet.of(eventClass);
+        }
+
+        @Override
+        public Set<EventClass> messageClasses() {
+            return ImmutableSet.of();
+        }
+
+        @CanIgnoreReturnValue
+        @Override
+        public Set<ProjectId> dispatch(EventEnvelope envelope) {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // NO-OP.
+        }
+
+        @Override
+        public Optional<ExternalMessageDispatcher<ProjectId>> createExternalDispatcher() {
+            return Optional.empty();
         }
     }
 }

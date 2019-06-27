@@ -204,6 +204,7 @@ public class CommandBus extends UnicastBus<Command,
      *
      * @return a set of classes of supported commands
      */
+    @Internal
     public final Set<CommandClass> registeredCommandClasses() {
         return registry().registeredMessageClasses();
     }
