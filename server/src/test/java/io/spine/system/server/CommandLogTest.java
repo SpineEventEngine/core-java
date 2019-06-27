@@ -39,7 +39,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandDispatched;
 import io.spine.system.server.event.CommandErrored;
@@ -86,7 +85,6 @@ class CommandLogTest {
                 .build();
         context = BoundedContext
                 .singleTenant(contextName.getValue())
-                .setStorage(InMemoryStorageFactory::newInstance)
                 .build();
         system = systemOf(context);
 

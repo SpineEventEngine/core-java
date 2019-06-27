@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
@@ -31,9 +30,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
@@ -41,7 +40,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -51,8 +49,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -70,12 +70,17 @@ public class CommandBus extends UnicastBus<Command,
                                            CommandClass,
                                            CommandDispatcher<?>> {
 
-    private final CommandScheduler scheduler;
-    private final EventBus eventBus;
-    private final SystemWriteSide systemWriteSide;
-    private final TenantIndex tenantIndex;
+    /** Consumes tenant IDs from incoming commands. */
+    private final Consumer<TenantId> tenantConsumer;
+
+    /** Consumes commands dispatched by this bus. */
+    private final CommandFlowWatcher watcher;
+
+    /** Callback for handling commands that failed. */
     private final CommandErrorHandler errorHandler;
-    private final CommandFlowWatcher flowWatcher;
+
+    private final CommandScheduler scheduler;
+    private final SystemWriteSide systemWriteSide;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -86,7 +91,7 @@ public class CommandBus extends UnicastBus<Command,
      */
     private final boolean multitenant;
 
-    private final DeadCommandHandler deadCommandHandler;
+    private final DeadCommandHandler deadCommandHandler = new DeadCommandHandler();
 
     /**
      * Tha validator for the commands posted into this bus.
@@ -106,15 +111,12 @@ public class CommandBus extends UnicastBus<Command,
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
-        this.scheduler = builder.commandScheduler;
-        this.eventBus = builder.eventBus;
+        this.scheduler = checkNotNull(builder.commandScheduler);
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
-        this.tenantIndex = builder.tenantIndex()
-                                  .orElseThrow(tenantIndexNotSet());
-        this.deadCommandHandler = new DeadCommandHandler();
-        this.errorHandler = CommandErrorHandler.with(systemWriteSide);
-        this.flowWatcher = builder.flowWatcher;
+        this.tenantConsumer = checkNotNull(builder.tenantConsumer);
+        this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
+        this.watcher = checkNotNull(builder.flowWatcher);
     }
 
     /**
@@ -126,18 +128,13 @@ public class CommandBus extends UnicastBus<Command,
 
     @Internal
     @VisibleForTesting
-    public boolean isMultitenant() {
+    public final boolean isMultitenant() {
         return multitenant;
-    }
-
-    @VisibleForTesting
-    CommandScheduler scheduler() {
-        return scheduler;
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
-    protected Collection<BusFilter<CommandEnvelope>> filterChainTail() {
+    protected final Collection<BusFilter<CommandEnvelope>> filterChainTail() {
         return ImmutableList.of(scheduler);
     }
 
@@ -177,43 +174,38 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     private static TenantId tenantOf(Iterable<Command> commands) {
-        return Streams.stream(commands)
-                      .map(Command::tenant)
-                      .findAny()
-                      .orElse(TenantId.getDefaultInstance());
+        Iterator<Command> iterator = commands.iterator();
+        return iterator.hasNext()
+               ? iterator.next().tenant()
+               : TenantId.getDefaultInstance();
     }
 
-    SystemWriteSide systemFor(TenantId tenantId) {
+    final SystemWriteSide systemFor(TenantId tenantId) {
         checkNotNull(tenantId);
         SystemWriteSide result = delegatingTo(systemWriteSide).get(tenantId);
         return result;
     }
 
     @Override
-    protected void dispatch(CommandEnvelope envelope) {
-        CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        flowWatcher.onDispatchCommand(envelope);
+    protected void dispatch(CommandEnvelope command) {
+        CommandDispatcher<?> dispatcher = dispatcherOf(command);
+        watcher.onDispatchCommand(command);
         try {
-            dispatcher.dispatch(envelope);
+            dispatcher.dispatch(command);
         } catch (RuntimeException exception) {
-            onError(envelope, exception);
+            errorHandler.handleAndPostIfRejection(command, exception);
         }
     }
 
-    private void onError(CommandEnvelope envelope, RuntimeException exception) {
-        Optional<Event> rejection = errorHandler.handle(envelope, exception)
-                                                .asRejection()
-                                                .map(RejectionEnvelope::outerObject);
-        rejection.ifPresent(eventBus::post);
-    }
-
     /**
-     * Obtains a view {@code Set} of commands that are known to this {@code CommandBus}.
+     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
      *
      * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
+     *
+     * @return a set of classes of supported commands
      */
     @Internal
-    public Set<CommandClass> registeredCommandClasses() {
+    public final Set<CommandClass> registeredCommandClasses() {
         return registry().registeredMessageClasses();
     }
 
@@ -241,7 +233,7 @@ public class CommandBus extends UnicastBus<Command,
     @Override
     protected void store(Iterable<Command> commands) {
         TenantId tenantId = tenantOf(commands);
-        tenantIndex.keep(tenantId);
+        tenantConsumer.accept(tenantId);
     }
 
     /**
@@ -263,7 +255,6 @@ public class CommandBus extends UnicastBus<Command,
                                                    CommandEnvelope,
                                                    CommandClass,
                                                    CommandDispatcher<?>> {
-
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
          *
@@ -275,15 +266,10 @@ public class CommandBus extends UnicastBus<Command,
          * {@code BoundedContext}.
          */
         private @Nullable Boolean multitenant;
-
-        /**
-         * Optional field for the {@code CommandBus}.
-         *
-         * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
-         */
+        private CommandFlowWatcher flowWatcher;
+        private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
         private EventBus eventBus;
-        private CommandFlowWatcher flowWatcher;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -306,16 +292,6 @@ public class CommandBus extends UnicastBus<Command,
             return this;
         }
 
-        public Optional<CommandScheduler> getCommandScheduler() {
-            return ofNullable(commandScheduler);
-        }
-
-        public Builder setCommandScheduler(CommandScheduler commandScheduler) {
-            checkNotNull(commandScheduler);
-            this.commandScheduler = commandScheduler;
-            return this;
-        }
-
         /**
          * Inject the {@link EventBus} of the bounded context to which the built bus belongs.
          *
@@ -330,7 +306,7 @@ public class CommandBus extends UnicastBus<Command,
             return this;
         }
 
-        Optional<EventBus> getEventBus() {
+        Optional<EventBus> eventBus() {
             return ofNullable(eventBus);
         }
 
@@ -351,19 +327,21 @@ public class CommandBus extends UnicastBus<Command,
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();
+            commandScheduler =
+                    ServerEnvironment.instance()
+                                     .newCommandScheduler();
+            @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
+            SystemWriteSide writeSide = system().get();
+            flowWatcher = new CommandFlowWatcher(
+                    (tenantId) -> delegatingTo(writeSide).get(tenantId)
+            );
+            commandScheduler.setWatcher(flowWatcher);
 
-            if (commandScheduler == null) {
-                commandScheduler = new ExecutorCommandScheduler();
-            }
-            flowWatcher = new CommandFlowWatcher((tenantId) -> {
-                @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
-                SystemWriteSide writeSide = system().get();
-                SystemWriteSide result = delegatingTo(writeSide).get(tenantId);
-                return result;
-            });
-            commandScheduler.setFlowWatcher(flowWatcher);
+            TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
+            tenantConsumer = tenantIndex::keep;
 
             CommandBus commandBus = createCommandBus();
+
             commandScheduler.setCommandBus(commandBus);
 
             return commandBus;

@@ -38,7 +38,6 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
@@ -62,7 +61,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A builder for producing {@code BoundedContext} instances.
@@ -74,7 +72,6 @@ public final class BoundedContextBuilder implements Logging {
     private final ContextSpec spec;
 
     private TenantIndex tenantIndex;
-    private @Nullable Function<ContextSpec, StorageFactory> storage;
     private @Nullable Function<ContextSpec, TracerFactory> tracing;
 
     private CommandBus.Builder commandBus;
@@ -151,48 +148,6 @@ public final class BoundedContextBuilder implements Logging {
         return spec.isMultitenant();
     }
 
-    /**
-     * Sets the supplier for {@code StorageFactory}.
-     *
-     * <p>If the supplier was not set or {@code null} was passed,
-     * {@link StorageFactorySwitch} will be used during the construction of
-     * a {@code BoundedContext} instance.
-     *
-     * @deprecated Use {@link #setStorage} instead
-     */
-    @CanIgnoreReturnValue
-    @Deprecated
-    public BoundedContextBuilder
-    setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
-        this.storage = supplier != null
-                       ? spec -> supplier.get()
-                       : null;
-        return this;
-    }
-
-    /**
-     * Sets the function which produces the {@code StorageFactory}.
-     *
-     * <p>If the function was not set or {@code null} was passed,
-     * {@link StorageFactorySwitch} will be used during the construction of
-     * a {@code BoundedContext} instance.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder
-    setStorage(@Nullable Function<ContextSpec, StorageFactory> function) {
-        this.storage = function;
-        return this;
-    }
-
-    public Optional<Function<ContextSpec, StorageFactory>> storage() {
-        return Optional.ofNullable(storage);
-    }
-
-    Function<ContextSpec, StorageFactory> buildStorage() {
-        checkState(storage != null);
-        return storage;
-    }
-
     @CanIgnoreReturnValue
     public BoundedContextBuilder
     setTracerFactorySupplier(@Nullable Function<ContextSpec, TracerFactory> tracing) {
@@ -248,7 +203,9 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(eventBus);
     }
 
-    EventBus buildEventBus() {
+    EventBus buildEventBus(BoundedContext context) {
+        checkNotNull(context);
+        eventBus.injectContext(context);
         return eventBus.build();
     }
 
@@ -510,7 +467,6 @@ public final class BoundedContextBuilder implements Logging {
      * such as:
      * <ul>
      *     <li>{@linkplain #tenantIndex()} tenancy;
-     *     <li>{@linkplain #storageFactory()} storage facilities;
      *     <li>{@linkplain #transportFactory()} transport facilities.
      * </ul>
      *
@@ -562,13 +518,11 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem(TransportFactory transport) {
-        BoundedContextName name = BoundedContextNames.system(spec.name());
+        String name = BoundedContextNames.system(spec.name()).getValue();
         boolean multitenant = isMultitenant();
         BoundedContextBuilder system = multitenant
-                                       ? BoundedContext.multitenant(name.getValue())
-                                       : BoundedContext.singleTenant(name.getValue());
-        Optional<? extends Function<ContextSpec, StorageFactory>> storage = storage();
-        storage.ifPresent(system::setStorage);
+                                       ? BoundedContext.multitenant(name)
+                                       : BoundedContext.singleTenant(name);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
@@ -582,7 +536,9 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
                    SystemClient client,
                    TransportFactory transport) {
-        StorageFactory storageFactory = storageFactory();
+        StorageFactory storageFactory =
+                ServerEnvironment.instance()
+                                 .storageFactory();
 
         initTenantIndex(storageFactory);
         initCommandBus(client.writeSide());
@@ -592,21 +548,6 @@ public final class BoundedContextBuilder implements Logging {
 
         B result = instanceFactory.apply(this);
         return result;
-    }
-
-    private StorageFactory storageFactory() {
-        if (storage == null) {
-            storage = new StorageFactorySwitch();
-        }
-        StorageFactory storageFactory = storage.apply(spec);
-
-        if (storageFactory == null) {
-            throw newIllegalStateException(
-                    "Supplier of StorageFactory (%s) returned null instance",
-                    storage
-            );
-        }
-        return storageFactory;
     }
 
     private void initTenantIndex(StorageFactory factory) {

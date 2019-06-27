@@ -99,7 +99,7 @@ class SubscriptionServiceTest {
             SubscriptionService subscriptionService = builder.build();
             assertNotNull(subscriptionService);
 
-            List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+            List<BoundedContext> boundedContexts = builder.contexts();
             assertThat(boundedContexts).hasSize(1);
             assertTrue(boundedContexts.contains(oneContext));
         }
@@ -119,7 +119,7 @@ class SubscriptionServiceTest {
             SubscriptionService service = builder.build();
             assertNotNull(service);
 
-            List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+            List<BoundedContext> boundedContexts = builder.contexts();
             assertThat(boundedContexts).containsExactly(bc1, bc2, bc3);
         }
     }
@@ -141,7 +141,7 @@ class SubscriptionServiceTest {
         SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
-        List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+        List<BoundedContext> boundedContexts = builder.contexts();
         assertThat(boundedContexts).containsExactly(bc3);
     }
 

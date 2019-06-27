@@ -142,7 +142,7 @@ public class QueryService
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
 
             Stand stand = boundedContext.stand();
-            ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
+            ImmutableSet<TypeUrl> exposedTypes = stand.exposedTypes();
 
             for (TypeUrl availableType : exposedTypes) {
                 mapBuilder.put(availableType, boundedContext);

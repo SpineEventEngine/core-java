@@ -19,13 +19,14 @@
  */
 package io.spine.server.event.store;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -37,7 +38,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -51,10 +51,9 @@ public final class EventStore implements AutoCloseable {
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
                     System.lineSeparator() +
-                    "Observed tenants are: %s";
+                    "Observed tenants are: %s.";
 
     private final ERepository storage;
-    private final Executor streamExecutor;
     private final Log log;
 
     /**
@@ -66,30 +65,18 @@ public final class EventStore implements AutoCloseable {
         return new Builder();
     }
 
-    private static void ensureSameTenant(Iterable<Event> events) {
-        checkNotNull(events);
-        Set<TenantId> tenants = Streams.stream(events)
-                                       .map(Event::tenant)
-                                       .collect(toSet());
-        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
+    /**
+     * Constructs new instance taking arguments from the passed builder.
+     */
+    private EventStore(Builder builder) {
+        super();
+        this.storage = new ERepository();
+        this.log = new Log(builder.logger());
     }
 
-    /**
-     * Constructs an instance with the passed executor for returning streams.
-     *
-     * @param streamExecutor the executor for updating new subscribers
-     * @param storageFactory the storage factory for creating underlying storage
-     * @param logger         debug logger instance
-     */
-    private EventStore(Executor streamExecutor,
-                       StorageFactory storageFactory,
-                       @Nullable Logger logger) {
-        super();
-        ERepository eventRepository = new ERepository();
-        eventRepository.initStorage(storageFactory);
-        this.storage = eventRepository;
-        this.streamExecutor = streamExecutor;
-        this.log = new Log(logger);
+    @Internal
+    public void init(BoundedContext context) {
+        context.register(storage);
     }
 
     /**
@@ -143,6 +130,14 @@ public final class EventStore implements AutoCloseable {
         log.stored(events);
     }
 
+    private static void ensureSameTenant(Iterable<Event> events) {
+        checkNotNull(events);
+        Set<TenantId> tenants = Streams.stream(events)
+                                       .map(Event::tenant)
+                                       .collect(toSet());
+        checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
+    }
+
     /**
      * Creates the stream with events matching the passed query.
      *
@@ -155,23 +150,14 @@ public final class EventStore implements AutoCloseable {
 
         log.readingStart(request, responseObserver);
 
-        streamExecutor.execute(() -> {
-            Iterator<Event> eventRecords = storage.iterator(request);
-            while (eventRecords.hasNext()) {
-                Event event = eventRecords.next();
-                responseObserver.onNext(event);
-            }
-            responseObserver.onCompleted();
-            log.readingComplete(responseObserver);
-        });
-    }
+        Iterator<Event> eventRecords = storage.iterator(request);
+        while (eventRecords.hasNext()) {
+            Event event = eventRecords.next();
+            responseObserver.onNext(event);
+        }
+        responseObserver.onCompleted();
 
-    /**
-     * Obtains stream executor used by the store.
-     */
-    @VisibleForTesting
-    public Executor getStreamExecutor() {
-        return streamExecutor;
+        log.readingComplete(responseObserver);
     }
 
     /**
@@ -194,7 +180,6 @@ public final class EventStore implements AutoCloseable {
      */
     public static final class Builder {
 
-        private Executor streamExecutor;
         private StorageFactory storageFactory;
         private @Nullable Logger logger;
 
@@ -207,21 +192,10 @@ public final class EventStore implements AutoCloseable {
          * verify that all required parameters are set.
          */
         private void checkState() {
-            checkNotNull(getStreamExecutor(), "streamExecutor must be set");
-            checkNotNull(getStorageFactory(), "eventStorage must be set");
+            checkNotNull(storageFactory(), "eventStorage must be set");
         }
 
-        public Executor getStreamExecutor() {
-            return streamExecutor;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setStreamExecutor(Executor executor) {
-            this.streamExecutor = checkNotNull(executor);
-            return this;
-        }
-
-        public StorageFactory getStorageFactory() {
+        public StorageFactory storageFactory() {
             return storageFactory;
         }
 
@@ -231,7 +205,7 @@ public final class EventStore implements AutoCloseable {
             return this;
         }
 
-        public @Nullable Logger getLogger() {
+        public @Nullable Logger logger() {
             return logger;
         }
 
@@ -252,19 +226,18 @@ public final class EventStore implements AutoCloseable {
             return this;
         }
 
+        /** Returns default logger for this class. */
+        private static Logger defaultLogger() {
+            return Logging.get(EventStore.class);
+        }
+
         /**
          * Creates new {@code EventStore} instance.
          */
         public EventStore build() {
             checkState();
-            EventStore result =
-                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
+            EventStore result = new EventStore(this);
             return result;
-        }
-
-        /** Returns default logger for this class. */
-        private static Logger defaultLogger() {
-            return Logging.get(EventStore.class);
         }
     }
 }

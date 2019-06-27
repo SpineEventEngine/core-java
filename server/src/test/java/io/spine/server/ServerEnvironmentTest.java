@@ -20,14 +20,24 @@
 
 package io.spine.server;
 
+import io.spine.base.Environment;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
+import io.spine.server.entity.Entity;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PATH;
 import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTION_VALUE;
@@ -39,6 +49,7 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("deprecation") // Need to test deprecated API of `ServerEnvironment`.
 @DisplayName("ServerEnvironment utility should")
@@ -142,6 +153,59 @@ class ServerEnvironmentTest {
         }
     }
 
+    @Nested
+    @DisplayName("configure production `StorageFactory`")
+    class StorageFactoryConfig {
+
+        private final Environment environment = Environment.getInstance();
+        private final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
+
+        @BeforeEach
+        void turnToProduction() {
+            environment.setToProduction();
+        }
+
+        @AfterEach
+        void backToTests() {
+            environment.setToTests();
+            serverEnvironment.clearStorageFactory();
+        }
+
+        @Test
+        @DisplayName("throwing NPE if not configured in Production mode")
+        void throwsIfNotConfigured() {
+            assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
+        }
+
+        @Test
+        @DisplayName("do not allow passing `InMemoryStorageFactory`")
+        void seriousStorageForProduction() {
+            InMemoryStorageFactory inMemoryStorageFactory = InMemoryStorageFactory.newInstance();
+
+            assertThrows(IllegalArgumentException.class, () ->
+                    serverEnvironment.configureProductionStorage(inMemoryStorageFactory)
+            );
+        }
+
+        @Test
+        @DisplayName("return configured `StorageFactory` when asked in Production")
+        void productionFactory() {
+            StubStorageFactory factory = new StubStorageFactory();
+            serverEnvironment.configureProductionStorage(factory);
+            assertThat(serverEnvironment.storageFactory())
+                    .isEqualTo(factory);
+        }
+
+        @Test
+        @DisplayName("return `InMemoryStorageFactory` under Tests")
+        void testsFactory() {
+            environment.setToTests();
+
+            assertThat(serverEnvironment.storageFactory())
+                    .isInstanceOf(InMemoryStorageFactory.class);
+        }
+    }
+
     @SuppressWarnings({
             "AccessOfSystemProperties" /* Testing the configuration loaded from System properties. */,
             "AbstractClassWithoutAbstractMethods" /* A test base with setUp and tearDown. */
@@ -175,6 +239,39 @@ class ServerEnvironmentTest {
 
         void setGaeEnvironment(String value) {
             System.setProperty(APP_ENGINE_ENVIRONMENT_PATH, value);
+        }
+    }
+
+    /**
+     * Stub implementation of {@code StorageFactory} which acts like {@code InMemoryStorageFactory}
+     * but has different type.
+     */
+    private static class StubStorageFactory implements StorageFactory {
+
+        private final StorageFactory delegate = InMemoryStorageFactory.newInstance();
+        @Override
+        public <I> AggregateStorage<I>
+        createAggregateStorage(ContextSpec context,
+                               Class<? extends Aggregate<I, ?, ?>> aggregateClass) {
+            return delegate.createAggregateStorage(context, aggregateClass);
+        }
+
+        @Override
+        public <I> RecordStorage<I>
+        createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
+            return delegate.createRecordStorage(context, entityClass);
+        }
+
+        @Override
+        public <I> ProjectionStorage<I>
+        createProjectionStorage(ContextSpec context,
+                                Class<? extends Projection<I, ?, ?>> projectionClass) {
+            return delegate.createProjectionStorage(context, projectionClass);
+        }
+
+        @Override
+        public void close() throws Exception {
+            delegate.close();
         }
     }
 }

@@ -32,7 +32,6 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
@@ -41,58 +40,49 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
  */
 public final class InMemoryStorageFactory implements StorageFactory {
 
-    private final ContextSpec context;
-
     /**
      * Creates new instance of the factory which would serve the specified context.
      *
-     * @param spec
-     *         the context specification
      * @return new instance of the factory
      */
-    public static InMemoryStorageFactory newInstance(ContextSpec spec) {
-        checkNotNull(spec);
-        return new InMemoryStorageFactory(spec);
+    public static InMemoryStorageFactory newInstance() {
+        return new InMemoryStorageFactory();
     }
 
-    private InMemoryStorageFactory(ContextSpec context) {
-        this.context = context;
-    }
-
-    @Override
-    public boolean isMultitenant() {
-        return context.isMultitenant();
+    private InMemoryStorageFactory() {
     }
 
     /** <b>NOTE</b>: the parameter is unused. */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(
-            Class<? extends Aggregate<I, ?, ?>> unused) {
-        return new InMemoryAggregateStorage<>(isMultitenant());
+    public <I> AggregateStorage<I>
+    createAggregateStorage(ContextSpec context, Class<? extends Aggregate<I, ?, ?>> unused) {
+        return new InMemoryAggregateStorage<>(context.isMultitenant());
     }
 
     @Override
     public <I> RecordStorage<I>
-    createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
+    createRecordStorage(ContextSpec context, Class<? extends Entity<I, ?>> entityClass) {
         EntityClass<?> modelClass = asEntityClass(entityClass);
-        StorageSpec<I> spec = toStorageSpec(modelClass);
-        return new InMemoryRecordStorage<>(spec, isMultitenant(), entityClass);
+        StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
+        return new InMemoryRecordStorage<>(storageSpec, context.isMultitenant(), entityClass);
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(
-            Class<? extends Projection<I, ?, ?>> projectionClass) {
+    public <I> ProjectionStorage<I>
+    createProjectionStorage(ContextSpec context,
+                            Class<? extends Projection<I, ?, ?>> projectionClass) {
         EntityClass<?> modelClass = asProjectionClass(projectionClass);
-        StorageSpec<I> spec = toStorageSpec(modelClass);
+        StorageSpec<I> storageSpec = toStorageSpec(context, modelClass);
         InMemoryRecordStorage<I> recordStorage =
-                new InMemoryRecordStorage<>(spec, isMultitenant(), projectionClass);
+                new InMemoryRecordStorage<>(storageSpec, context.isMultitenant(), projectionClass);
         return new InMemoryProjectionStorage<>(recordStorage);
     }
 
     /**
      * Obtains storage specification for the passed entity class.
      */
-    private <I> StorageSpec<I> toStorageSpec(EntityClass<?> modelClass) {
+    private static <I>
+    StorageSpec<I> toStorageSpec(ContextSpec context, EntityClass<?> modelClass) {
         Class<? extends Message> stateClass = modelClass.stateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.idClass();
@@ -106,12 +96,4 @@ public final class InMemoryStorageFactory implements StorageFactory {
         // NOP
     }
 
-    @Override
-    public StorageFactory toSingleTenant() {
-        if (!isMultitenant()) {
-            return this;
-        }
-        ContextSpec multitenantSpec = ContextSpec.singleTenant(context.name().getValue());
-        return newInstance(multitenantSpec);
-    }
 }

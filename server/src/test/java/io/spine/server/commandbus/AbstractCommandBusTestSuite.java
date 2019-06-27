@@ -34,11 +34,11 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.ContextSpec;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
@@ -46,7 +46,6 @@ import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.test.commandbus.event.CmdBusProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,7 +83,6 @@ abstract class AbstractCommandBusTestSuite {
 
     protected CommandBus commandBus;
     protected EventBus eventBus;
-    protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
     protected TenantIndex tenantIndex;
@@ -160,32 +158,37 @@ abstract class AbstractCommandBusTestSuite {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
-        String name = cls.getSimpleName();
-        ContextSpec spec = multitenant
-                           ? ContextSpec.multitenant(name)
-                           : ContextSpec.singleTenant(name);
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance(spec);
-        tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
-        scheduler = spy(new ExecutorCommandScheduler());
+        BoundedContext context = createContext();
+
+        tenantIndex = context.tenantIndex();
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
-        eventBus = EventBus.newBuilder()
-                           .setStorageFactory(storageFactory)
-                           .build();
+
+        eventBus = context.eventBus();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
-                .setCommandScheduler(scheduler)
-                .injectEventBus(eventBus)
+                .injectContext(context)
+                .injectEventBus(context.eventBus())
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
+
         requestFactory =
                 multitenant
                 ? new TestActorRequestFactory(getClass(), newUuid())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
+    }
+
+    private BoundedContext createContext() {
+        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
+        String name = cls.getSimpleName();
+        BoundedContextBuilder builder =
+                multitenant
+                ? BoundedContext.multitenant(name)
+                : BoundedContext.singleTenant(name);
+        return builder.build();
     }
 
     @AfterEach
@@ -236,7 +239,7 @@ abstract class AbstractCommandBusTestSuite {
     /**
      * A sample command handler that tells whether a handler was invoked.
      */
-    class CreateProjectHandler extends AbstractCommandHandler {
+    final class CreateProjectHandler extends AbstractCommandHandler {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();

@@ -20,20 +20,21 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.test.entity.event.EntProjectCreated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 @DisplayName("CompositeEventFilter should")
 class CompositeEventFilterTest {
@@ -65,17 +66,50 @@ class CompositeEventFilterTest {
     @Test
     @DisplayName("not accept an event is one filter not accepts")
     void rejectIfOneRejects() {
-        EventFilter spyFilter = mock(EventFilter.class);
         EventMessage eventMessage = EntProjectCreated.getDefaultInstance();
-        doReturn(Optional.of(eventMessage))
-                .when(spyFilter).filter(any(EventMessage.class));
+
+        MockFilter mockFilter = new MockFilter(eventMessage);
+
         CompositeEventFilter filter = CompositeEventFilter
                 .newBuilder()
                 .add(anyEvent -> Optional.empty())
-                .add(spyFilter)
+                .add(mockFilter)
                 .build();
+
         Optional<? extends EventMessage> filtered = filter.filter(eventMessage);
-        assertFalse(filtered.isPresent());
-        verifyZeroInteractions(spyFilter);
+
+        assertThat(filtered)
+                .isEmpty();
+        assertFalse(mockFilter.called());
+    }
+
+    /**
+     * Mock implementation of {@code EventFilter} which always returns the message passed on
+     * constructor, and remembers if its methods were called.
+     */
+    private static final class MockFilter implements EventFilter {
+
+        private boolean called;
+        private final EventMessage eventMessage;
+
+        private MockFilter(EventMessage message) {
+            this.eventMessage = message;
+        }
+
+        boolean called() {
+            return called;
+        }
+
+        @Override
+        public Optional<? extends EventMessage> filter(EventMessage event) {
+            called = true;
+            return Optional.of(eventMessage);
+        }
+
+        @Override
+        public ImmutableCollection<Event> filter(Collection<Event> events) {
+            called = true;
+            return ImmutableList.copyOf(events);
+        }
     }
 }

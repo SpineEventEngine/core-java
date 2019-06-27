@@ -42,8 +42,8 @@ public abstract class UnicastBus<T extends Message,
         super(builder);
     }
 
-    protected D getDispatcher(E envelope) {
-        return registry().getDispatcher(envelope)
+    protected D dispatcherOf(E envelope) {
+        return registry().dispatcherOf(envelope)
                          .orElseThrow(() -> noDispatcherFound(envelope));
     }
 

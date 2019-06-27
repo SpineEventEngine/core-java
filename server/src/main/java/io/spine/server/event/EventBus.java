@@ -34,6 +34,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
+import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
@@ -135,7 +136,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
 
     @VisibleForTesting
     Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
-        return registry().getDispatchersForType(eventClass);
+        return registry().dispatchersOf(eventClass);
     }
 
     @VisibleForTesting
@@ -250,6 +251,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     @Override
     protected EventDispatcherRegistry registry() {
         return (EventDispatcherRegistry) super.registry();
+    }
+
+    @Internal
+    public void init(BoundedContext context) {
+        eventStore.init(context);
     }
 
     /** The {@code Builder} for {@code EventBus}. */
@@ -440,7 +446,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             if (eventStore == null) {
                 eventStore = EventStore
                         .newBuilder()
-                        .setStreamExecutor(eventStoreStreamExecutor)
                         .setStorageFactory(storageFactory)
                         .withDefaultLogger()
                         .build();

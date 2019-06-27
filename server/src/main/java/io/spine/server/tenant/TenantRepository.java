@@ -20,12 +20,16 @@
 
 package io.spine.server.tenant;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
+import io.spine.server.ContextSpec;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantRepository.Entity;
@@ -47,8 +51,20 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
     @Override
-    public void initStorage(StorageFactory factory) {
-        super.initStorage(factory.toSingleTenant());
+    protected final RecordStorage<TenantId> createStorage(StorageFactory factory) {
+        ContextSpec singleTenant = ContextSpec.singleTenant(context().spec().name().getValue());
+        RecordStorage<TenantId> result = factory.createRecordStorage(singleTenant, entityClass());
+        return result;
+    }
+
+    @Override
+    public final void registerWith(BoundedContext context) {
+        context.register(this);
+    }
+
+    @Override
+    protected final boolean isTypeSupplier() {
+        return false;
     }
 
     /**
@@ -60,7 +76,7 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
      * @param id the tenant ID to store
      */
     @Override
-    public void keep(TenantId id) {
+    public final void keep(TenantId id) {
         if (cache.contains(id)) {
             return;
         }
@@ -77,6 +93,10 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
         cache.add(id);
     }
 
+    @VisibleForTesting
+    final boolean cached(TenantId id) {
+        return cache.contains(id);
+    }
     /**
      * Removes the passed value from the in-memory cache of known tenant IDs.
      *
@@ -86,7 +106,7 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
      * @param id the ID to remove from the cache
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise
      */
-    protected boolean unCache(TenantId id) {
+    protected final boolean unCache(TenantId id) {
         boolean result = cache.remove(id);
         return result;
     }
@@ -94,12 +114,12 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
     /**
      * Clears the cache of known tenant IDs.
      */
-    protected void clearCache() {
+    protected final void clearCache() {
         cache.clear();
     }
 
     @Override
-    public Set<TenantId> getAll() {
+    public final Set<TenantId> all() {
         Storage<TenantId, ?, ?> storage = storage();
         Iterator<TenantId> index = storage.index();
         Set<TenantId> result = ImmutableSet.copyOf(index);

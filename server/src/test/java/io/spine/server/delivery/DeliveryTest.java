@@ -263,7 +263,7 @@ public class DeliveryTest {
          *         the identifiers of target entities
          */
         private void runWith(Set<String> targets) {
-            BlackBoxBoundedContext context =
+            BlackBoxBoundedContext<?> context =
                     BlackBoxBoundedContext.singleTenant()
                                           .with(new CalculatorRepository());
 
@@ -294,7 +294,7 @@ public class DeliveryTest {
 
                 Integer sumForTarget = targetSignals.stream()
                                                     .map(CalculatorSignal::getValue)
-                                                    .reduce(0, (n1, n2) -> n1 + n2);
+                                                    .reduce(0, Integer::sum);
                 Calc expectedState = Calc.newBuilder()
                                          .setSum(sumForTarget)
                                          .build();
