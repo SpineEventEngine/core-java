@@ -21,13 +21,13 @@
 package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.bc.given.Given.NoOpCommandDispatcher;
 import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.storage.StorageFactory;
@@ -131,7 +131,7 @@ class BoundedContextBuilderTest {
     @Test
     @DisplayName("allow clearing storage factory supplier")
     void clearStorageFactorySupplier() {
-        assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
+        assertFalse(builder.setStorage(Tests.nullRef())
                            .storage()
                            .isPresent());
     }
@@ -214,53 +214,53 @@ class BoundedContextBuilderTest {
     @Nested
     class Repositories {
 
-        private Repository<?, ?> repository;
+        private AggregateRepository<?, ?> repository;
         private BoundedContextBuilder builder;
 
         @BeforeEach
         void setUp() {
             this.builder = BoundedContextBuilder.assumingTests();
-            repository = DefaultRepository.of(ProjectAggregate.class);
+            repository = (AggregateRepository<?, ?>) DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test
         @DisplayName("add repository")
         void addRepo() {
-            assertFalse(builder.hasRepository(repository));
+            assertFalse(builder.has(repository));
 
             builder.add(repository);
 
-            assertTrue(builder.hasRepository(repository));
+            assertTrue(builder.has(repository));
         }
 
         @Test
         @DisplayName("remove repository")
         void removeRepo() {
             builder.add(repository);
-            assertTrue(builder.hasRepository(repository));
+            assertTrue(builder.has(repository));
 
             builder.remove(repository);
-            assertFalse(builder.hasRepository(repository));
+            assertFalse(builder.has(repository));
         }
 
         @Test
         @DisplayName("add default repository for entity class")
         void addByEntityClass() {
-            assertFalse(builder.hasRepository(repository));
+            assertFalse(builder.has(repository));
 
             builder.add(repository.entityClass());
 
-            assertTrue(builder.hasRepository(repository.entityClass()));
+            assertTrue(builder.has(repository.entityClass()));
         }
 
         @Test
         @DisplayName("remove repository by entity class")
         void removeByEntityClass() {
             builder.add(repository);
-            assertTrue(builder.hasRepository(repository));
+            assertTrue(builder.has(repository));
 
             builder.remove(repository.entityClass());
-            assertFalse(builder.hasRepository(repository));
+            assertFalse(builder.has(repository));
         }
     }
 
@@ -279,21 +279,21 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("add command dispatcher")
         void addDispatcher() {
-            assertFalse(builder.hasCommandDispatcher(dispatcher));
+            assertFalse(builder.has(dispatcher));
 
-            builder.addCommandDispatcher(dispatcher);
+            builder.add(dispatcher);
 
-            assertTrue(builder.hasCommandDispatcher(dispatcher));
+            assertTrue(builder.has(dispatcher));
         }
 
         @Test
         @DisplayName("remove command dispatcher")
         void removeDispatcher() {
-            builder.addCommandDispatcher(dispatcher);
-            assertTrue(builder.hasCommandDispatcher(dispatcher));
+            builder.add(dispatcher);
+            assertTrue(builder.has(dispatcher));
 
-            builder.removeCommandDispatcher(dispatcher);
-            assertFalse(builder.hasCommandDispatcher(dispatcher));
+            builder.remove(dispatcher);
+            assertFalse(builder.has(dispatcher));
         }
     }
 
@@ -312,21 +312,21 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("add event dispatcher")
         void addDispatcher() {
-            assertFalse(builder.hasEventDispatcher(dispatcher));
+            assertFalse(builder.has(dispatcher));
 
-            builder.addEventDispatcher(dispatcher);
+            builder.add(dispatcher);
 
-            assertTrue(builder.hasEventDispatcher(dispatcher));
+            assertTrue(builder.has(dispatcher));
         }
 
         @Test
         @DisplayName("remove event dispatcher")
         void removeDispatcher() {
-            builder.addEventDispatcher(dispatcher);
-            assertTrue(builder.hasEventDispatcher(dispatcher));
+            builder.add(dispatcher);
+            assertTrue(builder.has(dispatcher));
 
-            builder.removeEventDispatcher(dispatcher);
-            assertFalse(builder.hasEventDispatcher(dispatcher));
+            builder.remove(dispatcher);
+            assertFalse(builder.has(dispatcher));
         }
     }
 }

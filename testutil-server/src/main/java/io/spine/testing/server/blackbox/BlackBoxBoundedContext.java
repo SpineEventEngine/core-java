@@ -275,19 +275,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Registers the specified event dispatchers with the {@code event bus} of this
-     * bounded context.
-     *
-     * @param dispatchers
-     *         dispatchers to register with the event bus of this bounded context
-     */
-    @CanIgnoreReturnValue
-    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
-        registerAll(boundedContext::registerEventDispatcher, dispatchers);
-        return thisRef();
-    }
-
-    /**
      * Registers the specified command dispatchers with this bounded context.
      *
      * @param dispatchers
@@ -297,6 +284,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public final T withHandlers(CommandDispatcher<?>... dispatchers) {
         registerAll(boundedContext::registerCommandDispatcher, dispatchers);
+        return thisRef();
+    }
+
+    /**
+     * Registers the specified event dispatchers with the {@code event bus} of this
+     * bounded context.
+     *
+     * @param dispatchers
+     *         dispatchers to register with the event bus of this bounded context
+     */
+    @CanIgnoreReturnValue
+    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
+        registerAll(boundedContext::registerEventDispatcher, dispatchers);
         return thisRef();
     }
 
