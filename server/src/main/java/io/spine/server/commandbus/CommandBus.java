@@ -74,7 +74,7 @@ public class CommandBus extends UnicastBus<Command,
     private final Consumer<TenantId> tenantConsumer;
 
     /** Consumes commands dispatched by this bus. */
-    private final Consumer<CommandEnvelope> commandConsumer;
+    private final CommandFlowWatcher watcher;
 
     /** Callback for handling commands that failed. */
     private final CommandErrorHandler errorHandler;
@@ -116,7 +116,7 @@ public class CommandBus extends UnicastBus<Command,
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
         this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
-        this.commandConsumer = checkNotNull(builder.commandConsumer);
+        this.watcher = checkNotNull(builder.flowWatcher);
     }
 
     /**
@@ -191,7 +191,7 @@ public class CommandBus extends UnicastBus<Command,
     @Override
     protected void dispatch(CommandEnvelope command) {
         CommandDispatcher<?> dispatcher = dispatcherOf(command);
-        commandConsumer.accept(command);
+        watcher.onDispatchCommand(command);
         try {
             dispatcher.dispatch(command);
         } catch (RuntimeException exception) {
@@ -267,7 +267,7 @@ public class CommandBus extends UnicastBus<Command,
          * {@code BoundedContext}.
          */
         private @Nullable Boolean multitenant;
-        private Consumer<CommandEnvelope> commandConsumer;
+        private CommandFlowWatcher flowWatcher;
         private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
         private EventBus eventBus;
@@ -328,11 +328,11 @@ public class CommandBus extends UnicastBus<Command,
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();
-            commandScheduler = ServerEnvironment.instance()
-                                                .newCommandScheduler();
-            CommandFlowWatcher flowWatcher = createFlowWatcher();
+            commandScheduler =
+                    ServerEnvironment.instance()
+                                     .newCommandScheduler();
+            flowWatcher = createFlowWatcher();
             commandScheduler.setWatcher(flowWatcher);
-            commandConsumer = flowWatcher::onDispatchCommand;
 
             TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
             tenantConsumer = tenantIndex::keep;
