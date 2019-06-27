@@ -338,6 +338,7 @@ public class CommandBus extends UnicastBus<Command,
             tenantConsumer = tenantIndex::keep;
 
             CommandBus commandBus = createCommandBus();
+
             commandScheduler.setCommandBus(commandBus);
 
             return commandBus;
