@@ -51,7 +51,8 @@ public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link RecordStorage}.
-     *  @param <I>
+     *
+     * @param <I>
      *         the type of entity IDs
      * @param context
      *         specification of the Bounded Context {@code RecordBasedRepository} of which
