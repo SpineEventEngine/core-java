@@ -25,6 +25,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Origin;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventFilter;
+import io.spine.system.server.EntityTypeName;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.type.TypeUrl;
 
@@ -40,7 +41,8 @@ public final class NoOpLifecycle extends EntityLifecycle {
         super(NoOpLifecycle.class.getSimpleName(),
               TypeUrl.of(Any.class),
               NoOpSystemWriteSide.INSTANCE,
-              EventFilter.allowAll());
+              EventFilter.allowAll(),
+              EntityTypeName.getDefaultInstance());
     }
 
     public static NoOpLifecycle instance() {

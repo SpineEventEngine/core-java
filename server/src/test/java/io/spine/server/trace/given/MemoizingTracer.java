@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.trace.AbstractTracer;
+import io.spine.system.server.EntityTypeName;
 import io.spine.type.TypeUrl;
 
 import java.util.Set;
@@ -55,7 +56,7 @@ public final class MemoizingTracer extends AbstractTracer {
     }
 
     @Override
-    public void processedBy(MessageId receiver) {
+    public void processedBy(MessageId receiver, EntityTypeName receiverType) {
         checkNotNull(receiver);
         MessageId idWithoutVersion = receiver
                 .toBuilder()

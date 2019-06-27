@@ -212,12 +212,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.7.1</version>
+    <version>3.8.0</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.20.0</version>
+    <version>1.21.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
