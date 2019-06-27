@@ -31,6 +31,7 @@ import io.spine.base.Identifier;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -215,7 +216,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
         this.context = context;
         if (!storageAssigned()) {
-            initStorage(context.storageFactory());
+            initStorage(ServerEnvironment.instance()
+                                         .storageFactory());
         }
         init(context);
     }

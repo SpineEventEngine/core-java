@@ -21,15 +21,20 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.Environment;
 import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
 
@@ -67,12 +72,17 @@ public final class ServerEnvironment {
     private final NodeId nodeId;
 
     /**
-     * A strategy of delivering the messages received by entity repositories
+     * The strategy of delivering the messages received by entity repositories
      * to the entity instances.
      *
      * <p>By default, initialized with the {@linkplain Delivery#local() local} delivery.
      */
     private Delivery delivery;
+
+    /**
+     * The storage factory for the production mode of the application.
+     */
+    private @MonotonicNonNull StorageFactory productionStorageFactory;
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -165,8 +175,6 @@ public final class ServerEnvironment {
      *
      * <p>At the moment, the node identifier is always UUID-generated. In future versions of the
      * framework it is expected to become configurable.
-     *
-     * TODO:2019-06-24:alex.tymchenko: https://github.com/SpineEventEngine/core-java/issues/1095
      */
     public NodeId nodeId() {
         return nodeId;
@@ -199,5 +207,39 @@ public final class ServerEnvironment {
     public static void configureDeployment(Supplier<DeploymentType> supplier) {
         checkNotNull(supplier);
         deploymentDetector = supplier;
+    }
+
+    /**
+     * Assigns {@code StorageFactory} for the production mode of the application.
+     *
+     * <p>Tests use {@code InMemoryStorageFactory}.
+     */
+    public void configureProductionStorage(StorageFactory storageFactory) {
+        checkNotNull(storageFactory);
+        checkArgument(
+                !(storageFactory instanceof InMemoryStorageFactory),
+                "%s cannot be used for production storage.",
+                InMemoryStorageFactory.class.getName()
+        );
+        this.productionStorageFactory = storageFactory;
+    }
+
+    /**
+     * Obtains production {@code StorageFactory} previously associated with the environment.
+     *
+     * @return {@code StorageFactory} instance for the production storage
+     * @throws NullPointerException
+     *         if the production {@code StorageFactory} was not
+     *         {@linkplain #configureProductionStorage(StorageFactory) configured} prior to the call
+     */
+    public StorageFactory storageFactory() {
+        if (Environment.getInstance().isTests()) {
+            return InMemoryStorageFactory.newInstance();
+        }
+        checkNotNull(productionStorageFactory,
+                     "Production `StorageFactory` is not configured." +
+                             " Please call `configureProductionStorage()`."
+        );
+        return productionStorageFactory;
     }
 }

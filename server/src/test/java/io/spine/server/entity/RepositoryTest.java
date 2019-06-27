@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.given.repository.ProjectEntity;
 import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.repository.TestRepo;
@@ -69,7 +70,8 @@ class RepositoryTest {
                 .assumingTests(true)
                 .build();
         repository = new TestRepo();
-        storageFactory = context.storageFactory();
+        storageFactory = ServerEnvironment.instance()
+                                          .storageFactory();
         context.register(repository);
         tenantId = newUuid();
     }

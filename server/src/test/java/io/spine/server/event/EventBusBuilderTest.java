@@ -24,6 +24,7 @@ import io.spine.core.Event;
 import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
@@ -61,7 +62,8 @@ class EventBusBuilderTest
         BoundedContext bc = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        this.storageFactory = bc.storageFactory();
+        this.storageFactory = ServerEnvironment.instance()
+                                               .storageFactory();
     }
 
     @Nested

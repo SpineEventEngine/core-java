@@ -469,7 +469,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /**
      * Obtains {@link StorageFactory} associated with this {@code BoundedContext}.
+     *
+     * @deprecated use {@link ServerEnvironment#storageFactory()}
      */
+    @Deprecated
     public StorageFactory storageFactory() {
         return storageFactory;
     }
