@@ -48,7 +48,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     @Test
     @DisplayName("allow adding filter")
     void allowAddingFilter() {
-        BusFilter<E> filter = new MockFilter<>();
+        BusFilter<E> filter = new StubFilter<>();
 
         assertThat(builder().appendFilter(filter)
                             .filters())
@@ -59,8 +59,8 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     @Test
     @DisplayName("preserve filters order")
     void preserveFiltersOrder() {
-        BusFilter<E> first = new MockFilter<>();
-        BusFilter<E> second = new MockFilter<>();
+        BusFilter<E> first = new StubFilter<>();
+        BusFilter<E> second = new StubFilter<>();
 
         B builder = builder();
         builder.appendFilter(first)
@@ -95,9 +95,9 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     }
 
     /**
-     * Mock implementation of {@code BusFilter}.
+     * Stub implementation of {@code BusFilter} which always returns empty {@code Optional}.
      */
-    private static final class MockFilter<E extends MessageEnvelope<?, ?, ?>>
+    private static final class StubFilter<E extends MessageEnvelope<?, ?, ?>>
             implements BusFilter<E> {
 
         @Override
