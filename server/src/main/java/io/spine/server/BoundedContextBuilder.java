@@ -453,10 +453,22 @@ public final class BoundedContextBuilder implements Logging {
         return ImmutableList.copyOf(repositories);
     }
 
+    /**
+     * Obtains the list of command dispatchers added to the builder by the time of the call.
+     *
+     * <p>Adding dispatchers to the builder after this method returns will not update the
+     * returned list.
+     */
     public ImmutableList<CommandDispatcher<?>> commandDispatchers() {
         return ImmutableList.copyOf(commandDispatchers);
     }
 
+    /**
+     * Obtains the list of event dispatchers added to the builder by the time of the call.
+     *
+     * <p>Adding dispatchers to the builder after this method returns will not update the
+     * returned list.
+     */
     public ImmutableList<EventDispatcher<?>> eventDispatchers() {
         return ImmutableList.copyOf(eventDispatchers);
     }
