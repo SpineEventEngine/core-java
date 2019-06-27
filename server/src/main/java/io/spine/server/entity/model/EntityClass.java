@@ -153,10 +153,16 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return stateClass;
     }
 
+    /**
+     * Obtains the visibility of this entity type as declared in the Protobuf definition.
+     */
     public final EntityVisibility visibility() {
         return visibility;
     }
 
+    /**
+     * Obtains the name of this class as an {@link EntityTypeName}.
+     */
     public final EntityTypeName typeName() {
         return EntityTypeName
                 .newBuilder()
