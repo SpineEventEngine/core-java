@@ -10,9 +10,13 @@ option java_outer_classname = "EntityTypeProto";
 option java_multiple_files = true;
 
 // Fully qualified name of an entity type.
+//
+// Unlike a type URL of the entity state, an `EntityTypeName` represents the name of the entity
+// class in the implementation language, such as Java.
+//
 message EntityTypeName {
 
-    oneof implementation_technology {
+    oneof impl {
 
         // The canonical name of the Java entity class.
         string java_class_name = 1;

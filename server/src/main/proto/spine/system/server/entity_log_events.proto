@@ -70,11 +70,7 @@ message EventDispatchedToSubscriber {
     //
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 
-    // The name of the receiver projection.
-    //
-    // Unlike the `receiver.type_url`, this is the name of the entity class in the implementation
-    // language, such as Java.
-    //
+    // The fully qualified name of the subscribing entity.
     EntityTypeName entity_type = 4 [(required) = true];
 }
 
@@ -98,11 +94,7 @@ message EventDispatchedToReactor {
     //
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 
-    // The name of the receiver entity.
-    //
-    // Unlike the `receiver.type_url`, this is the name of the entity class in the implementation
-    // language, such as Java.
-    //
+    // The fully qualified name of the reacting entity.
     EntityTypeName entity_type = 4 [(required) = true];
 }
 
@@ -126,11 +118,7 @@ message CommandDispatchedToHandler {
     //
     google.protobuf.Timestamp when_dispatched = 3 [(required) = true];
 
-    // The name of the receiver entity.
-    //
-    // Unlike the `receiver.type_url`, this is the name of the entity class in the implementation
-    // language, such as Java.
-    //
+    // The fully qualified name of the handling entity.
     EntityTypeName entity_type = 4 [(required) = true];
 }
 
@@ -147,11 +135,7 @@ message EventImported {
     // The time when the event was imported.
     google.protobuf.Timestamp when_imported = 3 [(required) = true, (validate) = true];
 
-    // The name of the receiver aggregate.
-    //
-    // Unlike the `receiver.type_url`, this is the name of the aggregate class in the implementation
-    // language, such as Java.
-    //
+    // The fully qualified name of the receiver aggregate.
     EntityTypeName entity_type = 4 [(required) = true];
 }
 
