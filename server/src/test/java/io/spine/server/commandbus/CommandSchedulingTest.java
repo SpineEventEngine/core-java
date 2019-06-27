@@ -42,7 +42,6 @@ import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -72,8 +71,6 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         Command cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
-
-        verify(scheduler).schedule(cmd);
     }
 
     @Test
@@ -84,7 +81,6 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         Command command = createProject();
         commandBus.post(command, observer);
 
-        verify(scheduler, never()).schedule(createProject());
         checkResult(command);
     }
 

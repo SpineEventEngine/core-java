@@ -22,16 +22,11 @@ package io.spine.testing.server;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
-import io.spine.server.ContextSpec;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.type.CommandEnvelope;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 import static io.spine.core.BoundedContextNames.newName;
 
@@ -68,15 +63,11 @@ public final class TestBoundedContext {
      * @return {@link BoundedContext} instance
      */
     public static BoundedContext create(BusFilter<CommandEnvelope> commandFilter) {
-        StorageFactorySwitch storageFactorySwitch = new StorageFactorySwitch();
-        Function<ContextSpec, StorageFactory> storage = InMemoryStorageFactory::newInstance;
-        StorageFactorySwitch supplier = storageFactorySwitch.init(storage, storage);
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()
                 .appendFilter(commandFilter);
         BoundedContext boundedContext = BoundedContext
                 .singleTenant(NAME.getValue())
-                .setStorage(supplier)
                 .setCommandBus(commandBus)
                 .build();
         return boundedContext;

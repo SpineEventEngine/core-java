@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.TenantId;
 
@@ -29,12 +28,15 @@ import io.spine.core.TenantId;
  * of tenant ID registration.
  */
 final class DefaultTenantRepository
-      extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
+      extends TenantRepository<Tenant, DefaultTenantRepository.Entity> {
 
-    static class Entity extends TenantRepository.Entity<Timestamp> {
+    static final class Entity extends TenantRepository.Entity<Tenant> {
 
-        protected Entity(TenantId id) {
-            super(id, (i) -> Time.currentTime());
+        private Entity(TenantId id) {
+            super(id, (i) -> Tenant.newBuilder()
+                                   .setId(i)
+                                   .setWhenCreated(Time.currentTime())
+                                   .build());
         }
     }
 }

@@ -38,18 +38,18 @@ class SingleTenantIndexTest {
     @Test
     @DisplayName("not add passed IDs")
     void keep() {
-        List<TenantId> before = ImmutableList.copyOf(index.getAll());
+        List<TenantId> before = ImmutableList.copyOf(index.all());
         index.keep(TenantId.newBuilder()
                            .setValue(randomString())
                            .build());
-        List<TenantId> after = ImmutableList.copyOf(index.getAll());
+        List<TenantId> after = ImmutableList.copyOf(index.all());
         assertThat(after).isEqualTo(before);
     }
 
     @Test
     @DisplayName("return set with one element")
     void getAll() {
-        List<TenantId> items = ImmutableList.copyOf(index.getAll());
+        List<TenantId> items = ImmutableList.copyOf(index.all());
 
         assertThat(items).containsExactly(SingleTenantIndex.tenantId());
     }

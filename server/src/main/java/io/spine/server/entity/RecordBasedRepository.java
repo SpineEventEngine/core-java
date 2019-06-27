@@ -107,6 +107,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void init(BoundedContext context) {
+        checkNotNull(context);
         super.init(context);
         cacheEntityColumns();
     }
@@ -133,7 +134,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        RecordStorage<I> result = factory.createRecordStorage(entityClass());
+        RecordStorage<I> result = factory.createRecordStorage(context().spec(), entityClass());
         return result;
     }
 

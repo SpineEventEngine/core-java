@@ -36,7 +36,7 @@ class TenantIndexTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance(spec);
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         new NullPointerTester()
                 .setDefault(StorageFactory.class, storageFactory)
                 .testAllPublicStaticMethods(TenantIndex.class);

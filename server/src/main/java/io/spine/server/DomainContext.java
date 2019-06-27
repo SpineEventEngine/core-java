@@ -53,12 +53,12 @@ final class DomainContext extends BoundedContext {
         this.system = checkNotNull(system);
     }
 
-    static DomainContext newInstance(BoundedContextBuilder builder,
-                                     SystemClient system) {
+    static DomainContext newInstance(BoundedContextBuilder builder, SystemClient system) {
         checkNotNull(builder);
         checkNotNull(system);
 
         DomainContext result = new DomainContext(builder, system);
+        result.init();
         return result;
     }
 

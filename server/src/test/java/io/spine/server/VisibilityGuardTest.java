@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server;
 
 import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
+import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.ExposedRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.HiddenRepository;
 import io.spine.server.entity.given.VisibilityGuardTestEnv.SubscribableRepository;

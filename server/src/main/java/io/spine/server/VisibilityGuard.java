@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.entity.EntityVisibility;
+import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
 
@@ -39,8 +40,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A registry of repositories that controls access to them depending on the visibility of
  * corresponding entity states.
  */
-@Internal
-public final class VisibilityGuard {
+final class VisibilityGuard {
 
     private final Map<Class<? extends Message>, RepositoryAccess> repositories = new HashMap<>();
 
@@ -51,14 +51,14 @@ public final class VisibilityGuard {
     /**
      * Creates a new instance of the guard.
      */
-    public static VisibilityGuard newInstance() {
+    static VisibilityGuard newInstance() {
         return new VisibilityGuard();
     }
 
     /**
      * Registers the passed repository with the guard.
      */
-    public void register(Repository<?, ?> repository) {
+    void register(Repository<?, ?> repository) {
         checkNotNull(repository);
         EntityClass<?> entityClass = repository.entityModelClass();
         Class<? extends Message> stateClass = entityClass.stateClass();
@@ -78,7 +78,7 @@ public final class VisibilityGuard {
     /**
      * Verifies if there is a registered repository for the passed entity state class.
      */
-    public boolean hasRepository(Class<? extends Message> stateClass) {
+    boolean hasRepository(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
         boolean result = repositories.containsKey(stateClass);
         return result;
@@ -97,7 +97,7 @@ public final class VisibilityGuard {
      *         prior to this call, or if all repositories were
      *         {@linkplain #shutDownRepositories() shut down}
      */
-    public Optional<Repository> repositoryFor(Class<? extends Message> stateClass) {
+    Optional<Repository> repositoryFor(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
         RepositoryAccess repositoryAccess = findOrThrow(stateClass);
         return repositoryAccess.get();
@@ -129,7 +129,7 @@ public final class VisibilityGuard {
         return result;
     }
 
-    public Set<TypeName> allEntityTypes() {
+    Set<TypeName> allEntityTypes() {
         Set<TypeName> result = repositories.values()
                                            .stream()
                                            .map(access -> access.repository
@@ -142,11 +142,15 @@ public final class VisibilityGuard {
     /**
      * Closes all registered repositories and clears the registration list.
      */
-    public void shutDownRepositories() {
+    void shutDownRepositories() {
         for (RepositoryAccess repositoryAccess : repositories.values()) {
             repositoryAccess.repository.close();
         }
         repositories.clear();
+    }
+
+    boolean isClosed() {
+        return repositories.isEmpty();
     }
 
     /**

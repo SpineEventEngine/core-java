@@ -40,7 +40,7 @@ import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
@@ -66,7 +66,6 @@ import java.util.concurrent.Executors;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.bus.EventBusTestEnv.command;
@@ -467,7 +466,7 @@ public class EventBusTest {
                                            .setValue(42)
                                            .build()))
                 .build();
-        StorageFactory storageFactory = new StorageFactorySwitch().apply(singleTenant("baz"));
+        StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {

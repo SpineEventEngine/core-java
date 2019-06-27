@@ -21,10 +21,10 @@
 package io.spine.server.commandbus;
 
 import io.spine.core.Command;
-import io.spine.server.ContextSpec;
+import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.testing.server.tenant.TenantAwareTest.createTenantIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -66,25 +65,26 @@ class CommandBusBuilderTest
 
     @BeforeEach
     void setUp() {
-        boolean multitenant = true;
-        String name = getClass().getSimpleName();
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(ContextSpec.multitenant(name));
-        tenantIndex = createTenantIndex(multitenant, storageFactory);
+        BoundedContext context =
+                BoundedContext.multitenant(getClass().getSimpleName())
+                              .build();
+        tenantIndex = context.tenantIndex();
         eventBus = EventBus
                 .newBuilder()
-                .setStorageFactory(storageFactory)
+                .injectContext(context)
+                .setStorageFactory(ServerEnvironment.instance().storageFactory())
                 .build();
     }
 
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        CommandBus commandBus = CommandBus.newBuilder()
-                                          .injectTenantIndex(tenantIndex)
-                                          .injectSystem(SYSTEM_WRITE_SIDE)
-                                          .injectEventBus(eventBus)
-                                          .build();
+        CommandBus commandBus = CommandBus
+                .newBuilder()
+                .injectTenantIndex(tenantIndex)
+                .injectSystem(SYSTEM_WRITE_SIDE)
+                .injectEventBus(eventBus)
+                .build();
         assertNotNull(commandBus);
     }
 
@@ -118,33 +118,14 @@ class CommandBusBuilderTest
     class AllowToSpecify {
 
         @Test
-        @DisplayName("CommandScheduler")
-        void commandScheduler() {
-            CommandScheduler expectedScheduler = mock(CommandScheduler.class);
-
-            CommandBus.Builder builder = builder().setCommandScheduler(expectedScheduler);
-
-            assertTrue(builder.getCommandScheduler()
-                              .isPresent());
-            assertEquals(expectedScheduler, builder.getCommandScheduler()
-                                                   .get());
-
-            CommandBus commandBus = builder.build();
-            assertNotNull(commandBus);
-
-            CommandScheduler actualScheduler = commandBus.scheduler();
-            assertEquals(expectedScheduler, actualScheduler);
-        }
-
-        @Test
         @DisplayName("EventBus")
         void eventBus() {
             EventBus expectedEventBus = mock(EventBus.class);
 
             CommandBus.Builder builder = builder().injectEventBus(expectedEventBus);
-            assertTrue(builder.getEventBus()
+            assertTrue(builder.eventBus()
                               .isPresent());
-            assertEquals(expectedEventBus, builder.getEventBus()
+            assertEquals(expectedEventBus, builder.eventBus()
                                                   .get());
         }
 

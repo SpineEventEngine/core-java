@@ -122,11 +122,11 @@ class CommandDispatcherRegistry
      * {@inheritDoc}
      *
      * <p>Overrides to expose the method to
-     * {@link CommandBus#getRegisteredCommandClasses() CommandBus}.
+     * {@link CommandBus#registeredCommandClasses() CommandBus}.
      */
     @Override
-    protected Set<CommandClass> getRegisteredMessageClasses() {
-        return super.getRegisteredMessageClasses();
+    protected Set<CommandClass> registeredMessageClasses() {
+        return super.registeredMessageClasses();
     }
 
     /**

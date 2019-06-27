@@ -56,7 +56,7 @@ final class DeadMessageFilter<T extends Message,
 
     @Override
     public Optional<Ack> accept(E envelope) {
-        Collection<D> dispatchers = registry.getDispatchers(envelope);
+        Collection<D> dispatchers = registry.dispatchersOf(envelope);
         if (dispatchers.isEmpty()) {
             MessageUnhandled report = deadMessageHandler.handle(envelope);
             Error error = report.asError();

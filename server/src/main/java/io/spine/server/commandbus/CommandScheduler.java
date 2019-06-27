@@ -46,16 +46,14 @@ import static java.util.Optional.empty;
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
-    // TODO:2018-07-27:dmytro.dashenkov: Refactor command scheduling - move to System BC.
-    // todo https://github.com/SpineEventEngine/core-java/issues/799
-
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
-    private boolean isActive = true;
+    private boolean active = true;
 
     private @Nullable CommandBus commandBus;
 
-    private @Nullable CommandFlowWatcher flowWatcher;
+    /** Consumes commands when they are scheduled by this instance. */
+    private @Nullable CommandFlowWatcher watcher;
 
     protected CommandScheduler() {
     }
@@ -69,11 +67,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     /**
-     * Assigns the {@code CommandFlowWatcher} to the scheduler during {@code CommandBus}
-     * {@linkplain CommandBus.Builder#build() construction}.
+     * Assigns watcher for traching scheduled commands.
      */
-    void setFlowWatcher(CommandFlowWatcher flowWatcher) {
-        this.flowWatcher = flowWatcher;
+    void setWatcher(CommandFlowWatcher watcher) {
+        this.watcher = watcher;
     }
 
     @Override
@@ -102,7 +99,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      *         if the scheduler is shut down
      */
     public void schedule(Command command) {
-        checkState(isActive, "Scheduler is shut down.");
+        checkState(active, "Scheduler is shut down.");
         if (isScheduledAlready(command)) {
             return;
         }
@@ -111,7 +108,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         rememberAsScheduled(commandUpdated);
 
         CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
-        flowWatcher().onScheduled(updatedCommandEnvelope);
+        watcher().onScheduled(updatedCommandEnvelope);
     }
 
     /**
@@ -126,9 +123,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         return commandBus;
     }
 
-    private CommandFlowWatcher flowWatcher() {
-        checkState(flowWatcher != null, "CommandFlowWatcher is not initialized.");
-        return flowWatcher;
+    private CommandFlowWatcher watcher() {
+        checkState(
+                watcher != null,
+                "`%s` is not assigned. Please call `setWatcher()`.",
+                CommandFlowWatcher.class.getName()
+        );
+        return watcher;
     }
 
     /**
@@ -169,7 +170,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * <p>Invocation has no effect if the scheduler is already shut down.
      */
     public void shutdown() {
-        isActive = false;
+        active = false;
     }
 
     /**
