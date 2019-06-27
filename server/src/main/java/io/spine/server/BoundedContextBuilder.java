@@ -330,7 +330,7 @@ public final class BoundedContextBuilder implements Logging {
 
     private static void registerTracing(BoundedContext domain, BoundedContext system) {
         domain.tracing().ifPresent(tracing -> {
-            EventDispatcher<?> observer = new TraceEventObserver(domain.name(), tracing);
+            EventDispatcher<?> observer = new TraceEventObserver(domain.spec(), tracing);
             system.registerEventDispatcher(observer);
         });
     }

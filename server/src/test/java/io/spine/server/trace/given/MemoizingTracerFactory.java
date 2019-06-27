@@ -22,6 +22,7 @@ package io.spine.server.trace.given;
 
 import com.google.protobuf.Message;
 import io.spine.core.Signal;
+import io.spine.server.ContextSpec;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
 
@@ -39,7 +40,7 @@ public final class MemoizingTracerFactory implements TracerFactory {
     private boolean closed = false;
 
     @Override
-    public Tracer trace(Signal<?, ?, ?> signalMessage) {
+    public Tracer trace(ContextSpec context, Signal<?, ?, ?> signalMessage) {
         Class<? extends Message> messageType = signalMessage.enclosedMessage()
                                                             .getClass();
         MemoizingTracer tracer = tracers.computeIfAbsent(messageType,

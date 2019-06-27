@@ -28,6 +28,7 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.trace.TracerFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -82,6 +83,11 @@ public final class ServerEnvironment implements AutoCloseable {
      * The storage factory for the production mode of the application.
      */
     private @Nullable StorageFactory productionStorageFactory;
+
+    /**
+     * The factory of {@code Tracer}s used in this environment.
+     */
+    private @Nullable TracerFactory tracerFactory;
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
