@@ -63,4 +63,9 @@ public final class FakeOption extends FieldValidatingOption<Void, Object> {
             return v -> ImmutableList.of();
         }
     }
+
+    @Override
+    public boolean shouldValidate(FieldValue<Object> value) {
+        return true;
+    }
 }
