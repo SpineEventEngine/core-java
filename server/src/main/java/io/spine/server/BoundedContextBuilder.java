@@ -94,7 +94,7 @@ public final class BoundedContextBuilder implements Logging {
     private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
 
     /**
-     * Command dispatchers to be registered with the context {@link EventBus} and/or
+     * Event dispatchers to be registered with the context {@link EventBus} and/or
      * {@link IntegrationBus} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
