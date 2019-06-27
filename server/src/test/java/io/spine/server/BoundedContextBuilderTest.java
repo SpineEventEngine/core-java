@@ -272,11 +272,13 @@ class BoundedContextBuilderTest {
 
         private BoundedContextBuilder builder;
         private CommandDispatcher<?> dispatcher;
+        private AggregateRepository<?, ?> repository;
 
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
             dispatcher = new NoOpCommandDispatcher();
+            repository = (AggregateRepository<?, ?>) DefaultRepository.of(ProjectAggregate.class);
         }
 
         @Test
@@ -302,12 +304,26 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("register repository if it's passed as command dispatcher")
         void registerRepo() {
-            AggregateRepository<?, ?> repository =
-                    (AggregateRepository<?, ?>) DefaultRepository.of(ProjectAggregate.class);
-
             assertFalse(builder.hasRepository(repository));
             builder.addCommandDispatcher(repository);
             assertTrue(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("remove registered repository if it's passed as command dispatcher")
+        void removeRegisteredRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.removeCommandDispatcher(repository);
+            assertFalse(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("check repository presence in Builder if it's passed as command dispatcher")
+        void checkHasRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasCommandDispatcher(repository));
         }
     }
 
@@ -316,11 +332,14 @@ class BoundedContextBuilderTest {
 
         private BoundedContextBuilder builder;
         private EventDispatcher<?> dispatcher;
+        private ProjectionRepository<?, ?, ?> repository;
 
         @BeforeEach
         void setUp() {
             builder = BoundedContextBuilder.assumingTests();
             dispatcher = new NoOpEventDispatcher();
+            repository =
+                    (ProjectionRepository<?, ?, ?>) DefaultRepository.of(ProjectProjection.class);
         }
 
         @Test
@@ -346,11 +365,26 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("register repository if it's passed as event dispatcher")
         void registerRepo() {
-            ProjectionRepository<?, ?, ?> repository =
-                    (ProjectionRepository<?, ?, ?>) DefaultRepository.of(ProjectProjection.class);
             assertFalse(builder.hasRepository(repository));
             builder.addEventDispatcher(repository);
             assertTrue(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("remove registered repository if it's passed as event dispatcher")
+        void removeRegisteredRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.removeEventDispatcher(repository);
+            assertFalse(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("check repository presence in Builder if it's passed as event dispatcher")
+        void checkHasRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasEventDispatcher(repository));
         }
     }
 }
