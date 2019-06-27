@@ -406,14 +406,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @Internal
     protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        TypeUrl stateType = entityStateType();
         SystemWriteSide writeSide = context().systemClient()
                                              .writeSide();
         EventFilter eventFilter = eventFilter();
         EntityLifecycle lifecycle = EntityLifecycle
                 .newBuilder()
                 .setEntityId(id)
-                .setEntityType(stateType)
+                .setEntityType(entityModelClass())
                 .setSystemWriteSide(writeSide)
                 .setEventFilter(eventFilter)
                 .build();

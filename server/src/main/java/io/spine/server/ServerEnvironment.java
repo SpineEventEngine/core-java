@@ -223,6 +223,10 @@ public final class ServerEnvironment implements AutoCloseable {
         this.productionStorageFactory = storageFactory;
     }
 
+    /**
+     * This is a test-only method required in tests (or cleanup after tests) that deal
+     * with assigning production storage factory.
+     */
     @VisibleForTesting
     void clearStorageFactory() {
         this.productionStorageFactory = null;

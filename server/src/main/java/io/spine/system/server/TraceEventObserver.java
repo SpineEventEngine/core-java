@@ -70,7 +70,7 @@ public final class TraceEventObserver extends AbstractEventSubscriber {
 
     private void trace(SignalDispatchedMixin<?> event) {
         try (Tracer tracer = tracing.trace(event.getPayload())) {
-            tracer.processedBy(event.getReceiver());
+            tracer.processedBy(event.getReceiver(), event.getEntityType());
         } catch (Exception e) {
             _error(e, "Error during trace construction on event {}.", event.getPayload().typeUrl());
         }

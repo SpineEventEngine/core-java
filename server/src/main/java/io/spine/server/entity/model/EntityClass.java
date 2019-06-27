@@ -29,6 +29,7 @@ import io.spine.server.entity.EntityFactory;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
+import io.spine.system.server.EntityTypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -152,8 +153,21 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         return stateClass;
     }
 
+    /**
+     * Obtains the visibility of this entity type as declared in the Protobuf definition.
+     */
     public final EntityVisibility visibility() {
         return visibility;
+    }
+
+    /**
+     * Obtains the name of this class as an {@link EntityTypeName}.
+     */
+    public final EntityTypeName typeName() {
+        return EntityTypeName
+                .newBuilder()
+                .setJavaClassName(value().getCanonicalName())
+                .vBuild();
     }
 
     /**
