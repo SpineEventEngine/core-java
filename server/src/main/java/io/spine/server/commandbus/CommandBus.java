@@ -175,11 +175,9 @@ public class CommandBus extends UnicastBus<Command,
 
     private static TenantId tenantOf(Iterable<Command> commands) {
         Iterator<Command> iterator = commands.iterator();
-        if (!iterator.hasNext()) {
-            return TenantId.getDefaultInstance();
-        }
-        TenantId result = iterator.next().tenant();
-        return result;
+        return iterator.hasNext()
+               ? iterator.next().tenant()
+               : TenantId.getDefaultInstance();
     }
 
     final SystemWriteSide systemFor(TenantId tenantId) {
