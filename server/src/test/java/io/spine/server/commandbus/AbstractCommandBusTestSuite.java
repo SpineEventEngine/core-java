@@ -183,10 +183,11 @@ abstract class AbstractCommandBusTestSuite {
     private BoundedContext createContext() {
         Class<? extends AbstractCommandBusTestSuite> cls = getClass();
         String name = cls.getSimpleName();
-        return (multitenant
-         ? BoundedContext.multitenant(name)
-         : BoundedContext.singleTenant(name))
-                .build();
+        BoundedContext result =
+                (multitenant
+                 ? BoundedContext.multitenant(name)
+                 : BoundedContext.singleTenant(name)).build();
+        return result;
     }
 
     @AfterEach
