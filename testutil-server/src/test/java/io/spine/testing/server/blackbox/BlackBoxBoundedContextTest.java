@@ -20,12 +20,12 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -48,6 +48,7 @@ import io.spine.testing.server.blackbox.given.BbInitProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
+import io.spine.testing.server.blackbox.given.BbTaskViewProjection;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
@@ -161,6 +162,14 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Test
+    @DisplayName("register a repository if it's passed as command dispatcher")
+    void registerRepoAsCommandDispatcher() {
+        BbReportRepository repository = new BbReportRepository();
+        context.withHandlers(repository);
+        assertThat(context.allStateTypes()).contains(TypeName.of(BbReport.class));
+    }
+
+    @Test
     @DisplayName("register event dispatcher")
     void registerEventDispatcher() {
         BbEventDispatcher dispatcher = new BbEventDispatcher();
@@ -182,6 +191,16 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         BbEventDispatcher validDispatcher = new BbEventDispatcher();
         assertThrows(NullPointerException.class,
                      () -> context.withEventDispatchers(validDispatcher, null));
+    }
+
+    @Test
+    @DisplayName("register a repository if it's passed as event dispatcher")
+    void registerRepoAsEventDispatcher() {
+        ProjectionRepository<?, ?, ?> repository =
+                (ProjectionRepository<?, ?, ?>)
+                        DefaultRepository.of(BbTaskViewProjection.class);
+        context.withEventDispatchers(repository);
+        assertThat(context.allStateTypes()).contains(TypeName.of(BbTaskView.class));
     }
 
     @Test
@@ -373,16 +392,17 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("create an instance by BoundedContextBuilder")
     class CreateByBuilder {
 
-        private final AggregateRepository<?, ?> aggregateRepository = new BbProjectRepository();
-        private final ProjectionRepository<?, ?, ?> projectionRepository =
-                (ProjectionRepository<?, ?, ?>) DefaultRepository.of(BbProjectViewProjection.class);
+        private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(
+                new BbProjectRepository(),
+                DefaultRepository.of(BbProjectViewProjection.class)
+        );
 
         private final CommandClass commandClass =
                 CommandClass.from(BbRegisterCommandDispatcher.class);
         private CommandDispatcher<?> commandDispatcher;
         private EventDispatcher<?> eventDispatcher;
 
-        private final Set<TypeName> types = toTypes(aggregateRepository, projectionRepository);
+        private final Set<TypeName> types = toTypes(repositories);
 
         private BlackBoxBoundedContext<?> blackBox;
         private EventEnricher enricher;
@@ -406,11 +426,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void singleTenant() {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
-                    .setEventBus(eventBus)
-                    .add(aggregateRepository)
-                    .add(projectionRepository);
-            builder.add(commandDispatcher);
-            builder.add(eventDispatcher);
+                    .setEventBus(eventBus);
+            repositories.forEach(builder::add);
+            builder.addCommandDispatcher(commandDispatcher);
+            builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
@@ -437,11 +456,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void multiTenant() {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(true)
-                    .setEventBus(eventBus)
-                    .add(aggregateRepository)
-                    .add(projectionRepository);
-            builder.add(commandDispatcher);
-            builder.add(eventDispatcher);
+                    .setEventBus(eventBus);
+            repositories.forEach(builder::add);
+            builder.addCommandDispatcher(commandDispatcher);
+            builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
@@ -453,11 +471,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         /**
          * Obtains the set of entity state types from the passed repositories.
          */
-        private Set<TypeName> toTypes(Repository<?, ?>... repos) {
+        private Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
             ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
-            for (Repository<?, ?> repo : repos) {
-                builder.add(repo.entityStateType().toTypeName());
-            }
+            repos.forEach(repository -> builder.add(repository.entityStateType()
+                                                              .toTypeName()));
             return builder.build();
         }
     }

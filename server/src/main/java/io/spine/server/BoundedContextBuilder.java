@@ -290,14 +290,15 @@ public final class BoundedContextBuilder implements Logging {
      * Adds the passed command dispatcher to the dispatcher registration list which will be
      * processed after the Bounded Context is created.
      *
-     * <p>This method should also be used for registering repositories of {@code CommandDispatcher}
-     * type, e.g. {@link io.spine.server.aggregate.AggregateRepository}.
+     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     *         that implement {@code CommandDispatcher}, but the {@link #add(Repository)} method
+     *         should be preferred for this purpose.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder add(CommandDispatcher<?> commandDispatcher) {
+    public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
         if (commandDispatcher instanceof Repository) {
-            return addRepository((Repository<?, ?>) commandDispatcher);
+            return add((Repository<?, ?>) commandDispatcher);
         }
         commandDispatchers.add(commandDispatcher);
         return this;
@@ -307,14 +308,15 @@ public final class BoundedContextBuilder implements Logging {
      * Adds the passed event dispatcher to the dispatcher registration list which will be processed
      * after the Bounded Context is created.
      *
-     * <p>This method should also be used for registering repositories of {@code EventDispatcher}
-     * type, e.g. {@link io.spine.server.projection.ProjectionRepository}.
+     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     *         that implement {@code EventDispatcher}, but the {@link #add(Repository)} method
+     *         should be preferred for this purpose.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder add(EventDispatcher<?> eventDispatcher) {
+    public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
         if (eventDispatcher instanceof Repository) {
-            return addRepository((Repository<?, ?>) eventDispatcher);
+            return add((Repository<?, ?>) eventDispatcher);
         }
         eventDispatchers.add(eventDispatcher);
         return this;
@@ -327,7 +329,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public <I, E extends Entity<I, ?>> BoundedContextBuilder add(Class<E> entityClass) {
         checkNotNull(entityClass);
-        return addRepository(DefaultRepository.of(entityClass));
+        return add(DefaultRepository.of(entityClass));
     }
 
     /**
@@ -335,32 +337,33 @@ public final class BoundedContextBuilder implements Logging {
      * the Bounded Context is created.
      */
     @CanIgnoreReturnValue
-    private BoundedContextBuilder addRepository(Repository<?, ?> repository) {
+    public BoundedContextBuilder add(Repository<?, ?> repository) {
+        checkNotNull(repository);
         repositories.add(repository);
         return this;
     }
 
     /**
-     * Removes the passed command dispatcher or repository from the registration list.
+     * Removes the passed command dispatcher from the corresponding registration list.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder remove(CommandDispatcher<?> commandDispatcher) {
+    public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
         if (commandDispatcher instanceof Repository) {
-            return removeRepository((Repository<?, ?>) commandDispatcher);
+            return remove((Repository<?, ?>) commandDispatcher);
         }
         commandDispatchers.remove(commandDispatcher);
         return this;
     }
 
     /**
-     * Removes the passed event dispatcher or repository from the registration list.
+     * Removes the passed event dispatcher from the corresponding registration list.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder remove(EventDispatcher<?> eventDispatcher) {
+    public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
         if (eventDispatcher instanceof Repository) {
-            return removeRepository((Repository<?, ?>) eventDispatcher);
+            return remove((Repository<?, ?>) eventDispatcher);
         }
         eventDispatchers.remove(eventDispatcher);
         return this;
@@ -381,7 +384,8 @@ public final class BoundedContextBuilder implements Logging {
      * Removes the passed repository from the registration list.
      */
     @CanIgnoreReturnValue
-    private BoundedContextBuilder removeRepository(Repository<?, ?> repository) {
+    public BoundedContextBuilder remove(Repository<?, ?> repository) {
+        checkNotNull(repository);
         repositories.remove(repository);
         return this;
     }
@@ -391,7 +395,7 @@ public final class BoundedContextBuilder implements Logging {
      * of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    boolean has(CommandDispatcher<?> commandDispatcher) {
+    boolean hasCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
         if (commandDispatcher instanceof Repository) {
             return hasRepository((Repository<?, ?>) commandDispatcher);
@@ -405,7 +409,7 @@ public final class BoundedContextBuilder implements Logging {
      * of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    boolean has(EventDispatcher<?> eventDispatcher) {
+    boolean hasEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
         if (eventDispatcher instanceof Repository) {
             return hasRepository((Repository<?, ?>) eventDispatcher);
@@ -419,7 +423,7 @@ public final class BoundedContextBuilder implements Logging {
      * registration list of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    <I, E extends Entity<I, ?>> boolean has(Class<E> entityClass) {
+    <I, E extends Entity<I, ?>> boolean hasRepository(Class<E> entityClass) {
         checkNotNull(entityClass);
         boolean result =
                 repositories.stream()
@@ -433,7 +437,8 @@ public final class BoundedContextBuilder implements Logging {
      * of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    private boolean hasRepository(Repository<?, ?> repository) {
+    public boolean hasRepository(Repository<?, ?> repository) {
+        checkNotNull(repository);
         boolean result = repositories.contains(repository);
         return result;
     }

@@ -50,7 +50,6 @@ final class BbReportAggregate extends Aggregate<BbReportId, BbReport, BbReport.B
                 .setProjectId(event.getProjectId())
                 .setTask(event.getTask())
                 .build();
-
     }
 
     @Apply
