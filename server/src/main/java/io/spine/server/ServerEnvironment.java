@@ -28,7 +28,6 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -41,7 +40,7 @@ import static com.google.common.base.Strings.emptyToNull;
 /**
  * The server conditions and configuration under which the application operates.
  */
-public final class ServerEnvironment {
+public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
 
@@ -82,7 +81,7 @@ public final class ServerEnvironment {
     /**
      * The storage factory for the production mode of the application.
      */
-    private @MonotonicNonNull StorageFactory productionStorageFactory;
+    private @Nullable StorageFactory productionStorageFactory;
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -224,6 +223,11 @@ public final class ServerEnvironment {
         this.productionStorageFactory = storageFactory;
     }
 
+    @VisibleForTesting
+    void clearStorageFactory() {
+        this.productionStorageFactory = null;
+    }
+
     /**
      * Obtains production {@code StorageFactory} previously associated with the environment.
      *
@@ -237,9 +241,20 @@ public final class ServerEnvironment {
             return InMemoryStorageFactory.newInstance();
         }
         checkNotNull(productionStorageFactory,
-                     "Production `StorageFactory` is not configured." +
-                             " Please call `configureProductionStorage()`."
+                     "Production `%s` is not configured." +
+                             " Please call `configureProductionStorage()`.",
+                     StorageFactory.class.getSimpleName()
         );
         return productionStorageFactory;
+    }
+
+    /**
+     * Releases resources associated with this instance.
+     */
+    @Override
+    public void close() throws Exception {
+        if (productionStorageFactory != null) {
+            productionStorageFactory.close();
+        }
     }
 }

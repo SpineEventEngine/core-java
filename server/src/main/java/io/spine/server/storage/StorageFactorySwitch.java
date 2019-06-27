@@ -128,9 +128,9 @@ public final class StorageFactorySwitch implements Function<ContextSpec, Storage
         } else {
             if (productionSupplier == null) {
                 throw newIllegalStateException(
-                        "A supplier of a production StorageFactory is not set " +
+                        "A supplier of a production `StorageFactory` is not set " +
                                 "but the code runs in the production mode. " +
-                                "Please call %s.init().", getClass().getSimpleName());
+                                "Please call `%s.init()`.", getClass().getSimpleName());
             }
             storageFactory = productionSupplier.apply(spec);
         }
