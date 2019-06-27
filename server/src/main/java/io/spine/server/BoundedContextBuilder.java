@@ -437,7 +437,7 @@ public final class BoundedContextBuilder implements Logging {
      * of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    public boolean hasRepository(Repository<?, ?> repository) {
+    boolean hasRepository(Repository<?, ?> repository) {
         checkNotNull(repository);
         boolean result = repositories.contains(repository);
         return result;
