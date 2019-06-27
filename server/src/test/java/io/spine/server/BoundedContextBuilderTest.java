@@ -320,7 +320,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("check repository presence in Builder if it's passed as command dispatcher")
+        @DisplayName("check repository presence in Builder if it's queried as command dispatcher")
         void checkHasRepo() {
             builder.add(repository);
             assertTrue(builder.hasCommandDispatcher(repository));
@@ -381,7 +381,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("check repository presence in Builder if it's passed as event dispatcher")
+        @DisplayName("check repository presence in Builder if it's queried as event dispatcher")
         void checkHasRepo() {
             builder.add(repository);
             assertTrue(builder.hasEventDispatcher(repository));
