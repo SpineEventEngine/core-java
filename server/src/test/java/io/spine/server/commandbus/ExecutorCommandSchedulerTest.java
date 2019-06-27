@@ -79,7 +79,7 @@ class ExecutorCommandSchedulerTest {
         // System BC integration is NOT tested in this suite.
         SystemWriteSide systemWriteSide = NoOpSystemWriteSide.INSTANCE;
         CommandFlowWatcher flowWatcher = new CommandFlowWatcher((t) -> systemWriteSide);
-        scheduler.setCommandConsumer(flowWatcher::onScheduled);
+        scheduler.setWatcher(flowWatcher);
     }
 
     @AfterEach

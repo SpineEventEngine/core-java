@@ -331,7 +331,7 @@ public class CommandBus extends UnicastBus<Command,
             commandScheduler = ServerEnvironment.instance()
                                                 .newCommandScheduler();
             CommandFlowWatcher flowWatcher = createFlowWatcher();
-            commandScheduler.setCommandConsumer(flowWatcher::onScheduled);
+            commandScheduler.setWatcher(flowWatcher);
             commandConsumer = flowWatcher::onDispatchCommand;
 
             TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());

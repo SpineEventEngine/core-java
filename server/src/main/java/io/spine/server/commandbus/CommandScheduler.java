@@ -32,7 +32,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -54,7 +53,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     private @Nullable CommandBus commandBus;
 
     /** Consumes commands when they are scheduled by this instance. */
-    private @Nullable Consumer<CommandEnvelope> commandConsumer;
+    private @Nullable CommandFlowWatcher watcher;
 
     protected CommandScheduler() {
     }
@@ -68,10 +67,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     /**
-     * Assigns consumer for command scheduled by this instance.
+     * Assigns watcher for traching scheduled commands.
      */
-    void setCommandConsumer(Consumer<CommandEnvelope> consumer) {
-        this.commandConsumer = consumer;
+    void setWatcher(CommandFlowWatcher watcher) {
+        this.watcher = watcher;
     }
 
     @Override
@@ -109,7 +108,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         rememberAsScheduled(commandUpdated);
 
         CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
-        consumer().accept(updatedCommandEnvelope);
+        watcher().onScheduled(updatedCommandEnvelope);
     }
 
     /**
@@ -124,12 +123,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         return commandBus;
     }
 
-    private Consumer<CommandEnvelope> consumer() {
+    private CommandFlowWatcher watcher() {
         checkState(
-                commandConsumer != null,
-                "Consumer of scheduled commands is not initialised. Please call `setConsumer()`."
+                watcher != null,
+                "`%s` is not assigned. Please call `setWatcher()`.",
+                CommandFlowWatcher.class.getName()
         );
-        return commandConsumer;
+        return watcher;
     }
 
     /**
