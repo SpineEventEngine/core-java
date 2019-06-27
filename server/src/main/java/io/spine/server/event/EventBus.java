@@ -146,9 +146,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     /**
-     * Obtains a view {@code Set} of events that are known to this {@code EventBus}.
+     * Obtains the view {@code Set} of events that are known to this {@code EventBus}.
      *
      * <p>This set is changed when event dispatchers or handlers are registered or un-registered.
+     *
+     * @return a set of classes of supported events
      */
     @Internal
     public final Set<EventClass> registeredEventClasses() {
