@@ -510,7 +510,7 @@ public final class BoundedContextBuilder implements Logging {
 
         initTenantIndex();
         initCommandBus(client.writeSide());
-        initEventBus(storageFactory);
+        initEventBus();
         initStand(client.readSide());
         initIntegrationBus(transport);
 
@@ -544,16 +544,9 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private void initEventBus(StorageFactory storageFactory) {
+    private void initEventBus() {
         if (eventBus == null) {
-            eventBus = EventBus.newBuilder()
-                               .setStorageFactory(storageFactory);
-        } else {
-            boolean eventStoreConfigured = eventBus.getEventStore()
-                                                   .isPresent();
-            if (!eventStoreConfigured) {
-                eventBus.setStorageFactory(storageFactory);
-            }
+            eventBus = EventBus.newBuilder();
         }
     }
 

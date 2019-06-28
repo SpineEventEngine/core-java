@@ -35,7 +35,6 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.given.client.ShoppingListAggregate;
 import io.spine.test.system.server.ListId;
 import io.spine.test.system.server.ShoppingList;
@@ -85,12 +84,8 @@ class DefaultSystemReadSideTest {
     @Test
     @DisplayName("not allow nulls on construction")
     void notAllowNullsOnConstruction() {
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         new NullPointerTester()
-                .setDefault(EventBus.class, EventBus
-                        .newBuilder()
-                        .setStorageFactory(storageFactory)
-                        .build())
+                .setDefault(EventBus.class, EventBus.newBuilder().build())
                 .testStaticMethods(DefaultSystemReadSide.class, PACKAGE);
     }
 

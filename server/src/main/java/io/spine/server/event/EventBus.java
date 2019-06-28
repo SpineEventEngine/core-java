@@ -21,7 +21,6 @@ package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
@@ -42,7 +41,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.enrich.Enricher;
 import io.spine.server.event.store.EventStore;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -50,9 +48,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
@@ -135,13 +131,13 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     @VisibleForTesting
-    Set<? extends EventDispatcher<?>> getDispatchers(EventClass eventClass) {
+    final Set<? extends EventDispatcher<?>> dispatchersOf(EventClass eventClass) {
         return registry().dispatchersOf(eventClass);
     }
 
     @VisibleForTesting
-    boolean hasDispatchers(EventClass eventClass) {
-        Set<?> dispatchers = getDispatchers(eventClass);
+    final boolean hasDispatchers(EventClass eventClass) {
+        Set<?> dispatchers = dispatchersOf(eventClass);
         return !dispatchers.isEmpty();
     }
 
@@ -265,21 +261,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     public static class Builder
             extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
-        private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
-
-        /**
-         * A {@code StorageFactory} for configuring the {@code EventStore} instance
-         * for this {@code EventBus}.
-         *
-         * <p>If the {@code EventStore} is passed to this {@code Builder} explicitly
-         * via {@link #setEventStore(EventStore)}, the {@code storageFactory} field
-         * value is not used.
-         *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
-         * to create an instance of {@code EventBus}.
-         */
-        private @Nullable StorageFactory storageFactory;
-
         /**
          * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
          *
@@ -289,16 +270,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
          * to create an instance of {@code EventBus}.
          */
-        private @Nullable EventStore eventStore;
-
-        /**
-         * Optional {@code Executor} for returning event stream from the {@code EventStore}.
-         *
-         * <p>Used only if the {@code EventStore} is NOT set explicitly.
-         *
-         * <p>If not set, a default value will be set by the builder.
-         */
-        private @Nullable Executor eventStoreStreamExecutor;
+        private EventStore eventStore;
 
         /**
          * Optional enricher for events.
@@ -319,72 +291,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Override
         protected DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> newRegistry() {
             return new EventDispatcherRegistry();
-        }
-
-        /**
-         * Specifies an {@code StorageFactory} to configure this {@code EventBus}.
-         *
-         * <p>This {@code StorageFactory} instance will be used to create
-         * an instance of {@code EventStore} for this {@code EventBus},
-         * <em>if</em> {@code EventStore} was not explicitly set in the builder.
-         *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
-         * to create an {@code EventBus}.
-         *
-         * @see #setEventStore(EventStore)
-         */
-        @CanIgnoreReturnValue
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
-            this.storageFactory = checkNotNull(storageFactory);
-            return this;
-        }
-
-        /**
-         * Specifies {@code EventStore} to be used when creating a new {@code EventBus}.
-         *
-         * <p>This method can be called if neither {@link #setEventStoreStreamExecutor(Executor)}
-         * nor {@link #setStorageFactory(StorageFactory)} were called before.
-         *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} must be set
-         * to create an {@code EventBus}.
-         *
-         * @see #setEventStoreStreamExecutor(Executor)
-         * @see #setStorageFactory(StorageFactory)
-         */
-        @CanIgnoreReturnValue
-        public Builder setEventStore(EventStore eventStore) {
-            checkState(storageFactory == null, "storageFactory already set.");
-            checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
-            this.eventStore = checkNotNull(eventStore);
-            return this;
-        }
-
-        public Optional<EventStore> getEventStore() {
-            return Optional.ofNullable(eventStore);
-        }
-
-        /**
-         * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
-         *
-         * <p>This {@code Executor} instance will be used for creating
-         * new {@code EventStore} instance when building {@code EventBus}, <em>if</em>
-         * {@code EventStore} was not explicitly set in the builder.
-         *
-         * <p>If an {@code Executor} is not set in the builder,
-         * {@link MoreExecutors#directExecutor()} will be used.
-         *
-         * @see #setEventStore(EventStore)
-         */
-        @CanIgnoreReturnValue
-        public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
-            checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
-            this.eventStoreStreamExecutor = eventStoreStreamExecutor;
-            return this;
-        }
-
-        public Optional<Executor> getEventStoreStreamExecutor() {
-            return Optional.ofNullable(eventStoreStreamExecutor);
         }
 
         /**
@@ -420,7 +326,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         /**
          * Obtains the logging level for {@linkplain EventBus#post(Event) post} operations.
          */
-        public Level getLogLevelForPost() {
+        public Level logLevelForPost() {
             return this.logLevelForPost;
         }
 
@@ -434,16 +340,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Internal
         @CheckReturnValue
         public EventBus build() {
-            if (eventStoreStreamExecutor == null) {
-                eventStoreStreamExecutor = MoreExecutors.directExecutor();
-            }
-            checkNotNull(eventStoreStreamExecutor);
-            if (eventStore == null) {
-                eventStore = EventStore
-                        .newBuilder()
-                        .withDefaultLogger()
-                        .build();
-            }
+            eventStore = EventStore
+                    .newBuilder()
+                    .withDefaultLogger()
+                    .build();
             EventBus result = new EventBus(this);
             return result;
         }
