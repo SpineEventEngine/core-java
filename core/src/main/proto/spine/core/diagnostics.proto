@@ -14,17 +14,30 @@ import "google/protobuf/any.proto";
 import "spine/core/actor_context.proto";
 import "spine/core/version.proto";
 
-// An identifier of a message dispatched to an entity.
+// An identifier of a domain message.
 //
-// May represent either an event or a command.
+// May represent a signal or an entity state.
 //
 message MessageId {
     option (is).java_type = "io.spine.core.MessageIdMixin";
 
+    // The ID of the message.
+    //
+    // If the message is a signal (an event of a command), `id` has the value of the signal ID (an
+    // `EventId` or a `CommandId`). If the message is an entity state, `id` had the value of
+    // the entity identifier.
+    //
     google.protobuf.Any id = 1 [(required) = true, (validate) = true];
 
+    // The type of the message.
     string type_url = 2 [(required) = true];
 
+    // The version associated with this message.
+    //
+    // If the message is an entity state, this is the version of the entity. If the message is
+    // an event, this is the `EventContext.version`. If the message is a command, the version is
+    // absent.
+    //
     core.Version version = 3 [(required) = false, (validate) = true];
 }
 
