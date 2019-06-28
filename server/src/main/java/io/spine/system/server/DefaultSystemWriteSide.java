@@ -20,13 +20,16 @@
 
 package io.spine.system.server;
 
+import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
+import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.UserId;
+import io.spine.grpc.LoggingObserver;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.grpc.LoggingObserver.Level.WARN;
 import static io.spine.system.server.SystemEventFactory.forMessage;
 
 /**
@@ -53,8 +56,10 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         checkNotNull(systemEvent);
         checkNotNull(origin);
         Event event = event(systemEvent, origin);
+        StreamObserver<Ack> loggingObserver =
+                LoggingObserver.<Ack>forClass(DefaultSystemWriteSide.class, WARN);
         system.eventBus()
-              .post(event, noOpObserver());
+              .post(event, loggingObserver);
     }
 
     private Event event(EventMessage message, Origin origin) {
