@@ -51,9 +51,10 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
     private final Set<TenantId> cache = Sets.newConcurrentHashSet();
 
     @Override
-    protected final RecordStorage<TenantId> createStorage(StorageFactory factory) {
-        ContextSpec singleTenant = ContextSpec.singleTenant(context().spec().name().getValue());
-        RecordStorage<TenantId> result = factory.createRecordStorage(singleTenant, entityClass());
+    protected final RecordStorage<TenantId> createStorage() {
+        StorageFactory sf = defaultStorageFactory();
+        ContextSpec singleTenant = context().spec().toSingleTenant();
+        RecordStorage<TenantId> result = sf.createRecordStorage(singleTenant, entityClass());
         return result;
     }
 

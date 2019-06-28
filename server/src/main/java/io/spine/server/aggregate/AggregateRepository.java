@@ -271,13 +271,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Creates aggregate storage for the repository.
      *
-     * @param factory the factory to create the storage
      * @return new storage
      */
     @Override
-    protected AggregateStorage<I> createStorage(StorageFactory factory) {
-        AggregateStorage<I> result =
-                factory.createAggregateStorage(context().spec(), entityClass());
+    protected AggregateStorage<I> createStorage() {
+        StorageFactory sf = defaultStorageFactory();
+        AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 

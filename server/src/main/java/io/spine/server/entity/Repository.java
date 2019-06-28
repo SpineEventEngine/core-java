@@ -209,11 +209,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         if (sameValue) {
             return;
         }
-
         this.context = context;
-        if (!isOpen()) {
-            open();
-        }
+        open();
         init(context);
     }
 
@@ -283,24 +280,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Does nothing.
-     *
-     * <p>Storage is initialized automatically via {@code StorageFactory} obtained from
-     * the {@code ServerEnvironment}.
-     *
-     * @deprecated do not use
+     * Initializes the storage of the repository.
      */
-    @Deprecated
-    public final void initStorage(StorageFactory factory) {
-        // Do nothing.
-    }
-
     protected final void open() {
         Storage<I, ?, ?> storage = storage();
         checkNotNull(storage, "Unable to initialize the storage.");
     }
 
-    protected StorageFactory storageFactory() {
+    protected StorageFactory defaultStorageFactory() {
         return ServerEnvironment.instance().storageFactory();
     }
 
@@ -313,8 +300,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     protected final synchronized Storage<I, ?, ?> storage() {
         if (storage == null) {
-            StorageFactory factory = storageFactory();
-            this.storage = createStorage(factory);
+            this.storage = createStorage();
         }
         return checkStorage(storage);
     }
@@ -324,7 +310,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @VisibleForTesting
     public final synchronized boolean storageAssigned() {
-        return isOpen();
+        return storage != null;
     }
 
     /**
@@ -339,15 +325,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Creates the storage using the passed factory.
+     * Creates the storage for this repository.
      *
-     * <p>Implementations are responsible for properly calling the factory
-     * for creating the storage, which is compatible with the repository.
+     * <p>Default implementations use {@link #defaultStorageFactory()} invoking its method
+     * which creates a storage compatible with the repository.
      *
-     * @param factory the factory to create the storage
+     * <p>Overwrite this method for creating a custom implementation of {@code Storage}.
+     *
      * @return the created storage instance
      */
-    protected abstract Storage<I, ?, ?> createStorage(StorageFactory factory);
+    protected abstract Storage<I, ?, ?> createStorage();
 
     /**
      * Closes the repository by closing the underlying storage.
@@ -368,7 +355,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Verifies if the repository is open.
      */
     public final synchronized boolean isOpen() {
-        return storage != null;
+        return context != null;
     }
 
     /**
