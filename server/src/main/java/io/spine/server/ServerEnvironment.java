@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandScheduler;
@@ -239,6 +240,29 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
+     * Assigns {@code TracerFactory} to this server environment.
+     */
+    public void configureTracing(TracerFactory tracerFactory) {
+        this.tracerFactory = checkNotNull(tracerFactory);
+    }
+
+    /**
+     * Obtains {@link TracerFactory} associated with this server environment.
+     */
+    public Optional<TracerFactory> tracing() {
+        return Optional.ofNullable(tracerFactory);
+    }
+
+    /**
+     * This is a test-only method required in tests that deal with assigning tracer factories.
+     */
+    @Internal
+    @VisibleForTesting
+    public void clearTracerFactory() {
+        this.tracerFactory = null;
+    }
+
+    /**
      * Obtains production {@code StorageFactory} previously associated with the environment.
      *
      * @return {@code StorageFactory} instance for the production storage
@@ -263,6 +287,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
+        if (tracerFactory != null) {
+            tracerFactory.close();
+        }
         if (productionStorageFactory != null) {
             productionStorageFactory.close();
         }

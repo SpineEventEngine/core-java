@@ -25,6 +25,7 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.trace.given.MemoizingTracer;
 import io.spine.server.trace.given.MemoizingTracerFactory;
 import io.spine.server.trace.given.airport.AirportContext;
@@ -37,6 +38,7 @@ import io.spine.test.trace.FlightScheduled;
 import io.spine.test.trace.ScheduleFlight;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Message tracing should")
 class TracingTest {
 
+    private static final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
     private static final TestActorRequestFactory requests =
             new TestActorRequestFactory(TracingTest.class);
 
@@ -64,13 +67,17 @@ class TracingTest {
     @BeforeEach
     void setUp() {
         tracing = new MemoizingTracerFactory();
+        serverEnvironment.configureTracing(tracing);
         context = AirportContext
                 .builder()
-                .setTracerFactorySupplier(spec -> tracing)
                 .build();
         spec = context.spec();
     }
 
+    @AfterEach
+    void tearDown() {
+        serverEnvironment.clearTracerFactory();
+    }
     @Test
     @DisplayName("trace actor commands")
     void traceCommands() {

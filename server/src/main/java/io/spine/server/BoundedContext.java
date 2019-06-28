@@ -53,7 +53,6 @@ import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -99,8 +98,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
     private final AggregateRootDirectory aggregateRootDirectory;
 
-    private final @Nullable TracerFactory tracerFactory;
-
     private final TenantIndex tenantIndex;
 
     /**
@@ -118,8 +115,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkInheritance();
 
         this.spec = builder.spec();
-        this.tracerFactory = builder.buildTracerFactorySupplier()
-                                    .apply(spec);
         this.eventBus = buildEventBus(builder);
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
@@ -465,13 +460,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Obtains {@link TracerFactory} associated with this {@code BoundedContext}.
-     */
-    public Optional<TracerFactory> tracing() {
-        return Optional.ofNullable(tracerFactory);
-    }
-
-    /**
      * Returns {@code true} if the Bounded Context is designed to serve more than one tenant of
      * the application, {@code false} otherwise.
      */
@@ -528,9 +516,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         integrationBus.close();
         stand.close();
         importBus.close();
-        if (tracerFactory != null) {
-            tracerFactory.close();
-        }
         shutDownRepositories();
 
         log().debug(closed(nameForLogging()));

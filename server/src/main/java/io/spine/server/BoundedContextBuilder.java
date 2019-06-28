@@ -46,7 +46,6 @@ import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.TraceEventObserver;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,16 +66,13 @@ import static io.spine.server.ContextSpec.singleTenant;
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
-
-    private TenantIndex tenantIndex;
-    private @Nullable Function<ContextSpec, TracerFactory> tracing;
-
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
     private TransportFactory transportFactory;
     private Supplier<AggregateRootDirectory> rootDirectory;
+    private TenantIndex tenantIndex;
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final List<Repository<?, ?>> repositories = new ArrayList<>();
@@ -130,23 +126,6 @@ public final class BoundedContextBuilder implements Logging {
 
     public boolean isMultitenant() {
         return spec.isMultitenant();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder
-    setTracerFactorySupplier(@Nullable Function<ContextSpec, TracerFactory> tracing) {
-        this.tracing = tracing;
-        return this;
-    }
-
-    public Optional<Function<ContextSpec, TracerFactory>> tracerFactory() {
-        return Optional.ofNullable(tracing);
-    }
-
-    Function<ContextSpec, @Nullable TracerFactory> buildTracerFactorySupplier() {
-        @SuppressWarnings("ReturnOfNull")
-        Function<ContextSpec, @Nullable TracerFactory> defaultSupplier = spec -> null;
-        return tracerFactory().orElse(defaultSupplier);
     }
 
     @CanIgnoreReturnValue
@@ -329,8 +308,9 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private static void registerTracing(BoundedContext domain, BoundedContext system) {
-        domain.tracing().ifPresent(tracing -> {
-            EventDispatcher<?> observer = new TraceEventObserver(domain.spec(), tracing);
+        Optional<TracerFactory> tracing = ServerEnvironment.instance().tracing();
+        tracing.ifPresent(factory -> {
+            EventDispatcher<?> observer = new TraceEventObserver(domain.spec(), factory);
             system.registerEventDispatcher(observer);
         });
     }
