@@ -223,6 +223,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
         builder.repositories()
                .forEach(result::with);
+        builder.commandDispatchers()
+               .forEach(result::withHandlers);
+        builder.eventDispatchers()
+               .forEach(result::withEventDispatchers);
 
         return result;
     }
@@ -259,28 +263,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public final T with(Repository<?, ?>... repositories) {
-        registerAll(boundedContext::register, repositories);
-        registerAll(this::remember, repositories);
+        registerAll(this::registerRepository, repositories);
         return thisRef();
+    }
+
+    private void registerRepository(Repository<?, ?> repository) {
+        boundedContext.register(repository);
+        remember(repository);
     }
 
     private void remember(Repository<?, ?> repository) {
         Class<Message> stateClass = repository.entityStateType()
                                               .getMessageClass();
         repositories.put(stateClass, repository);
-    }
-
-    /**
-     * Registers the specified event dispatchers with the {@code event bus} of this
-     * bounded context.
-     *
-     * @param dispatchers
-     *         dispatchers to register with the event bus of this bounded context
-     */
-    @CanIgnoreReturnValue
-    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
-        registerAll(boundedContext::registerEventDispatcher, dispatchers);
-        return thisRef();
     }
 
     /**
@@ -292,8 +287,37 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public final T withHandlers(CommandDispatcher<?>... dispatchers) {
-        registerAll(boundedContext::registerCommandDispatcher, dispatchers);
+        registerAll(this::registerCommandDispatcher, dispatchers);
         return thisRef();
+    }
+
+    private void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
+        if (dispatcher instanceof Repository) {
+            registerRepository((Repository<?, ?>) dispatcher);
+        } else {
+            boundedContext.registerCommandDispatcher(dispatcher);
+        }
+    }
+
+    /**
+     * Registers the specified event dispatchers with the {@code event bus} of this
+     * bounded context.
+     *
+     * @param dispatchers
+     *         dispatchers to register with the event bus of this bounded context
+     */
+    @CanIgnoreReturnValue
+    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
+        registerAll(this::registerEventDispatcher, dispatchers);
+        return thisRef();
+    }
+
+    private void registerEventDispatcher(EventDispatcher<?> dispatcher) {
+        if (dispatcher instanceof Repository) {
+            registerRepository((Repository<?, ?>) dispatcher);
+        } else {
+            boundedContext.registerEventDispatcher(dispatcher);
+        }
     }
 
     @SafeVarargs

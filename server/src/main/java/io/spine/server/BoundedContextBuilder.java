@@ -30,8 +30,11 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -45,7 +48,7 @@ import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -59,7 +62,8 @@ import static io.spine.server.ContextSpec.singleTenant;
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+// OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
@@ -72,7 +76,19 @@ public final class BoundedContextBuilder implements Logging {
     private TenantIndex tenantIndex;
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
-    private final List<Repository<?, ?>> repositories = new ArrayList<>();
+    private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
+
+    /**
+     * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
+     * Context creation.
+     */
+    private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
+
+    /**
+     * Event dispatchers to be registered with the context {@link EventBus} and/or
+     * {@link IntegrationBus} after the Bounded Context creation.
+     */
+    private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
 
     /**
      * Prevents direct instantiation.
@@ -204,6 +220,52 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Adds the passed command dispatcher to the dispatcher registration list which will be
+     * processed after the Bounded Context is created.
+     *
+     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     *         that implement {@code CommandDispatcher}, but the {@link #add(Repository)} method
+     *         should be preferred for this purpose.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        if (commandDispatcher instanceof Repository) {
+            return add((Repository<?, ?>) commandDispatcher);
+        }
+        commandDispatchers.add(commandDispatcher);
+        return this;
+    }
+
+    /**
+     * Adds the passed event dispatcher to the dispatcher registration list which will be processed
+     * after the Bounded Context is created.
+     *
+     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     *         that implement {@code EventDispatcher}, but the {@link #add(Repository)} method
+     *         should be preferred for this purpose.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        if (eventDispatcher instanceof Repository) {
+            return add((Repository<?, ?>) eventDispatcher);
+        }
+        eventDispatchers.add(eventDispatcher);
+        return this;
+    }
+
+    /**
+     * Adds the {@linkplain DefaultRepository default repository} for the passed entity class to
+     * the repository registration list.
+     */
+    @CanIgnoreReturnValue
+    public <I, E extends Entity<I, ?>> BoundedContextBuilder add(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        return add(DefaultRepository.of(entityClass));
+    }
+
+    /**
      * Adds the passed repository to the registration list which will be processed after
      * the Bounded Context is created.
      */
@@ -215,6 +277,43 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Removes the passed command dispatcher from the corresponding registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        if (commandDispatcher instanceof Repository) {
+            return remove((Repository<?, ?>) commandDispatcher);
+        }
+        commandDispatchers.remove(commandDispatcher);
+        return this;
+    }
+
+    /**
+     * Removes the passed event dispatcher from the corresponding registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        if (eventDispatcher instanceof Repository) {
+            return remove((Repository<?, ?>) eventDispatcher);
+        }
+        eventDispatchers.remove(eventDispatcher);
+        return this;
+    }
+
+    /**
+     * Removes the repository from the registration list by the passed entity class.
+     */
+    @CanIgnoreReturnValue
+    public <I, E extends Entity<I, ?>> BoundedContextBuilder remove(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        repositories.removeIf(repository -> repository.entityClass()
+                                                      .equals(entityClass));
+        return this;
+    }
+
+    /**
      * Removes the passed repository from the registration list.
      */
     @CanIgnoreReturnValue
@@ -222,6 +321,48 @@ public final class BoundedContextBuilder implements Logging {
         checkNotNull(repository);
         repositories.remove(repository);
         return this;
+    }
+
+    /**
+     * Verifies if the passed command dispatcher was previously added into the registration list
+     * of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    boolean hasCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        if (commandDispatcher instanceof Repository) {
+            return hasRepository((Repository<?, ?>) commandDispatcher);
+        }
+        boolean result = commandDispatchers.contains(commandDispatcher);
+        return result;
+    }
+
+    /**
+     * Verifies if the passed event dispatcher was previously added into the registration list
+     * of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    boolean hasEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        if (eventDispatcher instanceof Repository) {
+            return hasRepository((Repository<?, ?>) eventDispatcher);
+        }
+        boolean result = eventDispatchers.contains(eventDispatcher);
+        return result;
+    }
+
+    /**
+     * Verifies if the repository with a passed entity class was previously added into the
+     * registration list of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    <I, E extends Entity<I, ?>> boolean hasRepository(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        boolean result =
+                repositories.stream()
+                            .anyMatch(repository -> repository.entityClass()
+                                                              .equals(entityClass));
+        return result;
     }
 
     /**
@@ -243,6 +384,26 @@ public final class BoundedContextBuilder implements Logging {
      */
     public ImmutableList<Repository<?, ?>> repositories() {
         return ImmutableList.copyOf(repositories);
+    }
+
+    /**
+     * Obtains the list of command dispatchers added to the builder by the time of the call.
+     *
+     * <p>Adding dispatchers to the builder after this method returns will not update the
+     * returned list.
+     */
+    public ImmutableList<CommandDispatcher<?>> commandDispatchers() {
+        return ImmutableList.copyOf(commandDispatchers);
+    }
+
+    /**
+     * Obtains the list of event dispatchers added to the builder by the time of the call.
+     *
+     * <p>Adding dispatchers to the builder after this method returns will not update the
+     * returned list.
+     */
+    public ImmutableList<EventDispatcher<?>> eventDispatchers() {
+        return ImmutableList.copyOf(eventDispatchers);
     }
 
     /**
@@ -300,6 +461,7 @@ public final class BoundedContextBuilder implements Logging {
         log().debug("{} created.", result.nameForLogging());
 
         registerRepositories(result);
+        registerDispatchers(result);
         return result;
     }
 
@@ -308,6 +470,11 @@ public final class BoundedContextBuilder implements Logging {
             result.register(repository);
             log().debug("{} registered.", repository);
         }
+    }
+
+    private void registerDispatchers(BoundedContext result) {
+        commandDispatchers.forEach(result::registerCommandDispatcher);
+        eventDispatchers.forEach(result::registerEventDispatcher);
     }
 
     private BoundedContext buildDomain(SystemContext system, TransportFactory transport) {
@@ -399,8 +566,8 @@ public final class BoundedContextBuilder implements Logging {
             if (standMultitenant == null) {
                 stand.setMultitenant(isMultitenant());
             } else {
-                checkSameValue("Stand must match multitenancy of BoundedContext. " +
-                                       "Status in BoundedContext.Builder: %s Stand: %s",
+                checkSameValue("`Stand` must match multitenancy of `BoundedContext`. " +
+                                       "Status in `BoundedContext.Builder`: %s, `Stand`: %s.",
                                standMultitenant);
             }
         }

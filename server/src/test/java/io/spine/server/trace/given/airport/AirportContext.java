@@ -22,7 +22,6 @@ package io.spine.server.trace.given.airport;
 
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.DefaultRepository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
 import io.spine.test.trace.AirportId;
@@ -53,7 +52,7 @@ public final class AirportContext {
                 .singleTenant("Airport")
                 .add(flights)
                 .add(new TimetableRepository())
-                .add(DefaultRepository.of(BoardingProcman.class))
+                .add(BoardingProcman.class)
                 .setEventBus(eventBus);
     }
 }
