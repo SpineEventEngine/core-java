@@ -55,6 +55,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 
+    private static final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
+
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
@@ -65,16 +67,14 @@ class ServerEnvironmentTest {
     @DisplayName("tell when not running under AppEngine")
     void tellIfNotInAppEngine() {
         // Tests are not run by AppEngine by default.
-        assertFalse(ServerEnvironment.instance()
-                                     .isAppEngine());
+        assertFalse(serverEnvironment.isAppEngine());
     }
 
     @Test
     @DisplayName("obtain AppEngine version as optional string")
     void getAppEngineVersion() {
         // By default we're not running under AppEngine.
-        assertFalse(ServerEnvironment.instance()
-                                     .appEngineVersion()
+        assertFalse(serverEnvironment.appEngineVersion()
                                      .isPresent());
     }
 
@@ -84,7 +84,7 @@ class ServerEnvironmentTest {
         Delivery newDelivery = Delivery.newBuilder()
                                        .setStrategy(UniformAcrossAllShards.forNumber(42))
                                        .build();
-        ServerEnvironment environment = ServerEnvironment.instance();
+        ServerEnvironment environment = serverEnvironment;
         Delivery defaultValue = environment.delivery();
         environment.configureDelivery(newDelivery);
         assertEquals(newDelivery, environment.delivery());
@@ -97,7 +97,7 @@ class ServerEnvironmentTest {
     @DisplayName("tell when not running without any specific server environment")
     void tellIfStandalone() {
         // Tests are not run by AppEngine by default.
-        assertEquals(STANDALONE, ServerEnvironment.instance().deploymentType());
+        assertEquals(STANDALONE, serverEnvironment.deploymentType());
     }
 
     @Nested
@@ -111,15 +111,15 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
         void receivesCloudEnvironment() {
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.instance().deploymentType());
+            assertEquals(APPENGINE_CLOUD, serverEnvironment.deploymentType());
         }
 
         @Test
         @DisplayName("cache the property value")
         void cachesValue() {
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.instance().deploymentType());
+            assertEquals(APPENGINE_CLOUD, serverEnvironment.deploymentType());
             setGaeEnvironment("Unrecognized Value");
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.instance().deploymentType());
+            assertEquals(APPENGINE_CLOUD, serverEnvironment.deploymentType());
         }
     }
 
@@ -134,7 +134,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE local dev server environment")
         void receivesEmulatorEnvironment() {
-            assertEquals(APPENGINE_EMULATOR, ServerEnvironment.instance().deploymentType());
+            assertEquals(APPENGINE_EMULATOR, serverEnvironment.deploymentType());
         }
     }
 
@@ -149,7 +149,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("receive STANDALONE deployment type")
         void receivesStandalone() {
-            assertEquals(STANDALONE, ServerEnvironment.instance().deploymentType());
+            assertEquals(STANDALONE, serverEnvironment.deploymentType());
         }
     }
 
@@ -158,7 +158,6 @@ class ServerEnvironmentTest {
     class StorageFactoryConfig {
 
         private final Environment environment = Environment.getInstance();
-        private final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
 
         @BeforeEach
         void turnToProduction() {
