@@ -40,7 +40,7 @@ import static com.google.protobuf.util.Timestamps.compare;
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
  */
-public class InMemoryInboxStorage extends InboxStorage implements Logging {
+public final class InMemoryInboxStorage extends InboxStorage implements Logging {
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 

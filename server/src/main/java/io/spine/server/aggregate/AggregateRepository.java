@@ -273,7 +273,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
-        Storage<I, ?, ?> result = factory.createAggregateStorage(entityClass());
+        Storage<I, ?, ?> result = factory.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 

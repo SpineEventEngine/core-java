@@ -24,16 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.transport.GrpcContainer;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
@@ -46,8 +41,10 @@ public final class Server implements Logging {
 
     /** The port assigned to the server. */
     private final int port;
+
     /** Bounded Contexts exposed by the server. */
     private final ImmutableSet<BoundedContext> contexts;
+
     /** The container for Command- and Query- services. */
     private final GrpcContainer grpcContainer;
 
@@ -79,6 +76,7 @@ public final class Server implements Logging {
     /**
      * Waits for the server to become terminated.
      */
+    @SuppressWarnings("unused")
     public void awaitTermination() {
         grpcContainer.awaitTermination();
     }
@@ -115,7 +113,7 @@ public final class Server implements Logging {
     /**
      * Obtains the port assigned to the server.
      */
-    public int getPort() {
+    public int port() {
         return port;
     }
 
@@ -140,12 +138,10 @@ public final class Server implements Logging {
         return result;
     }
 
-
     public static class Builder {
 
         private int port = DEFAULT_CLIENT_SERVICE_PORT;
         private final Set<BoundedContextBuilder> contextBuilders = new HashSet<>();
-        private @MonotonicNonNull Function<ContextSpec, StorageFactory> storageFactory;
 
         private final Set<BoundedContext> contexts = new HashSet<>();
 
@@ -173,20 +169,9 @@ public final class Server implements Logging {
         }
 
         /**
-         * Assigns default {@code StorageFactory} for the server.
-         */
-        @CanIgnoreReturnValue
-        public Builder setStorageFactory(Function<ContextSpec, StorageFactory> storageFactory) {
-            checkNotNull(storageFactory);
-            this.storageFactory = storageFactory;
-            return this;
-        }
-
-        /**
          * Creates a new instance of the server.
          */
         public Server build() {
-            ensureStorageFactory();
             buildContexts();
             Server result = new Server(this);
             return result;
@@ -194,35 +179,7 @@ public final class Server implements Logging {
 
         private void buildContexts() {
             for (BoundedContextBuilder builder : contextBuilders) {
-                ensureStorageFactory(builder);
                 contexts.add(builder.build());
-            }
-        }
-
-        /**
-         * Ensures that the passed BoundedContext builder has a supplier of
-         * a storage factory supplier.
-         *
-         * <p>If no supplier assigned, creates a storage factory for the
-         * Bounded Context to be built and assigns its supplier.
-         */
-        private void ensureStorageFactory(BoundedContextBuilder builder) {
-            Optional<Function<ContextSpec, StorageFactory>> supplier = builder.storage();
-            if (!supplier.isPresent()) {
-                builder.setStorage(storageFactory);
-            }
-        }
-
-        /**
-         * Ensures that the builder has a non-null {@code StorageFactory} when it prepares
-         * to create a new {@code Server} instance.
-         *
-         * <p>If {@code StorageFactory} was not directly set to the builder, an instance of
-         * {@code InMemoryStorageFactory} will be used.
-         */
-        private void ensureStorageFactory() {
-            if (storageFactory == null) {
-                this.storageFactory = InMemoryStorageFactory::newInstance;
             }
         }
     }

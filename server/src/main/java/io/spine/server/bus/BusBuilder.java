@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
@@ -62,6 +63,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
 
     private @Nullable SystemWriteSide systemWriteSide;
     private @Nullable TenantIndex tenantIndex;
+    private BoundedContext context;
 
     /**
      * Creates a new instance of the bus builder.
@@ -121,6 +123,21 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      */
     public final Set<Consumer<E>> listeners() {
         return ImmutableSet.copyOf(listeners);
+    }
+
+    @Internal
+    public B injectContext(BoundedContext context) {
+        this.context = context;
+        return self();
+    }
+
+    protected final BoundedContext context() {
+        return checkNotNull(
+                context,
+                "%s does not have BoundedContext assigned." +
+                        " Please call `injectContext(BoundedContext)`.",
+                getClass().getName()
+        );
     }
 
     /**

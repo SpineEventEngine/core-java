@@ -21,16 +21,22 @@
 package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRootDirectory;
+import io.spine.server.bc.given.Given.NoOpCommandDispatcher;
+import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
+import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -96,16 +102,6 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("StorageFactory supplier if it was set")
-        void storageFactorySupplier() {
-            StorageFactory mock = mock(StorageFactory.class);
-            assertEquals(mock, builder.setStorage(spec -> mock)
-                                      .storage()
-                                      .get()
-                                      .apply(ContextSpec.singleTenant("Test")));
-        }
-
-        @Test
         @DisplayName("TransportFactory if it was set")
         void transportFactory() {
             TransportFactory factory = InMemoryTransportFactory.newInstance();
@@ -122,14 +118,6 @@ class BoundedContextBuilderTest {
             builder.setAggregateRootDirectory(() -> directory);
             assertEquals(directory, builder.aggregateRootDirectory());
         }
-    }
-
-    @Test
-    @DisplayName("allow clearing storage factory supplier")
-    void clearStorageFactorySupplier() {
-        assertFalse(builder.setStorageFactorySupplier(Tests.nullRef())
-                           .storage()
-                           .isPresent());
     }
 
     @Nested
@@ -237,6 +225,147 @@ class BoundedContextBuilderTest {
 
             builder.remove(repository);
             assertFalse(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("add default repository for entity class")
+        void addByEntityClass() {
+            assertFalse(builder.hasRepository(repository));
+
+            builder.add(repository.entityClass());
+
+            assertTrue(builder.hasRepository(repository.entityClass()));
+        }
+
+        @Test
+        @DisplayName("remove repository by entity class")
+        void removeByEntityClass() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.remove(repository.entityClass());
+            assertFalse(builder.hasRepository(repository));
+        }
+    }
+
+    @Nested
+    class CommandDispatchers {
+
+        private BoundedContextBuilder builder;
+        private CommandDispatcher<?> dispatcher;
+        private AggregateRepository<?, ?> repository;
+
+        @BeforeEach
+        void setUp() {
+            builder = BoundedContextBuilder.assumingTests();
+            dispatcher = new NoOpCommandDispatcher();
+            repository = (AggregateRepository<?, ?>) DefaultRepository.of(ProjectAggregate.class);
+        }
+
+        @Test
+        @DisplayName("add command dispatcher")
+        void addDispatcher() {
+            assertFalse(builder.hasCommandDispatcher(dispatcher));
+
+            builder.addCommandDispatcher(dispatcher);
+
+            assertTrue(builder.hasCommandDispatcher(dispatcher));
+        }
+
+        @Test
+        @DisplayName("remove command dispatcher")
+        void removeDispatcher() {
+            builder.addCommandDispatcher(dispatcher);
+            assertTrue(builder.hasCommandDispatcher(dispatcher));
+
+            builder.removeCommandDispatcher(dispatcher);
+            assertFalse(builder.hasCommandDispatcher(dispatcher));
+        }
+
+        @Test
+        @DisplayName("register repository if it's passed as command dispatcher")
+        void registerRepo() {
+            assertFalse(builder.hasRepository(repository));
+            builder.addCommandDispatcher(repository);
+            assertTrue(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("remove registered repository if it's passed as command dispatcher")
+        void removeRegisteredRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.removeCommandDispatcher(repository);
+            assertFalse(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("check repository presence in Builder if it's queried as command dispatcher")
+        void checkHasRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasCommandDispatcher(repository));
+        }
+    }
+
+    @Nested
+    class EventDispatchers {
+
+        private BoundedContextBuilder builder;
+        private EventDispatcher<?> dispatcher;
+        private ProjectionRepository<?, ?, ?> repository;
+
+        @BeforeEach
+        void setUp() {
+            builder = BoundedContextBuilder.assumingTests();
+            dispatcher = new NoOpEventDispatcher();
+            repository =
+                    (ProjectionRepository<?, ?, ?>) DefaultRepository.of(ProjectProjection.class);
+        }
+
+        @Test
+        @DisplayName("add event dispatcher")
+        void addDispatcher() {
+            assertFalse(builder.hasEventDispatcher(dispatcher));
+
+            builder.addEventDispatcher(dispatcher);
+
+            assertTrue(builder.hasEventDispatcher(dispatcher));
+        }
+
+        @Test
+        @DisplayName("remove event dispatcher")
+        void removeDispatcher() {
+            builder.addEventDispatcher(dispatcher);
+            assertTrue(builder.hasEventDispatcher(dispatcher));
+
+            builder.removeEventDispatcher(dispatcher);
+            assertFalse(builder.hasEventDispatcher(dispatcher));
+        }
+
+        @Test
+        @DisplayName("register repository if it's passed as event dispatcher")
+        void registerRepo() {
+            assertFalse(builder.hasRepository(repository));
+            builder.addEventDispatcher(repository);
+            assertTrue(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("remove registered repository if it's passed as event dispatcher")
+        void removeRegisteredRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasRepository(repository));
+
+            builder.removeEventDispatcher(repository);
+            assertFalse(builder.hasRepository(repository));
+        }
+
+        @Test
+        @DisplayName("check repository presence in Builder if it's queried as event dispatcher")
+        void checkHasRepo() {
+            builder.add(repository);
+            assertTrue(builder.hasEventDispatcher(repository));
         }
     }
 }

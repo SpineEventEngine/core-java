@@ -22,6 +22,7 @@ package io.spine.server.tenant;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
 
 import java.util.Set;
 
@@ -33,10 +34,13 @@ enum SingleTenantIndex implements TenantIndex {
 
     INSTANCE;
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
+    /**
+     * A stub instance of {@code TenantId} to be used by the storage in single-tenant context.
+     */
+    private static final TenantId singleTenant =
+            TenantId.newBuilder()
+                    .setValue("SINGLE_TENANT")
+                    .build();
 
     private static final ImmutableSet<TenantId> index = ImmutableSet.of(singleTenant);
 
@@ -48,12 +52,17 @@ enum SingleTenantIndex implements TenantIndex {
     }
 
     @Override
+    public void registerWith(BoundedContext context) {
+        // Do nothing.
+    }
+
+    @Override
     public void keep(TenantId id) {
         // Do nothing.
     }
 
     @Override
-    public Set<TenantId> getAll() {
+    public Set<TenantId> all() {
         return index;
     }
 

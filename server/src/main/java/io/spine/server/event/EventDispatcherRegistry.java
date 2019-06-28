@@ -62,8 +62,18 @@ class EventDispatcherRegistry
      * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
      */
     @Override
-    protected Set<EventDispatcher<?>> getDispatchersForType(EventClass messageClass) {
-        return super.getDispatchersForType(messageClass);
+    protected Set<EventDispatcher<?>> dispatchersOf(EventClass messageClass) {
+        return super.dispatchersOf(messageClass);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to {@link EventBus#registeredEventClasses() EventBus}.
+     */
+    @Override
+    protected Set<EventClass> registeredMessageClasses() {
+        return super.registeredMessageClasses();
     }
 
     /**

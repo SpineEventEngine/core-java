@@ -29,15 +29,20 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandErrored;
 import io.spine.system.server.event.CommandRejected;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.command.Rejections.causedByRejection;
 
 /**
@@ -53,20 +58,27 @@ import static io.spine.server.command.Rejections.causedByRejection;
 public final class CommandErrorHandler implements Logging {
 
     private final SystemWriteSide systemWriteSide;
+    private final @Nullable Supplier<EventBus> eventBusSupplier;
 
-    private CommandErrorHandler(SystemWriteSide systemWriteSide) {
+    private CommandErrorHandler(SystemWriteSide systemWriteSide,
+                                @Nullable Supplier<EventBus> eventBusSupplier) {
         this.systemWriteSide = systemWriteSide;
+        this.eventBusSupplier = eventBusSupplier;
     }
 
     /**
      * Creates a new {@code CommandErrorHandler} with the given {@link SystemWriteSide}.
      *
-     * @param systemWriteSide {@link SystemWriteSide} to post system commands into
+     * @param systemWriteSide
+     *         {@link SystemWriteSide} to post system commands into
+     * @param eventBusSupplier
+     *         the supplier of {@code EventBus} to post rejections
      * @return new instance of {@code CommandErrorHandler}
      */
-    public static CommandErrorHandler with(SystemWriteSide systemWriteSide) {
+    public static CommandErrorHandler with(SystemWriteSide systemWriteSide,
+                                           @Nullable Supplier<EventBus> eventBusSupplier) {
         checkNotNull(systemWriteSide);
-        return new CommandErrorHandler(systemWriteSide);
+        return new CommandErrorHandler(systemWriteSide, eventBusSupplier);
     }
 
     /**
@@ -83,6 +95,21 @@ public final class CommandErrorHandler implements Logging {
                              ? handleRejection(command, exception)
                              : handleRuntimeError(command, exception);
         return result;
+    }
+
+    /**
+     * Handles an exception occurred during dispatching of a command, and if was cased by
+     * a {@code Rejection} post it to the associated {@code EventBus}.
+     */
+    public void handleAndPostIfRejection(CommandEnvelope command, RuntimeException exception) {
+        CaughtError caughtError = handle(command, exception);
+        if (eventBusSupplier != null) {
+            EventBus eventBus = this.eventBusSupplier.get();
+            checkState(eventBus != null, "null `EventBus` is encountered in %s.", this);
+            Optional<Event> rejection = caughtError.asRejection()
+                                                   .map(RejectionEnvelope::outerObject);
+            rejection.ifPresent(eventBus::post);
+        }
     }
 
     private CaughtError handleRejection(CommandEnvelope command, RuntimeException exception) {

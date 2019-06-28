@@ -35,7 +35,6 @@ import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
@@ -100,8 +99,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
     private final AggregateRootDirectory aggregateRootDirectory;
 
-    /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
-    private final StorageFactory storageFactory;
     private final @Nullable TracerFactory tracerFactory;
 
     private final TenantIndex tenantIndex;
@@ -121,11 +118,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkInheritance();
 
         this.spec = builder.spec();
-        this.storageFactory = builder.buildStorage()
-                                     .apply(spec);
         this.tracerFactory = builder.buildTracerFactorySupplier()
                                     .apply(spec);
-        this.eventBus = builder.buildEventBus();
+        this.eventBus = buildEventBus(builder);
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
@@ -135,6 +130,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
 
+    /**
+     * Performs post-creation initialization of the instance.
+     *
+     * <p>This method must be called shortly after the constructor so that the instance can
+     * perform dependency injections steps that cannot be performed in the constructor.
+     */
+    protected final void init() {
+        eventBus.init(this);
+        tenantIndex.registerWith(this);
+    }
+    
     /**
      * Prevents 3rd party code from creating classes extending from {@code BoundedContext}.
      */
@@ -147,6 +153,11 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                 "The class `BoundedContext` is not designed for " +
                         "inheritance by the framework users."
         );
+    }
+
+    private EventBus buildEventBus(BoundedContextBuilder builder) {
+        EventBus result = builder.buildEventBus(this);
+        return result;
     }
 
     private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
@@ -279,7 +290,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private void registerWithIntegrationBus(ExternalDispatcherFactory<?> dispatcher) {
         ExternalMessageDispatcher<?> externalDispatcher =
                 dispatcher.createExternalDispatcher()
-                          .orElseThrow(notExternalDispatcherFrom(dispatcher));
+                          .orElseThrow(missingExternalDispatcherFrom(dispatcher));
 
         integrationBus().register(externalDispatcher);
     }
@@ -321,7 +332,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
      * delegates do not provide an external message dispatcher.
      */
-    private static Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
+    private static
+    Supplier<IllegalStateException> missingExternalDispatcherFrom(Object dispatcher) {
         return () -> newIllegalStateException(
                 "No external dispatcher provided by `%s`.", dispatcher);
     }
@@ -331,7 +343,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public CommandErrorHandler createCommandErrorHandler() {
         SystemWriteSide systemWriteSide = systemClient().writeSide();
-        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide);
+        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide, this::eventBus);
         return result;
     }
 
@@ -446,10 +458,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Obtains {@link StorageFactory} associated with this {@code BoundedContext}.
+     * Obtains specification of this context.
      */
-    public StorageFactory storageFactory() {
-        return storageFactory;
+    public ContextSpec spec() {
+        return spec;
     }
 
     /**
@@ -511,7 +523,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     @Override
     public void close() throws Exception {
-        storageFactory.close();
         commandBus.close();
         eventBus.close();
         integrationBus.close();
@@ -525,7 +536,18 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         log().debug(closed(nameForLogging()));
     }
 
-    String nameForLogging() {
+    /**
+     * Tells if the context is closed.
+     *
+     * <p>This is a test-only method which is needed for the tests that forcibly close a context,
+     * so that cleanup methods do not call it again.
+     */
+    @VisibleForTesting
+    public boolean isClosed() {
+        return guard.isClosed();
+    }
+
+    final String nameForLogging() {
         return BoundedContext.class.getSimpleName() + ' ' + name().getValue();
     }
 

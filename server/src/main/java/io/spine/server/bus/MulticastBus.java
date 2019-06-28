@@ -50,7 +50,7 @@ public abstract class MulticastBus<M extends Message,
      * @return the number of the dispatchers called or {@code 0} if there weren't any.
      */
     protected int callDispatchers(E messageEnvelope) {
-        Collection<D> dispatchers = registry().getDispatchers(messageEnvelope);
+        Collection<D> dispatchers = registry().dispatchersOf(messageEnvelope);
         for (D dispatcher : dispatchers) {
             dispatcher.dispatch(messageEnvelope);
         }

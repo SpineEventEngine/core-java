@@ -31,6 +31,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
@@ -47,6 +48,7 @@ import io.spine.testing.server.blackbox.given.BbInitProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
+import io.spine.testing.server.blackbox.given.BbTaskViewProjection;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
@@ -84,6 +86,7 @@ import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 /**
  * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
@@ -159,6 +162,14 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Test
+    @DisplayName("register a repository if it's passed as command dispatcher")
+    void registerRepoAsCommandDispatcher() {
+        BbReportRepository repository = new BbReportRepository();
+        context.withHandlers(repository);
+        assertThat(context.allStateTypes()).contains(TypeName.of(BbReport.class));
+    }
+
+    @Test
     @DisplayName("register event dispatcher")
     void registerEventDispatcher() {
         BbEventDispatcher dispatcher = new BbEventDispatcher();
@@ -180,6 +191,16 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         BbEventDispatcher validDispatcher = new BbEventDispatcher();
         assertThrows(NullPointerException.class,
                      () -> context.withEventDispatchers(validDispatcher, null));
+    }
+
+    @Test
+    @DisplayName("register a repository if it's passed as event dispatcher")
+    void registerRepoAsEventDispatcher() {
+        ProjectionRepository<?, ?, ?> repository =
+                (ProjectionRepository<?, ?, ?>)
+                        DefaultRepository.of(BbTaskViewProjection.class);
+        context.withEventDispatchers(repository);
+        assertThat(context.allStateTypes()).contains(TypeName.of(BbTaskView.class));
     }
 
     @Test
@@ -367,16 +388,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                         .close());
     }
 
-    /**
-     * Obtains the set of entity state types from the passed repositories.
-     */
-    private static Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
-        ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
-        repos.forEach(repository -> builder.add(repository.entityStateType()
-                                                          .toTypeName()));
-        return builder.build();
-    }
-
     @Nested
     @DisplayName("create an instance by BoundedContextBuilder")
     class CreateByBuilder {
@@ -385,6 +396,11 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 new BbProjectRepository(),
                 DefaultRepository.of(BbProjectViewProjection.class)
         );
+
+        private final CommandClass commandClass =
+                CommandClass.from(BbRegisterCommandDispatcher.class);
+        private CommandDispatcher<?> commandDispatcher;
+        private EventDispatcher<?> eventDispatcher;
 
         private final Set<TypeName> types = toTypes(repositories);
 
@@ -400,6 +416,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             eventBus = EventBus
                     .newBuilder()
                     .setEnricher(enricher);
+
+            EventBus someEventBus = mock(EventBus.class);
+            commandDispatcher = new BbCommandDispatcher(someEventBus, commandClass);
+            eventDispatcher = new BbEventDispatcher();
         }
 
         @Test
@@ -408,15 +428,24 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .assumingTests(false)
                     .setEventBus(eventBus);
             repositories.forEach(builder::add);
+            builder.addCommandDispatcher(commandDispatcher);
+            builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(SingleTenantBlackBoxContext.class);
             assertEntityTypes();
+            assertDispatchers();
             assertEnricher();
         }
 
         private void assertEntityTypes() {
             assertThat(blackBox.allStateTypes()).containsAtLeastElementsIn(types);
+        }
+
+        private void assertDispatchers() {
+            assertThat(blackBox.commandBus().registeredCommandClasses()).contains(commandClass);
+            assertThat(blackBox.eventBus().registeredEventClasses())
+                    .containsAtLeastElementsIn(eventDispatcher.eventClasses());
         }
 
         private void assertEnricher() {
@@ -429,11 +458,24 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                     .assumingTests(true)
                     .setEventBus(eventBus);
             repositories.forEach(builder::add);
+            builder.addCommandDispatcher(commandDispatcher);
+            builder.addEventDispatcher(eventDispatcher);
             blackBox = BlackBoxBoundedContext.from(builder);
 
             assertThat(blackBox).isInstanceOf(MultitenantBlackBoxContext.class);
             assertEntityTypes();
+            assertDispatchers();
             assertEnricher();
+        }
+
+        /**
+         * Obtains the set of entity state types from the passed repositories.
+         */
+        private Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
+            ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
+            repos.forEach(repository -> builder.add(repository.entityStateType()
+                                                              .toTypeName()));
+            return builder.build();
         }
     }
 

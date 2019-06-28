@@ -110,7 +110,7 @@ public final class ImportBus
 
     @Override
     protected void dispatch(EventEnvelope event) {
-        EventDispatcher<?> dispatcher = getDispatcher(event);
+        EventDispatcher<?> dispatcher = dispatcherOf(event);
         dispatcher.dispatch(event);
     }
 
@@ -159,8 +159,8 @@ public final class ImportBus
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected
-        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventEnvelope event) {
-            return super.getDispatcher(event);
+        Optional<? extends EventImportDispatcher<?>> dispatcherOf(EventEnvelope event) {
+            return super.dispatcherOf(event);
         }
     }
 

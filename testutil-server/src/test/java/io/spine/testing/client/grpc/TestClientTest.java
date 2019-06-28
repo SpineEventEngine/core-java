@@ -65,7 +65,7 @@ class TestClientTest {
                 .newBuilder()
                 .setValue(TestClientTest.class.getSimpleName())
                 .build();
-        client = new TestClient(userId, "localhost", server.getPort());
+        client = new TestClient(userId, "localhost", server.port());
     }
 
     @AfterEach

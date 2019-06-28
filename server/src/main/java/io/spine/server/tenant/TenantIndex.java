@@ -21,6 +21,7 @@
 package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
+import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Set;
@@ -33,6 +34,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface TenantIndex extends AutoCloseable {
 
     /**
+     * Assigns the context to this tenant index.
+     *
+     * <p>This method can be called only once. Subsequent calls would result
+     * in {@code RuntimeException}.
+     */
+    void registerWith(BoundedContext context);
+
+    /**
      * Stores the passed tenant ID in the index.
      */
     void keep(TenantId id);
@@ -40,7 +49,7 @@ public interface TenantIndex extends AutoCloseable {
     /**
      * Obtains the set of all stored tenant IDs.
      */
-    Set<TenantId> getAll();
+    Set<TenantId> all();
 
     /**
      * Closes the index for further read or write operations.
@@ -51,24 +60,20 @@ public interface TenantIndex extends AutoCloseable {
     void close();
 
     /**
-     * Creates default implementation of {@code TenantIndex} for multi-tenant context.
-     *
-     * <p>Storage of {@code TenantIndex} data is performed in single-tenant context, and a
-     * {@linkplain StorageFactory#toSingleTenant() single-tenant} version of the passed storage
-     * factory. Therefore, it is safe to pass both single-tenant and multi-tenant storage
-     * factories to this method as long as the passed factory implements
-     * {@link StorageFactory#toSingleTenant()}.
+     * Creates default implementation of {@code TenantIndex} for a multi-tenant context.
      */
     static TenantIndex createDefault(StorageFactory storageFactory) {
         checkNotNull(storageFactory);
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
         DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
-        tenantRepo.initStorage(storageFactory);
         return tenantRepo;
     }
 
     /**
      * Obtains a {@code TenantIndex} to be used in single-tenant context.
+     *
+     * <p>This rudimentary implementation always returns pre-defined constant {@code TenantId}
+     * value, which a single-tenant application does not need to use.
      */
     static TenantIndex singleTenant() {
         return SingleTenantIndex.INSTANCE;

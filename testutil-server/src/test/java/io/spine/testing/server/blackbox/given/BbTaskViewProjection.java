@@ -17,22 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.stand;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
+package io.spine.testing.server.blackbox.given;
 
-/**
- * An {@link QueryProcessor} implementation that always returns empty result.
- *
- * <p>Used to define a processing result for {@link Query} which does not hit any of
- * exposed state objects.
- */
-class NoopQueryProcessor implements QueryProcessor {
-    @Override
-    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-        return ImmutableList.of();
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.testing.server.blackbox.BbTaskId;
+import io.spine.testing.server.blackbox.BbTaskView;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
+
+public final class BbTaskViewProjection
+        extends Projection<BbTaskId, BbTaskView, BbTaskView.Builder> {
+
+    @Subscribe
+    void on(BbTaskAdded event) {
+        builder().setTitle(event.getTask()
+                                .getTitle());
+        builder().setDescription(event.getTask()
+                                      .getDescription());
     }
 }

@@ -30,13 +30,14 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
@@ -50,7 +51,7 @@ import io.spine.system.server.TraceEventObserver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -60,18 +61,17 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "OverlyComplexClass"})
+// OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
 
     private TenantIndex tenantIndex;
-    private @Nullable Function<ContextSpec, StorageFactory> storage;
     private @Nullable Function<ContextSpec, TracerFactory> tracing;
 
     private CommandBus.Builder commandBus;
@@ -82,7 +82,20 @@ public final class BoundedContextBuilder implements Logging {
     private Supplier<AggregateRootDirectory> rootDirectory;
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
-    private final List<Repository<?, ?>> repositories = new ArrayList<>();
+    private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
+
+    /**
+     * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
+     * Context creation.
+     */
+    private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
+
+    /**
+     * Event dispatchers to be registered with the context {@link EventBus} and/or
+     * {@link IntegrationBus} after the Bounded Context creation.
+     */
+    private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
+
 
     /**
      * Prevents direct instantiation.
@@ -133,48 +146,6 @@ public final class BoundedContextBuilder implements Logging {
 
     public boolean isMultitenant() {
         return spec.isMultitenant();
-    }
-
-    /**
-     * Sets the supplier for {@code StorageFactory}.
-     *
-     * <p>If the supplier was not set or {@code null} was passed,
-     * {@link StorageFactorySwitch} will be used during the construction of
-     * a {@code BoundedContext} instance.
-     *
-     * @deprecated Use {@link #setStorage} instead
-     */
-    @CanIgnoreReturnValue
-    @Deprecated
-    public BoundedContextBuilder
-    setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
-        this.storage = supplier != null
-                       ? spec -> supplier.get()
-                       : null;
-        return this;
-    }
-
-    /**
-     * Sets the function which produces the {@code StorageFactory}.
-     *
-     * <p>If the function was not set or {@code null} was passed,
-     * {@link StorageFactorySwitch} will be used during the construction of
-     * a {@code BoundedContext} instance.
-     */
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder
-    setStorage(@Nullable Function<ContextSpec, StorageFactory> function) {
-        this.storage = function;
-        return this;
-    }
-
-    public Optional<Function<ContextSpec, StorageFactory>> storage() {
-        return Optional.ofNullable(storage);
-    }
-
-    Function<ContextSpec, StorageFactory> buildStorage() {
-        checkState(storage != null);
-        return storage;
     }
 
     @CanIgnoreReturnValue
@@ -232,7 +203,9 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(eventBus);
     }
 
-    EventBus buildEventBus() {
+    EventBus buildEventBus(BoundedContext context) {
+        checkNotNull(context);
+        eventBus.injectContext(context);
         return eventBus.build();
     }
 
@@ -271,6 +244,52 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Adds the passed command dispatcher to the dispatcher registration list which will be
+     * processed after the Bounded Context is created.
+     *
+     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     *         that implement {@code CommandDispatcher}, but the {@link #add(Repository)} method
+     *         should be preferred for this purpose.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        if (commandDispatcher instanceof Repository) {
+            return add((Repository<?, ?>) commandDispatcher);
+        }
+        commandDispatchers.add(commandDispatcher);
+        return this;
+    }
+
+    /**
+     * Adds the passed event dispatcher to the dispatcher registration list which will be processed
+     * after the Bounded Context is created.
+     *
+     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     *         that implement {@code EventDispatcher}, but the {@link #add(Repository)} method
+     *         should be preferred for this purpose.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        if (eventDispatcher instanceof Repository) {
+            return add((Repository<?, ?>) eventDispatcher);
+        }
+        eventDispatchers.add(eventDispatcher);
+        return this;
+    }
+
+    /**
+     * Adds the {@linkplain DefaultRepository default repository} for the passed entity class to
+     * the repository registration list.
+     */
+    @CanIgnoreReturnValue
+    public <I, E extends Entity<I, ?>> BoundedContextBuilder add(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        return add(DefaultRepository.of(entityClass));
+    }
+
+    /**
      * Adds the passed repository to the registration list which will be processed after
      * the Bounded Context is created.
      */
@@ -282,6 +301,43 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Removes the passed command dispatcher from the corresponding registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        if (commandDispatcher instanceof Repository) {
+            return remove((Repository<?, ?>) commandDispatcher);
+        }
+        commandDispatchers.remove(commandDispatcher);
+        return this;
+    }
+
+    /**
+     * Removes the passed event dispatcher from the corresponding registration list.
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        if (eventDispatcher instanceof Repository) {
+            return remove((Repository<?, ?>) eventDispatcher);
+        }
+        eventDispatchers.remove(eventDispatcher);
+        return this;
+    }
+
+    /**
+     * Removes the repository from the registration list by the passed entity class.
+     */
+    @CanIgnoreReturnValue
+    public <I, E extends Entity<I, ?>> BoundedContextBuilder remove(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        repositories.removeIf(repository -> repository.entityClass()
+                                                      .equals(entityClass));
+        return this;
+    }
+
+    /**
      * Removes the passed repository from the registration list.
      */
     @CanIgnoreReturnValue
@@ -289,6 +345,48 @@ public final class BoundedContextBuilder implements Logging {
         checkNotNull(repository);
         repositories.remove(repository);
         return this;
+    }
+
+    /**
+     * Verifies if the passed command dispatcher was previously added into the registration list
+     * of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    boolean hasCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+        checkNotNull(commandDispatcher);
+        if (commandDispatcher instanceof Repository) {
+            return hasRepository((Repository<?, ?>) commandDispatcher);
+        }
+        boolean result = commandDispatchers.contains(commandDispatcher);
+        return result;
+    }
+
+    /**
+     * Verifies if the passed event dispatcher was previously added into the registration list
+     * of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    boolean hasEventDispatcher(EventDispatcher<?> eventDispatcher) {
+        checkNotNull(eventDispatcher);
+        if (eventDispatcher instanceof Repository) {
+            return hasRepository((Repository<?, ?>) eventDispatcher);
+        }
+        boolean result = eventDispatchers.contains(eventDispatcher);
+        return result;
+    }
+
+    /**
+     * Verifies if the repository with a passed entity class was previously added into the
+     * registration list of the Bounded Context this builder is going to build.
+     */
+    @VisibleForTesting
+    <I, E extends Entity<I, ?>> boolean hasRepository(Class<E> entityClass) {
+        checkNotNull(entityClass);
+        boolean result =
+                repositories.stream()
+                            .anyMatch(repository -> repository.entityClass()
+                                                              .equals(entityClass));
+        return result;
     }
 
     /**
@@ -310,6 +408,26 @@ public final class BoundedContextBuilder implements Logging {
      */
     public ImmutableList<Repository<?, ?>> repositories() {
         return ImmutableList.copyOf(repositories);
+    }
+
+    /**
+     * Obtains the list of command dispatchers added to the builder by the time of the call.
+     *
+     * <p>Adding dispatchers to the builder after this method returns will not update the
+     * returned list.
+     */
+    public ImmutableList<CommandDispatcher<?>> commandDispatchers() {
+        return ImmutableList.copyOf(commandDispatchers);
+    }
+
+    /**
+     * Obtains the list of event dispatchers added to the builder by the time of the call.
+     *
+     * <p>Adding dispatchers to the builder after this method returns will not update the
+     * returned list.
+     */
+    public ImmutableList<EventDispatcher<?>> eventDispatchers() {
+        return ImmutableList.copyOf(eventDispatchers);
     }
 
     /**
@@ -349,7 +467,6 @@ public final class BoundedContextBuilder implements Logging {
      * such as:
      * <ul>
      *     <li>{@linkplain #tenantIndex()} tenancy;
-     *     <li>{@linkplain #storageFactory()} storage facilities;
      *     <li>{@linkplain #transportFactory()} transport facilities.
      * </ul>
      *
@@ -368,6 +485,7 @@ public final class BoundedContextBuilder implements Logging {
         log().debug("{} created.", result.nameForLogging());
 
         registerRepositories(result);
+        registerDispatchers(result);
         registerTracing(result, system);
         return result;
     }
@@ -386,6 +504,11 @@ public final class BoundedContextBuilder implements Logging {
         }
     }
 
+    private void registerDispatchers(BoundedContext result) {
+        commandDispatchers.forEach(result::registerCommandDispatcher);
+        eventDispatchers.forEach(result::registerEventDispatcher);
+    }
+
     private BoundedContext buildDomain(SystemContext system, TransportFactory transport) {
         SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
@@ -395,13 +518,11 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem(TransportFactory transport) {
-        BoundedContextName name = BoundedContextNames.system(spec.name());
+        String name = BoundedContextNames.system(spec.name()).getValue();
         boolean multitenant = isMultitenant();
         BoundedContextBuilder system = multitenant
-                                       ? BoundedContext.multitenant(name.getValue())
-                                       : BoundedContext.singleTenant(name.getValue());
-        Optional<? extends Function<ContextSpec, StorageFactory>> storage = storage();
-        storage.ifPresent(system::setStorage);
+                                       ? BoundedContext.multitenant(name)
+                                       : BoundedContext.singleTenant(name);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
@@ -415,7 +536,9 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
                    SystemClient client,
                    TransportFactory transport) {
-        StorageFactory storageFactory = storageFactory();
+        StorageFactory storageFactory =
+                ServerEnvironment.instance()
+                                 .storageFactory();
 
         initTenantIndex(storageFactory);
         initCommandBus(client.writeSide());
@@ -425,21 +548,6 @@ public final class BoundedContextBuilder implements Logging {
 
         B result = instanceFactory.apply(this);
         return result;
-    }
-
-    private StorageFactory storageFactory() {
-        if (storage == null) {
-            storage = new StorageFactorySwitch();
-        }
-        StorageFactory storageFactory = storage.apply(spec);
-
-        if (storageFactory == null) {
-            throw newIllegalStateException(
-                    "Supplier of StorageFactory (%s) returned null instance",
-                    storage
-            );
-        }
-        return storageFactory;
     }
 
     private void initTenantIndex(StorageFactory factory) {

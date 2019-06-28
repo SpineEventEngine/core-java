@@ -32,12 +32,15 @@ import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
 import io.spine.testing.TestValues;
 import io.spine.type.TypeName;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +58,6 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
-import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.server.event.given.EventStoreTestEnv.initEventFactory;
 import static io.spine.server.event.given.EventStoreTestEnv.projectCreated;
 import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
@@ -68,6 +70,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventStore should")
 public class EventStoreTest {
 
+    private BoundedContext context;
     private EventStore eventStore;
 
     @BeforeAll
@@ -77,7 +80,13 @@ public class EventStoreTest {
 
     @BeforeEach
     void setUp() {
-        eventStore = eventStore();
+        context = BoundedContextBuilder.assumingTests().build();
+        eventStore = context.eventBus().eventStore();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        context.close();
     }
 
     @Nested

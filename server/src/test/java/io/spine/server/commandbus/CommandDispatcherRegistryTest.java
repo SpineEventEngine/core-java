@@ -75,7 +75,7 @@ class CommandDispatcherRegistryTest {
 
     @SafeVarargs
     private final void assertSupported(Class<? extends CommandMessage>... cmdClasses) {
-        Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
+        Set<CommandClass> supportedClasses = registry.registeredMessageClasses();
 
         for (Class<? extends CommandMessage> cls : cmdClasses) {
             CommandClass cmdClass = CommandClass.from(cls);
@@ -85,7 +85,7 @@ class CommandDispatcherRegistryTest {
 
     @SafeVarargs
     private final void assertNotSupported(Class<? extends CommandMessage>... cmdClasses) {
-        Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
+        Set<CommandClass> supportedClasses = registry.registeredMessageClasses();
 
         for (Class<? extends CommandMessage> cls : cmdClasses) {
             CommandClass cmdClass = CommandClass.from(cls);
@@ -156,7 +156,7 @@ class CommandDispatcherRegistryTest {
 
             registry.unregisterAll();
 
-            assertTrue(registry.getRegisteredMessageClasses()
+            assertTrue(registry.registeredMessageClasses()
                                .isEmpty());
         }
     }

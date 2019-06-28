@@ -20,29 +20,18 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.ContextSpec;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 @DisplayName("InMemoryStorageFactory should")
 class InMemoryStorageFactoryTest {
 
     @Test
-    @DisplayName("have single tenant instance")
-    void haveSingleTenantInstance() {
-        ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
-        assertFalse(InMemoryStorageFactory.newInstance(spec)
-                                          .isMultitenant());
-    }
-
-    @Test
-    @DisplayName("have multitenant instance")
-    void haveMultitenantInstance() {
-        ContextSpec spec = ContextSpec.multitenant(getClass().getSimpleName());
-        assertTrue(InMemoryStorageFactory.newInstance(spec)
-                                         .isMultitenant());
+    @DisplayName("create new factory")
+    void creation() {
+        assertThat(InMemoryStorageFactory.newInstance())
+                .isNotSameInstanceAs(InMemoryStorageFactory.newInstance());
     }
 }

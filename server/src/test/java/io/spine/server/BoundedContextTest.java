@@ -31,7 +31,6 @@ import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregate;
 import io.spine.server.bc.given.FinishedProjectProjection;
 import io.spine.server.bc.given.ProjectAggregate;
-import io.spine.server.bc.given.ProjectAggregateRepository;
 import io.spine.server.bc.given.ProjectCreationRepository;
 import io.spine.server.bc.given.ProjectProcessManager;
 import io.spine.server.bc.given.ProjectProjection;
@@ -45,13 +44,13 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,10 +77,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -241,13 +237,19 @@ class BoundedContextTest {
     @Test
     @DisplayName("propagate registered repositories to Stand")
     void propagateRepositoriesToStand() {
-        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
-        Stand stand = boundedContext.stand();
-        assertTrue(stand.getExposedTypes().isEmpty());
+        BoundedContext context = BoundedContextBuilder.assumingTests().build();
+        Stand stand = context.stand();
+
         Repository<ProjectId, ProjectAggregate> repo = DefaultRepository.of(ProjectAggregate.class);
-        boundedContext.register(repo);
-        assertThat(stand.getExposedTypes())
-                .containsExactly(repo.entityStateType());
+        TypeUrl stateType = repo.entityStateType();
+
+        assertThat(stand.exposedTypes())
+                .doesNotContain(stateType);
+
+        context.register(repo);
+
+        assertThat(stand.exposedTypes())
+                .contains(stateType);
     }
 
     @Test
@@ -316,16 +318,7 @@ class BoundedContextTest {
         Repository<ProjectId, ProjectAggregate> repository =
                 DefaultRepository.of(ProjectAggregate.class);
         context.register(repository);
-        assertTrue(repository.isStorageAssigned());
-    }
-
-    @Test
-    @DisplayName("not override storage during registration if repository has one")
-    void notOverrideStorage() {
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        Repository spy = spy(repository);
-        context.register(repository);
-        verify(spy, never()).initStorage(any(StorageFactory.class));
+        assertTrue(repository.storageAssigned());
     }
 
     @Test
@@ -427,7 +420,7 @@ class BoundedContextTest {
 
     /**
      * Simply checks that the result isn't empty to cover the integration with
-     * {@link io.spine.server.entity.VisibilityGuard VisibilityGuard}.
+     * {@link VisibilityGuard VisibilityGuard}.
      *
      * <p>See {@linkplain io.spine.server.entity.VisibilityGuardTest tests of VisibilityGuard}
      * for how visibility filtering works.

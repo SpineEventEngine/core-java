@@ -52,10 +52,8 @@ import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.ContextSpec.singleTenant;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.client.SystemClientTestEnv.findAggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,8 +85,7 @@ class DefaultSystemReadSideTest {
     @Test
     @DisplayName("not allow nulls on construction")
     void notAllowNullsOnConstruction() {
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(singleTenant(assumingTestsValue()));
+        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         new NullPointerTester()
                 .setDefault(EventBus.class, EventBus
                         .newBuilder()

@@ -17,18 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.storage.memory;
+package spine.server.tenant;
 
-import io.spine.server.aggregate.AggregateStorageTruncationTest;
-import io.spine.server.storage.StorageFactory;
-import org.junit.jupiter.api.DisplayName;
+import "spine/options.proto";
 
-@DisplayName("InMemoryAggregateStorage after truncation should")
-public class InMemoryAggregateStorageTruncationTest extends AggregateStorageTruncationTest {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.tenant";
+option java_multiple_files = true;
+option java_outer_classname = "TenantProto";
 
-    @Override
-    protected StorageFactory storageFactory() {
-        return InMemoryStorageFactory.newInstance();
-    }
+import "google/protobuf/timestamp.proto";
+
+import "spine/core/tenant_id.proto";
+
+// The state of entities implementing default Tenant Index.
+message Tenant {
+    option (internal_type) = true;
+    option (entity) = { kind: ENTITY visibility: QUERY };
+
+    spine.core.TenantId id = 1;
+
+    // The time when the entity holding the tenant data was created.
+    google.protobuf.Timestamp when_created = 2 [(required) = true];
 }

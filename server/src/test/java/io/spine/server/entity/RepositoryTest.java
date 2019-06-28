@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.given.repository.ProjectEntity;
 import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.repository.TestRepo;
@@ -52,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Repository should")
 class RepositoryTest {
 
-    private BoundedContext boundedContext;
+    private BoundedContext context;
     private Repository<ProjectId, ProjectEntity> repository;
     private StorageFactory storageFactory;
     private TenantId tenantId;
@@ -65,17 +66,21 @@ class RepositoryTest {
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContextBuilder
+        context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
         repository = new TestRepo();
-        storageFactory = boundedContext.storageFactory();
+        storageFactory = ServerEnvironment.instance()
+                                          .storageFactory();
+        context.register(repository);
         tenantId = newUuid();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        boundedContext.close();
+        if (!context.isClosed()) {
+            context.close();
+        }
     }
 
     @Test
@@ -99,28 +104,26 @@ class RepositoryTest {
     @Test
     @DisplayName("reject repeated storage initialization")
     void notInitStorageRepeatedly() {
-        repository.initStorage(storageFactory);
-
         assertThrows(IllegalStateException.class, () -> repository.initStorage(storageFactory));
     }
 
     @Test
     @DisplayName("have no storage upon creation")
     void haveNoStorageOnCreation() {
-        assertFalse(repository.isStorageAssigned());
+        assertFalse(new TestRepo().storageAssigned());
     }
 
     @Test
     @DisplayName("prohibit obtaining unassigned storage")
-    void notGetUnassignedStorage() {
+    void notGetUnassignedStorage() throws Exception {
+        context.close();
         assertThrows(IllegalStateException.class, () -> repository.storage());
     }
 
     @Test
-    @DisplayName("init storage with factory")
+    @DisplayName("init storage upon registration")
     void initStorageWithFactory() {
-        repository.initStorage(storageFactory);
-        assertTrue(repository.isStorageAssigned());
+        assertTrue(repository.storageAssigned());
         assertNotNull(repository.storage());
     }
 
@@ -135,57 +138,41 @@ class RepositoryTest {
     @DisplayName("prohibit overwriting already set context")
     class OverwritingContext {
 
-        private BoundedContext ctx1;
-        private BoundedContext ctx2;
-
-        @BeforeEach
-        void createContexts() {
-            ctx1 = BoundedContext
-                    .singleTenant("Context-1")
-                    .build();
-            ctx2 = BoundedContext
-                    .singleTenant("Context-2")
-                    .build();
-        }
-
         @Test
         @DisplayName("throwing ISE")
         void prohibit() {
-            repository.setContext(ctx1);
+            BoundedContext anotherContext = BoundedContext
+                    .singleTenant("Context-1")
+                    .build();
             assertThrows(IllegalStateException.class, () ->
-                    repository.setContext(ctx2));
+                    repository.setContext(anotherContext));
         }
 
         @Test
         @DisplayName("allowing passing the same value twice")
         void idempotency() {
-            repository.setContext(ctx1);
-            repository.setContext(ctx1);
+            // Previous value was set on registration.
+            repository.setContext(context);
             assertThat(repository.context())
-                    .isEqualTo(ctx1);
+                    .isEqualTo(context);
         }
     }
-
 
     @Test
     @DisplayName("close storage on close")
     void closeStorageOnClose() {
-        repository.initStorage(storageFactory);
-
         RecordStorage<?> storage = (RecordStorage<?>) repository.storage();
         repository.close();
 
         assertTrue(storage.isClosed());
-        assertFalse(repository.isStorageAssigned());
+        assertFalse(repository.storageAssigned());
     }
 
     @Test
     @DisplayName("disconnect from storage on close")
     void disconnectStorageOnClose() {
-        repository.initStorage(storageFactory);
-
         repository.close();
-        assertFalse(repository.isStorageAssigned());
+        assertFalse(repository.storageAssigned());
     }
 
     /**
@@ -195,8 +182,6 @@ class RepositoryTest {
         TenantAwareOperation op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                repository.initStorage(storageFactory);
-
                 createAndStore("Eins");
                 createAndStore("Zwei");
                 createAndStore("Drei");
@@ -209,7 +194,7 @@ class RepositoryTest {
     @DisplayName("iterate over entities")
     void iterateOverEntities() {
         createAndStoreEntities();
-        int numEntities = size(getIterator(tenantId));
+        int numEntities = size(iteratorAt(tenantId));
         assertEquals(3, numEntities);
     }
 
@@ -217,11 +202,11 @@ class RepositoryTest {
     @DisplayName("not allow removal in entities iterator")
     void notAllowRemovalInIterator() {
         createAndStoreEntities();
-        Iterator<ProjectEntity> iterator = getIterator(tenantId);
+        Iterator<ProjectEntity> iterator = iteratorAt(tenantId);
         assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
-    private Iterator<ProjectEntity> getIterator(TenantId tenantId) {
+    private Iterator<ProjectEntity> iteratorAt(TenantId tenantId) {
         Iterator<ProjectEntity> result =
                 TenantAwareRunner.with(tenantId)
                                  .evaluate(() -> repository.iterator(entity -> true));

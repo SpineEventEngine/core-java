@@ -42,7 +42,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final MultitenantStorage<TenantAggregateRecords<I>> multitenantStorage;
 
-    protected InMemoryAggregateStorage(boolean multitenant) {
+    InMemoryAggregateStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantAggregateRecords<I>>(multitenant) {
             @Override
@@ -53,7 +53,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     /** Creates a new single-tenant storage instance. */
-    protected static <I> InMemoryAggregateStorage<I> newInstance() {
+    static <I> InMemoryAggregateStorage<I> newInstance() {
         return new InMemoryAggregateStorage<>(false);
     }
 
