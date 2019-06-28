@@ -40,7 +40,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -84,13 +83,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final Supplier<CommandRouting<I>> commandRouting;
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting = EventRouting.withDefaultByProducerId();
+    private final EventRouting<I> eventRouting;
 
     /**
      * The routing for event import, which by default obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
-    private final EventRouting<I> eventImportRouting = EventRouting.withDefaultByProducerId();
+    private final EventRouting<I> eventImportRouting;
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -113,6 +112,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateRepository() {
         super();
         this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
+        this.eventRouting = EventRouting.withDefaultByProducerId();
+        this.eventImportRouting = EventRouting.withDefaultByProducerId();
     }
 
     /**
@@ -167,6 +168,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
                                     c -> new AggregateCommandEndpoint<>(this, c))
                 .build();
+    }
+
+    private Inbox<I> inbox() {
+        return checkNotNull(inbox);
     }
 
     /**
@@ -268,12 +273,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Creates aggregate storage for the repository.
      *
-     * @param factory the factory to create the storage
      * @return new storage
      */
     @Override
-    protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
-        Storage<I, ?, ?> result = factory.createAggregateStorage(context().spec(), entityClass());
+    protected AggregateStorage<I> createStorage() {
+        StorageFactory sf = defaultStorageFactory();
+        AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -296,7 +301,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public I dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
         I id = route(cmd);
-        inbox.send(cmd).toHandler(id);
+        inbox().send(cmd).toHandler(id);
         return id;
     }
 
@@ -368,7 +373,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Set<I> dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
         Set<I> targets = route(event);
-        targets.forEach((id) -> inbox.send(event).toReactor(id));
+        targets.forEach((id) -> inbox().send(event).toReactor(id));
         return targets;
     }
 
@@ -384,7 +389,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     final I importEvent(EventEnvelope event) {
         checkNotNull(event);
         I target = routeImport(event);
-        inbox.send(event).toImporter(target);
+        inbox().send(event).toImporter(target);
         return target;
     }
 
@@ -598,7 +603,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void close() {
         super.close();
-        if(inbox != null) {
+        if (inbox != null) {
             inbox.unregister();
         }
     }

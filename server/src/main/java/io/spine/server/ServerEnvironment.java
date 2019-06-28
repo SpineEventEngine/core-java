@@ -21,6 +21,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandScheduler;
@@ -28,6 +29,7 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.trace.TracerFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -84,6 +86,11 @@ public final class ServerEnvironment implements AutoCloseable {
     private @Nullable StorageFactory productionStorageFactory;
 
     /**
+     * The factory of {@code Tracer}s used in this environment.
+     */
+    private @Nullable TracerFactory tracerFactory;
+
+    /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
      */
     private Supplier<CommandScheduler> commandScheduler;
@@ -101,6 +108,13 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public static ServerEnvironment instance() {
         return INSTANCE;
+    }
+
+    /**
+     * The type of the environment application is deployed to.
+     */
+    public DeploymentType deploymentType() {
+        return deploymentDetector.get();
     }
 
     /**
@@ -180,13 +194,6 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * The type of the environment application is deployed to.
-     */
-    public static DeploymentType deploymentType() {
-        return deploymentDetector.get();
-    }
-
-    /**
      * Sets the default {@linkplain DeploymentType deployment type}
      * {@linkplain Supplier supplier} which utilizes system properties.
      */
@@ -233,6 +240,29 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
+     * Assigns {@code TracerFactory} to this server environment.
+     */
+    public void configureTracing(TracerFactory tracerFactory) {
+        this.tracerFactory = checkNotNull(tracerFactory);
+    }
+
+    /**
+     * Obtains {@link TracerFactory} associated with this server environment.
+     */
+    public Optional<TracerFactory> tracing() {
+        return Optional.ofNullable(tracerFactory);
+    }
+
+    /**
+     * This is a test-only method required in tests that deal with assigning tracer factories.
+     */
+    @Internal
+    @VisibleForTesting
+    public void clearTracerFactory() {
+        this.tracerFactory = null;
+    }
+
+    /**
      * Obtains production {@code StorageFactory} previously associated with the environment.
      *
      * @return {@code StorageFactory} instance for the production storage
@@ -257,6 +287,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
+        if (tracerFactory != null) {
+            tracerFactory.close();
+        }
         if (productionStorageFactory != null) {
             productionStorageFactory.close();
         }

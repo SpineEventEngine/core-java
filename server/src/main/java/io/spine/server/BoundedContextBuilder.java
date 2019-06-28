@@ -39,7 +39,6 @@ import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemClient;
@@ -47,8 +46,6 @@ import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.TraceEventObserver;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,21 +62,18 @@ import static io.spine.server.ContextSpec.singleTenant;
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "OverlyComplexClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 // OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
-
-    private TenantIndex tenantIndex;
-    private @Nullable Function<ContextSpec, TracerFactory> tracing;
-
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
     private TransportFactory transportFactory;
     private Supplier<AggregateRootDirectory> rootDirectory;
+    private TenantIndex tenantIndex;
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
@@ -95,7 +89,6 @@ public final class BoundedContextBuilder implements Logging {
      * {@link IntegrationBus} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
-
 
     /**
      * Prevents direct instantiation.
@@ -146,23 +139,6 @@ public final class BoundedContextBuilder implements Logging {
 
     public boolean isMultitenant() {
         return spec.isMultitenant();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder
-    setTracerFactorySupplier(@Nullable Function<ContextSpec, TracerFactory> tracing) {
-        this.tracing = tracing;
-        return this;
-    }
-
-    public Optional<Function<ContextSpec, TracerFactory>> tracerFactory() {
-        return Optional.ofNullable(tracing);
-    }
-
-    Function<ContextSpec, @Nullable TracerFactory> buildTracerFactorySupplier() {
-        @SuppressWarnings("ReturnOfNull")
-        Function<ContextSpec, @Nullable TracerFactory> defaultSupplier = spec -> null;
-        return tracerFactory().orElse(defaultSupplier);
     }
 
     @CanIgnoreReturnValue
@@ -486,15 +462,7 @@ public final class BoundedContextBuilder implements Logging {
 
         registerRepositories(result);
         registerDispatchers(result);
-        registerTracing(result, system);
         return result;
-    }
-
-    private static void registerTracing(BoundedContext domain, BoundedContext system) {
-        domain.tracing().ifPresent(tracing -> {
-            EventDispatcher<?> observer = new TraceEventObserver(domain.name(), tracing);
-            system.registerEventDispatcher(observer);
-        });
     }
 
     private void registerRepositories(BoundedContext result) {
@@ -598,8 +566,8 @@ public final class BoundedContextBuilder implements Logging {
             if (standMultitenant == null) {
                 stand.setMultitenant(isMultitenant());
             } else {
-                checkSameValue("Stand must match multitenancy of BoundedContext. " +
-                                       "Status in BoundedContext.Builder: %s Stand: %s",
+                checkSameValue("`Stand` must match multitenancy of `BoundedContext`. " +
+                                       "Status in `BoundedContext.Builder`: %s, `Stand`: %s.",
                                standMultitenant);
             }
         }

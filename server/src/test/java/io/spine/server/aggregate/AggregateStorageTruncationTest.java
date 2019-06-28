@@ -60,7 +60,6 @@ public abstract class AggregateStorageTruncationTest {
     @DisplayName("restore aggregate state properly")
     void restoreAggregateState() {
         FibonacciRepository repo = new FibonacciRepository();
-        repo.initStorage(storageFactory());
         SingleTenantBlackBoxContext context = BlackBoxBoundedContext
                 .singleTenant()
                 .with(repo);

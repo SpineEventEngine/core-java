@@ -22,7 +22,6 @@ package io.spine.server.entity.given.repository;
 
 import io.spine.server.entity.Repository;
 import io.spine.server.storage.Storage;
-import io.spine.server.storage.StorageFactory;
 
 import java.util.Optional;
 
@@ -48,7 +47,7 @@ public class RepoForEntityWithUnsupportedId extends Repository<Exception, Entity
     }
 
     @Override
-    protected Storage<Exception, ?, ?> createStorage(StorageFactory factory) {
+    protected Storage<Exception, ?, ?> createStorage() {
         return null;
     }
 }

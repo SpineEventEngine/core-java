@@ -23,13 +23,11 @@ package io.spine.server.entity;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.given.repository.ProjectEntity;
 import io.spine.server.entity.given.repository.RepoForEntityWithUnsupportedId;
 import io.spine.server.entity.given.repository.TestRepo;
 import io.spine.server.model.ModelError;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.entity.ProjectId;
@@ -55,7 +53,6 @@ class RepositoryTest {
 
     private BoundedContext context;
     private Repository<ProjectId, ProjectEntity> repository;
-    private StorageFactory storageFactory;
     private TenantId tenantId;
 
     private static ProjectId createId(String value) {
@@ -70,8 +67,6 @@ class RepositoryTest {
                 .assumingTests(true)
                 .build();
         repository = new TestRepo();
-        storageFactory = ServerEnvironment.instance()
-                                          .storageFactory();
         context.register(repository);
         tenantId = newUuid();
     }
@@ -99,12 +94,6 @@ class RepositoryTest {
     @DisplayName("not allow getting BoundedContext before registration")
     void notGetBcIfUnregistered() {
         assertThrows(IllegalStateException.class, () -> new TestRepo().context());
-    }
-
-    @Test
-    @DisplayName("reject repeated storage initialization")
-    void notInitStorageRepeatedly() {
-        assertThrows(IllegalStateException.class, () -> repository.initStorage(storageFactory));
     }
 
     @Test
