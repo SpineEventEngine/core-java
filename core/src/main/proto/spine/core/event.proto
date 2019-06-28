@@ -181,4 +181,7 @@ enum EventValidationError {
 
     // The event message is invalid according to custom Protobuf options set.
     INVALID_EVENT = 2;
+
+    // The event was already handled before.
+    DUPLICATE_EVENT = 3;
 }

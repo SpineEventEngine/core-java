@@ -156,7 +156,7 @@ enum CommandValidationError {
     //
     // A command is considered a duplicate if its ID matches the ID of another command.
     //
-    DUPLICATE = 6;
+    DUPLICATE_COMMAND = 6;
 }
 
 // Data from a `Command` which is accessible from the end user code to which

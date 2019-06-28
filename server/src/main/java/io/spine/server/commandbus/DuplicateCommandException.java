@@ -69,7 +69,7 @@ public class DuplicateCommandException extends CommandException implements Messa
     public static Error error(Message commandMessage, String errorText) {
         Error.Builder error = Error.newBuilder()
                                    .setType(DuplicateCommandException.class.getCanonicalName())
-                                   .setCode(CommandValidationError.DUPLICATE.getNumber())
+                                   .setCode(CommandValidationError.DUPLICATE_COMMAND.getNumber())
                                    .setMessage(errorText)
                                    .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
