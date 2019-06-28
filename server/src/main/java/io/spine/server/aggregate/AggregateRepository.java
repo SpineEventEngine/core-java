@@ -83,13 +83,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final Supplier<CommandRouting<I>> commandRouting;
 
     /** The routing schema for events to which aggregates react. */
-    private final EventRouting<I> eventRouting = EventRouting.withDefaultByProducerId();
+    private final EventRouting<I> eventRouting;
 
     /**
      * The routing for event import, which by default obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
-    private final EventRouting<I> eventImportRouting = EventRouting.withDefaultByProducerId();
+    private final EventRouting<I> eventImportRouting;
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -112,6 +112,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateRepository() {
         super();
         this.commandRouting = memoize(() -> CommandRouting.newInstance(idClass()));
+        this.eventRouting = EventRouting.withDefaultByProducerId();
+        this.eventImportRouting = EventRouting.withDefaultByProducerId();
     }
 
     /**
