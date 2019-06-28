@@ -97,7 +97,7 @@ class ServerEnvironmentTest {
     @DisplayName("tell when not running without any specific server environment")
     void tellIfStandalone() {
         // Tests are not run by AppEngine by default.
-        assertEquals(STANDALONE, ServerEnvironment.deploymentType());
+        assertEquals(STANDALONE, ServerEnvironment.instance().deploymentType());
     }
 
     @Nested
@@ -111,15 +111,15 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
         void receivesCloudEnvironment() {
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.deploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.instance().deploymentType());
         }
 
         @Test
         @DisplayName("cache the property value")
         void cachesValue() {
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.deploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.instance().deploymentType());
             setGaeEnvironment("Unrecognized Value");
-            assertEquals(APPENGINE_CLOUD, ServerEnvironment.deploymentType());
+            assertEquals(APPENGINE_CLOUD, ServerEnvironment.instance().deploymentType());
         }
     }
 
@@ -134,7 +134,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("obtain AppEngine environment GAE local dev server environment")
         void receivesEmulatorEnvironment() {
-            assertEquals(APPENGINE_EMULATOR, ServerEnvironment.deploymentType());
+            assertEquals(APPENGINE_EMULATOR, ServerEnvironment.instance().deploymentType());
         }
     }
 
@@ -149,7 +149,7 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("receive STANDALONE deployment type")
         void receivesStandalone() {
-            assertEquals(STANDALONE, ServerEnvironment.deploymentType());
+            assertEquals(STANDALONE, ServerEnvironment.instance().deploymentType());
         }
     }
 

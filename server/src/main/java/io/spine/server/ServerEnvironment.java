@@ -110,6 +110,13 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
+     * The type of the environment application is deployed to.
+     */
+    public DeploymentType deploymentType() {
+        return deploymentDetector.get();
+    }
+
+    /**
      * Returns {@code true} if the code is running on the Google App Engine,
      * {@code false} otherwise.
      *
@@ -183,13 +190,6 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public NodeId nodeId() {
         return nodeId;
-    }
-
-    /**
-     * The type of the environment application is deployed to.
-     */
-    public static DeploymentType deploymentType() {
-        return deploymentDetector.get();
     }
 
     /**
