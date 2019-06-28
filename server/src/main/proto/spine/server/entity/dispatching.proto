@@ -1,0 +1,68 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+syntax = "proto3";
+
+package spine.server.entity;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+option java_package = "io.spine.server.entity";
+option java_multiple_files = true;
+option java_outer_classname = "DispatchProto";
+
+import "spine/base/error.proto";
+import "spine/core/command.proto";
+import "spine/core/diagnostics.proto";
+import "spine/core/event.proto";
+
+message Propagation {
+
+    core.MessageId target_entity = 1  [(required) = true, (validate) = true];
+
+    repeated PropagationOutcome outcome = 2 [(required) = true, (validate) = true];
+
+    bool successful = 3;
+}
+
+message PropagationOutcome {
+
+    core.MessageId propagated_signal = 1 [(required) = true, (validate) = true];
+
+    oneof result {
+
+        Success success = 2 [(validate) = true];
+
+        base.Error error = 3 [(validate) = true];
+
+        Interruption interrupted = 4 [(validate) = true];
+    }
+}
+
+message Success {
+
+    repeated core.Event produced_event = 1 [(required) = false, (validate) = true];
+}
+
+message Interruption {
+
+    core.MessageId stopped_at = 1 [(required) = true, (validate) = true];
+}
