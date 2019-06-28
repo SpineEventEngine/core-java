@@ -22,8 +22,6 @@ package io.spine.server.event;
 
 import io.spine.core.Event;
 import io.spine.grpc.LoggingObserver;
-import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.store.EventStore;
@@ -50,20 +48,11 @@ import static org.mockito.Mockito.mock;
 class EventBusBuilderTest
         extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
 
-    private StorageFactory storageFactory;
+    private final StorageFactory storageFactory = ServerEnvironment.instance().storageFactory();
 
     @Override
     protected EventBus.Builder builder() {
         return EventBus.newBuilder();
-    }
-
-    @BeforeEach
-    void setUp() {
-        BoundedContext bc = BoundedContextBuilder
-                .assumingTests(true)
-                .build();
-        this.storageFactory = ServerEnvironment.instance()
-                                               .storageFactory();
     }
 
     @Nested
@@ -89,14 +78,6 @@ class EventBusBuilderTest
     @Nested
     @DisplayName("return set")
     class ReturnSet {
-
-        @Test
-        @DisplayName("StorageFactory")
-        void storageFactory() {
-            assertEquals(storageFactory, builder().setStorageFactory(storageFactory)
-                                                  .getStorageFactory()
-                                                  .get());
-        }
 
         @Test
         @DisplayName("EventStore")
@@ -127,13 +108,6 @@ class EventBusBuilderTest
                                           .enricher()
                                           .get());
         }
-    }
-
-    @Test
-    @DisplayName("throw ISE if neither EventStore nor StorageFactory is set")
-    void requireEventStoreOrStorageFactory() {
-        assertThrows(IllegalStateException.class, () -> EventBus.newBuilder()
-                                                                .build());
     }
 
     @Nested
@@ -192,15 +166,5 @@ class EventBusBuilderTest
 
         assertSame(builder, builder.setLogLevelForPost(newLevel));
         assertEquals(newLevel, builder.getLogLevelForPost());
-    }
-
-    private static void ensureExecutorDirect(Executor streamExecutor) {
-        long mainThreadId = Thread.currentThread()
-                                  .getId();
-        streamExecutor.execute(() -> {
-            long runnableThreadId = Thread.currentThread()
-                                          .getId();
-            assertEquals(mainThreadId, runnableThreadId);
-        });
     }
 }

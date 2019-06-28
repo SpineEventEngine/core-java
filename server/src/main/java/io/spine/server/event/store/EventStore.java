@@ -19,6 +19,7 @@
  */
 package io.spine.server.event.store;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
@@ -28,7 +29,6 @@ import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,11 +36,11 @@ import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -109,20 +109,21 @@ public final class EventStore implements AutoCloseable {
      */
     public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
-        Optional<Event> tenantDefiningEvent = Streams.stream(events)
-                                                     .filter(Objects::nonNull)
-                                                     .findFirst();
-        if (!tenantDefiningEvent.isPresent()) {
+        ImmutableList<Event> eventList =
+                Streams.stream(events)
+                       .filter(Objects::nonNull)
+                       .collect(toImmutableList());
+        if (eventList.isEmpty()) {
             return;
         }
-        Event event = tenantDefiningEvent.get();
+        Event event = eventList.get(0);
         TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
                 if (isTenantSet()) { // If multitenant context
-                    ensureSameTenant(events);
+                    ensureSameTenant(eventList);
                 }
-                storage.store(events);
+                storage.store(eventList);
             }
         };
         op.execute();
@@ -130,11 +131,11 @@ public final class EventStore implements AutoCloseable {
         log.stored(events);
     }
 
-    private static void ensureSameTenant(Iterable<Event> events) {
+    private static void ensureSameTenant(ImmutableList<Event> events) {
         checkNotNull(events);
-        Set<TenantId> tenants = Streams.stream(events)
-                                       .map(Event::tenant)
-                                       .collect(toSet());
+        Set<TenantId> tenants = events.stream()
+                                      .map(Event::tenant)
+                                      .collect(toSet());
         checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
@@ -180,29 +181,10 @@ public final class EventStore implements AutoCloseable {
      */
     public static final class Builder {
 
-        private StorageFactory storageFactory;
         private @Nullable Logger logger;
 
         /** Prevents instantiation from outside. */
         private Builder() {
-        }
-
-        /**
-         * This method must be called in {@link #build()} implementations to
-         * verify that all required parameters are set.
-         */
-        private void checkState() {
-            checkNotNull(storageFactory(), "eventStorage must be set");
-        }
-
-        public StorageFactory storageFactory() {
-            return storageFactory;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            this.storageFactory = checkNotNull(storageFactory);
-            return this;
         }
 
         public @Nullable Logger logger() {
@@ -235,7 +217,6 @@ public final class EventStore implements AutoCloseable {
          * Creates new {@code EventStore} instance.
          */
         public EventStore build() {
-            checkState();
             EventStore result = new EventStore(this);
             return result;
         }

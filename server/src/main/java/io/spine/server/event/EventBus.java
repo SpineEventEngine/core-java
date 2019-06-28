@@ -340,10 +340,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             return this;
         }
 
-        public Optional<StorageFactory> getStorageFactory() {
-            return Optional.ofNullable(storageFactory);
-        }
-
         /**
          * Specifies {@code EventStore} to be used when creating a new {@code EventBus}.
          *
@@ -438,9 +434,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Internal
         @CheckReturnValue
         public EventBus build() {
-            String message = "Either storageFactory or eventStore must be " +
-                             "set to build the EventBus instance";
-            checkState(storageFactory != null || eventStore != null, message);
             if (eventStoreStreamExecutor == null) {
                 eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
@@ -448,7 +441,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             if (eventStore == null) {
                 eventStore = EventStore
                         .newBuilder()
-                        .setStorageFactory(storageFactory)
                         .withDefaultLogger()
                         .build();
             }

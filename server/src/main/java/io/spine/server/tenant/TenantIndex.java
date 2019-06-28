@@ -22,11 +22,8 @@ package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.storage.StorageFactory;
 
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The index of tenant IDs in a multi-tenant application.
@@ -62,8 +59,7 @@ public interface TenantIndex extends AutoCloseable {
     /**
      * Creates default implementation of {@code TenantIndex} for a multi-tenant context.
      */
-    static TenantIndex createDefault(StorageFactory storageFactory) {
-        checkNotNull(storageFactory);
+    static TenantIndex createDefault() {
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
         DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
         return tenantRepo;

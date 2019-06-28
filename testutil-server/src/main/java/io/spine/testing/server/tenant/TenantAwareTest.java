@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.core.TenantId;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareTestSupport;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.server.tenant.TenantIndex;
@@ -42,9 +41,9 @@ import static com.google.common.base.Preconditions.checkState;
 public abstract class TenantAwareTest {
 
     public static
-    TenantIndex createTenantIndex(boolean multitenant, StorageFactory storageFactory) {
+    TenantIndex createTenantIndex(boolean multitenant) {
         return multitenant
-               ? TenantIndex.createDefault(storageFactory)
+               ? TenantIndex.createDefault()
                : TenantIndex.singleTenant();
     }
 

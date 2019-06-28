@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.event.store.EventStoreTest;
 import io.spine.test.event.ProjectCreated;
@@ -52,8 +51,6 @@ public class EventStoreTestEnv {
 
     public static EventStore eventStore() {
         return EventStore.newBuilder()
-                         .setStorageFactory(ServerEnvironment.instance()
-                                                             .storageFactory())
                          .withDefaultLogger()
                          .build();
     }

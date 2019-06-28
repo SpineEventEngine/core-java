@@ -508,7 +508,7 @@ public final class BoundedContextBuilder implements Logging {
                 ServerEnvironment.instance()
                                  .storageFactory();
 
-        initTenantIndex(storageFactory);
+        initTenantIndex();
         initCommandBus(client.writeSide());
         initEventBus(storageFactory);
         initStand(client.readSide());
@@ -518,10 +518,10 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
-    private void initTenantIndex(StorageFactory factory) {
+    private void initTenantIndex() {
         if (tenantIndex == null) {
             tenantIndex = isMultitenant()
-                          ? TenantIndex.createDefault(factory)
+                          ? TenantIndex.createDefault()
                           : TenantIndex.singleTenant();
         }
     }

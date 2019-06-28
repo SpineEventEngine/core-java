@@ -140,7 +140,7 @@ class ProcessManagerTest {
                 .build();
         StorageFactory storageFactory = ServerEnvironment.instance()
                                                          .storageFactory();
-        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
+        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false);
 
         EventBus eventBus = EventBus.newBuilder()
                                     .setStorageFactory(storageFactory)
