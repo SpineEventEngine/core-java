@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -48,7 +47,6 @@ import org.checkerframework.dataflow.qual.Pure;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -83,10 +81,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * The data storage for this repository.
      *
-     * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
-     * initialized} or the repository was {@linkplain #close() closed}.
+     * <p>This field is null if the storage was not initialized, or
+     * the repository was {@linkplain #close() closed}.
      */
-    private @Nullable Supplier<Storage<I, ?, ?>> storageSupplier;
+    private @Nullable Storage<I, ?, ?> storage;
 
     /**
      * Creates the repository.
@@ -187,19 +185,17 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Assigns a {@code BoundedContext} to this repository.
      *
-     * <p>If the repository does not have a storage assigned prior to this call, the storage
-     * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
-     * associated with the passed {@code BoundedContext}.
-     *
      * <p>A context for a repository can be set only once. Passing the same second time will have
      * no effect.
+     *
+     * <p>If the repository is not {@linkplain #isOpen() opened} prior to this call, it is opened.
      *
      * @throws IllegalStateException
      *          if the repository has a context value already assigned, and the passed value is
      *          not equal to the assigned one
      */
     @Internal
-    public final void setContext(BoundedContext context) {
+    public final synchronized void setContext(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -215,9 +211,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         }
 
         this.context = context;
-        if (!storageAssigned()) {
-            initStorage(ServerEnvironment.instance()
-                                         .storageFactory());
+        if (!isOpen()) {
+            open();
         }
         init(context);
     }
@@ -225,9 +220,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
      * registration} with a {@code BoundedContext}.
-     *
-     * <p>When this method is called, the repository already has {@link #context() BoundedContext}
-     * and the {@link #storage() Storage} {@linkplain #initStorage(StorageFactory) assigned}.
      *
      * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
      * of the parent {@code BoundedContext}.
@@ -261,7 +253,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
-    protected final boolean isRegistered() {
+    protected final synchronized boolean isRegistered() {
         return context != null;
     }
 
@@ -273,7 +265,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
      *         registered} yet
      */
-    protected final BoundedContext context() {
+    protected final synchronized BoundedContext context() {
         checkState(context != null,
                    "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
@@ -291,18 +283,25 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Initializes the storage using the passed factory.
+     * Does nothing.
      *
-     * @param factory the storage factory
-     * @throws IllegalStateException if the repository already has storage initialized
+     * <p>Storage is initialized automatically via {@code StorageFactory} obtained from
+     * the {@code ServerEnvironment}.
+     *
+     * @deprecated do not use
      */
+    @Deprecated
     public final void initStorage(StorageFactory factory) {
-        if (this.storageSupplier != null) {
-            throw newIllegalStateException(
-                    "The repository `%s` already has storage `%s`.",
-                    this, this.storageSupplier);
-        }
-        this.storageSupplier = Suppliers.memoize(() -> createStorage(factory));
+        // Do nothing.
+    }
+
+    protected final void open() {
+        Storage<I, ?, ?> storage = storage();
+        checkNotNull(storage, "Unable to initialize the storage.");
+    }
+
+    protected StorageFactory storageFactory() {
+        return ServerEnvironment.instance().storageFactory();
     }
 
     /**
@@ -312,10 +311,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    protected final Storage<I, ?, ?> storage() {
-        Storage<I, ?, ?> storage = this.storageSupplier != null
-                ? this.storageSupplier.get()
-                : null;
+    protected final synchronized Storage<I, ?, ?> storage() {
+        if (storage == null) {
+            StorageFactory factory = storageFactory();
+            this.storage = createStorage(factory);
+        }
         return checkStorage(storage);
     }
 
@@ -323,8 +323,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Returns {@code true} if the storage is assigned, {@code false} otherwise.
      */
     @VisibleForTesting
-    public final boolean storageAssigned() {
-        return this.storageSupplier != null;
+    public final synchronized boolean storageAssigned() {
+        return isOpen();
     }
 
     /**
@@ -356,10 +356,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void close() {
-        if (this.storageSupplier != null) {
+    public synchronized void close() {
+        if (isOpen()) {
             storage().close();
-            this.storageSupplier = null;
+            this.storage = null;
         }
         this.context = null;
     }
@@ -367,8 +367,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Verifies if the repository is open.
      */
-    public final boolean isOpen() {
-        return storageSupplier != null;
+    public final synchronized boolean isOpen() {
+        return storage != null;
     }
 
     /**

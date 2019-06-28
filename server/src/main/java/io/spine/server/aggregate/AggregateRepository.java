@@ -40,7 +40,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -155,7 +154,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Initializes the {@code Inbox}.
      */
-    private void initInbox() {
+    private synchronized void initInbox() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
@@ -167,6 +166,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
                                     c -> new AggregateCommandEndpoint<>(this, c))
                 .build();
+    }
+
+    private synchronized Inbox<I> inbox() {
+        return checkNotNull(inbox);
     }
 
     /**
@@ -272,8 +275,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return new storage
      */
     @Override
-    protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
-        Storage<I, ?, ?> result = factory.createAggregateStorage(context().spec(), entityClass());
+    protected AggregateStorage<I> createStorage(StorageFactory factory) {
+        AggregateStorage<I> result =
+                factory.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -296,7 +300,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public I dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
         I id = route(cmd);
-        inbox.send(cmd).toHandler(id);
+        inbox().send(cmd).toHandler(id);
         return id;
     }
 
@@ -368,7 +372,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Set<I> dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
         Set<I> targets = route(event);
-        targets.forEach((id) -> inbox.send(event).toReactor(id));
+        targets.forEach((id) -> inbox().send(event).toReactor(id));
         return targets;
     }
 
@@ -384,7 +388,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     final I importEvent(EventEnvelope event) {
         checkNotNull(event);
         I target = routeImport(event);
-        inbox.send(event).toImporter(target);
+        inbox().send(event).toImporter(target);
         return target;
     }
 
@@ -596,7 +600,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void close() {
+    public synchronized void close() {
         super.close();
         if(inbox != null) {
             inbox.unregister();

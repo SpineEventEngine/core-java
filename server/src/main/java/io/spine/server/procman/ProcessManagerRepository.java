@@ -174,7 +174,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Initializes the {@code Inbox}.
      */
-    private void initInbox() {
+    private synchronized void initInbox() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
@@ -184,6 +184,10 @@ public abstract class ProcessManagerRepository<I,
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
                                     c -> PmCommandEndpoint.of(this, c))
                 .build();
+    }
+
+    private synchronized Inbox<I> inbox() {
+        return checkNotNull(inbox);
     }
 
     /**
@@ -302,8 +306,8 @@ public abstract class ProcessManagerRepository<I,
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         I id = route(command);
-        inbox.send(command)
-             .toHandler(id);
+        inbox().send(command)
+               .toHandler(id);
         return id;
     }
 
@@ -324,7 +328,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        inbox.send(EventEnvelope.of(event)).toReactor(id);
+        inbox().send(EventEnvelope.of(event)).toReactor(id);
     }
 
     @Override
@@ -397,7 +401,7 @@ public abstract class ProcessManagerRepository<I,
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void close() {
+    public synchronized void close() {
         super.close();
         if(inbox != null) {
             inbox.unregister();

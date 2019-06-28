@@ -233,7 +233,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *         the type of IDs used in the repository
      * @param <E>
      *         the type of entities
-     * @see Repository#initStorage(StorageFactory)
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);

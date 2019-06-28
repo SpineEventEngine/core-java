@@ -110,7 +110,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * Initializes the {@code Inbox}.
      */
-    private void initInbox() {
+    private synchronized void initInbox() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
@@ -118,6 +118,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))
                 .build();
+    }
+
+    private synchronized Inbox<I> inbox() {
+        return checkNotNull(inbox);
     }
 
     @Override
@@ -321,8 +325,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected void dispatchTo(I id, Event event) {
-        inbox.send(EventEnvelope.of(event))
-             .toSubscriber(id);
+        inbox().send(EventEnvelope.of(event))
+               .toSubscriber(id);
     }
 
     @Internal
@@ -352,7 +356,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void close() {
+    public synchronized void close() {
         super.close();
         if (inbox != null) {
             inbox.unregister();
