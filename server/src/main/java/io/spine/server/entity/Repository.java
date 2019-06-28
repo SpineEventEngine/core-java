@@ -287,7 +287,17 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         checkNotNull(storage, "Unable to initialize the storage.");
     }
 
-    protected StorageFactory defaultStorageFactory() {
+    /**
+     * Obtains {@code StorageFactory} associated with the {@code ServerEnvironment} for
+     * {@linkplain #createStorage() creating} standard storages.
+     *
+     * <p>In order to create a custom storage, please override {@link #createStorage()} providing
+     * custom implementation.
+     * 
+     * @see #createStorage()
+     */
+    @Internal
+    protected static StorageFactory defaultStorageFactory() {
         return ServerEnvironment.instance().storageFactory();
     }
 
