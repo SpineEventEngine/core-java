@@ -603,7 +603,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void close() {
         super.close();
-        if(inbox != null) {
+        if (inbox != null) {
             inbox.unregister();
         }
     }
