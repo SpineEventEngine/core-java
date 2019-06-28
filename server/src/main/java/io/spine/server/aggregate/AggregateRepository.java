@@ -154,7 +154,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Initializes the {@code Inbox}.
      */
-    private synchronized void initInbox() {
+    private void initInbox() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
@@ -168,7 +168,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 .build();
     }
 
-    private synchronized Inbox<I> inbox() {
+    private Inbox<I> inbox() {
         return checkNotNull(inbox);
     }
 
@@ -599,7 +599,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public synchronized void close() {
+    public void close() {
         super.close();
         if(inbox != null) {
             inbox.unregister();

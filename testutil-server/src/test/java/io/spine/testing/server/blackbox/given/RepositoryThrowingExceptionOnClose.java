@@ -27,7 +27,7 @@ public abstract class RepositoryThrowingExceptionOnClose
         extends AggregateRepository<BbProjectId, BbProjectAggregate> {
 
     @Override
-    public synchronized void close() {
+    public void close() {
         super.close();
         throwException();
     }

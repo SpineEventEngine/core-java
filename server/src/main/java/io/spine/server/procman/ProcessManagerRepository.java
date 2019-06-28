@@ -174,7 +174,7 @@ public abstract class ProcessManagerRepository<I,
     /**
      * Initializes the {@code Inbox}.
      */
-    private synchronized void initInbox() {
+    private void initInbox() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         inbox = delivery
@@ -186,7 +186,7 @@ public abstract class ProcessManagerRepository<I,
                 .build();
     }
 
-    private synchronized Inbox<I> inbox() {
+    private Inbox<I> inbox() {
         return checkNotNull(inbox);
     }
 
@@ -401,7 +401,7 @@ public abstract class ProcessManagerRepository<I,
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public synchronized void close() {
+    public void close() {
         super.close();
         if(inbox != null) {
             inbox.unregister();

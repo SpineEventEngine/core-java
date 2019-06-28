@@ -195,7 +195,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *          not equal to the assigned one
      */
     @Internal
-    public final synchronized void setContext(BoundedContext context) {
+    public final void setContext(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -250,7 +250,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
-    protected final synchronized boolean isRegistered() {
+    protected final boolean isRegistered() {
         return context != null;
     }
 
@@ -262,7 +262,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
      *         registered} yet
      */
-    protected final synchronized BoundedContext context() {
+    protected final BoundedContext context() {
         checkState(context != null,
                    "The repository (class: `%s`) is not registered with a `BoundedContext`.",
                    getClass().getName());
@@ -298,7 +298,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @throws IllegalStateException if the storage is not assigned
      */
-    protected final synchronized Storage<I, ?, ?> storage() {
+    protected final Storage<I, ?, ?> storage() {
         if (storage == null) {
             this.storage = createStorage();
         }
@@ -309,7 +309,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * Returns {@code true} if the storage is assigned, {@code false} otherwise.
      */
     @VisibleForTesting
-    public final synchronized boolean storageAssigned() {
+    public final boolean storageAssigned() {
         return storage != null;
     }
 
@@ -343,7 +343,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public synchronized void close() {
+    public void close() {
         if (isOpen()) {
             storage().close();
             this.storage = null;
@@ -354,7 +354,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Verifies if the repository is open.
      */
-    public final synchronized boolean isOpen() {
+    public final boolean isOpen() {
         return context != null;
     }
 
