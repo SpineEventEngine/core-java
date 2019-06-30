@@ -24,6 +24,9 @@ import io.spine.annotation.SPI;
 
 /**
  * Abstract base for the storage of {@link Inbox} messages.
+ *
+ * <p>The storage instance is specific to the {@linkplain io.spine.server.ServerEnvironment
+ * server environment} and is used across {@code BoundedContext}s to store the delivered messages.
  */
 @SPI
 public abstract class InboxStorage
