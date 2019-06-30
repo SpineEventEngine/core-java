@@ -24,6 +24,7 @@ import io.spine.base.Environment;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.entity.Entity;
 import io.spine.server.projection.Projection;
@@ -266,6 +267,11 @@ class ServerEnvironmentTest {
         createProjectionStorage(ContextSpec context,
                                 Class<? extends Projection<I, ?, ?>> projectionClass) {
             return delegate.createProjectionStorage(context, projectionClass);
+        }
+
+        @Override
+        public InboxStorage createInboxStorage(boolean multitenant) {
+            return delegate.createInboxStorage(multitenant);
         }
 
         @Override
