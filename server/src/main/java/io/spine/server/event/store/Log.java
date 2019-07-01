@@ -24,26 +24,24 @@ import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.server.event.EventStreamQuery;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Logging for operations of {@link EventStore}.
  */
 final class Log {
 
-    private final @Nullable Logger logger;
+    private final Logger logger;
 
-    Log(@Nullable Logger logger) {
-        this.logger = logger;
+    Log(Logger logger) {
+        this.logger = checkNotNull(logger);
     }
 
     void stored(Event event) {
-        if (logger == null) {
-            return;
-        }
         if (logger.isDebugEnabled()) {
-            logger.debug("Stored: {}", TextFormat.shortDebugString(event));
+            logger.debug("Stored: {}.", TextFormat.shortDebugString(event));
         }
     }
 
@@ -54,22 +52,15 @@ final class Log {
     }
 
     void readingStart(EventStreamQuery query, StreamObserver<Event> responseObserver) {
-        if (logger == null) {
-            return;
-        }
-
         if (logger.isDebugEnabled()) {
             String requestData = TextFormat.shortDebugString(query);
-            logger.debug("Creating stream on request: {} for observer: {}",
+            logger.debug("Creating stream on request: {} for observer: {}.",
                          requestData,
                          responseObserver);
         }
     }
 
     void readingComplete(StreamObserver<Event> observer) {
-        if (logger == null) {
-            return;
-        }
         if (logger.isDebugEnabled()) {
             logger.debug("Observer {} got all queried events.", observer);
         }

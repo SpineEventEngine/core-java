@@ -340,10 +340,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Internal
         @CheckReturnValue
         public EventBus build() {
-            eventStore = EventStore
-                    .newBuilder()
-                    .withDefaultLogger()
-                    .build();
+            eventStore = new EventStore();
             EventBus result = new EventBus(this);
             return result;
         }

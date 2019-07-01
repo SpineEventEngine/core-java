@@ -21,7 +21,6 @@ package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
@@ -31,8 +30,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -46,7 +43,7 @@ import static java.util.stream.Collectors.toSet;
 /**
  * A store of all events in a Bounded Context.
  */
-public final class EventStore implements AutoCloseable {
+public final class EventStore implements AutoCloseable, Logging {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
@@ -57,21 +54,12 @@ public final class EventStore implements AutoCloseable {
     private final Log log;
 
     /**
-     * Creates a builder for locally running {@code EventStore}.
-     *
-     * @return new builder
-     */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
      * Constructs new instance taking arguments from the passed builder.
      */
-    private EventStore(Builder builder) {
+    public EventStore() {
         super();
         this.storage = new ERepository();
-        this.log = new Log(builder.logger());
+        this.log = new Log(Logging.get(getClass()));
     }
 
     @Internal
@@ -174,51 +162,5 @@ public final class EventStore implements AutoCloseable {
      */
     public boolean isOpen() {
         return storage.isOpen();
-    }
-
-    /**
-     * Builder for creating new {@code EventStore} instance.
-     */
-    public static final class Builder {
-
-        private @Nullable Logger logger;
-
-        /** Prevents instantiation from outside. */
-        private Builder() {
-        }
-
-        public @Nullable Logger logger() {
-            return logger;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setLogger(@Nullable Logger logger) {
-            this.logger = logger;
-            return this;
-        }
-
-        /**
-         * Sets default logger.
-         *
-         * @see #defaultLogger()
-         */
-        @CanIgnoreReturnValue
-        public Builder withDefaultLogger() {
-            setLogger(defaultLogger());
-            return this;
-        }
-
-        /** Returns default logger for this class. */
-        private static Logger defaultLogger() {
-            return Logging.get(EventStore.class);
-        }
-
-        /**
-         * Creates new {@code EventStore} instance.
-         */
-        public EventStore build() {
-            EventStore result = new EventStore(this);
-            return result;
-        }
     }
 }
