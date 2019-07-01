@@ -26,10 +26,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.command.CommandErrorHandler;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -60,6 +62,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -348,6 +351,21 @@ public abstract class ProcessManagerRepository<I,
         Iterable<Event> filteredEvents = eventFilter().filter(events);
         EventBus bus = context().eventBus();
         bus.post(filteredEvents);
+    }
+
+    /**
+     * Posts the passed event to {@link EventBus}.
+     */
+    void postEvent(Event event) {
+        postEvents(ImmutableList.of(event));
+    }
+
+    /**
+     * Posts passed commands to {@link CommandBus}.
+     */
+    void postCommands(Collection<Command> commands) {
+        CommandBus bus = context().commandBus();
+        bus.post(commands, noOpObserver());
     }
 
     /**

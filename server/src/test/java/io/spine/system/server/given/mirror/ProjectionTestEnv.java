@@ -64,7 +64,7 @@ public final class ProjectionTestEnv {
     public static EntityStateChanged entityStateChanged() {
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
-                .setEntity(historyId(RAW_ID))
+                .setEntity(messageId(RAW_ID))
                 .setNewState(pack(Empty.getDefaultInstance()))
                 .setWhen(currentTime())
                 .addSignalId(cause())
@@ -76,7 +76,7 @@ public final class ProjectionTestEnv {
     public static EntityArchived entityArchived() {
         EntityArchived event = EntityArchived
                 .newBuilder()
-                .setEntity(historyId(RAW_ID))
+                .setEntity(messageId(RAW_ID))
                 .setWhen(currentTime())
                 .addSignalId(cause())
                 .setVersion(VERSION)
@@ -87,7 +87,7 @@ public final class ProjectionTestEnv {
     public static EntityDeleted entityDeleted() {
         EntityDeleted event = EntityDeleted
                 .newBuilder()
-                .setEntity(historyId(RAW_ID))
+                .setEntity(messageId(RAW_ID))
                 .setWhen(currentTime())
                 .addSignalId(cause())
                 .setVersion(VERSION)
@@ -98,7 +98,7 @@ public final class ProjectionTestEnv {
     public static EntityUnarchived entityExtracted() {
         EntityUnarchived event = EntityUnarchived
                 .newBuilder()
-                .setEntity(historyId(RAW_ID))
+                .setEntity(messageId(RAW_ID))
                 .setWhen(currentTime())
                 .addSignalId(cause())
                 .setVersion(VERSION)
@@ -109,7 +109,7 @@ public final class ProjectionTestEnv {
     public static EntityRestored entityRestored() {
         EntityRestored event = EntityRestored
                 .newBuilder()
-                .setEntity(historyId(RAW_ID))
+                .setEntity(messageId(RAW_ID))
                 .setWhen(currentTime())
                 .addSignalId(cause())
                 .setVersion(VERSION)
@@ -117,7 +117,7 @@ public final class ProjectionTestEnv {
         return event;
     }
 
-    private static MessageId historyId(String entityId) {
+    private static MessageId messageId(String entityId) {
         MessageId historyId = MessageId
                 .newBuilder()
                 .setId(toAny(entityId))

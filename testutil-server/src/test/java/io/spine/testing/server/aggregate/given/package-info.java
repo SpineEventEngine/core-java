@@ -19,9 +19,9 @@
  */
 
 /**
- * Test environment for the {@link io.spine.testing.server.aggregate} package.
+ * This package contains test aggregates and repositories for being used by
+ * test suites classes which are subjects of testing.
  */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.testing.server.aggregate.given;

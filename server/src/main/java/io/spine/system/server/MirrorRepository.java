@@ -93,11 +93,11 @@ final class MirrorRepository
                       (message, context) -> targetsFrom(message.getEntity()));
     }
 
-    private static Set<MirrorId> targetsFrom(MessageId historyId) {
-        TypeUrl type = TypeUrl.parse(historyId.getTypeUrl());
+    private static Set<MirrorId> targetsFrom(MessageId entityId) {
+        TypeUrl type = TypeUrl.parse(entityId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
-               ? ImmutableSet.of(idFrom(historyId))
+               ? ImmutableSet.of(idFrom(entityId))
                : ImmutableSet.of();
     }
 

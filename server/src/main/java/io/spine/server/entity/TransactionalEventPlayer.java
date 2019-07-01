@@ -90,7 +90,9 @@ final class TransactionalEventPlayer implements EventPlayer {
         }
 
         private Propagation buildPropagationResult() {
-            return propagation.vBuild();
+            return propagation
+                    .setSuccessful(successful)
+                    .vBuild();
         }
     }
 }

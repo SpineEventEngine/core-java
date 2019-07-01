@@ -18,10 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.aggregate.given.agg;
+package io.spine.testing.server.projection.given;
 
-import io.spine.server.aggregate.AggregateRepository;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.testing.server.given.entity.TuEventLog;
 import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.event.TuProjectAssigned;
+import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
-public final class TuAggregateRepository extends AggregateRepository<TuProjectId, TuAggregate> {
+import static io.spine.protobuf.AnyPacker.pack;
+
+/**
+ * A sample projection for being used as the subject of tests under tests.
+ */
+public class TuEventLoggingView
+        extends Projection<TuProjectId, TuEventLog, TuEventLog.Builder> {
+
+    public TuEventLoggingView(TuProjectId id) {
+        super(id);
+    }
+
+    @Subscribe
+    void on(TuProjectAssigned event) {
+        builder().addEvent(pack(event));
+    }
+
+    @Subscribe
+    void on(TuProjectCreated event) {
+        builder().addEvent(pack(event));
+    }
 }

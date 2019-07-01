@@ -20,8 +20,10 @@
 
 package io.spine.server.procman;
 
+import io.spine.logging.Logging;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.Success;
 import io.spine.server.type.ActorMessageEnvelope;
 
 /**
@@ -34,7 +36,8 @@ import io.spine.server.type.ActorMessageEnvelope;
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends ActorMessageEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, P, M> {
+        extends EntityMessageEndpoint<I, P, M>
+        implements Logging {
 
     PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
         super(repository, envelope);
@@ -77,13 +80,36 @@ abstract class PmEndpoint<I,
      */
     private void tryDispatchAndSave(P manager) {
         try {
-            PropagationOutcome events = runTransactionFor(manager);
+            PropagationOutcome outcome = runTransactionFor(manager);
             store(manager);
             // TODO:2019-07-01:dmytro.dashenkov: Handle error case.
-            repository().postEvents(events.getSuccess().getProducedEvents().getEventList());
+            if (outcome.hasSuccess()) {
+                postMessages(outcome.getSuccess());
+            }
+            repository().postEvents(outcome.getSuccess().getProducedEvents().getEventList());
         } catch (RuntimeException ex) {
             store(manager);
             throw ex;
+        }
+    }
+
+    private void postMessages(Success successfulOutcome) {
+        Success.ExhaustCase type = successfulOutcome.getExhaustCase();
+        switch (type) {
+            case PRODUCED_EVENTS:
+                repository().postEvents(successfulOutcome.getProducedEvents()
+                                                         .getEventList());
+                break;
+            case REJECTION:
+                repository().postEvent(successfulOutcome.getRejection());
+                break;
+            case PRODUCED_COMMANDS:
+                repository().postCommands(successfulOutcome.getProducedCommands()
+                                                           .getCommandList());
+                break;
+            case EXHAUST_NOT_SET:
+            default:
+
         }
     }
 

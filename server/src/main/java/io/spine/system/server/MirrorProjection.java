@@ -74,8 +74,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
 
     @Subscribe
     void on(EntityStateChanged event) {
-        builder().setId(id())
-                 .setState(event.getNewState())
+        builder().setState(event.getNewState())
                  .setVersion(event.getNewVersion());
     }
 
@@ -87,8 +86,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
                 .toBuilder()
                 .setArchived(true)
                 .build();
-        builder.setId(id())
-               .setLifecycle(flags)
+        builder.setLifecycle(flags)
                .setVersion(event.getVersion());
         setArchived(true);
     }
@@ -101,8 +99,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
                 .toBuilder()
                 .setDeleted(true)
                 .build();
-        builder.setId(id())
-               .setLifecycle(flags)
+        builder.setLifecycle(flags)
                .setVersion(event.getVersion());
         setDeleted(true);
     }
@@ -112,8 +109,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
         Mirror.Builder builder = builder();
         builder.getLifecycleBuilder()
                .setArchived(false);
-        builder.setId(id())
-               .setVersion(event.getVersion());
+        builder.setVersion(event.getVersion());
         setArchived(false);
     }
 

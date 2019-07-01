@@ -19,23 +19,9 @@
  */
 
 /**
- * Test environment for testing the {@linkplain io.spine.testing.server.procman ProcessManager
- * testing utilities}.
- *
- * <p>Test suite classes in this package form the test environment for testing
- * abstract classes of {@linkplain io.spine.testing.server.procman ProcessManager tests}. These
- * classes use the {@link io.spine.testing.server.procman.given.pm pm} subpackage which contains
- * sample {@code ProcessManager} classes and corresponding repositories (that are subjects of
- * testing by sample test suite classes in this package).
- *
- * <p>The sample test suite classes do not have methods that run assertions. Assertion API of
- * abstract test classes is invoked by real tests placed under the
- * {@linkplain io.spine.testing.server.procman production code package}.
- *
- * @see io.spine.testing.server.procman.PmCommandOnEventTestShould
- * @see io.spine.testing.server.procman.PmCommandTestShould
+ * This package provides test environment classes of process managers and
+ * their repositories.
  */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.testing.server.procman.given;
