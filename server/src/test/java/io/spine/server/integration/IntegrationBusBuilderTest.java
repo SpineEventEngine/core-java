@@ -23,7 +23,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
-import io.spine.server.transport.TransportFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -51,13 +50,6 @@ class IntegrationBusBuilderTest
     class NotAcceptNull {
 
         @Test
-        @DisplayName("TransportFactory")
-        void transportFactory() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setTransportFactory(nullRef()));
-        }
-
-        @Test
         @DisplayName("EventBus")
         void eventBus() {
             assertThrows(NullPointerException.class,
@@ -68,7 +60,7 @@ class IntegrationBusBuilderTest
         @DisplayName("BoundedContextName")
         void boundedContextName() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setBoundedContextName(nullRef()));
+                         () -> builder().setContextName(nullRef()));
         }
     }
 
@@ -77,19 +69,11 @@ class IntegrationBusBuilderTest
     class ReturnSet {
 
         @Test
-        @DisplayName("TransportFactory")
-        void transportFactory() {
-            TransportFactory mock = mock(TransportFactory.class);
-            assertPresent(mock, builder().setTransportFactory(mock)
-                                         .getTransportFactory());
-        }
-
-        @Test
         @DisplayName("EventBus")
         void eventBus() {
             EventBus mock = mock(EventBus.class);
             assertPresent(mock, builder().setEventBus(mock)
-                                         .getEventBus());
+                                         .eventBus());
         }
 
         @Test
@@ -97,8 +81,8 @@ class IntegrationBusBuilderTest
         void boundedContextName() {
             BoundedContextName name =
                     BoundedContextNames.newName("Name that is expected back from the Builder");
-            assertPresent(name, builder().setBoundedContextName(name)
-                                         .getBoundedContextName());
+            assertPresent(name, builder().setContextName(name)
+                                         .contextName());
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // is the purpose of the method.

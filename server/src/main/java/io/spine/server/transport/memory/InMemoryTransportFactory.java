@@ -29,6 +29,7 @@ import io.spine.server.transport.TransportFactory;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
@@ -45,6 +46,9 @@ public class InMemoryTransportFactory implements TransportFactory {
     private final Multimap<ChannelId, Subscriber> subscribers =
             synchronizedMultimap(HashMultimap.create());
 
+    /** Turns {@code true} upon {@linkplain #close()} closing} the factory. */
+    private boolean closed;
+
     /** Prevent direct instantiation from outside of the inheritance tree. */
     protected InMemoryTransportFactory() {}
 
@@ -59,14 +63,14 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Publisher createPublisher(ChannelId channelId) {
-        InMemoryPublisher result = new InMemoryPublisher(channelId, providerOf(subscribers));
+        InMemoryPublisher result = new InMemoryPublisher(channelId, providerOf(subscribers()));
         return result;
     }
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId channelId) {
         Subscriber subscriber = newSubscriber(channelId);
-        subscribers.put(channelId, subscriber);
+        subscribers().put(channelId, subscriber);
         return subscriber;
     }
 
@@ -96,5 +100,15 @@ public class InMemoryTransportFactory implements TransportFactory {
             checkNotNull(channelId);
             return subscribers.get(channelId);
         };
+    }
+
+    private synchronized Multimap<ChannelId, Subscriber> subscribers() {
+        checkState(!closed, "`%s` is already closed.", getClass().getName());
+        return subscribers;
+    }
+
+    @Override
+    public synchronized void close() {
+        closed = true;
     }
 }

@@ -30,6 +30,8 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.trace.TracerFactory;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -42,6 +44,7 @@ import static com.google.common.base.Strings.emptyToNull;
 /**
  * The server conditions and configuration under which the application operates.
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
@@ -83,12 +86,17 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The storage factory for the production mode of the application.
      */
-    private @Nullable StorageFactory productionStorageFactory;
+    private @Nullable StorageFactory storageFactory;
 
     /**
      * The factory of {@code Tracer}s used in this environment.
      */
     private @Nullable TracerFactory tracerFactory;
+
+    /**
+     * The production factory for channel-based transport.
+     */
+    private @Nullable TransportFactory transportFactory;
 
     /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
@@ -220,14 +228,14 @@ public final class ServerEnvironment implements AutoCloseable {
      *
      * <p>Tests use {@code InMemoryStorageFactory}.
      */
-    public void configureProductionStorage(StorageFactory storageFactory) {
+    public void configureStorage(StorageFactory storageFactory) {
         checkNotNull(storageFactory);
         checkArgument(
                 !(storageFactory instanceof InMemoryStorageFactory),
                 "%s cannot be used for production storage.",
                 InMemoryStorageFactory.class.getName()
         );
-        this.productionStorageFactory = storageFactory;
+        this.storageFactory = storageFactory;
     }
 
     /**
@@ -236,7 +244,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @VisibleForTesting
     void clearStorageFactory() {
-        this.productionStorageFactory = null;
+        this.storageFactory = null;
     }
 
     /**
@@ -268,18 +276,69 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return {@code StorageFactory} instance for the production storage
      * @throws NullPointerException
      *         if the production {@code StorageFactory} was not
-     *         {@linkplain #configureProductionStorage(StorageFactory) configured} prior to the call
+     *         {@linkplain #configureStorage(StorageFactory) configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        if (Environment.getInstance().isTests()) {
+        if (environment().isTests()) {
             return InMemoryStorageFactory.newInstance();
         }
-        checkNotNull(productionStorageFactory,
+        checkNotNull(storageFactory,
                      "Production `%s` is not configured." +
                              " Please call `configureProductionStorage()`.",
                      StorageFactory.class.getSimpleName()
         );
-        return productionStorageFactory;
+        return storageFactory;
+    }
+
+    private static Environment environment() {
+        return Environment.instance();
+    }
+
+    /**
+     * Assigns {@code TransportFactory} for the production mode of the application.
+     */
+    public void configureTransport(TransportFactory transportFactory) {
+        checkArgument(
+                !(transportFactory instanceof InMemoryTransportFactory),
+                "`%s` cannot be used in production environment.",
+                InMemoryTransportFactory.class.getName()
+        );
+        this.transportFactory = checkNotNull(transportFactory);
+    }
+
+    /**
+     * Obtains {@code TransportFactory} associated with this server environment.
+     *
+     * <p>If the factory is not assigned in the Production mode, throws
+     * {@code NullPointerException} with the instruction to call
+     * {@link #configureTransport(TransportFactory)}.
+     *
+     * <p>If the factory is not assigned in the Tests mode, assigns the instance of
+     * {@link InMemoryTransportFactory} and returns it.
+     */
+    public TransportFactory transportFactory() {
+        boolean production = environment().isProduction();
+        if (production) {
+            checkNotNull(
+                    transportFactory,
+                    "`%s` is not assigned. Please call `configureTransport()`.",
+                    TransportFactory.class.getName()
+            );
+            return transportFactory;
+        }
+
+        if (transportFactory == null) {
+            this.transportFactory = InMemoryTransportFactory.newInstance();
+        }
+        return transportFactory;
+    }
+
+    /**
+     * This is test-only method required for tests dealing with configuring transport factory.
+     */
+    @VisibleForTesting
+    public void clearTransportFactory() {
+        this.transportFactory = null;
     }
 
     /**
@@ -290,8 +349,11 @@ public final class ServerEnvironment implements AutoCloseable {
         if (tracerFactory != null) {
             tracerFactory.close();
         }
-        if (productionStorageFactory != null) {
-            productionStorageFactory.close();
+        if (transportFactory != null) {
+            transportFactory.close();
+        }
+        if (storageFactory != null) {
+            storageFactory.close();
         }
     }
 }

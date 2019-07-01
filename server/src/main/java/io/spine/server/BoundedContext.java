@@ -182,7 +182,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkArgument(busBuilder.isPresent());
         IntegrationBus result =
                 busBuilder.get()
-                          .setBoundedContextName(name)
+                          .setContextName(name)
                           .setEventBus(eventBus)
                           .build();
         return result;

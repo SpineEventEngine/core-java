@@ -37,10 +37,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
@@ -71,7 +68,6 @@ public final class BoundedContextBuilder implements Logging {
     private EventBus.Builder eventBus;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
-    private TransportFactory transportFactory;
     private Supplier<AggregateRootDirectory> rootDirectory;
     private TenantIndex tenantIndex;
 
@@ -197,16 +193,6 @@ public final class BoundedContextBuilder implements Logging {
 
     Stand buildStand() {
         return stand.build();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setTransportFactory(TransportFactory transportFactory) {
-        this.transportFactory = checkNotNull(transportFactory);
-        return this;
-    }
-
-    public Optional<TransportFactory> transportFactory() {
-        return Optional.ofNullable(transportFactory);
     }
 
     @CanIgnoreReturnValue
@@ -443,7 +429,7 @@ public final class BoundedContextBuilder implements Logging {
      * such as:
      * <ul>
      *     <li>{@linkplain #tenantIndex()} tenancy;
-     *     <li>{@linkplain #transportFactory()} transport facilities.
+     *     <li>{@linkplain ServerEnvironment#transportFactory()} transport facilities.
      * </ul>
      *
      * <p>All the other configuration is NOT shared.
@@ -454,10 +440,8 @@ public final class BoundedContextBuilder implements Logging {
      * @return new {@code BoundedContext}
      */
     public BoundedContext build() {
-        TransportFactory transport = transportFactory()
-                .orElseGet(InMemoryTransportFactory::newInstance);
-        SystemContext system = buildSystem(transport);
-        BoundedContext result = buildDomain(system, transport);
+        SystemContext system = buildSystem();
+        BoundedContext result = buildDomain(system);
         log().debug("{} created.", result.nameForLogging());
 
         registerRepositories(result);
@@ -477,15 +461,15 @@ public final class BoundedContextBuilder implements Logging {
         eventDispatchers.forEach(result::registerEventDispatcher);
     }
 
-    private BoundedContext buildDomain(SystemContext system, TransportFactory transport) {
+    private BoundedContext buildDomain(SystemContext system) {
         SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
-        BoundedContext result = buildPartial(instanceFactory, systemClient, transport);
+        BoundedContext result = buildPartial(instanceFactory, systemClient);
         return result;
     }
 
-    private SystemContext buildSystem(TransportFactory transport) {
+    private SystemContext buildSystem() {
         String name = BoundedContextNames.system(spec.name()).getValue();
         boolean multitenant = isMultitenant();
         BoundedContextBuilder system = multitenant
@@ -495,24 +479,19 @@ public final class BoundedContextBuilder implements Logging {
         tenantIndex.ifPresent(system::setTenantIndex);
 
         SystemContext result = system.buildPartial(SystemContext::newInstance,
-                                                   NoOpSystemClient.INSTANCE,
-                                                   transport);
+                                                   NoOpSystemClient.INSTANCE
+        );
         return result;
     }
 
     private <B extends BoundedContext>
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                   SystemClient client,
-                   TransportFactory transport) {
-        StorageFactory storageFactory =
-                ServerEnvironment.instance()
-                                 .storageFactory();
-
+                   SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
         initEventBus();
         initStand(client.readSide());
-        initIntegrationBus(transport);
+        initIntegrationBus();
 
         B result = instanceFactory.apply(this);
         return result;
@@ -567,9 +546,8 @@ public final class BoundedContextBuilder implements Logging {
         stand.setSystemReadSide(systemReadSide);
     }
 
-    private void initIntegrationBus(TransportFactory factory) {
+    private void initIntegrationBus() {
         integrationBus = IntegrationBus.newBuilder();
-        integrationBus.setTransportFactory(factory);
     }
 
     /**

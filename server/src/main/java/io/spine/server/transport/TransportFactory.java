@@ -30,7 +30,7 @@ import io.spine.server.integration.ChannelId;
  * Publish-Subscriber Channel pattern.</a>
  */
 @SPI
-public interface TransportFactory {
+public interface TransportFactory extends AutoCloseable {
 
     /**
      * Creates a {@link Publisher} channel with the given ID.

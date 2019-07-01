@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
@@ -124,13 +125,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final PublisherHub publisherHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
         super(builder);
-        TransportFactory transportFactory = builder.getTransportFactory()
-                                                   .get();
-        this.boundedContextName = builder.boundedContextName;
+        TransportFactory transportFactory =
+                ServerEnvironment.instance()
+                                 .transportFactory();
+        this.boundedContextName = builder.contextName;
         this.subscriberHub = new SubscriberHub(transportFactory);
         this.publisherHub = new PublisherHub(transportFactory);
         this.localBusAdapters = createAdapters(builder, publisherHub);
@@ -155,7 +155,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private static
     ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder, PublisherHub publisherHub) {
         return ImmutableSet.of(
-                EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
+                EventBusAdapter.builderWith(builder.eventBus, builder.contextName)
                                .setPublisherHub(publisherHub)
                                .build()
         );
@@ -377,10 +377,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
          */
 
         private EventBus eventBus;
-        private BoundedContextName boundedContextName;
-        private TransportFactory transportFactory;
+        private BoundedContextName contextName;
 
-        public Optional<EventBus> getEventBus() {
+        public Optional<EventBus> eventBus() {
             return Optional.ofNullable(eventBus);
         }
 
@@ -390,27 +389,17 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return self();
         }
 
-        public Optional<BoundedContextName> getBoundedContextName() {
-            BoundedContextName value = Validate.isDefault(this.boundedContextName)
+        public Optional<BoundedContextName> contextName() {
+            BoundedContextName value = Validate.isDefault(this.contextName)
                                        ? null
-                                       : this.boundedContextName;
+                                       : this.contextName;
             return Optional.ofNullable(value);
         }
 
         @CanIgnoreReturnValue
-        public Builder setBoundedContextName(BoundedContextName boundedContextName) {
-            this.boundedContextName = checkNotNull(boundedContextName);
+        public Builder setContextName(BoundedContextName name) {
+            this.contextName = checkNotNull(name);
             return self();
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setTransportFactory(TransportFactory transportFactory) {
-            this.transportFactory = checkNotNull(transportFactory);
-            return self();
-        }
-
-        public Optional<TransportFactory> getTransportFactory() {
-            return Optional.ofNullable(transportFactory);
         }
 
         @Override
@@ -422,11 +411,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         @CheckReturnValue
         public IntegrationBus build() {
             checkState(eventBus != null,
-                       "`eventBus` must be set for IntegrationBus.");
-            checkNotDefault(boundedContextName,
-                            "`boundedContextName` must be set for IntegrationBus.");
-            checkState(transportFactory != null,
-                       "`TransportFactory` must be set for IntegrationBus.");
+                       "`eventBus` must be set for `IntegrationBus`.");
+            checkNotDefault(contextName,
+                            "`contextName` must be set for `IntegrationBus`.");
             return new IntegrationBus(this);
         }
 

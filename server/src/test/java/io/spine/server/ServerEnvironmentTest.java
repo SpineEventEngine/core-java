@@ -26,11 +26,16 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.entity.Entity;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("deprecation") // Need to test deprecated API of `ServerEnvironment`.
 @DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 
@@ -63,6 +67,7 @@ class ServerEnvironmentTest {
         assertHasPrivateParameterlessCtor(ServerEnvironment.class);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @DisplayName("tell when not running under AppEngine")
     void tellIfNotInAppEngine() {
@@ -70,6 +75,7 @@ class ServerEnvironmentTest {
         assertFalse(serverEnvironment.isAppEngine());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @DisplayName("obtain AppEngine version as optional string")
     void getAppEngineVersion() {
@@ -157,7 +163,7 @@ class ServerEnvironmentTest {
     @DisplayName("configure production `StorageFactory`")
     class StorageFactoryConfig {
 
-        private final Environment environment = Environment.getInstance();
+        private final Environment environment = Environment.instance();
 
         @BeforeEach
         void turnToProduction() {
@@ -177,12 +183,12 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("do not allow passing `InMemoryStorageFactory`")
+        @DisplayName("do not allow setting `InMemoryStorageFactory`")
         void seriousStorageForProduction() {
             InMemoryStorageFactory inMemoryStorageFactory = InMemoryStorageFactory.newInstance();
 
             assertThrows(IllegalArgumentException.class, () ->
-                    serverEnvironment.configureProductionStorage(inMemoryStorageFactory)
+                    serverEnvironment.configureStorage(inMemoryStorageFactory)
             );
         }
 
@@ -190,7 +196,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StubStorageFactory factory = new StubStorageFactory();
-            serverEnvironment.configureProductionStorage(factory);
+            serverEnvironment.configureStorage(factory);
             assertThat(serverEnvironment.storageFactory())
                     .isEqualTo(factory);
         }
@@ -202,6 +208,47 @@ class ServerEnvironmentTest {
 
             assertThat(serverEnvironment.storageFactory())
                     .isInstanceOf(InMemoryStorageFactory.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TransportFactory`")
+    class TransportFactoryConfig {
+
+        private final Environment environment = Environment.instance();
+
+        @BeforeEach
+        void turnToProduction() {
+            environment.setToProduction();
+        }
+
+        @AfterEach
+        void backToTests() {
+            environment.setToTests();
+            serverEnvironment.clearTransportFactory();
+        }
+
+        @Test
+        @DisplayName("throw NPE if not configured")
+        void throwsIfNotConfigured() {
+            assertThrows(NullPointerException.class, serverEnvironment::transportFactory);
+        }
+
+        @Test
+        @DisplayName("do not allow setting `InMemoryTransportFactory`")
+        void noInMemProdTransport() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    serverEnvironment.configureTransport(InMemoryTransportFactory.newInstance())
+            );
+        }
+
+        @Test
+        @DisplayName("return configured instance in Production")
+        void productionValue() {
+            TransportFactory factory = new StubTransportFactory();
+            serverEnvironment.configureTransport(factory);
+            assertThat(serverEnvironment.transportFactory())
+                    .isEqualTo(factory);
         }
     }
 
@@ -248,6 +295,7 @@ class ServerEnvironmentTest {
     private static class StubStorageFactory implements StorageFactory {
 
         private final StorageFactory delegate = InMemoryStorageFactory.newInstance();
+
         @Override
         public <I> AggregateStorage<I>
         createAggregateStorage(ContextSpec context,
@@ -266,6 +314,30 @@ class ServerEnvironmentTest {
         createProjectionStorage(ContextSpec context,
                                 Class<? extends Projection<I, ?, ?>> projectionClass) {
             return delegate.createProjectionStorage(context, projectionClass);
+        }
+
+        @Override
+        public void close() throws Exception {
+            delegate.close();
+        }
+    }
+
+    /**
+     * Stub implementation of {@code TransportFactory} which delegates all the calls
+     * to {@code InMemoryTransportFactory}.
+     */
+    private static class StubTransportFactory implements TransportFactory {
+
+        private final TransportFactory delegate = InMemoryTransportFactory.newInstance();
+
+        @Override
+        public Publisher createPublisher(ChannelId channelId) {
+            return delegate.createPublisher(channelId);
+        }
+
+        @Override
+        public Subscriber createSubscriber(ChannelId messageClass) {
+            return delegate.createSubscriber(messageClass);
         }
 
         @Override

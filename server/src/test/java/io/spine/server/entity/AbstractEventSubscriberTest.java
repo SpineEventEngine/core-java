@@ -38,7 +38,6 @@ import io.spine.server.given.groups.WronglyDomesticSubscriber;
 import io.spine.server.given.groups.WronglyExternalSubscriber;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.SystemBoundedContexts;
 import io.spine.system.server.event.EntityStateChanged;
@@ -62,14 +61,11 @@ class AbstractEventSubscriberTest {
 
     @BeforeEach
     void setUp() {
-        InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
         groupsContext = BoundedContext
                 .singleTenant("Groups")
-                .setTransportFactory(transport)
                 .build();
         organizationsContext = BoundedContext
                 .singleTenant("Organizations")
-                .setTransportFactory(transport)
                 .build();
         subscriber = new TestSubscriber();
         groupsContext.registerEventDispatcher(subscriber);
