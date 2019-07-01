@@ -29,6 +29,8 @@ option java_package = "io.spine.server.entity";
 option java_multiple_files = true;
 option java_outer_classname = "DispatchProto";
 
+import "google/protobuf/any.proto";
+
 import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/diagnostics.proto";
@@ -59,7 +61,24 @@ message PropagationOutcome {
 
 message Success {
 
-    repeated core.Event produced_event = 1 [(required) = false, (validate) = true];
+    oneof exhaust {
+
+        ProducedEvents produced_events = 1 [(validate) = true];
+
+        ProducedCommands produced_commands = 2 [(validate) = true];
+
+        core.Event rejection = 3 [(validate) = true];
+    }
+}
+
+message ProducedEvents {
+
+    repeated core.Event event = 1 [(required) = true, (validate) = true];
+}
+
+message ProducedCommands {
+
+    repeated core.Command command = 1 [(required) = true, (validate) = true];
 }
 
 message Interruption {

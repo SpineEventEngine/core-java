@@ -21,10 +21,8 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 /**
  * Dispatches event to reacting process managers.
@@ -53,10 +51,9 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(P processManager, EventEnvelope event) {
+    protected PropagationOutcome invokeDispatcher(P processManager, EventEnvelope event) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
-        List<Event> events = tx.dispatchEvent(event);
-        return events;
+        return tx.dispatchEvent(event);
     }
 
     /**

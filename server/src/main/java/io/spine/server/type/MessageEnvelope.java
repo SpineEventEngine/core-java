@@ -72,5 +72,5 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
     /**
      * Packs this message as an {@link Origin} of an event.
      */
-    Origin asEventOrigin();
+    Origin asMessageOrigin();
 }

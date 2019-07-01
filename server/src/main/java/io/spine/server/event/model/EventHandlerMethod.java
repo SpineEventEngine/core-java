@@ -25,13 +25,11 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
-import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 
@@ -45,11 +43,9 @@ import static io.spine.server.model.Handlers.createId;
  *         the type of the target object
  * @param <P>
  *         the type of the produced message classes
- * @param <R>
- *         the type of the method invocation result
  */
-public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends MethodResult<?>>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P, R> {
+public abstract class EventHandlerMethod<T, P extends MessageClass<?>>
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -107,12 +103,4 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>, R extends
         ensureExternalMatch(external);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @apiNote Overridden to mark the {@code rawMethodOutput} parameter as {@code Nullable}.
-     */
-    @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug: `@apiNote` isn't seen as modification
-    @Override
-    protected abstract R toResult(T target, @Nullable Object rawMethodOutput);
 }

@@ -21,14 +21,13 @@
 package io.spine.server.event.model;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
-import io.spine.server.model.MethodResult;
+import io.spine.server.model.NonProducingMethod;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -51,16 +50,11 @@ public abstract class SubscriberMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
-                                      EmptyClass,
-                                      MethodResult<Empty>> {
+                                      EmptyClass>
+        implements NonProducingMethod<EventSubscriber, EventClass, EventEnvelope> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
-    }
-
-    @Override
-    protected final MethodResult<Empty> toResult(EventSubscriber target, Object rawMethodOutput) {
-        return MethodResult.empty();
     }
 
     @Override

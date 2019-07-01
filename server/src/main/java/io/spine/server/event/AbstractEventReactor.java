@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.logging.Logging;
@@ -33,13 +32,11 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -94,9 +91,10 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         try {
             EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
                                                             event.originClass());
-            ReactorMethodResult result = method.invoke(this, event);
-            List<Event> events = result.produceEvents(event);
-            eventBus.post(events);
+            // TODO:2019-06-28:dmytro.dashenkov: Reenable.
+//            ReactorMethodResult result = method.invoke(this, event);
+//            List<Event> events = result.produceEvents(event);
+//            eventBus.post(events);
         } catch (RuntimeException ex) {
             onError(event, ex);
         }

@@ -22,6 +22,8 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -42,15 +44,12 @@ import static com.google.common.base.Preconditions.checkArgument;
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <P>
  *         the type of the produced message classes
- * @param <R>
- *         the type of the method result object
  */
 @Immutable
 public interface HandlerMethod<T,
                                C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
-                               P extends MessageClass<?>,
-                               R extends MethodResult<?>> {
+                               P extends MessageClass<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -84,6 +83,8 @@ public interface HandlerMethod<T,
      */
     Set<P> producedMessages();
 
+    Success toSuccessfulOutcome(Object rawResult, T target, MessageEnvelope<?, ?, ?> origin);
+
     /**
      * Invokes the method to handle {@code message} with the {@code context}.
      *
@@ -94,7 +95,7 @@ public interface HandlerMethod<T,
      * @return the result of message handling
      */
     @CanIgnoreReturnValue
-    R invoke(T target, E envelope);
+    PropagationOutcome invoke(T target, E envelope);
 
     /**
      * Tells if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.

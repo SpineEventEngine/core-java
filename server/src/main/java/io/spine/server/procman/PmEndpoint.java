@@ -20,11 +20,9 @@
 
 package io.spine.server.procman;
 
-import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.ActorMessageEnvelope;
-
-import java.util.List;
 
 /**
  * Common base message for endpoints of Process Managers.
@@ -79,19 +77,20 @@ abstract class PmEndpoint<I,
      */
     private void tryDispatchAndSave(P manager) {
         try {
-            List<Event> events = runTransactionFor(manager);
+            PropagationOutcome events = runTransactionFor(manager);
             store(manager);
-            repository().postEvents(events);
+            // TODO:2019-07-01:dmytro.dashenkov: Handle error case.
+            repository().postEvents(events.getSuccess().getProducedEvents().getEventList());
         } catch (RuntimeException ex) {
             store(manager);
             throw ex;
         }
     }
 
-    protected List<Event> runTransactionFor(P processManager) {
+    protected PropagationOutcome runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        List<Event> events = invokeDispatcher(processManager, envelope());
+        PropagationOutcome outcome = invokeDispatcher(processManager, envelope());
         tx.commit();
-        return events;
+        return outcome;
     }
 }

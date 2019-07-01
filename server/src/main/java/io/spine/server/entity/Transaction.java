@@ -25,18 +25,24 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
+import io.spine.validate.ValidationError;
+import io.spine.validate.ValidationException;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
@@ -141,7 +147,7 @@ public abstract class Transaction<I,
      *
      * <p>Contains all the phases, including failed.
      */
-    private final List<Phase<I, ?>> phases = newLinkedList();
+    private final List<Phase<I>> phases = newLinkedList();
 
     private TransactionListener<I> transactionListener;
 
@@ -226,6 +232,17 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
+    MessageId entityId() {
+        TypeUrl typeUrl = TypeUrl.of(entity.state()
+                                           .getClass());
+        return MessageId
+                .newBuilder()
+                .setId(Identifier.pack(entity.id()))
+                .setTypeUrl(typeUrl.value())
+                .setVersion(entity.getVersion())
+                .vBuild();
+    }
+
     protected final E entity() {
         return entity;
     }
@@ -237,7 +254,7 @@ public abstract class Transaction<I,
         return version;
     }
 
-    final List<Phase<I, ?>> phases() {
+    final List<Phase<I>> phases() {
         return ImmutableList.copyOf(phases);
     }
 
@@ -249,39 +266,38 @@ public abstract class Transaction<I,
      *
      * @param phase
      *         the phase to propagate
-     * @param <R>
-     *         the type of the phase propagation result
      * @return the phase propagation result
      */
     @CanIgnoreReturnValue
-    protected final <R> R propagate(Phase<I, R> phase) {
+    protected final PropagationOutcome propagate(Phase<I> phase) {
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
         try {
-            R result = phase.propagate();
+            PropagationOutcome result = phase.propagate();
             return result;
         } catch (Throwable t) {
             rollback(t);
-            //TODO:2019-06-24:alex.tymchenko:
-            // https://github.com/SpineEventEngine/core-java/issues/1094
-            throw propagate(t);
+            return PropagationOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(phase.signal().messageId())
+                    .setError(asError(t))
+                    .vBuild();
         } finally {
             phases.add(phase);
             listener.onAfterPhase(phase);
         }
     }
 
-    /**
-     * Rethrows the passed {@code Throwable} wrapped into {@code IllegalStateException},
-     * if it's not an instance of {@code InvalidEntityStateException}.
-     *
-     * <p>{@code InvalidEntityStateException} is rethrown as is.
-     */
-    private static RuntimeException propagate(Throwable t) {
-        if (t instanceof InvalidEntityStateException) {
-            throw (InvalidEntityStateException) t;
+    private static Error asError(Throwable throwable) {
+        Error.Builder error = Error
+                .newBuilder()
+                .setStacktrace(getStackTraceAsString(throwable));
+        Throwable cause = getRootCause(throwable);
+        if (cause instanceof ValidationException) {
+            ValidationError validationError = ((ValidationException) cause).asValidationError();
+            error.setValidationError(validationError);
         }
-        throw illegalStateWithCauseOf(t);
+        return error.vBuild();
     }
 
     /**
@@ -349,7 +365,6 @@ public abstract class Transaction<I,
             afterCommit(newRecord);
         } catch (RuntimeException e) {
             rollback(e);
-            throw propagate(e);
         } finally {
             releaseTx();
         }

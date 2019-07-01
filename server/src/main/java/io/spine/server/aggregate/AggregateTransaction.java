@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EventPlayingTransaction;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
 
@@ -75,8 +76,8 @@ public class AggregateTransaction<I,
     }
 
     @Override
-    protected final void doDispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
-        aggregate.invokeApplier(event);
+    protected final PropagationOutcome dispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
+        return aggregate.invokeApplier(event);
     }
 
     @Override

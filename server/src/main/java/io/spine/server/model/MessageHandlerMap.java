@@ -54,7 +54,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,
                                      P extends MessageClass<?>,
-                                     H extends HandlerMethod<?, M, ?, P, ?>>
+                                     H extends HandlerMethod<?, M, ?, P>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -80,7 +80,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
      */
     public static <M extends MessageClass<?>,
             P extends MessageClass<?>,
-            H extends HandlerMethod<?, M, ?, P, ?>>
+            H extends HandlerMethod<?, M, ?, P>>
     MessageHandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
@@ -236,7 +236,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
         return result;
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?, ?>>
+    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
         ImmutableSet<M> result = Streams.stream(handlerMethods)
                                         .map(HandlerMethod::getMessageClass)

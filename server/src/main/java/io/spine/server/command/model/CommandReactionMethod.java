@@ -21,7 +21,6 @@
 package io.spine.server.command.model;
 
 import io.spine.base.EventMessage;
-import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;
@@ -39,18 +38,11 @@ public final class CommandReactionMethod
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
-                                      CommandClass,
-                                      Result>
+                                      CommandClass>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
-    }
-
-    @Override
-    protected Result toResult(EventReceiver target, Object rawMethodOutput) {
-        Result result = new Result(rawMethodOutput, true);
-        return result;
     }
 
     @Override

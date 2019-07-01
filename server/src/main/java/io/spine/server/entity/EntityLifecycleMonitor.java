@@ -86,7 +86,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      * <p>Memoizes the dispatched message for diagnostics in case of a failure.
      */
     @Override
-    public void onBeforePhase(Phase<I, ?> phase) {
+    public void onBeforePhase(Phase<I> phase) {
         lastMessage = phase.signal();
     }
 
@@ -97,7 +97,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      * reported to the {@link EntityLifecycle} after a successful commit.
      */
     @Override
-    public void onAfterPhase(Phase<I, ?> phase) {
+    public void onAfterPhase(Phase<I> phase) {
         checkSameEntity(phase.entityId());
         MessageId messageId = phase.signal()
                                    .messageId();

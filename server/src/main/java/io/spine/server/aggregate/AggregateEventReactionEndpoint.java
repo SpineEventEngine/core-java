@@ -20,11 +20,9 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.Event;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.React;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 /**
  * Dispatches an event to aggregates of the associated {@code AggregateRepository}.
@@ -39,7 +37,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
+    protected PropagationOutcome invokeDispatcher(A aggregate, EventEnvelope event) {
         return aggregate.reactOn(event);
     }
 

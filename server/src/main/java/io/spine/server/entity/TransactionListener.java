@@ -39,7 +39,7 @@ public interface TransactionListener<I> {
      * @param phase
      *         the phase which is being applied
      */
-    void onBeforePhase(Phase<I, ?> phase);
+    void onBeforePhase(Phase<I> phase);
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
@@ -49,7 +49,7 @@ public interface TransactionListener<I> {
      * @param phase
      *         the phase which was applied before this callback is invoked
      */
-    void onAfterPhase(Phase<I, ?> phase);
+    void onAfterPhase(Phase<I> phase);
 
     /**
      * A callback invoked before committing the transaction.

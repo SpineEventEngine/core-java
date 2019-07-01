@@ -230,8 +230,8 @@ public abstract class TransactionTest<I,
         assertThat(tx.phases())
                 .hasSize(1);
 
-        Phase<I, ?> phase = tx.phases()
-                              .get(0);
+        Phase<I> phase = tx.phases()
+                           .get(0);
         assertTrue(checkPhase(event, phase));
     }
 
@@ -444,7 +444,7 @@ public abstract class TransactionTest<I,
                 .isEqualTo(versionFromEvent);
     }
 
-    private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {
+    private ArgumentMatcher<Phase<I>> matchesSuccessfulPhaseFor(Event event) {
         return phase -> checkPhase(event, phase);
     }
 }

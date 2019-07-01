@@ -20,17 +20,15 @@
 
 package io.spine.server.command;
 
-import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
-import io.spine.server.command.model.CommandHandlerMethod.Result;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.List;
 import java.util.Set;
 
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
@@ -88,9 +86,10 @@ public abstract class AbstractCommandHandler
     @Override
     public String dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
-        Result result = method.invoke(this, envelope);
-        List<Event> events = result.produceEvents(envelope);
-        postEvents(events);
+        PropagationOutcome result = method.invoke(this, envelope);
+        // TODO:2019-06-28:dmytro.dashenkov: Reenable.
+//        List<Event> events = result.produceEvents(envelope);
+//        postEvents(events);
         return getId();
     }
 

@@ -195,6 +195,6 @@ public final class CommandErrorHandler implements Logging {
     }
 
     private void postSystem(EventMessage systemEvent, CommandEnvelope origin) {
-        systemWriteSide.postEvent(systemEvent, origin.asEventOrigin());
+        systemWriteSide.postEvent(systemEvent, origin.asMessageOrigin());
     }
 }

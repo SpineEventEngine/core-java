@@ -24,7 +24,6 @@ import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
-import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -47,11 +46,6 @@ public class TwoParamMethod
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(rawMessageClass());
-    }
-
-    @Override
-    protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
-        return MethodResult.empty();
     }
 
     @Override

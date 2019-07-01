@@ -20,13 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.EntityLifecycle;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.List;
 
 import static io.spine.server.command.DispatchCommand.operationFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -45,7 +43,7 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, CommandEnvelope envelope) {
+    protected PropagationOutcome invokeDispatcher(A aggregate, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();

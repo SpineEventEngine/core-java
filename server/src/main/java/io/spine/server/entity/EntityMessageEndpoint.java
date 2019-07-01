@@ -21,11 +21,8 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.type.ActorMessageEnvelope;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -99,7 +96,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Invokes entity-specific method for dispatching the message.
      */
-    protected abstract List<Event> invokeDispatcher(E entity, M envelope);
+    protected abstract PropagationOutcome invokeDispatcher(E entity, M envelope);
 
     /**
      * Stores the entity if it was modified during message dispatching.

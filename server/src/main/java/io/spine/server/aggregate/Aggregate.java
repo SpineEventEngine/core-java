@@ -35,10 +35,10 @@ import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.Propagation;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.model.EventsResult;
-import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 
@@ -114,7 +114,6 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <B>
  *         the type of the aggregate state builder
  */
-@SuppressWarnings("OverlyCoupledClass")
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S>>
@@ -227,11 +226,11 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope command) {
+    protected PropagationOutcome dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
-        EventsResult result = method.invoke(this, command);
-        return result.produceEvents(command);
+        PropagationOutcome outcome = method.invoke(this, command);
+        return outcome;
     }
 
     /**
@@ -245,13 +244,11 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change because of the event
      */
-    List<Event> reactOn(EventEnvelope event) {
+    PropagationOutcome reactOn(EventEnvelope event) {
         idempotencyGuard.check(event);
         EventReactorMethod method =
                 thisClass().reactorOf(event.messageClass(), event.originClass());
-        ReactorMethodResult result =
-                method.invoke(this, event);
-        return result.produceEvents(event);
+        return method.invoke(this, event);
     }
 
     /**
@@ -260,15 +257,16 @@ public abstract class Aggregate<I,
      * @param event
      *         the event to apply
      */
-    final void invokeApplier(EventEnvelope event) {
+    final PropagationOutcome invokeApplier(EventEnvelope event) {
         Applier method = thisClass().applierOf(event.messageClass());
-        method.invoke(this, event);
+        return method.invoke(this, event);
     }
 
     @Override
-    public final void play(Iterable<Event> events) {
-        EventPlayer.forTransactionOf(this)
-                   .play(events);
+    public final Propagation play(Iterable<Event> events) {
+        return EventPlayer
+                .forTransactionOf(this)
+                .play(events);
     }
 
     /**

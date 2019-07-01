@@ -22,24 +22,19 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Streams.stream;
+import static io.spine.protobuf.AnyPacker.pack;
 
-/**
- * A result of a {@link HandlerMethod} execution.
- *
- * @param <V> the type of the messages produced by the method
- */
-public abstract class MethodResult<V extends Message> {
+final class MethodResult {
 
     /**
      * The ignored message types.
@@ -47,73 +42,25 @@ public abstract class MethodResult<V extends Message> {
      * <p>Messages of these types should not be posted to the system.
      */
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
-            Nothing.getDefaultInstance(),
-            Empty.getDefaultInstance()
+            pack(Nothing.getDefaultInstance()),
+            pack(Empty.getDefaultInstance())
     );
 
-    private final @Nullable Object rawMethodOutput;
-    private @MonotonicNonNull ImmutableList<V> messages;
+    private final ImmutableList<Any> messages;
 
-    protected MethodResult(@Nullable Object output) {
-        rawMethodOutput = output;
+    private MethodResult(ImmutableList<Any> messages) {
+        this.messages = messages;
     }
 
-    /**
-     * Assigns messages to a method result object.
-     *
-     * @throws IllegalStateException
-     *         if messages are already assigned
-     * @apiNote This method is meant to be called from withing a constructor of derived
-     *          classes, and called only once.
-     */
-    protected final void setMessages(List<V> messages) {
-        checkState(this.messages == null, "Method result messages are already assigned");
-        checkNotNull(messages);
-        this.messages = ImmutableList.copyOf(messages);
+    static MethodResult from(@Nullable Object rawMethodOutput) {
+        ImmutableList<Any> packedMessages = toMessages(rawMethodOutput);
+        ImmutableList<Any> filtered = filterIgnored(packedMessages);
+        return new MethodResult(filtered);
     }
 
-    protected @Nullable Object getRawMethodOutput() {
-        return rawMethodOutput;
-    }
-
-    /**
-     * Filters the list removing instances of the {@linkplain #IGNORED_MESSAGES ignored types}.
-     */
-    protected static <M extends Message> List<M> filterIgnored(List<M> messages) {
-        List<M> result = messages.stream()
-                                 .filter(message -> !IGNORED_MESSAGES.contains(message))
-                                 .collect(toList());
-        return result;
-    }
-
-    /**
-     * Obtains messages returned by the method call.
-     */
-    public List<V> asMessages() {
-        checkNotNull(messages, "Messages are not set");
-        return messages;
-    }
-
-    /**
-     * Returns result of a method which returns nothing.
-     *
-     * <p>Such a result could be obtained if a handling method returns {@code void},
-     * or {@code Empty}, if the contract requires returning a {@code Message}.
-     */
-    public static MethodResult<Empty> empty() {
-        return EmptyResult.INSTANCE;
-    }
-
-    /**
-     * Casts a handling result to a list of event messages.
-     *
-     * @param output the command handler method return value.
-     *               Could be a {@link Message}, a list of messages, or {@code null}.
-     * @return the list of event messages or an empty list if {@code null} is passed
-     */
-    @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    protected static <V extends Message> List<V> toMessages(@Nullable Object output) {
-        ImmutableList<V> emptyList = ImmutableList.of();
+    @SuppressWarnings("ChainOfInstanceofChecks")
+    private static ImmutableList<Any> toMessages(@Nullable Object output) {
+        ImmutableList<Any> emptyList = ImmutableList.of();
         if (output == null) {
             return emptyList;
         }
@@ -130,39 +77,40 @@ public abstract class MethodResult<V extends Message> {
         if (output instanceof Optional) {
             Optional optional = (Optional) output;
             if (optional.isPresent()) {
-                V message = (V) optional.get();
-                return ImmutableList.of(message);
+                Message message = (Message) optional.get();
+                Any pack = pack(message);
+                return ImmutableList.of(pack);
             } else {
                 return emptyList;
             }
         }
 
-        if (output instanceof List) {
-            // Cast to the list of messages as it is the one of the return types
-            // we expect by methods we call.
-            return ImmutableList.copyOf((List<V>) output);
-        }
-
-        // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            return ImmutableList.copyOf((Iterable<V>) output);
+            @SuppressWarnings("unchecked")
+            Iterable<Message> messages = (Iterable<Message>) output;
+            ImmutableList<Any> packedMessages = stream(messages)
+                    .map(AnyPacker::pack)
+                    .collect(toImmutableList());
+            // TODO:2019-06-28:dmytro.dashenkov: Performance considerations.
+            return packedMessages;
         }
 
         // Another type of result is single event message (as Message).
-        V singleMessage = (V) output;
-        return ImmutableList.of(singleMessage);
+        Message singleMessage = (Message) output;
+        return ImmutableList.of(pack(singleMessage));
     }
 
     /**
-     * An event applier does not return values.
+     * Filters the list removing instances of the {@linkplain #IGNORED_MESSAGES ignored types}.
      */
-    private static final class EmptyResult extends MethodResult<Empty> {
+    private static ImmutableList<Any> filterIgnored(ImmutableList<Any> messages) {
+        ImmutableList<Any> result = messages.stream()
+                                 .filter(message -> !IGNORED_MESSAGES.contains(message))
+                                 .collect(toImmutableList());
+        return result;
+    }
 
-        private static final EmptyResult INSTANCE = new EmptyResult();
-
-        private EmptyResult() {
-            super(null);
-            setMessages(ImmutableList.of());
-        }
+    ImmutableList<Any> messages() {
+        return messages;
     }
 }

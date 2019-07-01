@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EventPlayingTransaction;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
 
@@ -81,8 +82,8 @@ public class ProjectionTransaction<I,
     }
 
     @Override
-    protected void doDispatch(Projection<I, M, B> projection, EventEnvelope event) {
-        projection.apply(event);
+    protected PropagationOutcome dispatch(Projection<I, M, B> projection, EventEnvelope event) {
+        return projection.apply(event);
     }
 
     @Override

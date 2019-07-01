@@ -20,21 +20,20 @@
 
 package io.spine.server.model;
 
-import io.spine.base.EventMessage;
-import io.spine.server.EventProducer;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.server.entity.Success;
+import io.spine.server.type.EmptyClass;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.type.MessageClass;
 
-import java.util.List;
+@Immutable
+public interface NonProducingMethod<T,
+                                    C extends MessageClass,
+                                    E extends MessageEnvelope<?, ?, ?>>
+        extends HandlerMethod<T, C, E, EmptyClass> {
 
-/**
- * A reactor method may not return a result in response to an incoming message. When so,
- * the raw method should return {@link com.google.protobuf.Empty Empty}.
- */
-public final class ReactorMethodResult extends EventsResult {
-
-    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
-        super(producer, rawMethodOutput);
-        List<EventMessage> messages = toMessages(rawMethodOutput);
-        List<EventMessage> filtered = filterIgnored(messages);
-        setMessages(filtered);
+    @Override
+    default Success toSuccessfulOutcome(Object result, T target, MessageEnvelope<?, ?, ?> origin) {
+        return Success.getDefaultInstance();
     }
 }

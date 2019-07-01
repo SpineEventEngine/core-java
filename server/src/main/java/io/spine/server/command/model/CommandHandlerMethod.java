@@ -20,24 +20,21 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.EventMessage;
-import io.spine.server.EventProducer;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.model.EventsResult;
+import io.spine.server.model.EventProducingMethod;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 
 import java.lang.reflect.Method;
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * The wrapper for a command handler method.
  */
 public final class CommandHandlerMethod
-        extends CommandAcceptingMethod<CommandHandler, EventClass, CommandHandlerMethod.Result> {
+        extends CommandAcceptingMethod<CommandHandler, EventClass>
+        implements EventProducingMethod<CommandHandler, CommandClass, CommandEnvelope> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -47,27 +44,5 @@ public final class CommandHandlerMethod
      */
     CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);
-    }
-
-    /**
-     * Transforms the passed raw method output into a list of event messages.
-     */
-    @Override
-    protected Result toResult(CommandHandler target, Object rawMethodOutput) {
-        return new Result(target, rawMethodOutput);
-    }
-
-    /**
-     * The result of a command handler method execution.
-     */
-    public static final class Result extends EventsResult {
-
-        private Result(EventProducer producer, Object rawMethodResult) {
-            super(producer, rawMethodResult);
-            List<EventMessage> eventMessages = toMessages(rawMethodResult);
-            List<EventMessage> filtered = filterIgnored(eventMessages);
-            checkState(!filtered.isEmpty(), "Command handling method did not produce events");
-            setMessages(filtered);
-        }
     }
 }

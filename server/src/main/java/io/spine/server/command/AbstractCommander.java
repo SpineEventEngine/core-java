@@ -20,12 +20,16 @@
 
 package io.spine.server.command;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
-import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.Success;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
@@ -33,9 +37,11 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
 /**
@@ -62,8 +68,10 @@ public abstract class AbstractCommander
     @Override
     public String dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
-        CommandingMethod.Result result = method.invoke(this, command);
-        result.transformOrSplitAndPost(command, commandBus);
+        PropagationOutcome outcome = method.invoke(this, command);
+        Success success = outcome.getSuccess();
+        postCommands(success);
+        postRejection(success);
         return getId();
     }
 
@@ -80,9 +88,24 @@ public abstract class AbstractCommander
     @Override
     public Set<String> dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
-        CommandingMethod.Result result = method.invoke(this, event);
-        result.produceAndPost(event, commandBus);
+        PropagationOutcome outcome = method.invoke(this, event);
+        postCommands(outcome.getSuccess());
         return identity();
+    }
+
+    private void postCommands(Success successfulOutcome) {
+        if (successfulOutcome.hasProducedCommands()) {
+            List<Command> commands = successfulOutcome.getProducedCommands()
+                                                      .getCommandList();
+            commandBus.post(commands, noOpObserver());
+        }
+    }
+
+    private void postRejection(Success successfulOutcome) {
+        if (successfulOutcome.hasRejection()) {
+            ImmutableList<Event> events = ImmutableList.of(successfulOutcome.getRejection());
+            postEvents(events);
+        }
     }
 
     @Override

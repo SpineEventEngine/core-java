@@ -56,8 +56,9 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setArchived(true);
+                return super.dispatch(entity, event);
             }
         };
 
@@ -75,8 +76,9 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setDeleted(true);
+                return super.dispatch(entity, event);
             }
         };
 
@@ -96,8 +98,9 @@ public class TestTransaction {
         }
 
         @Override
-        protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+        protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
             // NoOp by default
+            return PropagationOutcome.getDefaultInstance();
         }
 
         @Override
@@ -106,7 +109,7 @@ public class TestTransaction {
         }
 
         private void dispatchForTest() {
-            doDispatch(entity(), null);
+            dispatch(entity(), null);
         }
     }
 

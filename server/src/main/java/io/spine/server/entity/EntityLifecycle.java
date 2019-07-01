@@ -189,7 +189,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asEventOrigin();
+                                                  .asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -205,7 +205,7 @@ public class EntityLifecycle {
                 .setId(command.getId())
                 .vBuild();
         Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asEventOrigin();
+                                                  .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -224,7 +224,7 @@ public class EntityLifecycle {
                 .setRejectionEvent(rejection)
                 .vBuild();
         Origin systemEventOrigin = RejectionEnvelope.from(EventEnvelope.of(rejection))
-                                                    .asEventOrigin();
+                                                    .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -243,7 +243,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asEventOrigin();
+                                                .asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -256,7 +256,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asEventOrigin();
+                                                .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -275,7 +275,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asEventOrigin();
+                                                .asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 

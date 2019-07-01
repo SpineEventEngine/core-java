@@ -106,6 +106,9 @@ public final class AggregateTestSupport {
     dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
         List<Message> result =
                 endpoint.runTransactionWith(aggregate)
+                        .getSuccess()
+                        .getProducedEvents()
+                        .getEventList()
                         .stream()
                         .map(Event::enclosedMessage)
                         .collect(toList());

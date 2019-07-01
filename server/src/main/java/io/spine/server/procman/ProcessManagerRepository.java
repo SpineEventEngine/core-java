@@ -30,7 +30,6 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.command.CommandErrorHandler;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -362,22 +361,13 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Loads or creates a process manager by the passed ID.
+     * {@inheritDoc}
      *
-     * <p>The process manager is created if there was no manager with such ID stored before.
-     *
-     * <p>The repository injects {@code CommandBus} from its {@code BoundedContext} into the
-     * instance of the process manager so that it can post commands if needed.
-     *
-     * @param id the ID of the process manager to load
-     * @return loaded or created process manager instance
+     * <p>Overrides to expose the method to the package.
      */
     @Override
     protected P findOrCreate(I id) {
-        P result = super.findOrCreate(id);
-        CommandBus commandBus = context().commandBus();
-        result.setCommandBus(commandBus);
-        return result;
+        return super.findOrCreate(id);
     }
 
     @Override

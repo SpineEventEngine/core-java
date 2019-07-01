@@ -114,8 +114,9 @@ class TransactionalEventPlayerTest {
         }
 
         @Override
-        protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+        protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
             dispatchedEvents.add(event.outerObject());
+            return PropagationOutcome.getDefaultInstance();
         }
 
         @Override

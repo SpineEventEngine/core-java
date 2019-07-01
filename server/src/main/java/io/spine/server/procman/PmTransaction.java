@@ -30,6 +30,7 @@ import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.CommandDispatchingPhase;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
@@ -92,11 +93,10 @@ public class PmTransaction<I,
      * @return the events generated from the command dispatch
      * @see ProcessManager#dispatchCommand(CommandEnvelope)
      */
-    final List<Event> perform(DispatchCommand<I> dispatch) {
+    final PropagationOutcome perform(DispatchCommand<I> dispatch) {
         VersionIncrement vi = createVersionIncrement();
-        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
-        List<Event> events = doPropagate(phase);
-        return events;
+        Phase<I> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
+        return doPropagate(phase);
     }
 
     /**
@@ -107,22 +107,22 @@ public class PmTransaction<I,
      * @return the events generated from the event dispatch
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
-    final List<Event> dispatchEvent(EventEnvelope event) {
-        Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
+    final PropagationOutcome dispatchEvent(EventEnvelope event) {
+        Phase<I> phase = new EventDispatchingPhase<>(
                 this,
                 createDispatch(event),
                 createVersionIncrement()
         );
-        List<Event> events = doPropagate(phase);
-        return events;
+        PropagationOutcome outcome = doPropagate(phase);
+        return outcome;
     }
 
-    private EventDispatch<I, ProcessManager<I, S, B>, List<Event>>
+    private EventDispatch<I, ProcessManager<I, S, B>>
     createDispatch(EventEnvelope event) {
         return new EventDispatch<>(this::dispatch, entity(), event);
     }
 
-    private List<Event> dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
+    private PropagationOutcome dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
         return pm.dispatchEvent(event);
     }
 
@@ -133,10 +133,15 @@ public class PmTransaction<I,
     /**
      * Propagates the phase and updates the process lifecycle after success.
      */
-    private List<Event> doPropagate(Phase<I, List<Event>> phase) {
-        List<Event> events = propagate(phase);
-        updateLifecycle(events);
-        return events;
+    private PropagationOutcome doPropagate(Phase<I> phase) {
+        PropagationOutcome outcome = propagate(phase);
+        List<Event> events = outcome.getSuccess()
+                                    .getProducedEvents()
+                                    .getEventList();
+        if (!events.isEmpty()) {
+            updateLifecycle(events);
+        }
+        return outcome;
     }
 
     /**

@@ -42,12 +42,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I>
  *         the type of entity ID
- * @param <R>
- *         the type of the {@code Phase} propagation result
  * @see Transaction
  */
 @Internal
-public abstract class Phase<I, R> {
+public abstract class Phase<I> {
 
     private final Transaction<I, ?, ?, ?> transaction;
     private final VersionIncrement versionIncrement;
@@ -64,8 +62,8 @@ public abstract class Phase<I, R> {
      *
      * @return the result of the task execution
      */
-    final R propagate() {
-        R result = performDispatch();
+    final PropagationOutcome propagate() {
+        PropagationOutcome result = performDispatch();
         transaction.incrementStateAndVersion(versionIncrement);
         markSuccessful();
         return result;
@@ -82,7 +80,7 @@ public abstract class Phase<I, R> {
     /**
      * Executes the dispatch task and returns the result.
      */
-    protected abstract R performDispatch();
+    protected abstract PropagationOutcome performDispatch();
 
     /**
      * Returns the ID of the entity to which the {@code Message} is dispatched.

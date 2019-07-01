@@ -32,26 +32,23 @@ import io.spine.server.event.EventDispatch;
  *         the type of entity ID
  * @param <E>
  *         the type of the entity
- * @param <R>
- *         the type of the event dispatch result
  */
 @Internal
-public final class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>, R>
-        extends Phase<I, R> {
+public final class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, ?>>
+        extends Phase<I> {
 
-    private final EventDispatch<I, E, R> dispatch;
+    private final EventDispatch<I, E> dispatch;
 
     public EventDispatchingPhase(Transaction<I, ?, ?, ?> transaction,
-                                 EventDispatch<I, E, R> dispatch,
+                                 EventDispatch<I, E> dispatch,
                                  VersionIncrement increment) {
         super(transaction, increment);
         this.dispatch = dispatch;
     }
 
     @Override
-    protected R performDispatch() {
-        R result = dispatch.perform();
-        return result;
+    protected PropagationOutcome performDispatch() {
+        return dispatch.perform();
     }
 
     @Override

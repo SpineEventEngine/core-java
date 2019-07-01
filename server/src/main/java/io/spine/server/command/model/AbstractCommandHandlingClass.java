@@ -41,7 +41,7 @@ import java.util.Set;
 @Immutable(containerOf = "H")
 public abstract class AbstractCommandHandlingClass<C,
                                                    P extends MessageClass<?>,
-                                                   H extends CommandAcceptingMethod<?, P, ?>>
+                                                   H extends CommandAcceptingMethod<?, P>>
         extends ModelClass<C>
         implements CommandHandlingClass {
 

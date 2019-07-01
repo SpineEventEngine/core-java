@@ -43,7 +43,7 @@ public interface EventPlayer {
      * @param events
      *         the event stream to play
      */
-    void play(Iterable<Event> events);
+    Propagation play(Iterable<Event> events);
 
     /**
      * Plays the given event.
@@ -53,9 +53,12 @@ public interface EventPlayer {
      * @param event
      *         the event to play
      */
-    default void play(Event event) {
+    default PropagationOutcome play(Event event) {
         Collection<Event> events = singleton(event);
-        play(events);
+        Propagation propagation = play(events);
+        PropagationOutcome outcome = propagation.getOutcomeList()
+                                                .get(0);
+        return outcome;
     }
 
     /**

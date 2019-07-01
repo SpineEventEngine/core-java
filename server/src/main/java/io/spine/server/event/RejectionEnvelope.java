@@ -183,8 +183,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public Origin asEventOrigin() {
-        return event.asEventOrigin();
+    public Origin asMessageOrigin() {
+        return event.asMessageOrigin();
     }
 
     @VisibleForTesting

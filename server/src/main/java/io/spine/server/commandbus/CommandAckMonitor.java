@@ -89,7 +89,7 @@ final class CommandAckMonitor extends DelegatingObserver<Ack> {
         Command command = commands.get(commandId);
         checkState(command != null, "Unknown command ID encountered: %s", commandId.value());
         Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asEventOrigin();
+                                                  .asMessageOrigin();
         writeSide.postEvent(systemEvent, systemEventOrigin);
     }
 

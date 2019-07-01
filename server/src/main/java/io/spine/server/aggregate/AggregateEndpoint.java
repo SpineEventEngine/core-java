@@ -25,6 +25,8 @@ import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.Success;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.ActorMessageEnvelope;
 
@@ -33,9 +35,12 @@ import java.util.List;
 /**
  * Abstract base for endpoints handling messages sent to aggregates.
  *
- * @param <I> the type of aggregate IDs
- * @param <A> the type of aggregates
- * @param <M> the type of message envelopes
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <A>
+ *         the type of aggregates
+ * @param <M>
+ *         the type of message envelopes
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
@@ -51,16 +56,24 @@ abstract class AggregateEndpoint<I,
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
 
-        List<Event> produced = runTransactionWith(aggregate);
+        PropagationOutcome outcome = runTransactionWith(aggregate);
+        if (outcome.hasSuccess()) {
+            // Update lifecycle flags only if the message was handled successfully and flags changed.
+            LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
+            if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
+                storage().writeLifecycleFlags(aggregateId, flagsAfter);
+            }
 
-        // Update lifecycle flags only if the message was handled successfully and flags changed.
-        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
-        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
-            storage().writeLifecycleFlags(aggregateId, flagsAfter);
+            store(aggregate);
+            Success success = outcome.getSuccess();
+            if (success.hasProducedEvents()) {
+                List<Event> events = success.getProducedEvents()
+                                            .getEventList();
+                repository().postEvents(events);
+            }
+        } else {
+            // TODO:2019-07-01:dmytro.dashenkov: Post "errored" system event.
         }
-
-        store(aggregate);
-        repository().postEvents(produced);
     }
 
     private A loadOrCreate(I aggregateId) {
@@ -68,12 +81,25 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    final List<Event> runTransactionWith(A aggregate) {
-        List<Event> events = invokeDispatcher(aggregate, envelope());
+    final PropagationOutcome runTransactionWith(A aggregate) {
+        PropagationOutcome outcome = invokeDispatcher(aggregate, envelope());
         AggregateTransaction tx = startTransaction(aggregate);
-        List<Event> producedEvents = aggregate.apply(events);
-        tx.commit();
-        return producedEvents;
+        Success successfulOutcome = outcome.getSuccess();
+        if (successfulOutcome.hasProducedEvents()) {
+            List<Event> eventList = successfulOutcome.getProducedEvents()
+                                                     .getEventList();
+            List<Event> producedEvents = aggregate.apply(eventList);
+            tx.commit();
+            PropagationOutcome.Builder result = outcome.toBuilder();
+            result.getSuccessBuilder()
+                  .getProducedEventsBuilder()
+                  .clearEvent()
+                  .addAllEvent(producedEvents);
+            return result.vBuild();
+        } else {
+            tx.commit();
+            return outcome;
+        }
     }
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.

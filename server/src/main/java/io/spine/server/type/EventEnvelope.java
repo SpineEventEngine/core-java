@@ -104,7 +104,7 @@ public final class EventEnvelope
     }
 
     @Override
-    public Origin asEventOrigin() {
+    public Origin asMessageOrigin() {
         return outerObject().asMessageOrigin();
     }
 

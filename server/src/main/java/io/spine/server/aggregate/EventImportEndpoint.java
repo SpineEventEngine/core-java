@@ -20,12 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
+import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.Success;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 /**
  * The endpoint for importing events into aggregates.
@@ -48,13 +47,23 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      * {@link Event} instance.
      *
      * @return the list with one {@code Event} which is being imported
-     * @implNote We do not need to perform anything with the aggregate and the passed event.
-     * The aggregate would consume the passed event when dispatching result is
-     * {@link io.spine.server.aggregate.AggregateEndpoint#runTransactionWith(Aggregate) applied}.
+     * @implNote We do not need to perform anything with the aggregate and the passed
+     *         event. The aggregate would consume the passed event when dispatching result is
+     *         {@link io.spine.server.aggregate.AggregateEndpoint#runTransactionWith(Aggregate)
+     *         applied}.
      */
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, EventEnvelope event) {
-        return ImmutableList.of(event.outerObject());
+    protected PropagationOutcome invokeDispatcher(A aggregate, EventEnvelope eventEnvelope) {
+        Event event = eventEnvelope.outerObject();
+        Success.Builder success = Success.newBuilder();
+        success.getProducedEventsBuilder()
+               .addEvent(event);
+        PropagationOutcome outcome = PropagationOutcome
+                .newBuilder()
+                .setPropagatedSignal(event.messageId())
+                .setSuccess(success)
+                .vBuild();
+        return outcome;
     }
 
     @Override

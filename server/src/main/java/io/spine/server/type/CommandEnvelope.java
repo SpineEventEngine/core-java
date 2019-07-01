@@ -102,7 +102,7 @@ public final class CommandEnvelope
     }
 
     @Override
-    public Origin asEventOrigin() {
+    public Origin asMessageOrigin() {
         return command().asMessageOrigin();
     }
 

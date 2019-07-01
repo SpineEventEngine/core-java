@@ -20,19 +20,16 @@
 
 package io.spine.server.projection;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 import static io.spine.server.projection.ProjectionTransaction.start;
 
@@ -83,9 +80,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @CanIgnoreReturnValue
     @Override
-    protected List<Event> invokeDispatcher(P projection, EventEnvelope event) {
-        projection.play(event.outerObject());
-        return ImmutableList.of();
+    protected PropagationOutcome invokeDispatcher(P projection, EventEnvelope event) {
+        return projection.play(event.outerObject());
     }
 
     @Override

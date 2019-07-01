@@ -21,33 +21,26 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.HasVersionColumn;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -84,9 +77,6 @@ public abstract class ProcessManager<I,
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, Commander, HasVersionColumn<I, S> {
 
-    /** The Command Bus to post routed commands. */
-    private volatile @MonotonicNonNull CommandBus commandBus;
-
     /**
      * Creates a new instance.
      */
@@ -113,11 +103,6 @@ public abstract class ProcessManager<I,
     @Override
     protected ProcessManagerClass<?> thisClass() {
         return (ProcessManagerClass<?>) super.thisClass();
-    }
-
-    /** The method to inject {@code CommandBus} instance from the repository. */
-    void setCommandBus(CommandBus commandBus) {
-        this.commandBus = checkNotNull(commandBus);
     }
 
     /**
@@ -161,23 +146,20 @@ public abstract class ProcessManager<I,
      *         Empty list, if the process manager substitutes the command
      */
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope command) {
+    protected PropagationOutcome dispatchCommand(CommandEnvelope command) {
         ProcessManagerClass<?> thisClass = thisClass();
         CommandClass commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
             CommandHandlerMethod method = thisClass.handlerOf(commandClass);
-            CommandHandlerMethod.Result result =
-                    method.invoke(this, command);
-            List<Event> events = result.produceEvents(command);
-            return events;
+            PropagationOutcome outcome = method.invoke(this, command);
+            return outcome;
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
             CommandSubstituteMethod method = thisClass.commanderOf(commandClass);
-            CommandSubstituteMethod.Result result = method.invoke(this, command);
-            result.transformOrSplitAndPost(command, commandBus);
-            return noEvents();
+            PropagationOutcome outcome = method.invoke(this, command);
+            return outcome;
         }
 
         // We could not normally get here since the dispatching table is a union of handled and
@@ -204,21 +186,19 @@ public abstract class ProcessManager<I,
      *                 in response to the event.
      *         </ul>
      */
-    List<Event> dispatchEvent(EventEnvelope event) {
+    PropagationOutcome dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.messageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
             EventReactorMethod method = thisClass.reactorOf(eventClass, event.originClass());
-            ReactorMethodResult methodResult = method.invoke(this, event);
-            List<Event> result = methodResult.produceEvents(event);
-            return result;
+            PropagationOutcome outcome = method.invoke(this, event);
+            return outcome;
         }
 
         if (thisClass.producesCommandsOn(eventClass)) {
             CommandReactionMethod method = thisClass.commanderOf(eventClass);
-            CommandReactionMethod.Result result = method.invoke(this, event);
-            result.produceAndPost(event, commandBus);
-            return noEvents();
+            PropagationOutcome outcome = method.invoke(this, event);
+            return outcome;
         }
 
         // We could not normally get here since the dispatching table is a union of handled and
@@ -228,10 +208,6 @@ public abstract class ProcessManager<I,
                         " nor produced commands.",
                 this, event.id(), eventClass
         );
-    }
-
-    private static List<Event> noEvents() {
-        return ImmutableList.of();
     }
 
     @Override

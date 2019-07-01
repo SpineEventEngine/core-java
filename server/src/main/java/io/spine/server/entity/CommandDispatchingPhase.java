@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.server.command.DispatchCommand;
@@ -38,7 +37,7 @@ import java.util.List;
  *         the type of entity ID
  */
 @Internal
-public final class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
+public final class CommandDispatchingPhase<I> extends Phase<I> {
 
     private final DispatchCommand<I> dispatch;
 
@@ -50,9 +49,8 @@ public final class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
     }
 
     @Override
-    protected List<Event> performDispatch() {
-        List<Event> events = dispatch.perform();
-        return events;
+    protected PropagationOutcome performDispatch() {
+        return dispatch.perform();
     }
 
     @Override
