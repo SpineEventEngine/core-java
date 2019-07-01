@@ -45,6 +45,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.validate.Validate.checkValid;
 
 /**
  * Abstract base for entities.
@@ -439,6 +440,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
 
     private void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
+        checkValid(newVersion);
         if (version.equals(newVersion)) {
             return;
         }

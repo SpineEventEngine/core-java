@@ -40,7 +40,7 @@ message Propagation {
 
     core.MessageId target_entity = 1  [(required) = true, (validate) = true];
 
-    repeated PropagationOutcome outcome = 2 [(required) = true, (validate) = true];
+    repeated PropagationOutcome outcome = 2 [(validate) = true];
 
     bool successful = 3;
 }

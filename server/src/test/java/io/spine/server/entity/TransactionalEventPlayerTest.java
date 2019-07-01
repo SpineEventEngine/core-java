@@ -91,7 +91,8 @@ class TransactionalEventPlayerTest {
 
         @Override
         public Propagation play(Iterable<Event> events) {
-            return EventPlayer.forTransactionOf(this).play(events);
+            return EventPlayer.forTransactionOf(this)
+                              .play(events);
         }
     }
 
@@ -114,9 +115,15 @@ class TransactionalEventPlayerTest {
         }
 
         @Override
-        protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
-            dispatchedEvents.add(event.outerObject());
-            return PropagationOutcome.getDefaultInstance();
+        protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope envelope) {
+            Event event = envelope.outerObject();
+            dispatchedEvents.add(event);
+            return PropagationOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event
+                                              .messageId())
+                    .setSuccess(Success.getDefaultInstance())
+                    .vBuild();
         }
 
         @Override

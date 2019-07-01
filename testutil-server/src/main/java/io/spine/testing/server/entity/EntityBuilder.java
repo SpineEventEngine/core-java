@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.AbstractEntity;
@@ -165,7 +166,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
     protected Timestamp timestamp() {
         return this.whenModified != null
                ? this.whenModified
-               : Timestamp.getDefaultInstance();
+               : Time.currentTime();
     }
 
     @Override

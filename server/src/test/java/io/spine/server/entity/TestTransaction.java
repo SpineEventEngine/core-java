@@ -20,8 +20,12 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.type.EventEnvelope;
+import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.event.EntProjectCreated;
+import io.spine.testing.server.TestEventFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -100,7 +104,11 @@ public class TestTransaction {
         @Override
         protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
             // NoOp by default
-            return PropagationOutcome.getDefaultInstance();
+            return PropagationOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event.outerObject().messageId())
+                    .setSuccess(Success.getDefaultInstance())
+                    .vBuild();
         }
 
         @Override
@@ -109,7 +117,13 @@ public class TestTransaction {
         }
 
         private void dispatchForTest() {
-            dispatch(entity(), null);
+            EntProjectCreated eventMessage = EntProjectCreated
+                    .newBuilder()
+                    .setProjectId(ProjectId.getDefaultInstance())
+                    .buildPartial();
+            TestEventFactory factory = TestEventFactory.newInstance(TestTransaction.class);
+            Event event = factory.createEvent(eventMessage);
+            dispatch(entity(), EventEnvelope.of(event));
         }
     }
 
