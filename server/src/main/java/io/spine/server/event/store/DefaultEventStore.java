@@ -21,19 +21,28 @@ package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
+import io.spine.client.OrderBy;
+import io.spine.client.Pagination;
+import io.spine.client.TargetFilters;
 import io.spine.core.Event;
+import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,28 +52,40 @@ import static java.util.stream.Collectors.toSet;
 /**
  * Default implementation of {@link EventStore}.
  */
-public final class DefaultEventStore implements EventStore {
+public final class DefaultEventStore
+        extends DefaultRecordBasedRepository<EventId, EEntity, Event>
+        implements EventStore {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
                     System.lineSeparator() +
                     "Observed tenants are: %s.";
 
-    private final ERepository storage;
     private final Log log;
 
     /**
-     * Constructs new instance taking arguments from the passed builder.
+     * Constructs new instance.
      */
     public DefaultEventStore() {
         super();
-        this.storage = new ERepository();
         this.log = new Log(Logging.get(getClass()));
     }
 
+    /**
+     * Initializes the instance by registering itself with the passed {@code BoundedContext}.
+     *
+     * @implNote Normally repositories are explicitly registered with a context during its creation.
+     * This method performs the registration with the context, so that normal repository flow
+     * is ensured. It avoids calling the {@code super.init()} since it assumes that the context
+     * is already assigned.
+     */
     @Override
+    @SuppressWarnings({"OverridingMethodsMustInvokeSuper", "MissingSuperCall"}) // see impl. note
     public void init(BoundedContext context) {
-        context.register(storage);
+        if (isOpen()) { // quit recursion.
+            return;
+        }
+        context.register(this);
     }
 
     @Override
@@ -73,7 +94,7 @@ public final class DefaultEventStore implements EventStore {
         TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
-                storage.store(event);
+                store(event);
             }
         };
         op.execute();
@@ -98,7 +119,7 @@ public final class DefaultEventStore implements EventStore {
                 if (isTenantSet()) { // If multitenant context
                     ensureSameTenant(eventList);
                 }
-                storage.store(eventList);
+                store(eventList);
             }
         };
         op.execute();
@@ -121,7 +142,7 @@ public final class DefaultEventStore implements EventStore {
 
         log.readingStart(request, responseObserver);
 
-        Iterator<Event> eventRecords = storage.iterator(request);
+        Iterator<Event> eventRecords = iterator(request);
         while (eventRecords.hasNext()) {
             Event event = eventRecords.next();
             responseObserver.onNext(event);
@@ -132,15 +153,55 @@ public final class DefaultEventStore implements EventStore {
     }
 
     /**
-     * Closes the underlying storage.
+     * Obtains an iterator over events matching the passed query.
+     * The iteration is chronologically sorted.
      */
-    @Override
-    public void close() {
-        storage.close();
+    private Iterator<Event> iterator(EventStreamQuery query) {
+        checkNotNull(query);
+        Iterator<EEntity> entities = find(query);
+        Predicate<Event> predicate = new MatchesStreamQuery(query);
+        Iterator<Event> result =
+                Streams.stream(entities)
+                       .map(EEntity::state)
+                       .filter(predicate)
+                       .sorted(chronologically())
+                       .iterator();
+        return result;
     }
 
     @Override
-    public boolean isOpen() {
-        return storage.isOpen();
+    protected boolean isTypeSupplier() {
+        return false;
+    }
+
+    /**
+     * Returns comparator which compares events by their timestamp in chronological order.
+     */
+    private static Comparator<Event> chronologically() {
+        return (e1, e2) -> Timestamps.compare(e1.time(), e2.time());
+    }
+
+    /**
+     * Obtains iteration over entities matching the passed query.
+     */
+    private Iterator<EEntity> find(EventStreamQuery query) {
+        TargetFilters filters = QueryToFilters.convert(query);
+        return find(filters,
+                    OrderBy.getDefaultInstance(),
+                    Pagination.getDefaultInstance(),
+                    FieldMask.getDefaultInstance());
+    }
+
+    private void store(Event event) {
+        EEntity entity = EEntity.create(event);
+        store(entity);
+    }
+
+    private void store(Iterable<Event> events) {
+        ImmutableList<EEntity> entities =
+                Streams.stream(events)
+                       .map(EEntity::create)
+                       .collect(toImmutableList());
+        store(entities);
     }
 }
