@@ -51,7 +51,6 @@ class MirrorProjectionTest {
                 .isEqualTo(Mirror.newBuilder()
                                  .setId(ID)
                                  .setState(event.getNewState())
-                                 .setLifecycle(LifecycleFlags.getDefaultInstance())
                                  .buildPartial());
     }
 
@@ -68,6 +67,11 @@ class MirrorProjectionTest {
                     .isFalse();
         assertMirror.hasStateThat()
                     .isNotEqualToDefaultInstance();
+        assertMirror.hasStateThat()
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Mirror.newBuilder()
+                                     .setLifecycle(LifecycleFlags.newBuilder().setArchived(true))
+                                     .buildPartial());
     }
 
     @Test
@@ -83,6 +87,11 @@ class MirrorProjectionTest {
                     .isTrue();
         assertMirror.hasStateThat()
                     .isNotEqualToDefaultInstance();
+        assertMirror.hasStateThat()
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Mirror.newBuilder()
+                                     .setLifecycle(LifecycleFlags.newBuilder().setDeleted(true))
+                                     .buildPartial());
     }
 
     @Test
