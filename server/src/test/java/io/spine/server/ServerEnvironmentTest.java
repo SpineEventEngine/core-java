@@ -173,7 +173,7 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             environment.setToTests();
-            serverEnvironment.clearStorageFactory();
+            serverEnvironment.reset();
         }
 
         @Test
@@ -225,7 +225,7 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             environment.setToTests();
-            serverEnvironment.clearTransportFactory();
+            serverEnvironment.reset();
         }
 
         @Test

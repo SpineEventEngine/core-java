@@ -75,7 +75,7 @@ class ProjectionEndToEndTest {
     @AfterEach
     void tearDown() {
         ServerEnvironment.instance()
-                         .clearTransportFactory();
+                         .reset();
     }
 
     @Test

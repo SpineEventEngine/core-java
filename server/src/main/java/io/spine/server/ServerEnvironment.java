@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandScheduler;
@@ -44,7 +43,6 @@ import static com.google.common.base.Strings.emptyToNull;
 /**
  * The server conditions and configuration under which the application operates.
  */
-@SuppressWarnings("ClassWithTooManyMethods")
 public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
@@ -239,15 +237,6 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * This is a test-only method required in tests (or cleanup after tests) that deal
-     * with assigning production storage factory.
-     */
-    @VisibleForTesting
-    void clearStorageFactory() {
-        this.storageFactory = null;
-    }
-
-    /**
      * Assigns {@code TracerFactory} to this server environment.
      */
     public void configureTracing(TracerFactory tracerFactory) {
@@ -259,15 +248,6 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public Optional<TracerFactory> tracing() {
         return Optional.ofNullable(tracerFactory);
-    }
-
-    /**
-     * This is a test-only method required in tests that deal with assigning tracer factories.
-     */
-    @Internal
-    @VisibleForTesting
-    public void clearTracerFactory() {
-        this.tracerFactory = null;
     }
 
     /**
@@ -334,11 +314,13 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * This is test-only method required for tests dealing with configuring transport factory.
+     * This is test-only method required for cleaning of the server environment instance in tests.
      */
     @VisibleForTesting
-    public void clearTransportFactory() {
+    public void reset() {
         this.transportFactory = null;
+        this.tracerFactory = null;
+        this.storageFactory = null;
     }
 
     /**

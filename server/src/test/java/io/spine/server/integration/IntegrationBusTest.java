@@ -80,7 +80,7 @@ class IntegrationBusTest {
     @AfterEach
     void tearDown() {
         ServerEnvironment.instance()
-                         .clearTransportFactory();
+                         .reset();
     }
 
     @Nested
