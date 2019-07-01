@@ -61,7 +61,7 @@ public class Model {
      *
      * <p>The method tries to obtain the context from the annotations of the package "hierarchy"
      * to which the class belongs. If no annotation found,
-     * {@linkplain BoundedContextNames::assumingTests test-only} will be created.
+     * {@linkplain BoundedContextNames#assumingTests() test-only} will be created.
      *
      * @see BoundedContext
      */
