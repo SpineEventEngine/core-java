@@ -56,7 +56,16 @@ public class Model {
         this.context = context;
     }
 
-    public static synchronized <T> Model getInstance(Class<? extends T> rawClass) {
+    /**
+     * Obtains the instance which belongs to the Bounded Context of the passed class.
+     *
+     * <p>The method tries to obtain the context from the annotations of the package “hierarchy”
+     * to which the class belongs. If no annotation found,
+     * {@linkplain BoundedContextNames::assumingTests test-only} will be created.
+     *
+     * @see BoundedContext
+     */
+    public static synchronized <T> Model inContextOf(Class<? extends T> rawClass) {
         Model model = models.get(rawClass);
         if (model != null) {
             return model;
