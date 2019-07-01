@@ -195,7 +195,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *     <li>added repositories.
      * </ul>
      */
-    public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
+    public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
         EventEnricher enricher =
                 builder.eventEnricher()
                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
