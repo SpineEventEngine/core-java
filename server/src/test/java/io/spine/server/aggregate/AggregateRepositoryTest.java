@@ -23,7 +23,6 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.truth.OptionalSubject;
-import com.google.common.truth.Truth8;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
@@ -78,6 +77,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
@@ -486,7 +486,7 @@ public class AggregateRepositoryTest {
             for (ProjectId childProject : childProjects) {
                 Optional<RejectionReactingAggregate> optional = repository.find(childProject);
 
-                OptionalSubject assertAggregate = Truth8.assertThat(optional);
+                OptionalSubject assertAggregate = assertThat(optional);
                 assertAggregate.isPresent();
 
                 // Check that all the aggregates:

@@ -132,7 +132,7 @@ public abstract class TransactionTest<I,
                 .build();
     }
 
-    protected abstract void applyEvent(Transaction tx, Event event);
+    protected abstract PropagationOutcome applyEvent(Transaction tx, Event event);
 
     @BeforeEach
     void setUp() {
@@ -265,7 +265,8 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
-        applyEvent(tx, event);
+        PropagationOutcome outcome = applyEvent(tx, event);
+        assertTrue(outcome.hasSuccess());
         S stateBeforeRollback = entity.state();
         Version versionBeforeRollback = entity.version();
         tx.rollback(new RuntimeException("that triggers rollback"));
@@ -339,7 +340,8 @@ public abstract class TransactionTest<I,
 
             Event event = withMessage(failingInHandler());
 
-            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            PropagationOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
         }
 
         @Test
@@ -349,7 +351,8 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
             Event event = withMessage(failingStateTransition());
 
-            assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
+            PropagationOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
         }
     }
 
@@ -367,7 +370,8 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(failingInHandler());
-            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            PropagationOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
 
@@ -382,10 +386,8 @@ public abstract class TransactionTest<I,
             Version nextVersion = Versions.increment(entity.version());
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
 
-            //TODO:2019-06-16:alex.tymchenko:
-            // see https://github.com/SpineEventEngine/core-java/issues/1094
-            assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
-
+            PropagationOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
 

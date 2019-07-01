@@ -20,10 +20,8 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.EventReactor;
@@ -44,6 +42,7 @@ import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.event.RefProjectAssigned;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.test.reflect.event.RefProjectStarted;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -54,7 +53,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -319,13 +317,9 @@ class EventReactorMethodTest {
         return found.get();
     }
 
-    private static EventEnvelope envelope(Message eventMessage) {
-        Any cmd = pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(cmd)
-                .setContext(EventContext.getDefaultInstance())
-                .build();
+    private static EventEnvelope envelope(EventMessage eventMessage) {
+        TestEventFactory factory = TestEventFactory.newInstance(EventReactorMethodTest.class);
+        Event event = factory.createEvent(eventMessage);
         EventEnvelope envelope = EventEnvelope.of(event);
         return envelope;
     }
