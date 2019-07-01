@@ -211,7 +211,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *     <li>added repositories.
      * </ul>
      */
-    public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
+    public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
         Optional<EventBus.Builder> eventBus = builder.eventBus();
         EventEnricher enricher =
                 eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
