@@ -157,7 +157,7 @@ class ServerEnvironmentTest {
     @DisplayName("configure production `StorageFactory`")
     class StorageFactoryConfig {
 
-        private final Environment environment = Environment.getInstance();
+        private final Environment environment = Environment.instance();
         private final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
 
         @BeforeEach

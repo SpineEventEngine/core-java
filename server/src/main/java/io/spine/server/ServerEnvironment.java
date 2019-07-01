@@ -241,7 +241,7 @@ public final class ServerEnvironment implements AutoCloseable {
      *         {@linkplain #configureProductionStorage(StorageFactory) configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        if (Environment.getInstance().isTests()) {
+        if (Environment.instance().isTests()) {
             return InMemoryStorageFactory.newInstance();
         }
         checkNotNull(productionStorageFactory,
