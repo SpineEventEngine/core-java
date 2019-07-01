@@ -49,14 +49,13 @@ import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTI
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
-import static io.spine.server.ServerEnvironment.resetDeploymentType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("ServerEnvironment utility should")
+@DisplayName("ServerEnvironment should")
 class ServerEnvironmentTest {
 
     private static final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
@@ -212,6 +211,26 @@ class ServerEnvironmentTest {
     }
 
     @Nested
+    @DisplayName("configure `StorageFactory` for tests")
+    class TestStorageFactoryConfig {
+
+        @AfterEach
+        void resetEnvironment() {
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("returning it when explicitly set")
+        void getSet() {
+            StorageFactory factory = new StubStorageFactory();
+
+            serverEnvironment.configureStorageForTests(factory);
+            assertThat(serverEnvironment.storageFactory())
+                    .isEqualTo(factory);
+        }
+    }
+
+    @Nested
     @DisplayName("configure `TransportFactory`")
     class TransportFactoryConfig {
 
@@ -270,7 +289,7 @@ class ServerEnvironmentTest {
         void setUp() {
             initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT_PATH);
             setGaeEnvironment(targetEnvironment);
-            resetDeploymentType();
+            serverEnvironment.reset();
         }
 
         @AfterEach
@@ -280,7 +299,7 @@ class ServerEnvironmentTest {
             } else {
                 setGaeEnvironment(initialValue);
             }
-            resetDeploymentType();
+            serverEnvironment.reset();
         }
 
         void setGaeEnvironment(String value) {

@@ -63,7 +63,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * <p>Value from this supplier are used to {@linkplain #deploymentType() get the deployment
      * type}.
      */
-    private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
+    private Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
     /**
      * The identifier of the server instance running in scope of this application.
@@ -84,7 +84,14 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The storage factory for the production mode of the application.
      */
-    private @Nullable StorageFactory storageFactory;
+    private @Nullable StorageFactory productionStorageFactory;
+
+    /**
+     * The storage factory for tests.
+     *
+     * <p>If not configured {@link InMemoryStorageFactory} will be used.
+     */
+    private @Nullable StorageFactory storageFactoryForTests;
 
     /**
      * The factory of {@code Tracer}s used in this environment.
@@ -203,8 +210,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * Sets the default {@linkplain DeploymentType deployment type}
      * {@linkplain Supplier supplier} which utilizes system properties.
      */
-    @VisibleForTesting
-    public static void resetDeploymentType() {
+    private void resetDeploymentType() {
         Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
         configureDeployment(supplier);
     }
@@ -213,10 +219,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * Makes the {@link #deploymentType()} return the values from the provided supplier.
      *
      * <p>When supplying your own deployment type in tests, remember to
-     * {@linkplain #resetDeploymentType() reset it} during tear down.
+     * {@linkplain #reset() reset it} during tear down.
      */
     @VisibleForTesting
-    public static void configureDeployment(Supplier<DeploymentType> supplier) {
+    public void configureDeployment(Supplier<DeploymentType> supplier) {
         checkNotNull(supplier);
         deploymentDetector = supplier;
     }
@@ -224,16 +230,25 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns {@code StorageFactory} for the production mode of the application.
      *
-     * <p>Tests use {@code InMemoryStorageFactory}.
+     * @see #configureStorageForTests(StorageFactory)
      */
-    public void configureStorage(StorageFactory storageFactory) {
-        checkNotNull(storageFactory);
+    public void configureStorage(StorageFactory productionStorageFactory) {
+        checkNotNull(productionStorageFactory);
         checkArgument(
-                !(storageFactory instanceof InMemoryStorageFactory),
+                !(productionStorageFactory instanceof InMemoryStorageFactory),
                 "%s cannot be used for production storage.",
                 InMemoryStorageFactory.class.getName()
         );
-        this.storageFactory = storageFactory;
+        this.productionStorageFactory = productionStorageFactory;
+    }
+
+    /**
+     * Assigns {@code StorageFactory} for tests.
+     *
+     * @see #configureStorage(StorageFactory)
+     */
+    public void configureStorageForTests(StorageFactory factory) {
+        this.storageFactoryForTests = checkNotNull(factory);
     }
 
     /**
@@ -260,14 +275,18 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
-            return InMemoryStorageFactory.newInstance();
+            if (storageFactoryForTests != null) {
+                return storageFactoryForTests;
+            }
+            this.storageFactoryForTests = InMemoryStorageFactory.newInstance();
+            return storageFactoryForTests;
         }
-        checkNotNull(storageFactory,
+        checkNotNull(productionStorageFactory,
                      "Production `%s` is not configured." +
-                             " Please call `configureProductionStorage()`.",
+                             " Please call `configureStorage()`.",
                      StorageFactory.class.getSimpleName()
         );
-        return storageFactory;
+        return productionStorageFactory;
     }
 
     private static Environment environment() {
@@ -320,7 +339,9 @@ public final class ServerEnvironment implements AutoCloseable {
     public void reset() {
         this.transportFactory = null;
         this.tracerFactory = null;
-        this.storageFactory = null;
+        this.productionStorageFactory = null;
+        this.storageFactoryForTests = null;
+        resetDeploymentType();
     }
 
     /**
@@ -334,8 +355,8 @@ public final class ServerEnvironment implements AutoCloseable {
         if (transportFactory != null) {
             transportFactory.close();
         }
-        if (storageFactory != null) {
-            storageFactory.close();
+        if (productionStorageFactory != null) {
+            productionStorageFactory.close();
         }
     }
 }
