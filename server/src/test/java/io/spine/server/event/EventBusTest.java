@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
@@ -63,6 +62,7 @@ import java.util.concurrent.Executors;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.BoundedContextBuilder.assumingTests;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.bus.EventBusTestEnv.command;
 import static io.spine.server.event.given.bus.EventBusTestEnv.createProject;
@@ -82,21 +82,20 @@ public class EventBusTest {
     private TestEventFactory eventFactory;
     private EventBus eventBus;
     private CommandBus commandBus;
-    private BoundedContext bc;
+    private BoundedContext context;
 
     private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
-        bc = BoundedContextBuilder
-                .assumingTests(true)
+        context = assumingTests(true)
                 .setEventBus(eventBusBuilder)
                 .build();
         ProjectRepository projectRepository = new ProjectRepository();
-        bc.register(projectRepository);
+        context.register(projectRepository);
 
-        this.commandBus = bc.commandBus();
-        this.eventBus = bc.eventBus();
+        this.commandBus = context.commandBus();
+        this.eventBus = context.eventBus();
     }
 
     @BeforeEach
@@ -106,7 +105,7 @@ public class EventBusTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        bc.close();
+        context.close();
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
@@ -254,11 +253,12 @@ public class EventBusTest {
 
         @BeforeEach
         void setUp() throws Exception {
-            eventBus = EventBus.newBuilder()
-                               .build();
-            eventBus.register(new BareDispatcher());
-            eventBus.register(new RememberingSubscriber());
+            BoundedContext context = assumingTests()
+                    .addEventDispatcher(new BareDispatcher())
+                    .addEventDispatcher(new RememberingSubscriber())
+                    .build();
 
+            eventBus = context.eventBus();
             eventBus.close();
         }
 

@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Logging for operations of {@link EventStore}.
+ * Logging for operations of {@link DefaultEventStore}.
  */
 final class Log {
 

@@ -34,13 +34,13 @@ import io.spine.core.EventContext;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.enrich.Enricher;
-import io.spine.server.event.store.EventStore;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -49,6 +49,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
@@ -97,13 +98,21 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * spy on final or anonymous classes.
      */
 
-    /** The {@code EventStore} to store events before they get handled. */
-    private final EventStore eventStore;
+    /**
+     * The {@code EventStore} to store events before they get handled.
+     *
+     * @see #init(BoundedContext)
+     */
+    private @MonotonicNonNull EventStore eventStore;
 
-    /** The handler for dead events. */
+    /**
+     * The handler for dead events.
+     */
     private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
 
-    /** The observer of post operations. */
+    /**
+     *  The observer of post operations.
+     */
     private final StreamObserver<Ack> streamObserver;
 
     /**
@@ -112,13 +121,14 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     @LazyInit
     private @MonotonicNonNull EventValidator eventValidator;
 
-    /** The enricher for posted events or {@code null} if the enrichment is not supported. */
+    /**
+     *  The enricher for posted events or {@code null} if the enrichment is not supported.
+     */
     private final @MonotonicNonNull EventEnricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
         super(builder);
-        this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
 
@@ -173,6 +183,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
 
     /** Returns {@link EventStore} associated with the bus. */
     public EventStore eventStore() {
+        checkNotNull(
+                eventStore,
+                "`EventStore` is not initialized. Please call `EventBus.init(BoundedContext)`."
+        );
         return eventStore;
     }
 
@@ -232,13 +246,13 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
 
     @Override
     protected void store(Iterable<Event> events) {
-        eventStore.appendAll(events);
+        eventStore().appendAll(events);
     }
 
     @Override
     public void close() throws Exception {
         super.close();
-        eventStore.close();
+        eventStore().close();
     }
 
     /**
@@ -253,6 +267,10 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
 
     @Internal
     public void init(BoundedContext context) {
+        eventStore =
+                ServerEnvironment.instance()
+                                 .storageFactory()
+                                 .createEventStore(context.spec());
         eventStore.init(context);
     }
 
@@ -260,17 +278,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     @CanIgnoreReturnValue
     public static class Builder
             extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher<?>> {
-
-        /**
-         * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
-         *
-         * <p>If not set, a default instance will be created by the builder
-         * with the help of the {@code StorageFactory}.
-         *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
-         * to create an instance of {@code EventBus}.
-         */
-        private EventStore eventStore;
 
         /**
          * Optional enricher for events.
@@ -340,7 +347,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Internal
         @CheckReturnValue
         public EventBus build() {
-            eventStore = new EventStore();
             EventBus result = new EventBus(this);
             return result;
         }

@@ -80,7 +80,7 @@ public abstract class TenantAwareTest {
     }
 
     private static void checkInTests() {
-        checkState(Environment.getInstance()
+        checkState(Environment.instance()
                               .isTests());
     }
 

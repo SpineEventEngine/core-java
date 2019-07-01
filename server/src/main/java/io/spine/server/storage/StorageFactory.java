@@ -24,7 +24,8 @@ import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.event.store.EventStore;
+import io.spine.server.event.EventStore;
+import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 
@@ -77,4 +78,14 @@ public interface StorageFactory extends AutoCloseable {
     <I> ProjectionStorage<I>
     createProjectionStorage(ContextSpec context,
                             Class<? extends Projection<I, ?, ?>> projectionClass);
+
+    /**
+     * Creates a new {@link EventStore}.
+     *
+     * @param context
+     *         specification of the Bounded Context events of which the store would serve.
+     */
+    default EventStore createEventStore(@SuppressWarnings("unused") ContextSpec context) {
+        return new DefaultEventStore();
+    }
 }

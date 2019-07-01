@@ -22,11 +22,11 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
+import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -41,9 +41,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * A store of all events in a Bounded Context.
+ * Default implementation of {@link EventStore}.
  */
-public final class EventStore implements AutoCloseable, Logging {
+public final class DefaultEventStore implements EventStore {
 
     private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
@@ -56,22 +56,18 @@ public final class EventStore implements AutoCloseable, Logging {
     /**
      * Constructs new instance taking arguments from the passed builder.
      */
-    public EventStore() {
+    public DefaultEventStore() {
         super();
         this.storage = new ERepository();
         this.log = new Log(Logging.get(getClass()));
     }
 
-    @Internal
+    @Override
     public void init(BoundedContext context) {
         context.register(storage);
     }
 
-    /**
-     * Appends the passed event to the history of events.
-     *
-     * @param event the record to append
-     */
+    @Override
     public void append(Event event) {
         checkNotNull(event);
         TenantAwareOperation op = new EventOperation(event) {
@@ -85,16 +81,7 @@ public final class EventStore implements AutoCloseable, Logging {
         log.stored(event);
     }
 
-    /**
-     * Appends the passed events to the history of events.
-     *
-     * <p>If the passed {@link Iterable} is empty, no action is performed.
-     *
-     * <p>If the passed {@linkplain Event Events} belong to the different
-     * {@linkplain TenantId tenants}, an {@link IllegalArgumentException} is thrown.
-     *
-     * @param events the events to append
-     */
+    @Override
     public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
         ImmutableList<Event> eventList =
@@ -127,12 +114,7 @@ public final class EventStore implements AutoCloseable, Logging {
         checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
-    /**
-     * Creates the stream with events matching the passed query.
-     *
-     * @param request          the query with filtering parameters for the event history
-     * @param responseObserver observer for the resulting stream
-     */
+    @Override
     public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         checkNotNull(request);
         checkNotNull(responseObserver);
@@ -157,9 +139,7 @@ public final class EventStore implements AutoCloseable, Logging {
         storage.close();
     }
 
-    /**
-     * Tells if the store is open.
-     */
+    @Override
     public boolean isOpen() {
         return storage.isOpen();
     }

@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
-import io.spine.server.event.store.EventStoreTest;
+import io.spine.server.event.store.DefaultEventStoreTest;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class EventStoreTestEnv {
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventStoreTest.class);
+            TestEventFactory.newInstance(DefaultEventStoreTest.class);
 
     /** Prevents instantiation of this utility class. */
     private EventStoreTestEnv() {

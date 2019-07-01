@@ -35,6 +35,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
@@ -66,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EventStore should")
-public class EventStoreTest {
+public class DefaultEventStoreTest {
 
     private BoundedContext context;
     private EventStore eventStore;

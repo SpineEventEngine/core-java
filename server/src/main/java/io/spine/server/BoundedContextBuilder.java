@@ -485,8 +485,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private <B extends BoundedContext>
-    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                   SystemClient client) {
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
         initEventBus();

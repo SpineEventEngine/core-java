@@ -40,10 +40,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
- * A storage used by {@link EventStore} for keeping event data.
+ * A storage used by {@link DefaultEventStore} for keeping event data.
  *
  * <p>This class allows to hide implementation details of storing events.
- * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
+ * {@link DefaultEventStore} serves as a facade, hiding the fact that the {@code EventStorage}
  * is a {@code Repository}.
  */
 final class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
