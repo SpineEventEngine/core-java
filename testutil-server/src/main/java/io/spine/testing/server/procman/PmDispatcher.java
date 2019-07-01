@@ -28,6 +28,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
@@ -39,7 +40,6 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
-import java.util.List;
 import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -74,11 +74,11 @@ public final class PmDispatcher {
      * @return the list of {@linkplain Event events}, being the envelope output.
      */
     @CanIgnoreReturnValue
-    public static List<Event> dispatch(ProcessManager<?, ?, ?> pm, MessageEnvelope envelope) {
+    public static PropagationOutcome dispatch(ProcessManager<?, ?, ?> pm, MessageEnvelope envelope) {
         checkNotNull(pm);
         checkNotNull(envelope);
         EndpointFn fn = endpoints.get(envelope.getClass());
-        List<Event> events = fn.apply(pm, envelope);
+        PropagationOutcome events = fn.apply(pm, envelope);
         return events;
     }
 
@@ -88,7 +88,7 @@ public final class PmDispatcher {
      * @see #endpoints
      */
     private interface EndpointFn
-            extends BiFunction<ProcessManager<?, ?, ?>, MessageEnvelope, List<Event>> {
+            extends BiFunction<ProcessManager<?, ?, ?>, MessageEnvelope, PropagationOutcome> {
     }
 
     /**
@@ -109,14 +109,9 @@ public final class PmDispatcher {
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-        List<Event> dispatch(P manager, CommandEnvelope envelope) {
+        PropagationOutcome dispatch(P manager, CommandEnvelope envelope) {
             TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(envelope);
-            List<Event> events = endpoint
-                    .runTransactionFor(manager)
-                    .getSuccess()
-                    .getProducedEvents()
-                    .getEventList();
-            return events;
+            return endpoint.runTransactionFor(manager);
         }
     }
 
@@ -138,14 +133,9 @@ public final class PmDispatcher {
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-        List<Event> dispatch(P manager, EventEnvelope event) {
+        PropagationOutcome dispatch(P manager, EventEnvelope event) {
             TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(event);
-            List<Event> events = endpoint
-                    .runTransactionFor(manager)
-                    .getSuccess()
-                    .getProducedEvents()
-                    .getEventList();
-            return events;
+            return endpoint.runTransactionFor(manager);
         }
     }
 

@@ -32,6 +32,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public interface EventProducingMethod<T extends EventProducer,
         extends HandlerMethod<T, C, E, EventClass> {
 
     @Override
-    default Success toSuccessfulOutcome(Object rawResult,
+    default Success toSuccessfulOutcome(@Nullable Object rawResult,
                                         T target,
                                         MessageEnvelope<?, ?, ?> origin) {
         MethodResult result = MethodResult.from(rawResult);

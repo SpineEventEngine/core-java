@@ -32,9 +32,11 @@ import io.spine.server.entity.Success;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 @Immutable
@@ -44,10 +46,12 @@ public interface CommandProducingMethod<T,
         extends HandlerMethod<T, C, E, CommandClass> {
 
     @Override
-    default Success toSuccessfulOutcome(Object rawResult, T target, MessageEnvelope<?, ?, ?> origin) {
+    default Success toSuccessfulOutcome(@Nullable Object rawResult,
+                                        T target,
+                                        MessageEnvelope<?, ?, ?> origin) {
         MethodResult result = MethodResult.from(rawResult);
         ActorContext actorContext = origin.asMessageOrigin()
-                                     .getActorContext();
+                                          .getActorContext();
         CommandFactory commandFactory = ActorRequestFactory
                 .fromContext(actorContext)
                 .command();
@@ -58,7 +62,15 @@ public interface CommandProducingMethod<T,
                     CommandMessage commandMessage = (CommandMessage) AnyPacker.unpack(msg);
                     return commandFactory.create(commandMessage);
                 })
-                                      .collect(toList());
+                .collect(toList());
+        if (commands.isEmpty()) {
+            String errorMessage = format(
+                    "Commander method `%s` did not produce any result for command with ID %s.",
+                    this,
+                    origin.id()
+            );
+            throw new IllegalOutcomeException(errorMessage);
+        }
         ProducedCommands signals = ProducedCommands
                 .newBuilder()
                 .addAllCommand(commands)

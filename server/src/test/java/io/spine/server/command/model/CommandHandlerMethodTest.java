@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
@@ -50,6 +51,7 @@ import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.type.CommandEnvelope;
@@ -71,6 +73,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -193,8 +196,8 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            assertThrows(IllegalStateException.class,
-                         () -> handler.invoke(handlerObject, envelope));
+            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            checkIllegalOutcome(outcome, envelope.command());
         }
 
         @Test
@@ -205,8 +208,20 @@ class CommandHandlerMethodTest {
                     new ProcessManagerDoingNothing(commandMessage.getProjectId()
                                                                  .getId());
             CommandEnvelope cmd = newCommand(commandMessage);
-            assertThrows(IllegalStateException.class,
-                         () -> PmDispatcher.dispatch(entity, cmd));
+            PropagationOutcome outcome = PmDispatcher.dispatch(entity, cmd);
+            checkIllegalOutcome(outcome, cmd.command());
+        }
+
+        private void checkIllegalOutcome(PropagationOutcome outcome, Command command) {
+            assertThat(outcome)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(PropagationOutcome
+                                       .newBuilder()
+                                       .setPropagatedSignal(command.messageId())
+                                       .setError(Error.newBuilder()
+                                                      .setType(IllegalOutcomeException.class
+                                                                       .getCanonicalName()))
+                                       .buildPartial());
         }
     }
 

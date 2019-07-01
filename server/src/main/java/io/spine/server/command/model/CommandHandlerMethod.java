@@ -21,13 +21,19 @@
 package io.spine.server.command.model;
 
 import io.spine.server.command.CommandHandler;
+import io.spine.server.entity.Success;
 import io.spine.server.model.EventProducingMethod;
+import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.MessageEnvelope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
+
+import static java.lang.String.format;
 
 /**
  * The wrapper for a command handler method.
@@ -44,5 +50,22 @@ public final class CommandHandlerMethod
      */
     CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);
+    }
+
+    @Override
+    public Success toSuccessfulOutcome(@Nullable Object rawResult,
+                                       CommandHandler target,
+                                       MessageEnvelope<?, ?, ?> origin) {
+        Success outcome = EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, origin);
+        if (outcome.getProducedEvents().getEventCount() == 0) {
+            String errorMessage = format(
+                    "Command handler %s did not produce any events when processing command %s",
+                    this,
+                    origin.id()
+            );
+            throw new IllegalOutcomeException(errorMessage);
+        } else {
+            return outcome;
+        }
     }
 }

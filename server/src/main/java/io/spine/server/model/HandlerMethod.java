@@ -27,6 +27,7 @@ import io.spine.server.entity.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -83,7 +84,10 @@ public interface HandlerMethod<T,
      */
     Set<P> producedMessages();
 
-    Success toSuccessfulOutcome(Object rawResult, T target, MessageEnvelope<?, ?, ?> origin);
+    Success toSuccessfulOutcome(@Nullable Object rawResult,
+                                T target,
+                                MessageEnvelope<?, ?, ?> origin)
+            throws IllegalOutcomeException;
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.

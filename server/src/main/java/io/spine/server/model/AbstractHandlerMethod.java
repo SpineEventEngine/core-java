@@ -45,6 +45,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static java.lang.String.format;
 
 /**
@@ -240,16 +241,23 @@ public abstract class AbstractHandlerMethod<T,
             Object rawOutput = method.invoke(target, arguments);
             Success success = toSuccessfulOutcome(rawOutput, target, envelope);
             outcome.setSuccess(success);
-            return outcome.vBuild();
+        } catch (IllegalOutcomeException e) {
+            Error error = Error
+                    .newBuilder()
+                    .setMessage(e.getMessage())
+                    .setStacktrace(getStackTraceAsString(e))
+                    .setType(e.getClass().getCanonicalName())
+                    .vBuild();
+            outcome.setError(error);
         } catch (InvocationTargetException e) {
             Error error = errorInHandler(envelope, e);
             outcome.setError(error);
-            return outcome.vBuild();
         } catch (IllegalArgumentException | IllegalAccessException e) {
             Message message = envelope.message();
             Message context = envelope.context();
             throw new HandlerMethodFailedException(target, message, context, getRootCause(e));
         }
+        return outcome.vBuild();
     }
 
     private Error errorInHandler(E envelope, InvocationTargetException e) {

@@ -21,12 +21,10 @@
 package io.spine.server.command.model;
 
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
@@ -38,6 +36,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,7 +48,6 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -215,13 +213,9 @@ class CommandReactionMethodTest {
         assertThat.containsExactly(expected);
     }
 
-    private static EventEnvelope envelope(Message eventMessage) {
-        Any cmd = pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(cmd)
-                .setContext(EventContext.getDefaultInstance())
-                .build();
+    private static EventEnvelope envelope(EventMessage eventMessage) {
+        TestEventFactory factory = TestEventFactory.newInstance(CommandReactionMethodTest.class);
+        Event event = factory.createEvent(eventMessage);
         EventEnvelope envelope = EventEnvelope.of(event);
         return envelope;
     }

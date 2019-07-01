@@ -165,7 +165,10 @@ class ProcessManagerTest {
     @CanIgnoreReturnValue
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
-        List<Event> result = dispatch(processManager, EventEnvelope.of(event));
+        List<Event> result = dispatch(processManager, EventEnvelope.of(event))
+                .getSuccess()
+                .getProducedEvents()
+                .getEventList();
         Any pmState = processManager.state()
                                     .getAny();
         Any expected = pack(eventMessage);
@@ -177,7 +180,10 @@ class ProcessManagerTest {
     private List<Event> testDispatchCommand(CommandMessage commandMsg) {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
-        List<Event> events = dispatch(processManager, envelope);
+        List<Event> events = dispatch(processManager, envelope)
+                .getSuccess()
+                .getProducedEvents()
+                .getEventList();
         assertEquals(pack(commandMsg), processManager.state()
                                                      .getAny());
         return events;

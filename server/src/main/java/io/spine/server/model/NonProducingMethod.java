@@ -25,6 +25,9 @@ import io.spine.server.entity.Success;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static java.lang.String.format;
 
 @Immutable
 public interface NonProducingMethod<T,
@@ -33,7 +36,17 @@ public interface NonProducingMethod<T,
         extends HandlerMethod<T, C, E, EmptyClass> {
 
     @Override
-    default Success toSuccessfulOutcome(Object result, T target, MessageEnvelope<?, ?, ?> origin) {
+    default Success toSuccessfulOutcome(@Nullable Object result,
+                                        T target,
+                                        MessageEnvelope<?, ?, ?> origin) {
+        if (result != null) {
+            String errorMessage = format(
+                    "Method `%s` should not produce any result. Produced: %s",
+                    this,
+                    result
+            );
+            throw new IllegalOutcomeException(errorMessage);
+        }
         return Success.getDefaultInstance();
     }
 }
