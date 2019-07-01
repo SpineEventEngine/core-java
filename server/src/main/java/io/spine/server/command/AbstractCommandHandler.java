@@ -87,9 +87,8 @@ public abstract class AbstractCommandHandler
     public String dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
         PropagationOutcome result = method.invoke(this, envelope);
-        // TODO:2019-06-28:dmytro.dashenkov: Reenable.
-//        List<Event> events = result.produceEvents(envelope);
-//        postEvents(events);
+        // TODO:2019-06-28:dmytro.dashenkov: Handle errors.
+        postEvents(result.getSuccess().getProducedEvents().getEventList());
         return getId();
     }
 

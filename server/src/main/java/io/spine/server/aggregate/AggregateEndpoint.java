@@ -57,7 +57,7 @@ abstract class AggregateEndpoint<I,
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
 
         PropagationOutcome outcome = runTransactionWith(aggregate);
-        if (outcome.hasSuccess()) {
+        if (outcome.hasSuccess()) { // TODO:2019-07-01:dmytro.dashenkov: Post "errored" system event.
             // Update lifecycle flags only if the message was handled successfully and flags changed.
             LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
             if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
@@ -71,8 +71,6 @@ abstract class AggregateEndpoint<I,
                                             .getEventList();
                 repository().postEvents(events);
             }
-        } else {
-            // TODO:2019-07-01:dmytro.dashenkov: Post "errored" system event.
         }
     }
 

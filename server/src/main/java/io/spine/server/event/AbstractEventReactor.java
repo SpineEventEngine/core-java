@@ -27,6 +27,8 @@ import io.spine.core.Versions;
 import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.ProducedEvents;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.integration.ExternalMessageClass;
@@ -91,10 +93,13 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         try {
             EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
                                                             event.originClass());
-            // TODO:2019-06-28:dmytro.dashenkov: Reenable.
-//            ReactorMethodResult result = method.invoke(this, event);
-//            List<Event> events = result.produceEvents(event);
-//            eventBus.post(events);
+            // TODO:2019-06-28:dmytro.dashenkov: Handle errors.
+            PropagationOutcome outcome = method.invoke(this, event);
+            if (outcome.hasSuccess()) {
+                ProducedEvents events = outcome.getSuccess()
+                                               .getProducedEvents();
+                eventBus.post(events.getEventList());
+            }
         } catch (RuntimeException ex) {
             onError(event, ex);
         }
