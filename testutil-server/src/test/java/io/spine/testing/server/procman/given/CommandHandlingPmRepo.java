@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.aggregate.given.agg;
+package io.spine.testing.server.procman.given;
 
-import io.spine.server.aggregate.AggregatePartRepository;
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.testing.server.given.entity.TuPmState;
 import io.spine.testing.server.given.entity.TuTaskId;
 
-public final class TuAggregatePartRepository
-        extends AggregatePartRepository<TuTaskId, TuAggregatePart, TuAggregateRoot> {
+public class CommandHandlingPmRepo
+        extends ProcessManagerRepository<TuTaskId, CommandHandlingPm, TuPmState> {
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.aggregate.given.agg;
+package io.spine.testing.server.aggregate.given;
 
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;

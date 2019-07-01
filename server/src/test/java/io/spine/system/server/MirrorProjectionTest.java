@@ -21,23 +21,102 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
-import io.spine.server.entity.Repository;
-import io.spine.testing.server.projection.ProjectionTest;
+import io.spine.server.entity.LifecycleFlags;
+import io.spine.system.server.event.EntityStateChanged;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.entity.EntitySubject;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityArchived;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityDeleted;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityExtracted;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityRestored;
+import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityStateChanged;
 
-/**
- * An implementation base for {@link MirrorProjection} event subscriber tests.
- */
-abstract class MirrorProjectionTest<E extends EventMessage>
-        extends ProjectionTest<MirrorId, E, Mirror, MirrorProjection> {
+@DisplayName("Mirror projection should")
+class MirrorProjectionTest {
 
-    MirrorProjectionTest(E eventMessage) {
-        super(ID, eventMessage);
+    @Test
+    @DisplayName("change its state on EntityStateChanged")
+    void stateChanged() {
+        EntityStateChanged event = entityStateChanged();
+        context()
+                .receivesEvent(event)
+                .assertEntityWithState(Mirror.class, ID)
+                .hasStateThat()
+                .comparingExpectedFieldsOnly()
+                .isEqualTo(Mirror.newBuilder()
+                                 .setId(ID)
+                                 .setState(event.getNewState())
+                                 .setLifecycle(LifecycleFlags.getDefaultInstance())
+                                 .buildPartial());
     }
 
-    @Override
-    protected Repository<MirrorId, MirrorProjection> createRepository() {
-        return new MirrorRepository();
+    @Test
+    @DisplayName("mark itself archived")
+    void archived() {
+        EventMessage event = entityArchived();
+        EntitySubject assertMirror = context()
+                .receivesEvents(entityStateChanged(), event)
+                .assertEntityWithState(Mirror.class, ID);
+        assertMirror.archivedFlag()
+                    .isTrue();
+        assertMirror.deletedFlag()
+                    .isFalse();
+        assertMirror.hasStateThat()
+                    .isNotEqualToDefaultInstance();
+    }
+
+    @Test
+    @DisplayName("mark itself deleted")
+    void deleted() {
+        EventMessage event = entityDeleted();
+        EntitySubject assertMirror = context()
+                .receivesEvents(entityStateChanged(), event)
+                .assertEntityWithState(Mirror.class, ID);
+        assertMirror.archivedFlag()
+                    .isFalse();
+        assertMirror.deletedFlag()
+                    .isTrue();
+        assertMirror.hasStateThat()
+                    .isNotEqualToDefaultInstance();
+    }
+
+    @Test
+    @DisplayName("un-archive self")
+    void extracted() {
+        EventMessage event = entityExtracted();
+        EntitySubject assertMirror = context()
+                .receivesEvents(entityStateChanged(), entityArchived(), event)
+                .assertEntityWithState(Mirror.class, ID);
+        assertMirror.archivedFlag()
+                    .isFalse();
+        assertMirror.deletedFlag()
+                    .isFalse();
+        assertMirror.hasStateThat()
+                    .isNotEqualToDefaultInstance();
+    }
+
+    @Test
+    @DisplayName("un-delete self")
+    void restored() {
+        EventMessage event = entityRestored();
+        EntitySubject assertMirror = context()
+                .receivesEvents(entityStateChanged(), entityDeleted(), event)
+                .assertEntityWithState(Mirror.class, ID);
+        assertMirror.archivedFlag()
+                    .isFalse();
+        assertMirror.deletedFlag()
+                    .isFalse();
+        assertMirror.hasStateThat()
+                    .isNotEqualToDefaultInstance();
+    }
+
+    private static BlackBoxBoundedContext context() {
+        return BlackBoxBoundedContext
+                .singleTenant()
+                .with(new MirrorRepository());
     }
 }
