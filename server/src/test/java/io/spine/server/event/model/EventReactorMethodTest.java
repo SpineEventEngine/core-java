@@ -20,13 +20,12 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.UserId;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;
@@ -39,7 +38,6 @@ import io.spine.server.event.model.given.reactor.RcWrongNoAnnotation;
 import io.spine.server.event.model.given.reactor.RcWrongNoParam;
 import io.spine.server.event.model.given.reactor.RcWrongSecondParam;
 import io.spine.server.event.model.given.reactor.TestEventReactor;
-import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.ProjectId;
@@ -153,17 +151,16 @@ class EventReactorMethodTest {
         void returnValue() {
             RefProjectCreated event = projectCreatedEvent();
 
-            ReactorMethodResult result =
-                    method.invoke(target, envelope(event));
-
-            IterableSubject assertThat = assertThat(result.asMessages());
-            assertThat.hasSize(1);
-            assertThat.containsExactly(
-                    RefProjectStarted
-                            .newBuilder()
-                            .setProjectId(event.getProjectId())
-                            .build()
-            );
+            PropagationOutcome outcome = method.invoke(target, envelope(event));
+            List<Event> events = outcome.getSuccess()
+                                        .getProducedEvents()
+                                        .getEventList();
+            assertThat(events).hasSize(1);
+            assertThat(events.get(0).enclosedMessage())
+                    .isEqualTo(RefProjectStarted
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .build());
         }
 
         @Test
@@ -174,10 +171,9 @@ class EventReactorMethodTest {
                     .newBuilder()
                     .build();
 
-            ReactorMethodResult result =
-                    method.invoke(target, envelope(event));
+            PropagationOutcome outcome = method.invoke(target, envelope(event));
 
-            assertThat(result.asMessages()).isEmpty();
+            assertThat(outcome.getSuccess().getProducedEvents().getEventList()).isEmpty();
         }
     }
 
@@ -212,36 +208,39 @@ class EventReactorMethodTest {
         @DisplayName("when returning Pair with two non-null values")
         void returningNonNull() {
             RefProjectCreated event = projectCreatedWithAssignee();
-            ReactorMethodResult result = method.invoke(target, envelope(event));
-
-            IterableSubject assertThat = assertThat(result.asMessages());
-            assertThat.hasSize(2);
-            assertThat.containsExactly(RefProjectStarted
-                                               .newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .build(),
-                                       RefProjectAssigned
-                                               .newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .setAssignee(event.getAssignee())
-                                               .build()
-            );
+            PropagationOutcome outcome = method.invoke(target, envelope(event));
+            List<Event> events = outcome.getSuccess()
+                                        .getProducedEvents()
+                                        .getEventList();
+            assertThat(events).hasSize(2);
+            assertThat(events.get(0).enclosedMessage())
+                    .isEqualTo(RefProjectStarted
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .build());
+            assertThat(events.get(1).enclosedMessage())
+                    .isEqualTo(RefProjectAssigned
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .setAssignee(event.getAssignee())
+                                       .build());
         }
 
         @Test
         @DisplayName("when returning Pair with null second value")
         void returningSecondNull() {
             RefProjectCreated event = projectCreatedEvent();
-            ReactorMethodResult result = method.invoke(target, envelope(event));
+            PropagationOutcome outcome = method.invoke(target, envelope(event));
 
-            List<EventMessage> messages = result.asMessages();
-            IterableSubject assertThat = assertThat(messages);
-            assertThat.hasSize(1);
-            assertThat.containsExactly(RefProjectStarted
-                                               .newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .build()
-            );
+            List<Event> events = outcome.getSuccess()
+                                        .getProducedEvents()
+                                        .getEventList();
+            assertThat(events).hasSize(1);
+            assertThat(events.get(0).enclosedMessage())
+                    .isEqualTo(RefProjectStarted
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .build());
         }
     }
 

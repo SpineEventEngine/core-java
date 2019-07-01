@@ -28,6 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
@@ -47,6 +48,7 @@ import io.spine.server.command.model.given.handler.ValidHandlerOneParam;
 import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsList;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
@@ -129,13 +131,13 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            CommandHandlerMethod.Result result = handler.invoke(handlerObject, envelope);
-            List<? extends Message> events = result.asMessages();
+            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
             verify(handlerObject, times(1))
                     .handleTest(cmd, emptyContext);
             assertEquals(1, events.size());
-            RefProjectCreated event = (RefProjectCreated) events.get(0);
+            RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
 
@@ -151,12 +153,12 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            CommandHandlerMethod.Result result = handler.invoke(handlerObject, envelope);
-            List<? extends Message> events = result.asMessages();
+            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
             verify(handlerObject, times(1)).handleTest(cmd);
             assertEquals(1, events.size());
-            RefProjectCreated event = (RefProjectCreated) events.get(0);
+            RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
     }

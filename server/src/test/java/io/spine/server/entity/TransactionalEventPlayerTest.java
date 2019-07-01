@@ -90,8 +90,8 @@ class TransactionalEventPlayerTest {
         }
 
         @Override
-        public void play(Iterable<Event> events) {
-            EventPlayer.forTransactionOf(this).play(events);
+        public Propagation play(Iterable<Event> events) {
+            return EventPlayer.forTransactionOf(this).play(events);
         }
     }
 
