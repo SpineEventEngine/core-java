@@ -22,6 +22,7 @@ package io.spine.server.event.store;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.OrderBy;
@@ -30,13 +31,13 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.TenantId;
-import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import org.slf4j.Logger;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -68,7 +69,7 @@ public final class DefaultEventStore
      */
     public DefaultEventStore() {
         super();
-        this.log = new Log(Logging.get(getClass()));
+        this.log = new Log();
     }
 
     /**
@@ -98,7 +99,6 @@ public final class DefaultEventStore
             }
         };
         op.execute();
-
         log.stored(event);
     }
 
@@ -203,5 +203,43 @@ public final class DefaultEventStore
                        .map(EEntity::create)
                        .collect(toImmutableList());
         store(entities);
+    }
+
+    /**
+     * Logging for operations of {@link DefaultEventStore}.
+     */
+    final class Log {
+
+        private final Logger log = log();
+        private final boolean debugEnabled = log.isDebugEnabled();
+
+        private void stored(Event event) {
+            if (debugEnabled) {
+                log.debug("Stored: {}.", TextFormat.shortDebugString(event));
+            }
+        }
+
+        private void stored(Iterable<Event> events) {
+            if (debugEnabled) {
+                for (Event event : events) {
+                    stored(event);
+                }
+            }
+        }
+
+        private void readingStart(EventStreamQuery query, StreamObserver<Event> observer) {
+            if (log.isDebugEnabled()) {
+                String requestData = TextFormat.shortDebugString(query);
+                log.debug("Creating stream on request: {} for observer: {}.",
+                          requestData,
+                          observer);
+            }
+        }
+
+        private void readingComplete(StreamObserver<Event> observer) {
+            if (log.isDebugEnabled()) {
+                log.debug("Observer {} got all queried events.", observer);
+            }
+        }
     }
 }
