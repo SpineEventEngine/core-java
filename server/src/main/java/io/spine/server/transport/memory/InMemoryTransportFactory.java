@@ -70,6 +70,7 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId channelId) {
+        checkNotNull(channelId);
         Subscriber subscriber = newSubscriber(channelId);
         subscribers().put(channelId, subscriber);
         return subscriber;
@@ -85,6 +86,7 @@ public class InMemoryTransportFactory implements TransportFactory {
      * @return an instance of subscriber
      */
     protected Subscriber newSubscriber(ChannelId channelId) {
+        checkNotNull(channelId);
         return new InMemorySubscriber(channelId);
     }
 

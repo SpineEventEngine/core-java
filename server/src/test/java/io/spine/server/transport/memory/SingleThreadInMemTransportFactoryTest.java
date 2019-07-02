@@ -20,47 +20,28 @@
 
 package io.spine.server.transport.memory;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.base.Identifier;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.transport.TransportFactory;
-import io.spine.testing.TestValues;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.transport.memory.InMemoryTransportFactoryTest.newChannelId;
 
-@DisplayName("`InMemoryTransportFactory` should")
-class InMemoryTransportFactoryTest {
+@DisplayName("`SingleThreadInMemTransportFactory` should")
+class SingleThreadInMemTransportFactoryTest {
 
     private TransportFactory transportFactory;
 
     @BeforeEach
     void createInstance() {
-        transportFactory = InMemoryTransportFactory.newInstance();
+        transportFactory = SingleThreadInMemTransportFactory.newInstance();
     }
 
     @Test
-    @DisplayName("reject requests when closed")
-    void closing() throws Exception {
-        transportFactory.close();
-
-        assertThrows(
-                IllegalStateException.class, () ->
-                transportFactory.createPublisher(newChannelId())
-        );
-    }
-
-    @Test
-    @DisplayName("reject null arguments")
-    void nulls() {
-        new NullPointerTester().testAllPublicInstanceMethods(transportFactory);
-    }
-
-    static ChannelId newChannelId() {
-        return ChannelId.newBuilder()
-                        .setIdentifier(Identifier.pack(TestValues.newUuidValue()))
-                        .build();
+    @DisplayName("create `SingleThreadInMemSubscriber`")
+    void subscribers() {
+        assertThat(transportFactory.createSubscriber(newChannelId()))
+                .isInstanceOf(SingleThreadInMemSubscriber.class);
     }
 }
