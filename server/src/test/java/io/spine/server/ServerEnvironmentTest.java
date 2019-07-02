@@ -254,14 +254,6 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("do not allow setting `InMemoryTransportFactory`")
-        void noInMemProdTransport() {
-            assertThrows(IllegalArgumentException.class, () ->
-                    serverEnvironment.configureTransport(InMemoryTransportFactory.newInstance())
-            );
-        }
-
-        @Test
         @DisplayName("return configured instance in Production")
         void productionValue() {
             TransportFactory factory = new StubTransportFactory();

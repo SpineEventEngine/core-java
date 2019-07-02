@@ -296,11 +296,6 @@ public final class ServerEnvironment implements AutoCloseable {
      * Assigns {@code TransportFactory} for the production mode of the application.
      */
     public void configureTransport(TransportFactory transportFactory) {
-        checkArgument(
-                !(transportFactory instanceof InMemoryTransportFactory),
-                "`%s` cannot be used in production environment.",
-                InMemoryTransportFactory.class.getName()
-        );
         this.transportFactory = checkNotNull(transportFactory);
     }
 
