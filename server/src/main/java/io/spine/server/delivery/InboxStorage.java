@@ -21,6 +21,12 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
+import io.spine.validate.Validated;
+
+import java.util.List;
+
+import static com.google.common.collect.Streams.stream;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for the storage of {@link Inbox} messages.
@@ -40,7 +46,15 @@ public abstract class InboxStorage
      * Marks the messages as {@linkplain InboxMessageStatus#DELIVERED delivered} and writes
      * the updated messages.
      *
-     * @param messages the messages to mark as delivered.
+     * @param messages
+     *         the messages to mark as delivered
      */
-    public abstract void markDelivered(Iterable<InboxMessage> messages);
+    public void markDelivered(Iterable<InboxMessage> messages) {
+        List<@Validated InboxMessage> updated =
+                stream(messages).map((m) -> m.toBuilder()
+                                             .setStatus(InboxMessageStatus.DELIVERED)
+                                             .vBuild())
+                                .collect(toList());
+        writeAll(updated);
+    }
 }

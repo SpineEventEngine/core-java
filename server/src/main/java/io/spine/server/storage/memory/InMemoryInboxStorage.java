@@ -25,20 +25,15 @@ import io.spine.logging.Logging;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
-import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.validate.Validated;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
-import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.compare;
-import static java.util.stream.Collectors.toList;
 
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
@@ -81,16 +76,6 @@ public final class InMemoryInboxStorage extends InboxStorage implements Logging 
         for (InboxMessage inboxMessage : messages) {
             write(inboxMessage);
         }
-    }
-
-    @Override
-    public void markDelivered(Iterable<InboxMessage> messages) {
-        List<@Validated InboxMessage> updated =
-                stream(messages).map((m) -> m.toBuilder()
-                                             .setStatus(InboxMessageStatus.DELIVERED)
-                                             .vBuild())
-                                .collect(toList());
-        writeAll(updated);
     }
 
     @Override
