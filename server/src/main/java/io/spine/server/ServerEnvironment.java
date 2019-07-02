@@ -89,7 +89,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * The storage factory for tests.
      *
-     * <p>If not configured {@link InMemoryStorageFactory} will be used.
+     * <p>If not configured, {@link InMemoryStorageFactory} will be used.
      */
     private @Nullable StorageFactory storageFactoryForTests;
 
@@ -275,10 +275,9 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
-            if (storageFactoryForTests != null) {
-                return storageFactoryForTests;
+            if (storageFactoryForTests == null) {
+                this.storageFactoryForTests = InMemoryStorageFactory.newInstance();
             }
-            this.storageFactoryForTests = InMemoryStorageFactory.newInstance();
             return storageFactoryForTests;
         }
         checkNotNull(productionStorageFactory,
