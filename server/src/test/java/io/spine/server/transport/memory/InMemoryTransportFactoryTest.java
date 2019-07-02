@@ -17,27 +17,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport;
 
-import io.spine.annotation.SPI;
+package io.spine.server.transport.memory;
+
+import io.spine.base.Identifier;
 import io.spine.server.integration.ChannelId;
+import io.spine.server.transport.TransportFactory;
+import io.spine.testing.TestValues;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * An abstract base for {@linkplain MessageChannel message channels}.
- */
-@SPI
-public abstract class AbstractChannel implements MessageChannel {
+@DisplayName("`InMemoryTransportFactory` should")
+class InMemoryTransportFactoryTest {
 
-    private final ChannelId channelId;
+    private TransportFactory transportFactory;
 
-    protected AbstractChannel(ChannelId channelId) {
-        this.channelId = checkNotNull(channelId);
+    @BeforeEach
+    void createInstance() {
+        transportFactory = InMemoryTransportFactory.newInstance();
     }
 
-    @Override
-    public ChannelId getId() {
-        return channelId;
+    @Test
+    @DisplayName("reject requests when closed")
+    void closing() throws Exception {
+        transportFactory.close();
+
+        assertThrows(
+                IllegalStateException.class, () ->
+                transportFactory.createPublisher(newChannelId())
+        );
+    }
+
+    private static ChannelId newChannelId() {
+        return ChannelId.newBuilder()
+                        .setIdentifier(Identifier.pack(TestValues.newUuidValue()))
+                        .build();
     }
 }

@@ -63,6 +63,7 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Publisher createPublisher(ChannelId channelId) {
+        checkNotNull(channelId);
         InMemoryPublisher result = new InMemoryPublisher(channelId, providerOf(subscribers()));
         return result;
     }
