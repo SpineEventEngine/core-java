@@ -42,7 +42,6 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.store.EventStore;
 import io.spine.server.stand.Stand;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
@@ -70,9 +69,7 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.testing.TestValues.randomString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -329,18 +326,6 @@ class BoundedContextTest {
                 .setEventBus(EventBus.newBuilder())
                 .build();
         assertNotNull(bc.eventBus());
-    }
-
-    @Test
-    @DisplayName("not overwrite EventStore if already set in EventBus.Builder")
-    void useEventStoreIfSet() {
-        EventStore eventStore = eventStore();
-        BoundedContext bc = BoundedContextBuilder
-                .assumingTests()
-                .setEventBus(EventBus.newBuilder().setEventStore(eventStore))
-                .build();
-        assertEquals(eventStore, bc.eventBus()
-                                   .eventStore());
     }
 
     @Nested

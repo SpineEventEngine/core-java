@@ -29,7 +29,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -39,7 +38,6 @@ import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerDispatcher;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.test.shared.AnyProcess;
 import io.spine.server.type.CommandClass;
@@ -138,12 +136,9 @@ class ProcessManagerTest {
         context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        StorageFactory storageFactory = ServerEnvironment.instance()
-                                                         .storageFactory();
-        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
+        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false);
 
         EventBus eventBus = EventBus.newBuilder()
-                                    .setStorageFactory(storageFactory)
                                     .build();
         CommandBus commandBus = spy(CommandBus.newBuilder()
                                               .injectTenantIndex(tenantIndex)

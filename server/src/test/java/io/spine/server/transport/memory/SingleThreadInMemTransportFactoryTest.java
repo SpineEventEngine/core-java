@@ -17,34 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport;
 
-import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
+package io.spine.server.transport.memory;
 
-/**
- * A factory for creating channel-based transport for {@code Message} inter-exchange between the
- * current deployment component and other application parts.
- *
- * Inspired by <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html">
- * Publish-Subscriber Channel pattern.</a>
- */
-@SPI
-public interface TransportFactory extends AutoCloseable {
+import io.spine.server.transport.TransportFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-    /**
-     * Creates a {@link Publisher} channel with the given ID.
-     *
-     * @param channelId the ID of the channel.
-     * @return a new {@code Publisher} instance
-     */
-    Publisher createPublisher(ChannelId channelId);
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.transport.memory.InMemoryTransportFactoryTest.newChannelId;
 
-    /**
-     * Creates a {@link Subscriber} channel with the given ID.
-     *
-     * @param messageClass the ID of the channel.
-     * @return a new {@code Subscriber} instance
-     */
-    Subscriber createSubscriber(ChannelId messageClass);
+@DisplayName("`SingleThreadInMemTransportFactory` should")
+class SingleThreadInMemTransportFactoryTest {
+
+    private TransportFactory transportFactory;
+
+    @BeforeEach
+    void createInstance() {
+        transportFactory = SingleThreadInMemTransportFactory.newInstance();
+    }
+
+    @Test
+    @DisplayName("create `SingleThreadInMemSubscriber`")
+    void subscribers() {
+        assertThat(transportFactory.createSubscriber(newChannelId()))
+                .isInstanceOf(SingleThreadInMemSubscriber.class);
+    }
 }

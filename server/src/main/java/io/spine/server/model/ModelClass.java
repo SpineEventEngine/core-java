@@ -48,7 +48,7 @@ public abstract class ModelClass<T> extends ClassTypeValue<T> {
     ModelClass<T> get(Class<T> rawClass,
                       Class<M> requestedModelClass,
                       Supplier<ModelClass<T>> supplier) {
-        Model model = Model.getInstance(rawClass);
+        Model model = Model.inContextOf(rawClass);
         ModelClass<T> result = model.getClass(rawClass, requestedModelClass, supplier);
         return result;
     }

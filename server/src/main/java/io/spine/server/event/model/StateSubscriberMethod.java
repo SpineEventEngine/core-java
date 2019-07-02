@@ -106,9 +106,9 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     @SuppressWarnings("TestOnlyProblems")
         // Checks that the resulting context is not `AssumingTests` in production environment.
     private BoundedContextName contextOf(Class<?> cls) {
-        Model model = Model.getInstance(cls);
+        Model model = Model.inContextOf(cls);
         BoundedContextName name = model.contextName();
-        if (Environment.getInstance().isProduction() && name.equals(assumingTests())) {
+        if (Environment.instance().isProduction() && name.equals(assumingTests())) {
             _warn("The class `%s` belongs to the Bounded Context named `%s`," +
                   " which is used for testing. As such, it should not be used in production." +
                   " Please see the description of `%s` for instructions on" +

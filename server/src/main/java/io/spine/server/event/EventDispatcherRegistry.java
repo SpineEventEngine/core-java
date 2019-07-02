@@ -59,7 +59,7 @@ class EventDispatcherRegistry
      * {@inheritDoc}
      *
      * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
+     * {@linkplain EventBus#dispatchersOf(EventClass)}) EventBus}.
      */
     @Override
     protected Set<EventDispatcher<?>> dispatchersOf(EventClass messageClass) {

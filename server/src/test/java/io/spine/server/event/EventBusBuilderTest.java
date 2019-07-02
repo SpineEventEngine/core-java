@@ -22,27 +22,16 @@ package io.spine.server.event;
 
 import io.spine.core.Event;
 import io.spine.grpc.LoggingObserver;
-import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilderTest;
-import io.spine.server.event.store.EventStore;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.Tests;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.Executor;
-
-import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent",
         "DuplicateStringLiteralInspection" /* Common test display names. */})
@@ -50,32 +39,9 @@ import static org.mockito.Mockito.mock;
 class EventBusBuilderTest
         extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
 
-    private StorageFactory storageFactory;
-
     @Override
     protected EventBus.Builder builder() {
         return EventBus.newBuilder();
-    }
-
-    @BeforeEach
-    void setUp() {
-        BoundedContext bc = BoundedContextBuilder
-                .assumingTests(true)
-                .build();
-        this.storageFactory = ServerEnvironment.instance()
-                                               .storageFactory();
-    }
-
-    @Nested
-    @DisplayName("not accept null")
-    class NotAcceptNull {
-
-        @Test
-        @DisplayName("EventStore")
-        void eventStore() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setEventStore(Tests.nullRef()));
-        }
     }
 
     @Test
@@ -91,92 +57,14 @@ class EventBusBuilderTest
     class ReturnSet {
 
         @Test
-        @DisplayName("StorageFactory")
-        void storageFactory() {
-            assertEquals(storageFactory, builder().setStorageFactory(storageFactory)
-                                                  .getStorageFactory()
-                                                  .get());
-        }
-
-        @Test
-        @DisplayName("EventStore")
-        void obtainEventStore() {
-            EventStore mock = eventStore();
-            assertEquals(mock, builder().setEventStore(mock)
-                                        .getEventStore()
-                                        .get());
-        }
-
-        @Test
-        @DisplayName("stream Executor for EventStore")
-        void streamExecutor() {
-            Executor mock = mock(Executor.class);
-            assertEquals(mock, builder().setEventStoreStreamExecutor(mock)
-                                        .getEventStoreStreamExecutor()
-                                        .get());
-        }
-
-        @Test
         @DisplayName("Enricher")
         void enricher() {
             EventEnricher enricher = EventEnricher
                     .newBuilder()
                     .build();
-            assertSame(enricher, builder().setStorageFactory(storageFactory)
-                                          .setEnricher(enricher)
+            assertSame(enricher, builder().setEnricher(enricher)
                                           .enricher()
                                           .get());
-        }
-    }
-
-    @Test
-    @DisplayName("throw ISE if neither EventStore nor StorageFactory is set")
-    void requireEventStoreOrStorageFactory() {
-        assertThrows(IllegalStateException.class, () -> EventBus.newBuilder()
-                                                                .build());
-    }
-
-    @Nested
-    @DisplayName("not allow to override")
-    class NotOverride {
-
-        private EventStore eventStore;
-
-        @BeforeEach
-        void setUp() {
-            eventStore = eventStore();
-        }
-
-        @Test
-        @DisplayName("EventStore by StorageFactory")
-        void eventStoreByStorageFactory() {
-            EventBus.Builder builder = builder().setEventStore(eventStore);
-            assertThrows(IllegalStateException.class,
-                         () -> builder.setStorageFactory(storageFactory));
-        }
-
-        @Test
-        @DisplayName("StorageFactory by EventStore")
-        void storageFactoryByEventStore() {
-            EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
-            assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStore(eventStore));
-        }
-
-        @Test
-        @DisplayName("EventStoreStreamExecutor by EventStore")
-        void eventExecutorByEventStore() {
-            EventBus.Builder builder = builder().setEventStoreStreamExecutor(mock(Executor.class));
-            assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStore(eventStore));
-        }
-
-        @Test
-        @DisplayName("EventStore by EventStoreStreamExecutor")
-        void eventStoreByEventExecutor() {
-            EventBus.Builder builder = builder().setEventStore(eventStore);
-            assertThrows(IllegalStateException.class,
-                         () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
         }
     }
 
@@ -184,23 +72,13 @@ class EventBusBuilderTest
     @DisplayName("allow configuring logging level for post operations")
     void setLogLevelForPost() {
         // See that the default level is TRACE.
-        assertEquals(LoggingObserver.Level.TRACE, builder().getLogLevelForPost());
+        assertEquals(LoggingObserver.Level.TRACE, builder().logLevelForPost());
 
         // Check setting new value.
         EventBus.Builder builder = builder();
         LoggingObserver.Level newLevel = LoggingObserver.Level.DEBUG;
 
         assertSame(builder, builder.setLogLevelForPost(newLevel));
-        assertEquals(newLevel, builder.getLogLevelForPost());
-    }
-
-    private static void ensureExecutorDirect(Executor streamExecutor) {
-        long mainThreadId = Thread.currentThread()
-                                  .getId();
-        streamExecutor.execute(() -> {
-            long runnableThreadId = Thread.currentThread()
-                                          .getId();
-            assertEquals(mainThreadId, runnableThreadId);
-        });
+        assertEquals(newLevel, builder.logLevelForPost());
     }
 }

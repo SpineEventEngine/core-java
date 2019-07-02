@@ -76,7 +76,7 @@ class TracingTest {
 
     @AfterEach
     void tearDown() {
-        serverEnvironment.clearTracerFactory();
+        serverEnvironment.reset();
     }
     @Test
     @DisplayName("trace actor commands")
