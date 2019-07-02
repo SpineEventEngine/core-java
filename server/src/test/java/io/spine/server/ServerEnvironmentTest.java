@@ -176,8 +176,10 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("throwing NPE if not configured in Production mode")
+        @DisplayName("throwing NPE if not configured in the Production mode")
         void throwsIfNotConfigured() {
+            // Ensure the server environment is clear.
+            serverEnvironment.reset();
             assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
         }
 
