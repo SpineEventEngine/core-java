@@ -37,7 +37,7 @@ public abstract class AbstractChannel implements MessageChannel {
     }
 
     @Override
-    public ChannelId getId() {
+    public ChannelId id() {
         return channelId;
     }
 }
