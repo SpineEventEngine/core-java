@@ -38,8 +38,8 @@ import static io.spine.server.event.store.QueryToFilters.convert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ERepository should")
-class ERepositoryTest {
+@DisplayName("QueryToFilters should")
+class QueryToFiltersTest {
 
     @Test
     @DisplayName("convert empty query to empty EntityFilters")

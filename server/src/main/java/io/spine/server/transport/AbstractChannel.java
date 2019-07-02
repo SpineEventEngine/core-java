@@ -22,6 +22,8 @@ package io.spine.server.transport;
 import io.spine.annotation.SPI;
 import io.spine.server.integration.ChannelId;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * An abstract base for {@linkplain MessageChannel message channels}.
  */
@@ -31,11 +33,11 @@ public abstract class AbstractChannel implements MessageChannel {
     private final ChannelId channelId;
 
     protected AbstractChannel(ChannelId channelId) {
-        this.channelId = channelId;
+        this.channelId = checkNotNull(channelId);
     }
 
     @Override
-    public ChannelId getId() {
+    public ChannelId id() {
         return channelId;
     }
 }

@@ -31,6 +31,7 @@ import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.given.groups.Group;
 import io.spine.server.given.groups.GroupId;
 import io.spine.server.given.groups.GroupName;
@@ -53,6 +54,7 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -69,6 +71,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Projection should")
 class ProjectionEndToEndTest {
+
+    @AfterEach
+    void tearDown() {
+        ServerEnvironment.instance()
+                         .reset();
+    }
 
     @Test
     @DisplayName("receive entity state updates from other entities")

@@ -27,11 +27,16 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.entity.Entity;
+import io.spine.server.integration.ChannelId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,15 +50,13 @@ import static io.spine.server.DeploymentDetector.APP_ENGINE_ENVIRONMENT_PRODUCTI
 import static io.spine.server.DeploymentType.APPENGINE_CLOUD;
 import static io.spine.server.DeploymentType.APPENGINE_EMULATOR;
 import static io.spine.server.DeploymentType.STANDALONE;
-import static io.spine.server.ServerEnvironment.resetDeploymentType;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("deprecation") // Need to test deprecated API of `ServerEnvironment`.
-@DisplayName("ServerEnvironment utility should")
+@DisplayName("ServerEnvironment should")
 class ServerEnvironmentTest {
 
     private static final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
@@ -64,6 +67,7 @@ class ServerEnvironmentTest {
         assertHasPrivateParameterlessCtor(ServerEnvironment.class);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @DisplayName("tell when not running under AppEngine")
     void tellIfNotInAppEngine() {
@@ -71,6 +75,7 @@ class ServerEnvironmentTest {
         assertFalse(serverEnvironment.isAppEngine());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @DisplayName("obtain AppEngine version as optional string")
     void getAppEngineVersion() {
@@ -158,7 +163,7 @@ class ServerEnvironmentTest {
     @DisplayName("configure production `StorageFactory`")
     class StorageFactoryConfig {
 
-        private final Environment environment = Environment.getInstance();
+        private final Environment environment = Environment.instance();
 
         @BeforeEach
         void turnToProduction() {
@@ -168,22 +173,24 @@ class ServerEnvironmentTest {
         @AfterEach
         void backToTests() {
             environment.setToTests();
-            serverEnvironment.clearStorageFactory();
+            serverEnvironment.reset();
         }
 
         @Test
-        @DisplayName("throwing NPE if not configured in Production mode")
+        @DisplayName("throwing NPE if not configured in the Production mode")
         void throwsIfNotConfigured() {
+            // Ensure the server environment is clear.
+            serverEnvironment.reset();
             assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
         }
 
         @Test
-        @DisplayName("do not allow passing `InMemoryStorageFactory`")
+        @DisplayName("do not allow setting `InMemoryStorageFactory`")
         void seriousStorageForProduction() {
             InMemoryStorageFactory inMemoryStorageFactory = InMemoryStorageFactory.newInstance();
 
             assertThrows(IllegalArgumentException.class, () ->
-                    serverEnvironment.configureProductionStorage(inMemoryStorageFactory)
+                    serverEnvironment.configureStorage(inMemoryStorageFactory)
             );
         }
 
@@ -191,7 +198,7 @@ class ServerEnvironmentTest {
         @DisplayName("return configured `StorageFactory` when asked in Production")
         void productionFactory() {
             StubStorageFactory factory = new StubStorageFactory();
-            serverEnvironment.configureProductionStorage(factory);
+            serverEnvironment.configureStorage(factory);
             assertThat(serverEnvironment.storageFactory())
                     .isEqualTo(factory);
         }
@@ -203,6 +210,61 @@ class ServerEnvironmentTest {
 
             assertThat(serverEnvironment.storageFactory())
                     .isInstanceOf(InMemoryStorageFactory.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `StorageFactory` for tests")
+    class TestStorageFactoryConfig {
+
+        @AfterEach
+        void resetEnvironment() {
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("returning it when explicitly set")
+        void getSet() {
+            StorageFactory factory = new StubStorageFactory();
+
+            serverEnvironment.configureStorageForTests(factory);
+            assertThat(serverEnvironment.storageFactory())
+                    .isEqualTo(factory);
+        }
+    }
+
+    @Nested
+    @DisplayName("configure `TransportFactory`")
+    class TransportFactoryConfig {
+
+        private final Environment environment = Environment.instance();
+
+        @BeforeEach
+        void turnToProduction() {
+            environment.setToProduction();
+        }
+
+        @AfterEach
+        void backToTests() {
+            environment.setToTests();
+            serverEnvironment.reset();
+        }
+
+        @Test
+        @DisplayName("throw NPE if not configured")
+        void throwsIfNotConfigured() {
+            // Ensure the instance is clear.
+            serverEnvironment.reset();
+            assertThrows(NullPointerException.class, serverEnvironment::transportFactory);
+        }
+
+        @Test
+        @DisplayName("return configured instance in Production")
+        void productionValue() {
+            TransportFactory factory = new StubTransportFactory();
+            serverEnvironment.configureTransport(factory);
+            assertThat(serverEnvironment.transportFactory())
+                    .isEqualTo(factory);
         }
     }
 
@@ -224,7 +286,7 @@ class ServerEnvironmentTest {
         void setUp() {
             initialValue = System.getProperty(APP_ENGINE_ENVIRONMENT_PATH);
             setGaeEnvironment(targetEnvironment);
-            resetDeploymentType();
+            serverEnvironment.reset();
         }
 
         @AfterEach
@@ -234,7 +296,7 @@ class ServerEnvironmentTest {
             } else {
                 setGaeEnvironment(initialValue);
             }
-            resetDeploymentType();
+            serverEnvironment.reset();
         }
 
         void setGaeEnvironment(String value) {
@@ -249,6 +311,7 @@ class ServerEnvironmentTest {
     private static class StubStorageFactory implements StorageFactory {
 
         private final StorageFactory delegate = InMemoryStorageFactory.newInstance();
+
         @Override
         public <I> AggregateStorage<I>
         createAggregateStorage(ContextSpec context,
@@ -272,6 +335,30 @@ class ServerEnvironmentTest {
         @Override
         public InboxStorage createInboxStorage(boolean multitenant) {
             return delegate.createInboxStorage(multitenant);
+        }
+
+        @Override
+        public void close() throws Exception {
+            delegate.close();
+        }
+    }
+
+    /**
+     * Stub implementation of {@code TransportFactory} which delegates all the calls
+     * to {@code InMemoryTransportFactory}.
+     */
+    private static class StubTransportFactory implements TransportFactory {
+
+        private final TransportFactory delegate = InMemoryTransportFactory.newInstance();
+
+        @Override
+        public Publisher createPublisher(ChannelId channelId) {
+            return delegate.createPublisher(channelId);
+        }
+
+        @Override
+        public Subscriber createSubscriber(ChannelId messageClass) {
+            return delegate.createSubscriber(messageClass);
         }
 
         @Override
