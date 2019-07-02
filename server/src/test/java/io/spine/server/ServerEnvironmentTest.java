@@ -180,7 +180,6 @@ class ServerEnvironmentTest {
         void throwsIfNotConfigured() {
             // Ensure the server environment is clear.
             serverEnvironment.reset();
-            environment.setToProduction();
             assertThrows(NullPointerException.class, serverEnvironment::storageFactory);
         }
 
@@ -253,6 +252,8 @@ class ServerEnvironmentTest {
         @Test
         @DisplayName("throw NPE if not configured")
         void throwsIfNotConfigured() {
+            // Ensure the instance is clear.
+            serverEnvironment.reset();
             assertThrows(NullPointerException.class, serverEnvironment::transportFactory);
         }
 
