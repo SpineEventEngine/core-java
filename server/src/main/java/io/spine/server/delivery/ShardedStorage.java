@@ -25,8 +25,7 @@ import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.ReadRequest;
 
 /**
- * An abstract class for the {@link io.spine.server.storage.RecordStorage RecordStorage}s, which
- * spread their records across shards.
+ * An abstract class for storages, which spread their contents across shards.
  *
  * @param <M>
  *         the type of the messages stored
@@ -51,6 +50,22 @@ public abstract class ShardedStorage<I, M extends ShardedRecord, R extends ReadR
      * @return the first page of the results
      */
     public abstract Page<M> readAll(ShardIndex index);
+
+    /**
+     * Writes a message to the storage.
+     *
+     * @param message
+     *         a message to write
+     */
+    public abstract void write(M message);
+
+    /**
+     * Writes several messages to the storage.
+     *
+     * @param messages
+     *         messages to write
+     */
+    public abstract void writeAll(Iterable<M> messages);
 
     /**
      * Removes the passed messages from the storage.

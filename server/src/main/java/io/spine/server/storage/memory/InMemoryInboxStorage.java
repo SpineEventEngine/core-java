@@ -33,9 +33,12 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.validate.Validated;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.compare;
+import static java.util.stream.Collectors.toList;
 
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
@@ -74,13 +77,20 @@ public final class InMemoryInboxStorage extends InboxStorage implements Logging 
     }
 
     @Override
-    public void markDelivered(Iterable<InboxMessage> messages) {
-        for (InboxMessage message : messages) {
-            @Validated InboxMessage updated = message.toBuilder()
-                                                      .setStatus(InboxMessageStatus.DELIVERED)
-                                                      .vBuild();
-            write(updated);
+    public void writeAll(Iterable<InboxMessage> messages) {
+        for (InboxMessage inboxMessage : messages) {
+            write(inboxMessage);
         }
+    }
+
+    @Override
+    public void markDelivered(Iterable<InboxMessage> messages) {
+        List<@Validated InboxMessage> updated =
+                stream(messages).map((m) -> m.toBuilder()
+                                             .setStatus(InboxMessageStatus.DELIVERED)
+                                             .vBuild())
+                                .collect(toList());
+        writeAll(updated);
     }
 
     @Override
