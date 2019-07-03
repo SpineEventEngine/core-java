@@ -9,7 +9,9 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "DiagnosticEventsProto";
 option java_multiple_files = true;
 
+import "spine/core/command.proto";
 import "spine/core/diagnostics.proto";
+import "spine/core/event.proto";
 import "spine/validate/validation_error.proto";
 
 // An event emitted whenever an entity validation constraint is violated.
@@ -30,4 +32,34 @@ message ConstraintViolated {
 
     // The validation constraint violations.
     repeated validate.ConstraintViolation violation = 4 [(required) = false];
+}
+
+message CannotDispatchCommandTwice {
+
+    // The violated entity info.
+    core.MessageId entity = 1;
+
+    core.CommandId command = 2;
+}
+
+message CannotDispatchEventTwice {
+
+    // The violated entity info.
+    core.MessageId entity = 1;
+
+    core.EventId event = 2;
+}
+
+message HandlerFailedUnexpectedly {
+
+    // The violated entity info.
+    core.MessageId entity = 1;
+
+    core.MessageId handled_signal = 2;
+
+    string type = 3;
+
+    string message = 4;
+
+    string stacktrace = 5;
 }
