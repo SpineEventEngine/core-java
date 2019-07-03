@@ -20,9 +20,11 @@
 
 package io.spine.server.type;
 
-import com.google.protobuf.Message;
 import io.spine.base.MessageContext;
 import io.spine.core.ActorContext;
+import io.spine.core.MessageId;
+import io.spine.core.Signal;
+import io.spine.core.SignalId;
 import io.spine.core.TenantId;
 
 /**
@@ -32,7 +34,9 @@ import io.spine.core.TenantId;
  * @param <T> the type of the object that wraps a message
  * @param <C> the type of the message context
  */
-public interface ActorMessageEnvelope<I extends Message, T, C extends MessageContext>
+public interface ActorMessageEnvelope<I extends SignalId,
+                                      T extends Signal<I, ?, C>,
+                                      C extends MessageContext>
         extends MessageEnvelope<I, T, C> {
 
     /**
@@ -44,4 +48,8 @@ public interface ActorMessageEnvelope<I extends Message, T, C extends MessageCon
      * Obtains an actor context for the wrapped message.
      */
     ActorContext actorContext();
+
+    default MessageId messageId() {
+        return outerObject().messageId();
+    }
 }

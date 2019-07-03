@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import io.spine.base.Error;
 import io.spine.logging.Logging;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.PropagationOutcome;
@@ -82,11 +83,16 @@ abstract class PmEndpoint<I,
         try {
             PropagationOutcome outcome = runTransactionFor(manager);
             store(manager);
-            // TODO:2019-07-01:dmytro.dashenkov: Handle error case.
             if (outcome.hasSuccess()) {
                 postMessages(outcome.getSuccess());
+            } else if (outcome.hasError()) {
+                Error error = outcome.getError();
+                repository().lifecycleOf(manager.id())
+                            .onHandlerFailed(envelope().messageId(), error);
+            } else {
+                _warn("Handling of {}:{} was interrupted: {}",
+                      envelope().messageClass(), envelope().id(), outcome.getInterrupted());
             }
-            repository().postEvents(outcome.getSuccess().getProducedEvents().getEventList());
         } catch (RuntimeException ex) {
             store(manager);
             throw ex;

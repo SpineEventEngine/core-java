@@ -21,7 +21,9 @@
 package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.base.Error;
 import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
@@ -45,7 +47,8 @@ import java.util.List;
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
                                  M extends ActorMessageEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, A, M> {
+        extends EntityMessageEndpoint<I, A, M>
+        implements Logging {
 
     AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
@@ -57,7 +60,7 @@ abstract class AggregateEndpoint<I,
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
 
         PropagationOutcome outcome = runTransactionWith(aggregate);
-        if (outcome.hasSuccess()) { // TODO:2019-07-01:dmytro.dashenkov: Post "errored" system event.
+        if (outcome.hasSuccess()) {
             // Update lifecycle flags only if the message was handled successfully and flags changed.
             LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
             if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
@@ -71,6 +74,13 @@ abstract class AggregateEndpoint<I,
                                             .getEventList();
                 repository().postEvents(events);
             }
+        } else if (outcome.hasError()){
+            Error error = outcome.getError();
+            repository().lifecycleOf(aggregateId)
+                        .onHandlerFailed(envelope().messageId(), error);
+        } else {
+            _warn("Handling of {}:{} was interrupted: {}",
+                  envelope().messageClass(), envelope().id(), outcome.getInterrupted());
         }
     }
 

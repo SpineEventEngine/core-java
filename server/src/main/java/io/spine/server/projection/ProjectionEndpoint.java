@@ -23,7 +23,9 @@ package io.spine.server.projection;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.core.EventContext;
+import io.spine.logging.Logging;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.PropagationOutcome;
@@ -38,7 +40,7 @@ import static io.spine.server.projection.ProjectionTransaction.start;
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, EventEnvelope> {
+        extends EntityMessageEndpoint<I, P, EventEnvelope> implements Logging {
 
     protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -74,8 +76,17 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
-        invokeDispatcher(projection, envelope());
-        tx.commit();
+        PropagationOutcome outcome = invokeDispatcher(projection, envelope());
+        if (outcome.hasSuccess()) {
+            tx.commit();
+        } else if (outcome.hasError()) {
+            Error error = outcome.getError();
+            repository().lifecycleOf(projection.id())
+                        .onHandlerFailed(envelope().messageId(), error);
+        } else {
+            _warn("Handling of {}:{} was interrupted: {}",
+                  envelope().messageClass(), envelope().id(), outcome.getInterrupted());
+        }
     }
 
     @CanIgnoreReturnValue

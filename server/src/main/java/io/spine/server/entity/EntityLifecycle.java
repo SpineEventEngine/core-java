@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
@@ -42,6 +43,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.EntityTypeName;
+import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.CommandHandled;
@@ -332,6 +334,20 @@ public class EntityLifecycle {
                 .addAllViolation(error.getConstraintViolationList())
                 .vBuild();
         postEvent(event);
+    }
+
+    public final void onHandlerFailed(MessageId handledSignal, Error error) {
+        checkNotNull(handledSignal);
+        checkNotNull(error);
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(entityId)
+                .setHandledSignal(handledSignal)
+                .setType(error.getType())
+                .setMessage(error.getMessage())
+                .setStacktrace(error.getStacktrace())
+                .vBuild();
+        postEvent(systemEvent);
     }
 
     private void postIfChanged(EntityRecordChange change,
