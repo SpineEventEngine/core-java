@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.entity.PropagationOutcome;
@@ -40,6 +41,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -250,8 +252,17 @@ public abstract class AbstractHandlerMethod<T,
                     .vBuild();
             outcome.setError(error);
         } catch (InvocationTargetException e) {
-            Error error = errorInHandler(envelope, e);
-            outcome.setError(error);
+            Throwable cause = e.getCause();
+            checkNotNull(cause);
+            if (cause instanceof ThrowableMessage) {
+                ThrowableMessage throwable = (ThrowableMessage) cause;
+                Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
+                Success success = maybeSuccess.orElseThrow(this::cannotThrowRejections);
+                outcome.setSuccess(success);
+            } else {
+                Error error = errorInHandler(envelope, cause);
+                outcome.setError(error);
+            }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             Message message = envelope.message();
             Message context = envelope.context();
@@ -260,14 +271,26 @@ public abstract class AbstractHandlerMethod<T,
         return outcome.vBuild();
     }
 
-    private Error errorInHandler(E envelope, InvocationTargetException e) {
-        Throwable cause = getRootCause(e);
+    private RuntimeException cannotThrowRejections() {
+        String errorMessage = format("`%s` may not throw rejections.", this);
+        return new IllegalOutcomeException(errorMessage);
+    }
+
+    protected Optional<Success> handleRejection(ThrowableMessage throwableMessage, T target,
+                                                E origin) {
+        return Optional.empty();
+    }
+
+    private Error errorInHandler(E envelope, Throwable thrown) {
+        Throwable cause = getRootCause(thrown);
+        String message = cause.getMessage();
         String errorMessage = format("Error handling message %s(ID: %s):%n%s",
                                      envelope.messageClass(),
                                      envelope.id(),
-                                     cause.getMessage());
+                                     message != null ? message : "");
         Error.Builder builder = Error
                 .newBuilder()
+                .setType(cause.getClass().getCanonicalName())
                 .setMessage(errorMessage);
         if (cause instanceof ValidationException) {
             ValidationException validationException = (ValidationException) cause;

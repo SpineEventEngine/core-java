@@ -73,6 +73,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
@@ -180,9 +181,10 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
-
-            assertThrows(IllegalStateException.class,
-                         () -> handler.invoke(handlerObject, envelope));
+            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            assertTrue(outcome.hasError());
+            assertThat(outcome.getError().getType())
+                    .isEqualTo(IllegalOutcomeException.class.getCanonicalName());
         }
 
         @Test

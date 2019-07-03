@@ -785,9 +785,8 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvent(twice()))
-                    .assertThat(emittedEvent(AggCannotReassignUnassignedTask.class, once()))
-                    .assertThat(emittedEvents(AggUserNotified.class))
+                    .assertThat(emittedEvents(AggCannotReassignUnassignedTask.class,
+                                              AggUserNotified.class))
                     .close();
         }
     }

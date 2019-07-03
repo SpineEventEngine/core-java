@@ -20,8 +20,10 @@
 
 package io.spine.server.command;
 
+import io.spine.server.EventProducer;
+
 /**
  * Common interface for all objects that receive commands in the end of the dispatching.
  */
-public interface CommandReceiver {
+public interface CommandReceiver extends EventProducer {
 }

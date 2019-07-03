@@ -30,10 +30,8 @@ import io.spine.server.route.CommandRoute;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
-import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeInt;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
@@ -42,10 +40,6 @@ import java.util.Set;
  */
 public final class FailingAggregateRepository
         extends AggregateRepository<Long, FailingAggregate> {
-
-    private boolean errorLogged;
-    private @Nullable MessageEnvelope lastErrorEnvelope;
-    private @Nullable RuntimeException lastException;
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
@@ -88,27 +82,5 @@ public final class FailingAggregateRepository
                         return ImmutableSet.of(1L, 2L);
                     }
                 });
-    }
-
-    @Override
-    protected void logError(String msgFormat,
-                            MessageEnvelope envelope,
-                            RuntimeException exception) {
-        super.logError(msgFormat, envelope, exception);
-        errorLogged = true;
-        lastErrorEnvelope = envelope;
-        lastException = exception;
-    }
-
-    public boolean isErrorLogged() {
-        return errorLogged;
-    }
-
-    public @Nullable MessageEnvelope getLastErrorEnvelope() {
-        return lastErrorEnvelope;
-    }
-
-    public @Nullable RuntimeException getLastException() {
-        return lastException;
     }
 }

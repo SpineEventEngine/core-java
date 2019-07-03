@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Error;
 import io.spine.core.Event;
@@ -32,6 +33,7 @@ import io.spine.server.entity.Success;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.ActorMessageEnvelope;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -66,13 +68,16 @@ abstract class AggregateEndpoint<I,
             if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
                 storage().writeLifecycleFlags(aggregateId, flagsAfter);
             }
-
-            store(aggregate);
             Success success = outcome.getSuccess();
             if (success.hasProducedEvents()) {
+                store(aggregate);
                 List<Event> events = success.getProducedEvents()
                                             .getEventList();
-                repository().postEvents(events);
+                post(events);
+            } else if (success.hasRejection()) {
+                post(success.getRejection());
+            } else {
+                onEmptyResult(aggregate, envelope());
             }
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
@@ -82,6 +87,14 @@ abstract class AggregateEndpoint<I,
             _warn("Handling of {}:{} was interrupted: {}",
                   envelope().messageClass(), envelope().id(), outcome.getInterrupted());
         }
+    }
+
+    private void post(Collection<Event> events) {
+        repository().postEvents(events);
+    }
+
+    private void post(Event event) {
+        post(ImmutableList.of(event));
     }
 
     private A loadOrCreate(I aggregateId) {

@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -91,6 +93,11 @@ public abstract class AbstractCommander
         PropagationOutcome outcome = method.invoke(this, event);
         postCommands(outcome.getSuccess());
         return identity();
+    }
+
+    @Override
+    public Version version() {
+        return Versions.zero();
     }
 
     private void postCommands(Success successfulOutcome) {

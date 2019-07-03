@@ -22,6 +22,10 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
+import io.spine.base.ThrowableMessage;
+import io.spine.server.EventProducer;
+import io.spine.server.entity.Success;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -29,6 +33,7 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -39,7 +44,7 @@ import java.lang.reflect.Method;
  *         the type of the produced message classes
  */
 @Immutable
-public abstract class CommandAcceptingMethod<T,
+public abstract class CommandAcceptingMethod<T extends EventProducer,
                                              P extends MessageClass<?>>
         extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, P> {
 
@@ -50,5 +55,17 @@ public abstract class CommandAcceptingMethod<T,
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.from(rawMessageClass());
+    }
+
+    @Override
+    protected Optional<Success>
+    handleRejection(ThrowableMessage throwableMessage, T target, CommandEnvelope origin) {
+        throwableMessage.initProducer(target.producerId());
+        RejectionEnvelope envelope = RejectionEnvelope.from(origin, throwableMessage);
+        Success success = Success
+                .newBuilder()
+                .setRejection(envelope.outerObject())
+                .vBuild();
+        return Optional.of(success);
     }
 }
