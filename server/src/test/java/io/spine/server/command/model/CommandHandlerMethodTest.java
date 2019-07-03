@@ -319,7 +319,7 @@ class CommandHandlerMethodTest {
             try {
                 handler.dispatch(envelope);
             } catch (HandlerMethodFailedException e) {
-                assertCauseAndId(e, handler.getId());
+                assertCauseAndId(e, handler.id());
             }
         }
 

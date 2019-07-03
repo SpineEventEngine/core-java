@@ -31,10 +31,12 @@ import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
@@ -66,6 +68,7 @@ public final class BoundedContextBuilder implements Logging {
     private final ContextSpec spec;
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
+    private EventEnricher eventEnricher;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
     private Supplier<AggregateRootDirectory> rootDirectory;
@@ -111,7 +114,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Creates a new builder for a single tenant test-only bounded context.
+     * Creates a new builder for a single tenant test-only Bounded Context.
      */
     @Internal
     @VisibleForTesting
@@ -175,9 +178,36 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(eventBus);
     }
 
+    /**
+     * Sets a custom {@link Enricher} for events posted to
+     * the {@code EventBus} of the context being built.
+     *
+     * <p>If the {@code Enricher} is not set, the enrichments
+     * will <strong>NOT</strong> be supported in this context.
+     *
+     * @param enricher
+     *         the {@code Enricher} for events or {@code null} if enrichment is not supported
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder enrichEventsUsing(EventEnricher enricher) {
+        this.eventEnricher = checkNotNull(enricher);
+        return this;
+    }
+
+    /**
+     * Obtains {@code EventEnricher} assigned to the context to be built, or
+     * empty {@code Optional} if no enricher was assigned prior to this call.
+     */
+    public Optional<EventEnricher> eventEnricher() {
+        return Optional.ofNullable(eventEnricher);
+    }
+
     EventBus buildEventBus(BoundedContext context) {
         checkNotNull(context);
         eventBus.injectContext(context);
+        if (eventEnricher != null) {
+            eventBus.injectEnricher(eventEnricher);
+        }
         return eventBus.build();
     }
 
@@ -199,7 +229,8 @@ public final class BoundedContextBuilder implements Logging {
     public BoundedContextBuilder setTenantIndex(TenantIndex tenantIndex) {
         if (isMultitenant()) {
             checkNotNull(tenantIndex,
-                         "TenantRepository cannot be null in a multitenant BoundedContext.");
+                         "`%s` cannot be null in a multitenant `BoundedContext`.",
+                         TenantIndex.class.getSimpleName());
         }
         this.tenantIndex = tenantIndex;
         return this;

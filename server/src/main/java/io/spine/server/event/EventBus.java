@@ -123,7 +123,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     /**
      *  The enricher for posted events or {@code null} if the enrichment is not supported.
      */
-    private final @MonotonicNonNull EventEnricher enricher;
+    private final @Nullable EventEnricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -313,13 +313,9 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * @param enricher
          *         the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
-        public Builder setEnricher(EventEnricher enricher) {
-            this.enricher = enricher;
-            return this;
-        }
-
-        public Optional<EventEnricher> enricher() {
-            return Optional.ofNullable(enricher);
+        @Internal
+        public void injectEnricher(EventEnricher enricher) {
+            this.enricher = checkNotNull(enricher);
         }
 
         /**

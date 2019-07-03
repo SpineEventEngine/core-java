@@ -54,7 +54,7 @@ public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatche
     @Override
     public String dispatch(CommandEnvelope envelope) {
         commandsReceived++;
-        return getId();
+        return id();
     }
 
     public int commandsDispatched() {

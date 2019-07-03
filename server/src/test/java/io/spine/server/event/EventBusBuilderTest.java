@@ -26,18 +26,14 @@ import io.spine.core.Event;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.Tests;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent",
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventBus Builder should")
 class EventBusBuilderTest
         extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
@@ -48,44 +44,20 @@ class EventBusBuilderTest
     }
 
     @Test
-    @DisplayName("accept null Enricher")
-    void acceptNullEnricher() {
-        assertNull(builder().setEnricher(Tests.nullRef())
-                            .enricher()
-                            .orElse(null));
-    }
-
-    @Nested
-    @DisplayName("return set")
-    class ReturnSet {
-
-        @Test
-        @DisplayName("Enricher")
-        void enricher() {
-            EventEnricher enricher = EventEnricher
-                    .newBuilder()
-                    .build();
-            assertSame(enricher, builder().setEnricher(enricher)
-                                          .enricher()
-                                          .get());
-        }
+    @DisplayName("reject null `EventEnricher`")
+    void rejectNullEnricher() {
+        assertThrows(NullPointerException.class, () ->
+                builder().injectEnricher(Tests.nullRef()));
     }
 
     @Nested
     @DisplayName("assign `StreamObserver`")
     class PostObserver {
 
-        private EventBus.Builder builder;
-
-        @BeforeEach
-        void createBuilder() {
-            builder = EventBus.newBuilder();
-        }
-
         @Test
-        @DisplayName("assigning `noOpObserver()` is not assigned")
+        @DisplayName("assigning `noOpObserver()` if not assigned")
         void assigningDefault() {
-            assertThat(builder.build()
+            assertThat(builder().build()
                               .observer())
                     .isInstanceOf(noOpObserver().getClass());
         }
@@ -107,11 +79,10 @@ class EventBusBuilderTest
                 }
             };
 
-            assertThat(builder.setObserver(observer)
-                              .build()
-                              .observer())
+            assertThat(builder().setObserver(observer)
+                                .build()
+                                .observer())
                     .isEqualTo(observer);
         }
-
     }
 }

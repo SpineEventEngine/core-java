@@ -64,7 +64,7 @@ public abstract class AbstractCommander
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
         CommandingMethod.Result result = method.invoke(this, command);
         result.transformOrSplitAndPost(command, commandBus);
-        return getId();
+        return id();
     }
 
     @Override

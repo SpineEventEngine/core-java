@@ -91,7 +91,7 @@ public abstract class AbstractCommandHandler
         Result result = method.invoke(this, envelope);
         List<Event> events = result.produceEvents(envelope);
         postEvents(events);
-        return getId();
+        return id();
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.

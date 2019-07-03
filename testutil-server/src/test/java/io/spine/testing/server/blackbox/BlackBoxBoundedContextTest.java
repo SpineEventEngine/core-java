@@ -406,17 +406,12 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private BlackBoxBoundedContext<?> blackBox;
         private EventEnricher enricher;
-        private EventBus.Builder eventBus;
 
         @BeforeEach
         void setUp() {
             enricher = EventEnricher
                     .newBuilder()
                     .build();
-            eventBus = EventBus
-                    .newBuilder()
-                    .setEnricher(enricher);
-
             EventBus someEventBus = mock(EventBus.class);
             commandDispatcher = new BbCommandDispatcher(someEventBus, commandClass);
             eventDispatcher = new BbEventDispatcher();
@@ -426,7 +421,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void singleTenant() {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
-                    .setEventBus(eventBus);
+                    .enrichEventsUsing(enricher);
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
@@ -456,7 +451,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void multiTenant() {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(true)
-                    .setEventBus(eventBus);
+                    .enrichEventsUsing(enricher);
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);

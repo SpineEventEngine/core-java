@@ -53,7 +53,7 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
     @Override
     public String dispatch(CommandEnvelope envelope) {
         commandsReceived++;
-        return getId();
+        return id();
     }
 
     public int commandsDispatched() {
