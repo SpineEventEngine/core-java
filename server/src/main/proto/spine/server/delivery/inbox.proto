@@ -20,7 +20,7 @@
 
 syntax = "proto3";
 
-package spine.server.inbox;
+package spine.server.delivery;
 
 import "spine/options.proto";
 
@@ -114,7 +114,7 @@ message InboxMessage {
     // The identifier of the `Inbox` in which this message is stored.
     InboxId inbox_id = 3 [(required) = true];
 
-    spine.server.sharding.ShardIndex shard_index = 4 [(required) = true];
+    ShardIndex shard_index = 4 [(required) = true];
 
     // What the message is.
     oneof payload {
