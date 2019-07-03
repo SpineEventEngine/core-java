@@ -35,13 +35,11 @@ import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
 import io.spine.server.procman.given.repo.ProjectCompletion;
@@ -54,6 +52,9 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.system.server.CannotDispatchCommandTwice;
+import io.spine.system.server.CannotDispatchEventTwice;
+import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
@@ -88,9 +89,11 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProject;
@@ -109,8 +112,6 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -318,29 +319,42 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("events")
         void events() {
+            DiagnosticMonitor monitor = new DiagnosticMonitor();
+            boundedContext.registerEventDispatcher(monitor);
             Event event = GivenMessage.projectStarted();
 
             dispatchEvent(event);
             assertTrue(TestProcessManager.processed(event.enclosedMessage()));
-
             dispatchEvent(event);
-            RuntimeException exception = repository().latestException();
-            assertNotNull(exception);
-            assertThat(exception, instanceOf(DuplicateEventException.class));
+
+            List<CannotDispatchEventTwice> duplicateEventEvents = monitor.duplicateEventEvents();
+            assertThat(duplicateEventEvents).hasSize(1);
+            CannotDispatchEventTwice systemEvent = duplicateEventEvents.get(0);
+            assertThat(systemEvent.getEvent()).isEqualTo(event.id());
+            PmProjectStarted eventMessage = (PmProjectStarted) event.enclosedMessage();
+            assertThat(unpack(systemEvent.getEntity().getId()))
+                    .isEqualTo(eventMessage.getProjectId());
         }
 
         @Test
         @DisplayName("commands")
         void commands() {
+            DiagnosticMonitor monitor = new DiagnosticMonitor();
+            boundedContext.registerEventDispatcher(monitor);
             Command command = GivenMessage.createProject();
 
             dispatchCommand(command);
             assertTrue(TestProcessManager.processed(command.enclosedMessage()));
-
             dispatchCommand(command);
-            RuntimeException exception = repository().latestException();
-            assertNotNull(exception);
-            assertThat(exception, instanceOf(DuplicateCommandException.class));
+
+            List<CannotDispatchCommandTwice> duplicateCommandEvents =
+                    monitor.duplicateCommandEvents();
+            assertThat(duplicateCommandEvents).hasSize(1);
+            CannotDispatchCommandTwice event = duplicateCommandEvents.get(0);
+            assertThat(event.getCommand()).isEqualTo(command.id());
+            PmCreateProject commandMessage = (PmCreateProject) command.enclosedMessage();
+            assertThat(unpack(event.getEntity().getId()))
+                    .isEqualTo(commandMessage.getProjectId());
         }
     }
 

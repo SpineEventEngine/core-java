@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static java.lang.String.format;
@@ -283,15 +284,11 @@ public abstract class AbstractHandlerMethod<T,
 
     private Error errorInHandler(E envelope, Throwable thrown) {
         Throwable cause = getRootCause(thrown);
-        String message = cause.getMessage();
-        String errorMessage = format("Error handling message %s(ID: %s):%n%s",
-                                     envelope.messageClass(),
-                                     envelope.id(),
-                                     message != null ? message : "");
+        String message = nullToEmpty(cause.getMessage());
         Error.Builder builder = Error
                 .newBuilder()
                 .setType(cause.getClass().getCanonicalName())
-                .setMessage(errorMessage);
+                .setMessage(message);
         if (cause instanceof ValidationException) {
             ValidationException validationException = (ValidationException) cause;
             builder.setValidationError(validationException.asValidationError());

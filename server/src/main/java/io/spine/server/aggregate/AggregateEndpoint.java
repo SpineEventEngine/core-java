@@ -104,9 +104,9 @@ abstract class AggregateEndpoint<I,
     @CanIgnoreReturnValue
     final PropagationOutcome runTransactionWith(A aggregate) {
         PropagationOutcome outcome = invokeDispatcher(aggregate, envelope());
-        AggregateTransaction tx = startTransaction(aggregate);
         Success successfulOutcome = outcome.getSuccess();
         if (successfulOutcome.hasProducedEvents()) {
+            AggregateTransaction tx = startTransaction(aggregate);
             List<Event> eventList = successfulOutcome.getProducedEvents()
                                                      .getEventList();
             List<Event> producedEvents = aggregate.apply(eventList);
@@ -118,7 +118,6 @@ abstract class AggregateEndpoint<I,
                   .addAllEvent(producedEvents);
             return result.vBuild();
         } else {
-            tx.commit();
             return outcome;
         }
     }

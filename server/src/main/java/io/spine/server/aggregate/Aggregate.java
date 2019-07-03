@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -282,15 +283,19 @@ public abstract class Aggregate<I,
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    final void play(AggregateHistory history) {
+    @CanIgnoreReturnValue
+    final Propagation play(AggregateHistory history) {
         Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
         List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
-        play(events);
-        remember(events);
+        Propagation propagation = play(events);
+        if (propagation.getSuccessful()) {
+            remember(events);
+        }
+        return propagation;
     }
 
     /**
@@ -311,12 +316,13 @@ public abstract class Aggregate<I,
      *         the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
-    final List<Event> apply(List<Event> events) {
+    final Propagation apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
-        play(versionedEvents);
+        // TODO:2019-07-03:dmytro.dashenkov: Alter event versions.
+        Propagation propagation = play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
-        return versionedEvents;
+        return propagation;
     }
 
     /**
