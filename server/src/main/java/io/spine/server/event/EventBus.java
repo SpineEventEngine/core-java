@@ -31,8 +31,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.grpc.LoggingObserver;
-import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
@@ -51,6 +49,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static java.lang.String.format;
 
 /**
@@ -113,7 +112,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     /**
      *  The observer of post operations.
      */
-    private final StreamObserver<Ack> streamObserver;
+    private final StreamObserver<Ack> observer;
 
     /**
      * The validator for events posted to the bus lazily {@linkplain #validator() initialized}.
@@ -130,8 +129,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     private EventBus(Builder builder) {
         super(builder);
         this.enricher = builder.enricher;
-        this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
-
+        this.observer = checkNotNull(builder.observer);
         this.deadMessageHandler = new DeadEventTap();
     }
 
@@ -201,7 +199,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
-        post(event, streamObserver);
+        post(event, observer());
     }
 
     /**
@@ -217,7 +215,12 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
-        post(events, streamObserver);
+        post(events, observer());
+    }
+
+    @VisibleForTesting
+    StreamObserver<Ack> observer() {
+        return observer;
     }
 
     /**
@@ -287,8 +290,8 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          */
         private @Nullable EventEnricher enricher;
 
-        /** Logging level for posted events.  */
-        private LoggingObserver.Level logLevelForPost = Level.TRACE;
+        /** The observer for {@link #post(Message, StreamObserver)} operations. */
+        private @Nullable StreamObserver<Ack> observer;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -320,21 +323,16 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         }
 
         /**
-         * Sets logging level for post operations.
-         *
-         * <p>If not set directly, {@link io.spine.grpc.LoggingObserver.Level#TRACE Level.TRACE}
-         * will be used.
+         * Assigns the observer for the {@link #post(Message, StreamObserver)} operations.
          */
-        public Builder setLogLevelForPost(Level level) {
-            this.logLevelForPost = level;
+        public Builder setObserver(StreamObserver<Ack> observer) {
+            this.observer = observer;
             return this;
         }
 
-        /**
-         * Obtains the logging level for {@linkplain EventBus#post(Event) post} operations.
-         */
-        public Level logLevelForPost() {
-            return this.logLevelForPost;
+        /** Obtains {@code StreamObserver} assigned to the bus. */
+        public Optional<StreamObserver<Ack>> observer() {
+            return Optional.ofNullable(observer);
         }
 
         /**
@@ -347,6 +345,9 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Internal
         @CheckReturnValue
         public EventBus build() {
+            if (observer == null) {
+                observer = noOpObserver();
+            }
             EventBus result = new EventBus(this);
             return result;
         }
