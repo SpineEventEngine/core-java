@@ -21,6 +21,7 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
+import io.spine.server.entity.Repository;
 import io.spine.server.type.ActorMessageEnvelope;
 
 /**
@@ -46,4 +47,8 @@ public interface MessageEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * Processes the exception thrown during dispatching the message.
      */
     void onError(M envelope, RuntimeException exception);
+
+    void onDuplicate(I target, M envelope);
+
+    Repository<I, ?> repository();
 }

@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
+import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.EventEnvelope;
 
@@ -33,7 +34,8 @@ import io.spine.server.type.EventEnvelope;
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, EventEnvelope> {
+        extends PmEndpoint<I, P, EventEnvelope>
+        implements EventEndpoint<I> {
 
     protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
         super(repository, event);

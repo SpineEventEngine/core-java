@@ -138,7 +138,8 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Obtains the parent repository of this endpoint.
      */
-    protected Repository<I, E> repository() {
+    @Override
+    public Repository<I, E> repository() {
         return repository;
     }
 }

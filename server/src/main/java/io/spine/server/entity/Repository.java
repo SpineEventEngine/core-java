@@ -404,7 +404,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @return {@link EntityLifecycle} of the given entity
      */
     @Internal
-    protected EntityLifecycle lifecycleOf(I id) {
+    public EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         SystemWriteSide writeSide = context().systemClient()
                                              .writeSide();

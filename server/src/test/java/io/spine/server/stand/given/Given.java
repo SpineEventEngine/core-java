@@ -23,7 +23,6 @@ package io.spine.server.stand.given;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
@@ -62,11 +61,6 @@ public class Given {
         protected void setupEventRouting(EventRouting<ProjectId> routing) {
             super.setupEventRouting(routing);
             routing.route(PrjProjectCreated.class, EVENT_TARGETS_FN);
-        }
-
-        @Override
-        public EntityLifecycle lifecycleOf(ProjectId id) {
-            return super.lifecycleOf(id);
         }
     }
 

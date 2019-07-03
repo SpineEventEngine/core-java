@@ -165,7 +165,7 @@ public final class PmDispatcher {
         }
 
         @Override
-        protected EntityLifecycle lifecycleOf(I id) {
+        public EntityLifecycle lifecycleOf(I id) {
             return NoOpLifecycle.instance();
         }
     }

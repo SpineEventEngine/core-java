@@ -18,25 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.delivery.given;
 
-import io.spine.server.delivery.EventEndpoint;
-import io.spine.server.type.EventEnvelope;
+import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.entity.Repository;
+import io.spine.server.type.CommandEnvelope;
 
-/**
- * Abstract base for endpoints that dispatch events to aggregates.
- *
- * <p>An aggregate may receive an event if it {@linkplain io.spine.server.event.React reacts} on it,
- * or if it {@linkplain io.spine.server.aggregate.Apply#allowImport() imports} it.
- *
- * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates
- */
-abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, EventEnvelope>
-        implements EventEndpoint<I> {
+import static io.spine.testing.Tests.nullRef;
 
-    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
-        super(repository, event);
+public class NoOpEndpoint implements MessageEndpoint<String, CommandEnvelope> {
+
+    @Override
+    public void dispatchTo(String targetId) {
+        // do nothing.
+    }
+
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        // do nothing.
+    }
+
+    @Override
+    public void onDuplicate(String target, CommandEnvelope envelope) {
+        // do nothing.
+    }
+
+    @Override
+    public Repository<String, ?> repository() {
+        return nullRef();
     }
 }

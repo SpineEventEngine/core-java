@@ -34,7 +34,6 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
@@ -578,16 +577,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Optional<A> find(I id) throws IllegalStateException {
         return load(id);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method into current package.
-     */
-    @Override
-    protected EntityLifecycle lifecycleOf(I id) {
-        return super.lifecycleOf(id);
     }
 
     private void onCommandTargetSet(I id, CommandId commandId) {

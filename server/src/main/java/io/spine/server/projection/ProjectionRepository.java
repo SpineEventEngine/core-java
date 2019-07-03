@@ -33,7 +33,6 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
@@ -357,16 +356,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         if (inbox != null) {
             inbox.unregister();
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method into current package.
-     */
-    @Override
-    protected EntityLifecycle lifecycleOf(I id) {
-        return super.lifecycleOf(id);
     }
 
     /**

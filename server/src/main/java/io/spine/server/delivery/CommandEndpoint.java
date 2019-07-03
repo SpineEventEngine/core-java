@@ -18,25 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.delivery;
 
-import io.spine.server.delivery.EventEndpoint;
-import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.CommandEnvelope;
 
-/**
- * Abstract base for endpoints that dispatch events to aggregates.
- *
- * <p>An aggregate may receive an event if it {@linkplain io.spine.server.event.React reacts} on it,
- * or if it {@linkplain io.spine.server.aggregate.Apply#allowImport() imports} it.
- *
- * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates
- */
-abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, EventEnvelope>
-        implements EventEndpoint<I> {
+public interface CommandEndpoint<I> extends MessageEndpoint<I, CommandEnvelope> {
 
-    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
-        super(repository, event);
+    @Override
+    default void onDuplicate(I target, CommandEnvelope envelope) {
+        repository().lifecycleOf(target)
+                    .onDuplicateCommand(envelope);
     }
 }

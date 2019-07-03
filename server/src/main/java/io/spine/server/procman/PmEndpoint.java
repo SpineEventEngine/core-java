@@ -56,7 +56,7 @@ abstract class PmEndpoint<I,
     }
 
     @Override
-    protected ProcessManagerRepository<I, P, ?> repository() {
+    public ProcessManagerRepository<I, P, ?> repository() {
         return (ProcessManagerRepository<I, P, ?>) super.repository();
     }
 

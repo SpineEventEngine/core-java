@@ -74,7 +74,7 @@ abstract class AggregateEndpoint<I,
                                             .getEventList();
                 repository().postEvents(events);
             }
-        } else if (outcome.hasError()){
+        } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(aggregateId)
                         .onHandlerFailed(envelope().messageId(), error);
@@ -131,7 +131,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected final AggregateRepository<I, A> repository() {
+    public final AggregateRepository<I, A> repository() {
         return (AggregateRepository<I, A>) super.repository();
     }
 

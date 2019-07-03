@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.server.delivery.given.NoOpEndpoint;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
@@ -91,16 +92,7 @@ public class EndpointsTest {
     }
 
     private static MessageEndpoint<String, CommandEnvelope> noOpEndpoint() {
-        return new MessageEndpoint<String, CommandEnvelope>() {
-            @Override
-            public void dispatchTo(String targetId) {
-                // do nothing.
-            }
-
-            @Override
-            public void onError(CommandEnvelope envelope, RuntimeException exception) {
-                // do nothing.
-            }
-        };
+        return new NoOpEndpoint();
     }
+
 }

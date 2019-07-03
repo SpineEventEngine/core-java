@@ -26,6 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.EventContext;
 import io.spine.logging.Logging;
+import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.PropagationOutcome;
@@ -40,7 +41,8 @@ import static io.spine.server.projection.ProjectionTransaction.start;
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, EventEnvelope> implements Logging {
+        extends EntityMessageEndpoint<I, P, EventEnvelope>
+        implements EventEndpoint<I>, Logging {
 
     protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -52,7 +54,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected ProjectionRepository<I, P, ?> repository() {
+    public ProjectionRepository<I, P, ?> repository() {
         return (ProjectionRepository<I, P, ?>) super.repository();
     }
 

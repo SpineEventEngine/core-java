@@ -35,6 +35,7 @@ message ConstraintViolated {
 }
 
 message CannotDispatchCommandTwice {
+    option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
     // The violated entity info.
     core.MessageId entity = 1;
@@ -43,6 +44,7 @@ message CannotDispatchCommandTwice {
 }
 
 message CannotDispatchEventTwice {
+    option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
     // The violated entity info.
     core.MessageId entity = 1;

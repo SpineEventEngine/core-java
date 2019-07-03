@@ -22,6 +22,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.delivery.CommandEndpoint;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandEnvelope;
@@ -37,7 +38,8 @@ import static io.spine.server.command.DispatchCommand.operationFor;
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, CommandEnvelope> {
+        extends PmEndpoint<I, P, CommandEnvelope>
+        implements CommandEndpoint<I> {
 
     protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         super(repository, cmd);

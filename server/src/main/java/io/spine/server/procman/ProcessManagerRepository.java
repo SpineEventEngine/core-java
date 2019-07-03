@@ -37,7 +37,6 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.TransactionListener;
@@ -366,16 +365,6 @@ public abstract class ProcessManagerRepository<I,
     void postCommands(Collection<Command> commands) {
         CommandBus bus = context().commandBus();
         bus.post(commands, noOpObserver());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method into current package.
-     */
-    @Override
-    protected EntityLifecycle lifecycleOf(I id) {
-        return super.lifecycleOf(id);
     }
 
     /**

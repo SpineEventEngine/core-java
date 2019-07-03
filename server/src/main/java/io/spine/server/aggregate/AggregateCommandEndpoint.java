@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.delivery.CommandEndpoint;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandClass;
@@ -36,7 +37,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <A> the type of the aggregates managed by the parent repository
  */
 final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, CommandEnvelope> {
+        extends AggregateEndpoint<I, A, CommandEnvelope>
+        implements CommandEndpoint<I> {
 
     AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);

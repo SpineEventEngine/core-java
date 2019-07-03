@@ -350,6 +350,14 @@ public class EntityLifecycle {
         postEvent(systemEvent);
     }
 
+    public void onDuplicateEvent(EventEnvelope envelope) {
+
+    }
+
+    public void onDuplicateCommand(CommandEnvelope envelope) {
+
+    }
+
     private void postIfChanged(EntityRecordChange change,
                                Collection<? extends MessageId> messageIds,
                                Origin origin) {

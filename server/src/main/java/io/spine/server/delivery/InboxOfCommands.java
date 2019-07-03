@@ -20,7 +20,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.type.CommandEnvelope;
 
 import java.util.Collection;
@@ -82,9 +81,5 @@ final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
             return (Predicate<InboxMessage>) InboxMessage::hasCommand;
         }
 
-        @Override
-        protected RuntimeException onDuplicateFound(InboxMessage duplicate) {
-            return DuplicateCommandException.of(duplicate.getCommand());
-        }
     }
 }
