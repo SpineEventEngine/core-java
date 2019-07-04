@@ -34,10 +34,6 @@ import static java.util.Collections.singletonList;
  */
 public class ValidCommandHandler extends AbstractCommandHandler {
 
-    protected ValidCommandHandler(EventBus eventBus) {
-        super(eventBus);
-    }
-
     @Assign
     public List<? extends EventMessage> handle(SendLink command) {
         return singletonList(LinkSent.newBuilder()
