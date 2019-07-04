@@ -56,6 +56,8 @@ message PropagationOutcome {
         base.Error error = 3 [(validate) = true];
 
         Interruption interrupted = 4 [(validate) = true];
+
+        Ignore ignored = 5 [(validate) = true];
     }
 }
 
@@ -84,4 +86,9 @@ message ProducedCommands {
 message Interruption {
 
     core.MessageId stopped_at = 1 [(required) = true, (validate) = true];
+}
+
+message Ignore {
+
+    string reason = 1 [(required) = true];
 }

@@ -24,12 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.entity.Ignore;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.tenant.EventOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
@@ -40,6 +41,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.lang.String.format;
 
 /**
@@ -67,19 +69,10 @@ public abstract class AbstractEventSubscriber
      */
     @Override
     public final Set<String> dispatch(EventEnvelope event) {
-        EventOperation op = new EventOperation(event.outerObject()) {
-            @Override
-            public void run() {
-                handle(event);
-            }
-        };
-        try {
-            op.execute();
-        } catch (RuntimeException exception) {
-            onError(event, exception);
-            return ImmutableSet.of();
-        }
-        return identity();
+        PropagationOutcome outcome = with(event.tenantId()).evaluate(() -> handle(event));
+        return outcome.hasSuccess()
+               ? identity()
+               : ImmutableSet.of();
     }
 
     /**
@@ -88,9 +81,27 @@ public abstract class AbstractEventSubscriber
      * <p>By default, passes the event to the corresponding {@linkplain io.spine.core.Subscribe
      * subscriber} method of the entity.
      */
-    protected void handle(EventEnvelope event) {
-        thisClass.subscriberOf(event)
-                 .ifPresent(method -> method.invoke(this, event));
+    protected PropagationOutcome handle(EventEnvelope event) {
+        PropagationOutcome outcome =
+                thisClass.subscriberOf(event)
+                         .map(method -> method.invoke(this, event))
+                         .orElseGet(() -> notSupported(event));
+        return outcome;
+    }
+
+    private PropagationOutcome notSupported(EventEnvelope event) {
+        Ignore ignore = Ignore
+                .newBuilder()
+                .setReason(format("Event %s[%s] does not match subscriber filters in %s.",
+                                  event.messageClass(),
+                                  event.id().value(),
+                                  this.getClass().getCanonicalName()))
+                .buildPartial();
+        return PropagationOutcome
+                .newBuilder()
+                .setPropagatedSignal(event.messageId())
+                .setIgnored(ignore)
+                .vBuild();
     }
 
     /**

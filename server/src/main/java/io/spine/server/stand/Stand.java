@@ -46,8 +46,11 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
+import io.spine.server.entity.Ignore;
+import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.Success;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.QueryOperation;
@@ -196,16 +199,27 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * Receives an event and notifies matching subscriptions.
      */
     @Override
-    protected void handle(EventEnvelope event) {
+    protected PropagationOutcome handle(EventEnvelope event) {
         TypeUrl typeUrl = TypeUrl.of(event.message());
         if (!subscriptionRegistry.hasType(typeUrl)) {
-            return;
+            return PropagationOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event.messageId())
+                    .setIgnored(Ignore.newBuilder()
+                                      .setReason("No subscribers")
+                                      .build())
+                    .vBuild();
         }
         subscriptionRegistry.byType(typeUrl)
                             .stream()
                             .filter(SubscriptionRecord::isActive)
                             .filter(record -> record.matches(event))
                             .forEach(record -> runSubscriptionUpdate(record, event));
+        return PropagationOutcome
+                .newBuilder()
+                .setPropagatedSignal(event.messageId())
+                .setSuccess(Success.getDefaultInstance())
+                .vBuild();
     }
 
     /**
