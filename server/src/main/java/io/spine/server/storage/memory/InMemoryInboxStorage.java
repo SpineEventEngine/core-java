@@ -29,6 +29,7 @@ import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
+import io.spine.server.storage.AbstractStorage;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -38,7 +39,9 @@ import static com.google.protobuf.util.Timestamps.compare;
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
  */
-public final class InMemoryInboxStorage extends InboxStorage implements Logging {
+public final class InMemoryInboxStorage
+        extends AbstractStorage<InboxMessageId, InboxMessage, InboxReadRequest>
+        implements InboxStorage, Logging {
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
