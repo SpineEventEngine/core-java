@@ -36,7 +36,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 public class AggregateWithMissingApplier
         extends Aggregate<ProjectId, Project, Project.Builder> {
 
-    private boolean createProjectCommandHandled = false;
+    private boolean handled = false;
 
     public AggregateWithMissingApplier(ProjectId id) {
         super(id);
@@ -45,11 +45,11 @@ public class AggregateWithMissingApplier
     /** There is no event applier for ProjectCreated event (intentionally). */
     @Assign
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
-        createProjectCommandHandled = true;
+        handled = true;
         return projectCreated(cmd.getProjectId(), cmd.getName());
     }
 
-    public boolean isCreateProjectCommandHandled() {
-        return createProjectCommandHandled;
+    public boolean commandHandled() {
+        return handled;
     }
 }

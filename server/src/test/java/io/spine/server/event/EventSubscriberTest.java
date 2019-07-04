@@ -81,10 +81,8 @@ class EventSubscriberTest {
     @Test
     @DisplayName("have log")
     void haveLog() {
-        assertEquals(subscriber.getClass()
-                               .getName(),
-                     subscriber.log()
-                               .getName());
+        assertEquals(subscriber.getClass().getName(),
+                     subscriber.log().getName());
     }
 
     @Test

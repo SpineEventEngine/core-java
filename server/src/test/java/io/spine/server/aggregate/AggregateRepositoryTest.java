@@ -671,6 +671,8 @@ public class AggregateRepositoryTest {
         assertThat(event.getHandledSignal()).isEqualTo(envelope.messageId());
         assertThat(event.getEntity().getTypeUrl())
                 .isEqualTo(repository.entityStateType().value());
+        assertThat(event.getError().getType())
+                .isEqualTo(IllegalArgumentException.class.getCanonicalName());
     }
 
     @Test

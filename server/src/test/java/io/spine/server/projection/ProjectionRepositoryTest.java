@@ -33,7 +33,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
@@ -45,6 +44,8 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.system.server.CannotDispatchEventTwice;
+import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -87,7 +88,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -379,6 +379,14 @@ class ProjectionRepositoryTest
     @MuteLogging
     class AvoidDuplicates {
 
+        private DiagnosticMonitor monitor;
+
+        @BeforeEach
+        void setUp() {
+            monitor = new DiagnosticMonitor();
+            boundedContext.registerEventDispatcher(monitor);
+        }
+
         @Test
         @DisplayName("events")
         void events() {
@@ -410,14 +418,16 @@ class ProjectionRepositoryTest
         private void dispatchSuccessfully(Event event) {
             dispatchEvent(event);
             assertTrue(TestProjection.processed(event.enclosedMessage()));
-            assertNull(repository().getLastException());
+            List<CannotDispatchEventTwice> events = monitor.duplicateEventEvents();
+            assertThat(events).isEmpty();
         }
 
         private void dispatchDuplicate(Event event) {
             dispatchEvent(event);
-            RuntimeException exception = repository().getLastException();
-            assertNotNull(exception);
-            assertThat(exception).isInstanceOf(DuplicateEventException.class);
+            List<CannotDispatchEventTwice> events = monitor.duplicateEventEvents();
+            assertThat(events).hasSize(1);
+            CannotDispatchEventTwice systemEvent = events.get(0);
+            assertThat(systemEvent.getEvent()).isEqualTo(event.id());
         }
     }
 

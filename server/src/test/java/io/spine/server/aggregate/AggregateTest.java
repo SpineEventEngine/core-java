@@ -358,14 +358,13 @@ public class AggregateTest {
             ModelTests.dropAllModels();
             AggregateWithMissingApplier aggregate =
                     new AggregateWithMissingApplier(ID);
-            assertThrows(IllegalStateException.class, () -> {
-                try {
-                    dispatchCommand(aggregate, command(createProject));
-                } catch (IllegalStateException e) { // expected exception
-                    assertTrue(aggregate.isCreateProjectCommandHandled());
-                    throw e;
-                }
-            });
+            Command command = command(createProject);
+            PropagationOutcome outcome = dispatchCommand(aggregate, command);
+            assertTrue(aggregate.commandHandled());
+            assertTrue(outcome.hasError());
+            Error error = outcome.getError();
+            assertThat(error.getType())
+                    .isEqualTo(IllegalStateException.class.getCanonicalName());
         }
     }
 
