@@ -244,10 +244,6 @@ abstract class AbstractCommandBusTestSuite {
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
 
-        CreateProjectHandler() {
-            super(eventBus);
-        }
-
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
             handlerInvoked = true;

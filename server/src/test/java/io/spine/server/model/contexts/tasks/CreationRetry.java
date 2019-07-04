@@ -24,7 +24,6 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
 import io.spine.test.model.contexts.tasks.TaskId;
 import io.spine.test.model.contexts.tasks.commands.CreateTask;
 import io.spine.test.model.contexts.tasks.rejections.TaskRejections;
@@ -41,8 +40,8 @@ public final class CreationRetry extends AbstractCommander {
 
     private static final Set<TaskId> rejectedTasks = newHashSet();
 
-    CreationRetry(CommandBus commandBus, EventBus eventBus) {
-        super(commandBus, eventBus);
+    CreationRetry(CommandBus commandBus) {
+        super(commandBus);
     }
 
     @Command

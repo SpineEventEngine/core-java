@@ -29,7 +29,6 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.tuple.Pair;
@@ -112,10 +111,6 @@ public class CommandHandlerTestEnv {
 
         private @Nullable CommandEnvelope lastErrorEnvelope;
         private @Nullable RuntimeException lastException;
-
-        public TestCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         public void assertHandled(Command expected) {
             commandsHandled.assertHandled(expected);

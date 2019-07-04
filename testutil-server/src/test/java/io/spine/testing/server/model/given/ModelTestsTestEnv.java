@@ -22,7 +22,6 @@ package io.spine.testing.server.model.given;
 
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventBus;
 import io.spine.server.model.Nothing;
 import io.spine.testing.server.given.entity.command.TuRemoveProject;
 
@@ -33,10 +32,6 @@ public class ModelTestsTestEnv {
     }
 
     public static class TestCommandHandler extends AbstractCommandHandler {
-        private TestCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
         @Assign
         Nothing handle(TuRemoveProject cmd) {
             return nothing();
@@ -44,9 +39,6 @@ public class ModelTestsTestEnv {
     }
 
     public static class DuplicatedCommandHandler extends AbstractCommandHandler {
-        private DuplicatedCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         /**
          * Handles the same command as {@link TestCommandHandler#handle(TuRemoveProject)}.

@@ -73,12 +73,13 @@ class AbstractCommanderTest {
     void setUp() {
         CommandBus commandBus = boundedContext.commandBus();
         EventBus eventBus = boundedContext.eventBus();
-        AbstractCommander commander = new Commendatore(commandBus, boundedContext.eventBus());
+        AbstractCommander commander = new Commendatore(commandBus);
         interceptor = new CommandInterceptor(boundedContext,
                                              FirstCmdCreateProject.class,
                                              CmdSetTaskDescription.class,
                                              CmdAssignTask.class,
                                              CmdStartTask.class);
+        interceptor.injectEventBus(eventBus);
         commandBus.register(commander);
         eventBus.register(DelegatingEventDispatcher.of(commander));
     }
@@ -190,8 +191,8 @@ class AbstractCommanderTest {
      */
     private static final class Commendatore extends AbstractCommander {
 
-        private Commendatore(CommandBus commandBus, EventBus eventBus) {
-            super(commandBus, eventBus);
+        private Commendatore(CommandBus commandBus) {
+            super(commandBus);
         }
 
         @Command

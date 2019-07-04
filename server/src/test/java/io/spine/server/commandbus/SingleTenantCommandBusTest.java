@@ -118,7 +118,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     void doPostCommandsInFIFO() {
         Command secondCommand = clearTenantId(secondStartProject());
         CommandPostingHandler handler =
-                new CommandPostingHandler(eventBus, commandBus, secondCommand);
+                new CommandPostingHandler(commandBus, secondCommand);
         commandBus.register(handler);
 
         Command firstCommand = clearTenantId(firstCreateProject());
@@ -135,7 +135,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
-        FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        FaultyHandler faultyHandler = new FaultyHandler();
         commandBus.register(faultyHandler);
 
         Command remoteTaskCommand = clearTenantId(removeTask());
