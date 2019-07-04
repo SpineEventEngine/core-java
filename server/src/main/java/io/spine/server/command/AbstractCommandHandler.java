@@ -121,7 +121,7 @@ public abstract class AbstractCommandHandler
      * Assigns {@code EventBus} to which the handler posts the produced events.
      */
     @Internal
-    public void injectEventBus(EventBus eventBus) {
+    public final void injectEventBus(EventBus eventBus) {
         this.eventBus = checkNotNull(eventBus);
     }
 
