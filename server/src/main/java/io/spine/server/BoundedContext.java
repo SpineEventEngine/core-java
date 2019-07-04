@@ -242,7 +242,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        repository.setContext(this);
+        initialize(repository);
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
@@ -271,6 +271,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
+        initialize(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
         }
@@ -282,6 +283,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
+        initialize(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
         }
@@ -306,6 +308,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
+        initialize(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             eventBus().register(dispatcher);
             SystemReadSide systemReadSide = systemClient().readSide();
@@ -324,8 +327,16 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
+        initialize(dispatcher);
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
         registerEventDispatcher(delegate);
+    }
+
+    private void initialize(Object registered) {
+        if (registered instanceof ContextAware) {
+            ContextAware contextAware = (ContextAware) registered;
+            contextAware.initialize(this);
+        }
     }
 
     /**

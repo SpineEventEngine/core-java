@@ -20,9 +20,15 @@
 
 package io.spine.server.event;
 
+import com.google.protobuf.Any;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.DiagnosticMonitor;
+import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.test.event.FailRequested;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
@@ -30,11 +36,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EventSubscriber should")
@@ -56,13 +62,26 @@ class EventSubscriberTest {
         // Create event which should fail.
         EventEnvelope eventEnvelope = createEvent(false);
 
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
+                .build();
+        context.registerEventDispatcher(subscriber);
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        context.registerEventDispatcher(monitor);
         Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
         FailingSubscriber sub = (FailingSubscriber) this.subscriber;
         assertTrue(sub.isMethodCalled());
         assertEquals(0, dispatchingResult.size());
-        assertEquals(eventEnvelope, sub.getLastErrorEnvelope());
-        assertNotNull(sub.getLastException());
+        List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
+        assertThat(systemEvents).hasSize(1);
+        HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
+        assertThat(systemEvent.getHandledSignal())
+                .isEqualTo(eventEnvelope.messageId());
+        assertThat(systemEvent.getError()).isNotEqualToDefaultInstance();
+        Any expectedId = Identifier.pack(subscriber.getClass()
+                                                   .getName());
+        assertThat(systemEvent.getEntity().getId()).isEqualTo(expectedId);
     }
 
     @Test
@@ -75,7 +94,6 @@ class EventSubscriberTest {
         FailingSubscriber sub = (FailingSubscriber) this.subscriber;
         assertTrue(sub.isMethodCalled());
         assertEquals(1, dispatchingResult.size());
-        assertNull(sub.getLastException());
     }
 
     @Test

@@ -31,6 +31,7 @@ import io.spine.base.Identifier;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Storage;
@@ -60,7 +61,8 @@ import static java.lang.String.format;
  * Abstract base class for repositories.
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
-public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable, Logging {
+public abstract class Repository<I, E extends Entity<I, ?>>
+        implements ContextAware, AutoCloseable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -198,8 +200,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *          if the repository has a context value already assigned, and the passed value is
      *          not equal to the assigned one
      */
+    @Override
     @Internal
-    public final void setContext(BoundedContext context) {
+    public final void initialize(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -235,6 +238,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @param context
      *          the {@code BoundedContext} of this repository
      */
+    @Internal
     @OverridingMethodsMustInvokeSuper
     protected void init(BoundedContext context) {
         if (isTypeSupplier()) {

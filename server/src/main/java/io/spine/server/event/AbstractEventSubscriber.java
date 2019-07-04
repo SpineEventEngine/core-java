@@ -22,7 +22,14 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Empty;
+import io.spine.base.Identifier;
+import io.spine.core.BoundedContextName;
+import io.spine.core.MessageId;
 import io.spine.logging.Logging;
+import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.entity.Ignore;
 import io.spine.server.entity.PropagationOutcome;
@@ -34,12 +41,18 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
+import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.lang.String.format;
@@ -54,10 +67,31 @@ import static java.lang.String.format;
  * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
-        implements EventDispatcher<String>, EventSubscriber, Logging {
+        implements EventDispatcher<String>, EventSubscriber, ContextAware, Logging {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
+    private final MessageId eventAnchor = MessageId
+            .newBuilder()
+            .setId(Identifier.pack(getClass().getName()))
+            .setTypeUrl(TypeUrl.of(Empty.class).value())
+            .vBuild();
+    @LazyInit
+    private SystemWriteSide system = NoOpSystemWriteSide.INSTANCE;
+    @LazyInit
+    private @MonotonicNonNull BoundedContextName contextName;
+
+    @Override
+    public void initialize(BoundedContext context) {
+        checkNotNull(context);
+        if (contextName != null) {
+            checkState(context.name().equals(contextName),
+                       "%s is already initialized in context %s.", this, contextName.getValue());
+        } else {
+            contextName = context.name();
+            system = context.systemClient().writeSide();
+        }
+    }
 
     /**
      * Dispatches the event to the handling method.
@@ -86,6 +120,15 @@ public abstract class AbstractEventSubscriber
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
                          .orElseGet(() -> notSupported(event));
+        if (outcome.hasError()) {
+            HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                    .newBuilder()
+                    .setEntity(eventAnchor)
+                    .setHandledSignal(event.messageId())
+                    .setError(outcome.getError())
+                    .vBuild();
+            system.postEvent(systemEvent, event.asMessageOrigin());
+        }
         return outcome;
     }
 
@@ -116,12 +159,6 @@ public abstract class AbstractEventSubscriber
     public void onError(EventEnvelope event, RuntimeException exception) {
         checkNotNull(event);
         checkNotNull(exception);
-        MessageClass messageClass = event.messageClass();
-        String messageId = event.idAsString();
-        String errorMessage =
-                format("Error handling event subscription (class: %s id: %s) in %s.",
-                       messageClass, messageId, thisClass);
-        log().error(errorMessage, exception);
     }
 
     @Override

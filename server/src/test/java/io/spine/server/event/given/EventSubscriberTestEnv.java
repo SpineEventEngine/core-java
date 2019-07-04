@@ -23,12 +23,10 @@ package io.spine.server.event.given;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.FailRequested;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.TaskAdded;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class EventSubscriberTestEnv {
 
@@ -40,8 +38,6 @@ public final class EventSubscriberTestEnv {
     public static class FailingSubscriber extends AbstractEventSubscriber {
 
         private boolean methodCalled = false;
-        private @Nullable EventEnvelope lastErrorEnvelope;
-        private @Nullable RuntimeException lastException;
 
         @Subscribe
         void on(FailRequested message, EventContext context) {
@@ -68,21 +64,6 @@ public final class EventSubscriberTestEnv {
 
         public boolean isMethodCalled() {
             return this.methodCalled;
-        }
-
-        @Override
-        public void onError(EventEnvelope event, RuntimeException exception) {
-            super.onError(event, exception);
-            lastErrorEnvelope = event;
-            lastException = exception;
-        }
-
-        public @Nullable EventEnvelope getLastErrorEnvelope() {
-            return lastErrorEnvelope;
-        }
-
-        public @Nullable RuntimeException getLastException() {
-            return lastException;
         }
     }
 }

@@ -40,7 +40,7 @@ import static io.spine.protobuf.AnyPacker.pack;
  */
 public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
 
-    /** The {@code EventBut} to which the dispatcher posts events it produces. */
+    /** The {@code EventBus} to which the dispatcher posts events it produces. */
     private final EventBus eventBus;
 
     /** Supplier for a packed version of the dispatcher ID. */
