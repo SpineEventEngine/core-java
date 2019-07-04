@@ -119,6 +119,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         Command secondCommand = clearTenantId(secondStartProject());
         CommandPostingHandler handler =
                 new CommandPostingHandler(commandBus, secondCommand);
+        handler.injectEventBus(eventBus);
         commandBus.register(handler);
 
         Command firstCommand = clearTenantId(firstCreateProject());

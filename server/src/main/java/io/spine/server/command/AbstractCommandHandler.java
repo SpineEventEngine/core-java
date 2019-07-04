@@ -126,7 +126,7 @@ public abstract class AbstractCommandHandler
     }
 
     private EventBus eventBus() {
-        return checkNotNull(eventBus);
+        return checkNotNull(eventBus, "`%s` does not have `EventBus` assigned.", this);
     }
 
     /**

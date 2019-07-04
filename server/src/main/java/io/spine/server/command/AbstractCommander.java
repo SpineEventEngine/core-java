@@ -48,6 +48,7 @@ public abstract class AbstractCommander
     private final CommandBus commandBus;
 
     protected AbstractCommander(CommandBus commandBus) {
+        super();
         this.commandBus = commandBus;
     }
 
