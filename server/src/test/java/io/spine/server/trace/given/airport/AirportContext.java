@@ -22,7 +22,6 @@ package io.spine.server.trace.given.airport;
 
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
 import io.spine.test.trace.AirportId;
 import io.spine.test.trace.FlightCanceled;
@@ -30,8 +29,10 @@ import io.spine.test.trace.FlightRescheduled;
 
 public final class AirportContext {
 
+    static final String NAME = "Airport";
+
     /**
-     * Prevents the utility class instantiation.
+     * Prevents instantiation of this configuration class.
      */
     private AirportContext() {
     }
@@ -45,14 +46,11 @@ public final class AirportContext {
                 .add(FlightCanceled.class, AirportId.class,
                      (event, context) -> flights.departureAirport(event.getId()))
                 .build();
-        EventBus.Builder eventBus = EventBus
-                .newBuilder()
-                .setEnricher(enricher);
         return BoundedContext
-                .singleTenant("Airport")
+                .singleTenant(NAME)
                 .add(flights)
                 .add(new TimetableRepository())
                 .add(BoardingProcman.class)
-                .setEventBus(eventBus);
+                .enrichEventsUsing(enricher);
     }
 }

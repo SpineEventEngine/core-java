@@ -26,7 +26,6 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
 import io.spine.test.commandbus.command.CmdBusAddTask;
 import io.spine.test.commandbus.command.CmdBusRemoveTask;
 import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
@@ -60,14 +59,10 @@ public class SingleTenantCommandBusTestEnv {
                 .setProjectId(ProjectId.getDefaultInstance())
                 .build();
 
-        public FaultyHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
-        CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context) throws
-                                                                          InvalidProjectName {
+        CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context)
+                throws InvalidProjectName {
             throw rejection;
         }
 
@@ -91,9 +86,7 @@ public class SingleTenantCommandBusTestEnv {
         private final List<Message> handledCommands = new ArrayList<>();
         private final Command commandToPost;
 
-        public CommandPostingHandler(EventBus eventBus, CommandBus commandBus,
-                                     Command commandToPost) {
-            super(eventBus);
+        public CommandPostingHandler(CommandBus commandBus, Command commandToPost) {
             this.commandBus = commandBus;
             this.commandToPost = commandToPost;
         }

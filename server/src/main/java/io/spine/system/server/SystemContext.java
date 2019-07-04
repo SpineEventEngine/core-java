@@ -77,8 +77,8 @@ public final class SystemContext extends BoundedContext {
         EventBus.Builder busBuilder = builder.eventBus()
                                              .orElseGet(EventBus::newBuilder);
         EventEnricher enricher = SystemEnricher.create(repository);
-        EventBus.Builder builderWithEnricher = busBuilder.setEnricher(enricher);
-        return builder.setEventBus(builderWithEnricher);
+        busBuilder.injectEnricher(enricher);
+        return builder.setEventBus(busBuilder);
     }
 
     private void registerRepositories(CommandLogRepository commandLog) {

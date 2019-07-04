@@ -20,38 +20,15 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Any;
-import io.spine.core.Event;
 import io.spine.logging.Logging;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.type.CommandEnvelope;
-
-import java.util.function.Supplier;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Suppliers.memoize;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
  * and post resulting events to {@link EventBus}.
  */
 public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
-
-    /** The {@code EventBut} to which the dispatcher posts events it produces. */
-    private final EventBus eventBus;
-
-    /** Supplier for a packed version of the dispatcher ID. */
-    private final Supplier<Any> producerId =
-            memoize(() -> pack(TypeConverter.toMessage(getId())));
-
-    /** Lazily initialized logger. */
-
-    protected AbstractCommandDispatcher(EventBus eventBus) {
-        this.eventBus = eventBus;
-    }
 
     /**
      * Obtains identity string of the dispatcher.
@@ -60,37 +37,8 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      *
      * @return the string with the handler identity
      */
-    public String getId() {
+    public String id() {
         return getClass().getName();
-    }
-
-    /**
-     * Obtains {@linkplain #getId() ID} packed into {@code Any} for being used in generated events.
-     */
-    public Any producerId() {
-        return producerId.get();
-    }
-
-    /**
-     * Posts passed events to {@link EventBus}.
-     */
-    protected void postEvents(Iterable<Event> events) {
-        eventBus.post(events);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Logs the error into the {@linkplain #log() log}.
-     */
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        _error(exception,
-               "Error handling command (class: `{}` id: `{}`).",
-               envelope.messageClass(),
-               envelope.idAsString());
     }
 
     /**
@@ -111,12 +59,12 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
             return false;
         }
         AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) o;
-        boolean equals = getId().equals(otherHandler.getId());
+        boolean equals = id().equals(otherHandler.id());
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return getId().hashCode();
+        return id().hashCode();
     }
 }

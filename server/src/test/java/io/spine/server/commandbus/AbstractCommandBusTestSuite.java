@@ -178,6 +178,7 @@ abstract class AbstractCommandBusTestSuite {
                 ? new TestActorRequestFactory(getClass(), newUuid())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
+        createProjectHandler.injectEventBus(eventBus);
         observer = memoizingObserver();
     }
 
@@ -243,10 +244,6 @@ abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
-
-        CreateProjectHandler() {
-            super(eventBus);
-        }
 
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {

@@ -57,7 +57,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -143,12 +142,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         this.postedEvents = new HashSet<>();
         EventBus.Builder eventBus = EventBus
                 .newBuilder()
-                .addListener(events)
-                .setEnricher(enricher);
+                .addListener(events);
         this.context = BoundedContextBuilder
                 .assumingTests(multitenant)
                 .setCommandBus(commandBus)
                 .setEventBus(eventBus)
+                .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();
         this.repositories = newHashMap();
@@ -203,14 +202,13 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * </ul>
      */
     public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
-        Optional<EventBus.Builder> eventBus = builder.eventBus();
         EventEnricher enricher =
-                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
-                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
-
-        BlackBoxBoundedContext<?> result = builder.isMultitenant()
-                                           ? multiTenant(enricher)
-                                           : singleTenant(enricher);
+                builder.eventEnricher()
+                       .orElseGet(BlackBoxBoundedContext::emptyEnricher);
+        BlackBoxBoundedContext<?> result =
+                builder.isMultitenant()
+                ? multiTenant(enricher)
+                : singleTenant(enricher);
 
         builder.repositories()
                .forEach(result::with);

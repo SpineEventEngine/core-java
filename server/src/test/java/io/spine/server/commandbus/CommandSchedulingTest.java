@@ -76,7 +76,9 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("not schedule command if no scheduling options are set")
     void notScheduleWithoutOptions() {
-        commandBus.register(new CreateProjectHandler());
+        CreateProjectHandler handler = new CreateProjectHandler();
+        handler.injectEventBus(eventBus);
+        commandBus.register(handler);
 
         Command command = createProject();
         commandBus.post(command, observer);

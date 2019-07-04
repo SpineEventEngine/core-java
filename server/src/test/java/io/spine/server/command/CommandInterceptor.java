@@ -41,10 +41,8 @@ public final class CommandInterceptor extends AbstractCommandHandler {
     @SafeVarargs
     @SuppressWarnings("ThisEscapedInObjectConstruction") // Already configured.
     CommandInterceptor(BoundedContext context, Class<? extends CommandMessage>... commandClasses) {
-        super(context.eventBus());
         this.intercept = setOf(commandClasses);
-        context.commandBus()
-               .register(this);
+        context.registerCommandDispatcher(this);
     }
 
     @Override

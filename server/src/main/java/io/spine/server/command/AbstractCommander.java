@@ -26,7 +26,6 @@ import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -48,8 +47,8 @@ public abstract class AbstractCommander
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     private final CommandBus commandBus;
 
-    protected AbstractCommander(CommandBus commandBus, EventBus eventBus) {
-        super(eventBus);
+    protected AbstractCommander(CommandBus commandBus) {
+        super();
         this.commandBus = commandBus;
     }
 
@@ -64,7 +63,7 @@ public abstract class AbstractCommander
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
         CommandingMethod.Result result = method.invoke(this, command);
         result.transformOrSplitAndPost(command, commandBus);
-        return getId();
+        return id();
     }
 
     @Override
@@ -83,6 +82,16 @@ public abstract class AbstractCommander
         CommandingMethod.Result result = method.invoke(this, event);
         result.produceAndPost(event, commandBus);
         return identity();
+    }
+
+    @Override
+    public void onError(CommandEnvelope command, RuntimeException exception) {
+        checkNotNull(command);
+        checkNotNull(exception);
+        _error(exception,
+               "Unable to transform the command (class: `{}` id: `{}`).",
+               command.messageClass(),
+               command.idAsString());
     }
 
     @Override

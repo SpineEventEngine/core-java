@@ -20,7 +20,6 @@
 
 package io.spine.server.command.model.given.handler;
 
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.testing.server.model.ModelTests;
 
@@ -30,20 +29,13 @@ import java.lang.reflect.Method;
  * Abstract base for test environment command handlers.
  *
  * <p>Derived classes must declare a method named {@linkplain #HANDLER_METHOD_NAME handleTest}
- * so that the method can be {@linkplain #getHandler() obtained} by the code of tests.
+ * so that the method can be {@linkplain #method() obtained} by the code of tests.
  */
 public abstract class TestCommandHandler extends AbstractCommandHandler {
 
     private static final String HANDLER_METHOD_NAME = "handleTest";
 
-    protected TestCommandHandler() {
-        super(BoundedContextBuilder
-                      .assumingTests(true)
-                      .build()
-                      .eventBus());
-    }
-
-    public Method getHandler() {
+    public Method method() {
         return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
     }
 }

@@ -40,7 +40,7 @@ public final class TasksContext {
         result.register(new TaskRepository());
         CommandBus commandBus = result.commandBus();
         EventBus eventBus = result.eventBus();
-        CreationRetry commander = new CreationRetry(commandBus, eventBus);
+        CreationRetry commander = new CreationRetry(commandBus);
         eventBus.register(DelegatingEventDispatcher.of(commander));
         return result;
     }

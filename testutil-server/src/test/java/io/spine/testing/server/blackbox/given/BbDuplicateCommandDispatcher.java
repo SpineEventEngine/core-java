@@ -23,7 +23,6 @@ package io.spine.testing.server.blackbox.given;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.command.AbstractCommandDispatcher;
-import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
@@ -37,11 +36,10 @@ import java.util.Set;
  */
 public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatcher {
 
-    private int commandsReceived = 0;
     private final CommandClass commandToIntercept;
 
-    public BbDuplicateCommandDispatcher(EventBus eventBus, CommandClass commandToIntercept) {
-        super(eventBus);
+    public BbDuplicateCommandDispatcher(CommandClass commandToIntercept) {
+        super();
         this.commandToIntercept = commandToIntercept;
     }
 
@@ -53,11 +51,11 @@ public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatche
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        commandsReceived++;
-        return getId();
+        return id();
     }
 
-    public int commandsDispatched() {
-        return commandsReceived;
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        // Do nothing.
     }
 }
