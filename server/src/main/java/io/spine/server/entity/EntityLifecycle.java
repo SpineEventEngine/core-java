@@ -345,9 +345,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setEntity(entityId)
                 .setHandledSignal(handledSignal)
-                .setType(error.getType())
-                .setMessage(error.getMessage())
-                .setStacktrace(error.getStacktrace())
+                .setError(error)
                 .vBuild();
         postEvent(systemEvent);
     }

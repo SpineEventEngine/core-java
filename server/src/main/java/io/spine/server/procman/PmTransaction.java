@@ -20,9 +20,9 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
@@ -31,6 +31,7 @@ import io.spine.server.entity.CommandDispatchingPhase;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
 import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.Success;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
@@ -38,8 +39,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
-
-import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
@@ -135,25 +134,16 @@ public class PmTransaction<I,
      */
     private PropagationOutcome doPropagate(Phase<I> phase) {
         PropagationOutcome outcome = propagate(phase);
-        List<Event> events = outcome.getSuccess()
-                                    .getProducedEvents()
+        Success success = outcome.getSuccess();
+        List<Event> events = success.getProducedEvents()
                                     .getEventList();
         if (!events.isEmpty()) {
             updateLifecycle(events);
         }
-        return outcome;
-    }
-
-    /**
-     * Updates and commits the process manager lifecycle flags after a rejection is thrown.
-     */
-    @Override
-    protected void beforeRollback(Throwable cause) {
-        super.beforeRollback(cause);
-        Throwable rootCause = getRootCause(cause);
-        if (rootCause instanceof ThrowableMessage) {
-            updateLifecycle((ThrowableMessage) rootCause);
+        if (success.hasRejection()) {
+            updateLifecycle(success.getRejection());
         }
+        return outcome;
     }
 
     /**
@@ -194,18 +184,7 @@ public class PmTransaction<I,
         }
     }
 
-    /**
-     * Updates the process lifecycle after a rejection is thrown.
-     *
-     * <p>Manually commits the changes as they are not going to be committed normally.
-     */
-    private void updateLifecycle(ThrowableMessage rejection) {
-        if (lifecycleRules.shouldArchiveOn(rejection)) {
-            setArchived(true);
-        }
-        if (lifecycleRules.shouldDeleteOn(rejection)) {
-            setDeleted(true);
-        }
-        commitAttributeChanges();
+    private void updateLifecycle(Event event) {
+        updateLifecycle(ImmutableList.of(event));
     }
 }

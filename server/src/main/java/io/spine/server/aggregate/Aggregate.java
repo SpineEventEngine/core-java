@@ -319,7 +319,6 @@ public abstract class Aggregate<I,
     final Propagation apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
-        // TODO:2019-07-03:dmytro.dashenkov: Alter event versions.
         Propagation propagation = play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
         return propagation;

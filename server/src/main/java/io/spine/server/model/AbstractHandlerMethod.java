@@ -261,7 +261,7 @@ public abstract class AbstractHandlerMethod<T,
                 Success success = maybeSuccess.orElseThrow(this::cannotThrowRejections);
                 outcome.setSuccess(success);
             } else {
-                Error error = errorInHandler(envelope, cause);
+                Error error = errorInHandler(cause);
                 outcome.setError(error);
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -282,7 +282,7 @@ public abstract class AbstractHandlerMethod<T,
         return Optional.empty();
     }
 
-    private Error errorInHandler(E envelope, Throwable thrown) {
+    private static Error errorInHandler(Throwable thrown) {
         Throwable cause = getRootCause(thrown);
         String message = nullToEmpty(cause.getMessage());
         Error.Builder builder = Error

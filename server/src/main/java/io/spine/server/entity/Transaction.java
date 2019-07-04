@@ -38,6 +38,7 @@ import io.spine.validate.ValidationException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -289,10 +290,12 @@ public abstract class Transaction<I,
     }
 
     private static Error asError(Throwable throwable) {
+        Throwable cause = getRootCause(throwable);
         Error.Builder error = Error
                 .newBuilder()
-                .setStacktrace(getStackTraceAsString(throwable));
-        Throwable cause = getRootCause(throwable);
+                .setType(cause.getClass().getCanonicalName())
+                .setStacktrace(getStackTraceAsString(cause))
+                .setMessage(nullToEmpty(cause.getMessage()));
         if (cause instanceof ValidationException) {
             ValidationError validationError = ((ValidationException) cause).asValidationError();
             error.setValidationError(validationError);
