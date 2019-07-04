@@ -21,13 +21,17 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Error;
 import io.spine.core.Event;
+import io.spine.core.EventId;
 import io.spine.logging.Logging;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.ProducedEvents;
+import io.spine.server.entity.Propagation;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.entity.TransactionListener;
@@ -35,6 +39,10 @@ import io.spine.server.type.ActorMessageEnvelope;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Abstract base for endpoints handling messages sent to aggregates.
@@ -105,20 +113,43 @@ abstract class AggregateEndpoint<I,
     final PropagationOutcome runTransactionWith(A aggregate) {
         PropagationOutcome outcome = invokeDispatcher(aggregate, envelope());
         Success successfulOutcome = outcome.getSuccess();
-        if (successfulOutcome.hasProducedEvents()) {
-            AggregateTransaction tx = startTransaction(aggregate);
-            List<Event> eventList = successfulOutcome.getProducedEvents()
-                                                     .getEventList();
-            List<Event> producedEvents = aggregate.apply(eventList);
+        return successfulOutcome.hasProducedEvents()
+               ? applyProducedEvents(aggregate, outcome)
+               : outcome;
+    }
+
+    private PropagationOutcome applyProducedEvents(A aggregate, PropagationOutcome commandOutcome) {
+        List<Event> events = commandOutcome.getSuccess()
+                                           .getProducedEvents()
+                                           .getEventList();
+        AggregateTransaction tx = startTransaction(aggregate);
+        Propagation propagation = aggregate.apply(events);
+        if (propagation.getSuccessful()) {
             tx.commit();
-            PropagationOutcome.Builder result = outcome.toBuilder();
-            result.getSuccessBuilder()
-                  .getProducedEventsBuilder()
-                  .clearEvent()
-                  .addAllEvent(producedEvents);
-            return result.vBuild();
+            PropagationOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
+            ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
+                                                                          .getProducedEventsBuilder();
+            Map<EventId, Event.Builder> correctedEvents = eventsBuilder
+                    .getEventBuilderList()
+                    .stream()
+                    .collect(ImmutableMap.toImmutableMap(Event.Builder::getId, builder -> builder));
+            for (PropagationOutcome outcome : propagation.getOutcomeList()) {
+                EventId eventId = unpack(outcome.getPropagatedSignal().getId(), EventId.class);
+                Event.Builder event = checkNotNull(correctedEvents.get(eventId));
+                event.getContextBuilder()
+                     .setVersion(outcome.getPropagatedSignal().getVersion());
+            }
+            return correctedCommandOutcome.vBuild();
         } else {
-            return outcome;
+            PropagationOutcome erroneous = propagation
+                    .getOutcomeList()
+                    .stream()
+                    .filter(PropagationOutcome::hasError)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Propagation was marked failed but no error occurred."
+                    ));
+            return erroneous;
         }
     }
 
