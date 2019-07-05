@@ -40,9 +40,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>A {@link #name()} allows to specify a custom column name to be persisted in a {@code Storage}.
  *
  * <p>If there are repeated column names within an {@code Entity},
- * the exception will be raised on a repository
- * {@linkplain io.spine.server.BoundedContext#register(io.spine.server.entity.Repository)
- * registration} for the entity.
+ * the exception will be raised when a repository serving the entity is added to
+ * its {@code BoundedContext}.
  */
 @Target(METHOD)
 @Retention(RUNTIME)

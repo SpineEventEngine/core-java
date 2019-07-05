@@ -21,7 +21,6 @@
 package io.spine.server.model.contexts.tasks;
 
 import io.spine.server.BoundedContext;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 
@@ -38,9 +37,8 @@ public final class TasksContext {
                 .singleTenant("Tasks")
                 .build();
         result.register(new TaskRepository());
-        CommandBus commandBus = result.commandBus();
         EventBus eventBus = result.eventBus();
-        CreationRetry commander = new CreationRetry(commandBus);
+        CreationRetry commander = new CreationRetry();
         eventBus.register(DelegatingEventDispatcher.of(commander));
         return result;
     }

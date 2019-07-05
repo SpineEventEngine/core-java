@@ -197,6 +197,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * @param <E>
      *         the type of entities
      */
+    @Internal
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
         repository.injectContext(this);

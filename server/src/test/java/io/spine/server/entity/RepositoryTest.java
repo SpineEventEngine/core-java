@@ -87,7 +87,7 @@ class RepositoryTest {
     @Test
     @DisplayName("report unregistered on init")
     void beUnregisteredOnInit() {
-        assertFalse(new TestRepo().isRegistered());
+        assertFalse(new TestRepo().hasContext());
     }
 
     @Test
