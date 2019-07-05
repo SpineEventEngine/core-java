@@ -13,6 +13,7 @@ import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/diagnostics.proto";
 import "spine/core/event.proto";
+import "spine/system/server/entity_type.proto";
 import "spine/validate/validation_error.proto";
 
 // An event emitted whenever an entity validation constraint is violated.
@@ -59,6 +60,15 @@ message HandlerFailedUnexpectedly {
     core.MessageId entity = 1;
 
     core.MessageId handled_signal = 2;
+
+    base.Error error = 3;
+}
+
+message RoutingFailed {
+
+    core.MessageId handled_signal = 1;
+
+    EntityTypeName entity_type = 2;
 
     base.Error error = 3;
 }
