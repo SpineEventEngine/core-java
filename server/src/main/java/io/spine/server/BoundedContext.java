@@ -227,7 +227,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Registers the passed command dispatcher with the {@code CommandBus} of
      * this {@code BoundedContext}.
      */
-    @SuppressWarnings("ChainOfInstanceofChecks") // to handle specifics of DI.
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
@@ -235,12 +234,12 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
             if (dispatcher instanceof AbstractCommandHandler) {
                 ((AbstractCommandHandler) dispatcher).injectEventBus(eventBus());
             }
-            if (dispatcher instanceof AbstractCommander) {
-                AbstractCommander commander = (AbstractCommander) dispatcher;
-                commander.injectCommandBus(commandBus());
-                DelegatingEventDispatcher<?> proxy = DelegatingEventDispatcher.of(commander);
-                registerEventDispatcher(proxy);
-            }
+        }
+        if (dispatcher instanceof AbstractCommander) {
+            AbstractCommander commander = (AbstractCommander) dispatcher;
+            commander.injectCommandBus(commandBus());
+            DelegatingEventDispatcher<?> proxy = DelegatingEventDispatcher.of(commander);
+            registerEventDispatcher(proxy);
         }
     }
 
