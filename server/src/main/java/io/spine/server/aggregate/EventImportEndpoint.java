@@ -49,7 +49,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @return the list with one {@code Event} which is being imported
      * @implNote We do not need to perform anything with the aggregate and the passed
      *         event. The aggregate would consume the passed event when dispatching result is
-     *         {@link io.spine.server.aggregate.AggregateEndpoint#runTransactionWith(Aggregate)
+     *         {@link io.spine.server.aggregate.AggregateEndpoint#handleAndApplyEvents(Aggregate)
      *         applied}.
      */
     @Override

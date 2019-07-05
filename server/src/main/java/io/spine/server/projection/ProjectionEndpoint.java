@@ -86,9 +86,6 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
             Error error = outcome.getError();
             repository().lifecycleOf(projection.id())
                         .onHandlerFailed(envelope().messageId(), error);
-        } else {
-            _warn("Handling of {}:{} was interrupted: {}",
-                  envelope().messageClass(), envelope().id(), outcome.getInterrupted());
         }
     }
 

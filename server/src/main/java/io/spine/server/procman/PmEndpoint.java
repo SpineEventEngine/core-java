@@ -90,9 +90,6 @@ abstract class PmEndpoint<I,
                 Error error = outcome.getError();
                 repository().lifecycleOf(manager.id())
                             .onHandlerFailed(envelope().messageId(), error);
-            } else {
-                _warn("Handling of {}:{} was interrupted: {}",
-                      envelope().messageClass(), envelope().id(), outcome.getInterrupted());
             }
         } catch (RuntimeException ex) {
             store(manager);

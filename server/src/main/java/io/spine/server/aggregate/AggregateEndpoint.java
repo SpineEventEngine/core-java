@@ -68,33 +68,36 @@ abstract class AggregateEndpoint<I,
     public final void dispatchTo(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
-
-        PropagationOutcome outcome = runTransactionWith(aggregate);
+        PropagationOutcome outcome = handleAndApplyEvents(aggregate);
         if (outcome.hasSuccess()) {
-            // Update lifecycle flags only if the message was handled successfully and flags changed.
-            LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
-            if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
-                storage().writeLifecycleFlags(aggregateId, flagsAfter);
-            }
-            Success success = outcome.getSuccess();
-            if (success.hasProducedEvents()) {
-                store(aggregate);
-                List<Event> events = success.getProducedEvents()
-                                            .getEventList();
-                post(events);
-            } else if (success.hasRejection()) {
-                post(success.getRejection());
-            } else {
-                onEmptyResult(aggregate, envelope());
-            }
-            afterDispatched(aggregateId);
+            updateLifecycle(aggregate, flagsBefore);
+            storeAndPost(aggregate, outcome);
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(aggregateId)
                         .onHandlerFailed(envelope().messageId(), error);
+        }
+    }
+
+    private void storeAndPost(A aggregate, PropagationOutcome outcome) {
+        Success success = outcome.getSuccess();
+        if (success.hasProducedEvents()) {
+            store(aggregate);
+            List<Event> events = success.getProducedEvents()
+                                        .getEventList();
+            post(events);
+        } else if (success.hasRejection()) {
+            post(success.getRejection());
         } else {
-            _warn("Handling of {}:{} was interrupted: {}",
-                  envelope().messageClass(), envelope().id(), outcome.getInterrupted());
+            onEmptyResult(aggregate, envelope());
+        }
+        afterDispatched(aggregate.id());
+    }
+
+    private void updateLifecycle(A aggregate, LifecycleFlags flagsBefore) {
+        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
+        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
+            storage().writeLifecycleFlags(aggregate.id(), flagsAfter);
         }
     }
 
@@ -111,7 +114,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    final PropagationOutcome runTransactionWith(A aggregate) {
+    final PropagationOutcome handleAndApplyEvents(A aggregate) {
         PropagationOutcome outcome = invokeDispatcher(aggregate, envelope());
         Success successfulOutcome = outcome.getSuccess();
         return successfulOutcome.hasProducedEvents()
@@ -127,31 +130,40 @@ abstract class AggregateEndpoint<I,
         Propagation propagation = aggregate.apply(events);
         if (propagation.getSuccessful()) {
             tx.commit();
-            PropagationOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
-            ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
-                                                                          .getProducedEventsBuilder();
-            Map<EventId, Event.Builder> correctedEvents = eventsBuilder
-                    .getEventBuilderList()
-                    .stream()
-                    .collect(ImmutableMap.toImmutableMap(Event.Builder::getId, builder -> builder));
-            for (PropagationOutcome outcome : propagation.getOutcomeList()) {
-                EventId eventId = unpack(outcome.getPropagatedSignal().getId(), EventId.class);
-                Event.Builder event = checkNotNull(correctedEvents.get(eventId));
-                event.getContextBuilder()
-                     .setVersion(outcome.getPropagatedSignal().getVersion());
-            }
-            return correctedCommandOutcome.vBuild();
+            return correctProducedCommands(commandOutcome, propagation);
         } else {
-            PropagationOutcome erroneous = propagation
-                    .getOutcomeList()
-                    .stream()
-                    .filter(PropagationOutcome::hasError)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "Propagation was marked failed but no error occurred."
-                    ));
-            return erroneous;
+            return firstErroneousOutcome(propagation);
         }
+    }
+
+    private static PropagationOutcome
+    correctProducedCommands(PropagationOutcome commandOutcome, Propagation eventPropagation) {
+        PropagationOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
+        ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
+                                                                      .getProducedEventsBuilder();
+        Map<EventId, Event.Builder> correctedEvents = eventsBuilder
+                .getEventBuilderList()
+                .stream()
+                .collect(ImmutableMap.toImmutableMap(Event.Builder::getId, builder -> builder));
+        for (PropagationOutcome outcome : eventPropagation.getOutcomeList()) {
+            EventId eventId = unpack(outcome.getPropagatedSignal().getId(), EventId.class);
+            Event.Builder event = checkNotNull(correctedEvents.get(eventId));
+            event.getContextBuilder()
+                 .setVersion(outcome.getPropagatedSignal().getVersion());
+        }
+        return correctedCommandOutcome.vBuild();
+    }
+
+    private static PropagationOutcome firstErroneousOutcome(Propagation propagation) {
+        PropagationOutcome erroneous = propagation
+                .getOutcomeList()
+                .stream()
+                .filter(PropagationOutcome::hasError)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Propagation was marked failed but no error occurred."
+                ));
+        return erroneous;
     }
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.

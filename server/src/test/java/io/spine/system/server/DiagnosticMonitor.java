@@ -34,6 +34,7 @@ public final class DiagnosticMonitor extends AbstractEventSubscriber {
     private final List<CannotDispatchCommandTwice> duplicateCommands = newArrayList();
     private final List<CannotDispatchEventTwice> duplicateEvents = newArrayList();
     private final List<HandlerFailedUnexpectedly> handlerFailures = newArrayList();
+    private final List<RoutingFailed> routingFailures = newArrayList();
 
     @Subscribe
     void on(ConstraintViolated event) {
@@ -55,6 +56,11 @@ public final class DiagnosticMonitor extends AbstractEventSubscriber {
         handlerFailures.add(event);
     }
 
+    @Subscribe
+    void on(RoutingFailed event) {
+        routingFailures.add(event);
+    }
+
     public ImmutableList<ConstraintViolated> constraintViolatedEvents() {
         return ImmutableList.copyOf(violations);
     }
@@ -69,5 +75,9 @@ public final class DiagnosticMonitor extends AbstractEventSubscriber {
 
     public List<HandlerFailedUnexpectedly> handlerFailureEvents() {
         return ImmutableList.copyOf(handlerFailures);
+    }
+
+    public List<RoutingFailed> routingFailures() {
+        return ImmutableList.copyOf(routingFailures);
     }
 }
