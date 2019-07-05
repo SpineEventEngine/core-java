@@ -65,10 +65,8 @@ import static java.util.Optional.ofNullable;
 /**
  * Dispatches the incoming commands to the corresponding handler.
  */
-public class CommandBus extends UnicastBus<Command,
-                                           CommandEnvelope,
-                                           CommandClass,
-                                           CommandDispatcher<?>> {
+public class CommandBus
+        extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher<?>> {
 
     /** Consumes tenant IDs from incoming commands. */
     private final Consumer<TenantId> tenantConsumer;

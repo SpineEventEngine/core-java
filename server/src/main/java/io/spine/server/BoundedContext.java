@@ -37,6 +37,7 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -305,9 +306,13 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
-            eventBus().register(dispatcher);
+            EventBus eventBus = eventBus();
+            eventBus.register(dispatcher);
             SystemReadSide systemReadSide = systemClient().readSide();
             systemReadSide.register(dispatcher);
+            if (dispatcher instanceof AbstractEventReactor) {
+                ((AbstractEventReactor) dispatcher).injectEventBus(eventBus);
+            }
         }
         if (dispatcher.dispatchesExternalEvents()) {
             registerWithIntegrationBus(dispatcher);

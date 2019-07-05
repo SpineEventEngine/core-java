@@ -22,6 +22,7 @@ package io.spine.server.event;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -46,6 +47,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.server.event.EventBus.checkAssigned;
 import static java.lang.String.format;
 
 /**
@@ -67,14 +69,21 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
 
     /** The event bus to which the emitted events are posted. */
-    private final EventBus eventBus;
+    private EventBus eventBus;
 
     private final Supplier<Any> producerId =
             memoize(() -> TypeConverter.toAny(getClass().getName()));
 
-    protected AbstractEventReactor(EventBus eventBus) {
-        checkNotNull(eventBus);
-        this.eventBus = eventBus;
+    protected AbstractEventReactor() {
+    }
+
+    @Internal
+    public final void injectEventBus(EventBus eventBus) {
+        this.eventBus = checkNotNull(eventBus);
+    }
+
+    private EventBus eventBus() {
+        return checkAssigned(this, eventBus);
     }
 
     @Override
@@ -92,11 +101,11 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
 
     private void reactAndPost(EventEnvelope event) {
         try {
-            EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
-                                                            event.originClass());
+            EventReactorMethod method =
+                    thisClass.reactorOf(event.messageClass(), event.originClass());
             ReactorMethodResult result = method.invoke(this, event);
             List<Event> events = result.produceEvents(event);
-            eventBus.post(events);
+            eventBus().post(events);
         } catch (RuntimeException ex) {
             onError(event, ex);
         }

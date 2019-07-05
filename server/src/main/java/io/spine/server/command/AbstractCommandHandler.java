@@ -40,6 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.event.EventBus.checkAssigned;
 
 /**
  * The abstract base for non-aggregate classes that expose command handling methods
@@ -126,7 +127,7 @@ public abstract class AbstractCommandHandler
     }
 
     private EventBus eventBus() {
-        return checkNotNull(eventBus, "`%s` does not have `EventBus` assigned.", this);
+        return checkAssigned(this, eventBus);
     }
 
     /**

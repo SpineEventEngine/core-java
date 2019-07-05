@@ -371,4 +371,24 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
             return exception;
         }
     }
+
+    /**
+     * Precondition check for objects depending on a reference to {@code EventBus}.
+     *
+     * @param holder
+     *         the object which holds the reference
+     * @param value
+     *         the value of the reference to check
+     * @return the passed value, if it's not null
+     * @throws NullPointerException
+     *         if the passed value is null
+     */
+    @Internal
+    public static EventBus checkAssigned(Object holder, @Nullable EventBus value) {
+        return checkNotNull(
+                value,
+                "`%s` does not have `EventBus` assigned.",
+                holder
+        );
+    }
 }

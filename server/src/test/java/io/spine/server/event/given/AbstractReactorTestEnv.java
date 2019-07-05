@@ -120,7 +120,8 @@ public class AbstractReactorTestEnv {
         private double totalDonated = 0.0d;
 
         public AutoCharityDonor(EventBus eventBus) {
-            super(eventBus);
+            super();
+            injectEventBus(eventBus);
         }
 
         @React(external = true)
@@ -157,7 +158,8 @@ public class AbstractReactorTestEnv {
         private final List<OrderServedLate> ordersServedLate = new ArrayList<>();
 
         public ServicePerformanceTracker(EventBus eventBus) {
-            super(eventBus);
+            super();
+            injectEventBus(eventBus);
         }
 
         @React
@@ -219,7 +221,8 @@ public class AbstractReactorTestEnv {
         private final NotificationMethod notificationMethod;
 
         public RestaurantNotifier(EventBus eventBus) {
-            super(eventBus);
+            super();
+            injectEventBus(eventBus);
             notificationMethod = SMS;
         }
 
@@ -272,7 +275,8 @@ public class AbstractReactorTestEnv {
     public static class FaultyNotifier extends AbstractEventReactor {
 
         public FaultyNotifier(EventBus eventBus) {
-            super(eventBus);
+            super();
+            injectEventBus(eventBus);
         }
 
         @React
@@ -291,7 +295,8 @@ public class AbstractReactorTestEnv {
     public static class FaultyCharityDonor extends AbstractEventReactor {
 
         public FaultyCharityDonor(EventBus eventBus) {
-            super(eventBus);
+            super();
+            injectEventBus(eventBus);
         }
 
         @React(external = true)
