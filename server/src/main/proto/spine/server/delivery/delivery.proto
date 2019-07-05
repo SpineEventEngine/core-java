@@ -20,7 +20,7 @@
 
 syntax = "proto3";
 
-package spine.server.sharding;
+package spine.server.delivery;
 
 import "spine/options.proto";
 

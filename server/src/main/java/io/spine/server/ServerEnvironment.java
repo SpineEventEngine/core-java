@@ -31,6 +31,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -77,9 +78,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * The strategy of delivering the messages received by entity repositories
      * to the entity instances.
      *
-     * <p>By default, initialized with the {@linkplain Delivery#local() local} delivery.
+     * <p>If not {@linkplain #configureDelivery(Delivery) configured by the end-user},
+     * initialized with the {@linkplain Delivery#local() local} delivery by default.
      */
-    private Delivery delivery;
+    private @MonotonicNonNull Delivery delivery;
 
     /**
      * The storage factory for the production mode of the application.
@@ -109,7 +111,6 @@ public final class ServerEnvironment implements AutoCloseable {
     private Supplier<CommandScheduler> commandScheduler;
 
     private ServerEnvironment() {
-        delivery = Delivery.local();
         nodeId = NodeId.newBuilder()
                        .setValue(Identifier.newUuid())
                        .vBuild();
@@ -163,7 +164,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * even dangerous to update the delivery mechanism later when the message delivery
      * process may have been already used by various {@code BoundedContext}s.
      */
-    public void configureDelivery(Delivery delivery) {
+    public synchronized void configureDelivery(Delivery delivery) {
         checkNotNull(delivery);
         this.delivery = delivery;
     }
@@ -174,7 +175,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * <p>Unless {@linkplain #configureDelivery(Delivery) updated manually}, returns
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
-    public Delivery delivery() {
+    public synchronized Delivery delivery() {
+        if (delivery == null) {
+            delivery = Delivery.local();
+        }
         return delivery;
     }
 
