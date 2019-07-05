@@ -227,6 +227,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Registers the passed command dispatcher with the {@code CommandBus} of
      * this {@code BoundedContext}.
      */
+    @Internal
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
@@ -247,6 +248,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Registers the passed command dispatcher with the {@code CommandBus} of
      * this {@code BoundedContext}.
      */
+    @Internal
     public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
@@ -271,6 +273,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
+    @Internal
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesEvents()) {
@@ -293,6 +296,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #registerEventDispatcher(EventDispatcher)
      */
+    @Internal
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
@@ -312,6 +316,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
+    @Internal
     public CommandErrorHandler createCommandErrorHandler() {
         SystemWriteSide systemWriteSide = systemClient().writeSide();
         CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide, this::eventBus);
