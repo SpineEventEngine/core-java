@@ -60,7 +60,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -111,18 +110,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * This constructor is for internal use of the framework. Application developers should not
      * create classes derived from {@code BoundedContext}.
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject dependencies.
     @Internal
     protected BoundedContext(BoundedContextBuilder builder) {
         super();
         checkInheritance();
-
         this.spec = builder.spec();
-        this.eventBus = buildEventBus(builder);
+        this.eventBus = builder.buildEventBus(this);
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
-
-        this.commandBus = buildCommandBus(builder, eventBus);
-        this.integrationBus = buildIntegrationBus(builder, eventBus, spec.name());
+        this.commandBus = builder.buildCommandBus(eventBus);
+        this.integrationBus = builder.buildIntegrationBus(this);
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
@@ -150,42 +148,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                 "The class `BoundedContext` is not designed for " +
                         "inheritance by the framework users."
         );
-    }
-
-    private EventBus buildEventBus(BoundedContextBuilder builder) {
-        EventBus result = builder.buildEventBus(this);
-        return result;
-    }
-
-    private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
-        CommandBus result = builder.commandBus()
-                                   .injectEventBus(eventBus)
-                                   .build();
-        return result;
-    }
-
-    /**
-     * Creates a new instance of {@link IntegrationBus} with the given parameters.
-     *
-     * @param builder
-     *         the {@link BoundedContextBuilder} to obtain the {@link IntegrationBus.Builder} from
-     * @param eventBus
-     *         the initialized {@link EventBus}
-     * @param name
-     *         the name of the constructed Bounded Context
-     * @return new instance of {@link IntegrationBus}
-     */
-    private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
-                                                      EventBus eventBus,
-                                                      BoundedContextName name) {
-        Optional<IntegrationBus.Builder> busBuilder = builder.integrationBus();
-        checkArgument(busBuilder.isPresent());
-        IntegrationBus result =
-                busBuilder.get()
-                          .setContextName(name)
-                          .setEventBus(eventBus)
-                          .build();
-        return result;
     }
 
     private static ImportBus buildImportBus(TenantIndex tenantIndex) {

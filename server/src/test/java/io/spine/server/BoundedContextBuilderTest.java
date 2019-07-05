@@ -25,6 +25,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRootDirectory;
+import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bc.given.Given.NoOpCommandDispatcher;
 import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
@@ -51,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("BoundedContext Builder should")
 class BoundedContextBuilderTest {
@@ -86,7 +86,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("AggregateRootDirectory if it was set")
         void aggregateRootDirectory() {
-            AggregateRootDirectory directory = mock(AggregateRootDirectory.class);
+            AggregateRootDirectory directory = new InMemoryRootDirectory();
             builder.setAggregateRootDirectory(() -> directory);
             assertEquals(directory, builder.aggregateRootDirectory());
         }

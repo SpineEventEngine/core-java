@@ -87,8 +87,9 @@ public final class BoundedContextBuilder implements Logging {
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
 
+    private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
+
     private Stand.Builder stand;
-    private IntegrationBus.Builder integrationBus;
     private Supplier<AggregateRootDirectory> rootDirectory;
     private TenantIndex tenantIndex;
 
@@ -146,14 +147,6 @@ public final class BoundedContextBuilder implements Logging {
         return spec.isMultitenant();
     }
 
-    Optional<IntegrationBus.Builder> integrationBus() {
-        return Optional.ofNullable(integrationBus);
-    }
-
-    CommandBus.Builder commandBus() {
-        return commandBus;
-    }
-
     /**
      * Obtains {@code TenantIndex} implementation associated with the Bounded Context.
      */
@@ -192,24 +185,8 @@ public final class BoundedContextBuilder implements Logging {
         return eventBus.enricher();
     }
 
-    EventBus buildEventBus(BoundedContext context) {
-        checkNotNull(context);
-        eventBus.injectContext(context);
-        return eventBus.build();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setStand(Stand.Builder stand) {
-        this.stand = checkNotNull(stand);
-        return this;
-    }
-
     public Optional<Stand.Builder> stand() {
         return Optional.ofNullable(stand);
-    }
-
-    Stand buildStand() {
-        return stand.build();
     }
 
     @CanIgnoreReturnValue
@@ -511,6 +488,33 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
+    EventBus buildEventBus(BoundedContext context) {
+        checkNotNull(context);
+        eventBus.injectContext(context);
+        return eventBus.build();
+    }
+
+    CommandBus buildCommandBus(EventBus eventBus) {
+        commandBus.injectEventBus(eventBus);
+        return commandBus.build();
+    }
+
+    IntegrationBus buildIntegrationBus(BoundedContext context) {
+        integrationBus.setContextName(context.spec().name())
+                      .setEventBus(context.eventBus());
+        return integrationBus.build();
+    }
+
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder setStand(Stand.Builder stand) {
+        this.stand = checkNotNull(stand);
+        return this;
+    }
+
+    Stand buildStand() {
+        return stand.build();
+    }
+
     private void registerRepositories(BoundedContext result) {
         for (Repository<?, ?> repository : repositories) {
             result.register(repository);
@@ -550,7 +554,6 @@ public final class BoundedContextBuilder implements Logging {
         initTenantIndex();
         initCommandBus(client.writeSide());
         initStand(client.readSide());
-        initIntegrationBus();
 
         B result = instanceFactory.apply(this);
         return result;
@@ -585,10 +588,6 @@ public final class BoundedContextBuilder implements Logging {
             }
         }
         stand.setSystemReadSide(systemReadSide);
-    }
-
-    private void initIntegrationBus() {
-        integrationBus = IntegrationBus.newBuilder();
     }
 
     /**
