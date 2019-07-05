@@ -85,7 +85,7 @@ public interface StorageFactory extends AutoCloseable {
      *
      * <p>The instance of {@code InboxStorage} is used in the {@link
      * io.spine.server.delivery.Delivery Delivery} operations. Therefore there is typically just
-     * a single instance if {@code InboxStorage} per {@link io.spine.server.ServerEnvironment
+     * a single instance of {@code InboxStorage} per {@link io.spine.server.ServerEnvironment
      * ServerEnvironment} instance, unlike other {@code Storage} types which instances are created
      * per-{@link io.spine.server.BoundedContext BoundedContext}.
      *
