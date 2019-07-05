@@ -24,7 +24,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
 import io.spine.test.reflect.Project;
@@ -70,10 +69,6 @@ public class ModelTestEnv {
     }
 
     public static class MCommandHandler extends AbstractCommandHandler {
-
-        private MCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         @Assign
         RefProjectCreated on(RefCreateProject cmd) {

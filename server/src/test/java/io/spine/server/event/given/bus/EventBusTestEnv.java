@@ -137,7 +137,7 @@ public class EventBusTestEnv {
                 .newBuilder()
                 .appendFilter(new TaskCreatedFilter());
         if (enricher != null) {
-            busBuilder.setEnricher(enricher);
+            busBuilder.injectEnricher(enricher);
         }
         return busBuilder;
     }

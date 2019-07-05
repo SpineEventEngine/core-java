@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@BoundedContext("Airport")
+@BoundedContext(AirportContext.NAME)
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.trace.given.airport;

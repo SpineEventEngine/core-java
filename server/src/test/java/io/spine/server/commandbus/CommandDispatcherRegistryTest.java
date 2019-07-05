@@ -110,7 +110,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            registry.register(new AllCommandHandler(eventBus));
+            registry.register(new AllCommandHandler());
 
             assertSupported(CmdBusCreateProject.class,
                             CmdBusAddTask.class,
@@ -138,7 +138,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            AllCommandHandler handler = new AllCommandHandler(eventBus);
+            AllCommandHandler handler = new AllCommandHandler();
 
             registry.register(handler);
             registry.unregister(handler);
@@ -151,7 +151,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("all command dispatchers and handlers")
         void everything() {
-            registry.register(new CreateProjectHandler(eventBus));
+            registry.register(new CreateProjectHandler());
             registry.register(new AddTaskDispatcher());
 
             registry.unregisterAll();
@@ -176,7 +176,7 @@ class CommandDispatcherRegistryTest {
         @DisplayName("command handler")
         void commandHandler() {
             assertThrows(IllegalArgumentException.class,
-                         () -> registry.register(new EmptyCommandHandler(eventBus)));
+                         () -> registry.register(new EmptyCommandHandler()));
         }
 
     }
@@ -195,7 +195,7 @@ class CommandDispatcherRegistryTest {
     @Test
     @DisplayName("state both dispatched and handled commands as supported")
     void supportDispatchedAndHandled() {
-        registry.register(new CreateProjectHandler(eventBus));
+        registry.register(new CreateProjectHandler());
         registry.register(new AddTaskDispatcher());
 
         assertSupported(CmdBusCreateProject.class, CmdBusAddTask.class);
@@ -224,9 +224,9 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("registered handler by another handler")
         void handlerByHandler() {
-            registry.register(new CreateProjectHandler(eventBus));
+            registry.register(new CreateProjectHandler());
             assertThrows(IllegalArgumentException.class,
-                         () -> registry.register(new CreateProjectHandler(eventBus)));
+                         () -> registry.register(new CreateProjectHandler()));
         }
 
         @Test
@@ -234,13 +234,13 @@ class CommandDispatcherRegistryTest {
         void dispatcherByHandler() {
             registry.register(new CreateProjectDispatcher());
             assertThrows(IllegalArgumentException.class,
-                         () -> registry.register(new CreateProjectHandler(eventBus)));
+                         () -> registry.register(new CreateProjectHandler()));
         }
 
         @Test
         @DisplayName("registered handler by dispatcher")
         void handlerByDispatcher() {
-            registry.register(new CreateProjectHandler(eventBus));
+            registry.register(new CreateProjectHandler());
             assertThrows(IllegalArgumentException.class,
                          () -> registry.register(new CreateProjectDispatcher()));
         }

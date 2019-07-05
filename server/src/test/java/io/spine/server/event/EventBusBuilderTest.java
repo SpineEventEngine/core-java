@@ -20,8 +20,9 @@
 
 package io.spine.server.event;
 
+import io.grpc.stub.StreamObserver;
+import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.grpc.LoggingObserver;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.Tests;
@@ -29,12 +30,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.grpc.StreamObservers.noOpObserver;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent",
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventBus Builder should")
 class EventBusBuilderTest
         extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
@@ -45,40 +44,45 @@ class EventBusBuilderTest
     }
 
     @Test
-    @DisplayName("accept null Enricher")
-    void acceptNullEnricher() {
-        assertNull(builder().setEnricher(Tests.nullRef())
-                            .enricher()
-                            .orElse(null));
+    @DisplayName("reject null `EventEnricher`")
+    void rejectNullEnricher() {
+        assertThrows(NullPointerException.class, () ->
+                builder().injectEnricher(Tests.nullRef()));
     }
 
     @Nested
-    @DisplayName("return set")
-    class ReturnSet {
+    @DisplayName("assign `StreamObserver`")
+    class PostObserver {
 
         @Test
-        @DisplayName("Enricher")
-        void enricher() {
-            EventEnricher enricher = EventEnricher
-                    .newBuilder()
-                    .build();
-            assertSame(enricher, builder().setEnricher(enricher)
-                                          .enricher()
-                                          .get());
+        @DisplayName("assigning `noOpObserver()` if not assigned")
+        void assigningDefault() {
+            assertThat(builder().build()
+                              .observer())
+                    .isInstanceOf(noOpObserver().getClass());
         }
-    }
 
-    @Test
-    @DisplayName("allow configuring logging level for post operations")
-    void setLogLevelForPost() {
-        // See that the default level is TRACE.
-        assertEquals(LoggingObserver.Level.TRACE, builder().logLevelForPost());
+        @Test
+        @DisplayName("assign custom observer")
+        void customValue() {
+            StreamObserver<Ack> observer = new StreamObserver<Ack>() {
+                @Override
+                public void onNext(Ack value) {
+                }
 
-        // Check setting new value.
-        EventBus.Builder builder = builder();
-        LoggingObserver.Level newLevel = LoggingObserver.Level.DEBUG;
+                @Override
+                public void onError(Throwable t) {
+                }
 
-        assertSame(builder, builder.setLogLevelForPost(newLevel));
-        assertEquals(newLevel, builder.logLevelForPost());
+                @Override
+                public void onCompleted() {
+                }
+            };
+
+            assertThat(builder().setObserver(observer)
+                                .build()
+                                .observer())
+                    .isEqualTo(observer);
+        }
     }
 }

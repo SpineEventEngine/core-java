@@ -54,7 +54,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
 
@@ -73,8 +72,8 @@ class CommandHandlerTest {
                 .build();
         commandBus = boundedContext.commandBus();
         eventBus = boundedContext.eventBus();
-        handler = new TestCommandHandler(eventBus);
-
+        handler = new TestCommandHandler();
+        handler.injectEventBus(eventBus);
         commandBus.register(handler);
     }
 
@@ -176,7 +175,7 @@ class CommandHandlerTest {
     @Test
     @DisplayName("handle equality")
     void equality() {
-        new EqualsTester().addEqualityGroup(handler, new TestCommandHandler(eventBus))
+        new EqualsTester().addEqualityGroup(handler, new TestCommandHandler())
                           .testEquals();
     }
 
