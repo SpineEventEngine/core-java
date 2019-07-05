@@ -28,7 +28,6 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
-import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.ProjectId;
@@ -37,7 +36,6 @@ import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -129,17 +127,6 @@ public class EventBusTestEnv {
 
         List<Event> results = observer.responses();
         return results;
-    }
-
-    @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
-    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
-        EventBus.Builder busBuilder = EventBus
-                .newBuilder()
-                .addFilter(new TaskCreatedFilter());
-        if (enricher != null) {
-            busBuilder.injectEnricher(enricher);
-        }
-        return busBuilder;
     }
 
     /**

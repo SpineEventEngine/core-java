@@ -24,7 +24,9 @@ import com.google.common.collect.ImmutableList;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.Assign;
+import io.spine.server.type.EventClass;
 import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Project;
@@ -34,11 +36,14 @@ import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBCreateProject;
 
 import java.util.List;
+import java.util.Set;
 
-class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+public final class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-    private ProjectAggregate(ProjectId id) {
-        super(id);
+    public static Set<EventClass> outgoingEvents() {
+        AggregateClass<?> modelClass = new ProjectAggregate().modelClass();
+        Set<EventClass> result = modelClass.outgoingEvents();
+        return result;
     }
 
     @Assign

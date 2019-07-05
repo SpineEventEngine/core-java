@@ -85,7 +85,7 @@ public final class BoundedContextBuilder implements Logging {
     private final ChainBuilder<CommandEnvelope> commandFilters = FilterChain.newBuilder();
     private final Set<Consumer<CommandEnvelope>> commandListeners = new HashSet<>();
 
-    private EventBus.Builder eventBus;
+    private final EventBus.Builder eventBus = EventBus.newBuilder();
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
      * {@link IntegrationBus} after the Bounded Context creation.
@@ -181,16 +181,6 @@ public final class BoundedContextBuilder implements Logging {
             ? checkNotNull(tenantIndex)
             : TenantIndex.singleTenant();
         return result;
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setEventBus(EventBus.Builder eventBus) {
-        this.eventBus = checkNotNull(eventBus);
-        return this;
-    }
-
-    public Optional<EventBus.Builder> eventBus() {
-        return Optional.ofNullable(eventBus);
     }
 
     /**
@@ -616,9 +606,6 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private void initEventBus() {
-        if (eventBus == null) {
-            eventBus = EventBus.newBuilder();
-        }
         eventFilters.filters()
                     .forEach(eventBus::addFilter);
         eventListeners.forEach(eventBus::addListener);

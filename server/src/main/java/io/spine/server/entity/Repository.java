@@ -195,7 +195,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *          not equal to the assigned one
      */
     @Internal
-    public final void setContext(BoundedContext context) {
+    public final void injectContext(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {

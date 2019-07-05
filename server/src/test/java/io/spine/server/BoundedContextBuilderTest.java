@@ -33,7 +33,6 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tenant.TenantIndex;
@@ -56,8 +55,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent",
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext Builder should")
 class BoundedContextBuilderTest {
 
@@ -78,26 +75,6 @@ class BoundedContextBuilderTest {
     @Nested
     @DisplayName("return")
     class Return {
-
-        @Test
-        @DisplayName("CommandBus Builder")
-        void commandBusBuilder() {
-            CommandBus.Builder expected = CommandBus.newBuilder();
-            builder = BoundedContextBuilder
-                    .assumingTests()
-                    .setCommandBus(expected);
-            assertEquals(expected, builder.commandBus()
-                                          .get());
-        }
-
-        @Test
-        @DisplayName("EventBus Builder")
-        void eventBusBuilder() {
-            EventBus.Builder expected = EventBus.newBuilder();
-            builder.setEventBus(expected);
-            assertEquals(expected, builder.eventBus()
-                                          .get());
-        }
 
         @Test
         @DisplayName("name if it was set")
@@ -128,25 +105,7 @@ class BoundedContextBuilderTest {
                                                .build()
                                                .tenantIndex());
         }
-
-        @Test
-        @DisplayName("CommandBus")
-        void commandBus() {
-            // Pass EventBus to builder initialization, and do NOT pass CommandBus.
-            BoundedContext boundedContext = builder.setEventBus(EventBus.newBuilder())
-                                                   .build();
-            assertNotNull(boundedContext.commandBus());
-        }
-
-        @Test
-        @DisplayName("EventBus")
-        void eventBus() {
-            // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
-            BoundedContext boundedContext = builder.setCommandBus(CommandBus.newBuilder())
-                                                   .build();
-            assertNotNull(boundedContext.eventBus());
-        }
-
+        
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {

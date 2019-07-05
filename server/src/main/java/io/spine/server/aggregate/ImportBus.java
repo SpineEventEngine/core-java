@@ -158,8 +158,7 @@ public final class ImportBus
 
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
-        protected
-        Optional<? extends EventImportDispatcher<?>> dispatcherOf(EventEnvelope event) {
+        protected Optional<EventImportDispatcher<?>> dispatcherOf(EventEnvelope event) {
             return super.dispatcherOf(event);
         }
     }

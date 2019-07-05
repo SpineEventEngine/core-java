@@ -41,7 +41,6 @@ import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.EventBus;
 import io.spine.server.stand.Stand;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
@@ -73,11 +72,6 @@ import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.slf4j.event.Level.DEBUG;
 
 /**
@@ -249,21 +243,6 @@ class BoundedContextTest {
                 .contains(stateType);
     }
 
-    @Test
-    @DisplayName("re-register Stand as event dispatcher when registering repository")
-    void registerStandAsEventDispatcher() {
-        EventBus eventBusMock = mock(EventBus.class);
-        EventBus.Builder builderMock = mock(EventBus.Builder.class);
-        when(builderMock.build()).thenReturn(eventBusMock);
-        BoundedContext boundedContext = BoundedContextBuilder
-                .assumingTests()
-                .setEventBus(builderMock)
-                .build();
-        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
-        verify(eventBusMock, times(1))
-                .register(eq(boundedContext.stand()));
-    }
-
     @ParameterizedTest
     @MethodSource("sameStateRepositories")
     @DisplayName("not allow two entity repositories with entities of same state")
@@ -316,16 +295,6 @@ class BoundedContextTest {
                 DefaultRepository.of(ProjectAggregate.class);
         context.register(repository);
         assertTrue(repository.storageAssigned());
-    }
-
-    @Test
-    @DisplayName("allow custom EventBus")
-    void setEventBusStorageFactory() {
-        BoundedContext bc = BoundedContextBuilder
-                .assumingTests()
-                .setEventBus(EventBus.newBuilder())
-                .build();
-        assertNotNull(bc.eventBus());
     }
 
     @Nested

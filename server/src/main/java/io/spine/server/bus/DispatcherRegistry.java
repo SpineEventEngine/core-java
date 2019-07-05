@@ -46,7 +46,6 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
 public abstract class DispatcherRegistry<C extends MessageClass<? extends Message>,
                                          E extends MessageEnvelope<?, ?, ?>,
                                          D extends MessageDispatcher<C, E, ?>> {
-
     /**
      * The map from a message class to one or more dispatchers of
      * messages of this class.
@@ -96,7 +95,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      *         the message envelope to find dispatchers for
      * @return a set of dispatchers or an empty set if no dispatchers are registered
      */
-    protected Set<D> dispatchersOf(E envelope) {
+    final Set<D> dispatchersOf(E envelope) {
         checkNotNull(envelope);
         C messageClass = classOf(envelope);
         Set<D> dispatchers = this.dispatchers
@@ -116,7 +115,7 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
      *         if more than one dispatcher is found
      * @apiNote This method must be called only for serving {@link UnicastBus}es.
      */
-    protected Optional<? extends D> dispatcherOf(E envelope) {
+    protected Optional<D> dispatcherOf(E envelope) {
         checkNotNull(envelope);
         Set<D> dispatchers = dispatchersOf(envelope);
         checkNotMoreThanOne(dispatchers, classOf(envelope));

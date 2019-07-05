@@ -20,55 +20,55 @@
 
 package io.spine.server.event;
 
-import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectAggregate;
-import io.spine.server.event.given.bus.RememberingSubscriber;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import io.spine.server.stand.Stand;
+import io.spine.server.type.EventClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("EventBus should manage event enrichment")
-class EventBusEnrichmentTest {
+@DisplayName("`EventBus` should")
+class EventBusStandIntegrationTest {
 
-    private EventBus eventBus;
-    private BoundedContext context;
-    private RememberingSubscriber subscriber;
-
-    @BeforeEach
-    void setUp() {
-        EventEnricher enricher = EventEnricher
-                .newBuilder()
+    @Test
+    @DisplayName("do not have `Stand` as the dispatcher if no repositories registered with the context")
+    void notRegistered() {
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
                 .build();
-        subscriber = new RememberingSubscriber();
-        context = BoundedContextBuilder
-                .assumingTests(true)
-                .enrichEventsUsing(enricher)
-                .addEventDispatcher(subscriber)
-                .add(ProjectAggregate.class)
-                .build();
-        eventBus = context.eventBus();
-    }
 
-    @AfterEach
-    void closeBoundedContext() throws Exception {
-        context.close();
+        EventBus eventBus = context.eventBus();
+        Stand stand = context.stand();
+
+        eventClasses().forEach(eventClass ->
+                assertThat(eventBus.dispatchersOf(eventClass))
+                        .doesNotContain(stand)
+        );
     }
 
     @Test
-    @DisplayName("for event that cannot be enriched")
-    void forNonEnrichable() {
-        eventBus.post(GivenEvent.projectCreated());
+    @DisplayName("has `Stand` as the dispatcher of events of the registered repository")
+    void reRegisterStand() {
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
+                .add(ProjectAggregate.class)
+                .build();
 
-        EventContext eventContext = subscriber.getEventContext();
-        assertThat(eventContext.getEnrichment()
-                               .getContainer()
-                               .getItemsCount())
-                .isEqualTo(0);
+        EventBus eventBus = context.eventBus();
+        Stand stand = context.stand();
+
+        eventClasses().forEach(eventClass ->
+             assertThat(eventBus.dispatchersOf(eventClass))
+                     .contains(stand)
+        );
+    }
+
+    private static Set<EventClass> eventClasses() {
+        return ProjectAggregate.outgoingEvents();
     }
 }

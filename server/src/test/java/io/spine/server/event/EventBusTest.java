@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
@@ -34,7 +35,7 @@ import io.spine.server.event.given.bus.EBProjectArchivedSubscriber;
 import io.spine.server.event.given.bus.EBProjectCreatedNoOpSubscriber;
 import io.spine.server.event.given.bus.EBTaskAddedNoOpSubscriber;
 import io.spine.server.event.given.bus.GivenEvent;
-import io.spine.server.event.given.bus.ProjectRepository;
+import io.spine.server.event.given.bus.ProjectAggregate;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
 import io.spine.server.type.EventClass;
@@ -66,7 +67,6 @@ import static io.spine.server.BoundedContextBuilder.assumingTests;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.bus.EventBusTestEnv.command;
 import static io.spine.server.event.given.bus.EventBusTestEnv.createProject;
-import static io.spine.server.event.given.bus.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.bus.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.bus.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.bus.EventBusTestEnv.readEvents;
@@ -86,14 +86,13 @@ public class EventBusTest {
 
     private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
-        EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
-
-        context = assumingTests(true)
-                .setEventBus(eventBusBuilder)
-                .build();
-        ProjectRepository projectRepository = new ProjectRepository();
-        context.register(projectRepository);
-
+        BoundedContextBuilder builder = assumingTests(true)
+                .addEventFiler(new TaskCreatedFilter())
+                .add(ProjectAggregate.class);
+        if (enricher != null) {
+            builder.enrichEventsUsing(enricher);
+        }
+        this.context = builder.build();
         this.commandBus = context.commandBus();
         this.eventBus = context.eventBus();
     }
@@ -121,8 +120,7 @@ public class EventBusTest {
 
         // Pass just String instance.
         assertThrows(IllegalArgumentException.class,
-                     () -> eventBus.register(new AbstractEventSubscriber() {
-                     }));
+                     () -> eventBus.register(new AbstractEventSubscriber() {}));
     }
 
     @Nested
