@@ -38,7 +38,6 @@ import io.spine.server.bc.given.ProjectRemovalProcman;
 import io.spine.server.bc.given.ProjectReport;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
@@ -300,18 +299,6 @@ class BoundedContextTest {
     @Nested
     @DisplayName("match multitenancy state of")
     class MatchMultitenancyState {
-
-        @Test
-        @DisplayName("CommandBus")
-        void ofCommandBus() {
-            CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                      .setMultitenant(false);
-            assertThrows(IllegalStateException.class,
-                         () -> BoundedContextBuilder
-                                 .assumingTests(true)
-                                 .setCommandBus(commandBus)
-                                 .build());
-        }
 
         @Test
         @DisplayName("Stand")

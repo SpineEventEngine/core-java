@@ -158,11 +158,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
-        Optional<CommandBus.Builder> busBuilder = builder.commandBus();
-        checkState(busBuilder.isPresent());
-        CommandBus result = busBuilder.get()
-                                      .injectEventBus(eventBus)
-                                      .build();
+        CommandBus result = builder.commandBus()
+                                   .injectEventBus(eventBus)
+                                   .build();
         return result;
     }
 

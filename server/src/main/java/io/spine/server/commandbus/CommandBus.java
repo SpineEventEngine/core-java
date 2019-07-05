@@ -281,11 +281,6 @@ public class CommandBus
         }
 
         @Internal
-        public @Nullable Boolean isMultitenant() {
-            return multitenant;
-        }
-
-        @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;

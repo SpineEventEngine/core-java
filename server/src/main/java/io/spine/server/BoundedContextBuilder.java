@@ -30,8 +30,6 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.ChainBuilder;
-import io.spine.server.bus.FilterChain;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
@@ -53,9 +51,7 @@ import io.spine.system.server.SystemWriteSide;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -75,23 +71,21 @@ public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
 
-    private CommandBus.Builder commandBus;
+    private final CommandBus.Builder commandBus = CommandBus.newBuilder();
+
     /**
      * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
      * Context creation.
      */
     private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
 
-    private final ChainBuilder<CommandEnvelope> commandFilters = FilterChain.newBuilder();
-    private final Set<Consumer<CommandEnvelope>> commandListeners = new HashSet<>();
+    private final EventBus.Builder eventBus = EventBus.newBuilder();
 
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
      * {@link IntegrationBus} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
-
-    private final EventBus.Builder eventBus = EventBus.newBuilder();
 
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
@@ -152,18 +146,12 @@ public final class BoundedContextBuilder implements Logging {
         return spec.isMultitenant();
     }
 
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setCommandBus(CommandBus.Builder commandBus) {
-        this.commandBus = checkNotNull(commandBus);
-        return this;
-    }
-
     Optional<IntegrationBus.Builder> integrationBus() {
         return Optional.ofNullable(integrationBus);
     }
 
-    public Optional<CommandBus.Builder> commandBus() {
-        return Optional.ofNullable(commandBus);
+    CommandBus.Builder commandBus() {
+        return commandBus;
     }
 
     /**
@@ -261,7 +249,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     public BoundedContextBuilder addCommandFilter(BusFilter<CommandEnvelope> filter) {
         checkNotNull(filter);
-        commandFilters.append(filter);
+        commandBus.addFilter(filter);
         return this;
     }
 
@@ -270,7 +258,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     public BoundedContextBuilder addCommandListener(Consumer<CommandEnvelope> listener) {
         checkNotNull(listener);
-        commandListeners.add(listener);
+        commandBus.addListener(listener);
         return this;
     }
 
@@ -577,24 +565,9 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private void initCommandBus(SystemWriteSide systemWriteSide) {
-        if (commandBus == null) {
-            commandBus = CommandBus.newBuilder()
-                                   .setMultitenant(isMultitenant());
-        } else {
-            Boolean commandBusMultitenancy = commandBus.isMultitenant();
-            if (commandBusMultitenancy != null) {
-                checkSameValue("`CommandBus` must match multitenancy of `BoundedContext`. " +
-                                       "Status in `BoundedContextBuilder`: %s `CommandBus`: %s.",
-                               commandBusMultitenancy);
-            } else {
-                commandBus.setMultitenant(isMultitenant());
-            }
-        }
+        commandBus.setMultitenant(isMultitenant());
         commandBus.injectSystem(systemWriteSide)
                   .injectTenantIndex(tenantIndex);
-        commandFilters.filters()
-                      .forEach(commandBus::addFilter);
-        commandListeners.forEach(commandBus::addListener);
     }
 
     private void initStand(SystemReadSide systemReadSide) {

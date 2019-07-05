@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -125,15 +124,6 @@ class CommandBusBuilderTest
                               .isPresent());
             assertEquals(expectedEventBus, builder.eventBus()
                                                   .get());
-        }
-
-        @Test
-        @DisplayName("if CommandBus is multitenant")
-        void ifIsMultitenant() {
-            assertTrue(builder().setMultitenant(true)
-                                .isMultitenant());
-            assertFalse(builder().setMultitenant(false)
-                                 .isMultitenant());
         }
 
         @Test

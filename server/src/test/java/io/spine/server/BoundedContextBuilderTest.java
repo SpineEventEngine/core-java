@@ -30,7 +30,6 @@ import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventDispatcher;
@@ -51,7 +50,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -166,17 +164,6 @@ class BoundedContextBuilderTest {
         public void close() {
             // Do nothing.
         }
-    }
-
-    @Test
-    @DisplayName("not accept `CommandBus` with different multitenancy state")
-    void matchCommandBusMultitenancy() {
-        CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                  .setMultitenant(true);
-        assertThrows(IllegalStateException.class,
-                     () -> BoundedContextBuilder.assumingTests(false)
-                                                .setCommandBus(commandBus)
-                                                .build());
     }
 
     @Nested
