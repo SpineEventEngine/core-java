@@ -29,9 +29,9 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.trace.TracerFactory;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -176,7 +176,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public synchronized Delivery delivery() {
-        if(delivery == null) {
+        if (delivery == null) {
             delivery = Delivery.local();
         }
         return delivery;
