@@ -25,7 +25,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EvTeamCreated;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
@@ -37,10 +36,6 @@ public class DelegatingEventDispatcherTestEnv {
 
     public static final class DummyEventDispatcherDelegate
             implements EventDispatcherDelegate<String> {
-
-        private boolean onErrorCalled;
-
-        private @Nullable RuntimeException lastException;
 
         @Override
         public Set<EventClass> domesticEvents() {
@@ -57,20 +52,6 @@ public class DelegatingEventDispatcherTestEnv {
         public Set<String> dispatchEvent(EventEnvelope event) {
             // Do nothing.
             return ImmutableSet.of(getClass().getName());
-        }
-
-        @Override
-        public void onError(EventEnvelope event, RuntimeException exception) {
-            onErrorCalled = true;
-            lastException = exception;
-        }
-
-        public boolean onErrorCalled() {
-            return onErrorCalled;
-        }
-
-        public @Nullable RuntimeException getLastException() {
-            return lastException;
         }
     }
 }

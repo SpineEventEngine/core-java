@@ -41,7 +41,6 @@ import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.event.store.EventStore;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
@@ -368,15 +367,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         public Set<ExternalMessageClass> messageClasses() {
             Set<EventClass> eventClasses = projectionClass().externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            checkNotNull(envelope);
-            checkNotNull(exception);
-            logError("Error dispatching external event (class: `%s`, id: `%s`)" +
-                             " to projection with state `%s`.",
-                     envelope, exception);
         }
     }
 }

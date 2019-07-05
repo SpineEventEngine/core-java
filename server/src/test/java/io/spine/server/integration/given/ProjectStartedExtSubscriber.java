@@ -22,10 +22,7 @@ package io.spine.server.integration.given;
 
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.event.ItgProjectStarted;
-
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
 public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
@@ -43,13 +40,5 @@ public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
 
     public static void clear() {
         externalEvent = null;
-    }
-
-    /**
-     * Rethrow all the issues, so that they are visible to tests.
-     */
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        throw illegalStateWithCauseOf(exception);
     }
 }

@@ -22,11 +22,8 @@ package io.spine.server.integration.given;
 
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.integration.command.ItgStartProject;
 import io.spine.test.integration.rejection.IntegrationRejections;
-
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * A subscriber for testing of external attribute mismatch check.
@@ -42,13 +39,5 @@ public final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
     @Subscribe
     void on(IntegrationRejections.ItgCannotStartArchivedProject rejection) {
         // do nothing.
-    }
-
-    /**
-     * Rethrow all the issues, so that they are visible to tests.
-     */
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        throw illegalStateWithCauseOf(exception);
     }
 }

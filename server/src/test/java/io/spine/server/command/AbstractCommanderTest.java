@@ -28,9 +28,7 @@ import io.spine.core.UserId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.DelegatingEventDispatcher;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFactory;
 import io.spine.server.tuple.Pair;
 import io.spine.test.command.CmdAssignTask;
@@ -45,6 +43,7 @@ import io.spine.test.command.TaskId;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,24 +62,28 @@ class AbstractCommanderTest {
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
     private final EventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-    private final BoundedContext boundedContext = BoundedContextBuilder
-            .assumingTests()
-            .build();
+    private BoundedContext boundedContext;
 
     private CommandInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        CommandBus commandBus = boundedContext.commandBus();
-        EventBus eventBus = boundedContext.eventBus();
-        AbstractCommander commander = new Commendatore(commandBus, boundedContext.eventBus());
-        interceptor = new CommandInterceptor(boundedContext,
-                                             FirstCmdCreateProject.class,
+        boundedContext = BoundedContextBuilder
+                .assumingTests()
+                .build();
+        AbstractCommander commander = new Commendatore();
+        interceptor = new CommandInterceptor(FirstCmdCreateProject.class,
                                              CmdSetTaskDescription.class,
                                              CmdAssignTask.class,
                                              CmdStartTask.class);
-        commandBus.register(commander);
-        eventBus.register(DelegatingEventDispatcher.of(commander));
+        boundedContext.registerCommandDispatcher(commander);
+        boundedContext.registerEventDispatcher(DelegatingEventDispatcher.of(commander));
+        boundedContext.registerCommandDispatcher(interceptor);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        boundedContext.close();
     }
 
     @Test
@@ -189,10 +192,6 @@ class AbstractCommanderTest {
      * Test environment class that generates new commands in response to incoming messages.
      */
     private static final class Commendatore extends AbstractCommander {
-
-        private Commendatore(CommandBus commandBus, EventBus eventBus) {
-            super(commandBus, eventBus);
-        }
 
         @Command
         FirstCmdCreateProject on(CmdCreateProject command) {

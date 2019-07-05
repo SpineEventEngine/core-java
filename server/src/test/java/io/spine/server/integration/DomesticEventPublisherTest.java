@@ -22,23 +22,14 @@ package io.spine.server.integration;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
-import io.spine.logging.Logging;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
-import io.spine.testdata.Sample;
-import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.event.SubstituteLoggingEvent;
-import org.slf4j.helpers.SubstituteLogger;
 
-import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,14 +37,11 @@ import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.BoundedContextNames.assumingTests;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.slf4j.event.Level.ERROR;
 
 @DisplayName("DomesticEventPublisher should")
 class DomesticEventPublisherTest {
 
     private static final EventClass TARGET_EVENT_CLASS = EventClass.from(ItgProjectCreated.class);
-    private static final TestEventFactory events =
-            TestEventFactory.newInstance(DomesticEventPublisherTest.class);
 
     private PublisherHub publisherHub;
 
@@ -92,33 +80,5 @@ class DomesticEventPublisherTest {
         assertThat(classes).isEmpty();
         Optional<?> externalDispatcher = publisher.createExternalDispatcher();
         assertFalse(externalDispatcher.isPresent());
-    }
-
-    @Test
-    @DisplayName("log errors")
-    void logErrors() {
-        DomesticEventPublisher publisher = new DomesticEventPublisher(
-                assumingTests(), publisherHub, TARGET_EVENT_CLASS
-        );
-        Event event = events.createEvent(
-                ItgProjectCreated
-                        .newBuilder()
-                        .setProjectId(Sample.messageOfType(ProjectId.class))
-                        .build()
-        );
-        ArrayDeque<SubstituteLoggingEvent> logQueue = new ArrayDeque<>();
-        Logging.redirect((SubstituteLogger) publisher.log(), logQueue);
-        publisher.onError(EventEnvelope.of(event), new TestException());
-        SubstituteLoggingEvent lastEvent = logQueue.getLast();
-
-        assertThat(lastEvent.getLevel()).isAtLeast(ERROR);
-        assertThat(lastEvent.getThrowable()).isInstanceOf(TestException.class);
-    }
-
-    /**
-     * A test exception type.
-     */
-    private static final class TestException extends RuntimeException  {
-        private static final long serialVersionUID = 0L;
     }
 }

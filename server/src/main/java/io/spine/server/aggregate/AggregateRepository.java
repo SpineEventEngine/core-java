@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -29,7 +28,6 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
@@ -92,14 +90,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final EventRouting<I> eventImportRouting = EventRouting.withDefaultByProducerId();
 
     /**
-     * The {@link CommandErrorHandler} tackling the dispatching errors.
-     *
-     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
-     * method.
-     */
-    private CommandErrorHandler commandErrorHandler;
-
-    /**
      * The {@link Inbox} for the messages, which are sent to the instances managed by this
      * repository.
      */
@@ -147,7 +137,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             context.importBus()
                    .register(EventImportDispatcher.of(this));
         }
-        this.commandErrorHandler = context.createCommandErrorHandler();
         initInbox();
     }
 
@@ -308,22 +297,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return target;
     }
 
-    /**
-     * Handles the given error.
-     *
-     * <p>If the given error is a rejection, posts the rejection event into
-     * the {@link EventBus}. Otherwise, logs the error.
-     *
-     * @param cmd
-     *         the command which caused the error
-     * @param exception
-     *         the error occurred during processing of the command
-     */
-    @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
-    }
-
     @Override
     public Set<EventClass> domesticEvents() {
         return aggregateClass().domesticEvents();
@@ -410,14 +383,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                           "Unable to route import event: `%s`.", event)
                   );
         return id;
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-        logError("Error reacting on event (class: `%s` ID: `%s`) in aggregate with the state `%s`.",
-                 event, exception);
     }
 
     /**

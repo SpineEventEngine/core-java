@@ -66,9 +66,4 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     protected void onEmptyResult(P pm, EventEnvelope event) {
         // Do nothing.
     }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        repository().onError(event, exception);
-    }
 }

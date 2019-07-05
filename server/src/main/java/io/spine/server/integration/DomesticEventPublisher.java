@@ -80,15 +80,6 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
     }
 
     @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(event);
-        _error(exception,
-               "Error publishing event (class: `%s`, ID: `%s`) from bounded context `%s`.",
-               event.messageClass(), event.id(), originContextName);
-    }
-
-    @Override
     public Set<EventClass> externalEventClasses() {
         return ImmutableSet.of();
     }

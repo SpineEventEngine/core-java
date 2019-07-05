@@ -21,12 +21,17 @@
 package io.spine.server.event;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
+import io.spine.base.Identifier;
+import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.entity.ProducedEvents;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.model.EventReactorClass;
@@ -37,15 +42,17 @@ import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.MessageClass;
+import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static java.lang.String.format;
 
 /**
  * An abstract base for all classes that may produce events in response to other events.
@@ -61,19 +68,35 @@ import static java.lang.String.format;
  * @see React reactors
  * @see BoundedContext#registerEventDispatcher(EventDispatcher)
  */
-public abstract class AbstractEventReactor implements EventReactor, EventDispatcher<String>, Logging {
+public abstract class AbstractEventReactor
+        implements EventReactor, EventDispatcher<String>, ContextAware {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
+    private final MessageId eventAnchor = MessageId
+            .newBuilder()
+            .setId(Identifier.pack(getClass().getName()))
+            .setTypeUrl(TypeUrl.of(Empty.class).value())
+            .vBuild();
+    @LazyInit
+    private SystemWriteSide system = NoOpSystemWriteSide.INSTANCE;
 
     /** The event bus to which the emitted events are posted. */
-    private final EventBus eventBus;
+    @LazyInit
+    private @MonotonicNonNull EventBus eventBus;
 
     private final Supplier<Any> producerId =
             memoize(() -> TypeConverter.toAny(getClass().getName()));
 
-    protected AbstractEventReactor(EventBus eventBus) {
-        checkNotNull(eventBus);
-        this.eventBus = eventBus;
+    @Override
+    public void initialize(BoundedContext context) {
+        checkNotInitialized();
+        eventBus = context.eventBus();
+        system = context.systemClient().writeSide();
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return eventBus != null;
     }
 
     @Override
@@ -90,31 +113,22 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
     }
 
     private void reactAndPost(EventEnvelope event) {
-        try {
-            EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
-                                                            event.originClass());
-            // TODO:2019-06-28:dmytro.dashenkov: Handle errors.
-            PropagationOutcome outcome = method.invoke(this, event);
-            if (outcome.hasSuccess()) {
-                ProducedEvents events = outcome.getSuccess()
-                                               .getProducedEvents();
-                eventBus.post(events.getEventList());
-            }
-        } catch (RuntimeException ex) {
-            onError(event, ex);
+        EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
+                                                        event.originClass());
+        PropagationOutcome outcome = method.invoke(this, event);
+        if (outcome.hasSuccess()) {
+            ProducedEvents events = outcome.getSuccess()
+                                           .getProducedEvents();
+            eventBus.post(events.getEventList());
+        } else if (outcome.hasError()) {
+            HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                    .newBuilder()
+                    .setEntity(eventAnchor)
+                    .setHandledSignal(event.messageId())
+                    .setError(outcome.getError())
+                    .vBuild();
+            system.postEvent(systemEvent, event.asMessageOrigin());
         }
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-        MessageClass messageClass = event.messageClass();
-        String messageId = event.idAsString();
-        String errorMessage =
-                format("Error reacting to event (class: %s id: %s) in %s.",
-                       messageClass, messageId, thisClass);
-        log().error(errorMessage, exception);
     }
 
     /**
@@ -154,18 +168,8 @@ public abstract class AbstractEventReactor implements EventReactor, EventDispatc
         @CanIgnoreReturnValue
         @Override
         public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-            try {
-                EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-                return AbstractEventReactor.this.dispatch(eventEnvelope);
-            } catch (RuntimeException ex) {
-                onError(envelope, ex);
-            }
-            return identity();
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            AbstractEventReactor.this.onError(envelope.toEventEnvelope(), exception);
+            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
+            return AbstractEventReactor.this.dispatch(eventEnvelope);
         }
     }
 }

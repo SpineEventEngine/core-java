@@ -59,14 +59,6 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
     R dispatch(E envelope);
 
     /**
-     * Handles an error occurred during dispatching a message.
-     *
-     * @param envelope  the message which caused the error
-     * @param exception the error
-     */
-    void onError(E envelope, RuntimeException exception);
-
-    /**
      * Checks if this dispatcher can dispatch the given message.
      *
      * <p>This method does not check that the type of the message is one of

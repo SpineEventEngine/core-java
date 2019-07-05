@@ -38,7 +38,6 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
@@ -76,9 +75,6 @@ public class CommandBus extends UnicastBus<Command,
     /** Consumes commands dispatched by this bus. */
     private final CommandFlowWatcher watcher;
 
-    /** Callback for handling commands that failed. */
-    private final CommandErrorHandler errorHandler;
-
     private final CommandScheduler scheduler;
     private final SystemWriteSide systemWriteSide;
 
@@ -115,7 +111,6 @@ public class CommandBus extends UnicastBus<Command,
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
-        this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
         this.watcher = checkNotNull(builder.flowWatcher);
     }
 
@@ -190,11 +185,7 @@ public class CommandBus extends UnicastBus<Command,
     protected void dispatch(CommandEnvelope command) {
         CommandDispatcher<?> dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);
-        try {
-            dispatcher.dispatch(command);
-        } catch (RuntimeException exception) {
-            errorHandler.handleAndPostIfRejection(command, exception);
-        }
+        dispatcher.dispatch(command);
     }
 
     /**

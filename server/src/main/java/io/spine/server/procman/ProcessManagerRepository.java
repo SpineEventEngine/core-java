@@ -30,7 +30,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
@@ -43,7 +42,6 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
@@ -86,14 +84,6 @@ public abstract class ProcessManagerRepository<I,
 
     /** The command routing schema used by this repository. */
     private final Supplier<CommandRouting<I>> commandRouting;
-
-    /**
-     * The {@link CommandErrorHandler} tackling the dispatching errors.
-     *
-     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
-     * method.
-     */
-    private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
     /**
      * The {@link Inbox} for the messages, which are sent to the instances managed by this
@@ -166,8 +156,6 @@ public abstract class ProcessManagerRepository<I,
         checkNotDeaf();
 
         context.registerCommandDispatcher(this);
-
-        this.commandErrorHandler = context.createCommandErrorHandler();
 
         initInbox();
     }
@@ -328,11 +316,6 @@ public abstract class ProcessManagerRepository<I,
         inbox.send(EventEnvelope.of(event)).toReactor(id);
     }
 
-    @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
-    }
-
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     @VisibleForTesting
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
@@ -412,15 +395,6 @@ public abstract class ProcessManagerRepository<I,
             ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
             Set<EventClass> eventClasses = pmClass.externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            checkNotNull(envelope);
-            checkNotNull(exception);
-            logError("Error dispatching external event (class: `%s`, id: `%s`) " +
-                             "to a process manager with state `%s`.",
-                     envelope, exception);
         }
     }
 }

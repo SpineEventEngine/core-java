@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EventEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements
-        ActorMessageEnvelope<EventId, Event, EventContext>,
+        SignalEnvelope<EventId, Event, EventContext>,
         EnrichableMessageEnvelope<EventId, Event, EventMessage, EventContext, EventEnvelope> {
 
     private final EventClass eventClass;

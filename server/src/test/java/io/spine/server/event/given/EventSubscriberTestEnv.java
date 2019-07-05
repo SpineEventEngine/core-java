@@ -22,6 +22,7 @@ package io.spine.server.event.given;
 
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.logging.Logging;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.event.FailRequested;
 import io.spine.test.event.ProjectCreated;
@@ -35,7 +36,7 @@ public final class EventSubscriberTestEnv {
     }
 
     /** The subscriber which throws exception from the subscriber method. */
-    public static class FailingSubscriber extends AbstractEventSubscriber {
+    public static class FailingSubscriber extends AbstractEventSubscriber implements Logging {
 
         private boolean methodCalled = false;
 

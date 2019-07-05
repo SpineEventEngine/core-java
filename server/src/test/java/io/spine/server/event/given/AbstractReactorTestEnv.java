@@ -30,7 +30,6 @@ import io.spine.server.event.CustomerNotified;
 import io.spine.server.event.CustomerNotified.NotificationMethod;
 import io.spine.server.event.DeliveryServiceNotified;
 import io.spine.server.event.DonationMade;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.OrderPaidFor;
 import io.spine.server.event.OrderReadyToBeServed;
 import io.spine.server.event.OrderServed;
@@ -119,10 +118,6 @@ public class AbstractReactorTestEnv {
         /** Total USDs donated by this donor. */
         private double totalDonated = 0.0d;
 
-        public AutoCharityDonor(EventBus eventBus) {
-            super(eventBus);
-        }
-
         @React(external = true)
         DonationMade donateToCharity(OrderPaidFor orderPaidFor) {
             Order order = orderPaidFor.getOrder();
@@ -155,10 +150,6 @@ public class AbstractReactorTestEnv {
 
         private final List<OrderServed> ordersServed = new ArrayList<>();
         private final List<OrderServedLate> ordersServedLate = new ArrayList<>();
-
-        public ServicePerformanceTracker(EventBus eventBus) {
-            super(eventBus);
-        }
 
         @React
         Optional<OrderServedLate> accept(OrderServed served) {
@@ -216,12 +207,7 @@ public class AbstractReactorTestEnv {
      */
     public static class RestaurantNotifier extends AbstractEventReactor {
 
-        private final NotificationMethod notificationMethod;
-
-        public RestaurantNotifier(EventBus eventBus) {
-            super(eventBus);
-            notificationMethod = SMS;
-        }
+        private final NotificationMethod notificationMethod = SMS;
 
         @React
         Pair<CustomerNotified, DeliveryServiceNotified>
@@ -266,37 +252,5 @@ public class AbstractReactorTestEnv {
                 .setOrder(someOrder())
                 .build();
         return result;
-    }
-
-    /** Throws an exception whenever an order is ready. */
-    public static class FaultyNotifier extends AbstractEventReactor {
-
-        public FaultyNotifier(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @React
-        Pair<CustomerNotified, DeliveryServiceNotified>
-        notifyAboutOrder(OrderReadyToBeServed orderReady) {
-            throw new RuntimeException("Could not send notifications.");
-        }
-    }
-
-    /**
-     * In an attempt to donate to charity, throws an exception every time an order is payed for.
-     *
-     * <p>An exception thrown by this method should be picked up by
-     * {@linkplain AbstractEventReactor#onError(EventEnvelope, RuntimeException)}.
-     */
-    public static class FaultyCharityDonor extends AbstractEventReactor {
-
-        public FaultyCharityDonor(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @React(external = true)
-        DonationMade makeDonation(OrderPaidFor orderPaidFor) {
-            throw new RuntimeException("Could not make a donation.");
-        }
     }
 }

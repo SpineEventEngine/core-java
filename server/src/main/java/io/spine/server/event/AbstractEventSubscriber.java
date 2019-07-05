@@ -40,11 +40,9 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -67,7 +65,7 @@ import static java.lang.String.format;
  * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
-        implements EventDispatcher<String>, EventSubscriber, ContextAware, Logging {
+        implements EventDispatcher<String>, EventSubscriber, ContextAware {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
@@ -84,6 +82,7 @@ public abstract class AbstractEventSubscriber
     @Override
     public void initialize(BoundedContext context) {
         checkNotNull(context);
+        // TODO:2019-07-05:dmytro.dashenkov: Make sure Stand is OK.
         if (contextName != null) {
             checkState(context.name().equals(contextName),
                        "%s is already initialized in context %s.", this, contextName.getValue());
@@ -91,6 +90,11 @@ public abstract class AbstractEventSubscriber
             contextName = context.name();
             system = context.systemClient().writeSide();
         }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return contextName != null;
     }
 
     /**
@@ -147,20 +151,6 @@ public abstract class AbstractEventSubscriber
                 .vBuild();
     }
 
-    /**
-     * Logs the error into the subscriber {@linkplain #log() log}.
-     *
-     * @param event
-     *         the event which caused the error
-     * @param exception
-     *         the error
-     */
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-    }
-
     @Override
     public boolean canDispatch(EventEnvelope event) {
         Optional<SubscriberMethod> subscriber = thisClass.subscriberOf(event);
@@ -201,27 +191,9 @@ public abstract class AbstractEventSubscriber
         }
 
         @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            checkNotNull(envelope);
-            checkNotNull(exception);
-            logError("Error dispatching external event to event subscriber " +
-                             "(event class: %s, id: %s)",
-                     envelope, exception);
-        }
-
-        @Override
         public boolean canDispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope event = envelope.toEventEnvelope();
             return AbstractEventSubscriber.this.canDispatch(event);
-        }
-
-        private void logError(String msgFormat,
-                              MessageEnvelope envelope,
-                              RuntimeException exception) {
-            MessageClass messageClass = envelope.messageClass();
-            String messageId = envelope.idAsString();
-            String errorMessage = format(msgFormat, messageClass, messageId);
-            _error(errorMessage, exception);
         }
     }
 }

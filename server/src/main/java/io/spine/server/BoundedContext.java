@@ -28,7 +28,6 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -51,7 +50,6 @@ import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
-import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -335,7 +333,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private void initialize(Object registered) {
         if (registered instanceof ContextAware) {
             ContextAware contextAware = (ContextAware) registered;
-            contextAware.initialize(this);
+            if (!contextAware.isInitialized()) {
+                contextAware.initialize(this);
+            }
         }
     }
 
@@ -347,15 +347,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     Supplier<IllegalStateException> missingExternalDispatcherFrom(Object dispatcher) {
         return () -> newIllegalStateException(
                 "No external dispatcher provided by `%s`.", dispatcher);
-    }
-
-    /**
-     * Creates a {@code CommandErrorHandler} for objects that handle commands.
-     */
-    public CommandErrorHandler createCommandErrorHandler() {
-        SystemWriteSide systemWriteSide = systemClient().writeSide();
-        CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide, this::eventBus);
-        return result;
     }
 
     /**

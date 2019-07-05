@@ -134,20 +134,6 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Logs error into the repository {@linkplain #log() log}.
-     *
-     * @param event
-     *         the message which caused the error
-     * @param exception
-     *         the error
-     */
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        logError("Error dispatching event (class: `%s`, ID: `%s`) to entity with state `%s`.",
-                 event, exception);
-    }
-
-    /**
      * An abstract base for the external message dispatchers, enabling
      * the {@code EventDispatchingRepository} instances to handle external events.
      */

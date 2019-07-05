@@ -245,7 +245,13 @@ abstract class AbstractCommandBusTestSuite {
         private final Set<CommandMessage> receivedCommands = newHashSet();
 
         CreateProjectHandler() {
-            super(eventBus);
+            super();
+            initialize(BoundedContextBuilder.assumingTests().build());
+        }
+
+        @Override
+        public final void initialize(BoundedContext context) {
+            super.initialize(context);
         }
 
         @Assign

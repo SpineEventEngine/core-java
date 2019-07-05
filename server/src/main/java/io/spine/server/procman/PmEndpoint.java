@@ -25,7 +25,7 @@ import io.spine.logging.Logging;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 /**
  * Common base message for endpoints of Process Managers.
@@ -36,7 +36,7 @@ import io.spine.server.type.ActorMessageEnvelope;
  */
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
-                          M extends ActorMessageEnvelope<?, ?, ?>>
+                          M extends SignalEnvelope<?, ?, ?>>
         extends EntityMessageEndpoint<I, P, M>
         implements Logging {
 
@@ -85,6 +85,7 @@ abstract class PmEndpoint<I,
             store(manager);
             if (outcome.hasSuccess()) {
                 postMessages(outcome.getSuccess());
+                afterDispatched(manager.id());
             } else if (outcome.hasError()) {
                 Error error = outcome.getError();
                 repository().lifecycleOf(manager.id())

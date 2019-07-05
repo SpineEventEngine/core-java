@@ -47,11 +47,6 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
                     .onDispatchEventToReactor(envelope().outerObject());
     }
 
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        repository().onError(event, exception);
-    }
-
     /**
      * Does nothing since a state of an aggregate should not be necessarily
      * updated upon reacting on an event.

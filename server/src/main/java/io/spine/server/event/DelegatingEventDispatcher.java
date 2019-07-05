@@ -78,11 +78,6 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         return delegate.dispatchEvent(event);
     }
 
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        delegate.onError(event, exception);
-    }
-
     /**
      * Wraps this dispatcher to an external event dispatcher.
      *
@@ -134,12 +129,6 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
             Set<I> ids = delegate.dispatchEvent(eventEnvelope);
             return ids;
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            delegate.onError(eventEnvelope, exception);
         }
     }
 }

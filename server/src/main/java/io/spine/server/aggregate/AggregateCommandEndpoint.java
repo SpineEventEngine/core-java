@@ -57,11 +57,6 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
                     .onDispatchCommand(envelope().command());
     }
 
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
-    }
-
     /**
      * Throws {@link IllegalStateException} with the message containing details of the aggregate and
      * the command in response to which the aggregate generated empty set of event messages.

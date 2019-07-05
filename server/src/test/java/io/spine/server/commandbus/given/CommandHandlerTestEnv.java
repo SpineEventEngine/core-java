@@ -20,16 +20,15 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.logging.Logging;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.tuple.Pair;
@@ -47,8 +46,6 @@ import io.spine.test.commandbus.event.CmdBusProjectStarted;
 import io.spine.test.commandbus.event.CmdBusTaskAdded;
 import io.spine.test.commandbus.event.CmdBusTaskAssigned;
 import io.spine.test.commandbus.event.CmdBusTaskStarted;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -92,30 +89,18 @@ public class CommandHandlerTestEnv {
             return identity();
         }
 
-        @Override
-        public void onError(EventEnvelope event, RuntimeException exception) {
-            // Do nothing.
-        }
-
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
         public List<EventEnvelope> getDispatched() {
             return dispatched;
         }
     }
 
-    public static class TestCommandHandler extends AbstractCommandHandler {
+    public static class TestCommandHandler extends AbstractCommandHandler implements Logging {
 
         private final ImmutableList<EventMessage> eventsOnStartProjectCmd =
                 createEventsOnStartProjectCmd();
 
         private final CommandHistory commandsHandled = new CommandHistory();
-
-        private @Nullable CommandEnvelope lastErrorEnvelope;
-        private @Nullable RuntimeException lastException;
-
-        public TestCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         public void assertHandled(Command expected) {
             commandsHandled.assertHandled(expected);
@@ -130,12 +115,6 @@ public class CommandHandlerTestEnv {
 
         public ImmutableList<EventMessage> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
-        }
-
-        @Override
-        @VisibleForTesting
-        public Logger log() {
-            return super.log();
         }
 
         @Assign
@@ -161,21 +140,6 @@ public class CommandHandlerTestEnv {
         handle(CmdBusCreateTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return createEventsOnCreateTaskCmd(msg);
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            super.onError(envelope, exception);
-            lastErrorEnvelope = envelope;
-            lastException = exception;
-        }
-
-        public @Nullable CommandEnvelope getLastErrorEnvelope() {
-            return lastErrorEnvelope;
-        }
-
-        public @Nullable RuntimeException getLastException() {
-            return lastException;
         }
 
         private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {

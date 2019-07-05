@@ -37,9 +37,7 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.MessageEnvelope;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -55,7 +53,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 
 /**
  * Abstract base class for repositories.
@@ -225,6 +222,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         init(context);
     }
 
+    @Override
+    public boolean isInitialized() {
+        return context != null;
+    }
+
     /**
      * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
      * registration} with a {@code BoundedContext}.
@@ -373,29 +375,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public final boolean isOpen() {
         return storageSupplier != null;
-    }
-
-    /**
-     * Logs error caused by a message processing into the {@linkplain #log() repository log}.
-     *
-     * <p>The formatted message has the following parameters:
-     * <ol>
-     *     <li>The name of the message class.
-     *     <li>The message ID.
-     *     <li>The URL of the entity state type.
-     * </ol>
-     *
-     * @param msgFormat the format of the message
-     * @param envelope  the envelope of the message caused the error
-     * @param exception the error
-     */
-    protected void logError(String msgFormat,
-                            MessageEnvelope envelope,
-                            RuntimeException exception) {
-        MessageClass messageClass = envelope.messageClass();
-        String stateType = entityStateType().value();
-        String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
-        _error(errorMessage, exception);
     }
 
     /**

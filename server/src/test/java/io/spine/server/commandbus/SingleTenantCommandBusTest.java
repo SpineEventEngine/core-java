@@ -48,6 +48,7 @@ import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.firstCreateProject;
 import static io.spine.server.commandbus.Given.ACommand.removeTask;
 import static io.spine.server.commandbus.Given.ACommand.secondStartProject;
+import static io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler.initializedHandler;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -117,8 +118,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @DisplayName("post commands in FIFO order")
     void doPostCommandsInFIFO() {
         Command secondCommand = clearTenantId(secondStartProject());
-        CommandPostingHandler handler =
-                new CommandPostingHandler(eventBus, commandBus, secondCommand);
+        CommandPostingHandler handler = initializedHandler(commandBus, secondCommand);
         commandBus.register(handler);
 
         Command firstCommand = clearTenantId(firstCreateProject());
@@ -135,7 +135,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
-        FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        FaultyHandler faultyHandler = FaultyHandler.initializedHandler();
         commandBus.register(faultyHandler);
 
         Command remoteTaskCommand = clearTenantId(removeTask());

@@ -20,7 +20,7 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Optional;
  * The {@linkplain LazyEndpoint endpoints} configured as destinations for
  * a certain {@linkplain io.spine.server.delivery.InboxLabel label}.
  */
-final class Endpoints<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+final class Endpoints<I, M extends SignalEnvelope<?, ?, ?>> {
 
     private final Map<InboxLabel, LazyEndpoint<I, M>> endpoints =
             new EnumMap<>(InboxLabel.class);

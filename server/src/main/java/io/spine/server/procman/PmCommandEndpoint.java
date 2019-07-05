@@ -65,11 +65,6 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         return tx.perform(dispatch);
     }
 
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
-    }
-
     /**
      * Does nothing since a state of a process manager should not be necessarily
      * updated during the command handling.

@@ -22,7 +22,7 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Repository;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 /**
  * An endpoint for messages delivered to an abstract target.
@@ -33,7 +33,7 @@ import io.spine.server.type.ActorMessageEnvelope;
  *         the type of message envelope being delivered
  */
 @Internal
-public interface MessageEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+public interface MessageEndpoint<I, M extends SignalEnvelope<?, ?, ?>> {
 
     /**
      * Dispatches the message to the target with the passed ID.
@@ -42,11 +42,6 @@ public interface MessageEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      *         the identifier of a target
      */
     void dispatchTo(I targetId);
-
-    /**
-     * Processes the exception thrown during dispatching the message.
-     */
-    void onError(M envelope, RuntimeException exception);
 
     void onDuplicate(I target, M envelope);
 

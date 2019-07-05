@@ -21,9 +21,6 @@
 package io.spine.server.model.contexts.tasks;
 
 import io.spine.server.BoundedContext;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.DelegatingEventDispatcher;
-import io.spine.server.event.EventBus;
 
 /**
  * Creates an instance of the Tasks Bounded Context.
@@ -34,14 +31,12 @@ public final class TasksContext {
     }
 
     public static BoundedContext newInstance() {
-        BoundedContext result = BoundedContext
+        BoundedContext context = BoundedContext
                 .singleTenant("Tasks")
                 .build();
-        result.register(new TaskRepository());
-        CommandBus commandBus = result.commandBus();
-        EventBus eventBus = result.eventBus();
-        CreationRetry commander = new CreationRetry(commandBus, eventBus);
-        eventBus.register(DelegatingEventDispatcher.of(commander));
-        return result;
+        context.register(new TaskRepository());
+        CreationRetry commander = new CreationRetry();
+        context.registerCommandDispatcher(commander);
+        return context;
     }
 }

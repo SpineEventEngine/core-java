@@ -31,7 +31,6 @@ import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.TestEntityWithStringColumn;
-import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandClass;
@@ -135,11 +134,6 @@ public class CommandDispatcherRegistryTestEnv {
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
         }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
     }
 
     public static class NoCommandsDispatcherRepo
@@ -160,11 +154,6 @@ public class CommandDispatcherRegistryTestEnv {
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
         }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
     }
 
     public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
@@ -177,11 +166,6 @@ public class CommandDispatcherRegistryTestEnv {
         @Override
         public Message dispatch(CommandEnvelope envelope) {
             return Empty.getDefaultInstance();
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
         }
     }
 
@@ -197,11 +181,6 @@ public class CommandDispatcherRegistryTestEnv {
             // Do nothing.
             return Empty.getDefaultInstance();
         }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
     }
 
     /*
@@ -210,10 +189,6 @@ public class CommandDispatcherRegistryTestEnv {
 
     public static class CreateProjectHandler extends AbstractCommandHandler {
 
-        public CreateProjectHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
             return CmdBusProjectCreated.getDefaultInstance();
@@ -221,10 +196,6 @@ public class CommandDispatcherRegistryTestEnv {
     }
 
     public static class AllCommandHandler extends AbstractCommandHandler {
-
-        public AllCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
@@ -243,10 +214,6 @@ public class CommandDispatcherRegistryTestEnv {
     }
 
     public static class EmptyCommandHandler extends AbstractCommandHandler {
-
-        public EmptyCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         @Override
         public Set<CommandClass> messageClasses() {

@@ -64,11 +64,6 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
         return delegate.dispatchCommand(envelope);
     }
 
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        delegate.onError(envelope, exception);
-    }
-
     /**
      * Returns the string representation of this dispatcher.
      *

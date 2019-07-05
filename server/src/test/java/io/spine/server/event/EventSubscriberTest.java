@@ -48,7 +48,7 @@ class EventSubscriberTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
-    private AbstractEventSubscriber subscriber;
+    private FailingSubscriber subscriber;
 
     @BeforeEach
     void setUp() {
@@ -70,8 +70,7 @@ class EventSubscriberTest {
         context.registerEventDispatcher(monitor);
         Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
-        FailingSubscriber sub = (FailingSubscriber) this.subscriber;
-        assertTrue(sub.isMethodCalled());
+        assertTrue(subscriber.isMethodCalled());
         assertEquals(0, dispatchingResult.size());
         List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
         assertThat(systemEvents).hasSize(1);
@@ -91,8 +90,7 @@ class EventSubscriberTest {
 
         Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
-        FailingSubscriber sub = (FailingSubscriber) this.subscriber;
-        assertTrue(sub.isMethodCalled());
+        assertTrue(subscriber.isMethodCalled());
         assertEquals(1, dispatchingResult.size());
     }
 

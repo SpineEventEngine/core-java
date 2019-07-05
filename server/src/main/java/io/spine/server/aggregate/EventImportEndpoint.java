@@ -77,16 +77,4 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
         _error("The aggregate `{}` was not modified during the import of the event `{}`.",
                aggregate, event);
     }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        _error(exception,
-               "Error importing event of class `{}` into repository `{}`. " +
-                       "Event message: `{}` context: `{}` id: `{}`",
-               event.messageClass(),
-               repository(),
-               event.message(),
-               event.messageClass(),
-               event.idAsString());
-    }
 }

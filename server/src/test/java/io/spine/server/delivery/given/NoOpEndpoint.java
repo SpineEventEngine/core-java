@@ -34,11 +34,6 @@ public class NoOpEndpoint implements MessageEndpoint<String, CommandEnvelope> {
     }
 
     @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // do nothing.
-    }
-
-    @Override
     public void onDuplicate(String target, CommandEnvelope envelope) {
         // do nothing.
     }

@@ -81,6 +81,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         PropagationOutcome outcome = invokeDispatcher(projection, envelope());
         if (outcome.hasSuccess()) {
             tx.commit();
+            afterDispatched(projection.id());
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(projection.id())
@@ -121,10 +122,5 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @Override
     protected void onEmptyResult(P entity, EventEnvelope event) {
         // Do nothing.
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        repository().onError(event, exception);
     }
 }

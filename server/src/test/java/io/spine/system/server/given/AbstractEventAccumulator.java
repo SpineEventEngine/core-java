@@ -82,14 +82,6 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
         return Optional.empty();
     }
 
-    /**
-     * {@linkplain org.junit.jupiter.api.Assertions#fail(Throwable) Fails} with the given exception.
-     */
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        fail(exception);
-    }
-
     public void assertEventCount(int expectedCount) {
         assertEquals(expectedCount, events.size(), errorMessage());
     }

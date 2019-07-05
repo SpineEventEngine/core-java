@@ -35,7 +35,7 @@ import io.spine.server.entity.Propagation;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +56,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
-                                 M extends ActorMessageEnvelope<?, ?, ?>>
+                                 M extends SignalEnvelope<?, ?, ?>>
         extends EntityMessageEndpoint<I, A, M>
         implements Logging {
 
@@ -87,6 +87,7 @@ abstract class AggregateEndpoint<I,
             } else {
                 onEmptyResult(aggregate, envelope());
             }
+            afterDispatched(aggregateId);
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(aggregateId)

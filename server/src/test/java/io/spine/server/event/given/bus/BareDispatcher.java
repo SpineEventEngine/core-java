@@ -61,11 +61,6 @@ public class BareDispatcher implements EventDispatcher<String> {
         return identity();
     }
 
-    @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
-    }
-
     public boolean isDispatchCalled() {
         return dispatchCalled;
     }

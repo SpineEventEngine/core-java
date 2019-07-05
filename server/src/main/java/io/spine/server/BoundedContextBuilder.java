@@ -65,7 +65,7 @@ import static io.spine.server.ContextSpec.singleTenant;
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "OverlyComplexClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 // OK for this central piece.
 public final class BoundedContextBuilder implements Logging {
 

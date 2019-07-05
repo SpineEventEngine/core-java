@@ -83,14 +83,6 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     }
 
     @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        EventClass eventClass = event.messageClass();
-        String id = event.idAsString();
-        _error("Unable to import event class: `{}` id: `{}` repository: `{}`.",
-               eventClass, id, repository);
-    }
-
-    @Override
     public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
         return Optional.empty();
     }

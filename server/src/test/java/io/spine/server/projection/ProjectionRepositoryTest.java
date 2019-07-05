@@ -42,8 +42,6 @@ import io.spine.server.projection.given.TestProjection;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.CannotDispatchEventTwice;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.event.EntityStateChanged;
@@ -436,30 +434,7 @@ class ProjectionRepositoryTest
         repository().dispatch(EventEnvelope.of(event));
     }
 
-    @Test
-    @DisplayName("log error when dispatching unknown event")
-    @MuteLogging
-    void logErrorOnUnknownEvent() {
-        Event event = GivenEvent.arbitrary();
-
-        dispatchEvent(event);
-
-        TestProjectionRepository repo = repository();
-        MessageEnvelope lastMessage = repo.getLastErrorEnvelope();
-
-        assertThat(lastMessage)
-                .isInstanceOf(EventEnvelope.class);
-        assertThat(lastMessage.message())
-                .isEqualTo(event.enclosedMessage());
-        assertThat(lastMessage.outerObject())
-                .isEqualTo(event);
-
-        // It must be "illegal argument type" since projections of this repository
-        // do not handle such events.
-        RuntimeException lastException = repo.getLastException();
-        assertThat(lastException)
-                .isInstanceOf(IllegalArgumentException.class);
-    }
+    // TODO:2019-07-05:dmytro.dashenkov: Add a test for ID type mismatch.
 
     @Nested
     @DisplayName("return")

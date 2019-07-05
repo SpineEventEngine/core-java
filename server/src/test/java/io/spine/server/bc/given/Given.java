@@ -81,11 +81,6 @@ public class Given {
         public ProjectId dispatch(CommandEnvelope envelope) {
             return ProjectId.getDefaultInstance();
         }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // NO-OP.
-        }
     }
 
     public static class NoOpEventDispatcher implements EventDispatcher<ProjectId> {
@@ -106,11 +101,6 @@ public class Given {
         @Override
         public Set<ProjectId> dispatch(EventEnvelope envelope) {
             return ImmutableSet.of();
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            // NO-OP.
         }
 
         @Override

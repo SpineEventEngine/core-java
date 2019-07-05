@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
-                                            M extends ActorMessageEnvelope<?, ?, ?>>
+                                            M extends SignalEnvelope<?, ?, ?>>
         implements MessageEndpoint<I, M> {
 
     /** The repository which created this endpoint. */
@@ -58,22 +58,13 @@ public abstract class EntityMessageEndpoint<I,
      * Dispatches the message to the entity with the passed ID and takes care of errors
      * during dispatching.
      *
-     * <p>Error handling is delegated to
-     * {@link #onError(ActorMessageEnvelope, RuntimeException)
-     * onError(envelope, exception)} method.
-     *
      * @param entityId
      *         the ID of the entity which to dispatch the message to
      */
     @Override
     public final void dispatchTo(I entityId) {
         checkNotNull(entityId);
-        try {
-            dispatchInTx(entityId);
-            afterDispatched(entityId);
-        } catch (RuntimeException exception) {
-            onError(envelope(), exception);
-        }
+        dispatchInTx(entityId);
     }
 
     /**

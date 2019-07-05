@@ -91,7 +91,7 @@ class CommandRoutingRejectionTest {
      * routing function.
      */
     @Test
-    @DisplayName("result in rejected command")
+    @DisplayName("result in a rejected command")
     void resultInRejectedCommand() {
         // Post a successful command to make sure general case works.
         String switchmanName = Switchman.class.getName();

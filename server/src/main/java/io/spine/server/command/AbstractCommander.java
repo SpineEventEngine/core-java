@@ -22,27 +22,28 @@ package io.spine.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
@@ -54,11 +55,13 @@ public abstract class AbstractCommander
         implements Commander, EventDispatcherDelegate<String> {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
-    private final CommandBus commandBus;
+    @LazyInit
+    private @MonotonicNonNull CommandBus commandBus;
 
-    protected AbstractCommander(CommandBus commandBus, EventBus eventBus) {
-        super(eventBus);
-        this.commandBus = commandBus;
+    @Override
+    public void initialize(BoundedContext context) {
+        super.initialize(context);
+        commandBus = context.commandBus();
     }
 
     @Override
@@ -113,15 +116,5 @@ public abstract class AbstractCommander
             ImmutableList<Event> events = ImmutableList.of(successfulOutcome.getRejection());
             postEvents(events);
         }
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-        _error(exception,
-               "Unable to create a command from event (class: `{}` id: `{}`).",
-               event.messageClass(),
-               event.idAsString());
     }
 }

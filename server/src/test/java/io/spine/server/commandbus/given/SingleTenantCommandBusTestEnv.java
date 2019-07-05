@@ -23,10 +23,11 @@ package io.spine.server.commandbus.given;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
 import io.spine.test.commandbus.command.CmdBusAddTask;
 import io.spine.test.commandbus.command.CmdBusRemoveTask;
 import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
@@ -55,14 +56,20 @@ public class SingleTenantCommandBusTestEnv {
      */
     public static class FaultyHandler extends AbstractCommandHandler {
 
+        private FaultyHandler() {
+            super();
+        }
+
+        public static FaultyHandler initializedHandler() {
+            FaultyHandler handler = new FaultyHandler();
+            handler.initialize(BoundedContextBuilder.assumingTests().build());
+            return handler;
+        }
+
         private final InvalidProjectName rejection = InvalidProjectName
                 .newBuilder()
                 .setProjectId(ProjectId.getDefaultInstance())
                 .build();
-
-        public FaultyHandler(EventBus eventBus) {
-            super(eventBus);
-        }
 
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
@@ -91,11 +98,20 @@ public class SingleTenantCommandBusTestEnv {
         private final List<Message> handledCommands = new ArrayList<>();
         private final Command commandToPost;
 
-        public CommandPostingHandler(EventBus eventBus, CommandBus commandBus,
-                                     Command commandToPost) {
-            super(eventBus);
+        public CommandPostingHandler(CommandBus commandBus, Command commandToPost) {
+            super();
             this.commandBus = commandBus;
             this.commandToPost = commandToPost;
+        }
+
+        public static CommandPostingHandler
+        initializedHandler(CommandBus commandBus, Command commandToPost) {
+            CommandPostingHandler handler = new CommandPostingHandler(commandBus, commandToPost);
+            BoundedContext context = BoundedContextBuilder
+                    .assumingTests()
+                    .build();
+            handler.initialize(context);
+            return handler;
         }
 
         @Assign

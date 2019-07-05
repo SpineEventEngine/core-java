@@ -18,20 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.type;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.test.integration.Project;
-import io.spine.test.integration.ProjectId;
+import io.spine.base.MessageContext;
+import io.spine.core.ActorContext;
+import io.spine.core.MessageId;
+import io.spine.core.Signal;
+import io.spine.core.SignalId;
+import io.spine.core.TenantId;
 
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+/**
+ * A common interface for messages sent by an actor.
+ *
+ * @param <I> the type of the message ID
+ * @param <T> the type of the object that wraps a message
+ * @param <C> the type of the message context
+ */
+public interface SignalEnvelope<I extends SignalId,
+                                T extends Signal<I, ?, C>,
+                                C extends MessageContext>
+        extends MessageEnvelope<I, T, C> {
 
-class ProjectWizardRepository
-        extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
+    /**
+     * Obtains ID of the tenant in which context the actor works.
+     */
+    TenantId tenantId();
 
-    @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        throw illegalStateWithCauseOf(exception);
+    /**
+     * Obtains an actor context for the wrapped message.
+     */
+    ActorContext actorContext();
+
+    default MessageId messageId() {
+        return outerObject().messageId();
     }
 }

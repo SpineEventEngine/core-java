@@ -23,7 +23,7 @@ package io.spine.server.delivery;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
  * @param <M>
  *         the type of message envelopes, which are served by this inbox part
  */
-abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
 
     private final Endpoints<I, M> endpoints;
     private final InboxWriter writer;
@@ -127,7 +127,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * dispatched messages to look for duplicate amongst.
      *
      * <p>In case a duplication is found, the respective endpoint is
-     * {@linkplain MessageEndpoint#onError(ActorMessageEnvelope, RuntimeException) notified}.
+     * {@linkplain MessageEndpoint#onError(SignalEnvelope, RuntimeException) notified}.
      */
     abstract class Dispatcher {
 

@@ -22,8 +22,20 @@ package io.spine.server;
 
 import io.spine.annotation.Internal;
 
+import static com.google.common.base.Preconditions.checkState;
+
 @Internal
 public interface ContextAware {
 
     void initialize(BoundedContext context);
+
+    boolean isInitialized();
+
+    default void checkInitialized() {
+        checkState(isInitialized(), "%s is NOT initialized.", this);
+    }
+
+    default void checkNotInitialized() {
+        checkState(!isInitialized(), "%s is already initialized.", this);
+    }
 }

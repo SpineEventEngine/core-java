@@ -20,17 +20,25 @@
 
 package io.spine.server.command;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
+import io.spine.base.Error;
 import io.spine.core.Event;
-import io.spine.logging.Logging;
+import io.spine.core.MessageId;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.SignalEnvelope;
+import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.system.server.SystemWriteSide;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -38,19 +46,34 @@ import static io.spine.protobuf.AnyPacker.pack;
  * The abstract base for non-aggregate classes that dispatch commands to their methods
  * and post resulting events to {@link EventBus}.
  */
-public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
+public abstract class AbstractCommandDispatcher
+        implements CommandDispatcher<String>, ContextAware {
 
     /** The {@code EventBus} to which the dispatcher posts events it produces. */
-    private final EventBus eventBus;
+    @LazyInit
+    private @MonotonicNonNull EventBus eventBus;
+    @LazyInit
+    private @MonotonicNonNull SystemWriteSide system;
 
     /** Supplier for a packed version of the dispatcher ID. */
     private final Supplier<Any> producerId =
             memoize(() -> pack(TypeConverter.toMessage(getId())));
+    private final Supplier<MessageId> eventAnchor = memoize(() -> MessageId
+            .newBuilder()
+            .setId(producerId())
+            .setTypeUrl(TypeUrl.of(Empty.class).value())
+            .vBuild());
 
-    /** Lazily initialized logger. */
+    @Override
+    public void initialize(BoundedContext context) {
+        checkNotInitialized();
+        eventBus = context.eventBus();
+        system = context.systemClient().writeSide();
+    }
 
-    protected AbstractCommandDispatcher(EventBus eventBus) {
-        this.eventBus = eventBus;
+    @Override
+    public boolean isInitialized() {
+        return eventBus != null;
     }
 
     /**
@@ -75,22 +98,19 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      * Posts passed events to {@link EventBus}.
      */
     protected void postEvents(Iterable<Event> events) {
+        checkInitialized();
         eventBus.post(events);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Logs the error into the {@linkplain #log() log}.
-     */
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        _error(exception,
-               "Error handling command (class: `{}` id: `{}`).",
-               envelope.messageClass(),
-               envelope.idAsString());
+    protected void onError(SignalEnvelope<?, ?, ?> signal, Error error) {
+        checkInitialized();
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(eventAnchor.get())
+                .setHandledSignal(signal.messageId())
+                .setError(error)
+                .vBuild();
+        system.postEvent(systemEvent, signal.asMessageOrigin());
     }
 
     /**
@@ -98,8 +118,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      *
      * <p>Two command handlers are equal if they handle the same set of commands.
      *
-     * @return if the passed {@code CommandHandler} handles the same
-     * set of command classes.
+     * @return if the passed {@code CommandHandler} handles the same set of command classes
      * @see #messageClasses()
      */
     @Override

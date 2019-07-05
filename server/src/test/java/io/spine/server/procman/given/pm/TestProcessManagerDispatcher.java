@@ -54,9 +54,4 @@ public class TestProcessManagerDispatcher implements CommandDispatcher<Message> 
     public Message dispatch(CommandEnvelope envelope) {
         return Empty.getDefaultInstance();
     }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // NoOp.
-    }
 }

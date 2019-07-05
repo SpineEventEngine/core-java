@@ -40,7 +40,6 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServed
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
@@ -58,18 +57,12 @@ class AbstractEventReactorTest {
         deliveryContext = BlackBoxBoundedContext.singleTenant();
         charityContext = BlackBoxBoundedContext.singleTenant();
 
-        charityDonor = new AutoCharityDonor(charityContext.eventBus());
+        charityDonor = new AutoCharityDonor();
         charityContext.withEventDispatchers(charityDonor);
 
-        performanceTracker = new ServicePerformanceTracker(restaurantContext.eventBus());
-        RestaurantNotifier notifier = new RestaurantNotifier(restaurantContext.eventBus());
+        performanceTracker = new ServicePerformanceTracker();
+        RestaurantNotifier notifier = new RestaurantNotifier();
         restaurantContext.withEventDispatchers(performanceTracker, notifier);
-    }
-
-    @Test
-    @DisplayName("throw upon a null event bus")
-    void throwOnNullEventBus() {
-        assertThrows(NullPointerException.class, () -> new AutoCharityDonor(null));
     }
 
     @DisplayName("while dealing with domestic events")
