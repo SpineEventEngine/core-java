@@ -20,6 +20,7 @@
 
 package io.spine.server.bus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -240,6 +242,16 @@ public abstract class Bus<T extends Message,
      */
     protected Collection<BusFilter<E>> filterChainHead() {
         return emptyList();
+    }
+
+    @VisibleForTesting
+    public boolean hasFilter(BusFilter<E> filter) {
+        return filterChain.get().contains(filter);
+    }
+
+    @VisibleForTesting
+    public boolean hasListener(Consumer<E> listener) {
+        return listeners.contains(listener);
     }
 
     /**

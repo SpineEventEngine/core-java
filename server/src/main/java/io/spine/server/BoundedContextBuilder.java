@@ -29,6 +29,9 @@ import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
+import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.ChainBuilder;
+import io.spine.server.bus.FilterChain;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
@@ -40,6 +43,8 @@ import io.spine.server.event.EventEnricher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
@@ -48,7 +53,10 @@ import io.spine.system.server.SystemWriteSide;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -66,9 +74,28 @@ import static io.spine.server.ContextSpec.singleTenant;
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
+
     private CommandBus.Builder commandBus;
+    /**
+     * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
+     * Context creation.
+     */
+    private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
+
+    private final ChainBuilder<CommandEnvelope> commandFilters = FilterChain.newBuilder();
+    private final Set<Consumer<CommandEnvelope>> commandListeners = new HashSet<>();
+
     private EventBus.Builder eventBus;
+    /**
+     * Event dispatchers to be registered with the context {@link EventBus} and/or
+     * {@link IntegrationBus} after the Bounded Context creation.
+     */
+    private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
+
+    private final ChainBuilder<EventEnvelope> eventFilters = FilterChain.newBuilder();
+    private final Set<Consumer<EventEnvelope>> eventListeners = new HashSet<>();
     private EventEnricher eventEnricher;
+
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
     private Supplier<AggregateRootDirectory> rootDirectory;
@@ -76,18 +103,6 @@ public final class BoundedContextBuilder implements Logging {
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
-
-    /**
-     * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
-     * Context creation.
-     */
-    private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
-
-    /**
-     * Event dispatchers to be registered with the context {@link EventBus} and/or
-     * {@link IntegrationBus} after the Bounded Context creation.
-     */
-    private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
 
     /**
      * Prevents direct instantiation.
@@ -255,6 +270,27 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Adds a filter for commands.
+     *
+     * <p>The order of appending the filters to the builder is the order of the filters in
+     * the {@code CommandBus}.
+     */
+    public BoundedContextBuilder addCommandFilter(BusFilter<CommandEnvelope> filter) {
+        checkNotNull(filter);
+        commandFilters.append(filter);
+        return this;
+    }
+
+    /**
+     * Adds a listener for commands posted to the {@code CommandBus} of the context being built.
+     */
+    public BoundedContextBuilder addCommandListener(Consumer<CommandEnvelope> listener) {
+        checkNotNull(listener);
+        commandListeners.add(listener);
+        return this;
+    }
+
+    /**
      * Adds the passed event dispatcher to the dispatcher registration list which will be processed
      * after the Bounded Context is created.
      *
@@ -269,6 +305,29 @@ public final class BoundedContextBuilder implements Logging {
             return add((Repository<?, ?>) eventDispatcher);
         }
         eventDispatchers.add(eventDispatcher);
+        return this;
+    }
+
+    /**
+     * Adds a filter for events.
+     *
+     * <p>The order of appending the filters to the builder is the order of the filters in
+     * the {@code EventBus}.
+     *
+     * @param filter the filter to add
+     */
+    public BoundedContextBuilder addEventFiler(BusFilter<EventEnvelope> filter) {
+        checkNotNull(filter);
+        eventFilters.append(filter);
+        return this;
+    }
+
+    /**
+     * Adds a listener of the events posted to the {@code EventBus} of the context being built.
+     */
+    public BoundedContextBuilder addEventListener(Consumer<EventEnvelope> listener) {
+        checkNotNull(listener);
+        eventListeners.add(listener);
         return this;
     }
 
@@ -542,8 +601,8 @@ public final class BoundedContextBuilder implements Logging {
         } else {
             Boolean commandBusMultitenancy = commandBus.isMultitenant();
             if (commandBusMultitenancy != null) {
-                checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
-                                       "Status in BoundedContextBuilder: %s CommandBus: %s",
+                checkSameValue("`CommandBus` must match multitenancy of `BoundedContext`. " +
+                                       "Status in `BoundedContextBuilder`: %s `CommandBus`: %s.",
                                commandBusMultitenancy);
             } else {
                 commandBus.setMultitenant(isMultitenant());
@@ -551,12 +610,18 @@ public final class BoundedContextBuilder implements Logging {
         }
         commandBus.injectSystem(systemWriteSide)
                   .injectTenantIndex(tenantIndex);
+        commandFilters.filters()
+                      .forEach(commandBus::addFilter);
+        commandListeners.forEach(commandBus::addListener);
     }
 
     private void initEventBus() {
         if (eventBus == null) {
             eventBus = EventBus.newBuilder();
         }
+        eventFilters.filters()
+                    .forEach(eventBus::addFilter);
+        eventListeners.forEach(eventBus::addListener);
     }
 
     private void initStand(SystemReadSide systemReadSide) {

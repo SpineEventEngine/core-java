@@ -20,6 +20,7 @@
 
 package io.spine.server.bus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.MessageEnvelope;
 
@@ -50,5 +51,10 @@ final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E>
                 // Do nothing.
             }
         });
+    }
+
+    @VisibleForTesting
+    boolean contains(Consumer<E> listener) {
+        return listeners.contains(listener);
     }
 }

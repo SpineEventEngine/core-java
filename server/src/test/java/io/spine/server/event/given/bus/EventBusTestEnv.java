@@ -135,7 +135,7 @@ public class EventBusTestEnv {
     public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
         EventBus.Builder busBuilder = EventBus
                 .newBuilder()
-                .appendFilter(new TaskCreatedFilter());
+                .addFilter(new TaskCreatedFilter());
         if (enricher != null) {
             busBuilder.injectEnricher(enricher);
         }

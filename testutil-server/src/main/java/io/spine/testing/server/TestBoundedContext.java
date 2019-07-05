@@ -65,7 +65,7 @@ public final class TestBoundedContext {
     public static BoundedContext create(BusFilter<CommandEnvelope> commandFilter) {
         CommandBus.Builder commandBus = CommandBus
                 .newBuilder()
-                .appendFilter(commandFilter);
+                .addFilter(commandFilter);
         BoundedContext boundedContext = BoundedContext
                 .singleTenant(NAME.getValue())
                 .setCommandBus(commandBus)

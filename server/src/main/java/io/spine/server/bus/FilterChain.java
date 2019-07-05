@@ -20,6 +20,8 @@
 
 package io.spine.server.bus;
 
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 
@@ -40,7 +42,8 @@ import static java.util.stream.Collectors.joining;
  *
  * <p>The {@link #close() close()} method closes all the underlying filters.
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
+@Internal
+public final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter<E> {
 
     private final Deque<BusFilter<E>> chain;
 
@@ -50,7 +53,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
         this.chain = builder.filters();
     }
 
-    static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {
+    public static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {
         return new ChainBuilder<>();
     }
 
@@ -65,6 +68,11 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
             }
         }
         return Optional.empty();
+    }
+
+    @VisibleForTesting
+    public boolean contains(BusFilter<E> filter) {
+        return chain.contains(filter);
     }
 
     /**
