@@ -28,9 +28,6 @@ import io.spine.core.UserId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.DelegatingEventDispatcher;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFactory;
 import io.spine.server.tuple.Pair;
 import io.spine.test.command.CmdAssignTask;
@@ -63,25 +60,21 @@ class AbstractCommanderTest {
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
     private final EventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-    private final BoundedContext boundedContext = BoundedContextBuilder
-            .assumingTests()
-            .build();
-
+    private BoundedContext context;
     private CommandInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        CommandBus commandBus = boundedContext.commandBus();
-        EventBus eventBus = boundedContext.eventBus();
-        AbstractCommander commander = new Commendatore(commandBus);
-        interceptor = new CommandInterceptor(boundedContext,
-                                             FirstCmdCreateProject.class,
+        interceptor = new CommandInterceptor(FirstCmdCreateProject.class,
                                              CmdSetTaskDescription.class,
                                              CmdAssignTask.class,
                                              CmdStartTask.class);
-        interceptor.injectEventBus(eventBus);
-        commandBus.register(commander);
-        eventBus.register(DelegatingEventDispatcher.of(commander));
+        AbstractCommander commander = new Commendatore();
+        context = BoundedContextBuilder
+                .assumingTests()
+                .addCommandDispatcher(commander)
+                .addCommandDispatcher(interceptor)
+                .build();
     }
 
     @Test
@@ -159,14 +152,14 @@ class AbstractCommanderTest {
 
     private void createCommandAndPost(CommandMessage commandMessage) {
         io.spine.core.Command command = commandFactory.create(commandMessage);
-        boundedContext.commandBus()
-                      .post(command, StreamObservers.noOpObserver());
+        context.commandBus()
+               .post(command, StreamObservers.noOpObserver());
     }
 
     private void createEventAndPost(EventMessage eventMessage) {
         io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
-        boundedContext.eventBus()
-                      .post(event);
+        context.eventBus()
+               .post(event);
     }
 
     private void postCreateTaskCommand(boolean startTask) {
@@ -190,10 +183,6 @@ class AbstractCommanderTest {
      * Test environment class that generates new commands in response to incoming messages.
      */
     private static final class Commendatore extends AbstractCommander {
-
-        private Commendatore(CommandBus commandBus) {
-            super(commandBus);
-        }
 
         @Command
         FirstCmdCreateProject on(CmdCreateProject command) {

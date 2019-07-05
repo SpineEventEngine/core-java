@@ -29,6 +29,7 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -208,15 +209,15 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates and registers the {@linkplain DefaultRepository default repository} for the passed
      * class of entities.
      *
-     * @param entityClass
-     *         the class of entities for which
      * @param <I>
      *         the type of entity identifiers
      * @param <E>
      *         the type of entities
+     * @param entityClass
+     *         the class of entities which will be served by a {@link DefaultRepository}
      * @see #register(Repository)
      */
-    public <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
+    <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
         checkNotNull(entityClass);
         register(DefaultRepository.of(entityClass));
     }
@@ -225,12 +226,19 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Registers the passed command dispatcher with the {@code CommandBus} of
      * this {@code BoundedContext}.
      */
+    @SuppressWarnings("ChainOfInstanceofChecks") // to handle specifics of DI.
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
             if (dispatcher instanceof AbstractCommandHandler) {
                 ((AbstractCommandHandler) dispatcher).injectEventBus(eventBus());
+            }
+            if (dispatcher instanceof AbstractCommander) {
+                AbstractCommander commander = (AbstractCommander) dispatcher;
+                commander.injectCommandBus(commandBus());
+                DelegatingEventDispatcher<?> proxy = DelegatingEventDispatcher.of(commander);
+                registerEventDispatcher(proxy);
             }
         }
     }
