@@ -43,6 +43,7 @@ import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.security.SecureRandom;
@@ -67,6 +68,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@Tag("slow")
 @DisplayName("Delivery of messages to entities should deliver those via")
 class DeliveryTest {
 
