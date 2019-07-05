@@ -70,7 +70,7 @@ abstract class PmEndpoint<I,
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
-    protected void dispatchInTx(I id) {
+    public void dispatchTo(I id) {
         P manager = repository().findOrCreate(id);
         tryDispatchAndSave(manager);
     }

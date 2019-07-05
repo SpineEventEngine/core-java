@@ -65,7 +65,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected final void dispatchInTx(I aggregateId) {
+    public final void dispatchTo(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
 

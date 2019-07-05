@@ -24,8 +24,6 @@ import io.spine.annotation.Internal;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.type.SignalEnvelope;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Abstract base for endpoints handling messages sent to entities.
  *
@@ -55,34 +53,9 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Dispatches the message to the entity with the passed ID and takes care of errors
-     * during dispatching.
-     *
-     * @param entityId
-     *         the ID of the entity which to dispatch the message to
-     */
-    @Override
-    public final void dispatchTo(I entityId) {
-        checkNotNull(entityId);
-        dispatchInTx(entityId);
-    }
-
-    /**
      * The callback invoked after the message is dispatched to an entity with the given ID.
      */
     protected abstract void afterDispatched(I entityId);
-
-    /**
-     * Dispatches the message to the entity with the passed ID, providing transactional work
-     * and storage of the entity.
-     *
-     * <p>Performs the delivery directly to the entity not taking
-     * the delivery strategy into account.
-     *
-     * @param entityId
-     *         the ID of the entity which to dispatch the message to
-     */
-    protected abstract void dispatchInTx(I entityId);
 
     /**
      * Invokes entity-specific method for dispatching the message.
