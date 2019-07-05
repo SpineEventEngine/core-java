@@ -51,6 +51,7 @@ import static java.util.Optional.ofNullable;
  * @param <T> the type of {@link Message} posted by the bus
  * @param <B> the own type of the builder
  */
+@Internal
 @CanIgnoreReturnValue
 public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  T extends Message,

@@ -88,6 +88,7 @@ import static java.lang.String.format;
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
  */
+@Internal
 public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
@@ -316,6 +317,14 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         @Internal
         public void injectEnricher(EventEnricher enricher) {
             this.enricher = checkNotNull(enricher);
+        }
+
+        /**
+         * Obtains {@code Enricher} assigned to the bus to be built.
+         */
+        @Internal
+        public Optional<EventEnricher> enricher() {
+            return Optional.ofNullable(enricher);
         }
 
         /**

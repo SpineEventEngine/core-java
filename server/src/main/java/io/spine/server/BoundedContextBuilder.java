@@ -85,16 +85,13 @@ public final class BoundedContextBuilder implements Logging {
     private final ChainBuilder<CommandEnvelope> commandFilters = FilterChain.newBuilder();
     private final Set<Consumer<CommandEnvelope>> commandListeners = new HashSet<>();
 
-    private final EventBus.Builder eventBus = EventBus.newBuilder();
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
      * {@link IntegrationBus} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
 
-    private final ChainBuilder<EventEnvelope> eventFilters = FilterChain.newBuilder();
-    private final Set<Consumer<EventEnvelope>> eventListeners = new HashSet<>();
-    private EventEnricher eventEnricher;
+    private final EventBus.Builder eventBus = EventBus.newBuilder();
 
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
@@ -195,7 +192,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder enrichEventsUsing(EventEnricher enricher) {
-        this.eventEnricher = checkNotNull(enricher);
+        eventBus.injectEnricher(enricher);
         return this;
     }
 
@@ -204,15 +201,12 @@ public final class BoundedContextBuilder implements Logging {
      * empty {@code Optional} if no enricher was assigned prior to this call.
      */
     public Optional<EventEnricher> eventEnricher() {
-        return Optional.ofNullable(eventEnricher);
+        return eventBus.enricher();
     }
 
     EventBus buildEventBus(BoundedContext context) {
         checkNotNull(context);
         eventBus.injectContext(context);
-        if (eventEnricher != null) {
-            eventBus.injectEnricher(eventEnricher);
-        }
         return eventBus.build();
     }
 
@@ -308,7 +302,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     public BoundedContextBuilder addEventFiler(BusFilter<EventEnvelope> filter) {
         checkNotNull(filter);
-        eventFilters.append(filter);
+        eventBus.addFilter(filter);
         return this;
     }
 
@@ -317,7 +311,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     public BoundedContextBuilder addEventListener(Consumer<EventEnvelope> listener) {
         checkNotNull(listener);
-        eventListeners.add(listener);
+        eventBus.addListener(listener);
         return this;
     }
 
@@ -558,9 +552,8 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        SystemContext result = system.buildPartial(SystemContext::newInstance,
-                                                   NoOpSystemClient.INSTANCE
-        );
+        SystemContext result =
+                system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
         return result;
     }
 
@@ -568,7 +561,6 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        initEventBus();
         initStand(client.readSide());
         initIntegrationBus();
 
@@ -603,12 +595,6 @@ public final class BoundedContextBuilder implements Logging {
         commandFilters.filters()
                       .forEach(commandBus::addFilter);
         commandListeners.forEach(commandBus::addListener);
-    }
-
-    private void initEventBus() {
-        eventFilters.filters()
-                    .forEach(eventBus::addFilter);
-        eventListeners.forEach(eventBus::addListener);
     }
 
     private void initStand(SystemReadSide systemReadSide) {

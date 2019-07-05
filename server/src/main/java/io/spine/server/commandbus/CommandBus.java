@@ -65,6 +65,7 @@ import static java.util.Optional.ofNullable;
 /**
  * Dispatches the incoming commands to the corresponding handler.
  */
+@Internal
 public class CommandBus
         extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher<?>> {
 
