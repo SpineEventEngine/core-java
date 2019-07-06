@@ -23,20 +23,22 @@ package io.spine.server.security;
 import com.example.OutsideClass;
 import io.spine.given.NonServerClass;
 import io.spine.system.server.given.SystemConfig;
-import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("InvocationGuard should")
-class SecurityTest extends UtilityClassTest<Security> {
+@DisplayName("`Security` should")
+class SecurityTest {
 
-    SecurityTest() {
-        super(Security.class);
+    @Test
+    @DisplayName("have private constructor")
+    void hasPrivateConstructor() {
+        assertHasPrivateParameterlessCtor(Security.class);
     }
 
     @Nested

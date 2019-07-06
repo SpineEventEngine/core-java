@@ -29,10 +29,22 @@ import static java.lang.String.format;
 /**
  * Controls which class can call a method.
  */
-public final class Security {
+public final class Security extends SecurityManager {
 
-    /** Prevents instantiation of this utility class. */
+    private static final Security INSTANCE = new Security();
+
+    /** Prevents instantiation of this class from outside. */
     private Security() {
+    }
+
+    /**
+     * Obtains the class preceding in call chain the class which calls the
+     * method from which this method is being called.
+     */
+    private Class previousCallerClass() {
+        Class[] context = getClassContext();
+        Class result = context[3];
+        return result;
     }
 
     /**
@@ -40,7 +52,7 @@ public final class Security {
      * the Spine Event Engine framework or its tests.
      */
     public static void allowOnlyFrameworkServer() {
-        Class callingClass = CallInspector.instance().previousCallerClass();
+        Class callingClass = INSTANCE.previousCallerClass();
         if (!belongsToServer(callingClass)) {
             throw nonAllowedCaller(callingClass);
         }
