@@ -20,6 +20,8 @@
 
 package io.spine.server.security;
 
+import com.example.OutsideClass;
+import io.spine.given.NonServerClass;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,7 +39,7 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
     }
 
     @Nested
-    @DisplayName("throw SecurityException")
+    @DisplayName("throw `SecurityException`")
     class Throwing {
 
         @Test
@@ -75,7 +77,43 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
         }
     }
 
+    @Nested
+    @DisplayName("restrict callers to `io.spine.server` packages")
+    class ServerFramework {
+
+        @Test
+        @DisplayName("allowing calls from the server part of the framework or its tests")
+        void allowFormServerPackages() {
+            try {
+                guardedCall();
+            } catch (Exception e) {
+                fail(e);
+            }
+        }
+        
+        @Test
+        @DisplayName("prohibiting calls from outside of framework")
+        void prohibitingFromOutside() {
+            assertThrowsOn(OutsideClass::attemptToCallRestrictedApi);
+        }
+
+        @Test
+        @DisplayName("prohibiting calls from non-server framework packages")
+        void prohibitFrameworkButNonServer() {
+            assertThrowsOn(NonServerClass::attemptToCallRestrictedApi);
+        }
+    }
+
     private static void assertThrowsOn(Executable executable) {
         assertThrows(SecurityException.class, executable);
+    }
+
+    /**
+     * This is a guarded method, which is invoked from
+     * the {@linkplain ServerFramework#allowFormServerPackages() test}, which should pass as the
+     * test belongs to the {@code io.spine.server} package.
+     */
+    private static void guardedCall() {
+        InvocationGuard.allowOnlyFrameworkServer();
     }
 }

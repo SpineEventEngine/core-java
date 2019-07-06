@@ -21,6 +21,8 @@
 package io.spine.server.security;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.code.java.PackageName;
+import io.spine.server.Server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -39,8 +41,7 @@ public final class InvocationGuard {
      */
     public static void allowOnly(String allowedCallerClass) {
         checkNotNull(allowedCallerClass);
-        Class callingClass = CallerProvider.instance()
-                                           .previousCallerClass();
+        Class callingClass = CallerProvider.instance().previousCallerClass();
         if (!allowedCallerClass.equals(callingClass.getName())) {
             throw nonAllowedCaller(callingClass);
         }
@@ -52,21 +53,32 @@ public final class InvocationGuard {
     public static void allowOnly(String firstClass, String... otherClasses) {
         checkNotNull(firstClass);
         checkNotNull(otherClasses);
-        Class callingClass = CallerProvider.instance()
-                                           .previousCallerClass();
         ImmutableSet<String> allowedCallers = ImmutableSet
                 .<String>builder()
                 .add(firstClass)
                 .add(otherClasses)
                 .build();
+        Class callingClass = CallerProvider.instance().previousCallerClass();
         if (!allowedCallers.contains(callingClass.getName())) {
+            throw nonAllowedCaller(callingClass);
+        }
+    }
+
+    /**
+     * Throws {@link SecurityException} of the calling class does not belong to
+     * the Spine Event Engine framework or its tests.
+     */
+    public static void allowOnlyFrameworkServer() {
+        Class callingClass = CallerProvider.instance().previousCallerClass();
+        PackageName serverPackage = PackageName.of(Server.class);
+        if (!callingClass.getName().startsWith(serverPackage.value())) {
             throw nonAllowedCaller(callingClass);
         }
     }
 
     private static SecurityException nonAllowedCaller(Class callingClass) {
         String msg = format(
-                "The class %s is not allowed to perform this operation.", callingClass
+                "The class `%s` is not allowed to perform this operation.", callingClass
         );
         throw new SecurityException(msg);
     }
