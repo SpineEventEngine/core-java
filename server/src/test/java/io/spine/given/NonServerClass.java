@@ -28,7 +28,7 @@ import io.spine.server.security.GivenRestrictedApi;
  *
  * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitFrameworkButNonServer
  */
-public class NonServerClass {
+public final class NonServerClass {
 
     private NonServerClass() {}
 

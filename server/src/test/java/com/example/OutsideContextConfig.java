@@ -20,19 +20,23 @@
 
 package com.example;
 
-import io.spine.server.security.GivenRestrictedApi;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.DefaultRepository;
+import io.spine.server.bc.given.ProjectAggregate;
 
 /**
- * A test environment class from outside the framework package structure for testing
- * {@link io.spine.server.security.InvocationGuard#allowOnlyFrameworkServer()}.
+ * Test environment class for testing {@code BoundedContext} configuration from
+ * outside the framework.
  *
- * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitingFromOutside()
+ * @see io.spine.server.BoundedContextTest.RestrictRegistrationCalls
  */
-public final class OutsideClass {
+public final class OutsideContextConfig {
 
-    private OutsideClass() {}
+    private OutsideContextConfig() {}
 
-    public static void attemptToCallRestrictedApi() {
-        GivenRestrictedApi.guardedMethod();
+    public static void repositoryRegistration() {
+        BoundedContext context = BoundedContextBuilder.assumingTests().build();
+        context.register(DefaultRepository.of(ProjectAggregate.class));
     }
 }

@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environment for {@link io.spine.server.security.InvocationGuard}.
+ * Test environment classes for testing invocations from outside the framework package namespace.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

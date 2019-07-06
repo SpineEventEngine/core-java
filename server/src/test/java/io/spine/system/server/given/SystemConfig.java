@@ -18,21 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.example;
+package io.spine.system.server.given;
 
-import io.spine.server.security.GivenRestrictedApi;
+import io.spine.server.security.InvocationGuard;
 
 /**
- * A test environment class from outside the framework package structure for testing
- * {@link io.spine.server.security.InvocationGuard#allowOnlyFrameworkServer()}.
+ * Test environment class for testing {@link io.spine.server.security.InvocationGuard}.
  *
- * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitingFromOutside()
+ * @see io.spine.server.security.InvocationGuardTest.ServerFramework#allowFromSystemServerPackages()
  */
-public final class OutsideClass {
+public class SystemConfig {
 
-    private OutsideClass() {}
+    private SystemConfig() {}
 
-    public static void attemptToCallRestrictedApi() {
-        GivenRestrictedApi.guardedMethod();
+    public static void guardedCall() {
+        InvocationGuard.allowOnlyFrameworkServer();
     }
 }

@@ -23,6 +23,7 @@ package io.spine.server.security;
 import com.google.common.collect.ImmutableSet;
 import io.spine.code.java.PackageName;
 import io.spine.server.Server;
+import io.spine.system.server.SystemContext;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -71,7 +72,10 @@ public final class InvocationGuard {
     public static void allowOnlyFrameworkServer() {
         Class callingClass = CallerProvider.instance().previousCallerClass();
         PackageName serverPackage = PackageName.of(Server.class);
-        if (!callingClass.getName().startsWith(serverPackage.value())) {
+        PackageName systemServerPackage = PackageName.of(SystemContext.class);
+        String callingClassName = callingClass.getName();
+        if (!(callingClassName.startsWith(serverPackage.value())
+                || callingClassName.startsWith(systemServerPackage.value()))) {
             throw nonAllowedCaller(callingClass);
         }
     }

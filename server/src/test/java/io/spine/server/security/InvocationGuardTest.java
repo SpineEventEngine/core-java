@@ -22,6 +22,7 @@ package io.spine.server.security;
 
 import com.example.OutsideClass;
 import io.spine.given.NonServerClass;
+import io.spine.system.server.given.SystemConfig;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -82,7 +83,7 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
     class ServerFramework {
 
         @Test
-        @DisplayName("allowing calls from the server part of the framework or its tests")
+        @DisplayName("allowing calls from `io.spine.server` packages")
         void allowFormServerPackages() {
             try {
                 guardedCall();
@@ -90,7 +91,17 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
                 fail(e);
             }
         }
-        
+
+        @Test
+        @DisplayName("allowing calls form the `io.spine.system.server` packages")
+        void allowFromSystemServerPackages() {
+            try {
+                SystemConfig.guardedCall();
+            } catch (Exception e) {
+                fail(e);
+            }
+        }
+
         @Test
         @DisplayName("prohibiting calls from outside of framework")
         void prohibitingFromOutside() {
