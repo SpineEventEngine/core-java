@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 
@@ -68,8 +67,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
         return Optional.empty();
     }
 
-    @VisibleForTesting
-    public boolean contains(BusFilter<E> filter) {
+    boolean contains(BusFilter<E> filter) {
         return chain.contains(filter);
     }
 
