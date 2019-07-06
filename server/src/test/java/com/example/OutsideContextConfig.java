@@ -20,10 +20,24 @@
 
 package com.example;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.bc.given.ProjectAggregate;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Test environment class for testing {@code BoundedContext} configuration from
@@ -36,7 +50,117 @@ public final class OutsideContextConfig {
     private OutsideContextConfig() {}
 
     public static void repositoryRegistration() {
-        BoundedContext context = BoundedContextBuilder.assumingTests().build();
-        context.register(DefaultRepository.of(ProjectAggregate.class));
+        context().register(DefaultRepository.of(ProjectAggregate.class));
+    }
+
+    public static void commandDispatcherRegistration() {
+        context().registerCommandDispatcher(newCommandDispatcher());
+    }
+
+    public static void commandDispatcherDelegateRegistration() {
+        context().registerCommandDispatcher(newCommandDispatcherDelegate());
+    }
+
+    public static void eventDispatcherRegistration() {
+        context().registerEventDispatcher(newEventDispatcher());
+    }
+
+    public static void eventDispatcherDelegateRegistration() {
+        context().registerEventDispatcher(newEventDispatcherDelegate());
+    }
+
+    private static BoundedContext context() {
+        return BoundedContextBuilder.assumingTests().build();
+    }
+
+    private static CommandDispatcher<String> newCommandDispatcher() {
+        return new CommandDispatcher<String>() {
+            @Override
+            public Set<CommandClass> messageClasses() {
+                return ImmutableSet.of();
+            }
+
+            @CanIgnoreReturnValue
+            @Override
+            public String dispatch(CommandEnvelope envelope) {
+                return getClass().getName();
+            }
+
+            @Override
+            public void onError(CommandEnvelope envelope, RuntimeException exception) {
+
+            }
+        };
+    }
+
+    private static CommandDispatcherDelegate<String> newCommandDispatcherDelegate() {
+        return new CommandDispatcherDelegate<String>() {
+            @Override
+            public Set<CommandClass> commandClasses() {
+                return ImmutableSet.of();
+            }
+
+            @Override
+            public String dispatchCommand(CommandEnvelope envelope) {
+                return getClass().getName();
+            }
+
+            @Override
+            public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            }
+        };
+    }
+
+    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
+    private static EventDispatcherDelegate<String> newEventDispatcherDelegate() {
+        return new EventDispatcherDelegate<String>() {
+            @Override
+            public Set<EventClass> domesticEvents() {
+                return ImmutableSet.of();
+            }
+
+            @Override
+            public Set<EventClass> externalEvents() {
+                return ImmutableSet.of();
+            }
+
+            @Override
+            public Set<String> dispatchEvent(EventEnvelope event) {
+                return ImmutableSet.of();
+            }
+
+            @Override
+            public void onError(EventEnvelope event, RuntimeException exception) {
+            }
+        };
+    }
+    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
+    private static EventDispatcher<String> newEventDispatcher() {
+        return new EventDispatcher<String>() {
+            @Override
+            public Set<EventClass> externalEventClasses() {
+                return ImmutableSet.of();
+            }
+
+            @Override
+            public Set<EventClass> messageClasses() {
+                return ImmutableSet.of();
+            }
+
+            @CanIgnoreReturnValue
+            @Override
+            public Set<String> dispatch(EventEnvelope envelope) {
+                return ImmutableSet.of();
+            }
+
+            @Override
+            public void onError(EventEnvelope envelope, RuntimeException exception) {
+            }
+
+            @Override
+            public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+                return Optional.empty();
+            }
+        };
     }
 }

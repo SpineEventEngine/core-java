@@ -451,13 +451,37 @@ class BoundedContextTest {
     }
 
     @Nested
-    @DisplayName("do not allow registration calls from outside the `io.spine.server` package")
+    @DisplayName("do not allow registration calls from outside the `io.spine.server` package for")
     class RestrictRegistrationCalls {
 
         @Test
-        @DisplayName("registering a repository from outside")
+        @DisplayName("`Repository`")
         void forRepository() {
             assertThrowsOn(OutsideContextConfig::repositoryRegistration);
+        }
+
+        @Test
+        @DisplayName("`CommandDispatcher`")
+        void forCommandDispatcher() {
+            assertThrowsOn(OutsideContextConfig::commandDispatcherRegistration);
+        }
+
+        @Test
+        @DisplayName("`CommandDispatcherDelegate`")
+        void forCommandDispatcherDelegate() {
+            assertThrowsOn(OutsideContextConfig::commandDispatcherDelegateRegistration);
+        }
+
+        @Test
+        @DisplayName("`EventDispatcher`")
+        void forEventDispatcher() {
+            assertThrowsOn(OutsideContextConfig::eventDispatcherRegistration);
+        }
+
+        @Test
+        @DisplayName("`EventDispatcherDelegate`")
+        void forEventDispatcherDelegate() {
+            assertThrowsOn(OutsideContextConfig::eventDispatcherDelegateRegistration);
         }
 
         private void assertThrowsOn(Executable executable) {
