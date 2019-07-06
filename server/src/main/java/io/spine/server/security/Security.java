@@ -40,15 +40,21 @@ public final class Security {
      * the Spine Event Engine framework or its tests.
      */
     public static void allowOnlyFrameworkServer() {
-        Class callingClass = Guard.instance().previousCallerClass();
+        Class callingClass = CallInspector.instance().previousCallerClass();
+        if (!belongsToServer(callingClass)) {
+            throw nonAllowedCaller(callingClass);
+        }
+    }
+
+    private static boolean belongsToServer(Class callingClass) {
         PackageName serverPackage = PackageName.of(Server.class);
         PackageName systemServerPackage = PackageName.of(SystemContext.class);
         String callingClassName = callingClass.getName();
-        if (!(callingClassName.startsWith(serverPackage.value())
+        boolean result =
+                callingClassName.startsWith(serverPackage.value())
                 || callingClassName.startsWith(systemServerPackage.value())
-                    || callingClassName.startsWith("io.spine.testing.server"))) {
-            throw nonAllowedCaller(callingClass);
-        }
+                || callingClassName.startsWith("io.spine.testing.server");
+        return result;
     }
 
     private static SecurityException nonAllowedCaller(Class callingClass) {

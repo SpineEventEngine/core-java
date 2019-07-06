@@ -23,14 +23,14 @@ package io.spine.server.security;
 /**
  * Provides information about the class calling a method.
  */
-final class Guard extends SecurityManager {
+final class CallInspector extends SecurityManager {
 
-    private static final Guard INSTANCE = new Guard();
+    private static final CallInspector INSTANCE = new CallInspector();
 
     /**
      * Obtains the instance.
      */
-    static Guard instance() {
+    static CallInspector instance() {
         return INSTANCE;
     }
 
