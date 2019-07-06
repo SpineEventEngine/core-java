@@ -45,7 +45,8 @@ public final class Security {
         PackageName systemServerPackage = PackageName.of(SystemContext.class);
         String callingClassName = callingClass.getName();
         if (!(callingClassName.startsWith(serverPackage.value())
-                || callingClassName.startsWith(systemServerPackage.value()))) {
+                || callingClassName.startsWith(systemServerPackage.value())
+                    || callingClassName.startsWith("io.spine.testing.server"))) {
             throw nonAllowedCaller(callingClass);
         }
     }
