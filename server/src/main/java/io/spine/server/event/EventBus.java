@@ -157,7 +157,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      *
      * @return a set of classes of supported events
      */
-    @Internal
     public final Set<EventClass> registeredEventClasses() {
         return registry().registeredMessageClasses();
     }
@@ -269,7 +268,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         return (EventDispatcherRegistry) super.registry();
     }
 
-    @Internal
     public void init(BoundedContext context) {
         eventStore =
                 ServerEnvironment.instance()
@@ -314,7 +312,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * @param enricher
          *         the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
-        @Internal
         public void injectEnricher(EventEnricher enricher) {
             this.enricher = checkNotNull(enricher);
         }
@@ -322,7 +319,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         /**
          * Obtains {@code Enricher} assigned to the bus to be built.
          */
-        @Internal
         public Optional<EventEnricher> enricher() {
             return Optional.ofNullable(enricher);
         }
@@ -347,7 +343,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
          * {@code BoundedContext}.
          */
         @Override
-        @Internal
         @CheckReturnValue
         public EventBus build() {
             if (observer == null) {
@@ -392,7 +387,6 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
      * @throws NullPointerException
      *         if the passed value is null
      */
-    @Internal
     public static EventBus checkAssigned(Object holder, @Nullable EventBus value) {
         return checkNotNull(
                 value,
