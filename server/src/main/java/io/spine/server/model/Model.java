@@ -26,8 +26,8 @@ import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.reflect.PackageInfo;
+import io.spine.security.InvocationGuard;
 import io.spine.server.annotation.BoundedContext;
-import io.spine.server.security.InvocationGuard;
 
 import java.util.Map;
 import java.util.Optional;

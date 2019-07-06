@@ -20,49 +20,19 @@
 
 package io.spine.server.security;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.code.java.PackageName;
 import io.spine.server.Server;
 import io.spine.system.server.SystemContext;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
  * Controls which class can call a method.
  */
-public final class InvocationGuard {
+public final class Security {
 
     /** Prevents instantiation of this utility class. */
-    private InvocationGuard() {
-    }
-
-    /**
-     * Throws {@link SecurityException} of the calling class is not that passed.
-     */
-    public static void allowOnly(String allowedCallerClass) {
-        checkNotNull(allowedCallerClass);
-        Class callingClass = CallerProvider.instance().previousCallerClass();
-        if (!allowedCallerClass.equals(callingClass.getName())) {
-            throw nonAllowedCaller(callingClass);
-        }
-    }
-
-    /**
-     * Throws {@link SecurityException} of the calling class is not among the named.
-     */
-    public static void allowOnly(String firstClass, String... otherClasses) {
-        checkNotNull(firstClass);
-        checkNotNull(otherClasses);
-        ImmutableSet<String> allowedCallers = ImmutableSet
-                .<String>builder()
-                .add(firstClass)
-                .add(otherClasses)
-                .build();
-        Class callingClass = CallerProvider.instance().previousCallerClass();
-        if (!allowedCallers.contains(callingClass.getName())) {
-            throw nonAllowedCaller(callingClass);
-        }
+    private Security() {
     }
 
     /**
@@ -70,7 +40,7 @@ public final class InvocationGuard {
      * the Spine Event Engine framework or its tests.
      */
     public static void allowOnlyFrameworkServer() {
-        Class callingClass = CallerProvider.instance().previousCallerClass();
+        Class callingClass = Guard.instance().previousCallerClass();
         PackageName serverPackage = PackageName.of(Server.class);
         PackageName systemServerPackage = PackageName.of(SystemContext.class);
         String callingClassName = callingClass.getName();
@@ -82,7 +52,7 @@ public final class InvocationGuard {
 
     private static SecurityException nonAllowedCaller(Class callingClass) {
         String msg = format(
-                "The class `%s` is not allowed to perform this operation.", callingClass
+                "`%s` is not allowed to make this call.", callingClass
         );
         throw new SecurityException(msg);
     }

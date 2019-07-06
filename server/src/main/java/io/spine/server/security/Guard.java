@@ -23,25 +23,15 @@ package io.spine.server.security;
 /**
  * Provides information about the class calling a method.
  */
-final class CallerProvider extends SecurityManager {
+final class Guard extends SecurityManager {
 
-    private static final CallerProvider INSTANCE = new CallerProvider();
+    private static final Guard INSTANCE = new Guard();
 
     /**
      * Obtains the instance.
      */
-    static CallerProvider instance() {
+    static Guard instance() {
         return INSTANCE;
-    }
-
-    /**
-     * Obtains the class of the object which calls the method from which this method
-     * is being called.
-     */
-    Class callerClass() {
-        Class[] context = getClassContext();
-        Class result = context[2];
-        return result;
     }
 
     /**

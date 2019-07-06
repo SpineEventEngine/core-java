@@ -21,10 +21,11 @@
 package com.example;
 
 import io.spine.server.security.GivenRestrictedApi;
+import io.spine.server.security.Security;
 
 /**
  * A test environment class from outside the framework package structure for testing
- * {@link io.spine.server.security.InvocationGuard#allowOnlyFrameworkServer()}.
+ * {@link Security#allowOnlyFrameworkServer()}.
  *
  * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitingFromOutside()
  */

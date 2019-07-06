@@ -33,49 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("InvocationGuard should")
-class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
+class SecurityTest extends UtilityClassTest<Security> {
 
-    InvocationGuardTest() {
-        super(InvocationGuard.class);
-    }
-
-    @Nested
-    @DisplayName("throw `SecurityException`")
-    class Throwing {
-
-        @Test
-        @DisplayName("if no classes are allowed")
-        void nobodyAllowed() {
-            assertThrowsOn(() -> InvocationGuard.allowOnly(""));
-        }
-
-        @Test
-        @DisplayName("if a calling class is not that allowed")
-        void notAllowed() {
-            assertThrowsOn(() -> InvocationGuard.allowOnly("java.lang.Boolean"));
-        }
-
-        @Test
-        @DisplayName("if a calling class is not among allowed")
-        void notAllowedFromMany() {
-            assertThrowsOn(() -> InvocationGuard.allowOnly(
-                    "java.lang.String",
-                    "org.junit.jupiter.api.Test")
-            );
-        }
-    }
-
-    @Test
-    @DisplayName("do not throw on allowed class")
-    void pass() {
-        String callingClass = CallerProvider.instance()
-                                            .callerClass()
-                                            .getName();
-        try {
-            InvocationGuard.allowOnly(callingClass);
-        } catch (Exception e) {
-            fail(e);
-        }
+    SecurityTest() {
+        super(Security.class);
     }
 
     @Nested
@@ -125,6 +86,6 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
      * test belongs to the {@code io.spine.server} package.
      */
     private static void guardedCall() {
-        InvocationGuard.allowOnlyFrameworkServer();
+        Security.allowOnlyFrameworkServer();
     }
 }

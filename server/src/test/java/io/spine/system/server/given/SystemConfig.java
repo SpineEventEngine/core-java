@@ -20,18 +20,18 @@
 
 package io.spine.system.server.given;
 
-import io.spine.server.security.InvocationGuard;
+import io.spine.server.security.Security;
 
 /**
- * Test environment class for testing {@link io.spine.server.security.InvocationGuard}.
+ * Test environment class for testing {@link Security}.
  *
- * @see io.spine.server.security.InvocationGuardTest.ServerFramework#allowFromSystemServerPackages()
+ * @see io.spine.server.security.SecurityTest.ServerFramework#allowFromSystemServerPackages()
  */
 public class SystemConfig {
 
     private SystemConfig() {}
 
     public static void guardedCall() {
-        InvocationGuard.allowOnlyFrameworkServer();
+        Security.allowOnlyFrameworkServer();
     }
 }

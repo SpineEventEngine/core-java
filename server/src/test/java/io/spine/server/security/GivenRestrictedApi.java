@@ -21,13 +21,13 @@
 package io.spine.server.security;
 
 /**
- * Test environment class for {@link InvocationGuardTest.ServerFramework#allowFormServerPackages()}
+ * Test environment class for {@link SecurityTest.ServerFramework#allowFormServerPackages()}
  */
 public class GivenRestrictedApi {
 
     private GivenRestrictedApi() {}
 
     public static void guardedMethod() {
-        InvocationGuard.allowOnlyFrameworkServer();
+        Security.allowOnlyFrameworkServer();
     }
 }

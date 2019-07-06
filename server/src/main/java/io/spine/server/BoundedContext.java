@@ -47,7 +47,7 @@ import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.security.InvocationGuard;
+import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -201,7 +201,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     @Internal
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        InvocationGuard.allowOnlyFrameworkServer();
+        Security.allowOnlyFrameworkServer();
         repository.injectContext(this);
         guard.register(repository);
         repository.onRegistered();
