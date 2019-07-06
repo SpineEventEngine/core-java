@@ -38,7 +38,7 @@ final class CallerProvider extends SecurityManager {
      * Obtains the class of the object which calls the method from which this method
      * is being called.
      */
-    Class getCallerClass() {
+    Class callerClass() {
         Class[] context = getClassContext();
         Class result = context[2];
         return result;
@@ -48,7 +48,7 @@ final class CallerProvider extends SecurityManager {
      * Obtains the class preceding in call chain the class which calls the
      * method from which this method is being called.
      */
-    Class getPreviousCallerClass() {
+    Class previousCallerClass() {
         Class[] context = getClassContext();
         Class result = context[3];
         return result;

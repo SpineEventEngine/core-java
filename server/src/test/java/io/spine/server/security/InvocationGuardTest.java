@@ -66,7 +66,7 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
     @DisplayName("do not throw on allowed class")
     void pass() {
         String callingClass = CallerProvider.instance()
-                                            .getCallerClass()
+                                            .callerClass()
                                             .getName();
         try {
             InvocationGuard.allowOnly(callingClass);

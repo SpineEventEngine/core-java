@@ -40,7 +40,7 @@ public final class InvocationGuard {
     public static void allowOnly(String allowedCallerClass) {
         checkNotNull(allowedCallerClass);
         Class callingClass = CallerProvider.instance()
-                                           .getPreviousCallerClass();
+                                           .previousCallerClass();
         if (!allowedCallerClass.equals(callingClass.getName())) {
             throw nonAllowedCaller(callingClass);
         }
@@ -53,7 +53,7 @@ public final class InvocationGuard {
         checkNotNull(firstClass);
         checkNotNull(otherClasses);
         Class callingClass = CallerProvider.instance()
-                                           .getPreviousCallerClass();
+                                           .previousCallerClass();
         ImmutableSet<String> allowedCallers = ImmutableSet
                 .<String>builder()
                 .add(firstClass)
