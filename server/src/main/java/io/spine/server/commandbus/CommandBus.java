@@ -125,7 +125,6 @@ public class CommandBus
         return new Builder();
     }
 
-    @Internal
     @VisibleForTesting
     public final boolean isMultitenant() {
         return multitenant;
@@ -317,7 +316,6 @@ public class CommandBus
          * {@code BoundedContext}.
          */
         @Override
-        @Internal
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();
