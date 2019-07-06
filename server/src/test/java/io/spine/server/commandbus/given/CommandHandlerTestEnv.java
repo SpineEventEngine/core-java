@@ -84,9 +84,8 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public Set<String> dispatch(EventEnvelope event) {
+        public void dispatch(EventEnvelope event) {
             dispatched.add(event);
-            return identity();
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.

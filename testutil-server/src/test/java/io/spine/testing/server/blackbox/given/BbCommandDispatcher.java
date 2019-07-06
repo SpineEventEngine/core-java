@@ -23,7 +23,6 @@ package io.spine.testing.server.blackbox.given;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.command.AbstractCommandDispatcher;
-import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
@@ -39,8 +38,8 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
     private int commandsReceived = 0;
     private final CommandClass commandToDispatch;
 
-    public BbCommandDispatcher(EventBus eventBus, CommandClass commandToDispatch) {
-        super(eventBus);
+    public BbCommandDispatcher(CommandClass commandToDispatch) {
+        super();
         this.commandToDispatch = commandToDispatch;
     }
 
@@ -51,9 +50,8 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
 
     @CanIgnoreReturnValue
     @Override
-    public String dispatch(CommandEnvelope envelope) {
+    public void dispatch(CommandEnvelope envelope) {
         commandsReceived++;
-        return getId();
     }
 
     public int commandsDispatched() {

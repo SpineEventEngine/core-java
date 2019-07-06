@@ -52,12 +52,12 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
     }
 
     @Override
-    public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+    public void dispatch(ExternalMessageEnvelope envelope) {
         EventEnvelope eventEnvelope = envelope.toEventEnvelope();
         checkArgument(eventEnvelope.isExternal(),
                       "External event expected, but got %s",
                       Stringifiers.toString(eventEnvelope.outerObject()));
-        return delegate.dispatch(eventEnvelope);
+        delegate.dispatch(eventEnvelope);
     }
 
     @Override

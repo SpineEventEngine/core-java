@@ -49,9 +49,8 @@ public class DelegatingEventDispatcherTestEnv {
         }
 
         @Override
-        public Set<String> dispatchEvent(EventEnvelope event) {
+        public void dispatchEvent(EventEnvelope event) {
             // Do nothing.
-            return ImmutableSet.of(getClass().getName());
         }
     }
 }

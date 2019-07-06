@@ -37,7 +37,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,10 +67,9 @@ class EventSubscriberTest {
         context.registerEventDispatcher(subscriber);
         DiagnosticMonitor monitor = new DiagnosticMonitor();
         context.registerEventDispatcher(monitor);
-        Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
+        subscriber.dispatch(eventEnvelope);
 
         assertTrue(subscriber.isMethodCalled());
-        assertEquals(0, dispatchingResult.size());
         List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
         assertThat(systemEvents).hasSize(1);
         HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
@@ -88,10 +86,8 @@ class EventSubscriberTest {
     void dispatchEvent() {
         EventEnvelope eventEnvelope = createEvent(true);
 
-        Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
-
+        subscriber.dispatch(eventEnvelope);
         assertTrue(subscriber.isMethodCalled());
-        assertEquals(1, dispatchingResult.size());
     }
 
     @Test

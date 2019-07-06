@@ -71,13 +71,12 @@ public abstract class AbstractCommander
 
     @CanIgnoreReturnValue
     @Override
-    public String dispatch(CommandEnvelope command) {
+    public void dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
         PropagationOutcome outcome = method.invoke(this, command);
         Success success = outcome.getSuccess();
         postCommands(success);
         postRejection(success);
-        return getId();
     }
 
     @Override
@@ -91,11 +90,10 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<String> dispatchEvent(EventEnvelope event) {
+    public void dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
         PropagationOutcome outcome = method.invoke(this, event);
         postCommands(outcome.getSuccess());
-        return identity();
     }
 
     @Override

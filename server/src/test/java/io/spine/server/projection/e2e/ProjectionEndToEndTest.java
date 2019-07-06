@@ -57,7 +57,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
-import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Time.currentTime;
@@ -161,8 +160,7 @@ class ProjectionEndToEndTest {
                 .setMessage(pack(stateChanged))
                 .setContext(eventContext)
                 .build();
-        Set<GroupId> targets = repository.dispatch(EventEnvelope.of(event));
-        assertThat(targets).isNotEmpty();
+        repository.dispatch(EventEnvelope.of(event));
 
         Iterator<GroupProjection> allGroups = repository.loadAll();
         assertTrue(allGroups.hasNext());

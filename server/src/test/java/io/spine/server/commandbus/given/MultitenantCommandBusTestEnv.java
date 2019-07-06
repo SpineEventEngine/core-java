@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
@@ -51,9 +50,8 @@ public class MultitenantCommandBusTestEnv {
         }
 
         @Override
-        public Message dispatch(CommandEnvelope envelope) {
+        public void dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
-            return Empty.getDefaultInstance();
         }
 
         public boolean wasDispatcherInvoked() {

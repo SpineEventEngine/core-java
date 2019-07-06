@@ -70,12 +70,11 @@ public abstract class AbstractCommandHandler
      * posts resulting events to the {@link EventBus}.
      *
      * @param envelope the command to dispatch
-     * @return the handler identity as the result of {@link #toString()}
      * @throws IllegalStateException
      *         if an exception occurred during command dispatching with this exception as the cause
      */
     @Override
-    public String dispatch(CommandEnvelope envelope) {
+    public void dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
         PropagationOutcome result = method.invoke(this, envelope);
         if (result.hasSuccess()) {
@@ -83,7 +82,6 @@ public abstract class AbstractCommandHandler
         } else if (result.hasError()){
             onError(envelope,result.getError());
         }
-        return getId();
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.

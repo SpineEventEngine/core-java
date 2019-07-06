@@ -23,7 +23,6 @@ package io.spine.server.commandbus.given;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
@@ -131,8 +130,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            return Empty.getDefaultInstance();
+        public void dispatch(CommandEnvelope envelope) {
+            // Do nothing.
         }
     }
 
@@ -151,8 +150,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            return Empty.getDefaultInstance();
+        public void dispatch(CommandEnvelope envelope) {
+            // Do nothing.
         }
     }
 
@@ -164,8 +163,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            return Empty.getDefaultInstance();
+        public void dispatch(CommandEnvelope envelope) {
+            // Do nothing.
         }
     }
 
@@ -177,9 +176,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public Message dispatch(CommandEnvelope envelope) {
+        public void dispatch(CommandEnvelope envelope) {
             // Do nothing.
-            return Empty.getDefaultInstance();
         }
     }
 

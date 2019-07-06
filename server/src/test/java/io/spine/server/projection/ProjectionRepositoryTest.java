@@ -346,8 +346,7 @@ class ProjectionRepositoryTest
             BoundedContext context = BoundedContextBuilder.assumingTests().build();
             context.register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
-            Set<ProjectId> targets = repository.dispatch(envelope);
-            assertThat(targets).containsExactly(id);
+            repository.dispatch(envelope);
             ProjectTaskNames expectedValue = ProjectTaskNames
                     .newBuilder()
                     .setProjectId(id)

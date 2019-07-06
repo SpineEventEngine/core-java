@@ -55,7 +55,7 @@ public interface EventDispatcherDelegate<I> {
     /**
      * Dispatches the event.
      */
-    Set<I> dispatchEvent(EventEnvelope event);
+    void dispatchEvent(EventEnvelope event);
 
     /**
      * Returns immutable set with one element with the identity of the multicast dispatcher

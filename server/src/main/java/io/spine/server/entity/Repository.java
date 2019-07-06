@@ -25,18 +25,24 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.base.Errors;
 import io.spine.base.Identifier;
+import io.spine.base.MessageContext;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.route.Route;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.SignalEnvelope;
+import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -375,6 +381,27 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public final boolean isOpen() {
         return storageSupplier != null;
+    }
+
+    protected final <M extends Message, C extends MessageContext, R> Optional<R>
+    route(Route<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
+        try {
+            @SuppressWarnings("unchecked")
+            M message = (M) envelope.message();
+            R result = routing.apply(message, envelope.context());
+            return Optional.of(result);
+        } catch (RuntimeException e) {
+            RoutingFailed systemEvent = RoutingFailed
+                    .newBuilder()
+                    .setEntityType(entityModelClass().typeName())
+                    .setHandledSignal(envelope.messageId())
+                    .setError(Errors.causeOf(e))
+                    .vBuild();
+            context().systemClient()
+                     .writeSide()
+                     .postEvent(systemEvent, envelope.asMessageOrigin());
+            return Optional.empty();
+        }
     }
 
     /**

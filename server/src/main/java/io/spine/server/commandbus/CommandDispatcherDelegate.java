@@ -60,7 +60,7 @@ public interface CommandDispatcherDelegate<I> {
 
     Set<CommandClass> commandClasses();
 
-    I dispatchCommand(CommandEnvelope envelope);
+    void dispatchCommand(CommandEnvelope envelope);
 
     /**
      * Verifies if this instance dispatches at least one command.

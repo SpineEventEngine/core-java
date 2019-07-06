@@ -21,13 +21,17 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
@@ -39,6 +43,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -69,6 +74,9 @@ public class CommandBus extends UnicastBus<Command,
                                            CommandClass,
                                            CommandDispatcher<?>> {
 
+    private static final Any REJECTION_PRODUCER_ID =
+            Identifier.pack(CommandBus.class.getSimpleName());
+
     /** Consumes tenant IDs from incoming commands. */
     private final Consumer<TenantId> tenantConsumer;
 
@@ -88,6 +96,8 @@ public class CommandBus extends UnicastBus<Command,
     private final boolean multitenant;
 
     private final DeadCommandHandler deadCommandHandler = new DeadCommandHandler();
+
+    private final EventBus eventBus;
 
     /**
      * Tha validator for the commands posted into this bus.
@@ -112,6 +122,7 @@ public class CommandBus extends UnicastBus<Command,
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
         this.watcher = checkNotNull(builder.flowWatcher);
+        this.eventBus = checkNotNull(builder.eventBus);
     }
 
     /**
@@ -185,7 +196,16 @@ public class CommandBus extends UnicastBus<Command,
     protected void dispatch(CommandEnvelope command) {
         CommandDispatcher<?> dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);
-        dispatcher.dispatch(command);
+        try {
+            dispatcher.dispatch(command);
+        } catch (RuntimeException e) {
+            Throwable cause = Throwables.getRootCause(e);
+            if (cause instanceof ThrowableMessage) {
+                ThrowableMessage message = (ThrowableMessage) cause;
+                RejectionEnvelope rejection = RejectionEnvelope.from(command, message);
+                eventBus.post(rejection.outerObject());
+            }
+        }
     }
 
     /**

@@ -20,7 +20,7 @@
 
 package io.spine.server.bus;
 
-import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.IdentityDispatcher;
+import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.NoOpDispatcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,9 +35,9 @@ class MulticastDispatcherIdentityTest {
     @Test
     @DisplayName("return dispatcher identity")
     void returnDispatcherIdentity() {
-        Set<String> set = new IdentityDispatcher().identity();
+        Set<String> set = new NoOpDispatcher().identity();
 
-        assertTrue(set.contains(IdentityDispatcher.ID));
+        assertTrue(set.contains(NoOpDispatcher.ID));
         assertEquals(1, set.size());
     }
 }

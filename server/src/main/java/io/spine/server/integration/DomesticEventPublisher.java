@@ -68,15 +68,13 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
     }
 
     @Override
-    public Set<String> dispatch(EventEnvelope event) {
+    public void dispatch(EventEnvelope event) {
         Event outerObject = event.outerObject();
         ExternalMessage msg = ExternalMessages.of(outerObject, originContextName);
         ExternalMessageClass messageClass = ExternalMessageClass.of(event.messageClass());
         ChannelId channelId = toId(messageClass);
         Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(event.id()), msg);
-
-        return ImmutableSet.of(channel.toString());
     }
 
     @Override

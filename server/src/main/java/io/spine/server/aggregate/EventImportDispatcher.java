@@ -77,9 +77,8 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
 
     @CanIgnoreReturnValue
     @Override
-    public Set<I> dispatch(EventEnvelope event) {
-        I result = repository.importEvent(event);
-        return ImmutableSet.of(result);
+    public void dispatch(EventEnvelope event) {
+        repository.importEvent(event);
     }
 
     @Override

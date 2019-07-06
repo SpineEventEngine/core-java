@@ -106,10 +106,9 @@ public abstract class AbstractEventReactor
 
     @CanIgnoreReturnValue
     @Override
-    public Set<String> dispatch(EventEnvelope event) {
+    public void dispatch(EventEnvelope event) {
         TenantAwareRunner.with(event.tenantId())
                          .run(() -> reactAndPost(event));
-        return identity();
     }
 
     private void reactAndPost(EventEnvelope event) {
@@ -167,9 +166,9 @@ public abstract class AbstractEventReactor
 
         @CanIgnoreReturnValue
         @Override
-        public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+        public void dispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            return AbstractEventReactor.this.dispatch(eventEnvelope);
+            AbstractEventReactor.this.dispatch(eventEnvelope);
         }
     }
 }

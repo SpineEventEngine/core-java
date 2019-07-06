@@ -53,10 +53,9 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * Dispatches the message contained in the passed envelope.
      *
      * @param envelope the envelope with the message
-     * @return ID(s) of entities to which the message was dispatched
      */
     @CanIgnoreReturnValue
-    R dispatch(E envelope);
+    void dispatch(E envelope);
 
     /**
      * Checks if this dispatcher can dispatch the given message.

@@ -35,7 +35,7 @@ public class MulticastDispatcherIdentityTestEnv {
     private MulticastDispatcherIdentityTestEnv() {
     }
 
-    public static class IdentityDispatcher
+    public static class NoOpDispatcher
             implements MulticastDispatcher<MessageClass, MessageEnvelope, String> {
 
         public static final String ID = newUuid();
@@ -46,8 +46,8 @@ public class MulticastDispatcherIdentityTestEnv {
         }
 
         @Override
-        public Set<String> dispatch(MessageEnvelope envelope) {
-            return identity();
+        public void dispatch(MessageEnvelope envelope) {
+            // Do nothing.
         }
 
         @Override

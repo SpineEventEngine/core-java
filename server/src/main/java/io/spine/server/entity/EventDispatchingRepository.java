@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -99,16 +100,15 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     @CanIgnoreReturnValue
-    public final Set<I> dispatch(EventEnvelope event) {
+    public final void dispatch(EventEnvelope event) {
         checkNotNull(event);
-        return doDispatch(event);
+        doDispatch(event);
     }
 
-    private Set<I> doDispatch(EventEnvelope event) {
+    private void doDispatch(EventEnvelope event) {
         Set<I> targets = route(event);
         Event outerObject = event.outerObject();
         targets.forEach(id -> dispatchTo(id, outerObject));
-        return targets;
     }
 
     /**
@@ -128,9 +128,8 @@ public abstract class EventDispatchingRepository<I,
      * @return a set of IDs of projections to dispatch the given event to
      */
     private Set<I> route(EventEnvelope event) {
-        EventRouting<I> routing = eventRouting();
-        Set<I> targets = routing.apply(event.message(), event.context());
-        return targets;
+        return route(eventRouting(), event)
+                .orElse(ImmutableSet.of());
     }
 
     /**
@@ -141,9 +140,9 @@ public abstract class EventDispatchingRepository<I,
             implements ExternalMessageDispatcher<I> {
 
         @Override
-        public Set<I> dispatch(ExternalMessageEnvelope externalEvent) {
+        public void dispatch(ExternalMessageEnvelope externalEvent) {
             EventEnvelope event = externalEvent.toEventEnvelope();
-            return EventDispatchingRepository.this.dispatch(event);
+            EventDispatchingRepository.this.dispatch(event);
         }
 
         @Override

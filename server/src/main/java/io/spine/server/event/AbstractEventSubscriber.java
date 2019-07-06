@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Empty;
@@ -102,15 +101,10 @@ public abstract class AbstractEventSubscriber
      *
      * @param event
      *         the envelope with the event
-     * @return the element set with the result of {@link #toString()} as the identify of the
-     *         subscriber or empty set if dispatching failed
      */
     @Override
-    public final Set<String> dispatch(EventEnvelope event) {
-        PropagationOutcome outcome = with(event.tenantId()).evaluate(() -> handle(event));
-        return outcome.hasSuccess()
-               ? identity()
-               : ImmutableSet.of();
+    public final void dispatch(EventEnvelope event) {
+        with(event.tenantId()).run(() -> handle(event));
     }
 
     /**
@@ -119,7 +113,7 @@ public abstract class AbstractEventSubscriber
      * <p>By default, passes the event to the corresponding {@linkplain io.spine.core.Subscribe
      * subscriber} method of the entity.
      */
-    protected PropagationOutcome handle(EventEnvelope event) {
+    protected void handle(EventEnvelope event) {
         PropagationOutcome outcome =
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
@@ -133,7 +127,6 @@ public abstract class AbstractEventSubscriber
                     .vBuild();
             system.postEvent(systemEvent, event.asMessageOrigin());
         }
-        return outcome;
     }
 
     private PropagationOutcome notSupported(EventEnvelope event) {
@@ -185,9 +178,9 @@ public abstract class AbstractEventSubscriber
 
         @CanIgnoreReturnValue
         @Override
-        public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+        public void dispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            return AbstractEventSubscriber.this.dispatch(eventEnvelope);
+            AbstractEventSubscriber.this.dispatch(eventEnvelope);
         }
 
         @Override

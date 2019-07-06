@@ -35,7 +35,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,10 +60,9 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
      */
     @CanIgnoreReturnValue
     @Override
-    public final Set<String> dispatch(EventEnvelope event) {
+    public final void dispatch(EventEnvelope event) {
         EventMessage msg = event.message();
         remember(msg);
-        return singleton(id);
     }
 
     @Override

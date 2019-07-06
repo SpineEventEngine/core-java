@@ -62,7 +62,6 @@ import static com.google.common.base.Suppliers.memoize;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
-import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -288,22 +287,15 @@ public abstract class ProcessManagerRepository<I,
      * @param command a request to dispatch
      */
     @Override
-    public I dispatchCommand(CommandEnvelope command) {
+    public void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I id = route(command);
-        inbox.send(command)
-             .toHandler(id);
-        return id;
+        Optional<I> target = route(command);
+        target.ifPresent(id -> inbox.send(command)
+                                    .toHandler(id));
     }
 
-    private I route(CommandEnvelope cmd) {
-        CommandRouting<I> routing = commandRouting();
-        I target = routing.apply(cmd.message(), cmd.context());
-
-        // We need to have a tenant set in order the callbacks could post the system events.
-        with(cmd.tenantId())
-                .run(() -> lifecycleOf(target).onTargetAssignedToCommand(cmd.id()));
-        return target;
+    private Optional<I> route(CommandEnvelope cmd) {
+        return route(commandRouting(),cmd);
     }
 
     /**

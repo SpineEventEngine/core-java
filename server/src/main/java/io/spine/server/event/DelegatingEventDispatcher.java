@@ -74,8 +74,8 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
-    public Set<I> dispatch(EventEnvelope event) {
-        return delegate.dispatchEvent(event);
+    public void dispatch(EventEnvelope event) {
+        delegate.dispatchEvent(event);
     }
 
     /**
@@ -125,10 +125,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         }
 
         @Override
-        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
+        public void dispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            Set<I> ids = delegate.dispatchEvent(eventEnvelope);
-            return ids;
+            delegate.dispatchEvent(eventEnvelope);
         }
     }
 }

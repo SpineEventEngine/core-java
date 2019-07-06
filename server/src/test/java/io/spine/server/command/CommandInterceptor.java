@@ -22,7 +22,6 @@ package io.spine.server.command;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.server.BoundedContext;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
@@ -45,16 +44,8 @@ public final class CommandInterceptor extends AbstractCommandHandler {
     }
 
     @Override
-    public void initialize(BoundedContext context) {
-        super.initialize(context);
-//        context.commandBus()
-//               .register(this);
-    }
-
-    @Override
-    public String dispatch(CommandEnvelope envelope) {
+    public void dispatch(CommandEnvelope envelope) {
         history.add(envelope);
-        return getClass().getName();
     }
 
     @Override
