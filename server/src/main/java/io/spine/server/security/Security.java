@@ -35,6 +35,7 @@ public final class Security extends SecurityManager {
 
     /** Prevents instantiation of this class from outside. */
     private Security() {
+        super();
     }
 
     /**
