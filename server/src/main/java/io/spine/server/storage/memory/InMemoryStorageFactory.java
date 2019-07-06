@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.projection.Projection;
@@ -78,6 +79,11 @@ public final class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryProjectionStorage<>(recordStorage);
     }
 
+    @Override
+    public InboxStorage createInboxStorage(boolean multitenant) {
+        return new InMemoryInboxStorage(multitenant);
+    }
+
     /**
      * Obtains storage specification for the passed entity class.
      */
@@ -95,5 +101,4 @@ public final class InMemoryStorageFactory implements StorageFactory {
     public void close() {
         // NOP
     }
-
 }
