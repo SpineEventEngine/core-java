@@ -53,7 +53,7 @@ public final class Security {
 
     private static SecurityException nonAllowedCaller(Class callingClass) {
         String msg = format(
-                "`%s` is not allowed to make this call.", callingClass
+                "The class `%s` is not allowed to make this call.", callingClass.getName()
         );
         throw new SecurityException(msg);
     }
