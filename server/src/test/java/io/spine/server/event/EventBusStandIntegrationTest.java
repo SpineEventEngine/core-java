@@ -52,7 +52,7 @@ class EventBusStandIntegrationTest {
     }
 
     @Test
-    @DisplayName("has `Stand` as the dispatcher of events of the registered repository")
+    @DisplayName("have `Stand` as the dispatcher of events of the registered repository")
     void reRegisterStand() {
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
