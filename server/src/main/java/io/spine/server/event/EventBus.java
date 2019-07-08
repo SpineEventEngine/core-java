@@ -377,7 +377,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     }
 
     /**
-     * Precondition check for objects depending on a reference to {@code EventBus}.
+     * Ensures that the passed object has a valid reference to {@code EventBus}.
      *
      * @param holder
      *         the object which holds the reference
