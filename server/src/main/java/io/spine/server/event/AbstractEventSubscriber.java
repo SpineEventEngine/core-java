@@ -49,7 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.lang.String.format;
@@ -81,14 +80,11 @@ public abstract class AbstractEventSubscriber
     @Override
     public void initialize(BoundedContext context) {
         checkNotNull(context);
-        // TODO:2019-07-05:dmytro.dashenkov: Make sure Stand is OK.
-        if (contextName != null) {
-            checkState(context.name().equals(contextName),
-                       "%s is already initialized in context %s.", this, contextName.getValue());
-        } else {
-            contextName = context.name();
-            system = context.systemClient().writeSide();
-        }
+        checkNotInitialized();
+        contextName = context.name();
+        system = context.systemClient()
+                        .writeSide();
+
     }
 
     @Override
