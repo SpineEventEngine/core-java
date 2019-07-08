@@ -20,7 +20,7 @@
 
 package io.spine.server.security;
 
-import com.example.OutsideClass;
+import com.example.ForeignClass;
 import io.spine.given.NonServerClass;
 import io.spine.system.server.given.SystemConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -68,7 +68,7 @@ class SecurityTest {
         @Test
         @DisplayName("prohibiting calls from outside of framework")
         void prohibitingFromOutside() {
-            assertThrowsOn(OutsideClass::attemptToCallRestrictedApi);
+            assertThrowsOn(ForeignClass::attemptToCallRestrictedApi);
         }
 
         @Test

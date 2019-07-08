@@ -45,9 +45,9 @@ import java.util.Set;
  *
  * @see io.spine.server.BoundedContextTest.RestrictRegistrationCalls
  */
-public final class OutsideContextConfig {
+public final class ForeignContextConfig {
 
-    private OutsideContextConfig() {}
+    private ForeignContextConfig() {}
 
     public static void repositoryRegistration() {
         context().register(DefaultRepository.of(ProjectAggregate.class));

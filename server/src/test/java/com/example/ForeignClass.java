@@ -29,9 +29,9 @@ import io.spine.server.security.Security;
  *
  * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitingFromOutside()
  */
-public final class OutsideClass {
+public final class ForeignClass {
 
-    private OutsideClass() {}
+    private ForeignClass() {}
 
     public static void attemptToCallRestrictedApi() {
         GivenRestrictedApi.guardedMethod();

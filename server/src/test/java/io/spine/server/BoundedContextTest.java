@@ -20,7 +20,7 @@
 
 package io.spine.server;
 
-import com.example.OutsideContextConfig;
+import com.example.ForeignContextConfig;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.truth.Truth8;
@@ -457,31 +457,31 @@ class BoundedContextTest {
         @Test
         @DisplayName("`Repository`")
         void forRepository() {
-            assertThrowsOn(OutsideContextConfig::repositoryRegistration);
+            assertThrowsOn(ForeignContextConfig::repositoryRegistration);
         }
 
         @Test
         @DisplayName("`CommandDispatcher`")
         void forCommandDispatcher() {
-            assertThrowsOn(OutsideContextConfig::commandDispatcherRegistration);
+            assertThrowsOn(ForeignContextConfig::commandDispatcherRegistration);
         }
 
         @Test
         @DisplayName("`CommandDispatcherDelegate`")
         void forCommandDispatcherDelegate() {
-            assertThrowsOn(OutsideContextConfig::commandDispatcherDelegateRegistration);
+            assertThrowsOn(ForeignContextConfig::commandDispatcherDelegateRegistration);
         }
 
         @Test
         @DisplayName("`EventDispatcher`")
         void forEventDispatcher() {
-            assertThrowsOn(OutsideContextConfig::eventDispatcherRegistration);
+            assertThrowsOn(ForeignContextConfig::eventDispatcherRegistration);
         }
 
         @Test
         @DisplayName("`EventDispatcherDelegate`")
         void forEventDispatcherDelegate() {
-            assertThrowsOn(OutsideContextConfig::eventDispatcherDelegateRegistration);
+            assertThrowsOn(ForeignContextConfig::eventDispatcherDelegateRegistration);
         }
 
         private void assertThrowsOn(Executable executable) {
