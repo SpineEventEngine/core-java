@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -53,7 +52,6 @@ import org.checkerframework.dataflow.qual.Pure;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -88,10 +86,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * The data storage for this repository.
      *
-     * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
-     * initialized} or the repository was {@linkplain #close() closed}.
+     * <p>This field is null if the storage was not initialized, or
+     * the repository was {@linkplain #close() closed}.
      */
-    private @Nullable Supplier<Storage<I, ?, ?>> storageSupplier;
+    private @Nullable Storage<I, ?, ?> storage;
 
     /**
      * Creates the repository.
@@ -192,12 +190,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Assigns a {@code BoundedContext} to this repository.
      *
-     * <p>If the repository does not have a storage assigned prior to this call, the storage
-     * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
-     * associated with the passed {@code BoundedContext}.
-     *
      * <p>A context for a repository can be set only once. Passing the same second time will have
      * no effect.
+     *
+     * <p>If the repository is not {@linkplain #isOpen() opened} prior to this call, it is opened.
      *
      * @throws IllegalStateException
      *          if the repository has a context value already assigned, and the passed value is
@@ -219,12 +215,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         if (sameValue) {
             return;
         }
-
         this.context = context;
-        if (!storageAssigned()) {
-            initStorage(ServerEnvironment.instance()
-                                         .storageFactory());
-        }
+        open();
         init(context);
     }
 
@@ -236,9 +228,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
      * registration} with a {@code BoundedContext}.
-     *
-     * <p>When this method is called, the repository already has {@link #context() BoundedContext}
-     * and the {@link #storage() Storage} {@linkplain #initStorage(StorageFactory) assigned}.
      *
      * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
      * of the parent {@code BoundedContext}.
@@ -303,18 +292,25 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Initializes the storage using the passed factory.
-     *
-     * @param factory the storage factory
-     * @throws IllegalStateException if the repository already has storage initialized
+     * Initializes the storage of the repository.
      */
-    public final void initStorage(StorageFactory factory) {
-        if (this.storageSupplier != null) {
-            throw newIllegalStateException(
-                    "The repository `%s` already has storage `%s`.",
-                    this, this.storageSupplier);
-        }
-        this.storageSupplier = Suppliers.memoize(() -> createStorage(factory));
+    protected final void open() {
+        Storage<I, ?, ?> storage = storage();
+        checkNotNull(storage, "Unable to initialize the storage.");
+    }
+
+    /**
+     * Obtains {@code StorageFactory} associated with the {@code ServerEnvironment} for
+     * {@linkplain #createStorage() creating} standard storages.
+     *
+     * <p>In order to create a custom storage, please override {@link #createStorage()} providing
+     * custom implementation.
+     * 
+     * @see #createStorage()
+     */
+    @Internal
+    protected static StorageFactory defaultStorageFactory() {
+        return ServerEnvironment.instance().storageFactory();
     }
 
     /**
@@ -325,9 +321,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @throws IllegalStateException if the storage is not assigned
      */
     protected final Storage<I, ?, ?> storage() {
-        Storage<I, ?, ?> storage = this.storageSupplier != null
-                ? this.storageSupplier.get()
-                : null;
+        if (storage == null) {
+            this.storage = createStorage();
+        }
         return checkStorage(storage);
     }
 
@@ -336,7 +332,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @VisibleForTesting
     public final boolean storageAssigned() {
-        return this.storageSupplier != null;
+        return storage != null;
     }
 
     /**
@@ -351,15 +347,16 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Creates the storage using the passed factory.
+     * Creates the storage for this repository.
      *
-     * <p>Implementations are responsible for properly calling the factory
-     * for creating the storage, which is compatible with the repository.
+     * <p>Default implementations use {@link #defaultStorageFactory()} invoking its method
+     * which creates a storage compatible with the repository.
      *
-     * @param factory the factory to create the storage
+     * <p>Overwrite this method for creating a custom implementation of {@code Storage}.
+     *
      * @return the created storage instance
      */
-    protected abstract Storage<I, ?, ?> createStorage(StorageFactory factory);
+    protected abstract Storage<I, ?, ?> createStorage();
 
     /**
      * Closes the repository by closing the underlying storage.
@@ -369,9 +366,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Override
     @OverridingMethodsMustInvokeSuper
     public void close() {
-        if (this.storageSupplier != null) {
+        if (isOpen()) {
             storage().close();
-            this.storageSupplier = null;
+            this.storage = null;
         }
         this.context = null;
     }
@@ -380,7 +377,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Verifies if the repository is open.
      */
     public final boolean isOpen() {
-        return storageSupplier != null;
+        return context != null;
     }
 
     protected final <M extends Message, C extends MessageContext, R> Optional<R>

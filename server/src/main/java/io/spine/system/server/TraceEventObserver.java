@@ -21,9 +21,9 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
+import io.spine.server.ContextSpec;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
@@ -41,11 +41,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class TraceEventObserver extends AbstractEventSubscriber implements Logging {
 
+    private final ContextSpec context;
     private final TracerFactory tracing;
 
-    public TraceEventObserver(BoundedContextName contextName, TracerFactory tracing) {
+    public TraceEventObserver(ContextSpec context, TracerFactory tracing) {
         super();
-        checkNotNull(contextName);
+        this.context = checkNotNull(context);
         this.tracing = checkNotNull(tracing);
     }
 
@@ -70,7 +71,7 @@ public final class TraceEventObserver extends AbstractEventSubscriber implements
     }
 
     private void trace(SignalDispatchedMixin<?> event) {
-        try (Tracer tracer = tracing.trace(event.getPayload())) {
+        try (Tracer tracer = tracing.trace(context, event.getPayload())) {
             tracer.processedBy(event.getReceiver(), event.getEntityType());
         } catch (Exception e) {
             _error(e, "Error during trace construction on event {}.", event.getPayload().typeUrl());

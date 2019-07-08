@@ -28,7 +28,6 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.ProjectionRepository;
@@ -86,7 +85,6 @@ import static io.spine.testing.server.blackbox.given.Given.userDeleted;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 /**
  * An abstract base for integration testing of Bounded Contexts with {@link BlackBoxBoundedContext}.
@@ -402,18 +400,12 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private BlackBoxBoundedContext<?> blackBox;
         private EventEnricher enricher;
-        private EventBus.Builder eventBus;
 
         @BeforeEach
         void setUp() {
             enricher = EventEnricher
                     .newBuilder()
                     .build();
-            eventBus = EventBus
-                    .newBuilder()
-                    .setEnricher(enricher);
-
-            EventBus someEventBus = mock(EventBus.class);
             commandDispatcher = new BbCommandDispatcher(commandClass);
             eventDispatcher = new BbEventDispatcher();
         }
@@ -422,7 +414,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void singleTenant() {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(false)
-                    .setEventBus(eventBus);
+                    .enrichEventsUsing(enricher);
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
@@ -452,7 +444,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         void multiTenant() {
             BoundedContextBuilder builder = BoundedContextBuilder
                     .assumingTests(true)
-                    .setEventBus(eventBus);
+                    .enrichEventsUsing(enricher);
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);

@@ -33,10 +33,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -99,16 +96,6 @@ class BoundedContextBuilderTest {
             assertEquals(nameString, BoundedContext.singleTenant(nameString)
                                                    .name()
                                                    .getValue());
-        }
-
-        @Test
-        @DisplayName("TransportFactory if it was set")
-        void transportFactory() {
-            TransportFactory factory = InMemoryTransportFactory.newInstance();
-
-            assertEquals(factory, builder.setTransportFactory(factory)
-                                         .transportFactory()
-                                         .get());
         }
 
         @Test

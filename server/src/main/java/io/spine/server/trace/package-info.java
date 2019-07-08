@@ -38,7 +38,7 @@
  *
  * @see io.spine.server.trace.TracerFactory
  * @see io.spine.server.trace.Tracer
- * @see io.spine.server.BoundedContext#tracing()
+ * @see io.spine.server.ServerEnvironment#tracing()
  */
 
 @CheckReturnValue

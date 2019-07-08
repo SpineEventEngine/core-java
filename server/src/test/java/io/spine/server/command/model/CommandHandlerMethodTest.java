@@ -129,7 +129,7 @@ class CommandHandlerMethodTest {
             ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
 
             Optional<CommandHandlerMethod> createdMethod =
-                    new CommandHandlerSignature().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.method());
             assertTrue(createdMethod.isPresent());
             CommandHandlerMethod handler = createdMethod.get();
             RefCreateProject cmd = createProject();
@@ -151,7 +151,7 @@ class CommandHandlerMethodTest {
             ValidHandlerOneParamReturnsList handlerObject =
                     spy(new ValidHandlerOneParamReturnsList());
             Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.method());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -176,7 +176,7 @@ class CommandHandlerMethodTest {
         void noEvents() {
             HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
             Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.method());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -192,7 +192,7 @@ class CommandHandlerMethodTest {
         void nothingEvent() {
             HandlerReturnsNothing handlerObject = new HandlerReturnsNothing();
             Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.method());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -234,7 +234,7 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("one Message param")
         void messageParam() {
-            Method handler = new ValidHandlerOneParam().getHandler();
+            Method handler = new ValidHandlerOneParam().method();
 
             assertIsCommandHandler(handler);
         }
@@ -243,7 +243,7 @@ class CommandHandlerMethodTest {
         @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("one Message param and `List` return type")
         void messageParamAndListReturn() {
-            Method handler = new ValidHandlerOneParamReturnsList().getHandler();
+            Method handler = new ValidHandlerOneParamReturnsList().method();
 
             assertIsCommandHandler(handler);
         }
@@ -252,7 +252,7 @@ class CommandHandlerMethodTest {
         @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("Message and Context params")
         void messageAndContextParam() {
-            Method handler = new ValidHandlerTwoParams().getHandler();
+            Method handler = new ValidHandlerTwoParams().method();
 
             assertIsCommandHandler(handler);
         }
@@ -260,7 +260,7 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("Message and Context params, and `List` return type")
         void messageAndContextParamAndListReturn() {
-            Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
+            Method handler = new ValidHandlerTwoParamsReturnsList().method();
 
             assertIsCommandHandler(handler);
         }
@@ -269,7 +269,7 @@ class CommandHandlerMethodTest {
         @MuteLogging /* Signature mismatch warnings are expected. */
         @DisplayName("non-public access")
         void nonPublicAccess() {
-            Method method = new ValidHandlerButPrivate().getHandler();
+            Method method = new ValidHandlerButPrivate().method();
 
             assertIsCommandHandler(method);
         }
@@ -282,7 +282,7 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("no annotation")
         void noAnnotation() {
-            Method handler = new InvalidHandlerNoAnnotation().getHandler();
+            Method handler = new InvalidHandlerNoAnnotation().method();
             assertFalse(new CommandHandlerSignature().matches(handler));
         }
 
@@ -338,7 +338,7 @@ class CommandHandlerMethodTest {
             try {
                 handler.dispatch(envelope);
             } catch (HandlerMethodFailedException e) {
-                assertCauseAndId(e, handler.getId());
+                assertCauseAndId(e, handler.id());
             }
         }
 

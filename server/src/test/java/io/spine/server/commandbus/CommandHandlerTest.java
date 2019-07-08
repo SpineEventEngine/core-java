@@ -48,7 +48,6 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
 
@@ -68,7 +67,7 @@ class CommandHandlerTest {
         commandBus = boundedContext.commandBus();
         eventBus = boundedContext.eventBus();
         handler = new TestCommandHandler();
-
+        handler.injectEventBus(eventBus);
         boundedContext.registerCommandDispatcher(handler);
     }
 

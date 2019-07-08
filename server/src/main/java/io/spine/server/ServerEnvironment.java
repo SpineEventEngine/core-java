@@ -28,6 +28,10 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.trace.TracerFactory;
+import io.spine.server.transport.TransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -60,7 +64,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * <p>Value from this supplier are used to {@linkplain #deploymentType() get the deployment
      * type}.
      */
-    private static Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
+    private Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
     /**
      * The identifier of the server instance running in scope of this application.
@@ -74,9 +78,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * The strategy of delivering the messages received by entity repositories
      * to the entity instances.
      *
-     * <p>By default, initialized with the {@linkplain Delivery#local() local} delivery.
+     * <p>If not {@linkplain #configureDelivery(Delivery) configured by the end-user},
+     * initialized with the {@linkplain Delivery#local() local} delivery by default.
      */
-    private Delivery delivery;
+    private @MonotonicNonNull Delivery delivery;
 
     /**
      * The storage factory for the production mode of the application.
@@ -84,12 +89,28 @@ public final class ServerEnvironment implements AutoCloseable {
     private @Nullable StorageFactory productionStorageFactory;
 
     /**
+     * The storage factory for tests.
+     *
+     * <p>If not configured, {@link InMemoryStorageFactory} will be used.
+     */
+    private @Nullable StorageFactory storageFactoryForTests;
+
+    /**
+     * The factory of {@code Tracer}s used in this environment.
+     */
+    private @Nullable TracerFactory tracerFactory;
+
+    /**
+     * The production factory for channel-based transport.
+     */
+    private @Nullable TransportFactory transportFactory;
+
+    /**
      * Provides schedulers used by all {@code CommandBus} instances of this environment.
      */
     private Supplier<CommandScheduler> commandScheduler;
 
     private ServerEnvironment() {
-        delivery = Delivery.local();
         nodeId = NodeId.newBuilder()
                        .setValue(Identifier.newUuid())
                        .vBuild();
@@ -101,6 +122,13 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public static ServerEnvironment instance() {
         return INSTANCE;
+    }
+
+    /**
+     * The type of the environment application is deployed to.
+     */
+    public DeploymentType deploymentType() {
+        return deploymentDetector.get();
     }
 
     /**
@@ -136,7 +164,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * even dangerous to update the delivery mechanism later when the message delivery
      * process may have been already used by various {@code BoundedContext}s.
      */
-    public void configureDelivery(Delivery delivery) {
+    public synchronized void configureDelivery(Delivery delivery) {
         checkNotNull(delivery);
         this.delivery = delivery;
     }
@@ -147,7 +175,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * <p>Unless {@linkplain #configureDelivery(Delivery) updated manually}, returns
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
-    public Delivery delivery() {
+    public synchronized Delivery delivery() {
+        if (delivery == null) {
+            delivery = Delivery.local();
+        }
         return delivery;
     }
 
@@ -180,18 +211,10 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * The type of the environment application is deployed to.
-     */
-    public static DeploymentType deploymentType() {
-        return deploymentDetector.get();
-    }
-
-    /**
      * Sets the default {@linkplain DeploymentType deployment type}
      * {@linkplain Supplier supplier} which utilizes system properties.
      */
-    @VisibleForTesting
-    public static void resetDeploymentType() {
+    private void resetDeploymentType() {
         Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
         configureDeployment(supplier);
     }
@@ -200,10 +223,10 @@ public final class ServerEnvironment implements AutoCloseable {
      * Makes the {@link #deploymentType()} return the values from the provided supplier.
      *
      * <p>When supplying your own deployment type in tests, remember to
-     * {@linkplain #resetDeploymentType() reset it} during tear down.
+     * {@linkplain #reset() reset it} during tear down.
      */
     @VisibleForTesting
-    public static void configureDeployment(Supplier<DeploymentType> supplier) {
+    public void configureDeployment(Supplier<DeploymentType> supplier) {
         checkNotNull(supplier);
         deploymentDetector = supplier;
     }
@@ -211,25 +234,39 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Assigns {@code StorageFactory} for the production mode of the application.
      *
-     * <p>Tests use {@code InMemoryStorageFactory}.
+     * @see #configureStorageForTests(StorageFactory)
      */
-    public void configureProductionStorage(StorageFactory storageFactory) {
-        checkNotNull(storageFactory);
+    public void configureStorage(StorageFactory productionStorageFactory) {
+        checkNotNull(productionStorageFactory);
         checkArgument(
-                !(storageFactory instanceof InMemoryStorageFactory),
+                !(productionStorageFactory instanceof InMemoryStorageFactory),
                 "%s cannot be used for production storage.",
                 InMemoryStorageFactory.class.getName()
         );
-        this.productionStorageFactory = storageFactory;
+        this.productionStorageFactory = productionStorageFactory;
     }
 
     /**
-     * This is a test-only method required in tests (or cleanup after tests) that deal
-     * with assigning production storage factory.
+     * Assigns {@code StorageFactory} for tests.
+     *
+     * @see #configureStorage(StorageFactory)
      */
-    @VisibleForTesting
-    void clearStorageFactory() {
-        this.productionStorageFactory = null;
+    public void configureStorageForTests(StorageFactory factory) {
+        this.storageFactoryForTests = checkNotNull(factory);
+    }
+
+    /**
+     * Assigns {@code TracerFactory} to this server environment.
+     */
+    public void configureTracing(TracerFactory tracerFactory) {
+        this.tracerFactory = checkNotNull(tracerFactory);
+    }
+
+    /**
+     * Obtains {@link TracerFactory} associated with this server environment.
+     */
+    public Optional<TracerFactory> tracing() {
+        return Optional.ofNullable(tracerFactory);
     }
 
     /**
@@ -238,18 +275,71 @@ public final class ServerEnvironment implements AutoCloseable {
      * @return {@code StorageFactory} instance for the production storage
      * @throws NullPointerException
      *         if the production {@code StorageFactory} was not
-     *         {@linkplain #configureProductionStorage(StorageFactory) configured} prior to the call
+     *         {@linkplain #configureStorage(StorageFactory) configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        if (Environment.instance().isTests()) {
-            return InMemoryStorageFactory.newInstance();
+        if (environment().isTests()) {
+            if (storageFactoryForTests == null) {
+                this.storageFactoryForTests = InMemoryStorageFactory.newInstance();
+            }
+            return storageFactoryForTests;
         }
         checkNotNull(productionStorageFactory,
                      "Production `%s` is not configured." +
-                             " Please call `configureProductionStorage()`.",
+                             " Please call `configureStorage()`.",
                      StorageFactory.class.getSimpleName()
         );
         return productionStorageFactory;
+    }
+
+    private static Environment environment() {
+        return Environment.instance();
+    }
+
+    /**
+     * Assigns {@code TransportFactory} for the production mode of the application.
+     */
+    public void configureTransport(TransportFactory transportFactory) {
+        this.transportFactory = checkNotNull(transportFactory);
+    }
+
+    /**
+     * Obtains {@code TransportFactory} associated with this server environment.
+     *
+     * <p>If the factory is not assigned in the Production mode, throws
+     * {@code NullPointerException} with the instruction to call
+     * {@link #configureTransport(TransportFactory)}.
+     *
+     * <p>If the factory is not assigned in the Tests mode, assigns the instance of
+     * {@link InMemoryTransportFactory} and returns it.
+     */
+    public TransportFactory transportFactory() {
+        boolean production = environment().isProduction();
+        if (production) {
+            checkNotNull(
+                    transportFactory,
+                    "`%s` is not assigned. Please call `configureTransport()`.",
+                    TransportFactory.class.getName()
+            );
+            return transportFactory;
+        }
+
+        if (transportFactory == null) {
+            this.transportFactory = InMemoryTransportFactory.newInstance();
+        }
+        return transportFactory;
+    }
+
+    /**
+     * This is test-only method required for cleaning of the server environment instance in tests.
+     */
+    @VisibleForTesting
+    public void reset() {
+        this.transportFactory = null;
+        this.tracerFactory = null;
+        this.productionStorageFactory = null;
+        this.storageFactoryForTests = null;
+        resetDeploymentType();
     }
 
     /**
@@ -257,6 +347,12 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
+        if (tracerFactory != null) {
+            tracerFactory.close();
+        }
+        if (transportFactory != null) {
+            transportFactory.close();
+        }
         if (productionStorageFactory != null) {
             productionStorageFactory.close();
         }

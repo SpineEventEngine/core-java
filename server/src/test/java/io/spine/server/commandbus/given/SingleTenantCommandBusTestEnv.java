@@ -73,8 +73,8 @@ public class SingleTenantCommandBusTestEnv {
 
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.
         @Assign
-        CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context) throws
-                                                                          InvalidProjectName {
+        CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context)
+                throws InvalidProjectName {
             throw rejection;
         }
 

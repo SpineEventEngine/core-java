@@ -19,7 +19,7 @@
  */
 
 /**
- * Provides implementation of {@link io.spine.server.event.store.EventStore}.
+ * Provides default implementation of {@link io.spine.server.event.EventStore}.
  */
 
 @CheckReturnValue

@@ -32,7 +32,6 @@ import io.spine.base.Time;
 import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.storage.memory.InMemoryInboxStorage;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -70,8 +69,10 @@ import static java.util.stream.Collectors.groupingBy;
  * {@code now - [idempotence window]}.
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
- * registered. Framework users should {@linkplain Builder#setInboxStorage(InboxStorage)
- * configure} the storage, taking into account that it is typically multi-tenant.
+ * registered. Framework users may {@linkplain Builder#setInboxStorage(InboxStorage)
+ * configure} the storage, taking into account that it is typically multi-tenant. By default,
+ * the {@code InboxStorage} for the delivery is provided by the environment-specific
+ * {@linkplain ServerEnvironment#storageFactory() storage factory} and is multi-tenant.
  *
  * <p>Once a message is written to the {@code Inbox},
  * the {@linkplain Delivery#subscribe(ShardObserver) pre-configured shard observers} are
@@ -478,7 +479,9 @@ public final class Delivery {
             }
 
             if (this.inboxStorage == null) {
-                this.inboxStorage = new InMemoryInboxStorage(true);
+                this.inboxStorage = ServerEnvironment.instance()
+                                                     .storageFactory()
+                                                     .createInboxStorage(true);
             }
 
             if (workRegistry == null) {

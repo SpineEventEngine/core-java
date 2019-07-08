@@ -178,6 +178,7 @@ abstract class AbstractCommandBusTestSuite {
                 ? new TestActorRequestFactory(getClass(), newUuid())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
+        createProjectHandler.injectEventBus(eventBus);
         observer = memoizingObserver();
     }
 

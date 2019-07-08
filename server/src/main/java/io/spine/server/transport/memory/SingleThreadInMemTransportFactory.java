@@ -28,12 +28,16 @@ import io.spine.server.transport.Subscriber;
  */
 public class SingleThreadInMemTransportFactory extends InMemoryTransportFactory {
 
-    @Override
-    protected Subscriber newSubscriber(ChannelId channelId) {
-        return new SingleThreadInMemSubscriber(channelId);
+    protected SingleThreadInMemTransportFactory() {
+        super();
     }
 
     public static SingleThreadInMemTransportFactory newInstance() {
         return new SingleThreadInMemTransportFactory();
+    }
+
+    @Override
+    protected Subscriber newSubscriber(ChannelId channelId) {
+        return new SingleThreadInMemSubscriber(channelId);
     }
 }

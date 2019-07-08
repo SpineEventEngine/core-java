@@ -22,6 +22,7 @@ package io.spine.server.trace;
 
 import io.spine.annotation.SPI;
 import io.spine.core.Signal;
+import io.spine.server.ContextSpec;
 
 /**
  * A factory of {@link Tracer}s of signal messages.
@@ -40,8 +41,11 @@ public interface TracerFactory extends AutoCloseable {
      *
      * <p>The tracer will be closed externally once it is no longer needed.
      *
-     * @param signalMessage the message to trace
+     * @param context
+     *         specification of the Bounded Context for signal of which the tracer is created
+     * @param signalMessage
+     *         the message to trace
      * @return new {@code Tracer}
      */
-    Tracer trace(Signal<?, ?, ?> signalMessage);
+    Tracer trace(ContextSpec context, Signal<?, ?, ?> signalMessage);
 }

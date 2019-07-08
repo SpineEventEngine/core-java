@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
  * Abstract base for test environment command handlers.
  *
  * <p>Derived classes must declare a method named {@linkplain #HANDLER_METHOD_NAME handleTest}
- * so that the method can be {@linkplain #getHandler() obtained} by the code of tests.
+ * so that the method can be {@linkplain #method() obtained} by the code of tests.
  */
 public abstract class TestCommandHandler extends AbstractCommandHandler {
 
@@ -50,7 +50,7 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
         super.initialize(context);
     }
 
-    public Method getHandler() {
+    public Method method() {
         return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
     }
 }

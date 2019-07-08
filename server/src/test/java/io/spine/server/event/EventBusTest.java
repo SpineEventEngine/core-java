@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
@@ -38,9 +37,6 @@ import io.spine.server.event.given.bus.GivenEvent;
 import io.spine.server.event.given.bus.ProjectRepository;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
-import io.spine.server.event.store.EventStore;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
@@ -66,7 +62,7 @@ import java.util.concurrent.Executors;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
+import static io.spine.server.BoundedContextBuilder.assumingTests;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.bus.EventBusTestEnv.command;
 import static io.spine.server.event.given.bus.EventBusTestEnv.createProject;
@@ -74,7 +70,6 @@ import static io.spine.server.event.given.bus.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.bus.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.bus.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.bus.EventBusTestEnv.readEvents;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -87,21 +82,20 @@ public class EventBusTest {
     private TestEventFactory eventFactory;
     private EventBus eventBus;
     private CommandBus commandBus;
-    private BoundedContext bc;
+    private BoundedContext context;
 
     private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
-        bc = BoundedContextBuilder
-                .assumingTests(true)
+        context = assumingTests(true)
                 .setEventBus(eventBusBuilder)
                 .build();
         ProjectRepository projectRepository = new ProjectRepository();
-        bc.register(projectRepository);
+        context.register(projectRepository);
 
-        this.commandBus = bc.commandBus();
-        this.eventBus = bc.eventBus();
+        this.commandBus = context.commandBus();
+        this.eventBus = context.eventBus();
     }
 
     @BeforeEach
@@ -111,7 +105,7 @@ public class EventBusTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        bc.close();
+        context.close();
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
@@ -119,16 +113,6 @@ public class EventBusTest {
     @DisplayName("have builder")
     void haveBuilder() {
         assertNotNull(EventBus.newBuilder());
-    }
-
-    @Test
-    @DisplayName("return associated EventStore")
-    void returnEventStore() {
-        EventStore eventStore = eventStore();
-        EventBus result = EventBus.newBuilder()
-                                  .setEventStore(eventStore)
-                                  .build();
-        assertEquals(eventStore, result.eventStore());
     }
 
     @Test
@@ -158,7 +142,7 @@ public class EventBusTest {
             assertTrue(eventBus.hasDispatchers(eventClass));
 
             Collection<? extends EventDispatcher<?>> dispatchers =
-                    eventBus.getDispatchers(eventClass);
+                    eventBus.dispatchersOf(eventClass);
             assertTrue(dispatchers.contains(subscriberOne));
             assertTrue(dispatchers.contains(subscriberTwo));
         }
@@ -170,7 +154,7 @@ public class EventBusTest {
 
             eventBus.register(dispatcher);
 
-            assertTrue(eventBus.getDispatchers(EventClass.from(ProjectCreated.class))
+            assertTrue(eventBus.dispatchersOf(EventClass.from(ProjectCreated.class))
                                .contains(dispatcher));
         }
     }
@@ -193,14 +177,14 @@ public class EventBusTest {
             // Check that the 2nd subscriber with the same event subscriber method remains
             // after the 1st subscriber unregisters.
             Collection<? extends EventDispatcher<?>> subscribers =
-                    eventBus.getDispatchers(eventClass);
+                    eventBus.dispatchersOf(eventClass);
             assertFalse(subscribers.contains(subscriberOne));
             assertTrue(subscribers.contains(subscriberTwo));
 
             // Check that after 2nd subscriber us unregisters he's no longer in
             eventBus.unregister(subscriberTwo);
 
-            assertFalse(eventBus.getDispatchers(eventClass)
+            assertFalse(eventBus.dispatchersOf(eventClass)
                                 .contains(subscriberTwo));
         }
 
@@ -214,14 +198,14 @@ public class EventBusTest {
             eventBus.register(dispatcherTwo);
 
             eventBus.unregister(dispatcherOne);
-            Set<? extends EventDispatcher<?>> dispatchers = eventBus.getDispatchers(eventClass);
+            Set<? extends EventDispatcher<?>> dispatchers = eventBus.dispatchersOf(eventClass);
 
             // Check we don't have 1st dispatcher, but have 2nd.
             assertFalse(dispatchers.contains(dispatcherOne));
             assertTrue(dispatchers.contains(dispatcherTwo));
 
             eventBus.unregister(dispatcherTwo);
-            assertFalse(eventBus.getDispatchers(eventClass)
+            assertFalse(eventBus.dispatchersOf(eventClass)
                                 .contains(dispatcherTwo));
         }
     }
@@ -260,24 +244,38 @@ public class EventBusTest {
         }
     }
 
-    @Test
-    @DisplayName("unregister registries on close")
-    void unregisterRegistriesOnClose() throws Exception {
-        EventStore eventStore = eventStore();
-        EventBus eventBus = EventBus
-                .newBuilder()
-                .setEventStore(eventStore)
-                .build();
-        eventBus.register(new BareDispatcher());
-        eventBus.register(new RememberingSubscriber());
-        EventClass eventClass = EventClass.from(ProjectCreated.class);
 
-        eventBus.close();
+    @Nested
+    @DisplayName("when closed")
+    class ClosingBus {
 
-        assertTrue(eventBus.getDispatchers(eventClass)
-                           .isEmpty());
+        private EventBus eventBus;
 
-        assertFalse(eventStore.isOpen());
+        @BeforeEach
+        void setUp() throws Exception {
+            BoundedContext context = assumingTests()
+                    .addEventDispatcher(new BareDispatcher())
+                    .addEventDispatcher(new RememberingSubscriber())
+                    .build();
+
+            eventBus = context.eventBus();
+            eventBus.close();
+        }
+
+        @Test
+        @DisplayName("unregister dispatchers")
+        void unregisterDispatchers() {
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
+            assertThat(eventBus.dispatchersOf(eventClass))
+                    .isEmpty();
+        }
+
+        @Test
+        @DisplayName("close `EventStore`")
+        void unregisterRegistriesOnClose() {
+            assertFalse(eventBus.eventStore()
+                                .isOpen());
+        }
     }
 
     @Test
@@ -466,13 +464,11 @@ public class EventBusTest {
                                            .setValue(42)
                                            .build()))
                 .build();
-        StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {
             EventBus eventBus = EventBus
                     .newBuilder()
-                    .setStorageFactory(storageFactory)
                     .build();
             for (int j = 0; j < threadCount; j++) {
                 executor.execute(() -> eventBus.post(event));

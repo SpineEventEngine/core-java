@@ -75,6 +75,18 @@ public final class ContextSpec {
         return multitenant;
     }
 
+    /**
+     * Returns a single-tenant version of this instance, if it is multitenant, or
+     * this instance if it is single-tenant.
+     */
+    public ContextSpec toSingleTenant() {
+        if (isMultitenant()) {
+            ContextSpec result = singleTenant(name.getValue());
+            return result;
+        }
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

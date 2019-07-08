@@ -50,14 +50,14 @@ public final class InMemoryPublisher extends AbstractChannel implements Publishe
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
-        Iterable<Subscriber> localSubscribers = getSubscribers(getId());
+        Iterable<Subscriber> localSubscribers = subscribersOf(id());
         for (Subscriber localSubscriber : localSubscribers) {
             localSubscriber.onMessage(message);
         }
         return Buses.acknowledge(messageId);
     }
 
-    private Iterable<Subscriber> getSubscribers(ChannelId channelId) {
+    private Iterable<Subscriber> subscribersOf(ChannelId channelId) {
         return subscriberProvider.apply(channelId);
     }
 

@@ -174,6 +174,10 @@ public abstract class ProcessManagerRepository<I,
                 .build();
     }
 
+    private Inbox<I> inbox() {
+        return checkNotNull(inbox);
+    }
+
     /**
      * Replaces default routing with the one which takes the target ID from the first field
      * of an event message.
@@ -290,7 +294,7 @@ public abstract class ProcessManagerRepository<I,
     public void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         Optional<I> target = route(command);
-        target.ifPresent(id -> inbox.send(command)
+        target.ifPresent(id -> inbox().send(command)
                                     .toHandler(id));
     }
 
@@ -305,7 +309,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        inbox.send(EventEnvelope.of(event)).toReactor(id);
+        inbox().send(EventEnvelope.of(event)).toReactor(id);
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.

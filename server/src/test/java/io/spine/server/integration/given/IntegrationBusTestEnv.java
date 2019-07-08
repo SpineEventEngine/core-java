@@ -24,7 +24,6 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.transport.TransportFactory;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
@@ -45,8 +44,8 @@ public class IntegrationBusTestEnv {
 
     @CanIgnoreReturnValue
     public static BoundedContext
-    contextWithExtEntitySubscribers(TransportFactory transportFactory) {
-        BoundedContext boundedContext = contextWithTransport(transportFactory);
+    contextWithExtEntitySubscribers() {
+        BoundedContext boundedContext = newContext();
         boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
         boundedContext.register(DefaultRepository.of(ProjectWizard.class));
         boundedContext.register(DefaultRepository.of(ProjectDetails.class));
@@ -54,8 +53,8 @@ public class IntegrationBusTestEnv {
     }
 
     @CanIgnoreReturnValue
-    public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
-        BoundedContext boundedContext = contextWithTransport(transportFactory);
+    public static BoundedContext contextWithExternalSubscribers() {
+        BoundedContext boundedContext = newContext();
         AbstractEventSubscriber eventSubscriber = new ProjectEventsSubscriber();
         boundedContext.integrationBus()
                       .register(eventSubscriber);
@@ -66,23 +65,22 @@ public class IntegrationBusTestEnv {
         return boundedContext;
     }
 
-    public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
+    public static BoundedContext newContext() {
         BoundedContext result = BoundedContext
                 .singleTenant(newUuid())
-                .setTransportFactory(transportFactory)
                 .build();
         return result;
     }
 
-    public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
-        BoundedContext result = contextWithTransport(factory);
+    public static BoundedContext contextWithProjectCreatedNeeds() {
+        BoundedContext result = newContext();
         result.integrationBus()
               .register(new ProjectEventsSubscriber());
         return result;
     }
 
-    public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory) {
-        BoundedContext result = contextWithTransport(factory);
+    public static BoundedContext contextWithProjectStartedNeeds() {
+        BoundedContext result = newContext();
         result.integrationBus()
               .register(new ProjectStartedExtSubscriber());
         return result;

@@ -36,9 +36,9 @@ import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
+import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.model.SubscriberMethod;
-import io.spine.server.event.store.EventStore;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.projection.model.ProjectionClass;
@@ -46,7 +46,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -73,9 +72,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
-
-    /** An underlying entity storage used to store projections. */
-    private RecordStorage<I> recordStorage;
 
     private @MonotonicNonNull Inbox<I> inbox;
 
@@ -116,6 +112,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))
                 .build();
+    }
+
+    private Inbox<I> inbox() {
+        return checkNotNull(inbox);
     }
 
     @Override
@@ -259,17 +259,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected RecordStorage<I> recordStorage() {
-        @SuppressWarnings("unused") // Ensure we invoke `createStorage()` via `storageSupplier`.
-        Storage<I, ?, ?> ensureStorage = storage();
+        @SuppressWarnings("unchecked") // ensured by the type returned by `createdStorage()`.
+        RecordStorage<I> recordStorage = ((ProjectionStorage<I>) storage()).recordStorage();
         return checkStorage(recordStorage);
     }
 
     @Override
-    protected RecordStorage<I> createStorage(StorageFactory factory) {
+    protected ProjectionStorage<I> createStorage() {
+        StorageFactory sf = defaultStorageFactory();
         Class<P> projectionClass = entityClass();
         ProjectionStorage<I> projectionStorage =
-                factory.createProjectionStorage(context().spec(), projectionClass);
-        this.recordStorage = projectionStorage.recordStorage();
+                sf.createProjectionStorage(context().spec(), projectionClass);
         return projectionStorage;
     }
 
@@ -319,8 +319,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     protected void dispatchTo(I id, Event event) {
-        inbox.send(EventEnvelope.of(event))
-             .toSubscriber(id);
+        inbox().send(EventEnvelope.of(event))
+               .toSubscriber(id);
     }
 
     @Internal

@@ -34,7 +34,7 @@ public interface MessageChannel extends AutoCloseable {
      *
      * @return the value of the channel identifier
      */
-    ChannelId getId();
+    ChannelId id();
 
     /**
      * Allows to understand whether this channel is stale and can be closed.

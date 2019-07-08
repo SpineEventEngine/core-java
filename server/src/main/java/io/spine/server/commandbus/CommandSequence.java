@@ -183,7 +183,9 @@ public abstract class CommandSequence<O extends Message,
      * to the {@code CommandBus}.
      *
      * <p>This method waits till the posting of the command is finished.
-     * @return the created and posted {@code Command}
+     *
+     * @return the created and posted {@code Command}, if the operation is successful, and
+     *         empty {@code Optional} if the posting caused an exception
      */
     private Optional<Command> post(CommandMessage message, CommandBus bus) {
         Command command = commandFactory.create(message);

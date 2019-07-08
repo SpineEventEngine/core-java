@@ -28,6 +28,8 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
+import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -39,7 +41,7 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.store.EventStore;
+import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
@@ -51,7 +53,6 @@ import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -97,8 +98,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
     private final AggregateRootDirectory aggregateRootDirectory;
 
-    private final @Nullable TracerFactory tracerFactory;
-
     private final TenantIndex tenantIndex;
 
     /**
@@ -116,8 +115,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkInheritance();
 
         this.spec = builder.spec();
-        this.tracerFactory = builder.buildTracerFactorySupplier()
-                                    .apply(spec);
         this.eventBus = buildEventBus(builder);
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
@@ -185,7 +182,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkArgument(busBuilder.isPresent());
         IntegrationBus result =
                 busBuilder.get()
-                          .setBoundedContextName(name)
+                          .setContextName(name)
                           .setEventBus(eventBus)
                           .build();
         return result;
@@ -236,7 +233,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *         the type of IDs used in the repository
      * @param <E>
      *         the type of entities
-     * @see Repository#initStorage(StorageFactory)
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
@@ -272,6 +268,9 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         initialize(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
+            if (dispatcher instanceof AbstractCommandHandler) {
+                ((AbstractCommandHandler) dispatcher).injectEventBus(eventBus());
+            }
         }
     }
 
@@ -428,7 +427,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
 
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
     public EventBus eventBus() {
-        return this.eventBus;
+        return eventBus;
     }
 
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
@@ -464,13 +463,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     public ContextSpec spec() {
         return spec;
-    }
-
-    /**
-     * Obtains {@link TracerFactory} associated with this {@code BoundedContext}.
-     */
-    public Optional<TracerFactory> tracing() {
-        return Optional.ofNullable(tracerFactory);
     }
 
     /**
@@ -513,7 +505,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
      *     <li>Closes {@link IntegrationBus}.
-     *     <li>Closes {@link EventStore EventStore}.
+     *     <li>Closes {@link DefaultEventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
      *     <li>Closes {@link TracerFactory} if it is present.
@@ -530,9 +522,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         integrationBus.close();
         stand.close();
         importBus.close();
-        if (tracerFactory != null) {
-            tracerFactory.close();
-        }
         shutDownRepositories();
 
         log().debug(closed(nameForLogging()));

@@ -144,7 +144,7 @@ public class CommandHandlerTestEnv {
         private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {
             ProjectId id = ProjectId
                     .newBuilder()
-                    .setId(getId())
+                    .setId(id())
                     .build();
             CmdBusProjectStarted startedEvent = CmdBusProjectStarted
                     .newBuilder()

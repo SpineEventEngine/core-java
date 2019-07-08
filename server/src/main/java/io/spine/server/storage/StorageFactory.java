@@ -23,8 +23,10 @@ package io.spine.server.storage;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
-import io.spine.server.event.store.EventStore;
+import io.spine.server.event.EventStore;
+import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 
@@ -77,4 +79,27 @@ public interface StorageFactory extends AutoCloseable {
     <I> ProjectionStorage<I>
     createProjectionStorage(ContextSpec context,
                             Class<? extends Projection<I, ?, ?>> projectionClass);
+
+    /**
+     * Creates a new {@link InboxStorage}.
+     *
+     * <p>The instance of {@code InboxStorage} is used in the {@link
+     * io.spine.server.delivery.Delivery Delivery} operations. Therefore there is typically just
+     * a single instance of {@code InboxStorage} per {@link io.spine.server.ServerEnvironment
+     * ServerEnvironment} instance, unlike other {@code Storage} types which instances are created
+     * per-{@link io.spine.server.BoundedContext BoundedContext}.
+     *
+     * @param multitenant whether the created storage should be multi-tenant
+     */
+    InboxStorage createInboxStorage(boolean multitenant);
+
+    /**
+     * Creates a new {@link EventStore}.
+     *
+     * @param context
+     *         specification of the Bounded Context events of which the store would serve
+     */
+    default EventStore createEventStore(@SuppressWarnings("unused") ContextSpec context) {
+        return new DefaultEventStore();
+    }
 }

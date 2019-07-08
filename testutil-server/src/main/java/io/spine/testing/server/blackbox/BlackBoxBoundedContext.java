@@ -43,8 +43,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
@@ -59,7 +57,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -99,13 +96,7 @@ import static java.util.Collections.singletonList;
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         implements Logging {
 
-    /**
-     * Use the same {@code TransportFactory} instance across all instances of
-     * {@code BlackBoxBoundedContext} in order to allow them to communicate via external events.
-     */
-    private static final TransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-    private final BoundedContext boundedContext;
+    private final BoundedContext context;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -151,13 +142,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         this.postedEvents = new HashSet<>();
         EventBus.Builder eventBus = EventBus
                 .newBuilder()
-                .addListener(events)
-                .setEnricher(enricher);
-        this.boundedContext = BoundedContextBuilder
+                .addListener(events);
+        this.context = BoundedContextBuilder
                 .assumingTests(multitenant)
                 .setCommandBus(commandBus)
-                .setTransportFactory(transportFactory)
                 .setEventBus(eventBus)
+                .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();
         this.repositories = newHashMap();
@@ -212,14 +202,13 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * </ul>
      */
     public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
-        Optional<EventBus.Builder> eventBus = builder.eventBus();
         EventEnricher enricher =
-                eventBus.map(b -> b.enricher().orElse(emptyEnricher()))
-                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
-
-        BlackBoxBoundedContext<?> result = builder.isMultitenant()
-                                           ? multiTenant(enricher)
-                                           : singleTenant(enricher);
+                builder.eventEnricher()
+                       .orElseGet(BlackBoxBoundedContext::emptyEnricher);
+        BlackBoxBoundedContext<?> result =
+                builder.isMultitenant()
+                ? multiTenant(enricher)
+                : singleTenant(enricher);
 
         builder.repositories()
                .forEach(result::with);
@@ -233,7 +222,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     /** Obtains the name of this bounded context. */
     public BoundedContextName name() {
-        return boundedContext.name();
+        return context.name();
     }
 
     /**
@@ -241,17 +230,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @VisibleForTesting
     Set<TypeName> allStateTypes() {
-        return boundedContext.stateTypes();
+        return context.stateTypes();
     }
 
     /** Obtains {@code event bus} instance used by this bounded context. */
     public EventBus eventBus() {
-        return boundedContext.eventBus();
+        return context.eventBus();
     }
 
     /** Obtains {@code command bus} instance used by this bounded context. */
     public CommandBus commandBus() {
-        return boundedContext.commandBus();
+        return context.commandBus();
     }
 
     /**
@@ -268,7 +257,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     private void registerRepository(Repository<?, ?> repository) {
-        boundedContext.register(repository);
+        context.register(repository);
         remember(repository);
     }
 
@@ -295,7 +284,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         if (dispatcher instanceof Repository) {
             registerRepository((Repository<?, ?>) dispatcher);
         } else {
-            boundedContext.registerCommandDispatcher(dispatcher);
+            context.registerCommandDispatcher(dispatcher);
         }
     }
 
@@ -316,7 +305,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         if (dispatcher instanceof Repository) {
             registerRepository((Repository<?, ?>) dispatcher);
         } else {
-            boundedContext.registerEventDispatcher(dispatcher);
+            context.registerEventDispatcher(dispatcher);
         }
     }
 
@@ -606,12 +595,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public T assertThat(VerifyState verifier) {
         QueryFactory queryFactory = requestFactory().query();
-        verifier.verify(boundedContext, queryFactory);
+        verifier.verify(context, queryFactory);
         return thisRef();
     }
 
     private BlackBoxSetup setup() {
-        return new BlackBoxSetup(boundedContext, requestFactory(), observer);
+        return new BlackBoxSetup(context, requestFactory(), observer);
     }
 
     /**
@@ -622,7 +611,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     public void close() {
         try {
-            boundedContext.close();
+            context.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }

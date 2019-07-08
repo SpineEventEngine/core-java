@@ -21,30 +21,79 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
+import io.spine.server.storage.Storage;
+import io.spine.validate.Validated;
+
+import java.util.List;
+
+import static com.google.common.collect.Streams.stream;
+import static java.util.stream.Collectors.toList;
 
 /**
- * Abstract base for the storage of {@link Inbox} messages.
+ * A contract for storages of {@link Inbox} messages.
+ *
+ * <p>The records a storage of this type are spreads across shards identified by a
+ * {@linkplain ShardIndex shard index}.
+ *
+ * <p>Typically, the storage instance is specific to the
+ * {@linkplain io.spine.server.ServerEnvironment server environment} and is used across
+ * {@code BoundedContext}s to store the delivered messages.
  */
 @SPI
-public abstract class InboxStorage
-        extends ShardedStorage<InboxMessageId, InboxMessage, InboxReadRequest> {
+public interface InboxStorage
+        extends Storage<InboxMessageId, InboxMessage, InboxReadRequest> {
 
-    protected InboxStorage(boolean multitenant) {
-        super(multitenant);
-    }
+    /**
+     * Reads the contents of the storage by the given shard index and returns the first page
+     * of the results.
+     *
+     * <p>The older items go first.
+     *
+     * @param index
+     *         the shard index to return the results for
+     * @return the first page of the results
+     */
+    Page<InboxMessage> readAll(ShardIndex index);
 
     /**
      * Writes a message to the storage.
      *
-     * @param message a message to write
+     * @param message
+     *         a message to write
      */
-    public abstract void write(InboxMessage message);
+    void write(InboxMessage message);
+
+    /**
+     * Writes several messages to the storage.
+     *
+     * @param messages
+     *         messages to write
+     */
+    void writeAll(Iterable<InboxMessage> messages);
+
+    /**
+     * Removes the passed messages from the storage.
+     *
+     * <p>Does nothing for messages that aren't in the storage already.
+     *
+     * @param messages
+     *         the messages to remove
+     */
+    void removeAll(Iterable<InboxMessage> messages);
 
     /**
      * Marks the messages as {@linkplain InboxMessageStatus#DELIVERED delivered} and writes
      * the updated messages.
      *
-     * @param messages the messages to mark as delivered.
+     * @param messages
+     *         the messages to mark as delivered
      */
-    public abstract void markDelivered(Iterable<InboxMessage> messages);
+    default void markDelivered(Iterable<InboxMessage> messages) {
+        List<@Validated InboxMessage> updated =
+                stream(messages).map((m) -> m.toBuilder()
+                                             .setStatus(InboxMessageStatus.DELIVERED)
+                                             .vBuild())
+                                .collect(toList());
+        writeAll(updated);
+    }
 }

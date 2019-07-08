@@ -31,24 +31,20 @@ import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.enrich.Enricher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.trace.TracerFactory;
-import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.system.server.TraceEventObserver;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,16 +66,13 @@ import static io.spine.server.ContextSpec.singleTenant;
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
-
-    private TenantIndex tenantIndex;
-    private @Nullable Function<ContextSpec, TracerFactory> tracing;
-
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
+    private EventEnricher eventEnricher;
     private Stand.Builder stand;
     private IntegrationBus.Builder integrationBus;
-    private TransportFactory transportFactory;
     private Supplier<AggregateRootDirectory> rootDirectory;
+    private TenantIndex tenantIndex;
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
@@ -95,7 +88,6 @@ public final class BoundedContextBuilder implements Logging {
      * {@link IntegrationBus} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
-
 
     /**
      * Prevents direct instantiation.
@@ -122,7 +114,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Creates a new builder for a single tenant test-only bounded context.
+     * Creates a new builder for a single tenant test-only Bounded Context.
      */
     @Internal
     @VisibleForTesting
@@ -146,23 +138,6 @@ public final class BoundedContextBuilder implements Logging {
 
     public boolean isMultitenant() {
         return spec.isMultitenant();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder
-    setTracerFactorySupplier(@Nullable Function<ContextSpec, TracerFactory> tracing) {
-        this.tracing = tracing;
-        return this;
-    }
-
-    public Optional<Function<ContextSpec, TracerFactory>> tracerFactory() {
-        return Optional.ofNullable(tracing);
-    }
-
-    Function<ContextSpec, @Nullable TracerFactory> buildTracerFactorySupplier() {
-        @SuppressWarnings("ReturnOfNull")
-        Function<ContextSpec, @Nullable TracerFactory> defaultSupplier = spec -> null;
-        return tracerFactory().orElse(defaultSupplier);
     }
 
     @CanIgnoreReturnValue
@@ -203,9 +178,36 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(eventBus);
     }
 
+    /**
+     * Sets a custom {@link Enricher} for events posted to
+     * the {@code EventBus} of the context being built.
+     *
+     * <p>If the {@code Enricher} is not set, the enrichments
+     * will <strong>NOT</strong> be supported in this context.
+     *
+     * @param enricher
+     *         the {@code Enricher} for events or {@code null} if enrichment is not supported
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder enrichEventsUsing(EventEnricher enricher) {
+        this.eventEnricher = checkNotNull(enricher);
+        return this;
+    }
+
+    /**
+     * Obtains {@code EventEnricher} assigned to the context to be built, or
+     * empty {@code Optional} if no enricher was assigned prior to this call.
+     */
+    public Optional<EventEnricher> eventEnricher() {
+        return Optional.ofNullable(eventEnricher);
+    }
+
     EventBus buildEventBus(BoundedContext context) {
         checkNotNull(context);
         eventBus.injectContext(context);
+        if (eventEnricher != null) {
+            eventBus.injectEnricher(eventEnricher);
+        }
         return eventBus.build();
     }
 
@@ -224,20 +226,11 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     @CanIgnoreReturnValue
-    public BoundedContextBuilder setTransportFactory(TransportFactory transportFactory) {
-        this.transportFactory = checkNotNull(transportFactory);
-        return this;
-    }
-
-    public Optional<TransportFactory> transportFactory() {
-        return Optional.ofNullable(transportFactory);
-    }
-
-    @CanIgnoreReturnValue
     public BoundedContextBuilder setTenantIndex(TenantIndex tenantIndex) {
         if (isMultitenant()) {
             checkNotNull(tenantIndex,
-                         "TenantRepository cannot be null in a multitenant BoundedContext.");
+                         "`%s` cannot be null in a multitenant `BoundedContext`.",
+                         TenantIndex.class.getSimpleName());
         }
         this.tenantIndex = tenantIndex;
         return this;
@@ -467,7 +460,7 @@ public final class BoundedContextBuilder implements Logging {
      * such as:
      * <ul>
      *     <li>{@linkplain #tenantIndex()} tenancy;
-     *     <li>{@linkplain #transportFactory()} transport facilities.
+     *     <li>{@linkplain ServerEnvironment#transportFactory()} transport facilities.
      * </ul>
      *
      * <p>All the other configuration is NOT shared.
@@ -478,23 +471,13 @@ public final class BoundedContextBuilder implements Logging {
      * @return new {@code BoundedContext}
      */
     public BoundedContext build() {
-        TransportFactory transport = transportFactory()
-                .orElseGet(InMemoryTransportFactory::newInstance);
-        SystemContext system = buildSystem(transport);
-        BoundedContext result = buildDomain(system, transport);
+        SystemContext system = buildSystem();
+        BoundedContext result = buildDomain(system);
         log().debug("{} created.", result.nameForLogging());
 
         registerRepositories(result);
         registerDispatchers(result);
-        registerTracing(result, system);
         return result;
-    }
-
-    private static void registerTracing(BoundedContext domain, BoundedContext system) {
-        domain.tracing().ifPresent(tracing -> {
-            EventDispatcher<?> observer = new TraceEventObserver(domain.name(), tracing);
-            system.registerEventDispatcher(observer);
-        });
     }
 
     private void registerRepositories(BoundedContext result) {
@@ -509,15 +492,15 @@ public final class BoundedContextBuilder implements Logging {
         eventDispatchers.forEach(result::registerEventDispatcher);
     }
 
-    private BoundedContext buildDomain(SystemContext system, TransportFactory transport) {
+    private BoundedContext buildDomain(SystemContext system) {
         SystemClient systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
-        BoundedContext result = buildPartial(instanceFactory, systemClient, transport);
+        BoundedContext result = buildPartial(instanceFactory, systemClient);
         return result;
     }
 
-    private SystemContext buildSystem(TransportFactory transport) {
+    private SystemContext buildSystem() {
         String name = BoundedContextNames.system(spec.name()).getValue();
         boolean multitenant = isMultitenant();
         BoundedContextBuilder system = multitenant
@@ -527,33 +510,27 @@ public final class BoundedContextBuilder implements Logging {
         tenantIndex.ifPresent(system::setTenantIndex);
 
         SystemContext result = system.buildPartial(SystemContext::newInstance,
-                                                   NoOpSystemClient.INSTANCE,
-                                                   transport);
+                                                   NoOpSystemClient.INSTANCE
+        );
         return result;
     }
 
     private <B extends BoundedContext>
-    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory,
-                   SystemClient client,
-                   TransportFactory transport) {
-        StorageFactory storageFactory =
-                ServerEnvironment.instance()
-                                 .storageFactory();
-
-        initTenantIndex(storageFactory);
+    B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
+        initTenantIndex();
         initCommandBus(client.writeSide());
-        initEventBus(storageFactory);
+        initEventBus();
         initStand(client.readSide());
-        initIntegrationBus(transport);
+        initIntegrationBus();
 
         B result = instanceFactory.apply(this);
         return result;
     }
 
-    private void initTenantIndex(StorageFactory factory) {
+    private void initTenantIndex() {
         if (tenantIndex == null) {
             tenantIndex = isMultitenant()
-                          ? TenantIndex.createDefault(factory)
+                          ? TenantIndex.createDefault()
                           : TenantIndex.singleTenant();
         }
     }
@@ -576,16 +553,9 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private void initEventBus(StorageFactory storageFactory) {
+    private void initEventBus() {
         if (eventBus == null) {
-            eventBus = EventBus.newBuilder()
-                               .setStorageFactory(storageFactory);
-        } else {
-            boolean eventStoreConfigured = eventBus.getEventStore()
-                                                   .isPresent();
-            if (!eventStoreConfigured) {
-                eventBus.setStorageFactory(storageFactory);
-            }
+            eventBus = EventBus.newBuilder();
         }
     }
 
@@ -598,17 +568,16 @@ public final class BoundedContextBuilder implements Logging {
             if (standMultitenant == null) {
                 stand.setMultitenant(isMultitenant());
             } else {
-                checkSameValue("Stand must match multitenancy of BoundedContext. " +
-                                       "Status in BoundedContext.Builder: %s Stand: %s",
+                checkSameValue("`Stand` must match multitenancy of `BoundedContext`. " +
+                                       "Status in `BoundedContext.Builder`: %s, `Stand`: %s.",
                                standMultitenant);
             }
         }
         stand.setSystemReadSide(systemReadSide);
     }
 
-    private void initIntegrationBus(TransportFactory factory) {
+    private void initIntegrationBus() {
         integrationBus = IntegrationBus.newBuilder();
-        integrationBus.setTransportFactory(factory);
     }
 
     /**

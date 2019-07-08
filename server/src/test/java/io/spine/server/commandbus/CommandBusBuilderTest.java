@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
@@ -72,7 +71,6 @@ class CommandBusBuilderTest
         eventBus = EventBus
                 .newBuilder()
                 .injectContext(context)
-                .setStorageFactory(ServerEnvironment.instance().storageFactory())
                 .build();
     }
 
