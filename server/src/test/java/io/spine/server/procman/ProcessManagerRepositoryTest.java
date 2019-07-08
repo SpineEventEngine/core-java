@@ -54,6 +54,7 @@ import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.CannotDispatchCommandTwice;
 import io.spine.system.server.CannotDispatchEventTwice;
 import io.spine.system.server.DiagnosticMonitor;
+import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
@@ -86,7 +87,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
@@ -475,16 +475,22 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw ISE when dispatching unknown command")
+    @DisplayName("produce RoutingFailed when dispatching unknown command")
     @MuteLogging
     void throwOnUnknownCommand() {
         Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
-        CommandEnvelope request = CommandEnvelope.of(unknownCommand);
+        CommandEnvelope command = CommandEnvelope.of(unknownCommand);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
-        Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repo.dispatchCommand(request));
-        assertThat(getRootCause(exception))
-             .isInstanceOf(IllegalStateException.class);
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
+        repo.dispatchCommand(command);
+        List<RoutingFailed> failures = monitor.routingFailures();
+        assertThat(failures).hasSize(1);
+        RoutingFailed failure = failures.get(0);
+        assertThat(failure.getEntityType().getJavaClassName())
+                .isEqualTo(repo.entityClass().getCanonicalName());
+        assertThat(failure.getError().getType())
+                .isEqualTo(IllegalStateException.class.getName());
     }
 
     @Nested

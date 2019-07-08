@@ -21,6 +21,7 @@
 package io.spine.server.model.contexts.tasks;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 
 /**
  * Creates an instance of the Tasks Bounded Context.
@@ -34,7 +35,7 @@ public final class TasksContext {
         BoundedContext context = BoundedContext
                 .singleTenant("Tasks")
                 .build();
-        context.register(new TaskRepository());
+        context.register(DefaultRepository.of(TaskAggregate.class));
         CreationRetry commander = new CreationRetry();
         context.registerCommandDispatcher(commander);
         return context;

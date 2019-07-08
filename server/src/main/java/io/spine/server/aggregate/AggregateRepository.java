@@ -23,7 +23,9 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -37,6 +39,7 @@ import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Route;
@@ -45,6 +48,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
@@ -264,8 +268,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Creates aggregate storage for the repository.
      *
-     * @param factory
-     *         the factory to create the storage
      * @return new storage
      */
     @Override
@@ -303,6 +305,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         Optional<I> target = route(commandRouting(), cmd);
         target.ifPresent(id -> with(cmd.tenantId()).run(() -> onCommandTargetSet(id, cmd.id())));
         return target;
+    }
+
+    @Internal
+    @Override
+    protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
+        super.onRoutingFailed(envelope, cause);
+        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
+            CommandEnvelope command = (CommandEnvelope) envelope;
+            ThrowableMessage rejection = (ThrowableMessage) cause;
+            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
+            postEvents(ImmutableSet.of(rejectionEnvelope.outerObject()));
+        }
     }
 
     @Override

@@ -27,7 +27,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.base.Errors;
 import io.spine.base.Identifier;
 import io.spine.base.MessageContext;
 import io.spine.logging.Logging;
@@ -55,6 +54,8 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -380,6 +381,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         return context != null;
     }
 
+    @Internal
     protected final <M extends Message, C extends MessageContext, R> Optional<R>
     route(Route<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
         try {
@@ -388,17 +390,24 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             R result = routing.apply(message, envelope.context());
             return Optional.of(result);
         } catch (RuntimeException e) {
-            RoutingFailed systemEvent = RoutingFailed
-                    .newBuilder()
-                    .setEntityType(entityModelClass().typeName())
-                    .setHandledSignal(envelope.messageId())
-                    .setError(Errors.causeOf(e))
-                    .vBuild();
-            context().systemClient()
-                     .writeSide()
-                     .postEvent(systemEvent, envelope.asMessageOrigin());
+            Throwable cause = getRootCause(e);
+            onRoutingFailed(envelope, cause);
             return Optional.empty();
         }
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    @Internal
+    protected void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
+        RoutingFailed systemEvent = RoutingFailed
+                .newBuilder()
+                .setEntityType(entityModelClass().typeName())
+                .setHandledSignal(envelope.messageId())
+                .setError(fromThrowable(cause))
+                .vBuild();
+        context().systemClient()
+                 .writeSide()
+                 .postEvent(systemEvent, envelope.asMessageOrigin());
     }
 
     /**

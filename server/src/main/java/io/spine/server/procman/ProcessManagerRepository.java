@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
@@ -40,6 +41,7 @@ import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.procman.model.ProcessManagerClass;
@@ -50,6 +52,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
@@ -300,6 +303,18 @@ public abstract class ProcessManagerRepository<I,
 
     private Optional<I> route(CommandEnvelope cmd) {
         return route(commandRouting(),cmd);
+    }
+
+    @Internal
+    @Override
+    protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
+        super.onRoutingFailed(envelope, cause);
+        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
+            CommandEnvelope command = (CommandEnvelope) envelope;
+            ThrowableMessage rejection = (ThrowableMessage) cause;
+            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
+            postEvent(rejectionEnvelope.outerObject());
+        }
     }
 
     /**

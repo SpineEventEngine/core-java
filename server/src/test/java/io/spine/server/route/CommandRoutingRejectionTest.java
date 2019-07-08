@@ -20,6 +20,7 @@
 
 package io.spine.server.route;
 
+import com.google.common.truth.IterableSubject;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -45,10 +46,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.route.given.switchman.SwitchPosition.RIGHT;
 import static io.spine.server.route.given.switchman.SwitchmanBureau.MISSING_SWITCHMAN_NAME;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -100,12 +102,13 @@ class CommandRoutingRejectionTest {
                 SetSwitch.newBuilder()
                          .setSwitchId(generateSwitchId())
                          .setSwitchmanName(switchmanName)
-                         .setPosition(SwitchPosition.RIGHT)
+                         .setPosition(RIGHT)
                          .build()
         );
-        assertEquals(0, switchmanObserver.events.size());
+        IterableSubject assertObservedEvents = assertThat(switchmanObserver.events);
+        assertObservedEvents.isEmpty();
         commandBus.post(command, observer);
-        assertEquals(1, switchmanObserver.events.size());
+        assertObservedEvents.hasSize(1);
 
         // Post a command with the argument which causes rejection in routing.
         Command commandToReject = requestFactory.createCommand(
@@ -121,8 +124,8 @@ class CommandRoutingRejectionTest {
         assertTrue(foundLog.isPresent());
         LogState log = foundLog.get().state();
         assertTrue(log.containsCounters(switchmanName));
-        assertTrue(log.getMissingSwitchmanList()
-                      .contains(MISSING_SWITCHMAN_NAME));
+        assertThat(log.getMissingSwitchmanList())
+                .contains(MISSING_SWITCHMAN_NAME);
     }
 
     private static SwitchId generateSwitchId() {
