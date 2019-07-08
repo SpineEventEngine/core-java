@@ -40,7 +40,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Route;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;

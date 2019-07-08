@@ -29,7 +29,6 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
