@@ -116,7 +116,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @DisplayName("command handler")
         void commandHandler() {
             CreateProjectHandler handler = new CreateProjectHandler();
-            context.registerCommandDispatcher(handler);
+            commandBus.register(handler);
+            handler.initialize(context);
 
             commandBus.post(createProject(), observer);
 
@@ -159,7 +160,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         CreateProjectHandler newCommandHandler() {
             CreateProjectHandler handler = new CreateProjectHandler();
-            context.registerCommandDispatcher(handler);
+            handler.initialize(context);
             return handler;
         }
     }

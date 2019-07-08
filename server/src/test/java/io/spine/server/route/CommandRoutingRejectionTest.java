@@ -47,6 +47,7 @@ import java.util.Optional;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.route.given.switchman.SwitchmanBureau.MISSING_SWITCHMAN_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,7 +110,7 @@ class CommandRoutingRejectionTest {
         // Post a command with the argument which causes rejection in routing.
         Command commandToReject = requestFactory.createCommand(
                 SetSwitch.newBuilder()
-                         .setSwitchmanName(SwitchmanBureau.MISSING_SWITCHMAN_NAME)
+                         .setSwitchmanName(MISSING_SWITCHMAN_NAME)
                          .setSwitchId(generateSwitchId())
                          .setPosition(SwitchPosition.LEFT)
                          .build()
@@ -121,7 +122,7 @@ class CommandRoutingRejectionTest {
         LogState log = foundLog.get().state();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
-                      .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));
+                      .contains(MISSING_SWITCHMAN_NAME));
     }
 
     private static SwitchId generateSwitchId() {

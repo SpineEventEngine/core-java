@@ -194,7 +194,7 @@ abstract class AbstractCommandBusTestSuite {
 
     @AfterEach
     void tearDown() throws Exception {
-        eventBus.close();
+        context.close();
     }
 
     @Test
@@ -244,11 +244,6 @@ abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
-
-        CreateProjectHandler() {
-            super();
-            initialize(BoundedContextBuilder.assumingTests().build());
-        }
 
         @Override
         public final void initialize(BoundedContext context) {

@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.truth.Truth;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
@@ -307,7 +306,7 @@ class ProcessManagerRepositoryTest
 
         PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
-        Truth.assertThat(message.getProjectId())
+        assertThat(message.getProjectId())
              .isEqualTo(ID);
     }
 
@@ -484,7 +483,7 @@ class ProcessManagerRepositoryTest
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
         Throwable exception = assertThrows(RuntimeException.class,
                                            () -> repo.dispatchCommand(request));
-        Truth.assertThat(getRootCause(exception))
+        assertThat(getRootCause(exception))
              .isInstanceOf(IllegalStateException.class);
     }
 
