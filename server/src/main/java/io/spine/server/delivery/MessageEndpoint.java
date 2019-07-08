@@ -43,7 +43,18 @@ public interface MessageEndpoint<I, M extends SignalEnvelope<?, ?, ?>> {
      */
     void dispatchTo(I targetId);
 
+    /**
+     * The callback invoked if the handled signal is a duplicate.
+     *
+     * @param target
+     *         the target entity
+     * @param envelope
+     *         the handled signal
+     */
     void onDuplicate(I target, M envelope);
 
+    /**
+     * Obtains the repository which manages the target entities.
+     */
     Repository<I, ?> repository();
 }
