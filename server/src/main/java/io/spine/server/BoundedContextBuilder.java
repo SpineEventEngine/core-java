@@ -255,7 +255,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     public BoundedContextBuilder addCommandFilter(BusFilter<CommandEnvelope> filter) {
         checkNotNull(filter);
-        commandBus.addFilter(filter);
+        commandBus.appendFilter(filter);
         return this;
     }
 
@@ -292,7 +292,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     public BoundedContextBuilder addEventFiler(BusFilter<EventEnvelope> filter) {
         checkNotNull(filter);
-        eventBus.addFilter(filter);
+        eventBus.appendFilter(filter);
         return this;
     }
 

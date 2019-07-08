@@ -50,7 +50,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     void allowAddingFilter() {
         BusFilter<E> filter = new StubFilter<>();
 
-        assertThat(builder().addFilter(filter)
+        assertThat(builder().appendFilter(filter)
                             .filters())
                 .contains(filter);
     }
@@ -63,8 +63,8 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
         BusFilter<E> second = new StubFilter<>();
 
         B builder = builder();
-        builder.addFilter(first)
-               .addFilter(second);
+        builder.appendFilter(first)
+               .appendFilter(second);
         Deque<BusFilter<E>> filters = builder.filters();
 
         assertThat(filters.pop())

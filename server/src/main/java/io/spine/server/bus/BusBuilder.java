@@ -81,7 +81,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      *
      * @param filter the filter to add
      */
-    public final B addFilter(BusFilter<E> filter) {
+    public final B appendFilter(BusFilter<E> filter) {
         checkNotNull(filter);
         chainBuilder.append(filter);
         return self();
@@ -90,7 +90,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
     /**
      * Obtains the filters added to this this builder by the time of the call.
      *
-     * @see #addFilter(BusFilter)
+     * @see #appendFilter(BusFilter)
      */
     public final Deque<BusFilter<E>> filters() {
         return chainBuilder.filters();
