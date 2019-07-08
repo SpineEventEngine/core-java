@@ -36,6 +36,7 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
@@ -303,7 +304,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private Optional<I> route(CommandEnvelope cmd) {
         Optional<I> target = route(commandRouting(), cmd);
-        target.ifPresent(id -> with(cmd.tenantId()).run(() -> onCommandTargetSet(id, cmd.id())));
+        target.ifPresent(id -> onCommandTargetSet(id, cmd));
         return target;
     }
 
@@ -575,8 +576,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return load(id);
     }
 
-    private void onCommandTargetSet(I id, CommandId commandId) {
-        lifecycleOf(id).onTargetAssignedToCommand(commandId);
+    private void onCommandTargetSet(I id, CommandEnvelope cmd) {
+        EntityLifecycle lifecycle = lifecycleOf(id);
+        CommandId commandId = cmd.id();
+        with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
 
     @OverridingMethodsMustInvokeSuper

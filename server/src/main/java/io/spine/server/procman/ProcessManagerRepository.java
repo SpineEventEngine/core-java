@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -37,6 +38,7 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.TransactionListener;
@@ -65,6 +67,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -302,7 +305,15 @@ public abstract class ProcessManagerRepository<I,
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
-        return route(commandRouting(),cmd);
+        Optional<I> target = route(commandRouting(), cmd);
+        target.ifPresent(id -> onCommandTargetSet(id, cmd));
+        return target;
+    }
+
+    private void onCommandTargetSet(I id, CommandEnvelope cmd) {
+        EntityLifecycle lifecycle = lifecycleOf(id);
+        CommandId commandId = cmd.id();
+        with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
 
     @Internal
