@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.server.type.given.GivenEvent.withMessage;
@@ -269,7 +270,8 @@ public abstract class TransactionTest<I,
         assertTrue(outcome.hasSuccess());
         S stateBeforeRollback = entity.state();
         Version versionBeforeRollback = entity.version();
-        tx.rollback(new RuntimeException("that triggers rollback"));
+        RuntimeException exception = new RuntimeException("that triggers rollback");
+        tx.rollback(fromThrowable(exception));
 
         S stateAfterRollback = entity.state();
         Version versionAfterRollback = entity.version();
