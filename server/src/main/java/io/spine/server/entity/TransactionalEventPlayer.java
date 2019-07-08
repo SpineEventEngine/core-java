@@ -21,8 +21,6 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.core.MessageId;
-import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,47 +50,6 @@ final class TransactionalEventPlayer implements EventPlayer {
         for (Event event : events) {
             process.play(event);
         }
-        return process.buildPropagationResult();
-    }
-
-    private static final class PropagationProcess {
-
-        private final EventPlayingTransaction<?, ?, ?, ?> transaction;
-
-        private final Propagation.Builder propagation = Propagation.newBuilder();
-        private boolean successful = true;
-        private MessageId lastMessage = MessageId.getDefaultInstance();
-
-        private PropagationProcess(EventPlayingTransaction<?, ?, ?, ?> transaction) {
-            this.transaction = transaction;
-            propagation.setTargetEntity(transaction.entityId());
-        }
-
-        private void play(Event event) {
-            if (successful) {
-                EventEnvelope eventEnvelope = EventEnvelope.of(event);
-                PropagationOutcome outcome = transaction.play(eventEnvelope);
-                propagation.addOutcome(outcome);
-                successful = outcome.hasSuccess();
-                lastMessage = event.messageId();
-            } else {
-                Interruption interruption = Interruption
-                        .newBuilder()
-                        .setStoppedAt(lastMessage)
-                        .buildPartial();
-                PropagationOutcome outcome = PropagationOutcome
-                        .newBuilder()
-                        .setPropagatedSignal(event.messageId())
-                        .setInterrupted(interruption)
-                        .vBuild();
-                propagation.addOutcome(outcome);
-            }
-        }
-
-        private Propagation buildPropagationResult() {
-            return propagation
-                    .setSuccessful(successful)
-                    .vBuild();
-        }
+        return process.summary();
     }
 }

@@ -287,7 +287,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Propagates the given phase and catches any kind of failures.
+     * Propagates the given phase and catches any failures if any.
      *
      * <p>The catch block in this method and in {@link #commit()} prevents from force majeure
      * situations such as storage failures, etc. All the exceptions produced in the framework users'
