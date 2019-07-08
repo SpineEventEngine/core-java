@@ -20,34 +20,39 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import io.spine.core.TenantId;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRootDirectory;
+import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bc.given.Given.NoOpCommandDispatcher;
 import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.bc.given.ProjectProjection;
-import io.spine.server.commandbus.CommandBus;
+import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.Listener;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.Set;
+
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent",
-        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext Builder should")
 class BoundedContextBuilderTest {
 
@@ -70,26 +75,6 @@ class BoundedContextBuilderTest {
     class Return {
 
         @Test
-        @DisplayName("CommandBus Builder")
-        void commandBusBuilder() {
-            CommandBus.Builder expected = CommandBus.newBuilder();
-            builder = BoundedContextBuilder
-                    .assumingTests()
-                    .setCommandBus(expected);
-            assertEquals(expected, builder.commandBus()
-                                          .get());
-        }
-
-        @Test
-        @DisplayName("EventBus Builder")
-        void eventBusBuilder() {
-            EventBus.Builder expected = EventBus.newBuilder();
-            builder.setEventBus(expected);
-            assertEquals(expected, builder.eventBus()
-                                          .get());
-        }
-
-        @Test
         @DisplayName("name if it was set")
         void name() {
             String nameString = getClass().getName();
@@ -101,7 +86,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("AggregateRootDirectory if it was set")
         void aggregateRootDirectory() {
-            AggregateRootDirectory directory = mock(AggregateRootDirectory.class);
+            AggregateRootDirectory directory = new InMemoryRootDirectory();
             builder.setAggregateRootDirectory(() -> directory);
             assertEquals(directory, builder.aggregateRootDirectory());
         }
@@ -118,25 +103,7 @@ class BoundedContextBuilderTest {
                                                .build()
                                                .tenantIndex());
         }
-
-        @Test
-        @DisplayName("CommandBus")
-        void commandBus() {
-            // Pass EventBus to builder initialization, and do NOT pass CommandBus.
-            BoundedContext boundedContext = builder.setEventBus(EventBus.newBuilder())
-                                                   .build();
-            assertNotNull(boundedContext.commandBus());
-        }
-
-        @Test
-        @DisplayName("EventBus")
-        void eventBus() {
-            // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
-            BoundedContext boundedContext = builder.setCommandBus(CommandBus.newBuilder())
-                                                   .build();
-            assertNotNull(boundedContext.eventBus());
-        }
-
+        
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {
@@ -161,25 +128,42 @@ class BoundedContextBuilderTest {
     }
 
     @Test
-    @DisplayName("allow TenantIndex configuration")
+    @DisplayName("allow `TenantIndex` configuration")
     void setTenantIndex() {
-        TenantIndex tenantIndex = mock(TenantIndex.class);
-        assertEquals(tenantIndex, BoundedContextBuilder
+        TenantIndex tenantIndex = new StubTenantIndex();
+
+        BoundedContextBuilder builder = BoundedContextBuilder
                 .assumingTests()
-                .setTenantIndex(tenantIndex)
-                .tenantIndex()
-                .get());
+                .setTenantIndex(tenantIndex);
+
+        assertThat(builder.tenantIndex())
+                .hasValue(tenantIndex);
     }
 
-    @Test
-    @DisplayName("not accept CommandBus with different multitenancy state")
-    void matchCommandBusMultitenancy() {
-        CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                  .setMultitenant(true);
-        assertThrows(IllegalStateException.class,
-                     () -> BoundedContextBuilder.assumingTests(false)
-                                                .setCommandBus(commandBus)
-                                                .build());
+    /**
+     * Stub implementation of {@code TenantIndex}.
+     */
+    private static class StubTenantIndex implements TenantIndex {
+
+        @Override
+        public void registerWith(BoundedContext context) {
+            // Do nothing.
+        }
+
+        @Override
+        public void keep(TenantId id) {
+            // Do nothing.
+        }
+
+        @Override
+        public Set<TenantId> all() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public void close() {
+            // Do nothing.
+        }
     }
 
     @Nested
@@ -347,12 +331,70 @@ class BoundedContextBuilderTest {
             builder.removeEventDispatcher(repository);
             assertFalse(builder.hasRepository(repository));
         }
-
         @Test
         @DisplayName("check repository presence in Builder if it's queried as event dispatcher")
         void checkHasRepo() {
             builder.add(repository);
             assertTrue(builder.hasEventDispatcher(repository));
+        }
+
+    }
+
+    @Nested
+    @DisplayName("allow adding filters for")
+    class Filters {
+
+        @Test
+        @DisplayName("commands")
+        void forCommands() {
+            BusFilter<CommandEnvelope> filter = command -> Optional.empty();
+
+            builder.addCommandFilter(filter);
+
+            assertTrue(builder.build()
+                              .commandBus()
+                              .hasFilter(filter));
+        }
+
+        @Test
+        @DisplayName("events")
+        void forEvents() {
+            BusFilter<EventEnvelope> filter = event -> Optional.empty();
+
+            builder.addEventFiler(filter);
+
+            assertTrue(builder.build()
+                              .eventBus()
+                              .hasFilter(filter));
+        }
+    }
+
+    @Nested
+    @DisplayName("allow adding listeners for")
+    class Listeners {
+
+        @Test
+        @DisplayName("commands")
+        void forCommands() {
+            Listener<CommandEnvelope> listener = c -> {};
+
+            builder.addCommandListener(listener);
+
+            assertTrue(builder.build()
+                              .commandBus()
+                              .hasListener(listener));
+        }
+
+        @Test
+        @DisplayName("events")
+        void forEvents() {
+            Listener<EventEnvelope> listener = c -> {};
+
+            builder.addEventListener(listener);
+
+            assertTrue(builder.build()
+                              .eventBus()
+                              .hasListener(listener));
         }
     }
 }

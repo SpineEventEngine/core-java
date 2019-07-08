@@ -67,6 +67,10 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
         return Optional.empty();
     }
 
+    boolean contains(BusFilter<E> filter) {
+        return chain.contains(filter);
+    }
+
     /**
      * Closes all the filters in the chain and deletes them from the chain.
      *

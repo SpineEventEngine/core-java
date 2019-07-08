@@ -18,24 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.contexts.tasks;
+package io.spine.server.bus;
 
-import io.spine.server.BoundedContext;
+import io.spine.server.type.MessageEnvelope;
+
+import java.util.function.Consumer;
 
 /**
- * Creates an instance of the Tasks Bounded Context.
+ * A listener receives a message when it is posted to a {@code Bus} <em>before</em> it is processed
+ * by {@linkplain BusFilter filters}.
+ *
+ * @param <E>
+ *         the type of envelopes of messages posted to the bus
  */
-public final class TasksContext {
-
-    private TasksContext() {
-    }
-
-    public static BoundedContext newInstance() {
-        BoundedContext result = BoundedContext
-                .singleTenant("Tasks")
-                .add(new TaskRepository())
-                .addCommandDispatcher(new CreationRetry())
-                .build();
-        return result;
-    }
+@FunctionalInterface
+public interface Listener<E extends MessageEnvelope<?, ?, ?>> extends Consumer<E> {
 }

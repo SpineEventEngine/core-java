@@ -20,17 +20,14 @@
 
 package io.spine.server.model.contexts.tasks;
 
-import io.spine.core.CommandContext;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.test.model.contexts.tasks.TaskId;
 import io.spine.test.model.contexts.tasks.commands.CreateTask;
 import io.spine.test.model.contexts.tasks.rejections.TaskRejections;
 
+import java.util.HashSet;
 import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A {@link io.spine.server.command.Commander Commander} which retries the task
@@ -38,14 +35,10 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public final class CreationRetry extends AbstractCommander {
 
-    private static final Set<TaskId> rejectedTasks = newHashSet();
-
-    CreationRetry(CommandBus commandBus) {
-        super(commandBus);
-    }
+    private static final Set<TaskId> rejectedTasks = new HashSet<>();
 
     @Command
-    CreateTask on(TaskRejections.TaskAlreadyExists rejection, CommandContext commandContext) {
+    CreateTask on(TaskRejections.TaskAlreadyExists rejection) {
         TaskId id = TaskId.generate();
         rejectedTasks.add(rejection.getId());
         return CreateTask

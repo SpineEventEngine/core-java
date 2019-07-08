@@ -29,6 +29,7 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
 import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -37,6 +38,7 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -45,6 +47,7 @@ import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
+import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -59,7 +62,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -110,18 +112,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * This constructor is for internal use of the framework. Application developers should not
      * create classes derived from {@code BoundedContext}.
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject dependencies.
     @Internal
     protected BoundedContext(BoundedContextBuilder builder) {
         super();
         checkInheritance();
-
         this.spec = builder.spec();
-        this.eventBus = buildEventBus(builder);
+        this.eventBus = builder.buildEventBus(this);
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
-
-        this.commandBus = buildCommandBus(builder, eventBus);
-        this.integrationBus = buildIntegrationBus(builder, eventBus, spec.name());
+        this.commandBus = builder.buildCommandBus(eventBus);
+        this.integrationBus = builder.buildIntegrationBus(this);
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
     }
@@ -149,44 +150,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
                 "The class `BoundedContext` is not designed for " +
                         "inheritance by the framework users."
         );
-    }
-
-    private EventBus buildEventBus(BoundedContextBuilder builder) {
-        EventBus result = builder.buildEventBus(this);
-        return result;
-    }
-
-    private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
-        Optional<CommandBus.Builder> busBuilder = builder.commandBus();
-        checkState(busBuilder.isPresent());
-        CommandBus result = busBuilder.get()
-                                      .injectEventBus(eventBus)
-                                      .build();
-        return result;
-    }
-
-    /**
-     * Creates a new instance of {@link IntegrationBus} with the given parameters.
-     *
-     * @param builder
-     *         the {@link BoundedContextBuilder} to obtain the {@link IntegrationBus.Builder} from
-     * @param eventBus
-     *         the initialized {@link EventBus}
-     * @param name
-     *         the name of the constructed Bounded Context
-     * @return new instance of {@link IntegrationBus}
-     */
-    private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
-                                                      EventBus eventBus,
-                                                      BoundedContextName name) {
-        Optional<IntegrationBus.Builder> busBuilder = builder.integrationBus();
-        checkArgument(busBuilder.isPresent());
-        IntegrationBus result =
-                busBuilder.get()
-                          .setContextName(name)
-                          .setEventBus(eventBus)
-                          .build();
-        return result;
     }
 
     private static ImportBus buildImportBus(TenantIndex tenantIndex) {
@@ -223,10 +186,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed repository with this {@code BoundedContext}.
-     *
-     * <p>If the repository does not have a storage assigned, it will be initialized
-     * using the {@code StorageFactory} associated with this {@code BoundedContext}.
+     * Internal method that registers the passed repository with this {@code BoundedContext}.
      *
      * @param repository
      *         the repository to register
@@ -234,10 +194,14 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *         the type of IDs used in the repository
      * @param <E>
      *         the type of entities
+     * @throws SecurityException
+     *          if called from outside the framework
      */
+    @Internal
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        repository.setContext(this);
+        Security.allowOnlyFrameworkServer();
+        repository.injectContext(this);
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
@@ -247,39 +211,55 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * Creates and registers the {@linkplain DefaultRepository default repository} for the passed
      * class of entities.
      *
-     * @param entityClass
-     *         the class of entities for which
      * @param <I>
      *         the type of entity identifiers
      * @param <E>
      *         the type of entities
+     * @param entityClass
+     *         the class of entities which will be served by a {@link DefaultRepository}
      * @see #register(Repository)
      */
-    public <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
+    final <I, E extends Entity<I, ?>> void register(Class<E> entityClass) {
         checkNotNull(entityClass);
         register(DefaultRepository.of(entityClass));
     }
 
     /**
-     * Registers the passed command dispatcher with the {@code CommandBus} of
-     * this {@code BoundedContext}.
+     * Internal method for registering the passed command dispatcher with the {@code CommandBus} of
+     * this context.
+     *
+     * @throws SecurityException
+     *          if called from outside the framework
      */
+    @Internal
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
+        Security.allowOnlyFrameworkServer();
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
             if (dispatcher instanceof AbstractCommandHandler) {
                 ((AbstractCommandHandler) dispatcher).injectEventBus(eventBus());
             }
         }
+        if (dispatcher instanceof AbstractCommander) {
+            AbstractCommander commander = (AbstractCommander) dispatcher;
+            commander.injectCommandBus(commandBus());
+            DelegatingEventDispatcher<?> proxy = DelegatingEventDispatcher.of(commander);
+            registerEventDispatcher(proxy);
+        }
     }
 
     /**
-     * Registers the passed command dispatcher with the {@code CommandBus} of
-     * this {@code BoundedContext}.
+     * Internal method for registering the passed command dispatcher with the {@code CommandBus} of
+     * this context.
+     *
+     * @throws SecurityException
+     *          if called from outside the framework
      */
+    @Internal
     public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
+        Security.allowOnlyFrameworkServer();
         if (dispatcher.dispatchesCommands()) {
             registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
         }
@@ -294,20 +274,29 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed event dispatcher with the buses of this {@code BoundedContext}.
+     * Internal method for registering the passed event dispatcher with the buses of
+     * this context.
      *
      * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
      * If the passed instance dispatches external events, registers it with
      * the {@code IntegrationBus}.
      *
+     * @throws SecurityException
+     *         if called from outside the framework
      * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
+    @Internal
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
+        Security.allowOnlyFrameworkServer();
         if (dispatcher.dispatchesEvents()) {
-            eventBus().register(dispatcher);
+            EventBus eventBus = eventBus();
+            eventBus.register(dispatcher);
             SystemReadSide systemReadSide = systemClient().readSide();
             systemReadSide.register(dispatcher);
+            if (dispatcher instanceof AbstractEventReactor) {
+                ((AbstractEventReactor) dispatcher).injectEventBus(eventBus);
+            }
         }
         if (dispatcher.dispatchesExternalEvents()) {
             registerWithIntegrationBus(dispatcher);
@@ -315,13 +304,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Registers the passed delegate of an {@link EventDispatcher} with the buses of this
-     * {@code BoundedContext}.
+     * Internal method for registering the passed delegate of an {@link EventDispatcher} with
+     * the buses of this context.
      *
+     * @throws SecurityException
+     *         if called from outside the framework
      * @see #registerEventDispatcher(EventDispatcher)
      */
+    @Internal
     public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
+        Security.allowOnlyFrameworkServer();
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
         registerEventDispatcher(delegate);
     }
@@ -339,6 +332,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
+    @Internal
     public CommandErrorHandler createCommandErrorHandler() {
         SystemWriteSide systemWriteSide = systemClient().writeSide();
         CommandErrorHandler result = CommandErrorHandler.with(systemWriteSide, this::eventBus);

@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.example.ForeignContextConfig;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.truth.Truth8;
@@ -38,10 +39,8 @@ import io.spine.server.bc.given.ProjectRemovalProcman;
 import io.spine.server.bc.given.ProjectReport;
 import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.EventBus;
 import io.spine.server.stand.Stand;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
@@ -55,6 +54,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -73,11 +73,6 @@ import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.slf4j.event.Level.DEBUG;
 
 /**
@@ -249,21 +244,6 @@ class BoundedContextTest {
                 .contains(stateType);
     }
 
-    @Test
-    @DisplayName("re-register Stand as event dispatcher when registering repository")
-    void registerStandAsEventDispatcher() {
-        EventBus eventBusMock = mock(EventBus.class);
-        EventBus.Builder builderMock = mock(EventBus.Builder.class);
-        when(builderMock.build()).thenReturn(eventBusMock);
-        BoundedContext boundedContext = BoundedContextBuilder
-                .assumingTests()
-                .setEventBus(builderMock)
-                .build();
-        boundedContext.register(DefaultRepository.of(ProjectAggregate.class));
-        verify(eventBusMock, times(1))
-                .register(eq(boundedContext.stand()));
-    }
-
     @ParameterizedTest
     @MethodSource("sameStateRepositories")
     @DisplayName("not allow two entity repositories with entities of same state")
@@ -318,31 +298,9 @@ class BoundedContextTest {
         assertTrue(repository.storageAssigned());
     }
 
-    @Test
-    @DisplayName("allow custom EventBus")
-    void setEventBusStorageFactory() {
-        BoundedContext bc = BoundedContextBuilder
-                .assumingTests()
-                .setEventBus(EventBus.newBuilder())
-                .build();
-        assertNotNull(bc.eventBus());
-    }
-
     @Nested
     @DisplayName("match multitenancy state of")
     class MatchMultitenancyState {
-
-        @Test
-        @DisplayName("CommandBus")
-        void ofCommandBus() {
-            CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                      .setMultitenant(false);
-            assertThrows(IllegalStateException.class,
-                         () -> BoundedContextBuilder
-                                 .assumingTests(true)
-                                 .setCommandBus(commandBus)
-                                 .build());
-        }
 
         @Test
         @DisplayName("Stand")
@@ -490,5 +448,44 @@ class BoundedContextTest {
                                  .build()
                                  .toString())
                 .isEqualTo(name);
+    }
+
+    @Nested
+    @DisplayName("do not allow registration calls from outside the `io.spine.server` package for")
+    class RestrictRegistrationCalls {
+
+        @Test
+        @DisplayName("`Repository`")
+        void forRepository() {
+            assertThrowsOn(ForeignContextConfig::repositoryRegistration);
+        }
+
+        @Test
+        @DisplayName("`CommandDispatcher`")
+        void forCommandDispatcher() {
+            assertThrowsOn(ForeignContextConfig::commandDispatcherRegistration);
+        }
+
+        @Test
+        @DisplayName("`CommandDispatcherDelegate`")
+        void forCommandDispatcherDelegate() {
+            assertThrowsOn(ForeignContextConfig::commandDispatcherDelegateRegistration);
+        }
+
+        @Test
+        @DisplayName("`EventDispatcher`")
+        void forEventDispatcher() {
+            assertThrowsOn(ForeignContextConfig::eventDispatcherRegistration);
+        }
+
+        @Test
+        @DisplayName("`EventDispatcherDelegate`")
+        void forEventDispatcherDelegate() {
+            assertThrowsOn(ForeignContextConfig::eventDispatcherDelegateRegistration);
+        }
+
+        private void assertThrowsOn(Executable executable) {
+            assertThrows(SecurityException.class, executable);
+        }
     }
 }

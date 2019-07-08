@@ -18,24 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.contexts.tasks;
-
-import io.spine.server.BoundedContext;
-
 /**
- * Creates an instance of the Tasks Bounded Context.
+ * Test environment classes for testing invocations from outside the framework package namespace.
  */
-public final class TasksContext {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package com.example;
 
-    private TasksContext() {
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public static BoundedContext newInstance() {
-        BoundedContext result = BoundedContext
-                .singleTenant("Tasks")
-                .add(new TaskRepository())
-                .addCommandDispatcher(new CreationRetry())
-                .build();
-        return result;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

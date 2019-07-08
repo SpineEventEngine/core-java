@@ -87,7 +87,7 @@ class RepositoryTest {
     @Test
     @DisplayName("report unregistered on init")
     void beUnregisteredOnInit() {
-        assertFalse(new TestRepo().isRegistered());
+        assertFalse(new TestRepo().hasContext());
     }
 
     @Test
@@ -134,14 +134,14 @@ class RepositoryTest {
                     .singleTenant("Context-1")
                     .build();
             assertThrows(IllegalStateException.class, () ->
-                    repository.setContext(anotherContext));
+                    repository.injectContext(anotherContext));
         }
 
         @Test
         @DisplayName("allowing passing the same value twice")
         void idempotency() {
             // Previous value was set on registration.
-            repository.setContext(context);
+            repository.injectContext(context);
             assertThat(repository.context())
                     .isEqualTo(context);
         }

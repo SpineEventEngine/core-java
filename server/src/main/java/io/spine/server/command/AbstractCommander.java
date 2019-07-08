@@ -21,6 +21,7 @@
 package io.spine.server.command;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Internal;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -45,11 +46,15 @@ public abstract class AbstractCommander
         implements Commander, EventDispatcherDelegate<String> {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
-    private final CommandBus commandBus;
+    private CommandBus commandBus;
 
-    protected AbstractCommander(CommandBus commandBus) {
-        super();
-        this.commandBus = commandBus;
+    @Internal
+    public void injectCommandBus(CommandBus commandBus) {
+        this.commandBus = checkNotNull(commandBus);
+    }
+
+    private CommandBus commandBus() {
+        return checkNotNull(commandBus, "`%s` does not have `CommandBus` assigned.", this);
     }
 
     @Override
@@ -62,7 +67,7 @@ public abstract class AbstractCommander
     public String dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
         CommandingMethod.Result result = method.invoke(this, command);
-        result.transformOrSplitAndPost(command, commandBus);
+        result.transformOrSplitAndPost(command, commandBus());
         return id();
     }
 
@@ -80,7 +85,7 @@ public abstract class AbstractCommander
     public Set<String> dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
         CommandingMethod.Result result = method.invoke(this, event);
-        result.produceAndPost(event, commandBus);
+        result.produceAndPost(event, commandBus());
         return identity();
     }
 

@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.core.TenantId;
+import io.spine.server.bus.Listener;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -52,7 +52,7 @@ import static java.util.Optional.ofNullable;
 abstract class MessageCollector<I extends SignalId,
                                 T extends Signal<I, ?, ?>,
                                 E extends MessageEnvelope<I, T, ?>>
-        implements Consumer<E> {
+        implements Listener<E> {
 
     private final List<T> outerObjects = new ArrayList<>();
     private final Map<I, Message> messages = new HashMap<>();

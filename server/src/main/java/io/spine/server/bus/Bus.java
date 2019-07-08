@@ -20,9 +20,11 @@
 
 package io.spine.server.bus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
@@ -48,6 +50,7 @@ import static java.util.Collections.singleton;
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
  */
+@Internal
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
@@ -240,6 +243,16 @@ public abstract class Bus<T extends Message,
      */
     protected Collection<BusFilter<E>> filterChainHead() {
         return emptyList();
+    }
+
+    @VisibleForTesting
+    public boolean hasFilter(BusFilter<E> filter) {
+        return filterChain.get().contains(filter);
+    }
+
+    @VisibleForTesting
+    public boolean hasListener(Listener<E> listener) {
+        return listeners.contains(listener);
     }
 
     /**

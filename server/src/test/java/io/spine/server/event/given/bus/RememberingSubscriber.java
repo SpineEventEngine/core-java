@@ -29,7 +29,7 @@ import io.spine.test.event.ProjectCreated;
 /**
  * Subscribes to the {@link ProjectCreated} event and remembers last event message and its context.
  */
-public class RememberingSubscriber extends AbstractEventSubscriber {
+public final class RememberingSubscriber extends AbstractEventSubscriber {
 
     private Message eventMessage;
     private EventContext eventContext;

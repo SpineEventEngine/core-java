@@ -18,12 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.given.bus;
+package io.spine.given;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.test.event.ProjectId;
+import io.spine.server.security.GivenRestrictedApi;
 
-public class ProjectRepository
-        extends AggregateRepository<ProjectId, ProjectAggregate> {
+/**
+ * A test environment class for {@link io.spine.server.security.InvocationGuardTest},
+ * which belongs to the framework namespace but is outside of the {@code io.spine.server} package.
+ *
+ * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitFrameworkButNonServer
+ */
+public final class NonServerClass {
 
+    private NonServerClass() {}
+
+    public static void attemptToCallRestrictedApi() {
+        GivenRestrictedApi.guardedMethod();
+    }
 }

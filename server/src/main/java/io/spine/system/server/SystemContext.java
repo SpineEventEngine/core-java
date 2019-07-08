@@ -24,7 +24,6 @@ import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.trace.TracerFactory;
@@ -64,21 +63,13 @@ public final class SystemContext extends BoundedContext {
      */
     public static SystemContext newInstance(BoundedContextBuilder builder) {
         CommandLogRepository commandLog = new CommandLogRepository();
-        BoundedContextBuilder preparedBuilder = prepareEnricher(builder, commandLog);
+        EventEnricher enricher = SystemEnricher.create(commandLog);
+        BoundedContextBuilder preparedBuilder = builder.enrichEventsUsing(enricher);
         SystemContext result = new SystemContext(preparedBuilder);
         result.registerRepositories(commandLog);
         result.registerTracing();
         result.init();
         return result;
-    }
-
-    private static BoundedContextBuilder prepareEnricher(BoundedContextBuilder builder,
-                                                         CommandLogRepository repository) {
-        EventBus.Builder busBuilder = builder.eventBus()
-                                             .orElseGet(EventBus::newBuilder);
-        EventEnricher enricher = SystemEnricher.create(repository);
-        busBuilder.injectEnricher(enricher);
-        return builder.setEventBus(busBuilder);
     }
 
     private void registerRepositories(CommandLogRepository commandLog) {

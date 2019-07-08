@@ -493,10 +493,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
          */
         private @Nullable Boolean multitenant;
 
+        private final TypeRegistry typeRegistry = InMemoryTypeRegistry.newInstance();
+        private final EventRegistry eventRegistry = InMemoryEventRegistry.newInstance();
+
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
-        private TypeRegistry typeRegistry;
-        private EventRegistry eventRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
@@ -558,7 +559,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             return typeRegistry;
         }
 
-        public EventRegistry eventRegistry() {
+        private EventRegistry eventRegistry() {
             return eventRegistry;
         }
 
@@ -588,9 +589,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             }
 
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
-
-            typeRegistry = InMemoryTypeRegistry.newInstance();
-            eventRegistry = InMemoryEventRegistry.newInstance();
 
             topicValidator = new TopicValidator(typeRegistry, eventRegistry);
             queryValidator = new QueryValidator(typeRegistry);

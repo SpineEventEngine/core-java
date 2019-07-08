@@ -39,7 +39,7 @@ import static java.util.Optional.empty;
  * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
  * property set to {@code true}.
  */
-public class TaskCreatedFilter implements BusFilter<EventEnvelope> {
+public final class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
     private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 

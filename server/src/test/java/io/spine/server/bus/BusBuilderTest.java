@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Deque;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -76,7 +75,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     @Test
     @DisplayName("add listener")
     void addingListener() {
-        Consumer<E> listener = (e) -> {};
+        Listener<E> listener = (e) -> {};
 
         assertThat(builder().addListener(listener)
                             .listeners())
@@ -86,7 +85,7 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
     @Test
     @DisplayName("remove listener")
     void removingListener() {
-        Consumer<E> listener = (e) -> {};
+        Listener<E> listener = (e) -> {};
 
         assertThat(builder().addListener(listener)
                             .removeListener(listener)

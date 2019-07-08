@@ -195,7 +195,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *          not equal to the assigned one
      */
     @Internal
-    public final void setContext(BoundedContext context) {
+    public final void injectContext(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -215,11 +215,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
-     * registration} with a {@code BoundedContext}.
+     * Initializes the repository after it is added to the {@code BoundedContext}.
      *
      * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
-     * of the parent {@code BoundedContext}.
+     * of the parent context.
      *
      * @param context
      *          the {@code BoundedContext} of this repository
@@ -250,7 +249,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
-    protected final boolean isRegistered() {
+    protected final boolean hasContext() {
         return context != null;
     }
 
@@ -259,8 +258,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @return parent {@code BoundedContext}
      * @throws IllegalStateException
-     *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
-     *         registered} yet
+     *         if the repository has no context assigned
      */
     protected final BoundedContext context() {
         checkState(context != null,
@@ -270,8 +268,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * The callback called by a {@link BoundedContext} during the {@linkplain
-     * BoundedContext#register(Repository) registration} of the repository.
+     * The callback is invoked by a {@link BoundedContext} when adding the repository.
      */
     @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
     @OverridingMethodsMustInvokeSuper

@@ -20,6 +20,7 @@
 
 package io.spine.server.bus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.MessageEnvelope;
 
@@ -34,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E> {
 
-    private final ImmutableSet<Consumer<E>> listeners;
+    private final ImmutableSet<Listener<E>> listeners;
 
     Listeners(BusBuilder<?, ?, E, ?, ?> builder) {
         checkNotNull(builder);
@@ -50,5 +51,10 @@ final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E>
                 // Do nothing.
             }
         });
+    }
+
+    @VisibleForTesting
+    boolean contains(Listener<E> listener) {
+        return listeners.contains(listener);
     }
 }
