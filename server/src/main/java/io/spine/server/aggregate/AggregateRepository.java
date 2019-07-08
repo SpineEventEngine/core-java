@@ -298,7 +298,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         checkNotNull(cmd);
         Optional<I> target = route(cmd);
         target.ifPresent(id -> inbox().send(cmd)
-                                    .toHandler(id));
+                                      .toHandler(id));
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
@@ -363,7 +363,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         checkNotNull(event);
         Set<I> targets = route(event);
         targets.forEach((id) -> inbox().send(event)
-                                     .toReactor(id));
+                                       .toReactor(id));
     }
 
     private Set<I> route(EventEnvelope event) {
@@ -378,7 +378,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         checkNotNull(event);
         Optional<I> target = routeImport(event);
         target.ifPresent(id -> inbox().send(event)
-                                    .toImporter(id));
+                                      .toImporter(id));
     }
 
     private Optional<I> routeImport(EventEnvelope event) {
@@ -391,7 +391,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             Set<I> ids = eventImportRouting.apply(message, context);
             int numberOfTargets = ids.size();
             String messageType = message.getClass()
-                                 .getName();
+                                        .getName();
             checkState(
                     numberOfTargets > 0,
                     "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",

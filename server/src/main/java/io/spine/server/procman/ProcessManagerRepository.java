@@ -84,8 +84,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
-                extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcherDelegate<I> {
+        extends EventDispatchingRepository<I, P, S>
+        implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
     private final Supplier<CommandRouting<I>> commandRouting;
@@ -146,11 +146,12 @@ public abstract class ProcessManagerRepository<I,
      * </ul>
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
+     *
      * @param context
      *         the Bounded Context of this repository
      * @throws IllegalStateException
-     *          if the Process Manager class of this repository does not declare message
-     *          handling methods
+     *         if the Process Manager class of this repository does not declare message
+     *         handling methods
      */
     @Override
     @OverridingMethodsMustInvokeSuper
@@ -185,7 +186,7 @@ public abstract class ProcessManagerRepository<I,
      * of an event message.
      *
      * @param routing
-     *          the routing to customize
+     *         the routing to customize
      */
     @Override
     @OverridingMethodsMustInvokeSuper
@@ -290,14 +291,15 @@ public abstract class ProcessManagerRepository<I,
      * <p>If there is no stored process manager with such an ID,
      * a new process manager is created and stored after it handles the passed command.
      *
-     * @param command a request to dispatch
+     * @param command
+     *         a request to dispatch
      */
     @Override
     public void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         Optional<I> target = route(command);
         target.ifPresent(id -> inbox().send(command)
-                                    .toHandler(id));
+                                      .toHandler(id));
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
@@ -331,7 +333,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        inbox().send(EventEnvelope.of(event)).toReactor(id);
+        inbox().send(EventEnvelope.of(event))
+               .toReactor(id);
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
@@ -397,7 +400,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public void close() {
         super.close();
-        if(inbox != null) {
+        if (inbox != null) {
             inbox.unregister();
         }
     }
