@@ -20,20 +20,24 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.Command;
+import io.spine.base.Error;
 import io.spine.core.CommandId;
+import io.spine.core.CommandValidationError;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.server.commandbus.DuplicateCommandException;
-import io.spine.server.event.DuplicateEventException;
+import io.spine.core.EventValidationError;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
 import java.util.function.Predicate;
+
+import static io.spine.core.CommandValidationError.DUPLICATE_COMMAND_VALUE;
+import static io.spine.core.EventValidationError.DUPLICATE_EVENT_VALUE;
+import static java.lang.String.format;
 
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
- * If it was, the exception is thrown.
  */
 final class IdempotencyGuard {
 
@@ -46,34 +50,54 @@ final class IdempotencyGuard {
     /**
      * Checks that the command was not dispatched to the aggregate.
      *
-     * <p>If it was a {@link DuplicateCommandException} is thrown.
-     *
      * @param command
      *         an envelope with a command to check
-     * @throws DuplicateCommandException
-     *         if the command was dispatched to the aggregate
+     * @return duplicate command error if the command has been recently handled,
+     *         {@code Optional.empty()} otherwise
      */
-    void check(CommandEnvelope command) {
+    Optional<Error> check(CommandEnvelope command) {
         if (didHandleRecently(command)) {
-            Command outerObject = command.outerObject();
-            throw DuplicateCommandException.of(outerObject);
+            String errorMessage = format(
+                    "Command %s[%s] is a duplicate.",
+                    command.messageClass(),
+                    command.id().value()
+            );
+            Error error = Error
+                    .newBuilder()
+                    .setType(CommandValidationError.class.getSimpleName())
+                    .setCode(DUPLICATE_COMMAND_VALUE)
+                    .setMessage(errorMessage)
+                    .vBuild();
+            return Optional.of(error);
+        } else {
+            return Optional.empty();
         }
     }
 
     /**
      * Checks that the event was not dispatched to the aggregate.
      *
-     * <p>If it was a {@link DuplicateEventException} is thrown.
-     *
      * @param event
      *         an envelope with an event to check
-     * @throws DuplicateEventException
-     *         if the event was dispatched to the aggregate
+     * @return duplicate event error if the event has been recently handled,
+     *         {@code Optional.empty()} otherwise
      */
-    void check(EventEnvelope event) {
+    Optional<Error> check(EventEnvelope event) {
         if (didHandleRecently(event)) {
-            Event outerObject = event.outerObject();
-            throw new DuplicateEventException(outerObject);
+            String errorMessage = format(
+                    "Event %s[%s] is a duplicate.",
+                    event.messageClass(),
+                    event.id().value()
+            );
+            Error error = Error
+                    .newBuilder()
+                    .setType(EventValidationError.class.getSimpleName())
+                    .setCode(DUPLICATE_EVENT_VALUE)
+                    .setMessage(errorMessage)
+                    .vBuild();
+            return Optional.of(error);
+        } else {
+            return Optional.empty();
         }
     }
 

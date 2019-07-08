@@ -27,6 +27,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -45,6 +46,7 @@ import io.spine.server.type.EventEnvelope;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -115,6 +117,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <B>
  *         the type of the aggregate state builder
  */
+// TODO:2019-07-08:dmytro.dashenkov: Remove some dependencies.
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S>>
@@ -228,10 +231,19 @@ public abstract class Aggregate<I,
      */
     @Override
     protected PropagationOutcome dispatchCommand(CommandEnvelope command) {
-        idempotencyGuard.check(command);
-        CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
-        PropagationOutcome outcome = method.invoke(this, command);
-        return outcome;
+        Optional<Error> error = idempotencyGuard.check(command);
+        if (error.isPresent()) {
+            PropagationOutcome outcome = PropagationOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(command.messageId())
+                    .setError(error.get())
+                    .vBuild();
+            return outcome;
+        } else {
+            CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
+            PropagationOutcome outcome = method.invoke(this, command);
+            return outcome;
+        }
     }
 
     /**
@@ -246,10 +258,19 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change because of the event
      */
     PropagationOutcome reactOn(EventEnvelope event) {
-        idempotencyGuard.check(event);
-        EventReactorMethod method =
-                thisClass().reactorOf(event.messageClass(), event.originClass());
-        return method.invoke(this, event);
+        Optional<Error> error = idempotencyGuard.check(event);
+        if (error.isPresent()) {
+            PropagationOutcome outcome = PropagationOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event.messageId())
+                    .setError(error.get())
+                    .vBuild();
+            return outcome;
+        } else {
+            EventReactorMethod method =
+                    thisClass().reactorOf(event.messageClass(), event.originClass());
+            return method.invoke(this, event);
+        }
     }
 
     /**
