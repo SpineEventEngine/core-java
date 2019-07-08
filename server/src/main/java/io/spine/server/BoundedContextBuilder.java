@@ -30,6 +30,7 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.Listener;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -262,7 +263,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Adds a listener for commands posted to the {@code CommandBus} of the context being built.
      */
-    public BoundedContextBuilder addCommandListener(Consumer<CommandEnvelope> listener) {
+    public BoundedContextBuilder addCommandListener(Listener<CommandEnvelope> listener) {
         checkNotNull(listener);
         commandBus.addListener(listener);
         return this;
@@ -299,7 +300,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Adds a listener of the events posted to the {@code EventBus} of the context being built.
      */
-    public BoundedContextBuilder addEventListener(Consumer<EventEnvelope> listener) {
+    public BoundedContextBuilder addEventListener(Listener<EventEnvelope> listener) {
         checkNotNull(listener);
         eventBus.addListener(listener);
         return this;

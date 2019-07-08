@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -252,7 +251,7 @@ public abstract class Bus<T extends Message,
     }
 
     @VisibleForTesting
-    public boolean hasListener(Consumer<E> listener) {
+    public boolean hasListener(Listener<E> listener) {
         return listeners.contains(listener);
     }
 
