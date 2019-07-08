@@ -21,11 +21,12 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.Version;
 import io.spine.logging.Logging;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
@@ -41,7 +42,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Functions.identity;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -144,12 +147,16 @@ abstract class AggregateEndpoint<I,
         Map<EventId, Event.Builder> correctedEvents = eventsBuilder
                 .getEventBuilderList()
                 .stream()
-                .collect(ImmutableMap.toImmutableMap(Event.Builder::getId, builder -> builder));
+                .collect(toImmutableMap(Event.Builder::getId, identity()));
         for (PropagationOutcome outcome : eventPropagation.getOutcomeList()) {
-            EventId eventId = unpack(outcome.getPropagatedSignal().getId(), EventId.class);
+            Any signalId = outcome.getPropagatedSignal()
+                                  .getId();
+            EventId eventId = unpack(signalId, EventId.class);
             Event.Builder event = checkNotNull(correctedEvents.get(eventId));
+            Version signalVersion = outcome.getPropagatedSignal()
+                                           .getVersion();
             event.getContextBuilder()
-                 .setVersion(outcome.getPropagatedSignal().getVersion());
+                 .setVersion(signalVersion);
         }
         return correctedCommandOutcome.vBuild();
     }
