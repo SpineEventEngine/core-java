@@ -27,10 +27,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -73,9 +71,6 @@ public class CommandBus extends UnicastBus<Command,
                                            CommandEnvelope,
                                            CommandClass,
                                            CommandDispatcher<?>> {
-
-    private static final Any REJECTION_PRODUCER_ID =
-            Identifier.pack(CommandBus.class.getSimpleName());
 
     /** Consumes tenant IDs from incoming commands. */
     private final Consumer<TenantId> tenantConsumer;

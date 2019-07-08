@@ -35,7 +35,7 @@ public class DelegatingEventDispatcherTestEnv {
     }
 
     public static final class DummyEventDispatcherDelegate
-            implements EventDispatcherDelegate<String> {
+            implements EventDispatcherDelegate {
 
         @Override
         public Set<EventClass> domesticEvents() {

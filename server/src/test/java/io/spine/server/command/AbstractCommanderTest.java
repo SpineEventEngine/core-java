@@ -28,7 +28,6 @@ import io.spine.core.UserId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventFactory;
 import io.spine.server.tuple.Pair;
 import io.spine.test.command.CmdAssignTask;
@@ -77,7 +76,6 @@ class AbstractCommanderTest {
                                              CmdAssignTask.class,
                                              CmdStartTask.class);
         boundedContext.registerCommandDispatcher(commander);
-        boundedContext.registerEventDispatcher(DelegatingEventDispatcher.of(commander));
         boundedContext.registerCommandDispatcher(interceptor);
     }
 

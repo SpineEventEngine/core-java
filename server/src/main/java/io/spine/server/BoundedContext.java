@@ -267,13 +267,17 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
         }
+        if (dispatcher instanceof EventDispatcherDelegate) {
+            EventDispatcherDelegate eventDispatcher = (EventDispatcherDelegate) dispatcher;
+            registerEventDispatcher(eventDispatcher);
+        }
     }
 
     /**
      * Registers the passed command dispatcher with the {@code CommandBus} of
      * this {@code BoundedContext}.
      */
-    public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
+    private void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
         initialize(dispatcher);
         if (dispatcher.dispatchesCommands()) {
@@ -309,6 +313,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         if (dispatcher.dispatchesExternalEvents()) {
             registerWithIntegrationBus(dispatcher);
         }
+        if (dispatcher instanceof CommandDispatcherDelegate) {
+            CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
+            registerCommandDispatcher(commandDispatcher);
+        }
     }
 
     /**
@@ -317,7 +325,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #registerEventDispatcher(EventDispatcher)
      */
-    public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
+    private void registerEventDispatcher(EventDispatcherDelegate dispatcher) {
         checkNotNull(dispatcher);
         initialize(dispatcher);
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);

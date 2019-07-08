@@ -52,7 +52,7 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
-        implements Commander, EventDispatcherDelegate<String> {
+        implements Commander, EventDispatcherDelegate {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     @LazyInit

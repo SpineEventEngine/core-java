@@ -36,11 +36,10 @@ import java.util.Set;
  * messages other than events (by implementing {@link io.spine.server.bus.MessageDispatcher
  * MessageDispatcher}), and dispatch events by implementing this interface.
  *
- * @param <I> the type of IDs of entities subscribed to events
  * @see DelegatingEventDispatcher
  */
 @Internal
-public interface EventDispatcherDelegate<I> {
+public interface EventDispatcherDelegate {
 
     /**
      * Obtains event classes dispatched by this delegate.
