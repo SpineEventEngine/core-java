@@ -87,6 +87,7 @@ abstract class AbstractCommandBusTestSuite {
     protected MemoizingObserver<Ack> observer;
     protected TenantIndex tenantIndex;
     protected SystemWriteSide systemWriteSide;
+    protected BoundedContext context;
 
     /**
      * A public constructor for derived test cases.
@@ -158,7 +159,7 @@ abstract class AbstractCommandBusTestSuite {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext context = createContext();
+        context = createContext();
 
         tenantIndex = context.tenantIndex();
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
@@ -172,13 +173,12 @@ abstract class AbstractCommandBusTestSuite {
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
-
         requestFactory =
                 multitenant
                 ? new TestActorRequestFactory(getClass(), newUuid())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
-        createProjectHandler.injectEventBus(eventBus);
+        context.registerCommandDispatcher(createProjectHandler);
         observer = memoizingObserver();
     }
 

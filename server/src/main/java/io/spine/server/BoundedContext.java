@@ -28,7 +28,6 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
-import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -267,9 +266,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         initialize(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
-            if (dispatcher instanceof AbstractCommandHandler) {
-                ((AbstractCommandHandler) dispatcher).injectEventBus(eventBus());
-            }
         }
     }
 

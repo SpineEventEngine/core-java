@@ -57,7 +57,7 @@ public abstract class AbstractCommandDispatcher
 
     /** Supplier for a packed version of the dispatcher ID. */
     private final Supplier<Any> producerId =
-            memoize(() -> pack(TypeConverter.toMessage(getId())));
+            memoize(() -> pack(TypeConverter.toMessage(id())));
     private final Supplier<MessageId> eventAnchor = memoize(() -> MessageId
             .newBuilder()
             .setId(producerId())
@@ -83,12 +83,12 @@ public abstract class AbstractCommandDispatcher
      *
      * @return the string with the handler identity
      */
-    public String getId() {
+    public String id() {
         return getClass().getName();
     }
 
     /**
-     * Obtains {@linkplain #getId() ID} packed into {@code Any} for being used in generated events.
+     * Obtains {@linkplain #id() ID} packed into {@code Any} for being used in generated events.
      */
     public Any producerId() {
         return producerId.get();
@@ -130,12 +130,12 @@ public abstract class AbstractCommandDispatcher
             return false;
         }
         AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) o;
-        boolean equals = getId().equals(otherHandler.getId());
+        boolean equals = id().equals(otherHandler.id());
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return getId().hashCode();
+        return id().hashCode();
     }
 }

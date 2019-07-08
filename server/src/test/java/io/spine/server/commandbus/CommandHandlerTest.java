@@ -67,7 +67,6 @@ class CommandHandlerTest {
         commandBus = boundedContext.commandBus();
         eventBus = boundedContext.eventBus();
         handler = new TestCommandHandler();
-        handler.injectEventBus(eventBus);
         boundedContext.registerCommandDispatcher(handler);
     }
 

@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
@@ -77,7 +78,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @DisplayName("not schedule command if no scheduling options are set")
     void notScheduleWithoutOptions() {
         CreateProjectHandler handler = new CreateProjectHandler();
-        handler.injectEventBus(eventBus);
+        handler.initialize(BoundedContextBuilder.assumingTests().build());
         commandBus.register(handler);
 
         Command command = createProject();
