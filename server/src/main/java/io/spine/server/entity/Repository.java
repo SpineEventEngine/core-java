@@ -268,7 +268,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * The callback called by a {@link BoundedContext} when adding the repository.
+     * The callback is invoked by a {@link BoundedContext} when adding the repository.
      */
     @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
     @OverridingMethodsMustInvokeSuper
