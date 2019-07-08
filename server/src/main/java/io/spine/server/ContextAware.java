@@ -24,17 +24,41 @@ import io.spine.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkState;
 
+/**
+ * An integral part of a Bounded Context which is aware of the other parts.
+ */
 @Internal
 public interface ContextAware {
 
+    /**
+     * Initializes this instance as a part of the given Bounded Context.
+     *
+     * <p>This method should be only called once. However, it is allowed to initialize a single
+     * instance many times with the <strong>same</strong> Bounded Context.
+     *
+     * @param context the Context to which this instance belongs
+     */
     void initialize(BoundedContext context);
 
+    /**
+     * Determines if this instance is already initialized with a Bounded Context.
+     */
     boolean isInitialized();
 
+    /**
+     * Verifies that this instance is already initialized.
+     *
+     * <p>Throws an {@code IllegalStateException} if not initialized.
+     */
     default void checkInitialized() {
         checkState(isInitialized(), "%s is NOT initialized.", this);
     }
 
+    /**
+     * Verifies that this instance is NOT initialized yet.
+     *
+     * <p>Throws an {@code IllegalStateException} if already initialized.
+     */
     default void checkNotInitialized() {
         checkState(!isInitialized(), "%s is already initialized.", this);
     }
