@@ -30,6 +30,7 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
@@ -201,6 +202,38 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Convenience method for handling the cases of passing a repository, which is also a message
+     * dispatcher to {@code addXxxDispatcher()} and {@code removeXxxDispatcher()} methods.
+     *
+     * <p>Such a call can be made by a developer (presumably by mistake) because some repositories
+     * <em>are</em> command- or event- dispatchers. Event though the methods
+     * {@link #add(Repository)} and {@link #remove(Repository)} is the correct way of handling
+     * removing repositories, we do not want to play hard in this case, and simply divert the flow
+     * to process the passed {@code Repository} via correct counterpart methods.
+     *
+     * @param dispatcher
+     *         the instance to handle
+     * @param repositoryConsumer
+     *         the operation to perform if the passed instance is a {@code Repository}
+     * @param dispatcherConsumer
+     *         the operation to perform if the passed instance is a not a {@code Repository}
+     * @param <D>
+     *         the type of the dispatchers
+     * @return this builder
+     */
+    private <D extends MessageDispatcher<?, ?, ?>>
+    BoundedContextBuilder ifRepository(D dispatcher,
+                                       Consumer<Repository<?, ?>> repositoryConsumer,
+                                       Consumer<D> dispatcherConsumer) {
+        if (dispatcher instanceof Repository) {
+            repositoryConsumer.accept((Repository<?, ?>) dispatcher);
+        } else {
+            dispatcherConsumer.accept(dispatcher);
+        }
+        return this;
+    }
+
+    /**
      * Adds the passed command dispatcher to the dispatcher registration list which will be
      * processed after the Bounded Context is created.
      *
@@ -211,11 +244,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
-        if (commandDispatcher instanceof Repository) {
-            return add((Repository<?, ?>) commandDispatcher);
-        }
-        commandDispatchers.add(commandDispatcher);
-        return this;
+        return ifRepository(commandDispatcher, this::add, commandDispatchers::add);
     }
 
     /**
@@ -250,11 +279,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
-        if (eventDispatcher instanceof Repository) {
-            return add((Repository<?, ?>) eventDispatcher);
-        }
-        eventDispatchers.add(eventDispatcher);
-        return this;
+        return ifRepository(eventDispatcher, this::add, eventDispatchers::add);
     }
 
     /**
@@ -307,11 +332,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
-        if (commandDispatcher instanceof Repository) {
-            return remove((Repository<?, ?>) commandDispatcher);
-        }
-        commandDispatchers.remove(commandDispatcher);
-        return this;
+        return ifRepository(commandDispatcher, this::remove, commandDispatchers::remove);
     }
 
     /**
@@ -320,11 +341,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
-        if (eventDispatcher instanceof Repository) {
-            return remove((Repository<?, ?>) eventDispatcher);
-        }
-        eventDispatchers.remove(eventDispatcher);
-        return this;
+        return ifRepository(eventDispatcher, this::remove, eventDispatchers::remove);
     }
 
     /**
