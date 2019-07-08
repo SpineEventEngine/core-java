@@ -312,6 +312,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
         super.onRoutingFailed(envelope, cause);
         if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
+            // TODO:2019-07-08:dmytro.dashenkov: Extract.
             CommandEnvelope command = (CommandEnvelope) envelope;
             ThrowableMessage rejection = (ThrowableMessage) cause;
             RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
