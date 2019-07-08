@@ -27,7 +27,7 @@ import io.spine.system.server.SystemContext;
 import static java.lang.String.format;
 
 /**
- * Controls which class can call a method.
+ * Controls which class is allowed to call a method.
  */
 public final class Security extends SecurityManager {
 
