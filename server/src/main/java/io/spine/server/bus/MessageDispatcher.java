@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -54,7 +53,6 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      *
      * @param envelope the envelope with the message
      */
-    @CanIgnoreReturnValue
     void dispatch(E envelope);
 
     /**
