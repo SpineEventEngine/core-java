@@ -21,7 +21,6 @@
 package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.annotation.Internal;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Deque;
@@ -34,16 +33,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <E> type of the filtered envelopes
  */
-@Internal
 @CanIgnoreReturnValue
-public final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
+final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
 
     private final Deque<BusFilter<E>> filters = new ConcurrentLinkedDeque<>();
 
     /**
      * Appends the given {@link BusFilter} to the tail of the built chain.
      */
-    public ChainBuilder<E> append(BusFilter<E> filter) {
+    ChainBuilder<E> append(BusFilter<E> filter) {
         checkNotNull(filter);
         filters.addLast(filter);
         return this;
@@ -52,7 +50,7 @@ public final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
     /**
      * Prepends the given {@link BusFilter} to the head of the built chain.
      */
-    public ChainBuilder<E> prepend(BusFilter<E> filter) {
+    ChainBuilder<E> prepend(BusFilter<E> filter) {
         checkNotNull(filter);
         filters.addFirst(filter);
         return this;
@@ -63,7 +61,7 @@ public final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
      *
      * @return new {@link Deque} containing all the filters
      */
-    public Deque<BusFilter<E>> filters() {
+    Deque<BusFilter<E>> filters() {
         return new ConcurrentLinkedDeque<>(filters);
     }
 

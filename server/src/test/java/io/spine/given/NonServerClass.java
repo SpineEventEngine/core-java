@@ -18,24 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.contexts.tasks;
+package io.spine.given;
 
-import io.spine.server.BoundedContext;
+import io.spine.server.security.GivenRestrictedApi;
 
 /**
- * Creates an instance of the Tasks Bounded Context.
+ * A test environment class for {@link io.spine.server.security.InvocationGuardTest},
+ * which belongs to the framework namespace but is outside of the {@code io.spine.server} package.
+ *
+ * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitFrameworkButNonServer
  */
-public final class TasksContext {
+public final class NonServerClass {
 
-    private TasksContext() {
-    }
+    private NonServerClass() {}
 
-    public static BoundedContext newInstance() {
-        BoundedContext result = BoundedContext
-                .singleTenant("Tasks")
-                .add(new TaskRepository())
-                .addCommandDispatcher(new CreationRetry())
-                .build();
-        return result;
+    public static void attemptToCallRestrictedApi() {
+        GivenRestrictedApi.guardedMethod();
     }
 }

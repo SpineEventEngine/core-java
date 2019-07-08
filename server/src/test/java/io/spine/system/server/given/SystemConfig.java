@@ -18,24 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.contexts.tasks;
+package io.spine.system.server.given;
 
-import io.spine.server.BoundedContext;
+import io.spine.server.security.Security;
 
 /**
- * Creates an instance of the Tasks Bounded Context.
+ * Test environment class for testing {@link Security}.
+ *
+ * @see io.spine.server.security.SecurityTest.ServerFramework#allowFromSystemServerPackages()
  */
-public final class TasksContext {
+public class SystemConfig {
 
-    private TasksContext() {
-    }
+    private SystemConfig() {}
 
-    public static BoundedContext newInstance() {
-        BoundedContext result = BoundedContext
-                .singleTenant("Tasks")
-                .add(new TaskRepository())
-                .addCommandDispatcher(new CreationRetry())
-                .build();
-        return result;
+    public static void guardedCall() {
+        Security.allowOnlyFrameworkServer();
     }
 }

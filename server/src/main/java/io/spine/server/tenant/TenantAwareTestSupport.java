@@ -23,7 +23,7 @@ package io.spine.server.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
-import io.spine.server.security.InvocationGuard;
+import io.spine.security.InvocationGuard;
 
 /**
  * Support utility for tenant-aware tests.

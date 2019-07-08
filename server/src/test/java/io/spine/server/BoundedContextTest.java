@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.example.OutsideContextConfig;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.truth.Truth8;
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -446,5 +448,44 @@ class BoundedContextTest {
                                  .build()
                                  .toString())
                 .isEqualTo(name);
+    }
+
+    @Nested
+    @DisplayName("do not allow registration calls from outside the `io.spine.server` package for")
+    class RestrictRegistrationCalls {
+
+        @Test
+        @DisplayName("`Repository`")
+        void forRepository() {
+            assertThrowsOn(OutsideContextConfig::repositoryRegistration);
+        }
+
+        @Test
+        @DisplayName("`CommandDispatcher`")
+        void forCommandDispatcher() {
+            assertThrowsOn(OutsideContextConfig::commandDispatcherRegistration);
+        }
+
+        @Test
+        @DisplayName("`CommandDispatcherDelegate`")
+        void forCommandDispatcherDelegate() {
+            assertThrowsOn(OutsideContextConfig::commandDispatcherDelegateRegistration);
+        }
+
+        @Test
+        @DisplayName("`EventDispatcher`")
+        void forEventDispatcher() {
+            assertThrowsOn(OutsideContextConfig::eventDispatcherRegistration);
+        }
+
+        @Test
+        @DisplayName("`EventDispatcherDelegate`")
+        void forEventDispatcherDelegate() {
+            assertThrowsOn(OutsideContextConfig::eventDispatcherDelegateRegistration);
+        }
+
+        private void assertThrowsOn(Executable executable) {
+            assertThrows(SecurityException.class, executable);
+        }
     }
 }

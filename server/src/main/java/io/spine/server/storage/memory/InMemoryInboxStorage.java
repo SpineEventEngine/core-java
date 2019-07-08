@@ -25,12 +25,11 @@ import io.spine.logging.Logging;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.InboxMessageId;
-import io.spine.server.delivery.InboxMessageStatus;
 import io.spine.server.delivery.InboxReadRequest;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
-import io.spine.validate.Validated;
+import io.spine.server.storage.AbstractStorage;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -40,7 +39,9 @@ import static com.google.protobuf.util.Timestamps.compare;
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
  */
-public final class InMemoryInboxStorage extends InboxStorage implements Logging {
+public final class InMemoryInboxStorage
+        extends AbstractStorage<InboxMessageId, InboxMessage, InboxReadRequest>
+        implements InboxStorage, Logging {
 
     private final MultitenantStorage<TenantInboxRecords> multitenantStorage;
 
@@ -74,12 +75,9 @@ public final class InMemoryInboxStorage extends InboxStorage implements Logging 
     }
 
     @Override
-    public void markDelivered(Iterable<InboxMessage> messages) {
-        for (InboxMessage message : messages) {
-            @Validated InboxMessage updated = message.toBuilder()
-                                                      .setStatus(InboxMessageStatus.DELIVERED)
-                                                      .vBuild();
-            write(updated);
+    public void writeAll(Iterable<InboxMessage> messages) {
+        for (InboxMessage inboxMessage : messages) {
+            write(inboxMessage);
         }
     }
 

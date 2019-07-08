@@ -21,36 +21,13 @@
 package io.spine.server.security;
 
 /**
- * Provides information about the class calling a method.
+ * Test environment class for {@link SecurityTest.ServerFramework#allowFormServerPackages()}
  */
-final class CallerProvider extends SecurityManager {
+public class GivenRestrictedApi {
 
-    private static final CallerProvider INSTANCE = new CallerProvider();
+    private GivenRestrictedApi() {}
 
-    /**
-     * Obtains the instance.
-     */
-    static CallerProvider instance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Obtains the class of the object which calls the method from which this method
-     * is being called.
-     */
-    Class getCallerClass() {
-        Class[] context = getClassContext();
-        Class result = context[2];
-        return result;
-    }
-
-    /**
-     * Obtains the class preceding in call chain the class which calls the
-     * method from which this method is being called.
-     */
-    Class getPreviousCallerClass() {
-        Class[] context = getClassContext();
-        Class result = context[3];
-        return result;
+    public static void guardedMethod() {
+        Security.allowOnlyFrameworkServer();
     }
 }
