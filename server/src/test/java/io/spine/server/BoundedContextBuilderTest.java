@@ -31,6 +31,7 @@ import io.spine.server.bc.given.Given.NoOpEventDispatcher;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.Listener;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventDispatcher;
@@ -45,7 +46,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -376,7 +376,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("commands")
         void forCommands() {
-            Consumer<CommandEnvelope> listener = c -> {};
+            Listener<CommandEnvelope> listener = c -> {};
 
             builder.addCommandListener(listener);
 
@@ -388,7 +388,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("events")
         void forEvents() {
-            Consumer<EventEnvelope> listener = c -> {};
+            Listener<EventEnvelope> listener = c -> {};
 
             builder.addEventListener(listener);
 
