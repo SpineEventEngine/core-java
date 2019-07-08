@@ -24,11 +24,11 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.type.TypeName;
 
+import static io.spine.core.CommandValidationError.DUPLICATE_COMMAND_VALUE;
 import static java.lang.String.format;
 
 /**
@@ -69,7 +69,7 @@ public class DuplicateCommandException extends CommandException implements Messa
     public static Error error(Message commandMessage, String errorText) {
         Error.Builder error = Error.newBuilder()
                                    .setType(DuplicateCommandException.class.getCanonicalName())
-                                   .setCode(CommandValidationError.DUPLICATE_COMMAND.getNumber())
+                                   .setCode(DUPLICATE_COMMAND_VALUE)
                                    .setMessage(errorText)
                                    .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
