@@ -533,6 +533,6 @@ class ProjectionRepositoryTest
                 .build();
 
         assertThrows(IllegalStateException.class, () ->
-                repo.initialize(context));
+                repo.init(context));
     }
 }

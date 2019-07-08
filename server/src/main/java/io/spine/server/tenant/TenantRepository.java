@@ -59,8 +59,11 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
     }
 
     @Override
-    public final void registerWith(BoundedContext context) {
-        context.register(this);
+    public final void init(BoundedContext context) {
+        if (!isInitialized()) {
+            super.init(context);
+            context.register(this);
+        }
     }
 
     @Override

@@ -73,7 +73,7 @@ public abstract class DefaultRecordBasedRepository<I,
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
+    public void init(BoundedContext context) {
         super.init(context);
         @SuppressWarnings("unused") // Trigger the method to initialize the converter.
         StorageConverter<I, E, S> unused = storageConverter();

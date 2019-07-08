@@ -200,9 +200,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *          if the repository has a context value already assigned, and the passed value is
      *          not equal to the assigned one
      */
+    @OverridingMethodsMustInvokeSuper
     @Override
     @Internal
-    public final void initialize(BoundedContext context) {
+    public void init(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -212,37 +213,26 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                             " Attempted to set: `%s`.",
                     this, this.context, context);
         }
-
         if (sameValue) {
             return;
         }
         this.context = context;
         open();
-        init(context);
-    }
-
-    @Override
-    public boolean isInitialized() {
-        return context != null;
-    }
-
-    /**
-     * Initializes the repository during its {@linkplain BoundedContext#register(Repository)
-     * registration} with a {@code BoundedContext}.
-     *
-     * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
-     * of the parent {@code BoundedContext}.
-     *
-     * @param context
-     *          the {@code BoundedContext} of this repository
-     */
-    @Internal
-    @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
         if (isTypeSupplier()) {
             context.stand()
                    .registerTypeSupplier(this);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unlike, {@link #isOpen()}, once the repository is
+     * {@linkplain #init(BoundedContext) initialized}, this method always returns {@code true}.
+     */
+    @Override
+    public boolean isInitialized() {
+        return context != null;
     }
 
     /**

@@ -38,7 +38,7 @@ public interface ContextAware {
      *
      * @param context the Context to which this instance belongs
      */
-    void initialize(BoundedContext context);
+    void init(BoundedContext context);
 
     /**
      * Determines if this instance is already initialized with a Bounded Context.

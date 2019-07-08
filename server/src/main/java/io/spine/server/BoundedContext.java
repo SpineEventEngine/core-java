@@ -131,7 +131,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     protected final void init() {
         eventBus.init(this);
-        tenantIndex.registerWith(this);
+        tenantIndex.init(this);
     }
     
     /**
@@ -336,7 +336,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         if (registered instanceof ContextAware) {
             ContextAware contextAware = (ContextAware) registered;
             if (!contextAware.isInitialized()) {
-                contextAware.initialize(this);
+                contextAware.init(this);
             }
         }
     }

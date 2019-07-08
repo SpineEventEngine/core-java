@@ -154,7 +154,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
+    public void init(BoundedContext context) {
         super.init(context);
         setupCommandRouting(commandRouting());
         checkNotDeaf();

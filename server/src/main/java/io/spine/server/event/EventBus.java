@@ -32,6 +32,7 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
@@ -88,7 +89,9 @@ import static java.lang.String.format;
  * @see io.spine.server.projection.Projection Projection
  * @see io.spine.core.Subscribe @Subscribe
  */
-public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+public class EventBus
+        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>>
+        implements ContextAware {
 
     /*
      * NOTE: Even though the EventBus has a private constructor and
@@ -268,6 +271,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         return (EventDispatcherRegistry) super.registry();
     }
 
+    @Override
     @Internal
     public void init(BoundedContext context) {
         eventStore =
@@ -275,6 +279,11 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
                                  .storageFactory()
                                  .createEventStore(context.spec());
         eventStore.init(context);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return eventStore.isInitialized();
     }
 
     /** The {@code Builder} for {@code EventBus}. */

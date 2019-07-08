@@ -246,8 +246,8 @@ abstract class AbstractCommandBusTestSuite {
         private final Set<CommandMessage> receivedCommands = newHashSet();
 
         @Override
-        public final void initialize(BoundedContext context) {
-            super.initialize(context);
+        public final void init(BoundedContext context) {
+            super.init(context);
         }
 
         @Assign

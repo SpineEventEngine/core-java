@@ -83,10 +83,10 @@ public final class DefaultEventStore
     @Override
     @SuppressWarnings({"OverridingMethodsMustInvokeSuper", "MissingSuperCall"}) // see impl. note
     public void init(BoundedContext context) {
-        if (isOpen()) { // quit recursion.
-            return;
+        if (!isInitialized()) { // quit recursion.
+            super.init(context);
+            context.register(this);
         }
-        context.register(this);
     }
 
     @Override

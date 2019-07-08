@@ -59,8 +59,8 @@ public abstract class AbstractCommander
     private @MonotonicNonNull CommandBus commandBus;
 
     @Override
-    public void initialize(BoundedContext context) {
-        super.initialize(context);
+    public void init(BoundedContext context) {
+        super.init(context);
         commandBus = context.commandBus();
     }
 

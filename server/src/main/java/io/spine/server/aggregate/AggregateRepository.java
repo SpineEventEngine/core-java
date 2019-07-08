@@ -131,7 +131,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
+    public void init(BoundedContext context) {
         checkNotVoid();
 
         super.init(context);

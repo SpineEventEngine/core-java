@@ -68,7 +68,7 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
+    public void init(BoundedContext context) {
         super.init(context);
         context.registerEventDispatcher(this);
         setupEventRouting(eventRouting());

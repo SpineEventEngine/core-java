@@ -78,7 +78,7 @@ public abstract class AbstractEventSubscriber
     private @MonotonicNonNull BoundedContextName contextName;
 
     @Override
-    public void initialize(BoundedContext context) {
+    public void init(BoundedContext context) {
         checkNotNull(context);
         checkNotInitialized();
         contextName = context.name();

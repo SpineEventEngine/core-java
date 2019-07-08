@@ -88,7 +88,7 @@ public abstract class AbstractEventReactor
             memoize(() -> TypeConverter.toAny(getClass().getName()));
 
     @Override
-    public void initialize(BoundedContext context) {
+    public void init(BoundedContext context) {
         checkNotInitialized();
         eventBus = context.eventBus();
         system = context.systemClient().writeSide();

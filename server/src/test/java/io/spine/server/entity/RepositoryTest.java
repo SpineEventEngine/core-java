@@ -134,14 +134,14 @@ class RepositoryTest {
                     .singleTenant("Context-1")
                     .build();
             assertThrows(IllegalStateException.class, () ->
-                    repository.initialize(anotherContext));
+                    repository.init(anotherContext));
         }
 
         @Test
         @DisplayName("allowing passing the same value twice")
         void idempotency() {
             // Previous value was set on registration.
-            repository.initialize(context);
+            repository.init(context);
             assertThat(repository.context())
                     .isEqualTo(context);
         }
