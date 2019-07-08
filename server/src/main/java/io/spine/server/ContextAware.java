@@ -25,7 +25,7 @@ import io.spine.annotation.Internal;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * An integral part of a Bounded Context which is aware of the other parts.
+ * An structural part of a Bounded Context which is aware of the other parts.
  */
 @Internal
 public interface ContextAware {
@@ -34,9 +34,11 @@ public interface ContextAware {
      * Initializes this instance as a part of the given Bounded Context.
      *
      * <p>This method should be only called once. However, it is allowed to initialize a single
-     * instance many times with the <strong>same</strong> Bounded Context.
+     * instance many times with the <strong>same</strong> Bounded Context. If the same instance is
+     * initialized with different Contexts, a runtime exception is thrown.
      *
-     * @param context the Context to which this instance belongs
+     * @param context
+     *         the Context to which this instance belongs
      */
     void init(BoundedContext context);
 
