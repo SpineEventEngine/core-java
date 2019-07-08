@@ -30,7 +30,6 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -136,13 +135,9 @@ class ProcessManagerTest {
                 .assumingTests(true)
                 .build();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false);
-
-        EventBus eventBus = EventBus.newBuilder()
-                                    .build();
         CommandBus commandBus = spy(CommandBus.newBuilder()
                                               .injectTenantIndex(tenantIndex)
                                               .injectSystem(NoOpSystemWriteSide.INSTANCE)
-                                              .injectEventBus(eventBus)
                                               .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)

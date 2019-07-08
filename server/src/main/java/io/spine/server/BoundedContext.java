@@ -117,7 +117,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
-        this.commandBus = buildCommandBus(builder, eventBus);
+        this.commandBus = buildCommandBus(builder);
         this.integrationBus = buildIntegrationBus(builder, eventBus, spec.name());
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
@@ -153,11 +153,10 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return result;
     }
 
-    private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
+    private static CommandBus buildCommandBus(BoundedContextBuilder builder) {
         Optional<CommandBus.Builder> busBuilder = builder.commandBus();
         checkState(busBuilder.isPresent());
         CommandBus result = busBuilder.get()
-                                      .injectEventBus(eventBus)
                                       .build();
         return result;
     }

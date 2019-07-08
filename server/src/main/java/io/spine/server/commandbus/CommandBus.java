@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -29,7 +28,6 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
@@ -40,8 +38,6 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
-import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -52,17 +48,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.bus.BusBuilder.FieldCheck.checkSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
-import static java.util.Optional.ofNullable;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -92,8 +85,6 @@ public class CommandBus extends UnicastBus<Command,
 
     private final DeadCommandHandler deadCommandHandler = new DeadCommandHandler();
 
-    private final EventBus eventBus;
-
     /**
      * Tha validator for the commands posted into this bus.
      *
@@ -117,7 +108,6 @@ public class CommandBus extends UnicastBus<Command,
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
         this.watcher = checkNotNull(builder.flowWatcher);
-        this.eventBus = checkNotNull(builder.eventBus);
     }
 
     /**
@@ -191,16 +181,7 @@ public class CommandBus extends UnicastBus<Command,
     protected void dispatch(CommandEnvelope command) {
         CommandDispatcher<?> dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);
-        try {
-            dispatcher.dispatch(command);
-        } catch (RuntimeException e) {
-            Throwable cause = Throwables.getRootCause(e);
-            if (cause instanceof ThrowableMessage) {
-                ThrowableMessage message = (ThrowableMessage) cause;
-                RejectionEnvelope rejection = RejectionEnvelope.from(command, message);
-                eventBus.post(rejection.outerObject());
-            }
-        }
+        dispatcher.dispatch(command);
     }
 
     /**
@@ -261,6 +242,7 @@ public class CommandBus extends UnicastBus<Command,
                                                    CommandEnvelope,
                                                    CommandClass,
                                                    CommandDispatcher<?>> {
+
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
          *
@@ -275,7 +257,6 @@ public class CommandBus extends UnicastBus<Command,
         private CommandFlowWatcher flowWatcher;
         private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
-        private EventBus eventBus;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -296,30 +277,6 @@ public class CommandBus extends UnicastBus<Command,
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
-        }
-
-        /**
-         * Inject the {@link EventBus} of the bounded context to which the built bus belongs.
-         *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
-         */
-        @Internal
-        public Builder injectEventBus(EventBus eventBus) {
-            checkNotNull(eventBus);
-            this.eventBus = eventBus;
-            return this;
-        }
-
-        Optional<EventBus> eventBus() {
-            return ofNullable(eventBus);
-        }
-
-        @Override
-        protected void checkFieldsSet() {
-            super.checkFieldsSet();
-            checkSet(eventBus, EventBus.class, "injectEventBus");
         }
 
         /**

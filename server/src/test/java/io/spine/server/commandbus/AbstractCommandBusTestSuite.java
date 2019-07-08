@@ -169,7 +169,6 @@ abstract class AbstractCommandBusTestSuite {
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .injectContext(context)
-                .injectEventBus(context.eventBus())
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
