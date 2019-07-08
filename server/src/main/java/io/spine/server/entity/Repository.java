@@ -386,6 +386,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         }
     }
 
+    /**
+     * A callback invoked when an exception is thrown from message routing.
+     *
+     * @param envelope the routed signal
+     * @param cause the root cause of the exception
+     */
     @OverridingMethodsMustInvokeSuper
     @Internal
     protected void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
