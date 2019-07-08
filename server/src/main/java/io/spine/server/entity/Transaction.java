@@ -42,6 +42,7 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.base.Errors.causeOf;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.lang.String.format;
@@ -233,6 +234,9 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
+    /**
+     * Obtains the {@link MessageId} of the entity under the transaction.
+     */
     MessageId entityId() {
         TypeUrl typeUrl = TypeUrl.of(entity.state()
                                            .getClass());
@@ -260,10 +264,13 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Propagates a phase and performs a rollback in case of an exception.
+     * Propagates a phase and performs a rollback in case of an error.
      *
      * <p>The transaction {@linkplain #listener() listener} is called for both failed and
      * successful phases.
+     *
+     * <p>If the signal propagation cases an error, a rejection, or an unhandled exception,
+     * the transaction is rolled back.
      *
      * @param phase
      *         the phase to propagate
@@ -273,19 +280,37 @@ public abstract class Transaction<I,
     protected final PropagationOutcome propagate(Phase<I> phase) {
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
+        PropagationOutcome outcome = propagateFailsafe(phase);
+        phases.add(phase);
+        listener.onAfterPhase(phase);
+        return outcome;
+    }
+
+    /**
+     * Propagates the given phase and catches any kind of failures.
+     *
+     * <p>The catch block in this method and in {@link #commit()} prevents from force majeure
+     * situations such as storage failures, etc. All the exceptions produced in the framework users'
+     * code are handled before this failsafe and is already packed in the {@code PropagationOutcome}
+     * produced by the phase.
+     *
+     * @see #propagate(Phase)
+     */
+    private PropagationOutcome propagateFailsafe(Phase<I> phase) {
         try {
             PropagationOutcome result = phase.propagate();
+            boolean phaseSuccess = result.hasSuccess() && !result.getSuccess().hasRejection();
+            if (!phaseSuccess) {
+                rollback(result.getError());
+            }
             return result;
         } catch (Throwable t) {
-            rollback(t);
+            rollback(causeOf(t));
             return PropagationOutcome
                     .newBuilder()
                     .setPropagatedSignal(phase.signal().messageId())
                     .setError(asError(t))
                     .vBuild();
-        } finally {
-            phases.add(phase);
-            listener.onAfterPhase(phase);
         }
     }
 
@@ -367,7 +392,7 @@ public abstract class Transaction<I,
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
         } catch (RuntimeException e) {
-            rollback(e);
+            rollback(causeOf(e));
         } finally {
             releaseTx();
         }
@@ -427,8 +452,7 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    final void rollback(Throwable cause) {
-        beforeRollback(cause);
+    final void rollback(Error cause) {
         TransactionListener<I> listener = listener();
         @NonValidated EntityRecord record = EntityRecord
                 .newBuilder()
@@ -440,15 +464,6 @@ public abstract class Transaction<I,
         listener.onTransactionFailed(cause, record);
         deactivate();
         entity.releaseTransaction();
-    }
-
-    /**
-     * Does necessary preparations before the transaction is marked as inactive and released.
-     */
-    @SuppressWarnings("NoopMethodInAbstractClass")
-    // Do not force descendants to override the method.
-    protected void beforeRollback(Throwable cause) {
-        // NO-OP.
     }
 
     /**

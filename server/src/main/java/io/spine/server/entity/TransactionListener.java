@@ -20,6 +20,7 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.validate.NonValidated;
 
 /**
@@ -62,13 +63,12 @@ public interface TransactionListener<I> {
     /**
      * A callback invoked if the commit has failed.
      *
-     * @param t
-     *         the {@code Throwable} which caused the commit failure
+     * @param cause
+     *         the error which caused the commit failure
      * @param entityRecord
-     *         the entity modified within the transaction
+     *         the uncommitted entity state
      */
-    void onTransactionFailed(Throwable t,
-                             @NonValidated EntityRecord entityRecord);
+    void onTransactionFailed(Error cause, @NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked after a successful commit.

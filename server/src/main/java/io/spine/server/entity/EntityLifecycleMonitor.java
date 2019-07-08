@@ -23,12 +23,12 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.logging.Logging;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
-import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -36,7 +36,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
@@ -131,10 +130,9 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      * <p>Notifies the {@link EntityLifecycle} of the failure.
      */
     @Override
-    public void onTransactionFailed(Throwable t, EntityRecord entityRecord) {
-        Throwable cause = getRootCause(t);
-        if (cause instanceof ValidationException) {
-            ValidationError error = ((ValidationException) cause).asValidationError();
+    public void onTransactionFailed(Error cause, EntityRecord entityRecord) {
+        if (cause.hasValidationError()) {
+            ValidationError error = cause.getValidationError();
             checkState(lastMessage != null, "Transaction failed but no messages were propagated.");
             MessageId causeMessage = lastMessage.messageId();
             MessageId rootMessage = lastMessage.rootMessage();
