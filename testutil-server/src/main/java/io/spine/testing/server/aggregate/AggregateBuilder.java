@@ -75,7 +75,7 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
         }
 
         private void doCommit() {
-            commitIfActive();
+            commit();
         }
     }
 }
