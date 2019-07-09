@@ -32,17 +32,15 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
-import io.spine.validate.ValidationError;
 import io.spine.validate.ValidationException;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.base.Throwables.getStackTraceAsString;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Errors.causeOf;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.lang.String.format;
@@ -315,16 +313,15 @@ public abstract class Transaction<I,
 
     private static Error asError(Throwable throwable) {
         Throwable cause = getRootCause(throwable);
-        Error.Builder error = Error
-                .newBuilder()
-                .setType(cause.getClass().getCanonicalName())
-                .setStacktrace(getStackTraceAsString(cause))
-                .setMessage(nullToEmpty(cause.getMessage()));
+        Error error = fromThrowable(throwable);
         if (cause instanceof ValidationException) {
-            ValidationError validationError = ((ValidationException) cause).asValidationError();
-            error.setValidationError(validationError);
+            ValidationException validationException = (ValidationException) cause;
+            error = error
+                    .toBuilder()
+                    .setValidationError(validationException.asValidationError())
+                    .vBuild();
         }
-        return error.vBuild();
+        return error;
     }
 
     /**

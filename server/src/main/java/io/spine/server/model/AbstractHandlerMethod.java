@@ -20,7 +20,6 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -48,7 +47,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.spine.base.Errors.fromThrowable;
 import static java.lang.String.format;
 
 /**
@@ -229,7 +228,6 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(externalAttribute);
     }
 
-    @CanIgnoreReturnValue
     @Override
     public PropagationOutcome invoke(T target, E envelope) {
         checkNotNull(target);
@@ -245,12 +243,7 @@ public abstract class AbstractHandlerMethod<T,
             Success success = toSuccessfulOutcome(rawOutput, target, envelope);
             outcome.setSuccess(success);
         } catch (IllegalOutcomeException e) {
-            Error error = Error
-                    .newBuilder()
-                    .setMessage(e.getMessage())
-                    .setStacktrace(getStackTraceAsString(e))
-                    .setType(e.getClass().getCanonicalName())
-                    .vBuild();
+            Error error = fromThrowable(e);
             outcome.setError(error);
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
