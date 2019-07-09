@@ -101,6 +101,11 @@ public abstract class AbstractCommander
         postCommands(outcome.getSuccess());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns a version with number {@code 0} and current time.
+     */
     @Override
     public Version version() {
         return Versions.zero();
