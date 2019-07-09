@@ -34,6 +34,12 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.protobuf.AnyPacker.pack;
 
+/**
+ * Result of a handler method processing a signal.
+ *
+ * <p>A handler method may return several types of objects. A {@code MessageResult} converts
+ * a generic returned value into a required format.
+ */
 final class MethodResult {
 
     /**

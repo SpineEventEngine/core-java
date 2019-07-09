@@ -29,6 +29,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static java.lang.String.format;
 
+/**
+ * A {@link HandlerMethod} which processes a message and produces no response.
+ *
+ * @param <T>
+ *         the type of the target object
+ * @param <C>
+ *         the type of the incoming message class
+ * @param <E>
+ *         the type of the {@link MessageEnvelope} wrapping the method arguments
+ */
 @Immutable
 public interface NonProducingMethod<T,
                                     C extends MessageClass,

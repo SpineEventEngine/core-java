@@ -39,6 +39,16 @@ import java.util.List;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * A {@link HandlerMethod} which produces commands in response to a signal.
+ *
+ * @param <T>
+ *         the type of the target object
+ * @param <C>
+ *         the type of the incoming message class
+ * @param <E>
+ *         the type of the {@link MessageEnvelope} wrapping the method arguments
+ */
 @Immutable
 public interface CommandProducingMethod<T,
                                         C extends MessageClass,
