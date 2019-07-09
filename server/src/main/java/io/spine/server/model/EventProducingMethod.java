@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.EventProducer;
 import io.spine.server.entity.ProducedEvents;
 import io.spine.server.entity.Success;
@@ -62,13 +61,9 @@ public interface EventProducingMethod<T extends EventProducer,
         EventFactory eventFactory = EventFactory.on(handledSignal, target.producerId());
         Version version = target.version();
         List<Event> events = result
-                .messages()
+                .messages(EventMessage.class)
                 .stream()
-                .map(msg -> {
-                    EventMessage eventMessage = (EventMessage) AnyPacker.unpack(
-                            msg);
-                    return eventFactory.createEvent(eventMessage, version);
-                })
+                .map(msg -> eventFactory.createEvent(msg, version))
                 .collect(toList());
         ProducedEvents producedEvents = ProducedEvents
                 .newBuilder()

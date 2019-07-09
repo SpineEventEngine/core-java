@@ -22,17 +22,14 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Streams.stream;
-import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * Result of a handler method processing a signal.
@@ -48,75 +45,69 @@ final class MethodResult {
      * <p>Messages of these types should not be posted to the system.
      */
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
-            pack(Nothing.getDefaultInstance()),
-            pack(Empty.getDefaultInstance())
+            Nothing.getDefaultInstance(),
+            Empty.getDefaultInstance()
     );
 
-    private final ImmutableList<Any> messages;
+    private final ImmutableList<Message> messages;
 
-    private MethodResult(ImmutableList<Any> messages) {
+    private MethodResult(ImmutableList<Message> messages) {
         this.messages = messages;
     }
 
     static MethodResult from(@Nullable Object rawMethodOutput) {
-        ImmutableList<Any> packedMessages = toMessages(rawMethodOutput);
-        ImmutableList<Any> filtered = filterIgnored(packedMessages);
+        List<Message> messages = toMessages(rawMethodOutput);
+        ImmutableList<Message> filtered = filterIgnored(messages);
         return new MethodResult(filtered);
     }
 
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private static ImmutableList<Any> toMessages(@Nullable Object output) {
-        ImmutableList<Any> emptyList = ImmutableList.of();
+    private static List<Message> toMessages(@Nullable Object output) {
         if (output == null) {
-            return emptyList;
-        }
-
-        // Allow reacting methods to return `Empty` instead of empty `List`. Do not store such
-        // events. Command Handling methods except those of `ProcessManager`s will not be able to
-        // use this trick because we check for non-empty result of such methods. `ProcessManager`
-        // command handlers are allowed to return `Empty` but not empty event `List`.
-        if (output instanceof Empty) {
-            return emptyList;
-        }
-
-        // Allow `Optional` for event reactions and command generation in response to events.
-        if (output instanceof Optional) {
-            Optional optional = (Optional) output;
-            if (optional.isPresent()) {
-                Message message = (Message) optional.get();
-                Any pack = pack(message);
-                return ImmutableList.of(pack);
-            } else {
-                return emptyList;
-            }
-        }
-
-        if (output instanceof Iterable) {
+            return ImmutableList.of();
+        } else if (output instanceof Optional) {
+            // Allow `Optional` for event reactions and command generation in response to events.
+            Optional<?> optional = (Optional<?>) output;
+            return optional.map(MethodResult::singleton)
+                           .orElse(ImmutableList.of());
+        } else if (output instanceof Iterable) {
             @SuppressWarnings("unchecked")
             Iterable<Message> messages = (Iterable<Message>) output;
-            ImmutableList<Any> packedMessages = stream(messages)
-                    .map(AnyPacker::pack)
-                    .collect(toImmutableList());
-            // TODO:2019-06-28:dmytro.dashenkov: Performance considerations.
-            return packedMessages;
+            return ImmutableList.copyOf(messages);
+        } else {
+            // Another type of result is single event message (as Message).
+            return singleton(output);
         }
+    }
 
-        // Another type of result is single event message (as Message).
-        Message singleMessage = (Message) output;
-        return ImmutableList.of(pack(singleMessage));
+    private static List<Message> singleton(Object messageDisguised) {
+        Message message = (Message) messageDisguised;
+        return ImmutableList.of(message);
     }
 
     /**
      * Filters the list removing instances of the {@linkplain #IGNORED_MESSAGES ignored types}.
      */
-    private static ImmutableList<Any> filterIgnored(ImmutableList<Any> messages) {
-        ImmutableList<Any> result = messages.stream()
-                                 .filter(message -> !IGNORED_MESSAGES.contains(message))
-                                 .collect(toImmutableList());
+    private static ImmutableList<Message> filterIgnored(List<Message> messages) {
+        ImmutableList<Message> result = messages
+                .stream()
+                .filter(message -> !IGNORED_MESSAGES.contains(message))
+                .collect(toImmutableList());
         return result;
     }
 
-    ImmutableList<Any> messages() {
-        return messages;
+    /**
+     * Obtains the method result as a list of messages.
+     *
+     * @param messageType
+     *         class of messages used; not used by the method, required only to satisfy the compiler
+     * @param <T>
+     *         the type of the messages
+     * @return list of messages
+     */
+    <T extends Message> ImmutableList<T> messages(
+            @SuppressWarnings("unused") Class<T> messageType) {
+        @SuppressWarnings("unchecked")
+        ImmutableList<T> castMessages = (ImmutableList<T>) this.messages;
+        return castMessages;
     }
 }

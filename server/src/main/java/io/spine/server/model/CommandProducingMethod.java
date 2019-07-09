@@ -26,7 +26,6 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.ProducedCommands;
 import io.spine.server.entity.Success;
 import io.spine.server.type.CommandClass;
@@ -66,12 +65,9 @@ public interface CommandProducingMethod<T,
                 .fromContext(actorContext)
                 .command();
         List<Command> commands = result
-                .messages()
+                .messages(CommandMessage.class)
                 .stream()
-                .map(msg -> {
-                    CommandMessage commandMessage = (CommandMessage) AnyPacker.unpack(msg);
-                    return commandFactory.create(commandMessage);
-                })
+                .map(commandFactory::create)
                 .collect(toList());
         if (commands.isEmpty()) {
             String errorMessage = format(
