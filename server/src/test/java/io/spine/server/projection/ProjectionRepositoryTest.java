@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.Lists;
+import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
@@ -42,6 +43,7 @@ import io.spine.server.projection.given.TestProjection;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.CannotDispatchEventTwice;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.event.EntityStateChanged;
@@ -127,7 +129,9 @@ class ProjectionRepositoryTest
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
-        return new TestProjectionRepository();
+        TestProjectionRepository repository = new TestProjectionRepository();
+        repository.init(boundedContext);
+        return repository;
     }
 
     @Override
@@ -433,7 +437,19 @@ class ProjectionRepositoryTest
         repository().dispatch(EventEnvelope.of(event));
     }
 
-    // TODO:2019-07-05:dmytro.dashenkov: Add a test for ID type mismatch.
+    @Test
+    @DisplayName("fail when dispatching unknown event")
+    void logErrorOnUnknownEvent() {
+        Event event = GivenEvent.arbitrary();
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> dispatchEvent(event));
+        StringSubject assertErrorMessage = assertThat(exception.getMessage());
+        assertErrorMessage.isNotNull();
+        assertErrorMessage.contains(repository().idClass().getName());
+    }
 
     @Nested
     @DisplayName("return")
