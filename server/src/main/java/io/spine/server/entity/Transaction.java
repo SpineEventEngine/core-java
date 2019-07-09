@@ -32,15 +32,12 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
-import io.spine.validate.ValidationException;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Errors.causeOf;
-import static io.spine.base.Errors.fromThrowable;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.lang.String.format;
@@ -306,22 +303,9 @@ public abstract class Transaction<I,
             return PropagationOutcome
                     .newBuilder()
                     .setPropagatedSignal(phase.signal().messageId())
-                    .setError(asError(t))
+                    .setError(causeOf(t))
                     .vBuild();
         }
-    }
-
-    private static Error asError(Throwable throwable) {
-        Throwable cause = getRootCause(throwable);
-        Error error = fromThrowable(throwable);
-        if (cause instanceof ValidationException) {
-            ValidationException validationException = (ValidationException) cause;
-            error = error
-                    .toBuilder()
-                    .setValidationError(validationException.asValidationError())
-                    .vBuild();
-        }
-        return error;
     }
 
     /**
