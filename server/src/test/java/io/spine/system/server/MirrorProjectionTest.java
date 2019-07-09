@@ -24,6 +24,7 @@ import io.spine.base.EventMessage;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -114,7 +115,7 @@ class MirrorProjectionTest {
                     .isNotEqualToDefaultInstance();
     }
 
-    private static BlackBoxBoundedContext context() {
+    private static SingleTenantBlackBoxContext context() {
         return BlackBoxBoundedContext
                 .singleTenant()
                 .with(new MirrorRepository());
