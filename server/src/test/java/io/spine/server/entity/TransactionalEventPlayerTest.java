@@ -120,8 +120,7 @@ class TransactionalEventPlayerTest {
             dispatchedEvents.add(event);
             return PropagationOutcome
                     .newBuilder()
-                    .setPropagatedSignal(event
-                                              .messageId())
+                    .setPropagatedSignal(event.messageId())
                     .setSuccess(Success.getDefaultInstance())
                     .vBuild();
         }
