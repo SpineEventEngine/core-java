@@ -118,7 +118,7 @@ public abstract class AbstractEventReactor
         if (outcome.hasSuccess()) {
             ProducedEvents events = outcome.getSuccess()
                                            .getProducedEvents();
-            eventBus.post(events.getEventList());
+            eventBus().post(events.getEventList());
         } else if (outcome.hasError()) {
             HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
                     .newBuilder()

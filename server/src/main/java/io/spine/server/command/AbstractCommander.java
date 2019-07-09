@@ -64,6 +64,10 @@ public abstract class AbstractCommander
         commandBus = context.commandBus();
     }
 
+    private CommandBus commandBus() {
+        return checkNotNull(commandBus, "`%s` does not have `CommandBus` assigned.", this);
+    }
+
     @Override
     public Set<CommandClass> messageClasses() {
         return thisClass.commands();

@@ -29,6 +29,9 @@ import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
+import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.Listener;
+import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
@@ -40,6 +43,8 @@ import io.spine.server.event.EventEnricher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
@@ -49,6 +54,7 @@ import io.spine.system.server.SystemWriteSide;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -66,16 +72,8 @@ import static io.spine.server.ContextSpec.singleTenant;
 public final class BoundedContextBuilder implements Logging {
 
     private final ContextSpec spec;
-    private CommandBus.Builder commandBus;
-    private EventBus.Builder eventBus;
-    private EventEnricher eventEnricher;
-    private Stand.Builder stand;
-    private IntegrationBus.Builder integrationBus;
-    private Supplier<AggregateRootDirectory> rootDirectory;
-    private TenantIndex tenantIndex;
 
-    /** Repositories to be registered with the Bounded Context being built after its creation. */
-    private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
+    private final CommandBus.Builder commandBus = CommandBus.newBuilder();
 
     /**
      * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
@@ -83,11 +81,22 @@ public final class BoundedContextBuilder implements Logging {
      */
     private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
 
+    private final EventBus.Builder eventBus = EventBus.newBuilder();
+
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
      * {@link IntegrationBus} after the Bounded Context creation.
      */
     private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
+
+    private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
+
+    private Stand.Builder stand;
+    private Supplier<AggregateRootDirectory> rootDirectory;
+    private TenantIndex tenantIndex;
+
+    /** Repositories to be registered with the Bounded Context being built after its creation. */
+    private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
 
     /**
      * Prevents direct instantiation.
@@ -140,20 +149,6 @@ public final class BoundedContextBuilder implements Logging {
         return spec.isMultitenant();
     }
 
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setCommandBus(CommandBus.Builder commandBus) {
-        this.commandBus = checkNotNull(commandBus);
-        return this;
-    }
-
-    Optional<IntegrationBus.Builder> integrationBus() {
-        return Optional.ofNullable(integrationBus);
-    }
-
-    public Optional<CommandBus.Builder> commandBus() {
-        return Optional.ofNullable(commandBus);
-    }
-
     /**
      * Obtains {@code TenantIndex} implementation associated with the Bounded Context.
      */
@@ -168,16 +163,6 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setEventBus(EventBus.Builder eventBus) {
-        this.eventBus = checkNotNull(eventBus);
-        return this;
-    }
-
-    public Optional<EventBus.Builder> eventBus() {
-        return Optional.ofNullable(eventBus);
-    }
-
     /**
      * Sets a custom {@link Enricher} for events posted to
      * the {@code EventBus} of the context being built.
@@ -190,7 +175,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder enrichEventsUsing(EventEnricher enricher) {
-        this.eventEnricher = checkNotNull(enricher);
+        eventBus.injectEnricher(enricher);
         return this;
     }
 
@@ -199,30 +184,11 @@ public final class BoundedContextBuilder implements Logging {
      * empty {@code Optional} if no enricher was assigned prior to this call.
      */
     public Optional<EventEnricher> eventEnricher() {
-        return Optional.ofNullable(eventEnricher);
-    }
-
-    EventBus buildEventBus(BoundedContext context) {
-        checkNotNull(context);
-        eventBus.injectContext(context);
-        if (eventEnricher != null) {
-            eventBus.injectEnricher(eventEnricher);
-        }
-        return eventBus.build();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setStand(Stand.Builder stand) {
-        this.stand = checkNotNull(stand);
-        return this;
+        return eventBus.enricher();
     }
 
     public Optional<Stand.Builder> stand() {
         return Optional.ofNullable(stand);
-    }
-
-    Stand buildStand() {
-        return stand.build();
     }
 
     @CanIgnoreReturnValue
@@ -237,6 +203,38 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Convenience method for handling the cases of passing a repository, which is also a message
+     * dispatcher to {@code addXxxDispatcher()} and {@code removeXxxDispatcher()} methods.
+     *
+     * <p>Such a call can be made by a developer (presumably by mistake) because some repositories
+     * <em>are</em> command- or event- dispatchers. Event though the methods
+     * {@link #add(Repository)} and {@link #remove(Repository)} is the correct way of handling
+     * removing repositories, we do not want to play hard in this case, and simply divert the flow
+     * to process the passed {@code Repository} via correct counterpart methods.
+     *
+     * @param dispatcher
+     *         the instance to handle
+     * @param repositoryConsumer
+     *         the operation to perform if the passed instance is a {@code Repository}
+     * @param dispatcherConsumer
+     *         the operation to perform if the passed instance is a not a {@code Repository}
+     * @param <D>
+     *         the type of the dispatchers
+     * @return this builder
+     */
+    private <D extends MessageDispatcher<?, ?, ?>>
+    BoundedContextBuilder ifRepository(D dispatcher,
+                                       Consumer<Repository<?, ?>> repositoryConsumer,
+                                       Consumer<D> dispatcherConsumer) {
+        if (dispatcher instanceof Repository) {
+            repositoryConsumer.accept((Repository<?, ?>) dispatcher);
+        } else {
+            dispatcherConsumer.accept(dispatcher);
+        }
+        return this;
+    }
+
+    /**
      * Adds the passed command dispatcher to the dispatcher registration list which will be
      * processed after the Bounded Context is created.
      *
@@ -247,10 +245,27 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
-        if (commandDispatcher instanceof Repository) {
-            return add((Repository<?, ?>) commandDispatcher);
-        }
-        commandDispatchers.add(commandDispatcher);
+        return ifRepository(commandDispatcher, this::add, commandDispatchers::add);
+    }
+
+    /**
+     * Adds a filter for commands.
+     *
+     * <p>The order of appending the filters to the builder is the order of the filters in
+     * the {@code CommandBus}.
+     */
+    public BoundedContextBuilder addCommandFilter(BusFilter<CommandEnvelope> filter) {
+        checkNotNull(filter);
+        commandBus.appendFilter(filter);
+        return this;
+    }
+
+    /**
+     * Adds a listener for commands posted to the {@code CommandBus} of the context being built.
+     */
+    public BoundedContextBuilder addCommandListener(Listener<CommandEnvelope> listener) {
+        checkNotNull(listener);
+        commandBus.addListener(listener);
         return this;
     }
 
@@ -265,10 +280,29 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
-        if (eventDispatcher instanceof Repository) {
-            return add((Repository<?, ?>) eventDispatcher);
-        }
-        eventDispatchers.add(eventDispatcher);
+        return ifRepository(eventDispatcher, this::add, eventDispatchers::add);
+    }
+
+    /**
+     * Adds a filter for events.
+     *
+     * <p>The order of appending the filters to the builder is the order of the filters in
+     * the {@code EventBus}.
+     *
+     * @param filter the filter to add
+     */
+    public BoundedContextBuilder addEventFiler(BusFilter<EventEnvelope> filter) {
+        checkNotNull(filter);
+        eventBus.appendFilter(filter);
+        return this;
+    }
+
+    /**
+     * Adds a listener of the events posted to the {@code EventBus} of the context being built.
+     */
+    public BoundedContextBuilder addEventListener(Listener<EventEnvelope> listener) {
+        checkNotNull(listener);
+        eventBus.addListener(listener);
         return this;
     }
 
@@ -299,11 +333,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
         checkNotNull(commandDispatcher);
-        if (commandDispatcher instanceof Repository) {
-            return remove((Repository<?, ?>) commandDispatcher);
-        }
-        commandDispatchers.remove(commandDispatcher);
-        return this;
+        return ifRepository(commandDispatcher, this::remove, commandDispatchers::remove);
     }
 
     /**
@@ -312,11 +342,7 @@ public final class BoundedContextBuilder implements Logging {
     @CanIgnoreReturnValue
     public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
         checkNotNull(eventDispatcher);
-        if (eventDispatcher instanceof Repository) {
-            return remove((Repository<?, ?>) eventDispatcher);
-        }
-        eventDispatchers.remove(eventDispatcher);
-        return this;
+        return ifRepository(eventDispatcher, this::remove, eventDispatchers::remove);
     }
 
     /**
@@ -480,6 +506,33 @@ public final class BoundedContextBuilder implements Logging {
         return result;
     }
 
+    EventBus buildEventBus(BoundedContext context) {
+        checkNotNull(context);
+        eventBus.injectContext(context);
+        return eventBus.build();
+    }
+
+    CommandBus buildCommandBus(EventBus eventBus) {
+        commandBus.injectEventBus(eventBus);
+        return commandBus.build();
+    }
+
+    IntegrationBus buildIntegrationBus(BoundedContext context) {
+        integrationBus.setContextName(context.spec().name())
+                      .setEventBus(context.eventBus());
+        return integrationBus.build();
+    }
+
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder setStand(Stand.Builder stand) {
+        this.stand = checkNotNull(stand);
+        return this;
+    }
+
+    Stand buildStand() {
+        return stand.build();
+    }
+
     private void registerRepositories(BoundedContext result) {
         for (Repository<?, ?> repository : repositories) {
             result.register(repository);
@@ -509,9 +562,8 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        SystemContext result = system.buildPartial(SystemContext::newInstance,
-                                                   NoOpSystemClient.INSTANCE
-        );
+        SystemContext result =
+                system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
         return result;
     }
 
@@ -519,9 +571,7 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        initEventBus();
         initStand(client.readSide());
-        initIntegrationBus();
 
         B result = instanceFactory.apply(this);
         return result;
@@ -536,27 +586,9 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private void initCommandBus(SystemWriteSide systemWriteSide) {
-        if (commandBus == null) {
-            commandBus = CommandBus.newBuilder()
-                                   .setMultitenant(isMultitenant());
-        } else {
-            Boolean commandBusMultitenancy = commandBus.isMultitenant();
-            if (commandBusMultitenancy != null) {
-                checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
-                                       "Status in BoundedContextBuilder: %s CommandBus: %s",
-                               commandBusMultitenancy);
-            } else {
-                commandBus.setMultitenant(isMultitenant());
-            }
-        }
+        commandBus.setMultitenant(isMultitenant());
         commandBus.injectSystem(systemWriteSide)
                   .injectTenantIndex(tenantIndex);
-    }
-
-    private void initEventBus() {
-        if (eventBus == null) {
-            eventBus = EventBus.newBuilder();
-        }
     }
 
     private void initStand(SystemReadSide systemReadSide) {
@@ -574,10 +606,6 @@ public final class BoundedContextBuilder implements Logging {
             }
         }
         stand.setSystemReadSide(systemReadSide);
-    }
-
-    private void initIntegrationBus() {
-        integrationBus = IntegrationBus.newBuilder();
     }
 
     /**

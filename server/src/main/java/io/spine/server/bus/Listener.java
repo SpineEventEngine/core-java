@@ -20,41 +20,17 @@
 
 package io.spine.server.bus;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.function.Consumer;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * Manages consumption of a message posted to the bus by its listeners.
+ * A listener receives a message when it is posted to a {@code Bus} <em>before</em> it is processed
+ * by {@linkplain BusFilter filters}.
  *
- * @param <E> the type of the {@link MessageEnvelope} posted by the bus
+ * @param <E>
+ *         the type of envelopes of messages posted to the bus
  */
-final class Listeners<E extends MessageEnvelope<?, ?, ?>> implements Consumer<E> {
-
-    private final ImmutableSet<Listener<E>> listeners;
-
-    Listeners(BusBuilder<?, ?, E, ?, ?> builder) {
-        checkNotNull(builder);
-        this.listeners = ImmutableSet.copyOf(builder.listeners());
-    }
-
-    @Override
-    public void accept(E envelope) {
-        listeners.forEach(listener -> {
-            try {
-                listener.accept(envelope);
-            } catch (RuntimeException ignored) {
-                // Do nothing.
-            }
-        });
-    }
-
-    @VisibleForTesting
-    boolean contains(Listener<E> listener) {
-        return listeners.contains(listener);
-    }
+@FunctionalInterface
+public interface Listener<E extends MessageEnvelope<?, ?, ?>> extends Consumer<E> {
 }

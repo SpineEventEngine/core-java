@@ -18,33 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.given.bus;
+package io.spine.system.server.given;
 
-import com.google.protobuf.Message;
-import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.event.ProjectCreated;
+import io.spine.server.security.Security;
 
 /**
- * Subscribes to the {@link ProjectCreated} event and remembers last event message and its context.
+ * Test environment class for testing {@link Security}.
+ *
+ * @see io.spine.server.security.SecurityTest.ServerFramework#allowFromSystemServerPackages()
  */
-public final class RememberingSubscriber extends AbstractEventSubscriber {
+public class SystemConfig {
 
-    private Message eventMessage;
-    private EventContext eventContext;
+    private SystemConfig() {}
 
-    @Subscribe
-    void on(ProjectCreated eventMsg, EventContext context) {
-        this.eventMessage = eventMsg;
-        this.eventContext = context;
-    }
-
-    public Message getEventMessage() {
-        return eventMessage;
-    }
-
-    public EventContext getEventContext() {
-        return eventContext;
+    public static void guardedCall() {
+        Security.allowOnlyFrameworkServer();
     }
 }

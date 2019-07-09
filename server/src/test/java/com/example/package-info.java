@@ -18,33 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.given.bus;
-
-import com.google.protobuf.Message;
-import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.event.ProjectCreated;
-
 /**
- * Subscribes to the {@link ProjectCreated} event and remembers last event message and its context.
+ * Test environment classes for testing invocations from outside the framework package namespace.
  */
-public final class RememberingSubscriber extends AbstractEventSubscriber {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package com.example;
 
-    private Message eventMessage;
-    private EventContext eventContext;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Subscribe
-    void on(ProjectCreated eventMsg, EventContext context) {
-        this.eventMessage = eventMsg;
-        this.eventContext = context;
-    }
-
-    public Message getEventMessage() {
-        return eventMessage;
-    }
-
-    public EventContext getEventContext() {
-        return eventContext;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

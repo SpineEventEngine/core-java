@@ -60,10 +60,9 @@ import static io.spine.system.server.WriteSideFunction.delegatingTo;
 /**
  * Dispatches the incoming commands to the corresponding handler.
  */
-public class CommandBus extends UnicastBus<Command,
-                                           CommandEnvelope,
-                                           CommandClass,
-                                           CommandDispatcher<?>> {
+@Internal
+public class CommandBus
+        extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher<?>> {
 
     /** Consumes tenant IDs from incoming commands. */
     private final Consumer<TenantId> tenantConsumer;
@@ -117,7 +116,6 @@ public class CommandBus extends UnicastBus<Command,
         return new Builder();
     }
 
-    @Internal
     @VisibleForTesting
     public final boolean isMultitenant() {
         return multitenant;
@@ -269,11 +267,6 @@ public class CommandBus extends UnicastBus<Command,
         }
 
         @Internal
-        public @Nullable Boolean isMultitenant() {
-            return multitenant;
-        }
-
-        @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
@@ -286,7 +279,6 @@ public class CommandBus extends UnicastBus<Command,
          * {@code BoundedContext}.
          */
         @Override
-        @Internal
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();

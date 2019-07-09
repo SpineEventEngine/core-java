@@ -572,10 +572,6 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     @Test
     @DisplayName("cache entity columns on registration")
     void cacheColumnsOnRegister() {
-        if (!repository().isRegistered()) {
-            repository().onRegistered();
-        }
-
         RecordStorage<I> storage = repository().recordStorage();
         EntityColumnCache entityColumnCache = storage.entityColumnCache();
 

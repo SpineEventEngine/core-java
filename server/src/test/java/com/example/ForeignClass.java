@@ -18,33 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.given.bus;
+package com.example;
 
-import com.google.protobuf.Message;
-import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.event.ProjectCreated;
+import io.spine.server.security.GivenRestrictedApi;
+import io.spine.server.security.Security;
 
 /**
- * Subscribes to the {@link ProjectCreated} event and remembers last event message and its context.
+ * A test environment class from outside the framework package structure for testing
+ * {@link Security#allowOnlyFrameworkServer()}.
+ *
+ * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitingFromOutside()
  */
-public final class RememberingSubscriber extends AbstractEventSubscriber {
+public final class ForeignClass {
 
-    private Message eventMessage;
-    private EventContext eventContext;
+    private ForeignClass() {}
 
-    @Subscribe
-    void on(ProjectCreated eventMsg, EventContext context) {
-        this.eventMessage = eventMsg;
-        this.eventContext = context;
-    }
-
-    public Message getEventMessage() {
-        return eventMessage;
-    }
-
-    public EventContext getEventContext() {
-        return eventContext;
+    public static void attemptToCallRestrictedApi() {
+        GivenRestrictedApi.guardedMethod();
     }
 }

@@ -32,6 +32,7 @@ import io.spine.server.type.CommandEnvelope;
 import java.util.Set;
 
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.event.EventBus.checkAssigned;
 
 /**
  * The abstract base for non-aggregate classes that expose command handling methods

@@ -33,7 +33,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
@@ -70,10 +69,8 @@ class ScheduledCommandTest {
         scheduler = new TestCommandScheduler();
         ServerEnvironment.instance()
                          .scheduleCommandsUsing(() -> scheduler);
-        CommandBus.Builder commandBus = CommandBus.newBuilder();
         context = BoundedContextBuilder
                 .assumingTests()
-                .setCommandBus(commandBus)
                 .build();
         context.register(DefaultRepository.of(CompanyAggregate.class));
         BoundedContext system = systemOf(this.context);

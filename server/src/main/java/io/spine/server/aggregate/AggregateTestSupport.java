@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.PropagationOutcome;
-import io.spine.server.security.InvocationGuard;
+import io.spine.security.InvocationGuard;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;

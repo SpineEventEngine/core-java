@@ -118,6 +118,11 @@ public class AbstractReactorTestEnv {
         /** Total USDs donated by this donor. */
         private double totalDonated = 0.0d;
 
+        public AutoCharityDonor(EventBus eventBus) {
+            super();
+            injectEventBus(eventBus);
+        }
+
         @React(external = true)
         DonationMade donateToCharity(OrderPaidFor orderPaidFor) {
             Order order = orderPaidFor.getOrder();

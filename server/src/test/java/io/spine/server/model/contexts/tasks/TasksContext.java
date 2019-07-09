@@ -34,10 +34,9 @@ public final class TasksContext {
     public static BoundedContext newInstance() {
         BoundedContext context = BoundedContext
                 .singleTenant("Tasks")
+                .add(DefaultRepository.of(TaskAggregate.class))
+                .addCommandDispatcher(new CreationRetry())
                 .build();
-        context.register(DefaultRepository.of(TaskAggregate.class));
-        CreationRetry commander = new CreationRetry();
-        context.registerCommandDispatcher(commander);
         return context;
     }
 }

@@ -51,6 +51,7 @@ import static java.util.Optional.ofNullable;
  * @param <T> the type of {@link Message} posted by the bus
  * @param <B> the own type of the builder
  */
+@Internal
 @CanIgnoreReturnValue
 public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  T extends Message,
@@ -59,7 +60,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  D extends MessageDispatcher<C, E, ?>> {
 
     private final ChainBuilder<E> chainBuilder;
-    private final Set<Consumer<E>> listeners = new HashSet<>();
+    private final Set<Listener<E>> listeners = new HashSet<>();
 
     private @Nullable SystemWriteSide systemWriteSide;
     private @Nullable TenantIndex tenantIndex;
@@ -78,7 +79,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      * <p>The order of appending the filters to the builder is the order of the filters in
      * the resulting bus.
      *
-     * @param filter the filter to append
+     * @param filter the filter to add
      */
     public final B appendFilter(BusFilter<E> filter) {
         checkNotNull(filter);
@@ -103,7 +104,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      * <p>If an exception is thrown by a {@linkplain Consumer#accept(Object) listener code}, it
      * will be ignored by the bus.
      */
-    public final B addListener(Consumer<E> listener) {
+    public final B addListener(Listener<E> listener) {
         checkNotNull(listener);
         listeners.add(listener);
         return self();
@@ -112,7 +113,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
     /**
      * Removes the listener. If the listener was not added before, the method has no effect.
      */
-    public final B removeListener(Consumer<E> listener) {
+    public final B removeListener(Listener<E> listener) {
         checkNotNull(listener);
         listeners.remove(listener);
         return self();
@@ -121,7 +122,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
     /**
      * Obtains immutable set of listeners added to the builder by the time of the call.
      */
-    public final Set<Consumer<E>> listeners() {
+    public final Set<Listener<E>> listeners() {
         return ImmutableSet.copyOf(listeners);
     }
 

@@ -253,7 +253,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Verifies whether the repository is registered with a {@code BoundedContext}.
      */
-    protected final boolean isRegistered() {
+    protected final boolean hasContext() {
         return context != null;
     }
 
@@ -262,8 +262,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @return parent {@code BoundedContext}
      * @throws IllegalStateException
-     *         if the repository is not registered {@linkplain BoundedContext#register(Repository)
-     *         registered} yet
+     *         if the repository has no context assigned
      */
     protected final BoundedContext context() {
         checkState(context != null,
@@ -273,8 +272,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * The callback called by a {@link BoundedContext} during the {@linkplain
-     * BoundedContext#register(Repository) registration} of the repository.
+     * The callback is invoked by a {@link BoundedContext} when adding the repository.
      */
     @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
     @OverridingMethodsMustInvokeSuper

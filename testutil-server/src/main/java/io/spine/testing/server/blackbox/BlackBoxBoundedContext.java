@@ -135,18 +135,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
         this.commands = new CommandCollector();
         this.postedCommands = new HashSet<>();
-        CommandBus.Builder commandBus = CommandBus
-                .newBuilder()
-                .addListener(commands);
         this.events = new EventCollector();
         this.postedEvents = new HashSet<>();
-        EventBus.Builder eventBus = EventBus
-                .newBuilder()
-                .addListener(events);
         this.context = BoundedContextBuilder
                 .assumingTests(multitenant)
-                .setCommandBus(commandBus)
-                .setEventBus(eventBus)
+                .addCommandListener(commands)
+                .addEventListener(events)
                 .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();

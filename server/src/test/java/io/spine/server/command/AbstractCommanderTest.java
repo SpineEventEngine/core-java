@@ -61,27 +61,26 @@ class AbstractCommanderTest {
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
     private final EventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-    private BoundedContext boundedContext;
-
+    private BoundedContext context;
     private CommandInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        boundedContext = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        AbstractCommander commander = new Commendatore();
         interceptor = new CommandInterceptor(FirstCmdCreateProject.class,
                                              CmdSetTaskDescription.class,
                                              CmdAssignTask.class,
                                              CmdStartTask.class);
-        boundedContext.registerCommandDispatcher(commander);
-        boundedContext.registerCommandDispatcher(interceptor);
+        AbstractCommander commander = new Commendatore();
+        context = BoundedContextBuilder
+                .assumingTests()
+                .addCommandDispatcher(commander)
+                .addCommandDispatcher(interceptor)
+                .build();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        boundedContext.close();
+        context.close();
     }
 
     @Test
@@ -159,14 +158,14 @@ class AbstractCommanderTest {
 
     private void createCommandAndPost(CommandMessage commandMessage) {
         io.spine.core.Command command = commandFactory.create(commandMessage);
-        boundedContext.commandBus()
-                      .post(command, StreamObservers.noOpObserver());
+        context.commandBus()
+               .post(command, StreamObservers.noOpObserver());
     }
 
     private void createEventAndPost(EventMessage eventMessage) {
         io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
-        boundedContext.eventBus()
-                      .post(event);
+        context.eventBus()
+               .post(event);
     }
 
     private void postCreateTaskCommand(boolean startTask) {

@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
@@ -32,6 +33,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @see MulticastBus
  */
+@Internal
 public abstract class UnicastBus<T extends Message,
                                  E extends MessageEnvelope<?, T, ?>,
                                  C extends MessageClass<? extends Message>,
