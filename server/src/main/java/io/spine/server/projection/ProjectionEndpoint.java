@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.EventContext;
-import io.spine.logging.Logging;
 import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
@@ -42,7 +41,7 @@ import static io.spine.server.projection.ProjectionTransaction.start;
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         extends EntityMessageEndpoint<I, P, EventEnvelope>
-        implements EventEndpoint<I>, Logging {
+        implements EventEndpoint<I> {
 
     protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
