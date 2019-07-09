@@ -24,6 +24,12 @@ import io.spine.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * An exception signifying that a handler method produced an unexpected result.
+ *
+ * <p>For example, event subscriber methods should not produce any result signals. If any such
+ * signals are encountered, an {@code IllegalOutcomeException} is thrown.
+ */
 @Internal
 public final class IllegalOutcomeException extends RuntimeException {
 
