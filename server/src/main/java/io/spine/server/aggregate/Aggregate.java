@@ -117,7 +117,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <B>
  *         the type of the aggregate state builder
  */
-// TODO:2019-07-08:dmytro.dashenkov: Remove some dependencies.
+@SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S>>
