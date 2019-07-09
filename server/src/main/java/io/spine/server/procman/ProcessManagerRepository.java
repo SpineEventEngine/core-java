@@ -320,6 +320,7 @@ public abstract class ProcessManagerRepository<I,
         super.onRoutingFailed(envelope, cause);
         if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
             // TODO:2019-07-08:dmytro.dashenkov: Extract.
+            //  https://github.com/SpineEventEngine/core-java/issues/1109
             CommandEnvelope command = (CommandEnvelope) envelope;
             ThrowableMessage rejection = (ThrowableMessage) cause;
             RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
