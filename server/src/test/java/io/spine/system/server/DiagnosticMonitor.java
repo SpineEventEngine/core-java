@@ -28,18 +28,17 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+/**
+ * A subscriber of some diagnostic events.
+ *
+ * <p>Memoizes all the received events for test purposes.
+ */
 public final class DiagnosticMonitor extends AbstractEventSubscriber {
 
-    private final List<ConstraintViolated> violations = newArrayList();
     private final List<CannotDispatchCommandTwice> duplicateCommands = newArrayList();
     private final List<CannotDispatchEventTwice> duplicateEvents = newArrayList();
     private final List<HandlerFailedUnexpectedly> handlerFailures = newArrayList();
     private final List<RoutingFailed> routingFailures = newArrayList();
-
-    @Subscribe
-    void on(ConstraintViolated event) {
-        violations.add(event);
-    }
 
     @Subscribe
     void on(CannotDispatchCommandTwice event) {
@@ -59,10 +58,6 @@ public final class DiagnosticMonitor extends AbstractEventSubscriber {
     @Subscribe
     void on(RoutingFailed event) {
         routingFailures.add(event);
-    }
-
-    public ImmutableList<ConstraintViolated> constraintViolatedEvents() {
-        return ImmutableList.copyOf(violations);
     }
 
     public List<CannotDispatchCommandTwice> duplicateCommandEvents() {
