@@ -74,6 +74,7 @@ import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,6 +151,8 @@ class ProcessManagerTest {
                               .withState(AnyProcess.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
+        InjectCommandBus.of(commandBus)
+                        .to(processManager);
     }
 
     @AfterEach
