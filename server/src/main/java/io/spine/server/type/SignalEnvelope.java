@@ -28,7 +28,7 @@ import io.spine.core.SignalId;
 import io.spine.core.TenantId;
 
 /**
- * A common interface for messages sent by an actor.
+ * A common interface for envelopes of signal messages.
  *
  * @param <I> the type of the message ID
  * @param <T> the type of the object that wraps a message
@@ -49,6 +49,9 @@ public interface SignalEnvelope<I extends SignalId,
      */
     ActorContext actorContext();
 
+    /**
+     * Obtains the message ID of the signal.
+     */
     default MessageId messageId() {
         return outerObject().messageId();
     }
