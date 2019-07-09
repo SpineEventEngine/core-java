@@ -50,7 +50,7 @@ final class PropagationProcess {
             EventEnvelope eventEnvelope = EventEnvelope.of(event);
             PropagationOutcome outcome = transaction.play(eventEnvelope);
             propagation.addOutcome(outcome);
-            successful = outcome.hasSuccess();
+            successful = !outcome.hasError();
             lastMessage = event.messageId();
         } else {
             Interruption interruption = Interruption

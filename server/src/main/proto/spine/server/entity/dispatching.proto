@@ -47,8 +47,7 @@ message Propagation {
     //
     repeated PropagationOutcome outcome = 2 [(validate) = true];
 
-    // The propagation is successful if all of the `outcome`s are successful, i.e. each of them has
-    // a `success` result.
+    // The propagation is successful if none of the `outcome`s is erroneous.
     //
     bool successful = 3;
 }
