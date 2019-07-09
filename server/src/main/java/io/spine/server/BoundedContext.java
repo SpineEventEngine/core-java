@@ -28,9 +28,6 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
-import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.command.AbstractCommander;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -38,7 +35,6 @@ import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -243,12 +239,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
             EventDispatcherDelegate eventDispatcher = (EventDispatcherDelegate) dispatcher;
             registerEventDispatcher(eventDispatcher);
         }
-        if (dispatcher instanceof AbstractCommander) {
-            AbstractCommander commander = (AbstractCommander) dispatcher;
-            commander.injectCommandBus(commandBus());
-            DelegatingEventDispatcher<?> proxy = DelegatingEventDispatcher.of(commander);
-            registerEventDispatcher(proxy);
-        }
     }
 
     /**
@@ -296,9 +286,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
             eventBus.register(dispatcher);
             SystemReadSide systemReadSide = systemClient().readSide();
             systemReadSide.register(dispatcher);
-            if (dispatcher instanceof AbstractEventReactor) {
-                ((AbstractEventReactor) dispatcher).injectEventBus(eventBus);
-            }
         }
         if (dispatcher.dispatchesExternalEvents()) {
             registerWithIntegrationBus(dispatcher);

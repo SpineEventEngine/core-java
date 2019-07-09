@@ -110,8 +110,10 @@ class CommandBusBuilderTest
         @DisplayName("if CommandBus is multitenant")
         void ifIsMultitenant() {
             assertTrue(builder().setMultitenant(true)
+                                .build()
                                 .isMultitenant());
             assertFalse(builder().setMultitenant(false)
+                                 .build()
                                  .isMultitenant());
         }
 

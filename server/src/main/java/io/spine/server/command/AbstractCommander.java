@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
@@ -109,7 +110,7 @@ public abstract class AbstractCommander
         if (successfulOutcome.hasProducedCommands()) {
             List<Command> commands = successfulOutcome.getProducedCommands()
                                                       .getCommandList();
-            commandBus.post(commands, noOpObserver());
+            commandBus().post(commands, noOpObserver());
         }
     }
 

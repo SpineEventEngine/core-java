@@ -26,8 +26,9 @@ import io.spine.test.model.contexts.tasks.TaskId;
 import io.spine.test.model.contexts.tasks.commands.CreateTask;
 import io.spine.test.model.contexts.tasks.rejections.TaskRejections;
 
-import java.util.HashSet;
 import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A {@link io.spine.server.command.Commander Commander} which retries the task

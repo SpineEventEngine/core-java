@@ -146,8 +146,13 @@ class BoundedContextBuilderTest {
     private static class StubTenantIndex implements TenantIndex {
 
         @Override
-        public void registerWith(BoundedContext context) {
+        public void init(BoundedContext context) {
             // Do nothing.
+        }
+
+        @Override
+        public boolean isInitialized() {
+            return true;
         }
 
         @Override
