@@ -125,6 +125,16 @@ abstract class AggregateEndpoint<I,
                : outcome;
     }
 
+    /**
+     * Applies the produced by the Aggregate events to the Aggregate.
+     *
+     * @param aggregate
+     *         the target Aggregate
+     * @param commandOutcome
+     *         the successful command propagation outcome
+     * @return the outcome of the command propagation with the events with the correct versions or
+     *         the erroneous outcome of applying an event
+     */
     private PropagationOutcome applyProducedEvents(A aggregate, PropagationOutcome commandOutcome) {
         List<Event> events = commandOutcome.getSuccess()
                                            .getProducedEvents()
@@ -139,6 +149,15 @@ abstract class AggregateEndpoint<I,
         }
     }
 
+    /**
+     * Corrects the versions of the produced events in the command outcome.
+     *
+     * @param commandOutcome
+     *         the successful command outcome
+     * @param eventPropagation
+     *         the result of event applying
+     * @return the same command outcome but with the events of the correct versions
+     */
     private static PropagationOutcome
     correctProducedCommands(PropagationOutcome commandOutcome, Propagation eventPropagation) {
         PropagationOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
@@ -161,6 +180,13 @@ abstract class AggregateEndpoint<I,
         return correctedCommandOutcome.vBuild();
     }
 
+    /**
+     * Finds the first erroneous outcome in the given propagation report.
+     *
+     * @param propagation
+     *         the non-successful propagation
+     * @return the first found outcome with an error
+     */
     private static PropagationOutcome firstErroneousOutcome(Propagation propagation) {
         PropagationOutcome erroneous = propagation
                 .getOutcomeList()
