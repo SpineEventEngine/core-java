@@ -58,10 +58,10 @@ public interface CommandProducingMethod<T,
     @Override
     default Success toSuccessfulOutcome(@Nullable Object rawResult,
                                         T target,
-                                        MessageEnvelope<?, ?, ?> origin) {
+                                        MessageEnvelope<?, ?, ?> handledSignal) {
         MethodResult result = MethodResult.from(rawResult);
-        ActorContext actorContext = origin.asMessageOrigin()
-                                          .getActorContext();
+        ActorContext actorContext = handledSignal.asMessageOrigin()
+                                                 .getActorContext();
         CommandFactory commandFactory = ActorRequestFactory
                 .fromContext(actorContext)
                 .command();
@@ -77,7 +77,7 @@ public interface CommandProducingMethod<T,
             String errorMessage = format(
                     "Commander method `%s` did not produce any result for command with ID %s.",
                     this,
-                    origin.id()
+                    handledSignal.id()
             );
             throw new IllegalOutcomeException(errorMessage);
         }

@@ -82,9 +82,22 @@ public interface HandlerMethod<T,
      */
     Set<P> producedMessages();
 
+    /**
+     * Converts the raw method result to a {@linkplain Success successful propagation outcome}.
+     *
+     * @param rawResult
+     *         the return value of the method
+     * @param target
+     *         the method receiver
+     * @param handledSignal
+     *         the handled signal
+     * @return the method result
+     * @throws IllegalOutcomeException
+     *         if the method produced result of an unexpected format
+     */
     Success toSuccessfulOutcome(@Nullable Object rawResult,
                                 T target,
-                                MessageEnvelope<?, ?, ?> origin)
+                                MessageEnvelope<?, ?, ?> handledSignal)
             throws IllegalOutcomeException;
 
     /**

@@ -48,7 +48,7 @@ public interface NonProducingMethod<T,
     @Override
     default Success toSuccessfulOutcome(@Nullable Object result,
                                         T target,
-                                        MessageEnvelope<?, ?, ?> origin) {
+                                        MessageEnvelope<?, ?, ?> handledSignal) {
         if (result != null) {
             String errorMessage = format(
                     "Method `%s` should not produce any result. Produced: %s",
