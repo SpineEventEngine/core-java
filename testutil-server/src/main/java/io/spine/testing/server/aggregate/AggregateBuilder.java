@@ -39,7 +39,8 @@ import io.spine.testing.server.entity.EntityBuilder;
 @VisibleForTesting
 public class AggregateBuilder<A extends Aggregate<I, S, ?>,
                               I,
-                              S extends Message> extends EntityBuilder<A, I, S> {
+                              S extends Message>
+        extends EntityBuilder<A, I, S> {
 
     public AggregateBuilder() {
         super();
@@ -57,7 +58,7 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
     @Override
     protected void setState(A result, S state, Version version) {
         TestAggregateTransaction tx = new TestAggregateTransaction(result, state, version);
-        tx.doCommit();
+        tx.commit();
     }
 
     /**
@@ -72,10 +73,6 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
 
         private TestAggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
             super(aggregate, state, version);
-        }
-
-        private void doCommit() {
-            commit();
         }
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.projection;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
@@ -35,6 +36,7 @@ import io.spine.testing.server.entity.EntityBuilder;
  * @param <I> the type of projection IDs
  * @param <S> the type of the projection state
  */
+@VisibleForTesting
 public class ProjectionBuilder<P extends Projection<I, S, B>,
                                I,
                                S extends Message,
@@ -58,7 +60,7 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
     protected void setState(P result, S state, Version version) {
         TestProjectionTransaction transaction =
                 new TestProjectionTransaction(result, state, version);
-        transaction.commitIfActive();
+        transaction.commit();
     }
 
     /**
