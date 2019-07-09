@@ -21,7 +21,6 @@
 package io.spine.server.procman;
 
 import io.spine.base.Error;
-import io.spine.logging.Logging;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
@@ -37,8 +36,7 @@ import io.spine.server.type.SignalEnvelope;
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
                           M extends SignalEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, P, M>
-        implements Logging {
+        extends EntityMessageEndpoint<I, P, M> {
 
     PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
         super(repository, envelope);
