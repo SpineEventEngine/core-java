@@ -26,7 +26,7 @@ import io.spine.testing.server.given.entity.TuEventLog;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
-import io.spine.testing.server.projection.given.prj.TuEventLoggingView;
+import io.spine.testing.server.projection.given.TuEventLoggingView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

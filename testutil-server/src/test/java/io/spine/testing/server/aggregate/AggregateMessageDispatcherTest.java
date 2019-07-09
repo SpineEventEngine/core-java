@@ -25,7 +25,7 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.aggregate.given.agg.TuMessageLog;
+import io.spine.testing.server.aggregate.given.TuMessageLog;
 import io.spine.testing.server.log.FloatLogged;
 import io.spine.testing.server.log.LogInteger;
 import io.spine.testing.server.log.ValueLogged;

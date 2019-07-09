@@ -195,7 +195,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *     <li>added repositories.
      * </ul>
      */
-    public static BlackBoxBoundedContext from(BoundedContextBuilder builder) {
+    public static BlackBoxBoundedContext<?> from(BoundedContextBuilder builder) {
         EventEnricher enricher =
                 builder.eventEnricher()
                        .orElseGet(BlackBoxBoundedContext::emptyEnricher);
@@ -740,34 +740,30 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     /**
      * Obtains a Subject for an entity of the passed class with the given ID.
      */
-    public <I, S extends Message, E extends Entity<I, S>>
+    public <I, E extends Entity<I, ? extends Message>>
     EntitySubject assertEntity(Class<E> entityClass, I id) {
-        @SuppressWarnings("unchecked") // safe as bound by entity class declaration.
-        @Nullable E found = (E) findEntity(entityClass, id);
+        @Nullable Entity<I, ?> found = findEntity(entityClass, id);
         return EntitySubject.assertEntity(found);
+    }
+
+    private <I> @Nullable Entity<I, ?> findEntity(Class<? extends Entity<I, ?>> entityClass, I id) {
+        Class<? extends Message> stateClass = stateClassOf(entityClass);
+        return findByState(stateClass, id);
     }
 
     /**
      * Obtains a Subject for an entity which has the state of the passed class with the given ID.
      */
-    public <I, S extends Message, E extends Entity<I, S>>
-    EntitySubject assertEntityWithState(Class<S> stateClass, I id) {
-        @Nullable E found = findByState(stateClass, id);
+    public <I, S extends Message> EntitySubject assertEntityWithState(Class<S> stateClass, I id) {
+        @Nullable Entity<I, S> found = findByState(stateClass, id);
         return EntitySubject.assertEntity(found);
     }
 
-    private <I, S extends Message, E extends Entity<I, S>>
-    @Nullable Entity<I, S> findEntity(Class<E> entityClass, I id) {
-        Class<S> stateClass = stateClassOf(entityClass);
-        return findByState(stateClass, id);
-    }
-
-    @SuppressWarnings("TypeParameterUnusedInFormals") // is safe as calling sites are bound.
-    private <I, S extends Message, E extends Entity<I, S>>
-    @Nullable E findByState(Class<S> stateClass, I id) {
+    private <I, S extends Message> @Nullable Entity<I, S> findByState(Class<S> stateClass, I id) {
         @SuppressWarnings("unchecked")
-        Repository<I, E> repo = (Repository<I, E>) repositoryOf(stateClass);
-        return readOperation(() -> repo.find(id).orElse(null));
+        Repository<I, ? extends Entity<I, S>> repo =
+                (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
+        return readOperation(() -> (Entity<I, S>) repo.find(id).orElse(null));
     }
 
     private Repository<?, ?> repositoryOf(Class<? extends Message> stateClass) {

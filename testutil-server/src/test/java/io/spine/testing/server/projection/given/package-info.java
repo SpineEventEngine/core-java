@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environment for the {@link io.spine.testing.server.projection} package.
+ * Test environment projections and repositories.
  */
 
 @CheckReturnValue
