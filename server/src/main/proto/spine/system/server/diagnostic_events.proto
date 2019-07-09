@@ -36,15 +36,18 @@ message ConstraintViolated {
     repeated validate.ConstraintViolation violation = 4 [(required) = false];
 }
 
+// An event emitted whenever a command is dispatched to an entity for the second time.
+//
 message CannotDispatchCommandTwice {
     option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
-    // The violated entity info.
     core.MessageId entity = 1;
 
     core.CommandId command = 2;
 }
 
+// An event emitted whenever an event is dispatched to an entity for the second time.
+//
 message CannotDispatchEventTwice {
     option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
@@ -54,21 +57,27 @@ message CannotDispatchEventTwice {
     core.EventId event = 2;
 }
 
+// An event emitted whenever a handler method fails with a runtime exception.
+//
 message HandlerFailedUnexpectedly {
 
-    // The violated entity info.
     core.MessageId entity = 1;
 
+    // The handled signal ID.
     core.MessageId handled_signal = 2;
 
+    // The error which occurred during the signal handling.
     base.Error error = 3;
 }
 
+// An event emitted whenever a runtime exception occurs during message routing.
+//
 message RoutingFailed {
 
     core.MessageId handled_signal = 1;
 
     EntityTypeName entity_type = 2;
 
+    // The error which occurred during the routing.
     base.Error error = 3;
 }
