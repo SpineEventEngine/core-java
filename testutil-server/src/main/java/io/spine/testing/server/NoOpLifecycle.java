@@ -20,7 +20,7 @@
 
 package io.spine.testing.server;
 
-import com.google.protobuf.Empty;
+import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.core.Origin;
 import io.spine.server.entity.Entity;
@@ -40,7 +40,7 @@ public final class NoOpLifecycle extends EntityLifecycle {
     @SuppressWarnings("TestOnlyProblems") // OK for a test utility.
     private NoOpLifecycle() {
         super(NoOpLifecycle.class.getSimpleName(),
-              TypeUrl.of(Empty.class),
+              TypeUrl.of(Any.class),
               NoOpSystemWriteSide.INSTANCE,
               EventFilter.allowAll(),
               EntityTypeName
