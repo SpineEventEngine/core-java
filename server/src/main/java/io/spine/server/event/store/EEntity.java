@@ -106,7 +106,7 @@ public final class EEntity extends TransactionalEntity<EventId, Event, Event.Bui
             EEntity entity = entity();
             entity.builder()
                   .mergeFrom(eventWithoutEnrichments);
-            commitIfActive();
+            commit();
             return entity;
         }
     }
