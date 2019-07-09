@@ -287,7 +287,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Propagates the given phase and catches any failures if any.
+     * Propagates the given phase and catches failures if any.
      *
      * <p>The catch block in this method and in {@link #commit()} prevents from force majeure
      * situations such as storage failures, etc. All the exceptions produced in the framework users'
@@ -299,8 +299,7 @@ public abstract class Transaction<I,
     private PropagationOutcome propagateFailsafe(Phase<I> phase) {
         try {
             PropagationOutcome result = phase.propagate();
-            boolean phaseSuccess = result.hasSuccess() && !result.getSuccess().hasRejection();
-            if (!phaseSuccess) {
+            if (result.hasError()) {
                 rollback(result.getError());
             }
             return result;
@@ -350,6 +349,19 @@ public abstract class Transaction<I,
     }
 
     /**
+     * Commits this transaction if it is still active.
+     *
+     * <p>If the transaction is not active, does nothing.
+     *
+     * @see #commit()
+     */
+    public final void commitIfActive() throws InvalidEntityStateException, IllegalStateException {
+        if (active) {
+            commit();
+        }
+    }
+
+    /**
      * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException
@@ -357,7 +369,8 @@ public abstract class Transaction<I,
      * @throws IllegalStateException
      *         in case of a generic error
      */
-    protected void commit() throws InvalidEntityStateException, IllegalStateException {
+    @VisibleForTesting
+    public final void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = builder();
         // If the transaction is running with phases, the entity already got its state.
         S newState = withPhases()
@@ -452,6 +465,7 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
+    @VisibleForTesting
     final void rollback(Error cause) {
         TransactionListener<I> listener = listener();
         @NonValidated EntityRecord record = EntityRecord
@@ -533,7 +547,7 @@ public abstract class Transaction<I,
      * Injects the current transaction instance into an entity.
      */
     private void injectTo(E entity) {
-        // assigning `this` to a variable to explicitly specify
+        // Assigning `this` to a variable to explicitly specify
         // the generic bounds for Java compiler.
         Transaction<I, E, S, B> tx = this;
         entity.injectTransaction(tx);

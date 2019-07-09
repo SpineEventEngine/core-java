@@ -120,7 +120,7 @@ abstract class PmEndpoint<I,
     protected PropagationOutcome runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
         PropagationOutcome outcome = invokeDispatcher(processManager, envelope());
-        tx.commit();
+        tx.commitIfActive();
         return outcome;
     }
 }

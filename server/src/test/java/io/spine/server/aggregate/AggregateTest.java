@@ -631,13 +631,11 @@ public class AggregateTest {
                     new FaultyAggregate(ID, false, true);
 
             Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
-            AggregateTransaction tx = AggregateTransaction.start(faultyAggregate);
+            AggregateTransaction.start(faultyAggregate);
             Propagation propagation = ((Aggregate) faultyAggregate).play(AggregateHistory
                                                                                  .newBuilder()
                                                                                  .addEvent(event)
                                                                                  .build());
-            tx.commit();
-
             assertThat(propagation.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()

@@ -554,7 +554,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         A result = create(id);
         AggregateTransaction tx = AggregateTransaction.start(result);
         result.play(history);
-        tx.commit();
+        tx.commitIfActive();
         return result;
     }
 

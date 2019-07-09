@@ -139,22 +139,10 @@ public class PmTransaction<I,
                                     .getEventList();
         if (!events.isEmpty()) {
             updateLifecycle(events);
-        }
-        if (success.hasRejection()) {
+        } else if (success.hasRejection()) {
             updateLifecycle(success.getRejection());
         }
         return outcome;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>This method is overridden to expose itself to repositories, state builders,
-     * and test utilities.
-     */
-    @Override
-    protected final void commit() {
-        super.commit();
     }
 
     /**

@@ -79,8 +79,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
         PropagationOutcome outcome = invokeDispatcher(projection, envelope());
+        tx.commitIfActive();
         if (outcome.hasSuccess()) {
-            tx.commit();
             afterDispatched(projection.id());
         } else if (outcome.hasError()) {
             Error error = outcome.getError();

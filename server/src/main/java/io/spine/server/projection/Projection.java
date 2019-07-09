@@ -114,7 +114,7 @@ public abstract class Projection<I,
     static boolean playOn(Projection<?, ?, ?> projection, Iterable<Event> events) {
         ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
-        tx.commit();
+        tx.commitIfActive();
         return projection.changed();
     }
 

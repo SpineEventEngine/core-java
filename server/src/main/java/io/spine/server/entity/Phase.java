@@ -50,8 +50,6 @@ public abstract class Phase<I> {
     private final Transaction<I, ?, ?, ?> transaction;
     private final VersionIncrement versionIncrement;
 
-    private boolean successful = false;
-
     Phase(Transaction<I, ?, ?, ?> transaction, VersionIncrement increment) {
         this.transaction = checkNotNull(transaction);
         this.versionIncrement = checkNotNull(increment);
@@ -65,16 +63,7 @@ public abstract class Phase<I> {
     final PropagationOutcome propagate() {
         PropagationOutcome result = performDispatch();
         transaction.incrementStateAndVersion(versionIncrement);
-        markSuccessful();
         return result;
-    }
-
-    final boolean isSuccessful() {
-        return successful;
-    }
-
-    private void markSuccessful() {
-        this.successful = true;
     }
 
     /**

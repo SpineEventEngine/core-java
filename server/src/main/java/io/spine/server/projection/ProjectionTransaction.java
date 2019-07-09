@@ -55,17 +55,6 @@ public class ProjectionTransaction<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This method is overridden to expose itself to repositories, state builders, and test
-     * utilities.
-     */
-    @Override
-    protected final void commit() {
-        super.commit();
-    }
-
-    /**
      * Creates a new transaction for a given {@code projection}.
      *
      * @param projection the {@code Projection} instance to start the transaction for.

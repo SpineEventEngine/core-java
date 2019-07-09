@@ -58,7 +58,7 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
     protected void setState(P result, S state, Version version) {
         TestProjectionTransaction transaction =
                 new TestProjectionTransaction(result, state, version);
-        transaction.doCommit();
+        transaction.commitIfActive();
     }
 
     /**
@@ -71,10 +71,6 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
                                           S state,
                                           Version version) {
             super(projection, state, version);
-        }
-
-        private void doCommit() {
-            commit();
         }
     }
 }

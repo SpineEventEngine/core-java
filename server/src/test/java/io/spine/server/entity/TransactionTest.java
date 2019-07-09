@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Errors.fromThrowable;
@@ -74,14 +72,6 @@ public abstract class TransactionTest<I,
         return Id.newBuilder()
                  .setId(getClass().getSimpleName() + '-' +  Identifier.newUuid())
                  .build();
-    }
-
-    private static boolean checkPhase(Event event, Phase phase) {
-        EventId id = event.getId();
-        Message phaseId = phase.messageId();
-        boolean equalIds = id.equals(phaseId);
-        boolean isSuccessful = phase.isSuccessful();
-        return equalIds && isSuccessful;
     }
 
     private static Version newVersion() {
@@ -226,14 +216,15 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
-        applyEvent(tx, event);
-
+        PropagationOutcome outcome = applyEvent(tx, event);
+        assertTrue(outcome.hasSuccess());
         assertThat(tx.phases())
                 .hasSize(1);
 
         Phase<I> phase = tx.phases()
                            .get(0);
-        assertTrue(checkPhase(event, phase));
+
+        assertThat(phase.messageId()).isEqualTo(event.id());
     }
 
     @Test
@@ -311,9 +302,12 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
 
         verifyZeroInteractions(listener);
-        applyEvent(tx, event);
+        PropagationOutcome outcome = applyEvent(tx, event);
+        assertTrue(outcome.hasSuccess());
 
-        verify(listener).onAfterPhase(argThat(matchesSuccessfulPhaseFor(event)));
+        verify(listener).onAfterPhase(argThat(
+                phase -> phase.messageId().equals(event.id())
+        ));
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
@@ -446,9 +440,5 @@ public abstract class TransactionTest<I,
         tx.commit();
         assertThat(entity.version())
                 .isEqualTo(versionFromEvent);
-    }
-
-    private ArgumentMatcher<Phase<I>> matchesSuccessfulPhaseFor(Event event) {
-        return phase -> checkPhase(event, phase);
     }
 }

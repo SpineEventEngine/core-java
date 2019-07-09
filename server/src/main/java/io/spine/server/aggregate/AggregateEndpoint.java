@@ -132,7 +132,7 @@ abstract class AggregateEndpoint<I,
         AggregateTransaction tx = startTransaction(aggregate);
         Propagation propagation = aggregate.apply(events);
         if (propagation.getSuccessful()) {
-            tx.commit();
+            tx.commitIfActive();
             return correctProducedCommands(commandOutcome, propagation);
         } else {
             return firstErroneousOutcome(propagation);
