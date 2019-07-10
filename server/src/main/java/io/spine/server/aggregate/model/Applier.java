@@ -26,7 +26,7 @@ import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAttribute;
-import io.spine.server.model.NonProducingMethod;
+import io.spine.server.model.VoidMethod;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -45,7 +45,7 @@ public final class Applier
                                       EventClass,
                                       EventEnvelope,
                                       EmptyClass>
-        implements NonProducingMethod<Aggregate, EventClass, EventEnvelope> {
+        implements VoidMethod<Aggregate, EventClass, EventEnvelope> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

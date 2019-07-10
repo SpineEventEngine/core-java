@@ -23,7 +23,7 @@ package io.spine.server.model.given.method;
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
-import io.spine.server.model.NonProducingMethod;
+import io.spine.server.model.VoidMethod;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -37,7 +37,7 @@ public class OneParamMethod
                                       EventClass,
                                       EventEnvelope,
                                       EmptyClass>
-        implements NonProducingMethod<Object, EventClass, EventEnvelope> {
+        implements VoidMethod<Object, EventClass, EventEnvelope> {
 
     public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);

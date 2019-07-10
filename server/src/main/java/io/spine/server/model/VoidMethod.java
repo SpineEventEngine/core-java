@@ -40,9 +40,9 @@ import static java.lang.String.format;
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
  */
 @Immutable
-public interface NonProducingMethod<T,
-                                    C extends MessageClass,
-                                    E extends MessageEnvelope<?, ?, ?>>
+public interface VoidMethod<T,
+                            C extends MessageClass,
+                            E extends MessageEnvelope<?, ?, ?>>
         extends HandlerMethod<T, C, E, EmptyClass> {
 
     @Override

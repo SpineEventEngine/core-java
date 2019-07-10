@@ -27,7 +27,7 @@ import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
-import io.spine.server.model.NonProducingMethod;
+import io.spine.server.model.VoidMethod;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -51,7 +51,7 @@ public abstract class SubscriberMethod
                                       EventClass,
                                       EventEnvelope,
                                       EmptyClass>
-        implements NonProducingMethod<EventSubscriber, EventClass, EventEnvelope> {
+        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope> {
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
