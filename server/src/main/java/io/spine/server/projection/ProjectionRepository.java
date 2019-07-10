@@ -95,8 +95,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(BoundedContext context) throws IllegalStateException {
-        super.init(context);
+    public void registerWith(BoundedContext context) throws IllegalStateException {
+        super.registerWith(context);
         ensureDispatchesEvents();
         initInbox();
     }

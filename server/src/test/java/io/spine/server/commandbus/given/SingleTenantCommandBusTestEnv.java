@@ -62,7 +62,7 @@ public class SingleTenantCommandBusTestEnv {
 
         public static FaultyHandler initializedHandler() {
             FaultyHandler handler = new FaultyHandler();
-            handler.init(BoundedContextBuilder.assumingTests().build());
+            handler.registerWith(BoundedContextBuilder.assumingTests().build());
             return handler;
         }
 
@@ -110,7 +110,7 @@ public class SingleTenantCommandBusTestEnv {
             BoundedContext context = BoundedContextBuilder
                     .assumingTests()
                     .build();
-            handler.init(context);
+            handler.registerWith(context);
             return handler;
         }
 

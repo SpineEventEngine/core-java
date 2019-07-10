@@ -106,9 +106,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotNull(context);
-        super.init(context);
+        super.registerWith(context);
         cacheEntityColumns();
     }
 

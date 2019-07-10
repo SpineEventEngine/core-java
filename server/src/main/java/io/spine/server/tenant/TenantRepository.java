@@ -59,9 +59,9 @@ public abstract class TenantRepository<T extends Message, E extends Entity<T>>
     }
 
     @Override
-    public final void init(BoundedContext context) {
-        if (!isInitialized()) { // Quit recursion.
-            super.init(context);
+    public final void registerWith(BoundedContext context) {
+        if (!isRegistered()) { // Quit recursion.
+            super.registerWith(context);
             context.register(this);
         }
     }

@@ -131,10 +131,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotVoid();
 
-        super.init(context);
+        super.registerWith(context);
 
         setupCommandRouting(commandRouting.get());
         setupEventRouting(eventRouting);

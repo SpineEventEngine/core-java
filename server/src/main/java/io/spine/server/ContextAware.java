@@ -31,37 +31,37 @@ import static com.google.common.base.Preconditions.checkState;
 public interface ContextAware {
 
     /**
-     * Initializes this instance as a part of the given Bounded Context.
+     * Registered this instance as a part of the given Bounded Context.
      *
-     * <p>This method should be only called once. However, it is allowed to initialize a single
+     * <p>This method should be only called once. However, it is allowed to register a single
      * instance many times with the <strong>same</strong> Bounded Context. If the same instance is
-     * initialized with different Contexts, a runtime exception is thrown.
+     * registered with different Contexts, a runtime exception is thrown.
      *
      * @param context
      *         the Context to which this instance belongs
      */
-    void init(BoundedContext context);
+    void registerWith(BoundedContext context);
 
     /**
-     * Determines if this instance is already initialized with a Bounded Context.
+     * Determines if this instance is already registered with a Bounded Context.
      */
-    boolean isInitialized();
+    boolean isRegistered();
 
     /**
-     * Verifies that this instance is already initialized.
+     * Verifies that this instance is already registered.
      *
-     * <p>Throws an {@code IllegalStateException} if not initialized.
+     * <p>Throws an {@code IllegalStateException} if not registered.
      */
-    default void checkInitialized() {
-        checkState(isInitialized(), "%s is NOT initialized.", this);
+    default void checkRegistered() {
+        checkState(isRegistered(), "%s is NOT registered.", this);
     }
 
     /**
-     * Verifies that this instance is NOT initialized yet.
+     * Verifies that this instance is NOT registered yet.
      *
-     * <p>Throws an {@code IllegalStateException} if already initialized.
+     * <p>Throws an {@code IllegalStateException} if already registered.
      */
-    default void checkNotInitialized() {
-        checkState(!isInitialized(), "%s is already initialized.", this);
+    default void checkNotRegistered() {
+        checkState(!isRegistered(), "%s is already registered.", this);
     }
 }

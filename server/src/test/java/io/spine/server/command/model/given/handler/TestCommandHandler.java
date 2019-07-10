@@ -42,12 +42,12 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
         BoundedContext context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        init(context);
+        registerWith(context);
     }
 
     @Override
-    public final void init(BoundedContext context) {
-        super.init(context);
+    public final void registerWith(BoundedContext context) {
+        super.registerWith(context);
     }
 
     public Method method() {

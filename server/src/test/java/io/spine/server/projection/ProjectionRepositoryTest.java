@@ -130,7 +130,7 @@ class ProjectionRepositoryTest
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
         TestProjectionRepository repository = new TestProjectionRepository();
-        repository.init(boundedContext);
+        repository.registerWith(boundedContext);
         return repository;
     }
 
@@ -549,6 +549,6 @@ class ProjectionRepositoryTest
                 .build();
 
         assertThrows(IllegalStateException.class, () ->
-                repo.init(context));
+                repo.registerWith(context));
     }
 }

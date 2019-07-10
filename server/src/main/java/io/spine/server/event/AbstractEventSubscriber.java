@@ -78,9 +78,9 @@ public abstract class AbstractEventSubscriber
     private @MonotonicNonNull BoundedContextName contextName;
 
     @Override
-    public void init(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotNull(context);
-        checkNotInitialized();
+        checkNotRegistered();
         contextName = context.name();
         system = context.systemClient()
                         .writeSide();
@@ -88,7 +88,7 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
-    public boolean isInitialized() {
+    public boolean isRegistered() {
         return contextName != null;
     }
 

@@ -104,7 +104,7 @@ public class EventBus
     /**
      * The {@code EventStore} to store events before they get handled.
      *
-     * @see #init(BoundedContext)
+     * @see #registerWith(BoundedContext)
      */
     private @MonotonicNonNull EventStore eventStore;
 
@@ -273,17 +273,17 @@ public class EventBus
 
     @Override
     @Internal
-    public void init(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         eventStore =
                 ServerEnvironment.instance()
                                  .storageFactory()
                                  .createEventStore(context.spec());
-        eventStore.init(context);
+        eventStore.registerWith(context);
     }
 
     @Override
-    public boolean isInitialized() {
-        return eventStore.isInitialized();
+    public boolean isRegistered() {
+        return eventStore.isRegistered();
     }
 
     /** The {@code Builder} for {@code EventBus}. */

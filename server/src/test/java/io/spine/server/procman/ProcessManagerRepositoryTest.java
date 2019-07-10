@@ -546,7 +546,7 @@ class ProcessManagerRepositoryTest
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        assertThrows(IllegalStateException.class, () -> repo.init(context));
+        assertThrows(IllegalStateException.class, () -> repo.registerWith(context));
     }
 
     @Test

@@ -203,7 +203,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @OverridingMethodsMustInvokeSuper
     @Override
     @Internal
-    public void init(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -228,10 +228,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * {@inheritDoc}
      *
      * <p>Unlike, {@link #isOpen()}, once the repository is
-     * {@linkplain #init(BoundedContext) initialized}, this method always returns {@code true}.
+     * {@linkplain #registerWith(BoundedContext) initialized}, this method always returns {@code true}.
      */
     @Override
-    public boolean isInitialized() {
+    public boolean isRegistered() {
         return context != null;
     }
 

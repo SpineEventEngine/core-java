@@ -130,8 +130,8 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * perform dependency injections steps that cannot be performed in the constructor.
      */
     protected final void init() {
-        eventBus.init(this);
-        tenantIndex.init(this);
+        eventBus.registerWith(this);
+        tenantIndex.registerWith(this);
     }
     
     /**
@@ -197,7 +197,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
         Security.allowOnlyFrameworkServer();
-        initialize(repository);
+        registerWithThis(repository);
         guard.register(repository);
         repository.onRegistered();
         registerEventDispatcher(stand());
@@ -231,7 +231,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         Security.allowOnlyFrameworkServer();
-        initialize(dispatcher);
+        registerWithThis(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             commandBus().register(dispatcher);
         }
@@ -250,7 +250,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     private void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
-        initialize(dispatcher);
+        registerWithThis(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
         }
@@ -280,7 +280,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         Security.allowOnlyFrameworkServer();
-        initialize(dispatcher);
+        registerWithThis(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             EventBus eventBus = eventBus();
             eventBus.register(dispatcher);
@@ -306,16 +306,20 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     private void registerEventDispatcher(EventDispatcherDelegate dispatcher) {
         checkNotNull(dispatcher);
-        initialize(dispatcher);
+        registerWithThis(dispatcher);
         DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
         registerEventDispatcher(delegate);
     }
 
-    private void initialize(Object registered) {
-        if (registered instanceof ContextAware) {
-            ContextAware contextAware = (ContextAware) registered;
-            if (!contextAware.isInitialized()) {
-                contextAware.init(this);
+    /**
+     * If the given {@code contextPart} is {@link ContextAware},
+     * {@linkplain ContextAware#registerWith registers} it with this context.
+     */
+    private void registerWithThis(Object contextPart) {
+        if (contextPart instanceof ContextAware) {
+            ContextAware contextAware = (ContextAware) contextPart;
+            if (!contextAware.isRegistered()) {
+                contextAware.registerWith(this);
             }
         }
     }

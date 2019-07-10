@@ -65,14 +65,14 @@ public abstract class AbstractCommandDispatcher
             .vBuild());
 
     @Override
-    public void init(BoundedContext context) {
-        checkNotInitialized();
+    public void registerWith(BoundedContext context) {
+        checkNotRegistered();
         eventBus = context.eventBus();
         system = context.systemClient().writeSide();
     }
 
     @Override
-    public boolean isInitialized() {
+    public boolean isRegistered() {
         return eventBus != null;
     }
 
@@ -98,12 +98,12 @@ public abstract class AbstractCommandDispatcher
      * Posts passed events to {@link EventBus}.
      */
     protected void postEvents(Iterable<Event> events) {
-        checkInitialized();
+        checkRegistered();
         eventBus.post(events);
     }
 
     protected void onError(SignalEnvelope<?, ?, ?> signal, Error error) {
-        checkInitialized();
+        checkRegistered();
         HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
                 .newBuilder()
                 .setEntity(eventAnchor.get())

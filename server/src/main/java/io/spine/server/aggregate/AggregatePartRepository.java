@@ -58,8 +58,8 @@ public abstract class AggregatePartRepository<I,
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(BoundedContext context) {
-        super.init(context);
+    public void registerWith(BoundedContext context) {
+        super.registerWith(context);
         context.aggregateRootDirectory()
                .register(this);
     }
