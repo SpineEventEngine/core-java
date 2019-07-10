@@ -45,7 +45,7 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -632,11 +632,11 @@ public class AggregateTest {
 
             Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
             AggregateTransaction.start(faultyAggregate);
-            BatchDispatch batchDispatch = ((Aggregate) faultyAggregate).play(AggregateHistory
+            BatchDispatchOutcome batchDispatchOutcome = ((Aggregate) faultyAggregate).play(AggregateHistory
                                                                                  .newBuilder()
                                                                                  .addEvent(event)
                                                                                  .build());
-            assertThat(batchDispatch.getSuccessful()).isFalse();
+            assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()
                     .setId(Identifier.pack(faultyAggregate.id()))
@@ -644,11 +644,11 @@ public class AggregateTest {
                                                .stateType()
                                                .value())
                     .buildPartial();
-            assertThat(batchDispatch.getTargetEntity())
+            assertThat(batchDispatchOutcome.getTargetEntity())
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(expectedTarget);
-            assertThat(batchDispatch.getOutcomeCount()).isEqualTo(1);
-            DispatchOutcome outcome = batchDispatch.getOutcome(0);
+            assertThat(batchDispatchOutcome.getOutcomeCount()).isEqualTo(1);
+            DispatchOutcome outcome = batchDispatchOutcome.getOutcome(0);
             assertThat(outcome.hasError()).isTrue();
             assertThat(outcome.getPropagatedSignal()).isEqualTo(event.messageId());
             Error error = outcome.getError();

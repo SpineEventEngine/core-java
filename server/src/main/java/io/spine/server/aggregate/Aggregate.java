@@ -36,7 +36,7 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.event.EventReactor;
@@ -285,7 +285,7 @@ public abstract class Aggregate<I,
     }
 
     @Override
-    public final BatchDispatch play(Iterable<Event> events) {
+    public final BatchDispatchOutcome play(Iterable<Event> events) {
         return EventPlayer
                 .forTransactionOf(this)
                 .play(events);
@@ -305,18 +305,18 @@ public abstract class Aggregate<I,
      *         the thrown instance
      */
     @CanIgnoreReturnValue
-    final BatchDispatch play(AggregateHistory history) {
+    final BatchDispatchOutcome play(AggregateHistory history) {
         Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
         List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
-        BatchDispatch batchDispatch = play(events);
-        if (batchDispatch.getSuccessful()) {
+        BatchDispatchOutcome batchDispatchOutcome = play(events);
+        if (batchDispatchOutcome.getSuccessful()) {
             remember(events);
         }
-        return batchDispatch;
+        return batchDispatchOutcome;
     }
 
     /**
@@ -337,12 +337,12 @@ public abstract class Aggregate<I,
      *         the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
-    final BatchDispatch apply(List<Event> events) {
+    final BatchDispatchOutcome apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
-        BatchDispatch batchDispatch = play(versionedEvents);
+        BatchDispatchOutcome batchDispatchOutcome = play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
-        return batchDispatch;
+        return batchDispatchOutcome;
     }
 
     /**

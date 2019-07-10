@@ -25,7 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.HasVersionColumn;
@@ -141,7 +141,7 @@ public abstract class Projection<I,
     }
 
     @Override
-    public BatchDispatch play(Iterable<Event> events) {
+    public BatchDispatchOutcome play(Iterable<Event> events) {
         EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         return eventPlayer.play(events);
     }

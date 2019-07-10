@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 
 import java.util.Collection;
@@ -45,7 +45,7 @@ public interface EventPlayer {
      * @param events
      *         the event stream to play
      */
-    BatchDispatch play(Iterable<Event> events);
+    BatchDispatchOutcome play(Iterable<Event> events);
 
     /**
      * Plays the given event.
@@ -57,9 +57,9 @@ public interface EventPlayer {
      */
     default DispatchOutcome play(Event event) {
         Collection<Event> events = singleton(event);
-        BatchDispatch batchDispatch = play(events);
-        DispatchOutcome outcome = batchDispatch.getOutcomeList()
-                                               .get(0);
+        BatchDispatchOutcome batchDispatchOutcome = play(events);
+        DispatchOutcome outcome = batchDispatchOutcome.getOutcomeList()
+                                                      .get(0);
         return outcome;
     }
 

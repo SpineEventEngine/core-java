@@ -28,7 +28,7 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.ProducedEvents;
 import io.spine.server.dispatch.Success;
@@ -140,12 +140,12 @@ abstract class AggregateEndpoint<I,
                                            .getProducedEvents()
                                            .getEventList();
         AggregateTransaction tx = startTransaction(aggregate);
-        BatchDispatch batchDispatch = aggregate.apply(events);
-        if (batchDispatch.getSuccessful()) {
+        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events);
+        if (batchDispatchOutcome.getSuccessful()) {
             tx.commitIfActive();
-            return correctProducedCommands(commandOutcome, batchDispatch);
+            return correctProducedCommands(commandOutcome, batchDispatchOutcome);
         } else {
-            return firstErroneousOutcome(batchDispatch);
+            return firstErroneousOutcome(batchDispatchOutcome);
         }
     }
 
@@ -159,7 +159,7 @@ abstract class AggregateEndpoint<I,
      * @return the same command outcome but with the events of the correct versions
      */
     private static DispatchOutcome
-    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatch eventDispatch) {
+    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatchOutcome eventDispatch) {
         DispatchOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
         ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
                                                                       .getProducedEventsBuilder();
@@ -181,14 +181,14 @@ abstract class AggregateEndpoint<I,
     }
 
     /**
-     * Finds the first erroneous outcome in the given batchDispatch report.
+     * Finds the first erroneous outcome in the given batchDispatchOutcome report.
      *
-     * @param batchDispatch
+     * @param batchDispatchOutcome
      *         the non-successful dispatch
      * @return the first found outcome with an error
      */
-    private static DispatchOutcome firstErroneousOutcome(BatchDispatch batchDispatch) {
-        DispatchOutcome erroneous = batchDispatch
+    private static DispatchOutcome firstErroneousOutcome(BatchDispatchOutcome batchDispatchOutcome) {
+        DispatchOutcome erroneous = batchDispatchOutcome
                 .getOutcomeList()
                 .stream()
                 .filter(DispatchOutcome::hasError)

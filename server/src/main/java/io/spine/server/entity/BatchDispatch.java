@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.core.Event;
 import io.spine.core.MessageId;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Interruption;
 import io.spine.server.type.EventEnvelope;
@@ -32,15 +32,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A process of propagation of a number of events.
  */
-final class PropagationProcess {
+final class BatchDispatch {
 
     private final EventPlayingTransaction<?, ?, ?, ?> transaction;
 
-    private final BatchDispatch.Builder propagation = BatchDispatch.newBuilder();
+    private final BatchDispatchOutcome.Builder propagation = BatchDispatchOutcome.newBuilder();
     private boolean successful = true;
     private MessageId lastMessage = MessageId.getDefaultInstance();
 
-    PropagationProcess(EventPlayingTransaction<?, ?, ?, ?> transaction) {
+    BatchDispatch(EventPlayingTransaction<?, ?, ?, ?> transaction) {
         this.transaction = checkNotNull(transaction);
         propagation.setTargetEntity(transaction.entityId());
     }
@@ -72,7 +72,7 @@ final class PropagationProcess {
     /**
      * Obtains the summary of all the propagates events.
      */
-    BatchDispatch summary() {
+    BatchDispatchOutcome summary() {
         return propagation
                 .setSuccessful(successful)
                 .vBuild();

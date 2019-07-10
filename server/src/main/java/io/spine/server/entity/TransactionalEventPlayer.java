@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.BatchDispatchOutcome;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,9 +45,9 @@ final class TransactionalEventPlayer implements EventPlayer {
      * Plays the given events upon the underlying entity transaction.
      */
     @Override
-    public BatchDispatch play(Iterable<Event> events) {
+    public BatchDispatchOutcome play(Iterable<Event> events) {
         checkNotNull(events);
-        PropagationProcess process = new PropagationProcess(transaction);
+        BatchDispatch process = new BatchDispatch(transaction);
         for (Event event : events) {
             process.play(event);
         }
