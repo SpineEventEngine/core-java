@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.delivery.CommandEndpoint;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;

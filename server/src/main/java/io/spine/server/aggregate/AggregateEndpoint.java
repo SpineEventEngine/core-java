@@ -28,13 +28,13 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
-import io.spine.server.entity.BatchDispatch;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.ProducedEvents;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.ProducedEvents;
-import io.spine.server.entity.Success;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.SignalEnvelope;
 

@@ -22,6 +22,8 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.event.EntProjectCreated;

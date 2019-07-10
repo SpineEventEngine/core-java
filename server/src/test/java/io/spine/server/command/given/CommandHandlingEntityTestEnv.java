@@ -22,7 +22,7 @@ package io.spine.server.command.given;
 
 import com.google.protobuf.StringValue;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.type.CommandEnvelope;
 

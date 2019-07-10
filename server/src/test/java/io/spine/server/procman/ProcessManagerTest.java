@@ -30,7 +30,7 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;

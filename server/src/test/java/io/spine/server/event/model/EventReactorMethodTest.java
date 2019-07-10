@@ -23,7 +23,7 @@ package io.spine.server.event.model;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;

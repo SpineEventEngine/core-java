@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateTestSupport;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;

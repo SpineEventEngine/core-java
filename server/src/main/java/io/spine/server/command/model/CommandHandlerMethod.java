@@ -21,7 +21,7 @@
 package io.spine.server.command.model;
 
 import io.spine.server.command.CommandHandler;
-import io.spine.server.entity.Success;
+import io.spine.server.dispatch.Success;
 import io.spine.server.model.EventProducingMethod;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.ParameterSpec;

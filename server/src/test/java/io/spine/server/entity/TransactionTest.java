@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;

@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.React;
 import io.spine.server.type.EventEnvelope;
 

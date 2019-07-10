@@ -21,9 +21,9 @@
 package io.spine.server.procman;
 
 import io.spine.base.Error;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.Success;
 import io.spine.server.type.SignalEnvelope;
 
 /**

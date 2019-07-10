@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatch;
 
 /**

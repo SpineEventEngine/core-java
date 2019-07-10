@@ -23,7 +23,7 @@ package io.spine.server.command;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
 

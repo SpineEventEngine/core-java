@@ -24,6 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.dispatch.DispatchOutcome;
 
 /**
  * A phase that dispatched a command to the entity in transaction.

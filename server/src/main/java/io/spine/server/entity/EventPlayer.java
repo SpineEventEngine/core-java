@@ -22,6 +22,8 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
+import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.DispatchOutcome;
 
 import java.util.Collection;
 

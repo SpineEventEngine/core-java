@@ -22,6 +22,9 @@ package io.spine.server.entity;
 
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.test.shared.StringEntity;
 import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;

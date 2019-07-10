@@ -19,13 +19,13 @@
  */
 syntax = "proto3";
 
-package spine.server.entity;
+package spine.server.dispatch;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
-option java_package = "io.spine.server.entity";
+option java_package = "io.spine.server.dispatch";
 option java_multiple_files = true;
 option java_outer_classname = "DispatchProto";
 

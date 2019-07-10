@@ -23,7 +23,7 @@ package io.spine.server.procman;
 import io.spine.annotation.Internal;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.delivery.CommandEndpoint;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
 

@@ -24,7 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.server.EventProducer;
-import io.spine.server.entity.Success;
+import io.spine.server.dispatch.Success;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;

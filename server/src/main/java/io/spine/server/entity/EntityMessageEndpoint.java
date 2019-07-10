@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.SignalEnvelope;
 
 /**

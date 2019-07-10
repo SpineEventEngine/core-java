@@ -21,7 +21,7 @@
 package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.entity.Success;
+import io.spine.server.dispatch.Success;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;

@@ -26,7 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.EventContext;
 import io.spine.server.delivery.EventEndpoint;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;

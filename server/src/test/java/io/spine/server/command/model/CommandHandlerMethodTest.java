@@ -49,7 +49,7 @@ import io.spine.server.command.model.given.handler.ValidHandlerOneParam;
 import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsList;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
-import io.spine.server.entity.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.SignatureMismatchException;

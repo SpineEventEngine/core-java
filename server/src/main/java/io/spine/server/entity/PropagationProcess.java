@@ -22,6 +22,9 @@ package io.spine.server.entity;
 
 import io.spine.core.Event;
 import io.spine.core.MessageId;
+import io.spine.server.dispatch.BatchDispatch;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Interruption;
 import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;

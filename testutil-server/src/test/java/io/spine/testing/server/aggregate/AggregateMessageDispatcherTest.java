@@ -20,8 +20,8 @@
 
 package io.spine.testing.server.aggregate;
 
-import io.spine.server.entity.DispatchOutcome;
-import io.spine.server.entity.ProducedEvents;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.ProducedEvents;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;

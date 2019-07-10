@@ -30,6 +30,7 @@ import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 

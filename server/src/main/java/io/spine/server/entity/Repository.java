@@ -113,7 +113,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @param obj an instance to store
      */
-    @SuppressWarnings("AbstractMethodWithMissingImplementations") // work-around IDEA bug.
     protected abstract void store(E obj);
 
     /**

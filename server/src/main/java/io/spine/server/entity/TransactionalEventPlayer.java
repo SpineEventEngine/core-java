@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
+import io.spine.server.dispatch.BatchDispatch;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
