@@ -51,7 +51,7 @@ public interface NonProducingMethod<T,
                                         MessageEnvelope<?, ?, ?> handledSignal) {
         if (result != null) {
             String errorMessage = format(
-                    "Method `%s` should not produce any result. Produced: %s",
+                    "Method `%s` should NOT produce any result. Produced: %s",
                     this,
                     result
             );
