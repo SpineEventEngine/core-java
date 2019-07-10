@@ -44,7 +44,7 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.CannotDispatchEventTwice;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
@@ -419,15 +419,15 @@ class ProjectionRepositoryTest
         private void dispatchSuccessfully(Event event) {
             dispatchEvent(event);
             assertTrue(TestProjection.processed(event.enclosedMessage()));
-            List<CannotDispatchEventTwice> events = monitor.duplicateEventEvents();
+            List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
             assertThat(events).isEmpty();
         }
 
         private void dispatchDuplicate(Event event) {
             dispatchEvent(event);
-            List<CannotDispatchEventTwice> events = monitor.duplicateEventEvents();
+            List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
             assertThat(events).hasSize(1);
-            CannotDispatchEventTwice systemEvent = events.get(0);
+            CannotDispatchDuplicateEvent systemEvent = events.get(0);
             assertThat(systemEvent.getEvent()).isEqualTo(event.id());
         }
     }

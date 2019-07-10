@@ -38,7 +38,7 @@ message ConstraintViolated {
 
 // An event emitted whenever a command is dispatched to an entity for the second time.
 //
-message CannotDispatchCommandTwice {
+message CannotDispatchDuplicateCommand {
     option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
     core.MessageId entity = 1;
@@ -48,7 +48,7 @@ message CannotDispatchCommandTwice {
 
 // An event emitted whenever an event is dispatched to an entity for the second time.
 //
-message CannotDispatchEventTwice {
+message CannotDispatchDuplicateEvent {
     option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
     // The violated entity info.

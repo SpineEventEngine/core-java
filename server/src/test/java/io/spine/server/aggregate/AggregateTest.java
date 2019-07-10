@@ -50,7 +50,7 @@ import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
-import io.spine.system.server.CannotDispatchCommandTwice;
+import io.spine.system.server.CannotDispatchDuplicateCommand;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -742,9 +742,9 @@ public class AggregateTest {
         CommandEnvelope envelope = CommandEnvelope.of(createCommand);
         repository.dispatch(envelope);
         repository.dispatch(envelope);
-        List<CannotDispatchCommandTwice> duplicateCommandEvents = monitor.duplicateCommandEvents();
+        List<CannotDispatchDuplicateCommand> duplicateCommandEvents = monitor.duplicateCommandEvents();
         assertThat(duplicateCommandEvents).hasSize(1);
-        CannotDispatchCommandTwice event = duplicateCommandEvents.get(0);
+        CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
         assertThat(event.getCommand()).isEqualTo(envelope.id());
     }
 

@@ -51,8 +51,8 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.CannotDispatchCommandTwice;
-import io.spine.system.server.CannotDispatchEventTwice;
+import io.spine.system.server.CannotDispatchDuplicateCommand;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.event.EntityStateChanged;
@@ -326,9 +326,9 @@ class ProcessManagerRepositoryTest
             assertTrue(TestProcessManager.processed(event.enclosedMessage()));
             dispatchEvent(event);
 
-            List<CannotDispatchEventTwice> duplicateEventEvents = monitor.duplicateEventEvents();
+            List<CannotDispatchDuplicateEvent> duplicateEventEvents = monitor.duplicateEventEvents();
             assertThat(duplicateEventEvents).hasSize(1);
-            CannotDispatchEventTwice systemEvent = duplicateEventEvents.get(0);
+            CannotDispatchDuplicateEvent systemEvent = duplicateEventEvents.get(0);
             assertThat(systemEvent.getEvent()).isEqualTo(event.id());
             PmProjectStarted eventMessage = (PmProjectStarted) event.enclosedMessage();
             assertThat(unpack(systemEvent.getEntity().getId()))
@@ -346,10 +346,10 @@ class ProcessManagerRepositoryTest
             assertTrue(TestProcessManager.processed(command.enclosedMessage()));
             dispatchCommand(command);
 
-            List<CannotDispatchCommandTwice> duplicateCommandEvents =
+            List<CannotDispatchDuplicateCommand> duplicateCommandEvents =
                     monitor.duplicateCommandEvents();
             assertThat(duplicateCommandEvents).hasSize(1);
-            CannotDispatchCommandTwice event = duplicateCommandEvents.get(0);
+            CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
             assertThat(event.getCommand()).isEqualTo(command.id());
             PmCreateProject commandMessage = (PmCreateProject) command.enclosedMessage();
             assertThat(unpack(event.getEntity().getId()))

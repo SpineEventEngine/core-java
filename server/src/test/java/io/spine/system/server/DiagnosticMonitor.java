@@ -35,18 +35,18 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public final class DiagnosticMonitor extends AbstractEventSubscriber {
 
-    private final List<CannotDispatchCommandTwice> duplicateCommands = newArrayList();
-    private final List<CannotDispatchEventTwice> duplicateEvents = newArrayList();
+    private final List<CannotDispatchDuplicateCommand> duplicateCommands = newArrayList();
+    private final List<CannotDispatchDuplicateEvent> duplicateEvents = newArrayList();
     private final List<HandlerFailedUnexpectedly> handlerFailures = newArrayList();
     private final List<RoutingFailed> routingFailures = newArrayList();
 
     @Subscribe
-    void on(CannotDispatchCommandTwice event) {
+    void on(CannotDispatchDuplicateCommand event) {
         duplicateCommands.add(event);
     }
 
     @Subscribe
-    void on(CannotDispatchEventTwice event) {
+    void on(CannotDispatchDuplicateEvent event) {
         duplicateEvents.add(event);
     }
 
@@ -60,11 +60,11 @@ public final class DiagnosticMonitor extends AbstractEventSubscriber {
         routingFailures.add(event);
     }
 
-    public List<CannotDispatchCommandTwice> duplicateCommandEvents() {
+    public List<CannotDispatchDuplicateCommand> duplicateCommandEvents() {
         return ImmutableList.copyOf(duplicateCommands);
     }
 
-    public List<CannotDispatchEventTwice> duplicateEventEvents() {
+    public List<CannotDispatchDuplicateEvent> duplicateEventEvents() {
         return ImmutableList.copyOf(duplicateEvents);
     }
 

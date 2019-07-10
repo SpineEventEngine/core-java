@@ -40,8 +40,8 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.CannotDispatchCommandTwice;
-import io.spine.system.server.CannotDispatchEventTwice;
+import io.spine.system.server.CannotDispatchDuplicateCommand;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.EntityTypeName;
@@ -352,7 +352,7 @@ public class EntityLifecycle {
 
     public void onDuplicateEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
-        CannotDispatchEventTwice event = CannotDispatchEventTwice
+        CannotDispatchDuplicateEvent event = CannotDispatchDuplicateEvent
                 .newBuilder()
                 .setEntity(entityId)
                 .setEvent(envelope.id())
@@ -362,7 +362,7 @@ public class EntityLifecycle {
 
     public void onDuplicateCommand(CommandEnvelope envelope) {
         checkNotNull(envelope);
-        CannotDispatchCommandTwice event = CannotDispatchCommandTwice
+        CannotDispatchDuplicateCommand event = CannotDispatchDuplicateCommand
                 .newBuilder()
                 .setEntity(entityId)
                 .setCommand(envelope.id())
