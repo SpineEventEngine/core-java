@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
 import io.spine.server.test.shared.EmptyAggregate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class WriteTest {
         new NullPointerTester()
                 .setDefault(Aggregate.class,
                             new Aggregate<String, EmptyAggregate, EmptyAggregate.Builder>("") {})
-                .setDefault(AggregateRepository.class, new AggregateRepository() {})
+                .setDefault(AggregateRepository.class, new ProjectAggregateRepository())
                 .testStaticMethods(Write.class, PACKAGE);
     }
 }

@@ -22,9 +22,12 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -42,15 +45,12 @@ import static com.google.common.base.Preconditions.checkArgument;
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <P>
  *         the type of the produced message classes
- * @param <R>
- *         the type of the method result object
  */
 @Immutable
 public interface HandlerMethod<T,
                                C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
-                               P extends MessageClass<?>,
-                               R extends MethodResult<?>> {
+                               P extends MessageClass<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -78,11 +78,27 @@ public interface HandlerMethod<T,
     Method rawMethod();
 
     /**
-     * Retrieves the message classes produced by this handler method.
-     *
-     * @see MethodResult#toMessages(Object).
+     * Retrieves the message classes produced by this handler method.*
      */
     Set<P> producedMessages();
+
+    /**
+     * Converts the raw method result to a {@linkplain Success successful propagation outcome}.
+     *
+     * @param rawResult
+     *         the return value of the method
+     * @param target
+     *         the method receiver
+     * @param handledSignal
+     *         the handled signal
+     * @return the method result
+     * @throws IllegalOutcomeException
+     *         if the method produced result of an unexpected format
+     */
+    Success toSuccessfulOutcome(@Nullable Object rawResult,
+                                T target,
+                                MessageEnvelope<?, ?, ?> handledSignal)
+            throws IllegalOutcomeException;
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.
@@ -94,7 +110,7 @@ public interface HandlerMethod<T,
      * @return the result of message handling
      */
     @CanIgnoreReturnValue
-    R invoke(T target, E envelope);
+    DispatchOutcome invoke(T target, E envelope);
 
     /**
      * Tells if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.

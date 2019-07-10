@@ -18,20 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+/**
+ * Contains types related to signal dispatching.
+ *
+ * <p>See {@code spine/server/dispatch/dispatching.proto} definitions.
+ */
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.test.integration.Project;
-import io.spine.test.integration.ProjectId;
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.dispatch;
 
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-class ProjectWizardRepository
-        extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
-
-    @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        throw illegalStateWithCauseOf(exception);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

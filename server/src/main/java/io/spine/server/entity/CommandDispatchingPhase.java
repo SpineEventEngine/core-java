@@ -21,38 +21,32 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
 import io.spine.server.command.DispatchCommand;
-
-import java.util.List;
+import io.spine.server.dispatch.DispatchOutcome;
 
 /**
  * A phase that dispatched a command to the entity in transaction.
- *
- * <p>The result of such dispatch is always a {@link List} of
- * {@linkplain io.spine.server.command.CommandHandlingEntity#dispatchCommand events}.
  *
  * @param <I>
  *         the type of entity ID
  */
 @Internal
-public final class CommandDispatchingPhase<I> extends Phase<I, List<Event>> {
+public final class CommandDispatchingPhase<I> extends Phase<I> {
 
     private final DispatchCommand<I> dispatch;
 
     public CommandDispatchingPhase(Transaction<I, ?, ?, ?> transaction,
                                    DispatchCommand<I> dispatch,
-                                   VersionIncrement vi) {
-        super(transaction, vi);
+                                   VersionIncrement versionIncrement) {
+        super(transaction, versionIncrement);
         this.dispatch = dispatch;
     }
 
     @Override
-    protected List<Event> performDispatch() {
-        List<Event> events = dispatch.perform();
-        return events;
+    protected DispatchOutcome performDispatch() {
+        return dispatch.perform();
     }
 
     @Override

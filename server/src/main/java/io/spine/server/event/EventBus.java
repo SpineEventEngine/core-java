@@ -32,6 +32,7 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
@@ -89,7 +90,9 @@ import static java.lang.String.format;
  * @see io.spine.core.Subscribe @Subscribe
  */
 @Internal
-public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+public class EventBus
+        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>>
+        implements ContextAware {
 
     /*
      * NOTE: Even though the EventBus has a private constructor and
@@ -101,7 +104,7 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
     /**
      * The {@code EventStore} to store events before they get handled.
      *
-     * @see #init(BoundedContext)
+     * @see #registerWith(BoundedContext)
      */
     private @MonotonicNonNull EventStore eventStore;
 
@@ -268,12 +271,19 @@ public class EventBus extends MulticastBus<Event, EventEnvelope, EventClass, Eve
         return (EventDispatcherRegistry) super.registry();
     }
 
-    public void init(BoundedContext context) {
+    @Override
+    @Internal
+    public void registerWith(BoundedContext context) {
         eventStore =
                 ServerEnvironment.instance()
                                  .storageFactory()
                                  .createEventStore(context.spec());
-        eventStore.init(context);
+        eventStore.registerWith(context);
+    }
+
+    @Override
+    public boolean isRegistered() {
+        return eventStore.isRegistered();
     }
 
     /** The {@code Builder} for {@code EventBus}. */

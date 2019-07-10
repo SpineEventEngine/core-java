@@ -34,7 +34,7 @@ import java.util.Set;
  *         the type of methods which perform command handling
  */
 public interface CommandHandlingClass<P extends MessageClass<?>,
-                                      H extends CommandAcceptingMethod<?, P, ?>> {
+                                      H extends CommandAcceptingMethod<?, P>> {
 
     /**
      * Obtains classes of commands handled by the class.

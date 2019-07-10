@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class CommandEnvelope
         extends AbstractMessageEnvelope<CommandId, Command, CommandContext>
-        implements ActorMessageEnvelope<CommandId, Command, CommandContext> {
+        implements SignalEnvelope<CommandId, Command, CommandContext> {
 
     /** The command class. */
     private final CommandClass commandClass;
@@ -102,7 +102,7 @@ public final class CommandEnvelope
     }
 
     @Override
-    public Origin asEventOrigin() {
+    public Origin asMessageOrigin() {
         return command().asMessageOrigin();
     }
 

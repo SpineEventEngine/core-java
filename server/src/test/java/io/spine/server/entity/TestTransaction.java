@@ -20,8 +20,14 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.type.EventEnvelope;
+import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.event.EntProjectCreated;
+import io.spine.testing.server.TestEventFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -56,8 +62,9 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setArchived(true);
+                return super.dispatch(entity, event);
             }
         };
 
@@ -75,8 +82,9 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setDeleted(true);
+                return super.dispatch(entity, event);
             }
         };
 
@@ -96,8 +104,13 @@ public class TestTransaction {
         }
 
         @Override
-        protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
+        protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
             // NoOp by default
+            return DispatchOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event.outerObject().messageId())
+                    .setSuccess(Success.getDefaultInstance())
+                    .vBuild();
         }
 
         @Override
@@ -106,7 +119,13 @@ public class TestTransaction {
         }
 
         private void dispatchForTest() {
-            doDispatch(entity(), null);
+            EntProjectCreated eventMessage = EntProjectCreated
+                    .newBuilder()
+                    .setProjectId(ProjectId.getDefaultInstance())
+                    .buildPartial();
+            TestEventFactory factory = TestEventFactory.newInstance(TestTransaction.class);
+            Event event = factory.createEvent(eventMessage);
+            dispatch(entity(), EventEnvelope.of(event));
         }
     }
 

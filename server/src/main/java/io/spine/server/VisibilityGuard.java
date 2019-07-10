@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.EntityVisibility;
@@ -70,8 +71,10 @@ final class VisibilityGuard {
         RepositoryAccess alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
             throw newIllegalStateException(
-                    "A repository for the state class %s already registered: %s",
-                    stateClass, alreadyRegistered);
+                    "A repository for the state class %s already registered: `%s`.",
+                    stateClass.getName(),
+                    alreadyRegistered
+            );
         }
     }
 
@@ -171,6 +174,14 @@ final class VisibilityGuard {
             return visibility.isNotNone()
                    ? Optional.of(repository)
                    : Optional.empty();
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("repository", repository)
+                              .add("visibility", visibility)
+                              .toString();
         }
     }
 }

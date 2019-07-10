@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
@@ -100,10 +101,10 @@ class AggregateTransactionTest
     }
 
     @Override
-    protected void applyEvent(Transaction tx, Event event) {
+    protected DispatchOutcome applyEvent(Transaction tx, Event event) {
         AggregateTransaction cast = (AggregateTransaction) tx;
         EventEnvelope envelope = EventEnvelope.of(event);
-        cast.play(envelope);
+        return cast.play(envelope);
     }
 
     @Test

@@ -87,6 +87,7 @@ abstract class AbstractCommandBusTestSuite {
     protected MemoizingObserver<Ack> observer;
     protected TenantIndex tenantIndex;
     protected SystemWriteSide systemWriteSide;
+    protected BoundedContext context;
 
     /**
      * A public constructor for derived test cases.
@@ -158,7 +159,7 @@ abstract class AbstractCommandBusTestSuite {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext context = createContext();
+        context = createContext();
 
         tenantIndex = context.tenantIndex();
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
@@ -168,17 +169,15 @@ abstract class AbstractCommandBusTestSuite {
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .injectContext(context)
-                .injectEventBus(context.eventBus())
                 .injectSystem(systemWriteSide)
                 .injectTenantIndex(tenantIndex)
                 .build();
-
         requestFactory =
                 multitenant
                 ? new TestActorRequestFactory(getClass(), newUuid())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
-        createProjectHandler.injectEventBus(eventBus);
+        context.registerCommandDispatcher(createProjectHandler);
         observer = memoizingObserver();
     }
 
@@ -194,7 +193,7 @@ abstract class AbstractCommandBusTestSuite {
 
     @AfterEach
     void tearDown() throws Exception {
-        eventBus.close();
+        context.close();
     }
 
     @Test
@@ -244,6 +243,11 @@ abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
+
+        @Override
+        public final void registerWith(BoundedContext context) {
+            super.registerWith(context);
+        }
 
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {

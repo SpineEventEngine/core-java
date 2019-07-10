@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -53,18 +52,8 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
      * Dispatches the message contained in the passed envelope.
      *
      * @param envelope the envelope with the message
-     * @return ID(s) of entities to which the message was dispatched
      */
-    @CanIgnoreReturnValue
-    R dispatch(E envelope);
-
-    /**
-     * Handles an error occurred during dispatching a message.
-     *
-     * @param envelope  the message which caused the error
-     * @param exception the error
-     */
-    void onError(E envelope, RuntimeException exception);
+    void dispatch(E envelope);
 
     /**
      * Checks if this dispatcher can dispatch the given message.

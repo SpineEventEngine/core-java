@@ -23,6 +23,7 @@ package io.spine.testing.server;
 import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.core.Origin;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventFilter;
 import io.spine.system.server.EntityTypeName;
@@ -42,7 +43,10 @@ public final class NoOpLifecycle extends EntityLifecycle {
               TypeUrl.of(Any.class),
               NoOpSystemWriteSide.INSTANCE,
               EventFilter.allowAll(),
-              EntityTypeName.getDefaultInstance());
+              EntityTypeName
+                      .newBuilder()
+                      .setJavaClassName(Entity.class.getCanonicalName())
+                      .vBuild());
     }
 
     public static NoOpLifecycle instance() {

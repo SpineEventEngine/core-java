@@ -448,8 +448,7 @@ class StandTest extends TenantAwareTest {
             Command command = requestFactory.command()
                                             .create(createCustomer);
             CommandEnvelope cmd = CommandEnvelope.of(command);
-            CustomerId id = repository.dispatch(cmd);
-            assertEquals(customerId, id);
+            repository.dispatch(cmd);
 
             // Check the subscription callback is run, notifying about new customer created.
             verify(executor, times(1)).execute(any(Runnable.class));
@@ -553,8 +552,7 @@ class StandTest extends TenantAwareTest {
             Command command = requestFactory.command()
                                             .create(createCustomer);
             CommandEnvelope cmd = CommandEnvelope.of(command);
-            CustomerId id = repository.dispatch(cmd);
-            assertEquals(customerId, id);
+            repository.dispatch(cmd);
 
             // Check the notify action is called with the correct event.
             Event event = action.newEvent();

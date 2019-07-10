@@ -19,6 +19,8 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
@@ -29,7 +31,6 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -111,7 +112,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     private static class TenantRegistry implements SubscriptionRegistry {
 
-        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = new HashMap<>();
+        private final SetMultimap<TypeUrl, SubscriptionRecord> typeToRecord = HashMultimap.create();
         private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
 
         @Override
@@ -133,13 +134,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     .build();
             SubscriptionRecord record = newRecordFor(subscription);
             TypeUrl type = record.getType();
-
-            if (!typeToRecord.containsKey(type)) {
-                typeToRecord.put(type, new HashSet<>());
-            }
-            typeToRecord.get(type)
-                        .add(record);
-
+            typeToRecord.put(type, record);
             subscriptionToAttrs.put(subscription, record);
             return subscription;
         }

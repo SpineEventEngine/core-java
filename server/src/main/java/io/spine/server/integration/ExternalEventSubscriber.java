@@ -24,14 +24,11 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.string.Stringifiers;
-import io.spine.type.MessageClass;
 
 import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * An internal wrapper class, which exposes an {@link AbstractEventSubscriber}
@@ -55,25 +52,12 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
     }
 
     @Override
-    public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+    public void dispatch(ExternalMessageEnvelope envelope) {
         EventEnvelope eventEnvelope = envelope.toEventEnvelope();
         checkArgument(eventEnvelope.isExternal(),
                       "External event expected, but got %s",
                       Stringifiers.toString(eventEnvelope.outerObject()));
-        return delegate.dispatch(eventEnvelope);
-    }
-
-    @Override
-    public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-
-        MessageClass messageClass = envelope.messageClass();
-        String messageId = envelope.idAsString();
-        String errorMessage =
-                format("Error handling external event subscription (class: %s id: %s).",
-                       messageClass, messageId);
-        log().error(errorMessage, exception);
+        delegate.dispatch(eventEnvelope);
     }
 
     @Override

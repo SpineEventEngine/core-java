@@ -22,14 +22,11 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.truth.OptionalSubject;
-import com.google.common.truth.Truth8;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
@@ -43,13 +40,13 @@ import io.spine.server.aggregate.given.repo.RejectingRepository;
 import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.MessageEnvelope;
+import io.spine.system.server.DiagnosticMonitor;
+import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -74,10 +71,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.givenAggregateId;
@@ -97,7 +97,6 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVers
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -462,7 +461,7 @@ public class AggregateRepositoryTest {
             ProjectId childId2 = givenAggregateId("acceptingChild-2");
             ProjectId childId3 = givenAggregateId("acceptingChild-3");
 
-            StreamObserver<Ack> observer = StreamObservers.noOpObserver();
+            StreamObserver<Ack> observer = noOpObserver();
             CommandBus commandBus = context.commandBus();
 
             // Create the parent project.
@@ -486,8 +485,7 @@ public class AggregateRepositoryTest {
             for (ProjectId childProject : childProjects) {
                 Optional<RejectionReactingAggregate> optional = repository.find(childProject);
 
-                OptionalSubject assertAggregate = Truth8.assertThat(optional);
-                assertAggregate.isPresent();
+                assertThat(optional).isPresent();
 
                 // Check that all the aggregates:
                 // 1. got Rejections.AggCannotStartArchivedProject;
@@ -654,6 +652,8 @@ public class AggregateRepositoryTest {
     void doNothingWhenEventReactionFails() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext().register(repository);
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext().registerEventDispatcher(monitor);
 
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
@@ -665,20 +665,14 @@ public class AggregateRepositoryTest {
         boundedContext().eventBus()
                         .post(envelope.outerObject());
 
-        assertTrue(repository.isErrorLogged());
-        RuntimeException lastException = repository.getLastException();
-        assertTrue(lastException instanceof HandlerMethodFailedException);
-
-        HandlerMethodFailedException methodFailedException =
-                (HandlerMethodFailedException) lastException;
-
-        assertEquals(envelope.message(), methodFailedException.getDispatchedMessage());
-        assertEquals(envelope.context(), methodFailedException.getMessageContext());
-
-        MessageEnvelope lastErrorEnvelope = repository.getLastErrorEnvelope();
-        assertNotNull(lastErrorEnvelope);
-        assertTrue(lastErrorEnvelope instanceof EventEnvelope);
-        assertEquals(envelope.message(), lastErrorEnvelope.message());
+        List<HandlerFailedUnexpectedly> handlerFailureEvents = monitor.handlerFailureEvents();
+        assertThat(handlerFailureEvents).hasSize(1);
+        HandlerFailedUnexpectedly event = handlerFailureEvents.get(0);
+        assertThat(event.getHandledSignal()).isEqualTo(envelope.messageId());
+        assertThat(event.getEntity().getTypeUrl())
+                .isEqualTo(repository.entityStateType().value());
+        assertThat(event.getError().getType())
+                .isEqualTo(IllegalArgumentException.class.getCanonicalName());
     }
 
     @Test
@@ -686,16 +680,20 @@ public class AggregateRepositoryTest {
     void notPassCommandRejectionToOnError() {
         FailingAggregateRepository repository = new FailingAggregateRepository();
         boundedContext().register(repository);
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext().registerEventDispatcher(monitor);
 
         // Passing negative long value to `FailingAggregate` should cause a rejection.
-        CommandEnvelope ce = CommandEnvelope.of(
-                requestFactory().createCommand(RejectNegativeLong.newBuilder()
-                                                                 .setNumber(-100_000_000L)
-                                                                 .build()));
+        RejectNegativeLong rejectNegative = RejectNegativeLong
+                .newBuilder()
+                .setNumber(-100_000_000L)
+                .vBuild();
+        Command command = requestFactory().createCommand(rejectNegative);
+        CommandEnvelope envelope = CommandEnvelope.of(
+                command);
         boundedContext().commandBus()
-                        .post(ce.command(), StreamObservers.noOpObserver());
-
-        assertFalse(repository.isErrorLogged());
+                        .post(envelope.command(), noOpObserver());
+        assertThat(monitor.handlerFailureEvents()).isEmpty();
     }
 
     @Test

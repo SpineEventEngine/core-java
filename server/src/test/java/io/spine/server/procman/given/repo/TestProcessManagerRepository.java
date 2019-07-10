@@ -24,48 +24,19 @@ import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.rejection.StandardRejection;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRouting;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.server.route.EventRoute.withId;
 
 public final class TestProcessManagerRepository
         extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
-    private @Nullable RuntimeException latestException;
-
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
         routing.route(StandardRejection.class,
                       (event, context) -> withId((ProjectId) event.entityId()));
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        this.latestException = exception;
-        super.onError(event, exception);
-    }
-
-    @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        this.latestException = exception;
-        try {
-            super.onError(cmd, exception);
-        } catch (Exception e) {
-            //TODO:2019-06-17:alex.tymchenko: Do we need to let the exceptions out at all?
-            // see https://github.com/SpineEventEngine/core-java/issues/1094
-            logError("Error dispatching command (class: `%s`, ID: `%s`) to entity with state `%s`.",
-                     cmd, exception);
-
-        }
-    }
-
-    public @Nullable RuntimeException latestException() {
-        return latestException;
     }
 
     @Override

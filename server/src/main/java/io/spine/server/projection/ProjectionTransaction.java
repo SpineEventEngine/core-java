@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
@@ -54,17 +55,6 @@ public class ProjectionTransaction<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This method is overridden to expose itself to repositories, state builders, and test
-     * utilities.
-     */
-    @Override
-    protected final void commit() {
-        super.commit();
-    }
-
-    /**
      * Creates a new transaction for a given {@code projection}.
      *
      * @param projection the {@code Projection} instance to start the transaction for.
@@ -81,8 +71,8 @@ public class ProjectionTransaction<I,
     }
 
     @Override
-    protected void doDispatch(Projection<I, M, B> projection, EventEnvelope event) {
-        projection.apply(event);
+    protected DispatchOutcome dispatch(Projection<I, M, B> projection, EventEnvelope event) {
+        return projection.apply(event);
     }
 
     @Override

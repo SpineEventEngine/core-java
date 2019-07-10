@@ -26,10 +26,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
@@ -41,9 +43,9 @@ import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRoute;
@@ -52,6 +54,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
@@ -61,6 +64,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -80,19 +84,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
-                extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcherDelegate<I> {
+        extends EventDispatchingRepository<I, P, S>
+        implements CommandDispatcherDelegate<I> {
 
     /** The command routing schema used by this repository. */
     private final Supplier<CommandRouting<I>> commandRouting;
-
-    /**
-     * The {@link CommandErrorHandler} tackling the dispatching errors.
-     *
-     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
-     * method.
-     */
-    private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
     /**
      * The {@link Inbox} for the messages, which are sent to the instances managed by this
@@ -150,24 +146,19 @@ public abstract class ProcessManagerRepository<I,
      * </ul>
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
+     *
      * @param context
      *         the Bounded Context of this repository
      * @throws IllegalStateException
-     *          if the Process Manager class of this repository does not declare message
-     *          handling methods
+     *         if the Process Manager class of this repository does not declare message
+     *         handling methods
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
-        super.init(context);
-
+    public void registerWith(BoundedContext context) {
+        super.registerWith(context);
         setupCommandRouting(commandRouting());
         checkNotDeaf();
-
-        context.registerCommandDispatcher(this);
-
-        this.commandErrorHandler = context.createCommandErrorHandler();
-
         initInbox();
     }
 
@@ -195,7 +186,7 @@ public abstract class ProcessManagerRepository<I,
      * of an event message.
      *
      * @param routing
-     *          the routing to customize
+     *         the routing to customize
      */
     @Override
     @OverridingMethodsMustInvokeSuper
@@ -300,25 +291,41 @@ public abstract class ProcessManagerRepository<I,
      * <p>If there is no stored process manager with such an ID,
      * a new process manager is created and stored after it handles the passed command.
      *
-     * @param command a request to dispatch
+     * @param command
+     *         a request to dispatch
      */
     @Override
-    public I dispatchCommand(CommandEnvelope command) {
+    public void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        I id = route(command);
-        inbox().send(command)
-               .toHandler(id);
-        return id;
+        Optional<I> target = route(command);
+        target.ifPresent(id -> inbox().send(command)
+                                      .toHandler(id));
     }
 
-    private I route(CommandEnvelope cmd) {
-        CommandRouting<I> routing = commandRouting();
-        I target = routing.apply(cmd.message(), cmd.context());
-
-        // We need to have a tenant set in order the callbacks could post the system events.
-        with(cmd.tenantId())
-                .run(() -> lifecycleOf(target).onTargetAssignedToCommand(cmd.id()));
+    private Optional<I> route(CommandEnvelope cmd) {
+        Optional<I> target = route(commandRouting(), cmd);
+        target.ifPresent(id -> onCommandTargetSet(id, cmd));
         return target;
+    }
+
+    private void onCommandTargetSet(I id, CommandEnvelope cmd) {
+        EntityLifecycle lifecycle = lifecycleOf(id);
+        CommandId commandId = cmd.id();
+        with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
+    }
+
+    @Internal
+    @Override
+    protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
+        super.onRoutingFailed(envelope, cause);
+        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
+            // TODO:2019-07-08:dmytro.dashenkov: Extract.
+            //  https://github.com/SpineEventEngine/core-java/issues/1109
+            CommandEnvelope command = (CommandEnvelope) envelope;
+            ThrowableMessage rejection = (ThrowableMessage) cause;
+            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
+            postEvent(rejectionEnvelope.outerObject());
+        }
     }
 
     /**
@@ -328,12 +335,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final void dispatchTo(I id, Event event) {
-        inbox().send(EventEnvelope.of(event)).toReactor(id);
-    }
-
-    @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
+        inbox().send(EventEnvelope.of(event))
+               .toReactor(id);
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
@@ -356,32 +359,28 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method into current package.
+     * Posts the passed event to {@link EventBus}.
      */
-    @Override
-    protected EntityLifecycle lifecycleOf(I id) {
-        return super.lifecycleOf(id);
+    void postEvent(Event event) {
+        postEvents(ImmutableList.of(event));
     }
 
     /**
-     * Loads or creates a process manager by the passed ID.
+     * Posts passed commands to {@link CommandBus}.
+     */
+    void postCommands(Collection<Command> commands) {
+        CommandBus bus = context().commandBus();
+        bus.post(commands, noOpObserver());
+    }
+
+    /**
+     * {@inheritDoc}
      *
-     * <p>The process manager is created if there was no manager with such ID stored before.
-     *
-     * <p>The repository injects {@code CommandBus} from its {@code BoundedContext} into the
-     * instance of the process manager so that it can post commands if needed.
-     *
-     * @param id the ID of the process manager to load
-     * @return loaded or created process manager instance
+     * <p>Overrides to expose the method to the package.
      */
     @Override
     protected P findOrCreate(I id) {
-        P result = super.findOrCreate(id);
-        CommandBus commandBus = context().commandBus();
-        result.setCommandBus(commandBus);
-        return result;
+        return super.findOrCreate(id);
     }
 
     @Override
@@ -403,7 +402,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public void close() {
         super.close();
-        if(inbox != null) {
+        if (inbox != null) {
             inbox.unregister();
         }
     }
@@ -419,15 +418,6 @@ public abstract class ProcessManagerRepository<I,
             ProcessManagerClass<?> pmClass = asProcessManagerClass(entityClass());
             Set<EventClass> eventClasses = pmClass.externalEvents();
             return ExternalMessageClass.fromEventClasses(eventClasses);
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            checkNotNull(envelope);
-            checkNotNull(exception);
-            logError("Error dispatching external event (class: `%s`, id: `%s`) " +
-                             "to a process manager with state `%s`.",
-                     envelope, exception);
         }
     }
 }

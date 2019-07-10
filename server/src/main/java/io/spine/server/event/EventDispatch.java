@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import io.spine.annotation.Internal;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.type.EventEnvelope;
 
@@ -36,13 +37,11 @@ import java.util.function.BiFunction;
  *         the type of entity ID
  * @param <E>
  *         the type of entity
- * @param <R>
- *         the type of the dispatch result
  */
 @Internal
-public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
+public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>> {
 
-    private final BiFunction<E, EventEnvelope, R> dispatchFunction;
+    private final BiFunction<E, EventEnvelope, DispatchOutcome> dispatchFunction;
     private final E entity;
     private final EventEnvelope event;
 
@@ -56,7 +55,7 @@ public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
      * @param event
      *         the dispatched event
      */
-    public EventDispatch(BiFunction<E, EventEnvelope, R> dispatchFunction,
+    public EventDispatch(BiFunction<E, EventEnvelope, DispatchOutcome> dispatchFunction,
                          E entity,
                          EventEnvelope event) {
         this.dispatchFunction = dispatchFunction;
@@ -67,7 +66,7 @@ public final class EventDispatch<I, E extends TransactionalEntity<I, ?, ?>, R> {
     /**
      * Executes the dispatch operation, returning its result.
      */
-    public R perform() {
+    public DispatchOutcome perform() {
         return dispatchFunction.apply(entity, event);
     }
 

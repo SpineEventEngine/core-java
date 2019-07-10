@@ -20,19 +20,18 @@
 
 package io.spine.server.projection;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
+import io.spine.base.Error;
 import io.spine.core.EventContext;
+import io.spine.server.delivery.EventEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 import static io.spine.server.projection.ProjectionTransaction.start;
 
@@ -41,7 +40,8 @@ import static io.spine.server.projection.ProjectionTransaction.start;
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
-        extends EntityMessageEndpoint<I, P, EventEnvelope> {
+        extends EntityMessageEndpoint<I, P, EventEnvelope>
+        implements EventEndpoint<I> {
 
     protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
@@ -53,12 +53,12 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     }
 
     @Override
-    protected ProjectionRepository<I, P, ?> repository() {
+    public ProjectionRepository<I, P, ?> repository() {
         return (ProjectionRepository<I, P, ?>) super.repository();
     }
 
     @Override
-    protected void dispatchInTx(I entityId) {
+    public void dispatchTo(I entityId) {
         ProjectionRepository<I, P, ?> repository = repository();
         P projection = repository.findOrCreate(entityId);
         runTransactionFor(projection);
@@ -77,15 +77,21 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
-        invokeDispatcher(projection, envelope());
-        tx.commit();
+        DispatchOutcome outcome = invokeDispatcher(projection, envelope());
+        tx.commitIfActive();
+        if (outcome.hasSuccess()) {
+            afterDispatched(projection.id());
+        } else if (outcome.hasError()) {
+            Error error = outcome.getError();
+            repository().lifecycleOf(projection.id())
+                        .onHandlerFailed(envelope().messageId(), error);
+        }
     }
 
     @CanIgnoreReturnValue
     @Override
-    protected List<Event> invokeDispatcher(P projection, EventEnvelope event) {
-        projection.play(event.outerObject());
-        return ImmutableList.of();
+    protected DispatchOutcome invokeDispatcher(P projection, EventEnvelope event) {
+        return projection.play(event.outerObject());
     }
 
     @Override
@@ -112,10 +118,5 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @Override
     protected void onEmptyResult(P entity, EventEnvelope event) {
         // Do nothing.
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        repository().onError(event, exception);
     }
 }

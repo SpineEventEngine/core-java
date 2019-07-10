@@ -78,13 +78,8 @@ public class Given {
 
         @CanIgnoreReturnValue
         @Override
-        public ProjectId dispatch(CommandEnvelope envelope) {
-            return ProjectId.getDefaultInstance();
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // NO-OP.
+        public void dispatch(CommandEnvelope envelope) {
+            // Do nothing.
         }
     }
 
@@ -104,13 +99,8 @@ public class Given {
 
         @CanIgnoreReturnValue
         @Override
-        public Set<ProjectId> dispatch(EventEnvelope envelope) {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            // NO-OP.
+        public void dispatch(EventEnvelope envelope) {
+            // Do nothing.
         }
 
         @Override

@@ -20,13 +20,10 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.UserId;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;
@@ -39,13 +36,13 @@ import io.spine.server.event.model.given.reactor.RcWrongNoAnnotation;
 import io.spine.server.event.model.given.reactor.RcWrongNoParam;
 import io.spine.server.event.model.given.reactor.RcWrongSecondParam;
 import io.spine.server.event.model.given.reactor.TestEventReactor;
-import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.event.RefProjectAssigned;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.test.reflect.event.RefProjectStarted;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,7 +53,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -153,17 +149,16 @@ class EventReactorMethodTest {
         void returnValue() {
             RefProjectCreated event = projectCreatedEvent();
 
-            ReactorMethodResult result =
-                    method.invoke(target, envelope(event));
-
-            IterableSubject assertThat = assertThat(result.asMessages());
-            assertThat.hasSize(1);
-            assertThat.containsExactly(
-                    RefProjectStarted
-                            .newBuilder()
-                            .setProjectId(event.getProjectId())
-                            .build()
-            );
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
+            List<Event> events = outcome.getSuccess()
+                                        .getProducedEvents()
+                                        .getEventList();
+            assertThat(events).hasSize(1);
+            assertThat(events.get(0).enclosedMessage())
+                    .isEqualTo(RefProjectStarted
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .build());
         }
 
         @Test
@@ -174,10 +169,9 @@ class EventReactorMethodTest {
                     .newBuilder()
                     .build();
 
-            ReactorMethodResult result =
-                    method.invoke(target, envelope(event));
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
 
-            assertThat(result.asMessages()).isEmpty();
+            assertThat(outcome.getSuccess().getProducedEvents().getEventList()).isEmpty();
         }
     }
 
@@ -212,36 +206,39 @@ class EventReactorMethodTest {
         @DisplayName("when returning Pair with two non-null values")
         void returningNonNull() {
             RefProjectCreated event = projectCreatedWithAssignee();
-            ReactorMethodResult result = method.invoke(target, envelope(event));
-
-            IterableSubject assertThat = assertThat(result.asMessages());
-            assertThat.hasSize(2);
-            assertThat.containsExactly(RefProjectStarted
-                                               .newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .build(),
-                                       RefProjectAssigned
-                                               .newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .setAssignee(event.getAssignee())
-                                               .build()
-            );
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
+            List<Event> events = outcome.getSuccess()
+                                        .getProducedEvents()
+                                        .getEventList();
+            assertThat(events).hasSize(2);
+            assertThat(events.get(0).enclosedMessage())
+                    .isEqualTo(RefProjectStarted
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .build());
+            assertThat(events.get(1).enclosedMessage())
+                    .isEqualTo(RefProjectAssigned
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .setAssignee(event.getAssignee())
+                                       .build());
         }
 
         @Test
         @DisplayName("when returning Pair with null second value")
         void returningSecondNull() {
             RefProjectCreated event = projectCreatedEvent();
-            ReactorMethodResult result = method.invoke(target, envelope(event));
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
 
-            List<EventMessage> messages = result.asMessages();
-            IterableSubject assertThat = assertThat(messages);
-            assertThat.hasSize(1);
-            assertThat.containsExactly(RefProjectStarted
-                                               .newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .build()
-            );
+            List<Event> events = outcome.getSuccess()
+                                        .getProducedEvents()
+                                        .getEventList();
+            assertThat(events).hasSize(1);
+            assertThat(events.get(0).enclosedMessage())
+                    .isEqualTo(RefProjectStarted
+                                       .newBuilder()
+                                       .setProjectId(event.getProjectId())
+                                       .build());
         }
     }
 
@@ -320,13 +317,9 @@ class EventReactorMethodTest {
         return found.get();
     }
 
-    private static EventEnvelope envelope(Message eventMessage) {
-        Any cmd = pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(cmd)
-                .setContext(EventContext.getDefaultInstance())
-                .build();
+    private static EventEnvelope envelope(EventMessage eventMessage) {
+        TestEventFactory factory = TestEventFactory.newInstance(EventReactorMethodTest.class);
+        Event event = factory.createEvent(eventMessage);
         EventEnvelope envelope = EventEnvelope.of(event);
         return envelope;
     }

@@ -18,23 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.delivery.given;
 
-import io.spine.base.EventMessage;
-import io.spine.server.EventProducer;
+import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.entity.Repository;
+import io.spine.server.type.CommandEnvelope;
 
-import java.util.List;
+import static io.spine.testing.Tests.nullRef;
 
-/**
- * A reactor method may not return a result in response to an incoming message. When so,
- * the raw method should return {@link com.google.protobuf.Empty Empty}.
- */
-public final class ReactorMethodResult extends EventsResult {
+public class NoOpEndpoint implements MessageEndpoint<String, CommandEnvelope> {
 
-    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
-        super(producer, rawMethodOutput);
-        List<EventMessage> messages = toMessages(rawMethodOutput);
-        List<EventMessage> filtered = filterIgnored(messages);
-        setMessages(filtered);
+    @Override
+    public void dispatchTo(String targetId) {
+        // do nothing.
+    }
+
+    @Override
+    public void onDuplicate(String target, CommandEnvelope envelope) {
+        // do nothing.
+    }
+
+    @Override
+    public Repository<String, ?> repository() {
+        return nullRef();
     }
 }

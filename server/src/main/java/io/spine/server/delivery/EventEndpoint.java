@@ -18,10 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.contexts.tasks;
+package io.spine.server.delivery;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.test.model.contexts.tasks.TaskId;
+import io.spine.server.type.EventEnvelope;
 
-final class TaskRepository extends AggregateRepository<TaskId, TaskAggregate> {
+public interface EventEndpoint<I> extends MessageEndpoint<I, EventEnvelope> {
+
+    @Override
+    default void onDuplicate(I target, EventEnvelope envelope) {
+        repository().lifecycleOf(target)
+                    .onDuplicateEvent(envelope);
+    }
 }

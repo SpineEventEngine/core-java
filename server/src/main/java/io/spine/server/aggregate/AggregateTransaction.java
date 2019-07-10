@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
@@ -52,17 +53,6 @@ public class AggregateTransaction<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>This method is overridden to expose itself to repositories, state builders,
-     * and test utilities.
-     */
-    @Override
-    protected final void commit() {
-        super.commit();
-    }
-
-    /**
      * Creates a new transaction for a given {@code aggregate}.
      *
      * @param aggregate the {@code Aggregate} instance to start the transaction for.
@@ -75,8 +65,8 @@ public class AggregateTransaction<I,
     }
 
     @Override
-    protected final void doDispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
-        aggregate.invokeApplier(event);
+    protected final DispatchOutcome dispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
+        return aggregate.invokeApplier(event);
     }
 
     @Override

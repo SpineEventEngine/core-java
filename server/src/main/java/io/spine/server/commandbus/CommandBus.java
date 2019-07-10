@@ -38,8 +38,6 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
-import io.spine.server.command.CommandErrorHandler;
-import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -50,17 +48,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.bus.BusBuilder.FieldCheck.checkSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.systemNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
-import static java.util.Optional.ofNullable;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -74,9 +69,6 @@ public class CommandBus
 
     /** Consumes commands dispatched by this bus. */
     private final CommandFlowWatcher watcher;
-
-    /** Callback for handling commands that failed. */
-    private final CommandErrorHandler errorHandler;
 
     private final CommandScheduler scheduler;
     private final SystemWriteSide systemWriteSide;
@@ -114,7 +106,6 @@ public class CommandBus
         this.systemWriteSide = builder.system()
                                       .orElseThrow(systemNotSet());
         this.tenantConsumer = checkNotNull(builder.tenantConsumer);
-        this.errorHandler = CommandErrorHandler.with(systemWriteSide, () -> builder.eventBus);
         this.watcher = checkNotNull(builder.flowWatcher);
     }
 
@@ -188,11 +179,7 @@ public class CommandBus
     protected void dispatch(CommandEnvelope command) {
         CommandDispatcher<?> dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);
-        try {
-            dispatcher.dispatch(command);
-        } catch (RuntimeException exception) {
-            errorHandler.handleAndPostIfRejection(command, exception);
-        }
+        dispatcher.dispatch(command);
     }
 
     /**
@@ -253,6 +240,7 @@ public class CommandBus
                                                    CommandEnvelope,
                                                    CommandClass,
                                                    CommandDispatcher<?>> {
+
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
          *
@@ -267,7 +255,6 @@ public class CommandBus
         private CommandFlowWatcher flowWatcher;
         private Consumer<TenantId> tenantConsumer;
         private CommandScheduler commandScheduler;
-        private EventBus eventBus;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -283,30 +270,6 @@ public class CommandBus
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
-        }
-
-        /**
-         * Inject the {@link EventBus} of the bounded context to which the built bus belongs.
-         *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
-         */
-        @Internal
-        public Builder injectEventBus(EventBus eventBus) {
-            checkNotNull(eventBus);
-            this.eventBus = eventBus;
-            return this;
-        }
-
-        Optional<EventBus> eventBus() {
-            return ofNullable(eventBus);
-        }
-
-        @Override
-        protected void checkFieldsSet() {
-            super.checkFieldsSet();
-            checkSet(eventBus, EventBus.class, "injectEventBus");
         }
 
         /**

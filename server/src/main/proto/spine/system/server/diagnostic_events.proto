@@ -9,7 +9,11 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "DiagnosticEventsProto";
 option java_multiple_files = true;
 
+import "spine/base/error.proto";
+import "spine/core/command.proto";
 import "spine/core/diagnostics.proto";
+import "spine/core/event.proto";
+import "spine/system/server/entity_type.proto";
 import "spine/validate/validation_error.proto";
 
 // An event emitted whenever an entity validation constraint is violated.
@@ -30,4 +34,46 @@ message ConstraintViolated {
 
     // The validation constraint violations.
     repeated validate.ConstraintViolation violation = 4 [(required) = false];
+}
+
+// An event emitted whenever a command is dispatched to an entity for the second time.
+message CannotDispatchDuplicateCommand {
+    option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
+
+    core.MessageId entity = 1;
+
+    core.CommandId command = 2;
+}
+
+// An event emitted whenever an event is dispatched to an entity for the second time.
+message CannotDispatchDuplicateEvent {
+    option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
+
+    // The violated entity info.
+    core.MessageId entity = 1;
+
+    core.EventId event = 2;
+}
+
+// An event emitted whenever a handler method fails with a runtime exception.
+message HandlerFailedUnexpectedly {
+
+    core.MessageId entity = 1;
+
+    // The handled signal ID.
+    core.MessageId handled_signal = 2;
+
+    // The error which occurred during the signal handling.
+    base.Error error = 3;
+}
+
+// An event emitted whenever a runtime exception occurs during message routing.
+message RoutingFailed {
+
+    core.MessageId handled_signal = 1;
+
+    EntityTypeName entity_type = 2;
+
+    // The error which occurred during the routing.
+    base.Error error = 3;
 }

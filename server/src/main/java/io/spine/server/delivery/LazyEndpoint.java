@@ -21,7 +21,7 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 import java.util.function.Function;
 
@@ -34,6 +34,6 @@ import java.util.function.Function;
  */
 @Internal
 @FunctionalInterface
-public interface LazyEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>>
+public interface LazyEndpoint<I, M extends SignalEnvelope<?, ?, ?>>
         extends Function<M, MessageEndpoint<I, M>> {
 }

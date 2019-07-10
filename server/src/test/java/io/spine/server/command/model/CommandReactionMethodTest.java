@@ -21,30 +21,34 @@
 package io.spine.server.command.model;
 
 import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
+import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
 import io.spine.server.command.model.given.reaction.TestCommandReactor;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.event.CmdProjectCreated;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.AnyPacker.pack;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("InnerClassMayBeStatic")
@@ -114,11 +118,8 @@ class CommandReactionMethodTest {
         @DisplayName("when returning value")
         void returnValue() {
             CmdProjectCreated message = createEvent(id);
-
-            CommandingMethod.Result result =
-                    method.invoke(target, envelope(message));
-
-            assertResult(result, this.id);
+            DispatchOutcome outcome = method.invoke(target, envelope(message));
+            assertResult(outcome, this.id);
         }
     }
 
@@ -162,9 +163,9 @@ class CommandReactionMethodTest {
             ProjectId givenId = this.id;
             CmdProjectCreated message = createEvent(givenId);
 
-            CommandingMethod.Result result = method.invoke(target, envelope(message));
+            DispatchOutcome outcome = method.invoke(target, envelope(message));
 
-            assertResult(result, givenId);
+            assertResult(outcome, givenId);
         }
 
         @Test
@@ -176,9 +177,9 @@ class CommandReactionMethodTest {
                     .setInitialize(false) // This will make the method return `Optional.empty()`.
                     .build();
 
-            CommandingMethod.Result result = method.invoke(target, envelope(message));
+            DispatchOutcome outcome = method.invoke(target, envelope(message));
 
-            assertThat(result.asMessages()).isEmpty();
+            assertThat(outcome.getSuccess().getProducedCommands().getCommandList()).isEmpty();
         }
     }
 
@@ -193,24 +194,28 @@ class CommandReactionMethodTest {
     /**
      * Asserts that the result has a message with correct type and passed field value.
      */
-    private static void assertResult(CommandingMethod.Result result, ProjectId id) {
+    private static void assertResult(DispatchOutcome outcome, ProjectId id) {
         CmdAddTask expected = CmdAddTask
                 .newBuilder()
                 .setProjectId(id)
                 .build();
-
-        IterableSubject assertThat = assertThat(result.asMessages());
+        assertTrue(outcome.hasSuccess());
+        Success success = outcome.getSuccess();
+        assertTrue(success.hasProducedCommands());
+        List<Command> commands = success.getProducedCommands()
+                                    .getCommandList();
+        List<CommandMessage> commandMessages = commands
+                .stream()
+                .map(Command::enclosedMessage)
+                .collect(toList());
+        IterableSubject assertThat = assertThat(commandMessages);
         assertThat.hasSize(1);
         assertThat.containsExactly(expected);
     }
 
-    private static EventEnvelope envelope(Message eventMessage) {
-        Any cmd = pack(eventMessage);
-        Event event = Event
-                .newBuilder()
-                .setMessage(cmd)
-                .setContext(EventContext.getDefaultInstance())
-                .build();
+    private static EventEnvelope envelope(EventMessage eventMessage) {
+        TestEventFactory factory = TestEventFactory.newInstance(CommandReactionMethodTest.class);
+        Event event = factory.createEvent(eventMessage);
         EventEnvelope envelope = EventEnvelope.of(event);
         return envelope;
     }

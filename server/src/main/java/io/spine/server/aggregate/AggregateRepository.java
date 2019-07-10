@@ -20,16 +20,18 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
@@ -38,13 +40,16 @@ import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
+import io.spine.server.route.Route;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
@@ -74,7 +79,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
-        implements CommandDispatcher<I>, EventDispatcherDelegate<I> {
+        implements CommandDispatcher<I>, EventDispatcherDelegate {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -90,14 +95,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
     private final EventRouting<I> eventImportRouting;
-
-    /**
-     * The {@link CommandErrorHandler} tackling the dispatching errors.
-     *
-     * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
-     * method.
-     */
-    private CommandErrorHandler commandErrorHandler;
 
     /**
      * The {@link Inbox} for the messages, which are sent to the instances managed by this
@@ -134,22 +131,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotVoid();
 
-        super.init(context);
+        super.registerWith(context);
 
         setupCommandRouting(commandRouting.get());
         setupEventRouting(eventRouting);
         setupImportRouting(eventImportRouting);
 
         context.registerCommandDispatcher(this);
-        context.registerEventDispatcher(this);
         if (aggregateClass().importsEvents()) {
             context.importBus()
                    .register(EventImportDispatcher.of(this));
         }
-        this.commandErrorHandler = context.createCommandErrorHandler();
         initInbox();
     }
 
@@ -164,7 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> new AggregateEventReactionEndpoint<>(this, e))
                 .addEventEndpoint(InboxLabel.IMPORT_EVENT,
-                                  e ->  new EventImportEndpoint<>(this, e))
+                                  e -> new EventImportEndpoint<>(this, e))
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
                                     c -> new AggregateCommandEndpoint<>(this, c))
                 .build();
@@ -295,39 +290,35 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The repository loads the aggregate by this ID, or creates a new aggregate
      * if there is no aggregate with such ID.
      *
-     * @param cmd the command to dispatch
+     * @param cmd
+     *         the command to dispatch
      */
     @Override
-    public I dispatch(CommandEnvelope cmd) {
+    public void dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
-        I id = route(cmd);
-        inbox().send(cmd).toHandler(id);
-        return id;
+        Optional<I> target = route(cmd);
+        target.ifPresent(id -> inbox().send(cmd)
+                                      .toHandler(id));
     }
 
-    private I route(CommandEnvelope cmd) {
-        CommandRouting<I> routing = commandRouting();
-        I target = routing.apply(cmd.message(), cmd.context());
-
-        // We need to have a tenant set in order the callbacks could post the system events.
-        with(cmd.tenantId()).run(() -> onCommandTargetSet(target, cmd.id()));
+    private Optional<I> route(CommandEnvelope cmd) {
+        Optional<I> target = route(commandRouting(), cmd);
+        target.ifPresent(id -> onCommandTargetSet(id, cmd));
         return target;
     }
 
-    /**
-     * Handles the given error.
-     *
-     * <p>If the given error is a rejection, posts the rejection event into
-     * the {@link EventBus}. Otherwise, logs the error.
-     *
-     * @param cmd
-     *         the command which caused the error
-     * @param exception
-     *         the error occurred during processing of the command
-     */
+    @Internal
     @Override
-    public void onError(CommandEnvelope cmd, RuntimeException exception) {
-        commandErrorHandler.handle(cmd, exception, event -> postEvents(ImmutableList.of(event)));
+    protected final void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
+        super.onRoutingFailed(envelope, cause);
+        if (envelope instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
+            // TODO:2019-07-08:dmytro.dashenkov: Extract.
+            //  https://github.com/SpineEventEngine/core-java/issues/1109
+            CommandEnvelope command = (CommandEnvelope) envelope;
+            ThrowableMessage rejection = (ThrowableMessage) cause;
+            RejectionEnvelope rejectionEnvelope = RejectionEnvelope.from(command, rejection);
+            postEvents(ImmutableSet.of(rejectionEnvelope.outerObject()));
+        }
     }
 
     @Override
@@ -366,64 +357,64 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Dispatches event to one or more aggregates reacting on the event.
      *
-     * @param event the event to dispatch
-     * @return identifiers of aggregates that reacted on the event
+     * @param event
+     *         the event to dispatch
      */
     @Override
-    public Set<I> dispatchEvent(EventEnvelope event) {
+    public void dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
         Set<I> targets = route(event);
-        targets.forEach((id) -> inbox().send(event).toReactor(id));
-        return targets;
+        targets.forEach((id) -> inbox().send(event)
+                                       .toReactor(id));
     }
 
     private Set<I> route(EventEnvelope event) {
-        EventRouting<I> routing = eventRouting();
-        Set<I> targets = routing.apply(event.message(), event.context());
-        return targets;
+        return route(eventRouting(), event)
+                .orElse(ImmutableSet.of());
     }
 
     /**
      * Imports the passed event into one of the aggregates.
      */
-    final I importEvent(EventEnvelope event) {
+    final void importEvent(EventEnvelope event) {
         checkNotNull(event);
-        I target = routeImport(event);
-        inbox().send(event).toImporter(target);
-        return target;
+        Optional<I> target = routeImport(event);
+        target.ifPresent(id -> inbox().send(event)
+                                      .toImporter(id));
     }
 
-    private I routeImport(EventEnvelope event) {
-        Set<I> ids = eventImportRouting.apply(event.message(), event.context());
-        int numberOfTargets = ids.size();
-        checkState(
-                numberOfTargets > 0,
-                "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
-                event.context(),
-                event.messageClass()
-        );
-        checkState(
-                numberOfTargets == 1,
-                "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
-                String.valueOf(numberOfTargets),
-                ids,
-                event.messageClass(),
-                event.context()
-        );
-        I id = ids.stream()
-                  .findFirst()
-                  .orElseThrow(() -> newIllegalStateException(
-                          "Unable to route import event: `%s`.", event)
-                  );
+    private Optional<I> routeImport(EventEnvelope event) {
+        Optional<I> id = route(eventImportRouting(), event);
         return id;
     }
 
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-        logError("Error reacting on event (class: `%s` ID: `%s`) in aggregate with the state `%s`.",
-                 event, exception);
+    private Route<? extends EventMessage, EventContext, I> eventImportRouting() {
+        return (message, context) -> {
+            Set<I> ids = eventImportRouting.apply(message, context);
+            int numberOfTargets = ids.size();
+            String messageType = message.getClass()
+                                        .getName();
+            checkState(
+                    numberOfTargets > 0,
+                    "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
+                    context,
+                    messageType
+            );
+            checkState(
+                    numberOfTargets == 1,
+                    "Expected one aggregate ID, but got %s (%s). Event class: `%s`, context: `%s`.",
+                    String.valueOf(numberOfTargets),
+                    ids,
+                    messageType,
+                    context
+            );
+            I id = ids.stream()
+                      .findFirst()
+                      .orElseThrow(() -> newIllegalStateException(
+                              "Unable to route import event `%s`.", messageType)
+                      );
+            return id;
+        };
     }
 
     /**
@@ -481,7 +472,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Returns the storage assigned to this aggregate.
      *
      * @return storage instance
-     * @throws IllegalStateException if the storage is null
+     * @throws IllegalStateException
+     *         if the storage is null
      */
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
@@ -492,8 +484,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads or creates an aggregate by the passed ID.
      *
-     * @param  id
-     *          the ID of the aggregate
+     * @param id
+     *         the ID of the aggregate
      * @return loaded or created aggregate instance
      */
     final A loadOrCreate(I id) {
@@ -563,7 +555,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         A result = create(id);
         AggregateTransaction tx = AggregateTransaction.start(result);
         result.play(history);
-        tx.commit();
+        tx.commitIfActive();
         return result;
     }
 
@@ -575,8 +567,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * or {@link io.spine.server.entity.Entity#isDeleted() deleted} lifecycle
      * attribute, or both of them, are set to {@code true}.
      *
-     * @param  id
-     *          the ID of the aggregate to load
+     * @param id
+     *         the ID of the aggregate to load
      * @return the aggregate instance, or {@link Optional#empty() empty()} if there is no
      *         aggregate with such ID
      */
@@ -585,18 +577,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return load(id);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overridden to expose the method into current package.
-     */
-    @Override
-    protected EntityLifecycle lifecycleOf(I id) {
-        return super.lifecycleOf(id);
-    }
-
-    private void onCommandTargetSet(I id, CommandId commandId) {
-        lifecycleOf(id).onTargetAssignedToCommand(commandId);
+    private void onCommandTargetSet(I id, CommandEnvelope cmd) {
+        EntityLifecycle lifecycle = lifecycleOf(id);
+        CommandId commandId = cmd.id();
+        with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
 
     @OverridingMethodsMustInvokeSuper

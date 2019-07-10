@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Queues;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
@@ -41,13 +40,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
-import org.slf4j.event.EventRecodingLogger;
-import org.slf4j.event.Level;
-import org.slf4j.event.SubstituteLoggingEvent;
-import org.slf4j.helpers.SubstituteLogger;
 
 import java.util.List;
-import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -73,8 +67,7 @@ class CommandHandlerTest {
         commandBus = boundedContext.commandBus();
         eventBus = boundedContext.eventBus();
         handler = new TestCommandHandler();
-        handler.injectEventBus(eventBus);
-        commandBus.register(handler);
+        boundedContext.registerCommandDispatcher(handler);
     }
 
     @AfterEach
@@ -186,33 +179,6 @@ class CommandHandlerTest {
         assertNotNull(logger);
         assertEquals(logger.getName(), handler.getClass()
                                               .getName());
-    }
-
-    @Test
-    @DisplayName("log errors")
-    void logErrors() {
-        CommandEnvelope commandEnvelope = generate();
-
-        // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
-        SubstituteLogger log = (SubstituteLogger) handler.log();
-
-        // Restrict the queue size only to the number of calls we want to make.
-        Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(1);
-        log.setDelegate(new EventRecodingLogger(log, queue));
-
-        SubstituteLoggingEvent loggingEvent;
-
-        RuntimeException exception = new RuntimeException("log_errors");
-        handler.onError(commandEnvelope, exception);
-
-        loggingEvent = queue.poll();
-
-        assertThat(loggingEvent.getLevel())
-                .isEqualTo(Level.ERROR);
-        assertThat(handler.getLastErrorEnvelope())
-                .isEqualTo(commandEnvelope);
-        assertThat(handler.getLastException())
-                .isEqualTo(exception);
     }
 
     private static CommandEnvelope generate() {

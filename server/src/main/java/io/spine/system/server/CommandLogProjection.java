@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import io.spine.core.ByField;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
@@ -52,24 +53,12 @@ import static io.spine.base.Time.currentTime;
 final class CommandLogProjection
         extends Projection<CommandId, CommandLog, CommandLog.Builder> {
 
-    /**
-     * Imports the event {@link CommandReceived}.
-     *
-     * <p>The event is generated when a command is received by the
-     * {@link io.spine.server.commandbus.CommandBus CommandBus}.
-     */
     @Subscribe
     void on(CommandReceived event) {
         timeline().setWhenReceived(currentTime());
         builder().setCommand(event.getPayload());
     }
 
-    /**
-     * Imports the event {@link CommandAcknowledged}.
-     *
-     * <p>The event is generated when the command passes
-     * {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
-     */
     @Subscribe
     void on(@SuppressWarnings("unused") CommandAcknowledged event) {
         timeline().setWhenAcknowledged(currentTime());
@@ -82,21 +71,11 @@ final class CommandLogProjection
         builder().setCommand(updatedCommand);
     }
 
-    /**
-     * Imports the event {@link CommandDispatched}.
-     *
-     * <p>The event is generated when the command is passed to a dispatcher after acknowledgement.
-     */
     @Subscribe
     void on(@SuppressWarnings("unused") CommandDispatched event) {
         timeline().setWhenDispatched(currentTime());
     }
 
-    /**
-     * Imports the event {@link TargetAssignedToCommand}.
-     *
-     * <p>The event is generated when the command target is determined.
-     */
     @Subscribe
     void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
@@ -104,21 +83,23 @@ final class CommandLogProjection
         builder().setTarget(target);
     }
 
-    /**
-     * Imports the event {@link CommandHandled}.
-     *
-     * <p>The event is generated after a command is successfully handled.
-     */
     @Subscribe
     void on(@SuppressWarnings("unused") CommandHandled event) {
         setStatus(Responses.statusOk());
     }
 
-    /**
-     * Imports the event {@link CommandErrored}.
-     *
-     * <p>The event is generated if the command caused a runtime error during handling.
-     */
+    @Subscribe(filter = @ByField(
+            path = "handled_signal.id.type_url",
+            value = "type.spine.io/spine.core.Command"
+    ))
+    void on(HandlerFailedUnexpectedly event) {
+        Status status = Status
+                .newBuilder()
+                .setError(event.getError())
+                .build();
+        setStatus(status);
+    }
+
     @Subscribe
     void on(CommandErrored event) {
         Status status = Status

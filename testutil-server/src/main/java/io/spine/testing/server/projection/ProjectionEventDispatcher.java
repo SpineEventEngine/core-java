@@ -109,7 +109,7 @@ public class ProjectionEventDispatcher {
             extends ProjectionRepository<I, P, S> {
 
         @Override
-        protected EntityLifecycle lifecycleOf(I id) {
+        public EntityLifecycle lifecycleOf(I id) {
             return NoOpLifecycle.instance();
         }
     }

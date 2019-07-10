@@ -467,21 +467,9 @@ class BoundedContextTest {
         }
 
         @Test
-        @DisplayName("`CommandDispatcherDelegate`")
-        void forCommandDispatcherDelegate() {
-            assertThrowsOn(ForeignContextConfig::commandDispatcherDelegateRegistration);
-        }
-
-        @Test
         @DisplayName("`EventDispatcher`")
         void forEventDispatcher() {
             assertThrowsOn(ForeignContextConfig::eventDispatcherRegistration);
-        }
-
-        @Test
-        @DisplayName("`EventDispatcherDelegate`")
-        void forEventDispatcherDelegate() {
-            assertThrowsOn(ForeignContextConfig::eventDispatcherDelegateRegistration);
         }
 
         private void assertThrowsOn(Executable executable) {

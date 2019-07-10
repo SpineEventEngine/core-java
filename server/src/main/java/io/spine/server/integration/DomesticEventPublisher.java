@@ -68,24 +68,13 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
     }
 
     @Override
-    public Set<String> dispatch(EventEnvelope event) {
+    public void dispatch(EventEnvelope event) {
         Event outerObject = event.outerObject();
         ExternalMessage msg = ExternalMessages.of(outerObject, originContextName);
         ExternalMessageClass messageClass = ExternalMessageClass.of(event.messageClass());
         ChannelId channelId = toId(messageClass);
         Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(event.id()), msg);
-
-        return ImmutableSet.of(channel.toString());
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(event);
-        _error(exception,
-               "Error publishing event (class: `%s`, ID: `%s`) from bounded context `%s`.",
-               event.messageClass(), event.id(), originContextName);
     }
 
     @Override

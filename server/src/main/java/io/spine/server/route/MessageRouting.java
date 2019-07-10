@@ -21,6 +21,7 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
+import io.spine.base.MessageContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.LinkedHashMap;
@@ -43,7 +44,8 @@ import static java.util.stream.Collectors.toList;
  * @param <R>
  *         the type returned by the {@linkplain Route#apply(Message, Message) routing function}
  */
-abstract class MessageRouting<M extends Message, C extends Message, R> implements Route<M, C, R> {
+abstract class MessageRouting<M extends Message, C extends MessageContext, R>
+        implements Route<M, C, R> {
 
     private static final long serialVersionUID = 0L;
 

@@ -18,33 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.delivery;
 
-import io.spine.server.commandbus.given.DelegatingCommandDispatcherTestEnv.EmptyCommandDispatcherDelegate;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.testing.client.TestActorRequestFactory;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+public interface CommandEndpoint<I> extends MessageEndpoint<I, CommandEnvelope> {
 
-@DisplayName("DelegatingCommandDispatcher should")
-class DelegatingCommandDispatcherTest {
-
-    @Test
-    @DisplayName("delegate `onError`")
-    void delegateOnError() {
-        EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
-
-        DelegatingCommandDispatcher<String> delegatingDispatcher =
-                DelegatingCommandDispatcher.of(delegate);
-
-        CommandEnvelope commandEnvelope = CommandEnvelope.of(
-                new TestActorRequestFactory(getClass()).generateCommand()
-        );
-
-        delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));
-
-        assertTrue(delegate.onErrorCalled());
+    @Override
+    default void onDuplicate(I target, CommandEnvelope envelope) {
+        repository().lifecycleOf(target)
+                    .onDuplicateCommand(envelope);
     }
 }

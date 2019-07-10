@@ -20,27 +20,18 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Any;
-import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
-import io.spine.server.command.model.CommandHandlerMethod.Result;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
-import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Suppliers.memoize;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
-import static io.spine.server.event.EventBus.checkAssigned;
 
 /**
  * The abstract base for non-aggregate classes that expose command handling methods
@@ -48,22 +39,25 @@ import static io.spine.server.event.EventBus.checkAssigned;
  *
  * <p>A command handler is responsible for:
  * <ol>
- *   <li>Changing the state of the business model in response to a command.
- *   <li>Producing corresponding events.
- *   <li>Posting events to {@code EventBus}.
+ *     <li>Changing the state of the business model in response to a command.
+ *     This is done by one of the command handling methods to which the handler dispatches
+ *     the command.
+ *     <li>Producing corresponding events.
+ *     <li>Posting events to {@code EventBus}.
  * </ol>
  *
- * <p>Event messages are returned as values of {@linkplain Assign command handling methods}.
+ * <p>Event messages are returned as values of command handling methods.
  *
- * <p>A command handler does not have own state. So the state of the business
+ * <p>A command handler does not have its own state. So the state of the business
  * model it changes is external to it. Even though such behaviour may be needed in
  * some rare cases, using {@linkplain io.spine.server.aggregate.Aggregate aggregates}
  * is a preferred way of handling commands.
  *
- * @implNote This class implements {@code CommandDispatcher} for dispatching messages
- *         to methods declared in the derived classes.
- * @see Assign @Assign
+ * <p>This class implements {@code CommandDispatcher} dispatching messages
+ * to methods declared in the derived classes.
+ *
  * @see io.spine.server.aggregate.Aggregate Aggregate
+ * @see CommandDispatcher
  */
 public abstract class AbstractCommandHandler
         extends AbstractCommandDispatcher
@@ -71,29 +65,23 @@ public abstract class AbstractCommandHandler
 
     private final CommandHandlerClass<?> thisClass = asCommandHandlerClass(getClass());
 
-    /** The bus to which post events. */
-    private EventBus eventBus;
-
-    /** Supplier for a packed version of the ID. */
-    private final Supplier<Any> producerId =
-            memoize(() -> pack(TypeConverter.toMessage(id())));
-
     /**
      * Dispatches the command to the handler method and
      * posts resulting events to the {@link EventBus}.
      *
      * @param envelope the command to dispatch
-     * @return the handler identity as the result of {@link #toString()}
      * @throws IllegalStateException
      *         if an exception occurred during command dispatching with this exception as the cause
      */
     @Override
-    public String dispatch(CommandEnvelope envelope) {
+    public void dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
-        Result result = method.invoke(this, envelope);
-        List<Event> events = result.produceEvents(envelope);
-        postEvents(events);
-        return id();
+        DispatchOutcome result = method.invoke(this, envelope);
+        if (result.hasSuccess()) {
+            postEvents(result.getSuccess().getProducedEvents().getEventList());
+        } else if (result.hasError()){
+            onError(envelope,result.getError());
+        }
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
@@ -108,47 +96,5 @@ public abstract class AbstractCommandHandler
     @Override
     public Version version() {
         return Version.getDefaultInstance();
-    }
-
-    /**
-     * Obtains {@linkplain #id() ID} packed into {@code Any} for being used in generated events.
-     */
-    @Override
-    public Any producerId() {
-        return producerId.get();
-    }
-
-    /**
-     * Assigns {@code EventBus} to which the handler posts the produced events.
-     */
-    @Internal
-    public final void injectEventBus(EventBus eventBus) {
-        this.eventBus = checkNotNull(eventBus);
-    }
-
-    private EventBus eventBus() {
-        return checkAssigned(this, eventBus);
-    }
-
-    /**
-     * Posts passed events to the associated {@code EventBus}.
-     */
-    private void postEvents(Iterable<Event> events) {
-        eventBus().post(events);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Logs the error into the {@linkplain #log() log}.
-     */
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        _error(exception,
-               "Error handling command (class: `{}` id: `{}`).",
-               envelope.messageClass(),
-               envelope.idAsString());
     }
 }

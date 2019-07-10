@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
@@ -39,9 +40,12 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.CannotDispatchDuplicateCommand;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.CommandTarget;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.EntityTypeName;
+import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.CommandHandled;
@@ -189,7 +193,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asEventOrigin();
+                                                  .asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -205,7 +209,7 @@ public class EntityLifecycle {
                 .setId(command.getId())
                 .vBuild();
         Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asEventOrigin();
+                                                  .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -224,7 +228,7 @@ public class EntityLifecycle {
                 .setRejectionEvent(rejection)
                 .vBuild();
         Origin systemEventOrigin = RejectionEnvelope.from(EventEnvelope.of(rejection))
-                                                    .asEventOrigin();
+                                                    .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -243,7 +247,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asEventOrigin();
+                                                .asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -256,7 +260,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asEventOrigin();
+                                                .asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -275,7 +279,7 @@ public class EntityLifecycle {
                 .setEntityType(typeName)
                 .vBuild();
         Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asEventOrigin();
+                                                .asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -330,6 +334,38 @@ public class EntityLifecycle {
                 .setLastMessage(lastMessage)
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
+                .vBuild();
+        postEvent(event);
+    }
+
+    public final void onHandlerFailed(MessageId handledSignal, Error error) {
+        checkNotNull(handledSignal);
+        checkNotNull(error);
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(entityId)
+                .setHandledSignal(handledSignal)
+                .setError(error)
+                .vBuild();
+        postEvent(systemEvent);
+    }
+
+    public void onDuplicateEvent(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        CannotDispatchDuplicateEvent event = CannotDispatchDuplicateEvent
+                .newBuilder()
+                .setEntity(entityId)
+                .setEvent(envelope.id())
+                .vBuild();
+        postEvent(event);
+    }
+
+    public void onDuplicateCommand(CommandEnvelope envelope) {
+        checkNotNull(envelope);
+        CannotDispatchDuplicateCommand event = CannotDispatchDuplicateCommand
+                .newBuilder()
+                .setEntity(entityId)
+                .setCommand(envelope.id())
                 .vBuild();
         postEvent(event);
     }

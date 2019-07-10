@@ -21,12 +21,11 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.delivery.CommandEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.List;
 
 import static io.spine.server.command.DispatchCommand.operationFor;
 
@@ -39,7 +38,8 @@ import static io.spine.server.command.DispatchCommand.operationFor;
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, CommandEnvelope> {
+        extends PmEndpoint<I, P, CommandEnvelope>
+        implements CommandEndpoint<I> {
 
     protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         super(repository, cmd);
@@ -58,16 +58,11 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(P processManager, CommandEnvelope envelope) {
+    protected DispatchOutcome invokeDispatcher(P processManager, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(processManager.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.perform(dispatch);
-    }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
     }
 
     /**

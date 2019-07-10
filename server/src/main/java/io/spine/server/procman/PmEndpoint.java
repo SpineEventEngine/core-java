@@ -20,11 +20,11 @@
 
 package io.spine.server.procman;
 
-import io.spine.core.Event;
+import io.spine.base.Error;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.type.ActorMessageEnvelope;
-
-import java.util.List;
+import io.spine.server.type.SignalEnvelope;
 
 /**
  * Common base message for endpoints of Process Managers.
@@ -35,7 +35,7 @@ import java.util.List;
  */
 abstract class PmEndpoint<I,
                           P extends ProcessManager<I, ?, ?>,
-                          M extends ActorMessageEnvelope<?, ?, ?>>
+                          M extends SignalEnvelope<?, ?, ?>>
         extends EntityMessageEndpoint<I, P, M> {
 
     PmEndpoint(ProcessManagerRepository<I, P, ?> repository, M envelope) {
@@ -54,7 +54,7 @@ abstract class PmEndpoint<I,
     }
 
     @Override
-    protected ProcessManagerRepository<I, P, ?> repository() {
+    public ProcessManagerRepository<I, P, ?> repository() {
         return (ProcessManagerRepository<I, P, ?>) super.repository();
     }
 
@@ -68,7 +68,7 @@ abstract class PmEndpoint<I,
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
-    protected void dispatchInTx(I id) {
+    public void dispatchTo(I id) {
         P manager = repository().findOrCreate(id);
         tryDispatchAndSave(manager);
     }
@@ -79,19 +79,46 @@ abstract class PmEndpoint<I,
      */
     private void tryDispatchAndSave(P manager) {
         try {
-            List<Event> events = runTransactionFor(manager);
+            DispatchOutcome outcome = runTransactionFor(manager);
             store(manager);
-            repository().postEvents(events);
+            if (outcome.hasSuccess()) {
+                postMessages(outcome.getSuccess());
+                afterDispatched(manager.id());
+            } else if (outcome.hasError()) {
+                Error error = outcome.getError();
+                repository().lifecycleOf(manager.id())
+                            .onHandlerFailed(envelope().messageId(), error);
+            }
         } catch (RuntimeException ex) {
             store(manager);
             throw ex;
         }
     }
 
-    protected List<Event> runTransactionFor(P processManager) {
+    private void postMessages(Success successfulOutcome) {
+        Success.ExhaustCase type = successfulOutcome.getExhaustCase();
+        switch (type) {
+            case PRODUCED_EVENTS:
+                repository().postEvents(successfulOutcome.getProducedEvents()
+                                                         .getEventList());
+                break;
+            case REJECTION:
+                repository().postEvent(successfulOutcome.getRejection());
+                break;
+            case PRODUCED_COMMANDS:
+                repository().postCommands(successfulOutcome.getProducedCommands()
+                                                           .getCommandList());
+                break;
+            case EXHAUST_NOT_SET:
+            default:
+
+        }
+    }
+
+    protected DispatchOutcome runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        List<Event> events = invokeDispatcher(processManager, envelope());
-        tx.commit();
-        return events;
+        DispatchOutcome outcome = invokeDispatcher(processManager, envelope());
+        tx.commitIfActive();
+        return outcome;
     }
 }

@@ -21,7 +21,8 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.entity.Repository;
+import io.spine.server.type.SignalEnvelope;
 
 /**
  * An endpoint for messages delivered to an abstract target.
@@ -32,7 +33,7 @@ import io.spine.server.type.ActorMessageEnvelope;
  *         the type of message envelope being delivered
  */
 @Internal
-public interface MessageEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+public interface MessageEndpoint<I, M extends SignalEnvelope<?, ?, ?>> {
 
     /**
      * Dispatches the message to the target with the passed ID.
@@ -43,7 +44,17 @@ public interface MessageEndpoint<I, M extends ActorMessageEnvelope<?, ?, ?>> {
     void dispatchTo(I targetId);
 
     /**
-     * Processes the exception thrown during dispatching the message.
+     * The callback invoked if the handled signal is a duplicate.
+     *
+     * @param target
+     *         the target entity
+     * @param envelope
+     *         the handled signal
      */
-    void onError(M envelope, RuntimeException exception);
+    void onDuplicate(I target, M envelope);
+
+    /**
+     * Obtains the repository which manages the target entities.
+     */
+    Repository<I, ?> repository();
 }

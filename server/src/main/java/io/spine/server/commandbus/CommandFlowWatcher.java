@@ -72,6 +72,6 @@ final class CommandFlowWatcher {
 
     private void postSystemEvent(EventMessage systemEvent, CommandEnvelope cmd) {
         SystemWriteSide writeSide = function.get(cmd.tenantId());
-        writeSide.postEvent(systemEvent, cmd.asEventOrigin());
+        writeSide.postEvent(systemEvent, cmd.asMessageOrigin());
     }
 }

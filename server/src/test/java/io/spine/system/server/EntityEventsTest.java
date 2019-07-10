@@ -193,8 +193,8 @@ class EntityEventsTest {
         postCommand(domainCommand);
 
         eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
-        EntityStateChanged stateChangedAgain = eventAccumulator.assertReceivedEvent(
-                EntityStateChanged.class);
+        EntityStateChanged stateChangedAgain =
+                eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(stateChangedAgain.getEntity());
         PersonCreation completedState = unpack(stateChangedAgain.getNewState(),
                                                PersonCreation.class);
@@ -221,8 +221,8 @@ class EntityEventsTest {
 
         checkEntityCreated(PROCESS_MANAGER, PersonProcman.TYPE);
 
-        EntityStateChanged stateChanged = eventAccumulator.assertReceivedEvent(
-                EntityStateChanged.class);
+        EntityStateChanged stateChanged =
+                eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         PersonCreation processState = unpack(stateChanged.getNewState(),
                                              PersonCreation.class);
         assertEquals(id, processState.getId());

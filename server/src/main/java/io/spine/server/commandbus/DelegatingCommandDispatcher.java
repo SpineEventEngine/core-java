@@ -60,13 +60,8 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
     }
 
     @Override
-    public final I dispatch(CommandEnvelope envelope) {
-        return delegate.dispatchCommand(envelope);
-    }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        delegate.onError(envelope, exception);
+    public final void dispatch(CommandEnvelope envelope) {
+        delegate.dispatchCommand(envelope);
     }
 
     /**

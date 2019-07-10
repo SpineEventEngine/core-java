@@ -39,13 +39,13 @@ public final class CommandInterceptor extends AbstractCommandHandler {
 
     @SafeVarargs
     CommandInterceptor(Class<? extends CommandMessage>... commandClasses) {
+        super();
         this.intercept = setOf(commandClasses);
     }
 
     @Override
-    public String dispatch(CommandEnvelope envelope) {
+    public void dispatch(CommandEnvelope envelope) {
         history.add(envelope);
-        return getClass().getName();
     }
 
     @Override

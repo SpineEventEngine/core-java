@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.Lists;
+import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
@@ -33,7 +34,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
@@ -43,8 +43,9 @@ import io.spine.server.projection.given.TestProjection;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.MessageEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
+import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -87,7 +88,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -129,7 +129,9 @@ class ProjectionRepositoryTest
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
-        return new TestProjectionRepository();
+        TestProjectionRepository repository = new TestProjectionRepository();
+        repository.registerWith(boundedContext);
+        return repository;
     }
 
     @Override
@@ -348,8 +350,7 @@ class ProjectionRepositoryTest
             BoundedContext context = BoundedContextBuilder.assumingTests().build();
             context.register(repository);
             EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
-            Set<ProjectId> targets = repository.dispatch(envelope);
-            assertThat(targets).containsExactly(id);
+            repository.dispatch(envelope);
             ProjectTaskNames expectedValue = ProjectTaskNames
                     .newBuilder()
                     .setProjectId(id)
@@ -378,6 +379,14 @@ class ProjectionRepositoryTest
     @DisplayName("not allow duplicate")
     @MuteLogging
     class AvoidDuplicates {
+
+        private DiagnosticMonitor monitor;
+
+        @BeforeEach
+        void setUp() {
+            monitor = new DiagnosticMonitor();
+            boundedContext.registerEventDispatcher(monitor);
+        }
 
         @Test
         @DisplayName("events")
@@ -410,14 +419,16 @@ class ProjectionRepositoryTest
         private void dispatchSuccessfully(Event event) {
             dispatchEvent(event);
             assertTrue(TestProjection.processed(event.enclosedMessage()));
-            assertNull(repository().getLastException());
+            List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
+            assertThat(events).isEmpty();
         }
 
         private void dispatchDuplicate(Event event) {
             dispatchEvent(event);
-            RuntimeException exception = repository().getLastException();
-            assertNotNull(exception);
-            assertThat(exception).isInstanceOf(DuplicateEventException.class);
+            List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
+            assertThat(events).hasSize(1);
+            CannotDispatchDuplicateEvent systemEvent = events.get(0);
+            assertThat(systemEvent.getEvent()).isEqualTo(event.id());
         }
     }
 
@@ -427,28 +438,17 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("log error when dispatching unknown event")
-    @MuteLogging
+    @DisplayName("fail when dispatching unknown event")
     void logErrorOnUnknownEvent() {
         Event event = GivenEvent.arbitrary();
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
 
-        dispatchEvent(event);
-
-        TestProjectionRepository repo = repository();
-        MessageEnvelope lastMessage = repo.getLastErrorEnvelope();
-
-        assertThat(lastMessage)
-                .isInstanceOf(EventEnvelope.class);
-        assertThat(lastMessage.message())
-                .isEqualTo(event.enclosedMessage());
-        assertThat(lastMessage.outerObject())
-                .isEqualTo(event);
-
-        // It must be "illegal argument type" since projections of this repository
-        // do not handle such events.
-        RuntimeException lastException = repo.getLastException();
-        assertThat(lastException)
-                .isInstanceOf(IllegalArgumentException.class);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> dispatchEvent(event));
+        StringSubject assertErrorMessage = assertThat(exception.getMessage());
+        assertErrorMessage.isNotNull();
+        assertErrorMessage.contains(repository().idClass().getName());
     }
 
     @Nested
@@ -549,6 +549,6 @@ class ProjectionRepositoryTest
                 .build();
 
         assertThrows(IllegalStateException.class, () ->
-                repo.injectContext(context));
+                repo.registerWith(context));
     }
 }

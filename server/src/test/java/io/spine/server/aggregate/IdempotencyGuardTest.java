@@ -21,16 +21,17 @@
 package io.spine.server.aggregate;
 
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.CommandValidationError;
 import io.spine.core.Event;
+import io.spine.core.EventValidationError;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.DuplicateCommandException;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -42,6 +43,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.core.CommandValidationError.DUPLICATE_COMMAND_VALUE;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
@@ -50,7 +56,7 @@ import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newProject
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.projectPaused;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProject;
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.taskStarted;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("IdempotencyGuard should")
 class IdempotencyGuardTest {
@@ -91,7 +97,12 @@ class IdempotencyGuardTest {
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            assertThrows(DuplicateCommandException.class, () -> check(guard, createCommand));
+            Optional<Error> error = check(guard, createCommand);
+            assertTrue(error.isPresent());
+            Error actualError = error.get();
+            assertThat(actualError.getType())
+                    .isEqualTo(CommandValidationError.class.getSimpleName());
+            assertThat(actualError.getCode()).isEqualTo(DUPLICATE_COMMAND_VALUE);
         }
 
         @Test
@@ -104,7 +115,8 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = aggregate();
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            check(guard, createCommand);
+            Optional<Error> error = check(guard, createCommand);
+            assertThat(error).isEmpty();
         }
 
         @Test
@@ -114,7 +126,8 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            guard.check(CommandEnvelope.of(createCommand));
+            Optional<Error> error = guard.check(CommandEnvelope.of(createCommand));
+            assertThat(error).isEmpty();
         }
 
         @Test
@@ -128,7 +141,8 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = aggregate();
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            check(guard, startCommand);
+            Optional<Error> error = check(guard, startCommand);
+            assertThat(error).isEmpty();
         }
 
         private void post(Command command) {
@@ -137,9 +151,9 @@ class IdempotencyGuardTest {
             commandBus.post(command, noOpObserver);
         }
 
-        private void check(IdempotencyGuard guard, Command command) {
+        private Optional<Error> check(IdempotencyGuard guard, Command command) {
             CommandEnvelope envelope = CommandEnvelope.of(command);
-            guard.check(envelope);
+            return guard.check(envelope);
         }
     }
 
@@ -161,7 +175,10 @@ class IdempotencyGuardTest {
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            assertThrows(DuplicateEventException.class, () -> check(guard, event));
+            Optional<Error> error = check(guard, event);
+            assertTrue(error.isPresent());
+            Error actualError = error.get();
+            assertThat(actualError.getType()).isEqualTo(EventValidationError.class.getSimpleName());
         }
 
         @Test
@@ -174,7 +191,8 @@ class IdempotencyGuardTest {
 
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            check(guard, event);
+            Optional<Error> error = check(guard, event);
+            assertThat(error).isEmpty();
         }
 
         @Test
@@ -184,7 +202,8 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            check(guard, event);
+            Optional<Error> error = check(guard, event);
+            assertThat(error).isEmpty();
         }
 
         @Test
@@ -199,7 +218,8 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = repository.loadAggregate(projectId);
 
             IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            check(guard, projectEvent);
+            Optional<Error> error = check(guard, projectEvent);
+            assertThat(error).isEmpty();
         }
 
         private void post(Event event) {
@@ -207,9 +227,9 @@ class IdempotencyGuardTest {
                           .post(event);
         }
 
-        private void check(IdempotencyGuard guard, Event event) {
+        private Optional<Error> check(IdempotencyGuard guard, Event event) {
             EventEnvelope envelope = EventEnvelope.of(event);
-            guard.check(envelope);
+            return guard.check(envelope);
         }
     }
 }

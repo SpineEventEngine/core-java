@@ -20,47 +20,96 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
+import io.spine.base.Error;
 import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.core.Version;
+import io.spine.logging.Logging;
+import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.ProducedEvents;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Functions.identity;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Abstract base for endpoints handling messages sent to aggregates.
  *
- * @param <I> the type of aggregate IDs
- * @param <A> the type of aggregates
- * @param <M> the type of message envelopes
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <A>
+ *         the type of aggregates
+ * @param <M>
+ *         the type of message envelopes
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
-                                 M extends ActorMessageEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, A, M> {
+                                 M extends SignalEnvelope<?, ?, ?>>
+        extends EntityMessageEndpoint<I, A, M>
+        implements Logging {
 
     AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
         super(repository, envelope);
     }
 
     @Override
-    protected final void dispatchInTx(I aggregateId) {
+    public final void dispatchTo(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
+        DispatchOutcome outcome = handleAndApplyEvents(aggregate);
+        if (outcome.hasSuccess()) {
+            updateLifecycle(aggregate, flagsBefore);
+            storeAndPost(aggregate, outcome);
+        } else if (outcome.hasError()) {
+            Error error = outcome.getError();
+            repository().lifecycleOf(aggregateId)
+                        .onHandlerFailed(envelope().messageId(), error);
+        }
+    }
 
-        List<Event> produced = runTransactionWith(aggregate);
+    private void storeAndPost(A aggregate, DispatchOutcome outcome) {
+        Success success = outcome.getSuccess();
+        if (success.hasProducedEvents()) {
+            store(aggregate);
+            List<Event> events = success.getProducedEvents()
+                                        .getEventList();
+            post(events);
+        } else if (success.hasRejection()) {
+            post(success.getRejection());
+        } else {
+            onEmptyResult(aggregate, envelope());
+        }
+        afterDispatched(aggregate.id());
+    }
 
-        // Update lifecycle flags only if the message was handled successfully and flags changed.
+    private void updateLifecycle(A aggregate, LifecycleFlags flagsBefore) {
         LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
         if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
-            storage().writeLifecycleFlags(aggregateId, flagsAfter);
+            storage().writeLifecycleFlags(aggregate.id(), flagsAfter);
         }
+    }
 
-        store(aggregate);
-        repository().postEvents(produced);
+    private void post(Collection<Event> events) {
+        repository().postEvents(events);
+    }
+
+    private void post(Event event) {
+        post(ImmutableList.of(event));
     }
 
     private A loadOrCreate(I aggregateId) {
@@ -68,12 +117,86 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    final List<Event> runTransactionWith(A aggregate) {
-        List<Event> events = invokeDispatcher(aggregate, envelope());
+    final DispatchOutcome handleAndApplyEvents(A aggregate) {
+        DispatchOutcome outcome = invokeDispatcher(aggregate, envelope());
+        Success successfulOutcome = outcome.getSuccess();
+        return successfulOutcome.hasProducedEvents()
+               ? applyProducedEvents(aggregate, outcome)
+               : outcome;
+    }
+
+    /**
+     * Applies the produced by the Aggregate events to the Aggregate.
+     *
+     * @param aggregate
+     *         the target Aggregate
+     * @param commandOutcome
+     *         the successful command propagation outcome
+     * @return the outcome of the command propagation with the events with the correct versions or
+     *         the erroneous outcome of applying an event
+     */
+    private DispatchOutcome applyProducedEvents(A aggregate, DispatchOutcome commandOutcome) {
+        List<Event> events = commandOutcome.getSuccess()
+                                           .getProducedEvents()
+                                           .getEventList();
         AggregateTransaction tx = startTransaction(aggregate);
-        List<Event> producedEvents = aggregate.apply(events);
-        tx.commit();
-        return producedEvents;
+        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events);
+        if (batchDispatchOutcome.getSuccessful()) {
+            tx.commitIfActive();
+            return correctProducedCommands(commandOutcome, batchDispatchOutcome);
+        } else {
+            return firstErroneousOutcome(batchDispatchOutcome);
+        }
+    }
+
+    /**
+     * Corrects the versions of the produced events in the command outcome.
+     *
+     * @param commandOutcome
+     *         the successful command outcome
+     * @param eventDispatch
+     *         the result of event applying
+     * @return the same command outcome but with the events of the correct versions
+     */
+    private static DispatchOutcome
+    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatchOutcome eventDispatch) {
+        DispatchOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
+        ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
+                                                                      .getProducedEventsBuilder();
+        Map<EventId, Event.Builder> correctedEvents = eventsBuilder
+                .getEventBuilderList()
+                .stream()
+                .collect(toImmutableMap(Event.Builder::getId, identity()));
+        for (DispatchOutcome outcome : eventDispatch.getOutcomeList()) {
+            Any signalId = outcome.getPropagatedSignal()
+                                  .getId();
+            EventId eventId = unpack(signalId, EventId.class);
+            Event.Builder event = checkNotNull(correctedEvents.get(eventId));
+            Version signalVersion = outcome.getPropagatedSignal()
+                                           .getVersion();
+            event.getContextBuilder()
+                 .setVersion(signalVersion);
+        }
+        return correctedCommandOutcome.vBuild();
+    }
+
+    /**
+     * Finds the first erroneous outcome in the given batchDispatchOutcome report.
+     *
+     * @param batchDispatchOutcome
+     *         the non-successful dispatch
+     * @return the first found outcome with an error
+     */
+    private static DispatchOutcome firstErroneousOutcome(BatchDispatchOutcome batchDispatchOutcome) {
+        DispatchOutcome erroneous = batchDispatchOutcome
+                .getOutcomeList()
+                .stream()
+                .filter(DispatchOutcome::hasError)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Dispatch was marked failed but no error occurred."
+                ));
+        return erroneous;
     }
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
@@ -97,7 +220,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected final AggregateRepository<I, A> repository() {
+    public final AggregateRepository<I, A> repository() {
         return (AggregateRepository<I, A>) super.repository();
     }
 

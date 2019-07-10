@@ -50,12 +50,6 @@ public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatche
 
     @CanIgnoreReturnValue
     @Override
-    public String dispatch(CommandEnvelope envelope) {
-        return id();
-    }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
+    public void dispatch(CommandEnvelope envelope) {
     }
 }

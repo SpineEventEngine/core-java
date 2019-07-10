@@ -22,12 +22,15 @@ package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoTruth;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.DefaultRepository;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.model.DuplicateHandlerMethodError;
@@ -41,9 +44,12 @@ import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.server.storage.StorageField;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
+import io.spine.system.server.DiagnosticMonitor;
+import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -61,6 +67,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -91,10 +98,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *         class, which is a part of Testutil Server library.
  */
 @DisplayName("Projection should")
-class ProjectionShould {
+class ProjectionTest {
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(ProjectionShould.class);
+            TestEventFactory.newInstance(ProjectionTest.class);
 
     private TestProjection projection;
 
@@ -197,10 +204,28 @@ class ProjectionShould {
     @Test
     @DisplayName("throw ISE if no handler is present for event")
     void throwIfNoHandlerPresent() {
-        assertThrows(IllegalStateException.class,
-                     () -> dispatch(projection,
-                                    GivenEvent.message(),
-                                    EventContext.getDefaultInstance()));
+        ProjectionRepository<String, ?, ?> repository =
+                (ProjectionRepository<String, ?, ?>) DefaultRepository.of(TestProjection.class);
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
+                .build();
+        context.register(repository);
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        context.registerEventDispatcher(monitor);
+        Event event = GivenEvent.arbitrary();
+        EventEnvelope envelope = EventEnvelope.of(event);
+        ProjectionEndpoint<String, ?> endpoint = ProjectionEndpoint.of(repository, envelope);
+
+        endpoint.dispatchTo(projection.id());
+
+        List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
+        assertThat(systemEvents).hasSize(1);
+        HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
+        assertThat(systemEvent.getHandledSignal().asEventId()).isEqualTo(event.id());
+        assertThat(systemEvent.getEntity().getId())
+                .isEqualTo(Identifier.pack(projection.id()));
+        assertThat(systemEvent.getError().getType())
+                .isEqualTo(IllegalStateException.class.getCanonicalName());
     }
 
     @Test

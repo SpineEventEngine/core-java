@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import io.spine.annotation.Internal;
 import io.spine.core.Subscribe;
+import io.spine.logging.Logging;
 import io.spine.server.ContextSpec;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.trace.Tracer;
@@ -38,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An event subscriber which listens to {@linkplain SignalDispatchedMixin dispatching events}.
  */
 @Internal
-public final class TraceEventObserver extends AbstractEventSubscriber {
+public final class TraceEventObserver extends AbstractEventSubscriber implements Logging {
 
     private final ContextSpec context;
     private final TracerFactory tracing;

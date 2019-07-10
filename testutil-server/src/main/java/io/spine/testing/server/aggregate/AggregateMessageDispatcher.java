@@ -21,18 +21,16 @@ package io.spine.testing.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateTestSupport;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +54,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message>
+    public static DispatchOutcome
     dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
         checkNotNull(aggregate);
         checkNotNull(command);
@@ -70,7 +68,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message>
+    public static DispatchOutcome
     dispatchCommand(Aggregate<?, ?, ?> aggregate, Command command) {
         checkNotNull(aggregate);
         checkNotNull(command);
@@ -85,7 +83,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message>
+    public static DispatchOutcome
     dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
@@ -99,7 +97,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message>
+    public static DispatchOutcome
     dispatchEvent(Aggregate<?, ?, ?> aggregate, Event event) {
         checkNotNull(aggregate);
         checkNotNull(event);
@@ -141,7 +139,7 @@ public class AggregateMessageDispatcher {
             extends AggregateRepository<I, A> {
 
         @Override
-        protected EntityLifecycle lifecycleOf(I id) {
+        public EntityLifecycle lifecycleOf(I id) {
             return NoOpLifecycle.instance();
         }
     }

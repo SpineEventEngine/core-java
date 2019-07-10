@@ -29,7 +29,6 @@ import io.spine.server.given.organizations.OrganizationEstablished;
 import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.type.MessageEnvelope;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -40,7 +39,6 @@ import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.core.given.GivenUserId;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -96,29 +94,9 @@ public class ProjectionRepositoryTestEnv {
     public static class TestProjectionRepository
             extends TestProjection.Repository {
 
-        private @Nullable MessageEnvelope lastErrorEnvelope;
-        private @Nullable RuntimeException lastException;
-
         @Subscribe
         void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
-        }
-
-        @Override
-        protected void logError(String msgFormat,
-                                MessageEnvelope envelope,
-                                RuntimeException exception) {
-            super.logError(msgFormat, envelope, exception);
-            lastErrorEnvelope = envelope;
-            lastException = exception;
-        }
-
-        public @Nullable MessageEnvelope getLastErrorEnvelope() {
-            return lastErrorEnvelope;
-        }
-
-        public @Nullable RuntimeException getLastException() {
-            return lastException;
         }
     }
 

@@ -21,13 +21,9 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.type.ActorMessageEnvelope;
-
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.type.SignalEnvelope;
 
 /**
  * Abstract base for endpoints handling messages sent to entities.
@@ -43,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
-                                            M extends ActorMessageEnvelope<?, ?, ?>>
+                                            M extends SignalEnvelope<?, ?, ?>>
         implements MessageEndpoint<I, M> {
 
     /** The repository which created this endpoint. */
@@ -58,48 +54,14 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Dispatches the message to the entity with the passed ID and takes care of errors
-     * during dispatching.
-     *
-     * <p>Error handling is delegated to
-     * {@link #onError(ActorMessageEnvelope, RuntimeException)
-     * onError(envelope, exception)} method.
-     *
-     * @param entityId
-     *         the ID of the entity which to dispatch the message to
-     */
-    @Override
-    public final void dispatchTo(I entityId) {
-        checkNotNull(entityId);
-        try {
-            dispatchInTx(entityId);
-            afterDispatched(entityId);
-        } catch (RuntimeException exception) {
-            onError(envelope(), exception);
-        }
-    }
-
-    /**
      * The callback invoked after the message is dispatched to an entity with the given ID.
      */
     protected abstract void afterDispatched(I entityId);
 
     /**
-     * Dispatches the message to the entity with the passed ID, providing transactional work
-     * and storage of the entity.
-     *
-     * <p>Performs the delivery directly to the entity not taking
-     * the delivery strategy into account.
-     *
-     * @param entityId
-     *         the ID of the entity which to dispatch the message to
-     */
-    protected abstract void dispatchInTx(I entityId);
-
-    /**
      * Invokes entity-specific method for dispatching the message.
      */
-    protected abstract List<Event> invokeDispatcher(E entity, M envelope);
+    protected abstract DispatchOutcome invokeDispatcher(E entity, M envelope);
 
     /**
      * Stores the entity if it was modified during message dispatching.
@@ -141,7 +103,8 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Obtains the parent repository of this endpoint.
      */
-    protected Repository<I, E> repository() {
+    @Override
+    public Repository<I, E> repository() {
         return repository;
     }
 }

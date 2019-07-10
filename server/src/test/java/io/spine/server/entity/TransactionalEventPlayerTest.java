@@ -22,6 +22,9 @@ package io.spine.server.entity;
 
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.test.shared.StringEntity;
 import io.spine.server.type.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
@@ -90,8 +93,9 @@ class TransactionalEventPlayerTest {
         }
 
         @Override
-        public void play(Iterable<Event> events) {
-            EventPlayer.forTransactionOf(this).play(events);
+        public BatchDispatchOutcome play(Iterable<Event> events) {
+            return EventPlayer.forTransactionOf(this)
+                              .play(events);
         }
     }
 
@@ -114,8 +118,14 @@ class TransactionalEventPlayerTest {
         }
 
         @Override
-        protected void doDispatch(TransactionalEntity entity, EventEnvelope event) {
-            dispatchedEvents.add(event.outerObject());
+        protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope envelope) {
+            Event event = envelope.outerObject();
+            dispatchedEvents.add(event);
+            return DispatchOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event.messageId())
+                    .setSuccess(Success.getDefaultInstance())
+                    .vBuild();
         }
 
         @Override

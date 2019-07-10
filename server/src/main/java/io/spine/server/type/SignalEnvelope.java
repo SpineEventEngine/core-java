@@ -18,37 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.type;
 
-import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.type.TypeName;
-
-import static java.lang.String.format;
+import io.spine.base.MessageContext;
+import io.spine.core.ActorContext;
+import io.spine.core.MessageId;
+import io.spine.core.Signal;
+import io.spine.core.SignalId;
+import io.spine.core.TenantId;
 
 /**
- * Reports an attempt to dispatch a duplicate event.
+ * A common interface for envelopes of signal messages.
  *
- * <p>An event is considered a duplicate when its ID matches the ID of another event which was
- * already dispatched to a given entity.
+ * @param <I> the type of the message ID
+ * @param <T> the type of the object that wraps a message
+ * @param <C> the type of the message context
  */
-public final class DuplicateEventException extends RuntimeException {
+public interface SignalEnvelope<I extends SignalId,
+                                T extends Signal<I, ?, C>,
+                                C extends MessageContext>
+        extends MessageEnvelope<I, T, C> {
 
-    private static final String MESSAGE =
-            "The event %s (ID: %s) cannot be dispatched to a single entity twice.";
+    /**
+     * Obtains ID of the tenant in which context the actor works.
+     */
+    TenantId tenantId();
 
-    private static final long serialVersionUID = 0L;
+    /**
+     * Obtains an actor context for the wrapped message.
+     */
+    ActorContext actorContext();
 
-    public DuplicateEventException(Event event) {
-        super(messageFrom(event));
-    }
-
-    private static String messageFrom(Event event) {
-        EventId eventId = event.getId();
-        Message eventMessage = event.enclosedMessage();
-        TypeName eventType = TypeName.of(eventMessage);
-        String result = format(MESSAGE, eventType, eventId.getValue());
-        return result;
+    /**
+     * Obtains the message ID of the signal.
+     */
+    default MessageId messageId() {
+        return outerObject().messageId();
     }
 }

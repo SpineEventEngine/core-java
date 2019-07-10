@@ -21,18 +21,14 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.security.InvocationGuard;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Internal utility class for assisting in aggregate tests.
@@ -58,8 +54,7 @@ public final class AggregateTestSupport {
      * @param <A> the type of {@code Aggregate}
      * @return the list of produced event messages
      */
-    public static <I, A extends Aggregate<I, ?, ?>>
-    List<? extends Message>
+    public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchCommand(AggregateRepository<I, A> repository, A aggregate, CommandEnvelope command) {
         checkArguments(repository, aggregate, command);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
@@ -76,8 +71,7 @@ public final class AggregateTestSupport {
      * @param <A> the type of {@code Aggregate}
      * @return the list of produced event messages
      */
-    public static <I, A extends Aggregate<I, ?, ?>>
-    List<? extends Message>
+    public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
@@ -99,17 +93,12 @@ public final class AggregateTestSupport {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
-        endpoint.runTransactionWith(aggregate);
+        endpoint.handleAndApplyEvents(aggregate);
     }
 
-    private static <I, A extends Aggregate<I, ?, ?>> List<Message>
+    private static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
-        List<Message> result =
-                endpoint.runTransactionWith(aggregate)
-                        .stream()
-                        .map(Event::enclosedMessage)
-                        .collect(toList());
-        return result;
+        return endpoint.handleAndApplyEvents(aggregate);
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> void

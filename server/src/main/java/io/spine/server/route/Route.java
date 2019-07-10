@@ -48,7 +48,6 @@ public interface Route<M extends Message, C extends Message, R>
      *         Javadoc references. Without overriding it will be {@code #apply(Object, Object)}
      *         which may be confusing in the context of event routing.
      */
-    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") // see @apiNote
     @Override
     R apply(M message, C context);
 }

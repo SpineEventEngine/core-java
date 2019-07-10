@@ -18,20 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.model;
 
-import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.test.shared.StringProjection;
-import io.spine.server.type.EventEnvelope;
-import io.spine.test.integration.ProjectId;
+import io.spine.annotation.Internal;
 
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-class ProjectDetailsRepository
-        extends ProjectionRepository<ProjectId, ProjectDetails, StringProjection> {
+/**
+ * An exception signifying that a handler method produced an unexpected result.
+ *
+ * <p>For example, event subscriber methods should not produce any result signals. If any such
+ * signals are encountered, an {@code IllegalOutcomeException} is thrown.
+ */
+@Internal
+public final class IllegalOutcomeException extends RuntimeException {
 
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        throw illegalStateWithCauseOf(exception);
+    private static final long serialVersionUID = 0L;
+
+    public IllegalOutcomeException(String message) {
+        super(checkNotNull(message));
     }
 }

@@ -22,10 +22,12 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -34,16 +36,17 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.model.EventsResult;
-import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -114,7 +117,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * @param <B>
  *         the type of the aggregate state builder
  */
-@SuppressWarnings("OverlyCoupledClass")
+@SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S>>
@@ -227,11 +230,20 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope command) {
-        idempotencyGuard.check(command);
-        CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
-        EventsResult result = method.invoke(this, command);
-        return result.produceEvents(command);
+    protected DispatchOutcome dispatchCommand(CommandEnvelope command) {
+        Optional<Error> error = idempotencyGuard.check(command);
+        if (error.isPresent()) {
+            DispatchOutcome outcome = DispatchOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(command.messageId())
+                    .setError(error.get())
+                    .vBuild();
+            return outcome;
+        } else {
+            CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
+            DispatchOutcome outcome = method.invoke(this, command);
+            return outcome;
+        }
     }
 
     /**
@@ -245,13 +257,20 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change because of the event
      */
-    List<Event> reactOn(EventEnvelope event) {
-        idempotencyGuard.check(event);
-        EventReactorMethod method =
-                thisClass().reactorOf(event.messageClass(), event.originClass());
-        ReactorMethodResult result =
-                method.invoke(this, event);
-        return result.produceEvents(event);
+    DispatchOutcome reactOn(EventEnvelope event) {
+        Optional<Error> error = idempotencyGuard.check(event);
+        if (error.isPresent()) {
+            DispatchOutcome outcome = DispatchOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(event.messageId())
+                    .setError(error.get())
+                    .vBuild();
+            return outcome;
+        } else {
+            EventReactorMethod method =
+                    thisClass().reactorOf(event.messageClass(), event.originClass());
+            return method.invoke(this, event);
+        }
     }
 
     /**
@@ -260,15 +279,16 @@ public abstract class Aggregate<I,
      * @param event
      *         the event to apply
      */
-    final void invokeApplier(EventEnvelope event) {
+    final DispatchOutcome invokeApplier(EventEnvelope event) {
         Applier method = thisClass().applierOf(event.messageClass());
-        method.invoke(this, event);
+        return method.invoke(this, event);
     }
 
     @Override
-    public final void play(Iterable<Event> events) {
-        EventPlayer.forTransactionOf(this)
-                   .play(events);
+    public final BatchDispatchOutcome play(Iterable<Event> events) {
+        return EventPlayer
+                .forTransactionOf(this)
+                .play(events);
     }
 
     /**
@@ -284,15 +304,19 @@ public abstract class Aggregate<I,
      *         if applying events caused an exception, which is set as the {@code cause} for
      *         the thrown instance
      */
-    final void play(AggregateHistory history) {
+    @CanIgnoreReturnValue
+    final BatchDispatchOutcome play(AggregateHistory history) {
         Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
         List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
-        play(events);
-        remember(events);
+        BatchDispatchOutcome batchDispatchOutcome = play(events);
+        if (batchDispatchOutcome.getSuccessful()) {
+            remember(events);
+        }
+        return batchDispatchOutcome;
     }
 
     /**
@@ -313,12 +337,12 @@ public abstract class Aggregate<I,
      *         the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
-    final List<Event> apply(List<Event> events) {
+    final BatchDispatchOutcome apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
-        play(versionedEvents);
+        BatchDispatchOutcome batchDispatchOutcome = play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
-        return versionedEvents;
+        return batchDispatchOutcome;
     }
 
     /**

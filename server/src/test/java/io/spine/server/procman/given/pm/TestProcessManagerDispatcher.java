@@ -20,7 +20,6 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
@@ -51,12 +50,7 @@ public class TestProcessManagerDispatcher implements CommandDispatcher<Message> 
     }
 
     @Override
-    public Message dispatch(CommandEnvelope envelope) {
-        return Empty.getDefaultInstance();
-    }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // NoOp.
+    public void dispatch(CommandEnvelope envelope) {
+        // Do nothing.
     }
 }

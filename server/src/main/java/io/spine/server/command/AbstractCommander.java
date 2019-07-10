@@ -20,22 +20,32 @@
 
 package io.spine.server.command;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.annotation.Internal;
+import com.google.errorprone.annotations.concurrent.LazyInit;
+import io.spine.core.Command;
+import io.spine.core.Event;
+import io.spine.core.Version;
+import io.spine.core.Versions;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
-import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
 /**
@@ -43,14 +53,16 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
-        implements Commander, EventDispatcherDelegate<String> {
+        implements Commander, EventDispatcherDelegate {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
-    private CommandBus commandBus;
+    @LazyInit
+    private @MonotonicNonNull CommandBus commandBus;
 
-    @Internal
-    public void injectCommandBus(CommandBus commandBus) {
-        this.commandBus = checkNotNull(commandBus);
+    @Override
+    public void registerWith(BoundedContext context) {
+        super.registerWith(context);
+        commandBus = context.commandBus();
     }
 
     private CommandBus commandBus() {
@@ -64,11 +76,12 @@ public abstract class AbstractCommander
 
     @CanIgnoreReturnValue
     @Override
-    public String dispatch(CommandEnvelope command) {
+    public void dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
-        CommandingMethod.Result result = method.invoke(this, command);
-        result.transformOrSplitAndPost(command, commandBus());
-        return id();
+        DispatchOutcome outcome = method.invoke(this, command);
+        Success success = outcome.getSuccess();
+        postCommands(success);
+        postRejection(success);
     }
 
     @Override
@@ -82,30 +95,34 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public Set<String> dispatchEvent(EventEnvelope event) {
+    public void dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
-        CommandingMethod.Result result = method.invoke(this, event);
-        result.produceAndPost(event, commandBus());
-        return identity();
+        DispatchOutcome outcome = method.invoke(this, event);
+        postCommands(outcome.getSuccess());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always returns a version with number {@code 0} and current time.
+     */
     @Override
-    public void onError(CommandEnvelope command, RuntimeException exception) {
-        checkNotNull(command);
-        checkNotNull(exception);
-        _error(exception,
-               "Unable to transform the command (class: `{}` id: `{}`).",
-               command.messageClass(),
-               command.idAsString());
+    public Version version() {
+        return Versions.zero();
     }
 
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-        _error(exception,
-               "Unable to create a command from event (class: `{}` id: `{}`).",
-               event.messageClass(),
-               event.idAsString());
+    private void postCommands(Success successfulOutcome) {
+        if (successfulOutcome.hasProducedCommands()) {
+            List<Command> commands = successfulOutcome.getProducedCommands()
+                                                      .getCommandList();
+            commandBus().post(commands, noOpObserver());
+        }
+    }
+
+    private void postRejection(Success successfulOutcome) {
+        if (successfulOutcome.hasRejection()) {
+            ImmutableList<Event> events = ImmutableList.of(successfulOutcome.getRejection());
+            postEvents(events);
+        }
     }
 }

@@ -20,6 +20,8 @@
 
 package io.spine.server.command.model.given.handler;
 
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.testing.server.model.ModelTests;
 
@@ -34,6 +36,19 @@ import java.lang.reflect.Method;
 public abstract class TestCommandHandler extends AbstractCommandHandler {
 
     private static final String HANDLER_METHOD_NAME = "handleTest";
+
+    protected TestCommandHandler() {
+        super();
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests(true)
+                .build();
+        registerWith(context);
+    }
+
+    @Override
+    public final void registerWith(BoundedContext context) {
+        super.registerWith(context);
+    }
 
     public Method method() {
         return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);

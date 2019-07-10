@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandHandler;
@@ -31,7 +30,6 @@ import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.CreateP
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyCommandHandler;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
-import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.test.commandbus.command.CmdBusAddTask;
@@ -57,19 +55,10 @@ class CommandDispatcherRegistryTest {
      */
     private CommandDispatcherRegistry registry;
 
-    /**
-     * The instance of {@code EventBus} that we need for stub command handler classes.
-     */
-    private EventBus eventBus;
 
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-
-        BoundedContext boundedContext = BoundedContext
-                .singleTenant(getClass().getSimpleName())
-                .build();
-        eventBus = boundedContext.eventBus();
         registry = new CommandDispatcherRegistry();
     }
 

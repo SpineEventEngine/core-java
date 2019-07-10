@@ -179,7 +179,7 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<?, ?, ?, ?, ?, ?> anotherMethod =
+            AbstractHandlerMethod<?, ?, ?, ?, ?> anotherMethod =
                     new TwoParamMethod(StubHandler.getTwoParameterMethod(),
                                        TwoParamSpec.INSTANCE);
             assertEquals(twoParamMethod, anotherMethod);

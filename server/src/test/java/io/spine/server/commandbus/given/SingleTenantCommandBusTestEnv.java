@@ -23,6 +23,8 @@ package io.spine.server.commandbus.given;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
@@ -53,6 +55,16 @@ public class SingleTenantCommandBusTestEnv {
      * A {@code CommandHandler}, which throws a rejection upon a command.
      */
     public static class FaultyHandler extends AbstractCommandHandler {
+
+        private FaultyHandler() {
+            super();
+        }
+
+        public static FaultyHandler initializedHandler() {
+            FaultyHandler handler = new FaultyHandler();
+            handler.registerWith(BoundedContextBuilder.assumingTests().build());
+            return handler;
+        }
 
         private final InvalidProjectName rejection = InvalidProjectName
                 .newBuilder()
@@ -87,8 +99,19 @@ public class SingleTenantCommandBusTestEnv {
         private final Command commandToPost;
 
         public CommandPostingHandler(CommandBus commandBus, Command commandToPost) {
+            super();
             this.commandBus = commandBus;
             this.commandToPost = commandToPost;
+        }
+
+        public static CommandPostingHandler
+        initializedHandler(CommandBus commandBus, Command commandToPost) {
+            CommandPostingHandler handler = new CommandPostingHandler(commandBus, commandToPost);
+            BoundedContext context = BoundedContextBuilder
+                    .assumingTests()
+                    .build();
+            handler.registerWith(context);
+            return handler;
         }
 
         @Assign

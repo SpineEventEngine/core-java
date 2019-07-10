@@ -20,26 +20,37 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Empty;
+import io.spine.base.Identifier;
+import io.spine.core.BoundedContextName;
+import io.spine.core.MessageId;
 import io.spine.logging.Logging;
+import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Ignore;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.tenant.EventOperation;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
+import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.system.server.NoOpSystemWriteSide;
+import io.spine.system.server.SystemWriteSide;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.lang.String.format;
 
 /**
@@ -52,34 +63,44 @@ import static java.lang.String.format;
  * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
-        implements EventDispatcher<String>, EventSubscriber, Logging {
+        implements EventDispatcher<String>, EventSubscriber, ContextAware {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
+    private final MessageId eventAnchor = MessageId
+            .newBuilder()
+            .setId(Identifier.pack(getClass().getName()))
+            .setTypeUrl(TypeUrl.of(Empty.class).value())
+            .vBuild();
+    @LazyInit
+    private SystemWriteSide system = NoOpSystemWriteSide.INSTANCE;
+    @LazyInit
+    private @MonotonicNonNull BoundedContextName contextName;
+
+    @Override
+    public void registerWith(BoundedContext context) {
+        checkNotNull(context);
+        checkNotRegistered();
+        contextName = context.name();
+        system = context.systemClient()
+                        .writeSide();
+
+    }
+
+    @Override
+    public boolean isRegistered() {
+        return contextName != null;
+    }
 
     /**
      * Dispatches the event to the handling method.
      *
      * @param event
      *         the envelope with the event
-     * @return the element set with the result of {@link #toString()} as the identify of the
-     *         subscriber or empty set if dispatching failed
      */
     @Override
-    public final Set<String> dispatch(EventEnvelope event) {
-        EventOperation op = new EventOperation(event.outerObject()) {
-            @Override
-            public void run() {
-                handle(event);
-            }
-        };
-        try {
-            op.execute();
-        } catch (RuntimeException exception) {
-            onError(event, exception);
-            return ImmutableSet.of();
-        }
-        return identity();
+    public final void dispatch(EventEnvelope event) {
+        with(event.tenantId()).run(() -> handle(event));
     }
 
     /**
@@ -89,28 +110,34 @@ public abstract class AbstractEventSubscriber
      * subscriber} method of the entity.
      */
     protected void handle(EventEnvelope event) {
-        thisClass.subscriberOf(event)
-                 .ifPresent(method -> method.invoke(this, event));
+        DispatchOutcome outcome =
+                thisClass.subscriberOf(event)
+                         .map(method -> method.invoke(this, event))
+                         .orElseGet(() -> notSupported(event));
+        if (outcome.hasError()) {
+            HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                    .newBuilder()
+                    .setEntity(eventAnchor)
+                    .setHandledSignal(event.messageId())
+                    .setError(outcome.getError())
+                    .vBuild();
+            system.postEvent(systemEvent, event.asMessageOrigin());
+        }
     }
 
-    /**
-     * Logs the error into the subscriber {@linkplain #log() log}.
-     *
-     * @param event
-     *         the event which caused the error
-     * @param exception
-     *         the error
-     */
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        checkNotNull(event);
-        checkNotNull(exception);
-        MessageClass messageClass = event.messageClass();
-        String messageId = event.idAsString();
-        String errorMessage =
-                format("Error handling event subscription (class: %s id: %s) in %s.",
-                       messageClass, messageId, thisClass);
-        log().error(errorMessage, exception);
+    private DispatchOutcome notSupported(EventEnvelope event) {
+        Ignore ignore = Ignore
+                .newBuilder()
+                .setReason(format("Event %s[%s] does not match subscriber filters in %s.",
+                                  event.messageClass(),
+                                  event.id().value(),
+                                  this.getClass().getCanonicalName()))
+                .buildPartial();
+        return DispatchOutcome
+                .newBuilder()
+                .setPropagatedSignal(event.messageId())
+                .setIgnored(ignore)
+                .vBuild();
     }
 
     @Override
@@ -147,33 +174,15 @@ public abstract class AbstractEventSubscriber
 
         @CanIgnoreReturnValue
         @Override
-        public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+        public void dispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            return AbstractEventSubscriber.this.dispatch(eventEnvelope);
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            checkNotNull(envelope);
-            checkNotNull(exception);
-            logError("Error dispatching external event to event subscriber " +
-                             "(event class: %s, id: %s)",
-                     envelope, exception);
+            AbstractEventSubscriber.this.dispatch(eventEnvelope);
         }
 
         @Override
         public boolean canDispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope event = envelope.toEventEnvelope();
             return AbstractEventSubscriber.this.canDispatch(event);
-        }
-
-        private void logError(String msgFormat,
-                              MessageEnvelope envelope,
-                              RuntimeException exception) {
-            MessageClass messageClass = envelope.messageClass();
-            String messageId = envelope.idAsString();
-            String errorMessage = format(msgFormat, messageClass, messageId);
-            _error(errorMessage, exception);
         }
     }
 }

@@ -20,7 +20,8 @@
 
 package io.spine.testing.server.aggregate;
 
-import com.google.protobuf.Message;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.ProducedEvents;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -33,8 +34,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
+import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,37 +51,41 @@ class AggregateMessageDispatcherTest {
 
     @Test
     @DisplayName("dispatch command")
-    void dispatchCommand() {
+    void dispatchCmd() {
         TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
         int messageValue = 2017_07_28;
         LogInteger message = LogInteger.newBuilder()
                                        .setValue(messageValue)
                                        .build();
         CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
-        List<? extends Message> eventMessages =
-                AggregateMessageDispatcher.dispatchCommand(aggregate, commandEnvelope);
+        DispatchOutcome outcome = dispatchCommand(aggregate, commandEnvelope);
         assertTrue(aggregate.state()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
-        assertEquals(1, eventMessages.size());
-        assertTrue(eventMessages.get(0) instanceof ValueLogged);
+        assertTrue(outcome.hasSuccess());
+        ProducedEvents events = outcome.getSuccess()
+                                       .getProducedEvents();
+        assertEquals(1, events.getEventCount());
+        assertTrue(events.getEvent(0).enclosedMessage() instanceof ValueLogged);
     }
 
     @Test
     @DisplayName("dispatch event")
-    void dispatchEvent() {
+    void dispatchEvt() {
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         float messageValue = 2017.0729f;
         FloatLogged message = FloatLogged.newBuilder()
                                          .setValue(messageValue)
                                          .build();
         EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
-        List<? extends Message> eventMessages =
-                AggregateMessageDispatcher.dispatchEvent(aggregate, eventEnvelope);
+        DispatchOutcome outcome = dispatchEvent(aggregate, eventEnvelope);
         assertTrue(aggregate.state()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
-        assertEquals(1, eventMessages.size());
-        assertTrue(eventMessages.get(0) instanceof ValueLogged);
+        assertTrue(outcome.hasSuccess());
+        ProducedEvents events = outcome.getSuccess()
+                                       .getProducedEvents();
+        assertEquals(1, events.getEventCount());
+        assertTrue(events.getEvent(0).enclosedMessage() instanceof ValueLogged);
     }
 }

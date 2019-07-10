@@ -20,15 +20,61 @@
 
 package io.spine.server.command;
 
-import io.spine.logging.Logging;
+import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
+import io.spine.base.Error;
+import io.spine.core.Event;
+import io.spine.core.MessageId;
+import io.spine.protobuf.TypeConverter;
+import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.type.SignalEnvelope;
+import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.system.server.SystemWriteSide;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
+import java.util.function.Supplier;
+
+import static com.google.common.base.Suppliers.memoize;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
  * and post resulting events to {@link EventBus}.
  */
-public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
+public abstract class AbstractCommandDispatcher
+        implements CommandDispatcher<String>, ContextAware {
+
+    /** The {@code EventBus} to which the dispatcher posts events it produces. */
+    @LazyInit
+    private @MonotonicNonNull EventBus eventBus;
+    @LazyInit
+    private @MonotonicNonNull SystemWriteSide system;
+
+    /** Supplier for a packed version of the dispatcher ID. */
+    private final Supplier<Any> producerId =
+            memoize(() -> pack(TypeConverter.toMessage(id())));
+    private final Supplier<MessageId> eventAnchor = memoize(() -> MessageId
+            .newBuilder()
+            .setId(producerId())
+            .setTypeUrl(TypeUrl.of(Empty.class).value())
+            .vBuild());
+
+    @Override
+    public void registerWith(BoundedContext context) {
+        checkNotRegistered();
+        eventBus = context.eventBus();
+        system = context.systemClient().writeSide();
+    }
+
+    @Override
+    public boolean isRegistered() {
+        return eventBus != null;
+    }
 
     /**
      * Obtains identity string of the dispatcher.
@@ -42,12 +88,37 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     }
 
     /**
+     * Obtains {@linkplain #id() ID} packed into {@code Any} for being used in generated events.
+     */
+    public Any producerId() {
+        return producerId.get();
+    }
+
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
+    protected void postEvents(Iterable<Event> events) {
+        checkRegistered();
+        eventBus.post(events);
+    }
+
+    protected void onError(SignalEnvelope<?, ?, ?> signal, Error error) {
+        checkRegistered();
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(eventAnchor.get())
+                .setHandledSignal(signal.messageId())
+                .setError(error)
+                .vBuild();
+        system.postEvent(systemEvent, signal.asMessageOrigin());
+    }
+
+    /**
      * Indicates whether some other command handler is "equal to" this one.
      *
      * <p>Two command handlers are equal if they handle the same set of commands.
      *
-     * @return if the passed {@code CommandHandler} handles the same
-     * set of command classes.
+     * @return if the passed {@code CommandHandler} handles the same set of command classes
      * @see #messageClasses()
      */
     @Override

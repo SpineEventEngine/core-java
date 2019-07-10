@@ -135,7 +135,7 @@ public final class ExternalMessageEnvelope
      * @throws UnsupportedOperationException always
      */
     @Override
-    public Origin asEventOrigin() {
+    public Origin asMessageOrigin() {
         throw newIllegalStateException(
                 "An external message like this (%s) may not be a direct origin of any event.",
                 this

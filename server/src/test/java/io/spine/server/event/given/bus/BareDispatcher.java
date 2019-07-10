@@ -56,14 +56,8 @@ public class BareDispatcher implements EventDispatcher<String> {
     }
 
     @Override
-    public Set<String> dispatch(EventEnvelope event) {
+    public void dispatch(EventEnvelope event) {
         dispatchCalled = true;
-        return identity();
-    }
-
-    @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
     }
 
     public boolean isDispatchCalled() {

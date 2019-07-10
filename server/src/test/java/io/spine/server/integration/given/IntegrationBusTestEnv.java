@@ -22,6 +22,7 @@ package io.spine.server.integration.given;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
@@ -45,9 +46,9 @@ public class IntegrationBusTestEnv {
     public static BoundedContext
     contextWithExtEntitySubscribers() {
         BoundedContext boundedContext = newContext();
-        boundedContext.register(new ProjectDetailsRepository());
-        boundedContext.register(new ProjectWizardRepository());
-        boundedContext.register(new ProjectCountAggregateRepository());
+        boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
+        boundedContext.register(DefaultRepository.of(ProjectWizard.class));
+        boundedContext.register(DefaultRepository.of(ProjectDetails.class));
         return boundedContext;
     }
 
@@ -59,8 +60,8 @@ public class IntegrationBusTestEnv {
                       .register(eventSubscriber);
         boundedContext.eventBus()
                       .register(eventSubscriber);
-        boundedContext.register(new ProjectCountAggregateRepository());
-        boundedContext.register(new ProjectWizardRepository());
+        boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
+        boundedContext.register(DefaultRepository.of(ProjectWizard.class));
         return boundedContext;
     }
 

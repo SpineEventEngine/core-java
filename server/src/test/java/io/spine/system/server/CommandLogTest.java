@@ -34,6 +34,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
@@ -60,6 +61,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
@@ -192,7 +194,9 @@ class CommandLogTest {
             checkAcknowledged(proposeId);
             checkDispatched(proposeId);
             checkTargetAssigned(proposeId, CompanyNameProcman.TYPE);
-            checkErrored(proposeId);
+            Error error = checkHandlerFailed(proposeId);
+            assertThat(error.getType())
+                    .isEqualTo(IllegalArgumentException.class.getCanonicalName());
         }
 
         private Command buildInvalidCommand() {
@@ -252,6 +256,16 @@ class CommandLogTest {
         private Error checkErrored(CommandId commandId) {
             CommandErrored errored = eventAccumulator.assertReceivedEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
+            return errored.getError();
+        }
+
+        @CanIgnoreReturnValue
+        private Error checkHandlerFailed(CommandId commandId) {
+            HandlerFailedUnexpectedly errored =
+                    eventAccumulator.assertReceivedEvent(HandlerFailedUnexpectedly.class);
+            MessageId signalId = errored.getHandledSignal();
+            assertTrue(signalId.isCommand());
+            assertEquals(commandId, signalId.asCommandId());
             return errored.getError();
         }
 

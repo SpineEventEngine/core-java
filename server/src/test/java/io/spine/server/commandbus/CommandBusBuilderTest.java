@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
-import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.NoOpSystemWriteSide;
@@ -36,7 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,14 +50,12 @@ class CommandBusBuilderTest
     private static final SystemWriteSide SYSTEM_WRITE_SIDE = NoOpSystemWriteSide.INSTANCE;
 
     private TenantIndex tenantIndex;
-    private EventBus eventBus;
 
     @Override
     protected CommandBus.Builder builder() {
         return CommandBus.newBuilder()
                          .injectSystem(SYSTEM_WRITE_SIDE)
-                         .injectTenantIndex(tenantIndex)
-                         .injectEventBus(eventBus);
+                         .injectTenantIndex(tenantIndex);
     }
 
     @BeforeEach
@@ -67,10 +64,6 @@ class CommandBusBuilderTest
                 BoundedContext.multitenant(getClass().getSimpleName())
                               .build();
         tenantIndex = context.tenantIndex();
-        eventBus = EventBus
-                .newBuilder()
-                .injectContext(context)
-                .build();
     }
 
     @Test
@@ -80,7 +73,6 @@ class CommandBusBuilderTest
                 .newBuilder()
                 .injectTenantIndex(tenantIndex)
                 .injectSystem(SYSTEM_WRITE_SIDE)
-                .injectEventBus(eventBus)
                 .build();
         assertNotNull(commandBus);
     }
@@ -115,15 +107,14 @@ class CommandBusBuilderTest
     class AllowToSpecify {
 
         @Test
-        @DisplayName("EventBus")
-        void eventBus() {
-            EventBus expectedEventBus = mock(EventBus.class);
-
-            CommandBus.Builder builder = builder().injectEventBus(expectedEventBus);
-            assertTrue(builder.eventBus()
-                              .isPresent());
-            assertEquals(expectedEventBus, builder.eventBus()
-                                                  .get());
+        @DisplayName("if CommandBus is multitenant")
+        void ifIsMultitenant() {
+            assertTrue(builder().setMultitenant(true)
+                                .build()
+                                .isMultitenant());
+            assertFalse(builder().setMultitenant(false)
+                                 .build()
+                                 .isMultitenant());
         }
 
         @Test

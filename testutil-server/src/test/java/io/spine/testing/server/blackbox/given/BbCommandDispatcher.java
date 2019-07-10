@@ -50,14 +50,8 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
 
     @CanIgnoreReturnValue
     @Override
-    public String dispatch(CommandEnvelope envelope) {
+    public void dispatch(CommandEnvelope envelope) {
         commandsReceived++;
-        return id();
-    }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        // Do nothing.
     }
 
     public int commandsDispatched() {

@@ -84,10 +84,7 @@ class AggregateCommandEndpointTest {
     void postEventsOnCommandDispatching() {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
-        ProjectId id = repository.dispatch(cmd);
-        assertThat(id)
-                .isEqualTo(projectId);
-
+        repository.dispatch(cmd);
         AggProjectCreated msg = subscriber.remembered;
         assertThat(msg.getProjectId())
                 .isEqualTo(projectId);
@@ -99,9 +96,7 @@ class AggregateCommandEndpointTest {
         CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
         AggCreateProject msg = (AggCreateProject) cmd.message();
 
-        ProjectId id = repository.dispatch(cmd);
-        assertThat(id).isEqualTo(projectId);
-
+        repository.dispatch(cmd);
         Optional<ProjectAggregate> optional = repository.find(projectId);
         assertTrue(optional.isPresent());
 

@@ -164,6 +164,7 @@ class ServerEnvironmentTest {
     class StorageFactoryConfig {
 
         private final Environment environment = Environment.instance();
+        private final ServerEnvironment serverEnvironment = ServerEnvironment.instance();
 
         @BeforeEach
         void turnToProduction() {

@@ -30,7 +30,7 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -74,7 +74,6 @@ import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,13 +136,9 @@ class ProcessManagerTest {
                 .assumingTests(true)
                 .build();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false);
-
-        EventBus eventBus = EventBus.newBuilder()
-                                    .build();
         CommandBus commandBus = spy(CommandBus.newBuilder()
                                               .injectTenantIndex(tenantIndex)
                                               .injectSystem(NoOpSystemWriteSide.INSTANCE)
-                                              .injectEventBus(eventBus)
                                               .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
@@ -151,8 +146,6 @@ class ProcessManagerTest {
                               .withState(AnyProcess.getDefaultInstance())
                               .build();
         commandBus.register(new TestProcessManagerDispatcher());
-        InjectCommandBus.of(commandBus)
-                        .to(processManager);
     }
 
     @AfterEach
@@ -163,7 +156,10 @@ class ProcessManagerTest {
     @CanIgnoreReturnValue
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
         Event event = eventFactory.createEvent(eventMessage);
-        List<Event> result = dispatch(processManager, EventEnvelope.of(event));
+        List<Event> result = dispatch(processManager, EventEnvelope.of(event))
+                .getSuccess()
+                .getProducedEvents()
+                .getEventList();
         Any pmState = processManager.state()
                                     .getAny();
         Any expected = pack(eventMessage);
@@ -175,7 +171,10 @@ class ProcessManagerTest {
     private List<Event> testDispatchCommand(CommandMessage commandMsg) {
         CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                     .create(commandMsg));
-        List<Event> events = dispatch(processManager, envelope);
+        List<Event> events = dispatch(processManager, envelope)
+                .getSuccess()
+                .getProducedEvents()
+                .getEventList();
         assertEquals(pack(commandMsg), processManager.state()
                                                      .getAny());
         return events;
@@ -402,7 +401,7 @@ class ProcessManagerTest {
     }
 
     @Nested
-    @DisplayName("throw ISE when dispatching unknown")
+    @DisplayName("fail when dispatching unknown")
     class ThrowOnUnknown {
 
         @Test
@@ -420,7 +419,8 @@ class ProcessManagerTest {
         void event() {
             EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
 
-            assertThrows(IllegalStateException.class, () -> dispatch(processManager, envelope));
+            DispatchOutcome outcome = dispatch(processManager, envelope);
+            assertTrue(outcome.hasError());
         }
     }
 

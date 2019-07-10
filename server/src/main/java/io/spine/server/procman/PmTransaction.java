@@ -20,13 +20,15 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.CommandDispatchingPhase;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
@@ -37,8 +39,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.List;
-
-import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
@@ -92,11 +92,10 @@ public class PmTransaction<I,
      * @return the events generated from the command dispatch
      * @see ProcessManager#dispatchCommand(CommandEnvelope)
      */
-    final List<Event> perform(DispatchCommand<I> dispatch) {
+    final DispatchOutcome perform(DispatchCommand<I> dispatch) {
         VersionIncrement vi = createVersionIncrement();
-        Phase<I, List<Event>> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
-        List<Event> events = doPropagate(phase);
-        return events;
+        Phase<I> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
+        return doPropagate(phase);
     }
 
     /**
@@ -107,22 +106,22 @@ public class PmTransaction<I,
      * @return the events generated from the event dispatch
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
-    final List<Event> dispatchEvent(EventEnvelope event) {
-        Phase<I, List<Event>> phase = new EventDispatchingPhase<>(
+    final DispatchOutcome dispatchEvent(EventEnvelope event) {
+        Phase<I> phase = new EventDispatchingPhase<>(
                 this,
                 createDispatch(event),
                 createVersionIncrement()
         );
-        List<Event> events = doPropagate(phase);
-        return events;
+        DispatchOutcome outcome = doPropagate(phase);
+        return outcome;
     }
 
-    private EventDispatch<I, ProcessManager<I, S, B>, List<Event>>
+    private EventDispatch<I, ProcessManager<I, S, B>>
     createDispatch(EventEnvelope event) {
         return new EventDispatch<>(this::dispatch, entity(), event);
     }
 
-    private List<Event> dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
+    private DispatchOutcome dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
         return pm.dispatchEvent(event);
     }
 
@@ -133,33 +132,17 @@ public class PmTransaction<I,
     /**
      * Propagates the phase and updates the process lifecycle after success.
      */
-    private List<Event> doPropagate(Phase<I, List<Event>> phase) {
-        List<Event> events = propagate(phase);
-        updateLifecycle(events);
-        return events;
-    }
-
-    /**
-     * Updates and commits the process manager lifecycle flags after a rejection is thrown.
-     */
-    @Override
-    protected void beforeRollback(Throwable cause) {
-        super.beforeRollback(cause);
-        Throwable rootCause = getRootCause(cause);
-        if (rootCause instanceof ThrowableMessage) {
-            updateLifecycle((ThrowableMessage) rootCause);
+    private DispatchOutcome doPropagate(Phase<I> phase) {
+        DispatchOutcome outcome = propagate(phase);
+        Success success = outcome.getSuccess();
+        List<Event> events = success.getProducedEvents()
+                                    .getEventList();
+        if (!events.isEmpty()) {
+            updateLifecycle(events);
+        } else if (success.hasRejection()) {
+            updateLifecycle(success.getRejection());
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>This method is overridden to expose itself to repositories, state builders,
-     * and test utilities.
-     */
-    @Override
-    protected final void commit() {
-        super.commit();
+        return outcome;
     }
 
     /**
@@ -189,18 +172,7 @@ public class PmTransaction<I,
         }
     }
 
-    /**
-     * Updates the process lifecycle after a rejection is thrown.
-     *
-     * <p>Manually commits the changes as they are not going to be committed normally.
-     */
-    private void updateLifecycle(ThrowableMessage rejection) {
-        if (lifecycleRules.shouldArchiveOn(rejection)) {
-            setArchived(true);
-        }
-        if (lifecycleRules.shouldDeleteOn(rejection)) {
-            setDeleted(true);
-        }
-        commitAttributeChanges();
+    private void updateLifecycle(Event event) {
+        updateLifecycle(ImmutableList.of(event));
     }
 }

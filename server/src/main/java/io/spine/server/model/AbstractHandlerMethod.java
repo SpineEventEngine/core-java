@@ -20,10 +20,15 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.base.Error;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.MessageId;
+import io.spine.core.Signal;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
@@ -34,11 +39,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.base.Errors.causeOf;
+import static io.spine.base.Errors.fromThrowable;
 import static java.lang.String.format;
 
 /**
@@ -57,17 +65,14 @@ import static java.lang.String.format;
  *         the type of message envelopes, in which the messages to handle are wrapped
  * @param <P>
  *         the type of the produced message classes
- * @param <R>
- *         the type of the method invocation result
  */
 @Immutable
 public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
                                             C extends MessageClass<M>,
-                                            E extends MessageEnvelope<?, ?, ?>,
-                                            P extends MessageClass<?>,
-                                            R extends MethodResult<?>>
-        implements HandlerMethod<T, C, E, P, R> {
+                                            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
+                                            P extends MessageClass<?>>
+        implements HandlerMethod<T, C, E, P> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -222,22 +227,51 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(externalAttribute);
     }
 
-    @CanIgnoreReturnValue
     @Override
-    public R invoke(T target, E envelope) {
+    public DispatchOutcome invoke(T target, E envelope) {
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
+        MessageId signal = envelope.outerObject().messageId();
+        DispatchOutcome.Builder outcome = DispatchOutcome
+                .newBuilder()
+                .setPropagatedSignal(signal);
         try {
             Object[] arguments = parameterSpec.extractArguments(envelope);
             Object rawOutput = method.invoke(target, arguments);
-            R result = toResult(target, rawOutput);
-            return result;
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            Success success = toSuccessfulOutcome(rawOutput, target, envelope);
+            outcome.setSuccess(success);
+        } catch (IllegalOutcomeException e) {
+            Error error = fromThrowable(e);
+            outcome.setError(error);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            checkNotNull(cause);
+            if (cause instanceof ThrowableMessage) {
+                ThrowableMessage throwable = (ThrowableMessage) cause;
+                Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
+                Success success = maybeSuccess.orElseThrow(this::cannotThrowRejections);
+                outcome.setSuccess(success);
+            } else {
+                Error error = causeOf(cause);
+                outcome.setError(error);
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
             Message message = envelope.message();
             Message context = envelope.context();
             throw new HandlerMethodFailedException(target, message, context, getRootCause(e));
         }
+        return outcome.vBuild();
+    }
+
+    private RuntimeException cannotThrowRejections() {
+        String errorMessage = format("`%s` may not throw rejections.", this);
+        return new IllegalOutcomeException(errorMessage);
+    }
+
+    protected Optional<Success> handleRejection(ThrowableMessage throwableMessage, T target,
+                                                E origin) {
+        return Optional.empty();
     }
 
     /**
@@ -255,11 +289,6 @@ public abstract class AbstractHandlerMethod<T,
     protected void checkAttributesMatch(E envelope) throws IllegalArgumentException {
         // Do nothing by default.
     }
-
-    /**
-     * Converts the output of the raw method call to the result object.
-     */
-    protected abstract R toResult(T target, Object rawMethodOutput);
 
     /**
      * Returns a full name of the handler method.

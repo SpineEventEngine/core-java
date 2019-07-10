@@ -24,20 +24,24 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
+import io.spine.base.MessageContext;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.route.Route;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
+import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.SystemWriteSide;
-import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -50,15 +54,17 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 
 /**
  * Abstract base class for repositories.
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
-public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable, Logging {
+public abstract class Repository<I, E extends Entity<I, ?>>
+        implements ContextAware, AutoCloseable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -107,7 +113,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * @param obj an instance to store
      */
-    @SuppressWarnings("AbstractMethodWithMissingImplementations") // work-around IDEA bug.
     protected abstract void store(E obj);
 
     /**
@@ -194,8 +199,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *          if the repository has a context value already assigned, and the passed value is
      *          not equal to the assigned one
      */
+    @OverridingMethodsMustInvokeSuper
+    @Override
     @Internal
-    public final void injectContext(BoundedContext context) {
+    public void registerWith(BoundedContext context) {
         checkNotNull(context);
         boolean sameValue = context.equals(this.context);
         if (this.context != null && !sameValue) {
@@ -205,30 +212,26 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
                             " Attempted to set: `%s`.",
                     this, this.context, context);
         }
-
         if (sameValue) {
             return;
         }
         this.context = context;
         open();
-        init(context);
-    }
-
-    /**
-     * Initializes the repository after it is added to the {@code BoundedContext}.
-     *
-     * <p>Registers itself as a type supplier with the {@link io.spine.server.stand.Stand Stand}
-     * of the parent context.
-     *
-     * @param context
-     *          the {@code BoundedContext} of this repository
-     */
-    @OverridingMethodsMustInvokeSuper
-    protected void init(BoundedContext context) {
         if (isTypeSupplier()) {
             context.stand()
                    .registerTypeSupplier(this);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unlike, {@link #isOpen()}, once the repository is
+     * {@linkplain #registerWith(BoundedContext) initialized}, this method always returns {@code true}.
+     */
+    @Override
+    public boolean isRegistered() {
+        return context != null;
     }
 
     /**
@@ -365,27 +368,39 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         return context != null;
     }
 
+    @Internal
+    protected final <M extends Message, C extends MessageContext, R> Optional<R>
+    route(Route<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
+        try {
+            @SuppressWarnings("unchecked")
+            M message = (M) envelope.message();
+            R result = routing.apply(message, envelope.context());
+            return Optional.of(result);
+        } catch (RuntimeException e) {
+            Throwable cause = getRootCause(e);
+            onRoutingFailed(envelope, cause);
+            return Optional.empty();
+        }
+    }
+
     /**
-     * Logs error caused by a message processing into the {@linkplain #log() repository log}.
+     * A callback invoked when an exception is thrown from message routing.
      *
-     * <p>The formatted message has the following parameters:
-     * <ol>
-     *     <li>The name of the message class.
-     *     <li>The message ID.
-     *     <li>The URL of the entity state type.
-     * </ol>
-     *
-     * @param msgFormat the format of the message
-     * @param envelope  the envelope of the message caused the error
-     * @param exception the error
+     * @param envelope the routed signal
+     * @param cause the root cause of the exception
      */
-    protected void logError(String msgFormat,
-                            MessageEnvelope envelope,
-                            RuntimeException exception) {
-        MessageClass messageClass = envelope.messageClass();
-        String stateType = entityStateType().value();
-        String errorMessage = format(msgFormat, messageClass, envelope.idAsString(), stateType);
-        _error(errorMessage, exception);
+    @OverridingMethodsMustInvokeSuper
+    @Internal
+    protected void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
+        RoutingFailed systemEvent = RoutingFailed
+                .newBuilder()
+                .setEntityType(entityModelClass().typeName())
+                .setHandledSignal(envelope.messageId())
+                .setError(fromThrowable(cause))
+                .vBuild();
+        context().systemClient()
+                 .writeSide()
+                 .postEvent(systemEvent, envelope.asMessageOrigin());
     }
 
     /**
@@ -398,7 +413,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @return {@link EntityLifecycle} of the given entity
      */
     @Internal
-    protected EntityLifecycle lifecycleOf(I id) {
+    public EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         SystemWriteSide writeSide = context().systemClient()
                                              .writeSide();

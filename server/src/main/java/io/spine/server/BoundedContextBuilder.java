@@ -512,8 +512,7 @@ public final class BoundedContextBuilder implements Logging {
         return eventBus.build();
     }
 
-    CommandBus buildCommandBus(EventBus eventBus) {
-        commandBus.injectEventBus(eventBus);
+    CommandBus buildCommandBus() {
         return commandBus.build();
     }
 

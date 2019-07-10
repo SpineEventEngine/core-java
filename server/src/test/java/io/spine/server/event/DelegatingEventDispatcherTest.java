@@ -21,37 +21,14 @@
 package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
-import io.spine.core.BoundedContextNames;
-import io.spine.core.Event;
 import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.DummyEventDispatcherDelegate;
-import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.integration.ExternalMessages;
-import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.given.GivenEvent;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.TestValues.newUuidValue;
-import static io.spine.util.Exceptions.newIllegalStateException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DelegatingEventDispatcher should")
 class DelegatingEventDispatcherTest {
-
-    private DummyEventDispatcherDelegate delegate;
-    private DelegatingEventDispatcher<String> delegatingDispatcher;
-
-    @BeforeEach
-    void setUp() {
-        delegate = new DummyEventDispatcherDelegate();
-        delegatingDispatcher = DelegatingEventDispatcher.of(delegate);
-    }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -59,40 +36,5 @@ class DelegatingEventDispatcherTest {
         new NullPointerTester()
                 .setDefault(EventDispatcherDelegate.class, new DummyEventDispatcherDelegate())
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
-    }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
-    @Test
-    @DisplayName("delegate `onError`")
-    void delegateOnError() {
-        EventEnvelope event = EventEnvelope.of(GivenEvent.arbitrary());
-        RuntimeException exception = new RuntimeException("test delegating onError");
-        delegatingDispatcher.onError(event, exception);
-
-        assertTrue(delegate.onErrorCalled());
-        assertEquals(exception, delegate.getLastException());
-    }
-
-    @Test
-    @DisplayName("expose external dispatcher that delegates `onError`")
-    void exposeExternalDispatcher() {
-        ExternalMessageDispatcher<String> extMessageDispatcher =
-                delegatingDispatcher
-                        .createExternalDispatcher()
-                        .orElseThrow(() -> newIllegalStateException("No external events in `%s`.",
-                                                                    delegatingDispatcher));
-        StringValue eventMsg = newUuidValue();
-        Event event = GivenEvent.arbitrary();
-        ExternalMessage externalMessage =
-                ExternalMessages.of(event, BoundedContextNames.newName(getClass().getName()));
-
-        ExternalMessageEnvelope externalMessageEnvelope =
-                ExternalMessageEnvelope.of(externalMessage, eventMsg);
-
-        RuntimeException exception =
-                new RuntimeException("test external dispatcher delegating onError");
-        extMessageDispatcher.onError(externalMessageEnvelope, exception);
-
-        assertTrue(delegate.onErrorCalled());
     }
 }

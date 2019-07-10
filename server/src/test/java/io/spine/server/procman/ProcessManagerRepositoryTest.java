@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.truth.Truth;
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
@@ -35,13 +34,11 @@ import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
 import io.spine.server.procman.given.repo.ProjectCompletion;
@@ -54,6 +51,10 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.system.server.CannotDispatchDuplicateCommand;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
+import io.spine.system.server.DiagnosticMonitor;
+import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
@@ -86,11 +87,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProject;
@@ -109,8 +111,6 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -306,7 +306,7 @@ class ProcessManagerRepositoryTest
 
         PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
-        Truth.assertThat(message.getProjectId())
+        assertThat(message.getProjectId())
              .isEqualTo(ID);
     }
 
@@ -318,29 +318,42 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("events")
         void events() {
+            DiagnosticMonitor monitor = new DiagnosticMonitor();
+            boundedContext.registerEventDispatcher(monitor);
             Event event = GivenMessage.projectStarted();
 
             dispatchEvent(event);
             assertTrue(TestProcessManager.processed(event.enclosedMessage()));
-
             dispatchEvent(event);
-            RuntimeException exception = repository().latestException();
-            assertNotNull(exception);
-            assertThat(exception, instanceOf(DuplicateEventException.class));
+
+            List<CannotDispatchDuplicateEvent> duplicateEventEvents = monitor.duplicateEventEvents();
+            assertThat(duplicateEventEvents).hasSize(1);
+            CannotDispatchDuplicateEvent systemEvent = duplicateEventEvents.get(0);
+            assertThat(systemEvent.getEvent()).isEqualTo(event.id());
+            PmProjectStarted eventMessage = (PmProjectStarted) event.enclosedMessage();
+            assertThat(unpack(systemEvent.getEntity().getId()))
+                    .isEqualTo(eventMessage.getProjectId());
         }
 
         @Test
         @DisplayName("commands")
         void commands() {
+            DiagnosticMonitor monitor = new DiagnosticMonitor();
+            boundedContext.registerEventDispatcher(monitor);
             Command command = GivenMessage.createProject();
 
             dispatchCommand(command);
             assertTrue(TestProcessManager.processed(command.enclosedMessage()));
-
             dispatchCommand(command);
-            RuntimeException exception = repository().latestException();
-            assertNotNull(exception);
-            assertThat(exception, instanceOf(DuplicateCommandException.class));
+
+            List<CannotDispatchDuplicateCommand> duplicateCommandEvents =
+                    monitor.duplicateCommandEvents();
+            assertThat(duplicateCommandEvents).hasSize(1);
+            CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
+            assertThat(event.getCommand()).isEqualTo(command.id());
+            PmCreateProject commandMessage = (PmCreateProject) command.enclosedMessage();
+            assertThat(unpack(event.getEntity().getId()))
+                    .isEqualTo(commandMessage.getProjectId());
         }
     }
 
@@ -462,16 +475,22 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw ISE when dispatching unknown command")
+    @DisplayName("produce RoutingFailed when dispatching unknown command")
     @MuteLogging
     void throwOnUnknownCommand() {
         Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
-        CommandEnvelope request = CommandEnvelope.of(unknownCommand);
+        CommandEnvelope command = CommandEnvelope.of(unknownCommand);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
-        Throwable exception = assertThrows(RuntimeException.class,
-                                           () -> repo.dispatchCommand(request));
-        Truth.assertThat(getRootCause(exception))
-             .isInstanceOf(IllegalStateException.class);
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
+        repo.dispatchCommand(command);
+        List<RoutingFailed> failures = monitor.routingFailures();
+        assertThat(failures).hasSize(1);
+        RoutingFailed failure = failures.get(0);
+        assertThat(failure.getEntityType().getJavaClassName())
+                .isEqualTo(repo.entityClass().getCanonicalName());
+        assertThat(failure.getError().getType())
+                .isEqualTo(IllegalStateException.class.getName());
     }
 
     @Nested
@@ -527,7 +546,7 @@ class ProcessManagerRepositoryTest
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
                 .build();
-        assertThrows(IllegalStateException.class, () -> repo.injectContext(context));
+        assertThrows(IllegalStateException.class, () -> repo.registerWith(context));
     }
 
     @Test

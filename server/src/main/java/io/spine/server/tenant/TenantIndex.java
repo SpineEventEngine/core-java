@@ -21,22 +21,14 @@
 package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContext;
+import io.spine.server.ContextAware;
 
 import java.util.Set;
 
 /**
  * The index of tenant IDs in a multi-tenant application.
  */
-public interface TenantIndex extends AutoCloseable {
-
-    /**
-     * Assigns the context to this tenant index.
-     *
-     * <p>This method can be called only once. Subsequent calls would result
-     * in {@code RuntimeException}.
-     */
-    void registerWith(BoundedContext context);
+public interface TenantIndex extends ContextAware, AutoCloseable {
 
     /**
      * Stores the passed tenant ID in the index.

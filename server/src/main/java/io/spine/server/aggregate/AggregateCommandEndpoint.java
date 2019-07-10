@@ -20,13 +20,12 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.core.Event;
 import io.spine.server.command.DispatchCommand;
+import io.spine.server.delivery.CommandEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.List;
 
 import static io.spine.server.command.DispatchCommand.operationFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -38,14 +37,15 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <A> the type of the aggregates managed by the parent repository
  */
 final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends AggregateEndpoint<I, A, CommandEnvelope> {
+        extends AggregateEndpoint<I, A, CommandEnvelope>
+        implements CommandEndpoint<I> {
 
     AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);
     }
 
     @Override
-    protected List<Event> invokeDispatcher(A aggregate, CommandEnvelope envelope) {
+    protected DispatchOutcome invokeDispatcher(A aggregate, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();
@@ -55,11 +55,6 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     protected void afterDispatched(I entityId) {
         repository().lifecycleOf(entityId)
                     .onDispatchCommand(envelope().command());
-    }
-
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
     }
 
     /**

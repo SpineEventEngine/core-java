@@ -20,6 +20,7 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.validate.NonValidated;
 
 /**
@@ -39,7 +40,7 @@ public interface TransactionListener<I> {
      * @param phase
      *         the phase which is being applied
      */
-    void onBeforePhase(Phase<I, ?> phase);
+    void onBeforePhase(Phase<I> phase);
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
@@ -49,7 +50,7 @@ public interface TransactionListener<I> {
      * @param phase
      *         the phase which was applied before this callback is invoked
      */
-    void onAfterPhase(Phase<I, ?> phase);
+    void onAfterPhase(Phase<I> phase);
 
     /**
      * A callback invoked before committing the transaction.
@@ -62,13 +63,12 @@ public interface TransactionListener<I> {
     /**
      * A callback invoked if the commit has failed.
      *
-     * @param t
-     *         the {@code Throwable} which caused the commit failure
+     * @param cause
+     *         the error which caused the commit failure
      * @param entityRecord
-     *         the entity modified within the transaction
+     *         the uncommitted entity state
      */
-    void onTransactionFailed(Throwable t,
-                             @NonValidated EntityRecord entityRecord);
+    void onTransactionFailed(Error cause, @NonValidated EntityRecord entityRecord);
 
     /**
      * A callback invoked after a successful commit.

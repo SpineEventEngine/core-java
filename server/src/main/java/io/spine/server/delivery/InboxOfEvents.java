@@ -20,7 +20,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.server.event.DuplicateEventException;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Collection;
@@ -74,9 +73,5 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
             return (Predicate<InboxMessage>) InboxMessage::hasEvent;
         }
 
-        @Override
-        protected RuntimeException onDuplicateFound(InboxMessage duplicate) {
-            return new DuplicateEventException(duplicate.getEvent());
-        }
     }
 }

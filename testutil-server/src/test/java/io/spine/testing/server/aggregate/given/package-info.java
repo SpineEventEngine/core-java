@@ -19,8 +19,7 @@
  */
 
 /**
- * This package contains test aggregates and repositories for being used by
- * test suites classes which are subjects of testing.
+ * This package contains model to be used to test Aggregate-related test utilities.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

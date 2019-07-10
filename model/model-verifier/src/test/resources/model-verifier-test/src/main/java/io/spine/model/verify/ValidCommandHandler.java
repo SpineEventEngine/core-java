@@ -23,7 +23,6 @@ package io.spine.model.verify;
 import io.spine.base.EventMessage;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventBus;
 
 import java.util.List;
 

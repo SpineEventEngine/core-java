@@ -22,8 +22,11 @@ package io.spine.server.projection;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.TransactionalEntity;
@@ -31,7 +34,9 @@ import io.spine.server.event.EventSubscriber;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.type.EventEnvelope;
 
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static java.lang.String.format;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -109,18 +114,35 @@ public abstract class Projection<I,
     static boolean playOn(Projection<?, ?, ?> projection, Iterable<Event> events) {
         ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
-        tx.commit();
+        tx.commitIfActive();
         return projection.changed();
     }
 
-    void apply(EventEnvelope event) {
-        thisClass().subscriberOf(event)
-                   .ifPresent(method -> method.invoke(this, event));
+    DispatchOutcome apply(EventEnvelope event) {
+        return thisClass()
+                .subscriberOf(event)
+                .map(method -> method.invoke(this, event))
+                .orElseGet(() -> unhandledEvent(event));
+    }
+
+    private DispatchOutcome unhandledEvent(EventEnvelope event) {
+        Error error = Error
+                .newBuilder()
+                .setCode(UNSUPPORTED_EVENT_VALUE)
+                .setMessage(format("Projection %s cannot handle event %s.",
+                                   thisClass(),
+                                   event.messageTypeName()))
+                .buildPartial();
+        return DispatchOutcome
+                .newBuilder()
+                .setPropagatedSignal(event.outerObject().messageId())
+                .setError(error)
+                .vBuild();
     }
 
     @Override
-    public void play(Iterable<Event> events) {
+    public BatchDispatchOutcome play(Iterable<Event> events) {
         EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
-        eventPlayer.play(events);
+        return eventPlayer.play(events);
     }
 }

@@ -151,6 +151,11 @@ class BoundedContextBuilderTest {
         }
 
         @Override
+        public boolean isRegistered() {
+            return true;
+        }
+
+        @Override
         public void keep(TenantId id) {
             // Do nothing.
         }

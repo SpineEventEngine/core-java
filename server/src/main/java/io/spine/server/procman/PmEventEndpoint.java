@@ -21,10 +21,9 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
+import io.spine.server.delivery.EventEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.EventEnvelope;
-
-import java.util.List;
 
 /**
  * Dispatches event to reacting process managers.
@@ -35,7 +34,8 @@ import java.util.List;
 @SuppressWarnings("unchecked") // Operations on repository are logically checked.
 @Internal
 public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
-        extends PmEndpoint<I, P, EventEnvelope> {
+        extends PmEndpoint<I, P, EventEnvelope>
+        implements EventEndpoint<I> {
 
     protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
         super(repository, event);
@@ -53,10 +53,9 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> invokeDispatcher(P processManager, EventEnvelope event) {
+    protected DispatchOutcome invokeDispatcher(P processManager, EventEnvelope event) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
-        List<Event> events = tx.dispatchEvent(event);
-        return events;
+        return tx.dispatchEvent(event);
     }
 
     /**
@@ -66,10 +65,5 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     @Override
     protected void onEmptyResult(P pm, EventEnvelope event) {
         // Do nothing.
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        repository().onError(event, exception);
     }
 }

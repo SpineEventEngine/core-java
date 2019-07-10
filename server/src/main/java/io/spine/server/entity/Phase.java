@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
+import io.spine.server.dispatch.DispatchOutcome;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,17 +43,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I>
  *         the type of entity ID
- * @param <R>
- *         the type of the {@code Phase} propagation result
  * @see Transaction
  */
 @Internal
-public abstract class Phase<I, R> {
+public abstract class Phase<I> {
 
     private final Transaction<I, ?, ?, ?> transaction;
     private final VersionIncrement versionIncrement;
-
-    private boolean successful = false;
 
     Phase(Transaction<I, ?, ?, ?> transaction, VersionIncrement increment) {
         this.transaction = checkNotNull(transaction);
@@ -64,25 +61,16 @@ public abstract class Phase<I, R> {
      *
      * @return the result of the task execution
      */
-    final R propagate() {
-        R result = performDispatch();
+    final DispatchOutcome propagate() {
+        DispatchOutcome result = performDispatch();
         transaction.incrementStateAndVersion(versionIncrement);
-        markSuccessful();
         return result;
-    }
-
-    final boolean isSuccessful() {
-        return successful;
-    }
-
-    private void markSuccessful() {
-        this.successful = true;
     }
 
     /**
      * Executes the dispatch task and returns the result.
      */
-    protected abstract R performDispatch();
+    protected abstract DispatchOutcome performDispatch();
 
     /**
      * Returns the ID of the entity to which the {@code Message} is dispatched.

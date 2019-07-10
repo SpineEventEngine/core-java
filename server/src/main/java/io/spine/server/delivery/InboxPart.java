@@ -23,13 +23,12 @@ package io.spine.server.delivery;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.server.type.ActorMessageEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -50,7 +49,7 @@ import java.util.stream.Collectors;
  * @param <M>
  *         the type of message envelopes, which are served by this inbox part
  */
-abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
+abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
 
     private final Endpoints<I, M> endpoints;
     private final InboxWriter writer;
@@ -109,9 +108,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
 
         TenantAwareRunner
                 .with(envelope.tenantId())
-                .run(() -> {
-                    writer.write(message);
-                });
+                .run(() -> writer.write(message));
     }
 
     private InboxSignalId signalIdFrom(M envelope, I targetId) {
@@ -130,7 +127,7 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      * dispatched messages to look for duplicate amongst.
      *
      * <p>In case a duplication is found, the respective endpoint is
-     * {@linkplain MessageEndpoint#onError(ActorMessageEnvelope, RuntimeException) notified}.
+     * {@linkplain MessageEndpoint#onError(SignalEnvelope, RuntimeException) notified}.
      */
     abstract class Dispatcher {
 
@@ -156,7 +153,6 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
         protected abstract Predicate<? super InboxMessage> filterByType();
 
         void deliver(InboxMessage message) {
-            Optional<? extends RuntimeException> duplicationException = checkDuplicate(message);
             M envelope = asEnvelope(message);
             InboxLabel label = message.getLabel();
             InboxId inboxId = message.getInboxId();
@@ -164,28 +160,18 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                     endpoints.get(label, envelope)
                              .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
 
+            @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
+            I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
             TenantAwareRunner
                     .with(envelope.tenantId())
                     .run(() -> {
-                        if (duplicationException.isPresent()) {
-                            endpoint.onError(envelope, duplicationException.get());
+                        if (duplicate(message)) {
+                            endpoint.onDuplicate(unpackedId, envelope);
                         } else {
-                            @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-                                    I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
                             endpoint.dispatchTo(unpackedId);
                         }
                     });
         }
-
-        /**
-         * Emits a exception, specific to the type of the message, in case the passed message
-         * is determined to be a duplicate.
-         *
-         * @param duplicate
-         *         the duplicate message
-         * @return a type-specific exception
-         */
-        protected abstract RuntimeException onDuplicateFound(InboxMessage duplicate);
 
         /**
          * Checks whether the message has already been stored in the inbox.
@@ -193,15 +179,11 @@ abstract class InboxPart<I, M extends ActorMessageEnvelope<?, ?, ?>> {
          * <p>In case of duplication returns an {@code Optional} containing the duplication
          * exception wrapped into a inbox-specific runtime exception for further handling.
          */
-        private Optional<? extends RuntimeException> checkDuplicate(InboxMessage message) {
+        private boolean duplicate(InboxMessage message) {
             String currentId = message.getSignalId()
                                       .getValue();
             boolean hasDuplicate = rawIds.contains(currentId);
-            if (hasDuplicate) {
-                RuntimeException exception = onDuplicateFound(message);
-                return Optional.of(exception);
-            }
-            return Optional.empty();
+            return hasDuplicate;
         }
     }
 }

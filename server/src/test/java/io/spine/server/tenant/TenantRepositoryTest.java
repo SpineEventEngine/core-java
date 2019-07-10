@@ -21,7 +21,6 @@
 package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,9 +40,11 @@ class TenantRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContext bc = BoundedContextBuilder.assumingTests().build();
         repository = new TenantRepositoryImpl();
-        bc.register(repository);
+        BoundedContextBuilder
+                .assumingTests(true)
+                .setTenantIndex(repository)
+                .build();
     }
 
     @Test

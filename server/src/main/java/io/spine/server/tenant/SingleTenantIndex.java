@@ -52,11 +52,6 @@ enum SingleTenantIndex implements TenantIndex {
     }
 
     @Override
-    public void registerWith(BoundedContext context) {
-        // Do nothing.
-    }
-
-    @Override
     public void keep(TenantId id) {
         // Do nothing.
     }
@@ -69,5 +64,15 @@ enum SingleTenantIndex implements TenantIndex {
     @Override
     public void close() {
         // Do nothing.
+    }
+
+    @Override
+    public void registerWith(BoundedContext context) {
+        // Do nothing.
+    }
+
+    @Override
+    public boolean isRegistered() {
+        return true;
     }
 }

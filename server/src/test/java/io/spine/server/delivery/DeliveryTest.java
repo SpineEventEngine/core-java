@@ -39,6 +39,7 @@ import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,26 +68,27 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@SlowTest
 @DisplayName("Delivery of messages to entities should deliver those via")
-public class DeliveryTest {
+class DeliveryTest {
 
     private Delivery originalDelivery;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.originalDelivery = ServerEnvironment.instance()
                                                  .delivery();
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         ServerEnvironment.instance()
                          .configureDelivery(originalDelivery);
     }
 
     @Test
     @DisplayName("a single shard to a single target in a multi-threaded env")
-    public void singleTarget_singleShard_manyThreads() {
+    void singleTargetSingleShardManyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
         new ThreadSimulator(42).runWith(aTarget);
@@ -94,7 +96,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to multiple targets in a multi-threaded env")
-    public void manyTargets_singleShard_manyThreads() {
+    void manyTargetsSingleShardManyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(7);
         new ThreadSimulator(10).runWith(targets);
@@ -102,7 +104,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to a single target in a multi-threaded env")
-    public void singleTarget_manyShards_manyThreads() {
+    void singleTargetManyShardsManyThreads() {
         changeShardCountTo(1986);
         ImmutableSet<String> targets = singleTarget();
         new ThreadSimulator(15).runWith(targets);
@@ -110,7 +112,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to multiple targets in a multi-threaded env")
-    public void manyTargets_manyShards_manyThreads() {
+    void manyTargetsManyShardsManyThreads() {
         changeShardCountTo(2004);
         ImmutableSet<String> targets = manyTargets(13);
         new ThreadSimulator(19).runWith(targets);
@@ -118,7 +120,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to a single target in a single-threaded env")
-    public void singleTarget_manyShards_singleThread() {
+    void singleTargetManyShardsSingleThread() {
         changeShardCountTo(12);
         ImmutableSet<String> aTarget = singleTarget();
         new ThreadSimulator(1).runWith(aTarget);
@@ -126,7 +128,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to a single target in a single-threaded env")
-    public void singleTarget_singleShard_singleThread() {
+    void singleTargetSingleShardSingleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
         new ThreadSimulator(1).runWith(aTarget);
@@ -134,7 +136,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to mutiple targets in a single-threaded env")
-    public void manyTargets_singleShard_singleThread() {
+    void manyTargetsSingleShardSingleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);
         new ThreadSimulator(1).runWith(targets);
@@ -142,7 +144,7 @@ public class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to multiple targets in a single-threaded env")
-    public void manyTargets_manyShards_singleThread() {
+    void manyTargetsManyShardsSingleThread() {
         changeShardCountTo(2019);
         ImmutableSet<String> targets = manyTargets(13);
         new ThreadSimulator(1).runWith(targets);
@@ -151,7 +153,7 @@ public class DeliveryTest {
     @Test
     @DisplayName("multiple shards to multiple targets " +
             "in a multi-threaded env with the custom strategy")
-    public void with_custom_strategy() {
+    void withCustomStrategy() {
 
         FixedShardStrategy strategy = new FixedShardStrategy(13);
         Delivery newDelivery = Delivery.localWithStrategyAndWindow(strategy, Durations.ZERO);
@@ -176,7 +178,7 @@ public class DeliveryTest {
             "keep them as `TO_DELIVER` right after they are written to `InboxStorage`, " +
             "and mark every as `DELIVERED` after they are actually delivered.")
     @SuppressWarnings("MethodWithMultipleLoops")    // Traversing over the storage.
-    public void mark_delivered() {
+    void markDelivered() {
 
         FixedShardStrategy strategy = new FixedShardStrategy(3);
 

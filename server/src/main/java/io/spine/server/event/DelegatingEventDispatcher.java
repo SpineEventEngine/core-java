@@ -45,7 +45,7 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     /**
      * A target delegate.
      */
-    private final EventDispatcherDelegate<I> delegate;
+    private final EventDispatcherDelegate delegate;
 
     /**
      * Creates a new instance of {@code DelegatingCommandDispatcher}, proxying the calls
@@ -54,12 +54,12 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      * @param delegate a delegate to pass the dispatching duties to
      * @return new instance
      */
-    public static <I> DelegatingEventDispatcher<I> of(EventDispatcherDelegate<I> delegate) {
+    public static <I> DelegatingEventDispatcher<I> of(EventDispatcherDelegate delegate) {
         checkNotNull(delegate);
         return new DelegatingEventDispatcher<>(delegate);
     }
 
-    private DelegatingEventDispatcher(EventDispatcherDelegate<I> delegate) {
+    private DelegatingEventDispatcher(EventDispatcherDelegate delegate) {
         this.delegate = delegate;
     }
 
@@ -74,13 +74,8 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
-    public Set<I> dispatch(EventEnvelope event) {
-        return delegate.dispatchEvent(event);
-    }
-
-    @Override
-    public void onError(EventEnvelope event, RuntimeException exception) {
-        delegate.onError(event, exception);
+    public void dispatch(EventEnvelope event) {
+        delegate.dispatchEvent(event);
     }
 
     /**
@@ -117,9 +112,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     private static final class ExternalDispatcher<I>
             implements ExternalMessageDispatcher<I> {
 
-        private final EventDispatcherDelegate<I> delegate;
+        private final EventDispatcherDelegate delegate;
 
-        private ExternalDispatcher(EventDispatcherDelegate<I> delegate) {
+        private ExternalDispatcher(EventDispatcherDelegate delegate) {
             this.delegate = delegate;
         }
 
@@ -130,16 +125,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         }
 
         @Override
-        public Set<I> dispatch(ExternalMessageEnvelope envelope) {
+        public void dispatch(ExternalMessageEnvelope envelope) {
             EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            Set<I> ids = delegate.dispatchEvent(eventEnvelope);
-            return ids;
-        }
-
-        @Override
-        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-            EventEnvelope eventEnvelope = envelope.toEventEnvelope();
-            delegate.onError(eventEnvelope, exception);
+            delegate.dispatchEvent(eventEnvelope);
         }
     }
 }

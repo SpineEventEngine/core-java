@@ -24,10 +24,10 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
@@ -39,9 +39,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Errors.fromThrowable;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.server.type.given.GivenEvent.withMessage;
@@ -73,14 +73,6 @@ public abstract class TransactionTest<I,
         return Id.newBuilder()
                  .setId(getClass().getSimpleName() + '-' +  Identifier.newUuid())
                  .build();
-    }
-
-    private static boolean checkPhase(Event event, Phase phase) {
-        EventId id = event.getId();
-        Message phaseId = phase.messageId();
-        boolean equalIds = id.equals(phaseId);
-        boolean isSuccessful = phase.isSuccessful();
-        return equalIds && isSuccessful;
     }
 
     private static Version newVersion() {
@@ -132,7 +124,7 @@ public abstract class TransactionTest<I,
                 .build();
     }
 
-    protected abstract void applyEvent(Transaction tx, Event event);
+    protected abstract DispatchOutcome applyEvent(Transaction tx, Event event);
 
     @BeforeEach
     void setUp() {
@@ -225,14 +217,15 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
-        applyEvent(tx, event);
-
+        DispatchOutcome outcome = applyEvent(tx, event);
+        assertTrue(outcome.hasSuccess());
         assertThat(tx.phases())
                 .hasSize(1);
 
-        Phase<I, ?> phase = tx.phases()
-                              .get(0);
-        assertTrue(checkPhase(event, phase));
+        Phase<I> phase = tx.phases()
+                           .get(0);
+
+        assertThat(phase.messageId()).isEqualTo(event.id());
     }
 
     @Test
@@ -265,10 +258,12 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
-        applyEvent(tx, event);
+        DispatchOutcome outcome = applyEvent(tx, event);
+        assertTrue(outcome.hasSuccess());
         S stateBeforeRollback = entity.state();
         Version versionBeforeRollback = entity.version();
-        tx.rollback(new RuntimeException("that triggers rollback"));
+        RuntimeException exception = new RuntimeException("that triggers rollback");
+        tx.rollback(fromThrowable(exception));
 
         S stateAfterRollback = entity.state();
         Version versionAfterRollback = entity.version();
@@ -308,9 +303,12 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
 
         verifyZeroInteractions(listener);
-        applyEvent(tx, event);
+        DispatchOutcome outcome = applyEvent(tx, event);
+        assertTrue(outcome.hasSuccess());
 
-        verify(listener).onAfterPhase(argThat(matchesSuccessfulPhaseFor(event)));
+        verify(listener).onAfterPhase(argThat(
+                phase -> phase.messageId().equals(event.id())
+        ));
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
@@ -339,7 +337,8 @@ public abstract class TransactionTest<I,
 
             Event event = withMessage(failingInHandler());
 
-            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            DispatchOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
         }
 
         @Test
@@ -349,7 +348,8 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
             Event event = withMessage(failingStateTransition());
 
-            assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
+            DispatchOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
         }
     }
 
@@ -367,7 +367,8 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(failingInHandler());
-            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            DispatchOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
 
@@ -382,10 +383,8 @@ public abstract class TransactionTest<I,
             Version nextVersion = Versions.increment(entity.version());
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
 
-            //TODO:2019-06-16:alex.tymchenko:
-            // see https://github.com/SpineEventEngine/core-java/issues/1094
-            assertThrows(InvalidEntityStateException.class, () -> applyEvent(tx, event));
-
+            DispatchOutcome outcome = applyEvent(tx, event);
+            assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
 
@@ -442,9 +441,5 @@ public abstract class TransactionTest<I,
         tx.commit();
         assertThat(entity.version())
                 .isEqualTo(versionFromEvent);
-    }
-
-    private ArgumentMatcher<Phase<I, ?>> matchesSuccessfulPhaseFor(Event event) {
-        return phase -> checkPhase(event, phase);
     }
 }

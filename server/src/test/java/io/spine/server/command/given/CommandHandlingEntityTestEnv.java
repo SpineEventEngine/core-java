@@ -20,14 +20,11 @@
 
 package io.spine.server.command.given;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.StringValue;
-import io.spine.core.Event;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.type.CommandEnvelope;
-
-import java.util.List;
 
 import static io.spine.testing.TestValues.newUuidValue;
 
@@ -58,8 +55,8 @@ public class CommandHandlingEntityTestEnv {
         }
 
         @Override
-        protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-            return ImmutableList.of();
+        protected DispatchOutcome dispatchCommand(CommandEnvelope cmd) {
+            return DispatchOutcome.getDefaultInstance();
         }
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import io.spine.base.Error;
 import io.spine.validate.NonValidated;
 
 /**
@@ -29,12 +30,12 @@ import io.spine.validate.NonValidated;
 final class SilentWitness<I> implements TransactionListener<I> {
 
     @Override
-    public void onBeforePhase(Phase<I, ?> phase) {
+    public void onBeforePhase(Phase<I> phase) {
         // Do nothing.
     }
 
     @Override
-    public void onAfterPhase(Phase<I, ?> phase) {
+    public void onAfterPhase(Phase<I> phase) {
         // Do nothing.
     }
 
@@ -44,7 +45,7 @@ final class SilentWitness<I> implements TransactionListener<I> {
     }
 
     @Override
-    public void onTransactionFailed(Throwable t, EntityRecord record) {
+    public void onTransactionFailed(Error cause, EntityRecord record) {
         // Do nothing.
     }
 

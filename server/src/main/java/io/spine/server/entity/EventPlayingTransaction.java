@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatch;
-import io.spine.server.model.Nothing;
 import io.spine.server.type.EventEnvelope;
 
 /**
@@ -61,16 +61,11 @@ class EventPlayingTransaction<I,
      * Applies the given event to the entity in transaction.
      */
     @VisibleForTesting
-    public void play(EventEnvelope event) {
+    public DispatchOutcome play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
-        EventDispatch<I, E, Nothing> dsp = new EventDispatch<>(this::dispatch, entity(), event);
-        Phase<I, Nothing> phase = new EventDispatchingPhase<>(this, dsp, increment);
-        propagate(phase);
-    }
-
-    private Nothing dispatch(E entity, EventEnvelope event) {
-        doDispatch(entity, event);
-        return Nothing.getDefaultInstance();
+        EventDispatch<I, E> dsp = new EventDispatch<>(this::dispatch, entity(), event);
+        Phase<I> phase = new EventDispatchingPhase<>(this, dsp, increment);
+        return propagate(phase);
     }
 
     /**
@@ -83,7 +78,7 @@ class EventPlayingTransaction<I,
      * @param event
      *         the event to dispatch
      */
-    protected abstract void doDispatch(E entity, EventEnvelope event);
+    protected abstract DispatchOutcome dispatch(E entity, EventEnvelope event);
 
     /**
      * Creates a version increment for the entity based on the currently processed event.

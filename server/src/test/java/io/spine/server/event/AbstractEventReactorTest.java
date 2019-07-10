@@ -21,10 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.logging.Logging;
 import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
-import io.spine.server.event.given.AbstractReactorTestEnv.FaultyCharityDonor;
-import io.spine.server.event.given.AbstractReactorTestEnv.FaultyNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
 import io.spine.testing.client.blackbox.Count;
@@ -34,11 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.event.SubstituteLoggingEvent;
-import org.slf4j.helpers.SubstituteLogger;
-
-import java.util.ArrayDeque;
-import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderPaidFor;
@@ -48,9 +40,6 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServed
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.slf4j.event.Level.ERROR;
 
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
@@ -68,18 +57,12 @@ class AbstractEventReactorTest {
         deliveryContext = BlackBoxBoundedContext.singleTenant();
         charityContext = BlackBoxBoundedContext.singleTenant();
 
-        charityDonor = new AutoCharityDonor(charityContext.eventBus());
+        charityDonor = new AutoCharityDonor();
         charityContext.withEventDispatchers(charityDonor);
 
-        performanceTracker = new ServicePerformanceTracker(restaurantContext.eventBus());
-        RestaurantNotifier notifier = new RestaurantNotifier(restaurantContext.eventBus());
+        performanceTracker = new ServicePerformanceTracker();
+        RestaurantNotifier notifier = new RestaurantNotifier();
         restaurantContext.withEventDispatchers(performanceTracker, notifier);
-    }
-
-    @Test
-    @DisplayName("throw upon a null event bus")
-    void throwOnNullEventBus() {
-        assertThrows(NullPointerException.class, () -> new AutoCharityDonor(null));
     }
 
     @DisplayName("while dealing with domestic events")
@@ -113,19 +96,6 @@ class AbstractEventReactorTest {
                     .count();
             assertThat(ordersInTime).isEqualTo(2);
             assertThat(ordersServedLate).hasSize(1);
-        }
-
-        @Test
-        @DisplayName("log an error")
-        void logError() {
-            FaultyNotifier faultyNotifier = new FaultyNotifier(restaurantContext.eventBus());
-            restaurantContext.withEventDispatchers(faultyNotifier);
-
-            Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
-                    (SubstituteLogger) faultyNotifier.log());
-
-            restaurantContext.receivesEvent(someOrderReady());
-            assertSingleError(loggedMessages);
         }
 
         @Test
@@ -188,41 +158,5 @@ class AbstractEventReactorTest {
                           .receivesExternalEvent(restaurantContext.name(), paidInRestaurant)
                           .assertThat(emittedEvent(DonationMade.class, twice()));
         }
-
-        @DisplayName("log an error")
-        @Test
-        void logAnError() {
-            FaultyCharityDonor faultyDonor = new FaultyCharityDonor(charityContext.eventBus());
-            charityContext.withEventDispatchers(faultyDonor);
-            OrderPaidFor orderPaidFor = someOrderPaidFor();
-
-            Queue<SubstituteLoggingEvent> loggedMessages = redirectLogging(
-                    (SubstituteLogger) faultyDonor.log());
-
-            charityContext.receivesExternalEvent(deliveryContext.name(), orderPaidFor);
-            assertSingleError(loggedMessages);
-        }
-    }
-
-    /** Redirects the specified logging to a new queue, then returns the queue. */
-    private static Queue<SubstituteLoggingEvent> redirectLogging(SubstituteLogger logger) {
-        Queue<SubstituteLoggingEvent> result = new ArrayDeque<>();
-        Logging.redirect(logger, result);
-        return result;
-    }
-
-    /**
-     * Makes sure that the error has been logged correctly.
-     *
-     * <p>Checks that:
-     * <ul>
-     *     <li>only 1 message has been logged;
-     *     <li>logged message is of the {@code ERROR} level.
-     * </ul>
-     */
-    private static void assertSingleError(Queue<SubstituteLoggingEvent> messages) {
-        assertThat(messages).hasSize(1);
-        SubstituteLoggingEvent loggedWarning = messages.poll();
-        assertEquals(ERROR, loggedWarning.getLevel());
     }
 }

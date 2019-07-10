@@ -20,6 +20,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.server.delivery.given.NoOpEndpoint;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
@@ -34,18 +35,18 @@ import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
 import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
 
 @DisplayName("Delivery endpoints should")
-public class EndpointsTest {
+class EndpointsTest {
 
     @Test
     @DisplayName("be empty by default")
-    public void beEmpty() {
+    void beEmpty() {
         Endpoints<String, CommandEnvelope> endpoints = new Endpoints<>();
         assertThat(endpoints.isEmpty()).isTrue();
     }
 
     @Test
     @DisplayName("allow to append endpoint providers and remember the last one per label")
-    public void appendEndpoint() {
+    void appendEndpoint() {
         Endpoints<String, CommandEnvelope> endpoints = new Endpoints<>();
 
         MessageEndpoint<String, CommandEnvelope> first = noOpEndpoint();
@@ -64,13 +65,12 @@ public class EndpointsTest {
 
     @Test
     @DisplayName("return `Optional.empty()` if no endpoint providers configured for the label")
-    public void returnEmpty() {
+    void returnEmpty() {
         Endpoints<String, CommandEnvelope> endpoints = new Endpoints<>();
         Optional<MessageEndpoint<String, CommandEnvelope>> result =
                 endpoints.get(REACT_UPON_EVENT, cmdEnvelope());
         assertThat(result.isPresent()).isFalse();
     }
-
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked via the Truth API statement.
     private static void checkContains(Endpoints<String, CommandEnvelope> endpoints,
@@ -91,16 +91,6 @@ public class EndpointsTest {
     }
 
     private static MessageEndpoint<String, CommandEnvelope> noOpEndpoint() {
-        return new MessageEndpoint<String, CommandEnvelope>() {
-            @Override
-            public void dispatchTo(String targetId) {
-                // do nothing.
-            }
-
-            @Override
-            public void onError(CommandEnvelope envelope, RuntimeException exception) {
-                // do nothing.
-            }
-        };
+        return new NoOpEndpoint();
     }
 }

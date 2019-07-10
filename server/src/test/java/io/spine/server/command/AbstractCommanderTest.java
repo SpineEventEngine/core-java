@@ -42,6 +42,7 @@ import io.spine.test.command.TaskId;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,11 @@ class AbstractCommanderTest {
                 .addCommandDispatcher(commander)
                 .addCommandDispatcher(interceptor)
                 .build();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        context.close();
     }
 
     @Test

@@ -21,15 +21,17 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.DefaultSubject;
-import com.google.common.truth.Subject;
+import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -43,10 +45,13 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
+import io.spine.system.server.CannotDispatchDuplicateCommand;
+import io.spine.system.server.DiagnosticMonitor;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -78,9 +83,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
@@ -108,7 +113,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
@@ -244,23 +248,31 @@ public class AggregateTest {
         void byOneForEmptyApplier() {
             int version = amishAggregate.versionNumber();
 
-            List<? extends Message> messages =
-                    dispatchCommand(amishAggregate, command(pauseProject));
+            Command command = command(pauseProject);
+            List<? extends Message> messages = dispatchCommand(amishAggregate, command)
+                    .getSuccess()
+                    .getProducedEvents()
+                    .getEventList();
             assertEquals(1, messages.size());
 
             assertEquals(version + 1, amishAggregate.versionNumber());
         }
 
         /**
-         * This tests a use-case implying returning a {@code List} of events in response to a command.
+         * This tests a use-case implying returning a {@code List} of events in response to a
+         * command.
          */
         @Test
         @DisplayName("by number of events upon handling command with several events")
         void byNumberOfEvents() {
             int version = amishAggregate.versionNumber();
 
+            Command command = command(cancelProject);
             List<? extends Message> eventMessages =
-                    dispatchCommand(amishAggregate, command(cancelProject));
+                    dispatchCommand(amishAggregate, command)
+                            .getSuccess()
+                            .getProducedEvents()
+                            .getEventList();
             // Expecting to return more than one to differ from other testing scenarios.
             assertTrue(eventMessages.size() > 1);
 
@@ -346,14 +358,13 @@ public class AggregateTest {
             ModelTests.dropAllModels();
             AggregateWithMissingApplier aggregate =
                     new AggregateWithMissingApplier(ID);
-            assertThrows(IllegalStateException.class, () -> {
-                try {
-                    dispatchCommand(aggregate, command(createProject));
-                } catch (IllegalStateException e) { // expected exception
-                    assertTrue(aggregate.isCreateProjectCommandHandled());
-                    throw e;
-                }
-            });
+            Command command = command(createProject);
+            DispatchOutcome outcome = dispatchCommand(aggregate, command);
+            assertTrue(aggregate.commandHandled());
+            assertTrue(outcome.hasError());
+            Error error = outcome.getError();
+            assertThat(error.getType())
+                    .isEqualTo(IllegalStateException.class.getCanonicalName());
         }
     }
 
@@ -435,10 +446,12 @@ public class AggregateTest {
                                        command(addTask),
                                        command(startProject));
 
-            List<Event> events = aggregate().getUncommittedEvents().list();
+            List<Event> events = aggregate().getUncommittedEvents()
+                                            .list();
 
             assertEventClasses(getEventClasses(events),
-                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
+                               AggProjectCreated.class, AggTaskAdded.class,
+                               AggProjectStarted.class);
         }
 
         @Test
@@ -482,7 +495,8 @@ public class AggregateTest {
         @DisplayName("which are being committed")
         void beingCommittedByDefault() {
             aggregate().commitEvents();
-            assertFalse(aggregate.historyBackward().hasNext());
+            assertFalse(aggregate.historyBackward()
+                                 .hasNext());
         }
     }
 
@@ -492,9 +506,11 @@ public class AggregateTest {
         aggregate.dispatchCommands(command(createProject),
                                    command(addTask),
                                    command(startProject));
-        assertTrue(aggregate().getUncommittedEvents().nonEmpty());
+        assertTrue(aggregate().getUncommittedEvents()
+                              .nonEmpty());
         aggregate().commitEvents();
-        assertFalse(aggregate().getUncommittedEvents().nonEmpty());
+        assertFalse(aggregate().getUncommittedEvents()
+                               .nonEmpty());
     }
 
     @Test
@@ -564,70 +580,80 @@ public class AggregateTest {
         }
     }
 
-    @SuppressWarnings("NonExceptionNameEndsWithException") // OK for test case name.
     @Nested
-    @DisplayName("propagate RuntimeException")
-    class PropagateRuntimeException {
+    @DisplayName("catch RuntimeExceptions in")
+    class CatchHandlerFailures {
 
         @Test
-        @DisplayName("when handler throws")
+        @DisplayName("handlers")
         void whenHandlerThrows() {
             ModelTests.dropAllModels();
+
             FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
             Command command = Given.ACommand.createProject();
-            try {
-                dispatchCommand(faultyAggregate, env(command));
-                failNotThrows();
-            } catch (RuntimeException e) {
-                Throwable cause = getRootCause(e);
-                assertTrue(cause instanceof IllegalStateException);
-                assertEquals(FaultyAggregate.BROKEN_HANDLER, cause.getMessage());
-            }
+            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+            assertTrue(outcome.hasError());
+            Error error = outcome.getError();
+            assertThat(error)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Error.newBuilder()
+                                    .setType(IllegalStateException.class.getCanonicalName())
+                                    .setMessage(FaultyAggregate.BROKEN_HANDLER)
+                                    .buildPartial());
         }
 
         @Test
-        @DisplayName("when applier throws")
+        @DisplayName("appliers")
         void whenApplierThrows() {
             ModelTests.dropAllModels();
             FaultyAggregate faultyAggregate =
                     new FaultyAggregate(ID, false, true);
 
             Command command = Given.ACommand.createProject();
-            try {
-                dispatchCommand(faultyAggregate, env(command));
-                failNotThrows();
-            } catch (RuntimeException e) {
-                Throwable cause = getRootCause(e);
-                assertTrue(cause instanceof IllegalStateException);
-                assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
-            }
+            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+
+            assertThat(outcome.hasError()).isTrue();
+            Error error = outcome.getError();
+            assertThat(error)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Error.newBuilder()
+                                    .setType(IllegalStateException.class.getCanonicalName())
+                                    .setMessage(FaultyAggregate.BROKEN_APPLIER)
+                                    .buildPartial());
         }
 
         @Test
-        @DisplayName("when play raises exception")
+        @DisplayName("the event replay")
         void whenPlayThrows() {
             ModelTests.dropAllModels();
             FaultyAggregate faultyAggregate =
                     new FaultyAggregate(ID, false, true);
-            try {
-                Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
 
-                AggregateTransaction tx = AggregateTransaction.start(faultyAggregate);
-                ((Aggregate) faultyAggregate).play(AggregateHistory.newBuilder()
-                                                                   .addEvent(event)
-                                                                   .build());
-                tx.commit();
-                failNotThrows();
-            } catch (RuntimeException e) {
-                Throwable cause = getRootCause(e);
-                assertTrue(cause instanceof IllegalStateException);
-                assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
-            }
-        }
-
-        private void failNotThrows() {
-            fail("Should have thrown RuntimeException.");
+            Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
+            AggregateTransaction.start(faultyAggregate);
+            BatchDispatchOutcome batchDispatchOutcome = ((Aggregate) faultyAggregate).play(AggregateHistory
+                                                                                 .newBuilder()
+                                                                                 .addEvent(event)
+                                                                                 .build());
+            assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
+            MessageId expectedTarget = MessageId
+                    .newBuilder()
+                    .setId(Identifier.pack(faultyAggregate.id()))
+                    .setTypeUrl(faultyAggregate.modelClass()
+                                               .stateType()
+                                               .value())
+                    .buildPartial();
+            assertThat(batchDispatchOutcome.getTargetEntity())
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(expectedTarget);
+            assertThat(batchDispatchOutcome.getOutcomeCount()).isEqualTo(1);
+            DispatchOutcome outcome = batchDispatchOutcome.getOutcome(0);
+            assertThat(outcome.hasError()).isTrue();
+            assertThat(outcome.getPropagatedSignal()).isEqualTo(event.messageId());
+            Error error = outcome.getError();
+            assertThat(error.getType()).isEqualTo(IllegalStateException.class.getCanonicalName());
+            assertThat(error.getMessage()).isEqualTo(FaultyAggregate.BROKEN_APPLIER);
         }
     }
 
@@ -670,9 +696,8 @@ public class AggregateTest {
                     .isFalse();
         }
 
-        private Subject<DefaultSubject, Object> assertNextCommandId() {
-            return assertThat(history.next()
-                                     .rootCommandId());
+        private ProtoSubject<?, Message> assertNextCommandId() {
+            return assertThat(history.next().rootCommandId());
         }
 
         @Test
@@ -709,16 +734,18 @@ public class AggregateTest {
     @Test
     @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
+
         TenantId tenantId = newTenantId();
         Command createCommand = command(createProject, tenantId);
         CommandEnvelope envelope = CommandEnvelope.of(createCommand);
         repository.dispatch(envelope);
-
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                                                  () -> repository.dispatch(envelope));
-        Throwable cause = getRootCause(exception);
-        assertThat(cause)
-             .isInstanceOf(DuplicateCommandException.class);
+        repository.dispatch(envelope);
+        List<CannotDispatchDuplicateCommand> duplicateCommandEvents = monitor.duplicateCommandEvents();
+        assertThat(duplicateCommandEvents).hasSize(1);
+        CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
+        assertThat(event.getCommand()).isEqualTo(envelope.id());
     }
 
     @Nested
@@ -785,9 +812,8 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvent(twice()))
-                    .assertThat(emittedEvent(AggCannotReassignUnassignedTask.class, once()))
-                    .assertThat(emittedEvents(AggUserNotified.class))
+                    .assertThat(emittedEvents(AggCannotReassignUnassignedTask.class,
+                                              AggUserNotified.class))
                     .close();
         }
     }

@@ -58,7 +58,7 @@ public final class EventOrigin {
      */
     public static EventOrigin fromAnotherMessage(MessageEnvelope<?, ?, ?> envelope) {
         checkNotNull(envelope);
-        Origin origin = envelope.asEventOrigin();
+        Origin origin = envelope.asMessageOrigin();
         return new EventOrigin(origin, null);
     }
 

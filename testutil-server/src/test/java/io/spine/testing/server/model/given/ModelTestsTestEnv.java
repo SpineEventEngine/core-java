@@ -32,6 +32,10 @@ public class ModelTestsTestEnv {
     }
 
     public static class TestCommandHandler extends AbstractCommandHandler {
+        private TestCommandHandler() {
+            super();
+        }
+
         @Assign
         Nothing handle(TuRemoveProject cmd) {
             return nothing();
@@ -39,6 +43,9 @@ public class ModelTestsTestEnv {
     }
 
     public static class DuplicatedCommandHandler extends AbstractCommandHandler {
+        private DuplicatedCommandHandler() {
+            super();
+        }
 
         /**
          * Handles the same command as {@link TestCommandHandler#handle(TuRemoveProject)}.

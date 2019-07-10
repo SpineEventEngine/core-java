@@ -51,7 +51,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
                                          P extends MessageClass<?>,
-                                         M extends HandlerMethod<?, EventClass, ?, P, ?>>
+                                         M extends HandlerMethod<?, EventClass, ?, P>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;

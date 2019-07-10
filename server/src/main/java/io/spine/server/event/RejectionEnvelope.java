@@ -35,11 +35,11 @@ import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.type.AbstractMessageEnvelope;
-import io.spine.server.type.ActorMessageEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.RejectionClass;
+import io.spine.server.type.SignalEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -51,7 +51,7 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
  */
 public final class RejectionEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
-        implements ActorMessageEnvelope<EventId, Event, EventContext> {
+        implements SignalEnvelope<EventId, Event, EventContext> {
 
     /**
      * The default producer ID for rejection events.
@@ -183,8 +183,8 @@ public final class RejectionEnvelope
     }
 
     @Override
-    public Origin asEventOrigin() {
-        return event.asEventOrigin();
+    public Origin asMessageOrigin() {
+        return event.asMessageOrigin();
     }
 
     @VisibleForTesting

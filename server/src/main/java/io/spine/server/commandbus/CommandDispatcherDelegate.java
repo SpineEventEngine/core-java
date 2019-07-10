@@ -60,15 +60,7 @@ public interface CommandDispatcherDelegate<I> {
 
     Set<CommandClass> commandClasses();
 
-    I dispatchCommand(CommandEnvelope envelope);
-
-    /**
-     * Handles an error occurred during command dispatching.
-     *
-     * @param envelope  the event which caused the error
-     * @param exception the error
-     */
-    void onError(CommandEnvelope envelope, RuntimeException exception);
+    void dispatchCommand(CommandEnvelope envelope);
 
     /**
      * Verifies if this instance dispatches at least one command.

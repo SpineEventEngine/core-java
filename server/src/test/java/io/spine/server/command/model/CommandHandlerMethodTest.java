@@ -24,10 +24,12 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
@@ -47,7 +49,9 @@ import io.spine.server.command.model.given.handler.ValidHandlerOneParam;
 import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsList;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.type.CommandEnvelope;
@@ -69,6 +73,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -129,13 +135,13 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            CommandHandlerMethod.Result result = handler.invoke(handlerObject, envelope);
-            List<? extends Message> events = result.asMessages();
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
+            List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
             verify(handlerObject, times(1))
                     .handleTest(cmd, emptyContext);
             assertEquals(1, events.size());
-            RefProjectCreated event = (RefProjectCreated) events.get(0);
+            RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
 
@@ -151,12 +157,12 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            CommandHandlerMethod.Result result = handler.invoke(handlerObject, envelope);
-            List<? extends Message> events = result.asMessages();
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
+            List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
             verify(handlerObject, times(1)).handleTest(cmd);
             assertEquals(1, events.size());
-            RefProjectCreated event = (RefProjectCreated) events.get(0);
+            RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
     }
@@ -175,9 +181,10 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
-
-            assertThrows(IllegalStateException.class,
-                         () -> handler.invoke(handlerObject, envelope));
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
+            assertTrue(outcome.hasError());
+            assertThat(outcome.getError().getType())
+                    .isEqualTo(IllegalOutcomeException.class.getCanonicalName());
         }
 
         @Test
@@ -191,8 +198,8 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            assertThrows(IllegalStateException.class,
-                         () -> handler.invoke(handlerObject, envelope));
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
+            checkIllegalOutcome(outcome, envelope.command());
         }
 
         @Test
@@ -203,8 +210,20 @@ class CommandHandlerMethodTest {
                     new ProcessManagerDoingNothing(commandMessage.getProjectId()
                                                                  .getId());
             CommandEnvelope cmd = newCommand(commandMessage);
-            assertThrows(IllegalStateException.class,
-                         () -> PmDispatcher.dispatch(entity, cmd));
+            DispatchOutcome outcome = PmDispatcher.dispatch(entity, cmd);
+            checkIllegalOutcome(outcome, cmd.command());
+        }
+
+        private void checkIllegalOutcome(DispatchOutcome outcome, Command command) {
+            assertThat(outcome)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(DispatchOutcome
+                                       .newBuilder()
+                                       .setPropagatedSignal(command.messageId())
+                                       .setError(Error.newBuilder()
+                                                      .setType(IllegalOutcomeException.class
+                                                                       .getCanonicalName()))
+                                       .buildPartial());
         }
     }
 

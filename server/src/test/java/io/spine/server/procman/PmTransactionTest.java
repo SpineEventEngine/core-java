@@ -22,6 +22,7 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
@@ -96,12 +97,10 @@ class PmTransactionTest
                             .contains(actualMessage));
     }
 
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Method called to dispatch event.
     @Override
-    protected void applyEvent(Transaction tx, Event event) {
+    protected DispatchOutcome applyEvent(Transaction tx, Event event) {
         PmTransaction cast = (PmTransaction) tx;
         EventEnvelope envelope = EventEnvelope.of(event);
-        cast.dispatchEvent(envelope);
+        return cast.dispatchEvent(envelope);
     }
 }

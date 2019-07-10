@@ -22,12 +22,11 @@ package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAttribute;
-import io.spine.server.model.MethodResult;
+import io.spine.server.model.VoidMethod;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -45,8 +44,8 @@ public final class Applier
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
-                                      EmptyClass,
-                                      MethodResult<Empty>> {
+                                      EmptyClass>
+        implements VoidMethod<Aggregate, EventClass, EventEnvelope> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -71,11 +70,6 @@ public final class Applier
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(rawMessageClass());
-    }
-
-    @Override
-    protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
-        return MethodResult.empty();
     }
 
     boolean allowsImport() {

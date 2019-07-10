@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import io.spine.base.EventMessage;
+import io.spine.server.entity.LifecycleFlags;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -66,6 +67,11 @@ class MirrorProjectionTest {
                     .isFalse();
         assertMirror.hasStateThat()
                     .isNotEqualToDefaultInstance();
+        assertMirror.hasStateThat()
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Mirror.newBuilder()
+                                     .setLifecycle(LifecycleFlags.newBuilder().setArchived(true))
+                                     .buildPartial());
     }
 
     @Test
@@ -81,6 +87,11 @@ class MirrorProjectionTest {
                     .isTrue();
         assertMirror.hasStateThat()
                     .isNotEqualToDefaultInstance();
+        assertMirror.hasStateThat()
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Mirror.newBuilder()
+                                     .setLifecycle(LifecycleFlags.newBuilder().setDeleted(true))
+                                     .buildPartial());
     }
 
     @Test

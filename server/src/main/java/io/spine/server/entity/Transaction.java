@@ -25,18 +25,22 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.base.Errors.causeOf;
 import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
@@ -141,7 +145,7 @@ public abstract class Transaction<I,
      *
      * <p>Contains all the phases, including failed.
      */
-    private final List<Phase<I, ?>> phases = newLinkedList();
+    private final List<Phase<I>> phases = newLinkedList();
 
     private TransactionListener<I> transactionListener;
 
@@ -226,6 +230,20 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
+    /**
+     * Obtains the {@link MessageId} of the entity under the transaction.
+     */
+    MessageId entityId() {
+        TypeUrl typeUrl = TypeUrl.of(entity.state()
+                                           .getClass());
+        return MessageId
+                .newBuilder()
+                .setId(Identifier.pack(entity.id()))
+                .setTypeUrl(typeUrl.value())
+                .setVersion(entity.getVersion())
+                .vBuild();
+    }
+
     protected final E entity() {
         return entity;
     }
@@ -237,51 +255,58 @@ public abstract class Transaction<I,
         return version;
     }
 
-    final List<Phase<I, ?>> phases() {
+    final List<Phase<I>> phases() {
         return ImmutableList.copyOf(phases);
     }
 
     /**
-     * Propagates a phase and performs a rollback in case of an exception.
+     * Propagates a phase and performs a rollback in case of an error.
      *
      * <p>The transaction {@linkplain #listener() listener} is called for both failed and
      * successful phases.
      *
+     * <p>If the signal propagation cases an error, a rejection, or an unhandled exception,
+     * the transaction is rolled back.
+     *
      * @param phase
      *         the phase to propagate
-     * @param <R>
-     *         the type of the phase propagation result
      * @return the phase propagation result
      */
     @CanIgnoreReturnValue
-    protected final <R> R propagate(Phase<I, R> phase) {
+    protected final DispatchOutcome propagate(Phase<I> phase) {
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
-        try {
-            R result = phase.propagate();
-            return result;
-        } catch (Throwable t) {
-            rollback(t);
-            //TODO:2019-06-24:alex.tymchenko:
-            // https://github.com/SpineEventEngine/core-java/issues/1094
-            throw propagate(t);
-        } finally {
-            phases.add(phase);
-            listener.onAfterPhase(phase);
-        }
+        DispatchOutcome outcome = propagateFailsafe(phase);
+        phases.add(phase);
+        listener.onAfterPhase(phase);
+        return outcome;
     }
 
     /**
-     * Rethrows the passed {@code Throwable} wrapped into {@code IllegalStateException},
-     * if it's not an instance of {@code InvalidEntityStateException}.
+     * Propagates the given phase and catches failures if any.
      *
-     * <p>{@code InvalidEntityStateException} is rethrown as is.
+     * <p>The catch block in this method and in {@link #commit()} prevents from force majeure
+     * situations such as storage failures, etc. All the exceptions produced in the framework users'
+     * code are handled before this failsafe and is already packed in the {@code DispatchOutcome}
+     * produced by the phase.
+     *
+     * @see #propagate(Phase)
      */
-    private static RuntimeException propagate(Throwable t) {
-        if (t instanceof InvalidEntityStateException) {
-            throw (InvalidEntityStateException) t;
+    private DispatchOutcome propagateFailsafe(Phase<I> phase) {
+        try {
+            DispatchOutcome result = phase.propagate();
+            if (result.hasError()) {
+                rollback(result.getError());
+            }
+            return result;
+        } catch (Throwable t) {
+            rollback(causeOf(t));
+            return DispatchOutcome
+                    .newBuilder()
+                    .setPropagatedSignal(phase.signal().messageId())
+                    .setError(causeOf(t))
+                    .vBuild();
         }
-        throw illegalStateWithCauseOf(t);
     }
 
     /**
@@ -306,6 +331,19 @@ public abstract class Transaction<I,
     }
 
     /**
+     * Commits this transaction if it is still active.
+     *
+     * <p>If the transaction is not active, does nothing.
+     *
+     * @see #commit()
+     */
+    public final void commitIfActive() throws InvalidEntityStateException, IllegalStateException {
+        if (active) {
+            commit();
+        }
+    }
+
+    /**
      * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException
@@ -313,7 +351,8 @@ public abstract class Transaction<I,
      * @throws IllegalStateException
      *         in case of a generic error
      */
-    protected void commit() throws InvalidEntityStateException, IllegalStateException {
+    @VisibleForTesting
+    public final void commit() throws InvalidEntityStateException, IllegalStateException {
         B builder = builder();
         // If the transaction is running with phases, the entity already got its state.
         S newState = withPhases()
@@ -348,8 +387,7 @@ public abstract class Transaction<I,
             EntityRecord newRecord = entityRecord();
             afterCommit(newRecord);
         } catch (RuntimeException e) {
-            rollback(e);
-            throw propagate(e);
+            rollback(causeOf(e));
         } finally {
             releaseTx();
         }
@@ -409,8 +447,8 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    final void rollback(Throwable cause) {
-        beforeRollback(cause);
+    @VisibleForTesting
+    final void rollback(Error cause) {
         TransactionListener<I> listener = listener();
         @NonValidated EntityRecord record = EntityRecord
                 .newBuilder()
@@ -422,15 +460,6 @@ public abstract class Transaction<I,
         listener.onTransactionFailed(cause, record);
         deactivate();
         entity.releaseTransaction();
-    }
-
-    /**
-     * Does necessary preparations before the transaction is marked as inactive and released.
-     */
-    @SuppressWarnings("NoopMethodInAbstractClass")
-    // Do not force descendants to override the method.
-    protected void beforeRollback(Throwable cause) {
-        // NO-OP.
     }
 
     /**
@@ -500,7 +529,7 @@ public abstract class Transaction<I,
      * Injects the current transaction instance into an entity.
      */
     private void injectTo(E entity) {
-        // assigning `this` to a variable to explicitly specify
+        // Assigning `this` to a variable to explicitly specify
         // the generic bounds for Java compiler.
         Transaction<I, E, S, B> tx = this;
         entity.injectTransaction(tx);
