@@ -154,12 +154,12 @@ abstract class AggregateEndpoint<I,
      *
      * @param commandOutcome
      *         the successful command outcome
-     * @param eventBatchDispatch
+     * @param eventDispatch
      *         the result of event applying
      * @return the same command outcome but with the events of the correct versions
      */
     private static DispatchOutcome
-    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatch eventBatchDispatch) {
+    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatch eventDispatch) {
         DispatchOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
         ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
                                                                       .getProducedEventsBuilder();
@@ -167,7 +167,7 @@ abstract class AggregateEndpoint<I,
                 .getEventBuilderList()
                 .stream()
                 .collect(toImmutableMap(Event.Builder::getId, identity()));
-        for (DispatchOutcome outcome : eventBatchDispatch.getOutcomeList()) {
+        for (DispatchOutcome outcome : eventDispatch.getOutcomeList()) {
             Any signalId = outcome.getPropagatedSignal()
                                   .getId();
             EventId eventId = unpack(signalId, EventId.class);
