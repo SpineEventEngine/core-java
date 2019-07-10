@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkState;
 public interface ContextAware {
 
     /**
-     * Registered this instance as a part of the given Bounded Context.
+     * Registers this instance as a part of the given Bounded Context.
      *
      * <p>This method should be only called once. However, it is allowed to register a single
      * instance many times with the <strong>same</strong> Bounded Context. If the same instance is
