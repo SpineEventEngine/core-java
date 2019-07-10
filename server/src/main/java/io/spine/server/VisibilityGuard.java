@@ -71,8 +71,10 @@ final class VisibilityGuard {
         RepositoryAccess alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
             throw newIllegalStateException(
-                    "A repository for the state class %s already registered: `%s`",
-                    stateClass.getName(), alreadyRegistered);
+                    "A repository for the state class %s already registered: `%s`.",
+                    stateClass.getName(),
+                    alreadyRegistered
+            );
         }
     }
 
