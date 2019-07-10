@@ -35,7 +35,6 @@ import "spine/core/diagnostics.proto";
 import "spine/core/event.proto";
 
 // Report of a batch propagation of several signals.
-//
 message BatchDispatchOutcome {
 
     // The ID of the entity handling the signals.
@@ -48,12 +47,10 @@ message BatchDispatchOutcome {
     repeated DispatchOutcome outcome = 2 [(validate) = true];
 
     // The propagation is successful if none of the `outcome`s is erroneous.
-    //
     bool successful = 3;
 }
 
 // The result of handling a single signal.
-//
 message DispatchOutcome {
 
     // The ID of the propagated signal.
@@ -89,7 +86,6 @@ message DispatchOutcome {
 }
 
 // A successful signal handling result.
-//
 message Success {
 
     oneof exhaust {
@@ -106,21 +102,18 @@ message Success {
 }
 
 // Events produced during a signal handling.
-//
 message ProducedEvents {
 
     repeated core.Event event = 1 [(required) = true, (validate) = true];
 }
 
 // Commands produced during a signal handling.
-//
 message ProducedCommands {
 
     repeated core.Command command = 1 [(required) = true, (validate) = true];
 }
 
 // Signal handling interruption.
-//
 message Interruption {
 
     // The message which caused the interruption.
@@ -132,7 +125,6 @@ message Interruption {
 }
 
 // Ignored signal handling.
-//
 message Ignore {
 
     // The reason why the signal was ignored.

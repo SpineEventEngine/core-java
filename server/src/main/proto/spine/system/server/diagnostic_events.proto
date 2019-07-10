@@ -37,7 +37,6 @@ message ConstraintViolated {
 }
 
 // An event emitted whenever a command is dispatched to an entity for the second time.
-//
 message CannotDispatchDuplicateCommand {
     option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
@@ -47,7 +46,6 @@ message CannotDispatchDuplicateCommand {
 }
 
 // An event emitted whenever an event is dispatched to an entity for the second time.
-//
 message CannotDispatchDuplicateEvent {
     option (is) = {java_type: "CannonDispatchDuplicate" generate: true};
 
@@ -58,7 +56,6 @@ message CannotDispatchDuplicateEvent {
 }
 
 // An event emitted whenever a handler method fails with a runtime exception.
-//
 message HandlerFailedUnexpectedly {
 
     core.MessageId entity = 1;
@@ -71,7 +68,6 @@ message HandlerFailedUnexpectedly {
 }
 
 // An event emitted whenever a runtime exception occurs during message routing.
-//
 message RoutingFailed {
 
     core.MessageId handled_signal = 1;
