@@ -29,7 +29,7 @@ import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
 import io.spine.server.command.model.given.reaction.TestCommandReactor;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.type.EventEnvelope;
@@ -118,7 +118,7 @@ class CommandReactionMethodTest {
         @DisplayName("when returning value")
         void returnValue() {
             CmdProjectCreated message = createEvent(id);
-            PropagationOutcome outcome = method.invoke(target, envelope(message));
+            DispatchOutcome outcome = method.invoke(target, envelope(message));
             assertResult(outcome, this.id);
         }
     }
@@ -163,7 +163,7 @@ class CommandReactionMethodTest {
             ProjectId givenId = this.id;
             CmdProjectCreated message = createEvent(givenId);
 
-            PropagationOutcome outcome = method.invoke(target, envelope(message));
+            DispatchOutcome outcome = method.invoke(target, envelope(message));
 
             assertResult(outcome, givenId);
         }
@@ -177,7 +177,7 @@ class CommandReactionMethodTest {
                     .setInitialize(false) // This will make the method return `Optional.empty()`.
                     .build();
 
-            PropagationOutcome outcome = method.invoke(target, envelope(message));
+            DispatchOutcome outcome = method.invoke(target, envelope(message));
 
             assertThat(outcome.getSuccess().getProducedCommands().getCommandList()).isEmpty();
         }
@@ -194,7 +194,7 @@ class CommandReactionMethodTest {
     /**
      * Asserts that the result has a message with correct type and passed field value.
      */
-    private static void assertResult(PropagationOutcome outcome, ProjectId id) {
+    private static void assertResult(DispatchOutcome outcome, ProjectId id) {
         CmdAddTask expected = CmdAddTask
                 .newBuilder()
                 .setProjectId(id)

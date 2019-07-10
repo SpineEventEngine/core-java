@@ -22,7 +22,7 @@ package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
 import io.spine.server.delivery.EventEndpoint;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.type.EventEnvelope;
 
 /**
@@ -53,7 +53,7 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected PropagationOutcome invokeDispatcher(P processManager, EventEnvelope event) {
+    protected DispatchOutcome invokeDispatcher(P processManager, EventEnvelope event) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.dispatchEvent(event);
     }

@@ -21,8 +21,8 @@
 package io.spine.server.procman;
 
 import io.spine.base.Error;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.type.SignalEnvelope;
 
@@ -79,7 +79,7 @@ abstract class PmEndpoint<I,
      */
     private void tryDispatchAndSave(P manager) {
         try {
-            PropagationOutcome outcome = runTransactionFor(manager);
+            DispatchOutcome outcome = runTransactionFor(manager);
             store(manager);
             if (outcome.hasSuccess()) {
                 postMessages(outcome.getSuccess());
@@ -115,9 +115,9 @@ abstract class PmEndpoint<I,
         }
     }
 
-    protected PropagationOutcome runTransactionFor(P processManager) {
+    protected DispatchOutcome runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        PropagationOutcome outcome = invokeDispatcher(processManager, envelope());
+        DispatchOutcome outcome = invokeDispatcher(processManager, envelope());
         tx.commitIfActive();
         return outcome;
     }

@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.event.React;
 import io.spine.server.type.EventEnvelope;
 
@@ -37,7 +37,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected PropagationOutcome invokeDispatcher(A aggregate, EventEnvelope event) {
+    protected DispatchOutcome invokeDispatcher(A aggregate, EventEnvelope event) {
         return aggregate.reactOn(event);
     }
 

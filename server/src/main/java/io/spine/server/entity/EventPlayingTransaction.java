@@ -60,7 +60,7 @@ class EventPlayingTransaction<I,
      * Applies the given event to the entity in transaction.
      */
     @VisibleForTesting
-    public PropagationOutcome play(EventEnvelope event) {
+    public DispatchOutcome play(EventEnvelope event) {
         VersionIncrement increment = createVersionIncrement(event);
         EventDispatch<I, E> dsp = new EventDispatch<>(this::dispatch, entity(), event);
         Phase<I> phase = new EventDispatchingPhase<>(this, dsp, increment);
@@ -77,7 +77,7 @@ class EventPlayingTransaction<I,
      * @param event
      *         the event to dispatch
      */
-    protected abstract PropagationOutcome dispatch(E entity, EventEnvelope event);
+    protected abstract DispatchOutcome dispatch(E entity, EventEnvelope event);
 
     /**
      * Creates a version increment for the entity based on the currently processed event.

@@ -28,9 +28,9 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.entity.CommandDispatchingPhase;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EventDispatchingPhase;
 import io.spine.server.entity.Phase;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.VersionIncrement;
@@ -92,7 +92,7 @@ public class PmTransaction<I,
      * @return the events generated from the command dispatch
      * @see ProcessManager#dispatchCommand(CommandEnvelope)
      */
-    final PropagationOutcome perform(DispatchCommand<I> dispatch) {
+    final DispatchOutcome perform(DispatchCommand<I> dispatch) {
         VersionIncrement vi = createVersionIncrement();
         Phase<I> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
         return doPropagate(phase);
@@ -106,13 +106,13 @@ public class PmTransaction<I,
      * @return the events generated from the event dispatch
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
-    final PropagationOutcome dispatchEvent(EventEnvelope event) {
+    final DispatchOutcome dispatchEvent(EventEnvelope event) {
         Phase<I> phase = new EventDispatchingPhase<>(
                 this,
                 createDispatch(event),
                 createVersionIncrement()
         );
-        PropagationOutcome outcome = doPropagate(phase);
+        DispatchOutcome outcome = doPropagate(phase);
         return outcome;
     }
 
@@ -121,7 +121,7 @@ public class PmTransaction<I,
         return new EventDispatch<>(this::dispatch, entity(), event);
     }
 
-    private PropagationOutcome dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
+    private DispatchOutcome dispatch(ProcessManager<I, S, B> pm, EventEnvelope event) {
         return pm.dispatchEvent(event);
     }
 
@@ -132,8 +132,8 @@ public class PmTransaction<I,
     /**
      * Propagates the phase and updates the process lifecycle after success.
      */
-    private PropagationOutcome doPropagate(Phase<I> phase) {
-        PropagationOutcome outcome = propagate(phase);
+    private DispatchOutcome doPropagate(Phase<I> phase) {
+        DispatchOutcome outcome = propagate(phase);
         Success success = outcome.getSuccess();
         List<Event> events = success.getProducedEvents()
                                     .getEventList();

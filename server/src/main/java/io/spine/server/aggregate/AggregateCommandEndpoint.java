@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.delivery.CommandEndpoint;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
@@ -45,7 +45,7 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected PropagationOutcome invokeDispatcher(A aggregate, CommandEnvelope envelope) {
+    protected DispatchOutcome invokeDispatcher(A aggregate, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
         DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();

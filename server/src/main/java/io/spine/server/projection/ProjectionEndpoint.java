@@ -26,9 +26,9 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.EventContext;
 import io.spine.server.delivery.EventEndpoint;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.EventEnvelope;
@@ -77,7 +77,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
-        PropagationOutcome outcome = invokeDispatcher(projection, envelope());
+        DispatchOutcome outcome = invokeDispatcher(projection, envelope());
         tx.commitIfActive();
         if (outcome.hasSuccess()) {
             afterDispatched(projection.id());
@@ -90,7 +90,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @CanIgnoreReturnValue
     @Override
-    protected PropagationOutcome invokeDispatcher(P projection, EventEnvelope event) {
+    protected DispatchOutcome invokeDispatcher(P projection, EventEnvelope event) {
         return projection.play(event.outerObject());
     }
 

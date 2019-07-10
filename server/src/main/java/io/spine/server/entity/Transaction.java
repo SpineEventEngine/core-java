@@ -272,10 +272,10 @@ public abstract class Transaction<I,
      * @return the phase propagation result
      */
     @CanIgnoreReturnValue
-    protected final PropagationOutcome propagate(Phase<I> phase) {
+    protected final DispatchOutcome propagate(Phase<I> phase) {
         TransactionListener<I> listener = listener();
         listener.onBeforePhase(phase);
-        PropagationOutcome outcome = propagateFailsafe(phase);
+        DispatchOutcome outcome = propagateFailsafe(phase);
         phases.add(phase);
         listener.onAfterPhase(phase);
         return outcome;
@@ -286,21 +286,21 @@ public abstract class Transaction<I,
      *
      * <p>The catch block in this method and in {@link #commit()} prevents from force majeure
      * situations such as storage failures, etc. All the exceptions produced in the framework users'
-     * code are handled before this failsafe and is already packed in the {@code PropagationOutcome}
+     * code are handled before this failsafe and is already packed in the {@code DispatchOutcome}
      * produced by the phase.
      *
      * @see #propagate(Phase)
      */
-    private PropagationOutcome propagateFailsafe(Phase<I> phase) {
+    private DispatchOutcome propagateFailsafe(Phase<I> phase) {
         try {
-            PropagationOutcome result = phase.propagate();
+            DispatchOutcome result = phase.propagate();
             if (result.hasError()) {
                 rollback(result.getError());
             }
             return result;
         } catch (Throwable t) {
             rollback(causeOf(t));
-            return PropagationOutcome
+            return DispatchOutcome
                     .newBuilder()
                     .setPropagatedSignal(phase.signal().messageId())
                     .setError(causeOf(t))

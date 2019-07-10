@@ -23,7 +23,7 @@ package io.spine.server.event.model;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;
@@ -149,7 +149,7 @@ class EventReactorMethodTest {
         void returnValue() {
             RefProjectCreated event = projectCreatedEvent();
 
-            PropagationOutcome outcome = method.invoke(target, envelope(event));
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
             List<Event> events = outcome.getSuccess()
                                         .getProducedEvents()
                                         .getEventList();
@@ -169,7 +169,7 @@ class EventReactorMethodTest {
                     .newBuilder()
                     .build();
 
-            PropagationOutcome outcome = method.invoke(target, envelope(event));
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
 
             assertThat(outcome.getSuccess().getProducedEvents().getEventList()).isEmpty();
         }
@@ -206,7 +206,7 @@ class EventReactorMethodTest {
         @DisplayName("when returning Pair with two non-null values")
         void returningNonNull() {
             RefProjectCreated event = projectCreatedWithAssignee();
-            PropagationOutcome outcome = method.invoke(target, envelope(event));
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
             List<Event> events = outcome.getSuccess()
                                         .getProducedEvents()
                                         .getEventList();
@@ -228,7 +228,7 @@ class EventReactorMethodTest {
         @DisplayName("when returning Pair with null second value")
         void returningSecondNull() {
             RefProjectCreated event = projectCreatedEvent();
-            PropagationOutcome outcome = method.invoke(target, envelope(event));
+            DispatchOutcome outcome = method.invoke(target, envelope(event));
 
             List<Event> events = outcome.getSuccess()
                                         .getProducedEvents()

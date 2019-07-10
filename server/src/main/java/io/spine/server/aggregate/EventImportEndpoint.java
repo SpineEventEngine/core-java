@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import io.spine.core.Event;
 import io.spine.logging.Logging;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.type.EventEnvelope;
 
@@ -53,12 +53,12 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      *         applied}.
      */
     @Override
-    protected PropagationOutcome invokeDispatcher(A aggregate, EventEnvelope eventEnvelope) {
+    protected DispatchOutcome invokeDispatcher(A aggregate, EventEnvelope eventEnvelope) {
         Event event = eventEnvelope.outerObject();
         Success.Builder success = Success.newBuilder();
         success.getProducedEventsBuilder()
                .addEvent(event);
-        PropagationOutcome outcome = PropagationOutcome
+        DispatchOutcome outcome = DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(event.messageId())
                 .setSuccess(success)

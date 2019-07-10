@@ -28,12 +28,12 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
+import io.spine.server.entity.BatchDispatch;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.ProducedEvents;
-import io.spine.server.entity.Propagation;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.SignalEnvelope;
@@ -71,7 +71,7 @@ abstract class AggregateEndpoint<I,
     public final void dispatchTo(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
-        PropagationOutcome outcome = handleAndApplyEvents(aggregate);
+        DispatchOutcome outcome = handleAndApplyEvents(aggregate);
         if (outcome.hasSuccess()) {
             updateLifecycle(aggregate, flagsBefore);
             storeAndPost(aggregate, outcome);
@@ -82,7 +82,7 @@ abstract class AggregateEndpoint<I,
         }
     }
 
-    private void storeAndPost(A aggregate, PropagationOutcome outcome) {
+    private void storeAndPost(A aggregate, DispatchOutcome outcome) {
         Success success = outcome.getSuccess();
         if (success.hasProducedEvents()) {
             store(aggregate);
@@ -117,8 +117,8 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    final PropagationOutcome handleAndApplyEvents(A aggregate) {
-        PropagationOutcome outcome = invokeDispatcher(aggregate, envelope());
+    final DispatchOutcome handleAndApplyEvents(A aggregate) {
+        DispatchOutcome outcome = invokeDispatcher(aggregate, envelope());
         Success successfulOutcome = outcome.getSuccess();
         return successfulOutcome.hasProducedEvents()
                ? applyProducedEvents(aggregate, outcome)
@@ -135,17 +135,17 @@ abstract class AggregateEndpoint<I,
      * @return the outcome of the command propagation with the events with the correct versions or
      *         the erroneous outcome of applying an event
      */
-    private PropagationOutcome applyProducedEvents(A aggregate, PropagationOutcome commandOutcome) {
+    private DispatchOutcome applyProducedEvents(A aggregate, DispatchOutcome commandOutcome) {
         List<Event> events = commandOutcome.getSuccess()
                                            .getProducedEvents()
                                            .getEventList();
         AggregateTransaction tx = startTransaction(aggregate);
-        Propagation propagation = aggregate.apply(events);
-        if (propagation.getSuccessful()) {
+        BatchDispatch batchDispatch = aggregate.apply(events);
+        if (batchDispatch.getSuccessful()) {
             tx.commitIfActive();
-            return correctProducedCommands(commandOutcome, propagation);
+            return correctProducedCommands(commandOutcome, batchDispatch);
         } else {
-            return firstErroneousOutcome(propagation);
+            return firstErroneousOutcome(batchDispatch);
         }
     }
 
@@ -154,20 +154,20 @@ abstract class AggregateEndpoint<I,
      *
      * @param commandOutcome
      *         the successful command outcome
-     * @param eventPropagation
+     * @param eventBatchDispatch
      *         the result of event applying
      * @return the same command outcome but with the events of the correct versions
      */
-    private static PropagationOutcome
-    correctProducedCommands(PropagationOutcome commandOutcome, Propagation eventPropagation) {
-        PropagationOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
+    private static DispatchOutcome
+    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatch eventBatchDispatch) {
+        DispatchOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
         ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
                                                                       .getProducedEventsBuilder();
         Map<EventId, Event.Builder> correctedEvents = eventsBuilder
                 .getEventBuilderList()
                 .stream()
                 .collect(toImmutableMap(Event.Builder::getId, identity()));
-        for (PropagationOutcome outcome : eventPropagation.getOutcomeList()) {
+        for (DispatchOutcome outcome : eventBatchDispatch.getOutcomeList()) {
             Any signalId = outcome.getPropagatedSignal()
                                   .getId();
             EventId eventId = unpack(signalId, EventId.class);
@@ -181,20 +181,20 @@ abstract class AggregateEndpoint<I,
     }
 
     /**
-     * Finds the first erroneous outcome in the given propagation report.
+     * Finds the first erroneous outcome in the given batchDispatch report.
      *
-     * @param propagation
-     *         the non-successful propagation
+     * @param batchDispatch
+     *         the non-successful dispatch
      * @return the first found outcome with an error
      */
-    private static PropagationOutcome firstErroneousOutcome(Propagation propagation) {
-        PropagationOutcome erroneous = propagation
+    private static DispatchOutcome firstErroneousOutcome(BatchDispatch batchDispatch) {
+        DispatchOutcome erroneous = batchDispatch
                 .getOutcomeList()
                 .stream()
-                .filter(PropagationOutcome::hasError)
+                .filter(DispatchOutcome::hasError)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
-                        "Propagation was marked failed but no error occurred."
+                        "Dispatch was marked failed but no error occurred."
                 ));
         return erroneous;
     }

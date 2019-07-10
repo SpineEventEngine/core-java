@@ -20,8 +20,8 @@
 
 package io.spine.testing.server.aggregate;
 
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.ProducedEvents;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -58,7 +58,7 @@ class AggregateMessageDispatcherTest {
                                        .setValue(messageValue)
                                        .build();
         CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
-        PropagationOutcome outcome = dispatchCommand(aggregate, commandEnvelope);
+        DispatchOutcome outcome = dispatchCommand(aggregate, commandEnvelope);
         assertTrue(aggregate.state()
                             .getValue()
                             .contains(String.valueOf(messageValue)));
@@ -78,7 +78,7 @@ class AggregateMessageDispatcherTest {
                                          .setValue(messageValue)
                                          .build();
         EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
-        PropagationOutcome outcome = dispatchEvent(aggregate, eventEnvelope);
+        DispatchOutcome outcome = dispatchEvent(aggregate, eventEnvelope);
         assertTrue(aggregate.state()
                             .getValue()
                             .contains(String.valueOf(messageValue)));

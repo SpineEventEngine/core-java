@@ -29,8 +29,8 @@ import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.HasVersionColumn;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
@@ -146,19 +146,19 @@ public abstract class ProcessManager<I,
      *         Empty list, if the process manager substitutes the command
      */
     @Override
-    protected PropagationOutcome dispatchCommand(CommandEnvelope command) {
+    protected DispatchOutcome dispatchCommand(CommandEnvelope command) {
         ProcessManagerClass<?> thisClass = thisClass();
         CommandClass commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
             CommandHandlerMethod method = thisClass.handlerOf(commandClass);
-            PropagationOutcome outcome = method.invoke(this, command);
+            DispatchOutcome outcome = method.invoke(this, command);
             return outcome;
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
             CommandSubstituteMethod method = thisClass.commanderOf(commandClass);
-            PropagationOutcome outcome = method.invoke(this, command);
+            DispatchOutcome outcome = method.invoke(this, command);
             return outcome;
         }
 
@@ -186,18 +186,18 @@ public abstract class ProcessManager<I,
      *                 in response to the event.
      *         </ul>
      */
-    PropagationOutcome dispatchEvent(EventEnvelope event) {
+    DispatchOutcome dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.messageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
             EventReactorMethod method = thisClass.reactorOf(eventClass, event.originClass());
-            PropagationOutcome outcome = method.invoke(this, event);
+            DispatchOutcome outcome = method.invoke(this, event);
             return outcome;
         }
 
         if (thisClass.producesCommandsOn(eventClass)) {
             CommandReactionMethod method = thisClass.commanderOf(eventClass);
-            PropagationOutcome outcome = method.invoke(this, event);
+            DispatchOutcome outcome = method.invoke(this, event);
             return outcome;
         }
 

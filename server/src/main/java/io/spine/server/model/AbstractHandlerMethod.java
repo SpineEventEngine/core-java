@@ -27,7 +27,7 @@ import io.spine.base.Error;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.MessageEnvelope;
@@ -228,12 +228,12 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public PropagationOutcome invoke(T target, E envelope) {
+    public DispatchOutcome invoke(T target, E envelope) {
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
         MessageId signal = envelope.outerObject().messageId();
-        PropagationOutcome.Builder outcome = PropagationOutcome
+        DispatchOutcome.Builder outcome = DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(signal);
         try {

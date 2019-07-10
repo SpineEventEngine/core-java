@@ -23,8 +23,8 @@ package io.spine.server.command;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -76,8 +76,8 @@ public final class DispatchCommand<I> {
      *
      * @return the produced events including the rejections thrown by the command handler
      */
-    public PropagationOutcome perform() {
-        PropagationOutcome outcome = entity.dispatchCommand(command);
+    public DispatchOutcome perform() {
+        DispatchOutcome outcome = entity.dispatchCommand(command);
         if (outcome.hasSuccess()) {
             onCommandResult(command.command(), outcome);
         }
@@ -92,7 +92,7 @@ public final class DispatchCommand<I> {
         return command;
     }
 
-    private void onCommandResult(Command command, PropagationOutcome produced) {
+    private void onCommandResult(Command command, DispatchOutcome produced) {
         if (produced.hasSuccess() && produced.getSuccess().hasRejection()) {
             Event rejectionEvent = produced.getSuccess()
                                            .getRejection();

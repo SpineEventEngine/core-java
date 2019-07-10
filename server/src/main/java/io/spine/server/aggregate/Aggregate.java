@@ -36,9 +36,9 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.entity.BatchDispatch;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.Propagation;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.type.CommandEnvelope;
@@ -230,10 +230,10 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
-    protected PropagationOutcome dispatchCommand(CommandEnvelope command) {
+    protected DispatchOutcome dispatchCommand(CommandEnvelope command) {
         Optional<Error> error = idempotencyGuard.check(command);
         if (error.isPresent()) {
-            PropagationOutcome outcome = PropagationOutcome
+            DispatchOutcome outcome = DispatchOutcome
                     .newBuilder()
                     .setPropagatedSignal(command.messageId())
                     .setError(error.get())
@@ -241,7 +241,7 @@ public abstract class Aggregate<I,
             return outcome;
         } else {
             CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
-            PropagationOutcome outcome = method.invoke(this, command);
+            DispatchOutcome outcome = method.invoke(this, command);
             return outcome;
         }
     }
@@ -257,10 +257,10 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change because of the event
      */
-    PropagationOutcome reactOn(EventEnvelope event) {
+    DispatchOutcome reactOn(EventEnvelope event) {
         Optional<Error> error = idempotencyGuard.check(event);
         if (error.isPresent()) {
-            PropagationOutcome outcome = PropagationOutcome
+            DispatchOutcome outcome = DispatchOutcome
                     .newBuilder()
                     .setPropagatedSignal(event.messageId())
                     .setError(error.get())
@@ -279,13 +279,13 @@ public abstract class Aggregate<I,
      * @param event
      *         the event to apply
      */
-    final PropagationOutcome invokeApplier(EventEnvelope event) {
+    final DispatchOutcome invokeApplier(EventEnvelope event) {
         Applier method = thisClass().applierOf(event.messageClass());
         return method.invoke(this, event);
     }
 
     @Override
-    public final Propagation play(Iterable<Event> events) {
+    public final BatchDispatch play(Iterable<Event> events) {
         return EventPlayer
                 .forTransactionOf(this)
                 .play(events);
@@ -305,18 +305,18 @@ public abstract class Aggregate<I,
      *         the thrown instance
      */
     @CanIgnoreReturnValue
-    final Propagation play(AggregateHistory history) {
+    final BatchDispatch play(AggregateHistory history) {
         Snapshot snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
         List<Event> events = history.getEventList();
         eventCountAfterLastSnapshot = events.size();
-        Propagation propagation = play(events);
-        if (propagation.getSuccessful()) {
+        BatchDispatch batchDispatch = play(events);
+        if (batchDispatch.getSuccessful()) {
             remember(events);
         }
-        return propagation;
+        return batchDispatch;
     }
 
     /**
@@ -337,12 +337,12 @@ public abstract class Aggregate<I,
      *         the events to apply
      * @return the exact list of {@code events} but with adjusted versions
      */
-    final Propagation apply(List<Event> events) {
+    final BatchDispatch apply(List<Event> events) {
         VersionSequence versionSequence = new VersionSequence(version());
         ImmutableList<Event> versionedEvents = versionSequence.update(events);
-        Propagation propagation = play(versionedEvents);
+        BatchDispatch batchDispatch = play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
-        return propagation;
+        return batchDispatch;
     }
 
     /**

@@ -33,7 +33,7 @@ final class PropagationProcess {
 
     private final EventPlayingTransaction<?, ?, ?, ?> transaction;
 
-    private final Propagation.Builder propagation = Propagation.newBuilder();
+    private final BatchDispatch.Builder propagation = BatchDispatch.newBuilder();
     private boolean successful = true;
     private MessageId lastMessage = MessageId.getDefaultInstance();
 
@@ -48,7 +48,7 @@ final class PropagationProcess {
     void play(Event event) {
         if (successful) {
             EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            PropagationOutcome outcome = transaction.play(eventEnvelope);
+            DispatchOutcome outcome = transaction.play(eventEnvelope);
             propagation.addOutcome(outcome);
             successful = !outcome.hasError();
             lastMessage = event.messageId();
@@ -57,7 +57,7 @@ final class PropagationProcess {
                     .newBuilder()
                     .setStoppedAt(lastMessage)
                     .buildPartial();
-            PropagationOutcome outcome = PropagationOutcome
+            DispatchOutcome outcome = DispatchOutcome
                     .newBuilder()
                     .setPropagatedSignal(event.messageId())
                     .setInterrupted(interruption)
@@ -69,7 +69,7 @@ final class PropagationProcess {
     /**
      * Obtains the summary of all the propagates events.
      */
-    Propagation summary() {
+    BatchDispatch summary() {
         return propagation
                 .setSuccessful(successful)
                 .vBuild();

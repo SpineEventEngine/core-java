@@ -32,8 +32,8 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.ProducedEvents;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.integration.ExternalMessageClass;
@@ -114,7 +114,7 @@ public abstract class AbstractEventReactor
     private void reactAndPost(EventEnvelope event) {
         EventReactorMethod method = thisClass.reactorOf(event.messageClass(),
                                                         event.originClass());
-        PropagationOutcome outcome = method.invoke(this, event);
+        DispatchOutcome outcome = method.invoke(this, event);
         if (outcome.hasSuccess()) {
             ProducedEvents events = outcome.getSuccess()
                                            .getProducedEvents();

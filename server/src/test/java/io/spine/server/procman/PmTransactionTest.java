@@ -22,7 +22,7 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
@@ -98,7 +98,7 @@ class PmTransactionTest
     }
 
     @Override
-    protected PropagationOutcome applyEvent(Transaction tx, Event event) {
+    protected DispatchOutcome applyEvent(Transaction tx, Event event) {
         PmTransaction cast = (PmTransaction) tx;
         EventEnvelope envelope = EventEnvelope.of(event);
         return cast.dispatchEvent(envelope);

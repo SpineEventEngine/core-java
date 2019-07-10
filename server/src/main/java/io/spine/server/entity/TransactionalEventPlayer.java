@@ -44,7 +44,7 @@ final class TransactionalEventPlayer implements EventPlayer {
      * Plays the given events upon the underlying entity transaction.
      */
     @Override
-    public Propagation play(Iterable<Event> events) {
+    public BatchDispatch play(Iterable<Event> events) {
         checkNotNull(events);
         PropagationProcess process = new PropagationProcess(transaction);
         for (Event event : events) {

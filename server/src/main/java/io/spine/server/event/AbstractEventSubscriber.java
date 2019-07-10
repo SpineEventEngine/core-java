@@ -30,8 +30,8 @@ import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Ignore;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.integration.ExternalMessageClass;
@@ -110,7 +110,7 @@ public abstract class AbstractEventSubscriber
      * subscriber} method of the entity.
      */
     protected void handle(EventEnvelope event) {
-        PropagationOutcome outcome =
+        DispatchOutcome outcome =
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
                          .orElseGet(() -> notSupported(event));
@@ -125,7 +125,7 @@ public abstract class AbstractEventSubscriber
         }
     }
 
-    private PropagationOutcome notSupported(EventEnvelope event) {
+    private DispatchOutcome notSupported(EventEnvelope event) {
         Ignore ignore = Ignore
                 .newBuilder()
                 .setReason(format("Event %s[%s] does not match subscriber filters in %s.",
@@ -133,7 +133,7 @@ public abstract class AbstractEventSubscriber
                                   event.id().value(),
                                   this.getClass().getCanonicalName()))
                 .buildPartial();
-        return PropagationOutcome
+        return DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(event.messageId())
                 .setIgnored(ignore)

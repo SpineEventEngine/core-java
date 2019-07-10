@@ -26,8 +26,8 @@ import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateTestSupport;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
@@ -54,7 +54,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static PropagationOutcome
+    public static DispatchOutcome
     dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
         checkNotNull(aggregate);
         checkNotNull(command);
@@ -68,7 +68,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static PropagationOutcome
+    public static DispatchOutcome
     dispatchCommand(Aggregate<?, ?, ?> aggregate, Command command) {
         checkNotNull(aggregate);
         checkNotNull(command);
@@ -83,7 +83,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static PropagationOutcome
+    public static DispatchOutcome
     dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
@@ -97,7 +97,7 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static PropagationOutcome
+    public static DispatchOutcome
     dispatchEvent(Aggregate<?, ?, ?> aggregate, Event event) {
         checkNotNull(aggregate);
         checkNotNull(event);

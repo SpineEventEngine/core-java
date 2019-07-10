@@ -60,8 +60,8 @@ public abstract class Phase<I> {
      *
      * @return the result of the task execution
      */
-    final PropagationOutcome propagate() {
-        PropagationOutcome result = performDispatch();
+    final DispatchOutcome propagate() {
+        DispatchOutcome result = performDispatch();
         transaction.incrementStateAndVersion(versionIncrement);
         return result;
     }
@@ -69,7 +69,7 @@ public abstract class Phase<I> {
     /**
      * Executes the dispatch task and returns the result.
      */
-    protected abstract PropagationOutcome performDispatch();
+    protected abstract DispatchOutcome performDispatch();
 
     /**
      * Returns the ID of the entity to which the {@code Message} is dispatched.

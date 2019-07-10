@@ -43,7 +43,7 @@ public interface EventPlayer {
      * @param events
      *         the event stream to play
      */
-    Propagation play(Iterable<Event> events);
+    BatchDispatch play(Iterable<Event> events);
 
     /**
      * Plays the given event.
@@ -53,11 +53,11 @@ public interface EventPlayer {
      * @param event
      *         the event to play
      */
-    default PropagationOutcome play(Event event) {
+    default DispatchOutcome play(Event event) {
         Collection<Event> events = singleton(event);
-        Propagation propagation = play(events);
-        PropagationOutcome outcome = propagation.getOutcomeList()
-                                                .get(0);
+        BatchDispatch batchDispatch = play(events);
+        DispatchOutcome outcome = batchDispatch.getOutcomeList()
+                                               .get(0);
         return outcome;
     }
 

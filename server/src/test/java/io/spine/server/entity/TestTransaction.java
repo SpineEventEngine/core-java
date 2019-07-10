@@ -60,7 +60,7 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setArchived(true);
                 return super.dispatch(entity, event);
             }
@@ -80,7 +80,7 @@ public class TestTransaction {
         TestTx tx = new TestTx(entity) {
 
             @Override
-            protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
+            protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
                 entity.setDeleted(true);
                 return super.dispatch(entity, event);
             }
@@ -102,9 +102,9 @@ public class TestTransaction {
         }
 
         @Override
-        protected PropagationOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
+        protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
             // NoOp by default
-            return PropagationOutcome
+            return DispatchOutcome
                     .newBuilder()
                     .setPropagatedSignal(event.outerObject().messageId())
                     .setSuccess(Success.getDefaultInstance())

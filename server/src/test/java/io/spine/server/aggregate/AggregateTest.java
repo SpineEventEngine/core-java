@@ -45,8 +45,8 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.Propagation;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.BatchDispatch;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -359,7 +359,7 @@ public class AggregateTest {
             AggregateWithMissingApplier aggregate =
                     new AggregateWithMissingApplier(ID);
             Command command = command(createProject);
-            PropagationOutcome outcome = dispatchCommand(aggregate, command);
+            DispatchOutcome outcome = dispatchCommand(aggregate, command);
             assertTrue(aggregate.commandHandled());
             assertTrue(outcome.hasError());
             Error error = outcome.getError();
@@ -592,7 +592,7 @@ public class AggregateTest {
             FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
             Command command = Given.ACommand.createProject();
-            PropagationOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
             assertTrue(outcome.hasError());
             Error error = outcome.getError();
             assertThat(error)
@@ -611,7 +611,7 @@ public class AggregateTest {
                     new FaultyAggregate(ID, false, true);
 
             Command command = Given.ACommand.createProject();
-            PropagationOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
 
             assertThat(outcome.hasError()).isTrue();
             Error error = outcome.getError();
@@ -632,11 +632,11 @@ public class AggregateTest {
 
             Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
             AggregateTransaction.start(faultyAggregate);
-            Propagation propagation = ((Aggregate) faultyAggregate).play(AggregateHistory
+            BatchDispatch batchDispatch = ((Aggregate) faultyAggregate).play(AggregateHistory
                                                                                  .newBuilder()
                                                                                  .addEvent(event)
                                                                                  .build());
-            assertThat(propagation.getSuccessful()).isFalse();
+            assertThat(batchDispatch.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()
                     .setId(Identifier.pack(faultyAggregate.id()))
@@ -644,11 +644,11 @@ public class AggregateTest {
                                                .stateType()
                                                .value())
                     .buildPartial();
-            assertThat(propagation.getTargetEntity())
+            assertThat(batchDispatch.getTargetEntity())
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(expectedTarget);
-            assertThat(propagation.getOutcomeCount()).isEqualTo(1);
-            PropagationOutcome outcome = propagation.getOutcome(0);
+            assertThat(batchDispatch.getOutcomeCount()).isEqualTo(1);
+            DispatchOutcome outcome = batchDispatch.getOutcome(0);
             assertThat(outcome.hasError()).isTrue();
             assertThat(outcome.getPropagatedSignal()).isEqualTo(event.messageId());
             Error error = outcome.getError();

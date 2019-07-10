@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.security.InvocationGuard;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
@@ -54,7 +54,7 @@ public final class AggregateTestSupport {
      * @param <A> the type of {@code Aggregate}
      * @return the list of produced event messages
      */
-    public static <I, A extends Aggregate<I, ?, ?>> PropagationOutcome
+    public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchCommand(AggregateRepository<I, A> repository, A aggregate, CommandEnvelope command) {
         checkArguments(repository, aggregate, command);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
@@ -71,7 +71,7 @@ public final class AggregateTestSupport {
      * @param <A> the type of {@code Aggregate}
      * @return the list of produced event messages
      */
-    public static <I, A extends Aggregate<I, ?, ?>> PropagationOutcome
+    public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
         checkArguments(repository, aggregate, event);
         InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
@@ -96,7 +96,7 @@ public final class AggregateTestSupport {
         endpoint.handleAndApplyEvents(aggregate);
     }
 
-    private static <I, A extends Aggregate<I, ?, ?>> PropagationOutcome
+    private static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchAndCollect(AggregateEndpoint<I, A, ?> endpoint, A aggregate) {
         return endpoint.handleAndApplyEvents(aggregate);
     }

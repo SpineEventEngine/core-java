@@ -123,7 +123,7 @@ public abstract class TransactionTest<I,
                 .build();
     }
 
-    protected abstract PropagationOutcome applyEvent(Transaction tx, Event event);
+    protected abstract DispatchOutcome applyEvent(Transaction tx, Event event);
 
     @BeforeEach
     void setUp() {
@@ -216,7 +216,7 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
-        PropagationOutcome outcome = applyEvent(tx, event);
+        DispatchOutcome outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
         assertThat(tx.phases())
                 .hasSize(1);
@@ -257,7 +257,7 @@ public abstract class TransactionTest<I,
         Transaction<I, E, S, B> tx = createTx(entity);
 
         Event event = withMessage(createEventMessage());
-        PropagationOutcome outcome = applyEvent(tx, event);
+        DispatchOutcome outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
         S stateBeforeRollback = entity.state();
         Version versionBeforeRollback = entity.version();
@@ -302,7 +302,7 @@ public abstract class TransactionTest<I,
         Event event = withMessage(createEventMessage());
 
         verifyZeroInteractions(listener);
-        PropagationOutcome outcome = applyEvent(tx, event);
+        DispatchOutcome outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
 
         verify(listener).onAfterPhase(argThat(
@@ -336,7 +336,7 @@ public abstract class TransactionTest<I,
 
             Event event = withMessage(failingInHandler());
 
-            PropagationOutcome outcome = applyEvent(tx, event);
+            DispatchOutcome outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
         }
 
@@ -347,7 +347,7 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
             Event event = withMessage(failingStateTransition());
 
-            PropagationOutcome outcome = applyEvent(tx, event);
+            DispatchOutcome outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
         }
     }
@@ -366,7 +366,7 @@ public abstract class TransactionTest<I,
             Transaction<I, E, S, B> tx = createTx(entity);
 
             Event event = withMessage(failingInHandler());
-            PropagationOutcome outcome = applyEvent(tx, event);
+            DispatchOutcome outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
@@ -382,7 +382,7 @@ public abstract class TransactionTest<I,
             Version nextVersion = Versions.increment(entity.version());
             Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
 
-            PropagationOutcome outcome = applyEvent(tx, event);
+            DispatchOutcome outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }

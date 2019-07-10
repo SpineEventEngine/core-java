@@ -25,10 +25,10 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.BatchDispatch;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.HasVersionColumn;
-import io.spine.server.entity.Propagation;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.projection.model.ProjectionClass;
@@ -118,14 +118,14 @@ public abstract class Projection<I,
         return projection.changed();
     }
 
-    PropagationOutcome apply(EventEnvelope event) {
+    DispatchOutcome apply(EventEnvelope event) {
         return thisClass()
                 .subscriberOf(event)
                 .map(method -> method.invoke(this, event))
                 .orElseGet(() -> unhandledEvent(event));
     }
 
-    private PropagationOutcome unhandledEvent(EventEnvelope event) {
+    private DispatchOutcome unhandledEvent(EventEnvelope event) {
         Error error = Error
                 .newBuilder()
                 .setCode(UNSUPPORTED_EVENT_VALUE)
@@ -133,7 +133,7 @@ public abstract class Projection<I,
                                    thisClass(),
                                    event.messageTypeName()))
                 .buildPartial();
-        return PropagationOutcome
+        return DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(event.outerObject().messageId())
                 .setError(error)
@@ -141,7 +141,7 @@ public abstract class Projection<I,
     }
 
     @Override
-    public Propagation play(Iterable<Event> events) {
+    public BatchDispatch play(Iterable<Event> events) {
         EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         return eventPlayer.play(events);
     }

@@ -47,7 +47,7 @@ public final class EventDispatchingPhase<I, E extends TransactionalEntity<I, ?, 
     }
 
     @Override
-    protected PropagationOutcome performDispatch() {
+    protected DispatchOutcome performDispatch() {
         return dispatch.perform();
     }
 

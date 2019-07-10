@@ -22,7 +22,7 @@ package io.spine.server.command.given;
 
 import com.google.protobuf.StringValue;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.type.CommandEnvelope;
 
@@ -55,8 +55,8 @@ public class CommandHandlingEntityTestEnv {
         }
 
         @Override
-        protected PropagationOutcome dispatchCommand(CommandEnvelope cmd) {
-            return PropagationOutcome.getDefaultInstance();
+        protected DispatchOutcome dispatchCommand(CommandEnvelope cmd) {
+            return DispatchOutcome.getDefaultInstance();
         }
     }
 }

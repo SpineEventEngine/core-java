@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.EventPlayingTransaction;
-import io.spine.server.entity.PropagationOutcome;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
 
@@ -71,7 +71,7 @@ public class ProjectionTransaction<I,
     }
 
     @Override
-    protected PropagationOutcome dispatch(Projection<I, M, B> projection, EventEnvelope event) {
+    protected DispatchOutcome dispatch(Projection<I, M, B> projection, EventEnvelope event) {
         return projection.apply(event);
     }
 

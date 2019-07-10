@@ -32,7 +32,7 @@ import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
@@ -78,7 +78,7 @@ public abstract class AbstractCommander
     @Override
     public void dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
-        PropagationOutcome outcome = method.invoke(this, command);
+        DispatchOutcome outcome = method.invoke(this, command);
         Success success = outcome.getSuccess();
         postCommands(success);
         postRejection(success);
@@ -97,7 +97,7 @@ public abstract class AbstractCommander
     @Override
     public void dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.messageClass());
-        PropagationOutcome outcome = method.invoke(this, event);
+        DispatchOutcome outcome = method.invoke(this, event);
         postCommands(outcome.getSuccess());
     }
 

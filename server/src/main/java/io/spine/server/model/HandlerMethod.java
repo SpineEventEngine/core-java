@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.entity.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
@@ -110,7 +110,7 @@ public interface HandlerMethod<T,
      * @return the result of message handling
      */
     @CanIgnoreReturnValue
-    PropagationOutcome invoke(T target, E envelope);
+    DispatchOutcome invoke(T target, E envelope);
 
     /**
      * Tells if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.

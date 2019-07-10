@@ -44,7 +44,7 @@ public final class CommandDispatchingPhase<I> extends Phase<I> {
     }
 
     @Override
-    protected PropagationOutcome performDispatch() {
+    protected DispatchOutcome performDispatch() {
         return dispatch.perform();
     }
 

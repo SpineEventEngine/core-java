@@ -49,7 +49,7 @@ import io.spine.server.command.model.given.handler.ValidHandlerOneParam;
 import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsList;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
-import io.spine.server.entity.PropagationOutcome;
+import io.spine.server.entity.DispatchOutcome;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.SignatureMismatchException;
@@ -135,7 +135,7 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
             List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
             verify(handlerObject, times(1))
@@ -157,7 +157,7 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
             List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
 
             verify(handlerObject, times(1)).handleTest(cmd);
@@ -181,7 +181,7 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
-            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
             assertTrue(outcome.hasError());
             assertThat(outcome.getError().getType())
                     .isEqualTo(IllegalOutcomeException.class.getCanonicalName());
@@ -198,7 +198,7 @@ class CommandHandlerMethodTest {
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
-            PropagationOutcome outcome = handler.invoke(handlerObject, envelope);
+            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
             checkIllegalOutcome(outcome, envelope.command());
         }
 
@@ -210,14 +210,14 @@ class CommandHandlerMethodTest {
                     new ProcessManagerDoingNothing(commandMessage.getProjectId()
                                                                  .getId());
             CommandEnvelope cmd = newCommand(commandMessage);
-            PropagationOutcome outcome = PmDispatcher.dispatch(entity, cmd);
+            DispatchOutcome outcome = PmDispatcher.dispatch(entity, cmd);
             checkIllegalOutcome(outcome, cmd.command());
         }
 
-        private void checkIllegalOutcome(PropagationOutcome outcome, Command command) {
+        private void checkIllegalOutcome(DispatchOutcome outcome, Command command) {
             assertThat(outcome)
                     .comparingExpectedFieldsOnly()
-                    .isEqualTo(PropagationOutcome
+                    .isEqualTo(DispatchOutcome
                                        .newBuilder()
                                        .setPropagatedSignal(command.messageId())
                                        .setError(Error.newBuilder()
