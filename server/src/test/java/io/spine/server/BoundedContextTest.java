@@ -47,6 +47,8 @@ import io.spine.system.server.SystemContext;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.SecretProject;
+import io.spine.testing.logging.Interceptor;
+import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -58,14 +60,11 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.event.SubstituteLoggingEvent;
-import org.slf4j.helpers.SubstituteLogger;
 
-import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -73,7 +72,6 @@ import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.slf4j.event.Level.DEBUG;
 
 /**
  * Tests of {@link BoundedContext}.
@@ -416,27 +414,61 @@ class BoundedContextTest {
         );
     }
 
-    @Test
-    @DisplayName("close System context when domain context is closed")
-    void closeSystemWhenDomainIsClosed() throws Exception {
-        BoundedContextName contextName = BoundedContextNames.newName("TestDomain");
-        BoundedContextName systemContextName = BoundedContextNames.system(contextName);
-        BoundedContext context = BoundedContext.singleTenant(contextName.getValue()).build();
-        Queue<SubstituteLoggingEvent> log = new ArrayDeque<>();
-        Logging.redirect((SubstituteLogger) Logging.get(DomainContext.class), log);
-        Logging.redirect((SubstituteLogger) Logging.get(SystemContext.class), log);
+    @Nested
+    @DisplayName("when closing")
+    class ClosingContext {
 
-        context.close();
+        private final BoundedContextName contextName =
+                BoundedContextNames.newName("TestDomain");
+        private final BoundedContextName systemContextName =
+                BoundedContextNames.system(contextName);
+        private final Level debugLevel = Logging.debugLevel();
 
-        assertThat(log).hasSize(2);
+        private Interceptor domainInterceptor;
+        private Interceptor systemInterceptor;
 
-        SubstituteLoggingEvent domainLogEvent = log.poll();
-        assertThat(domainLogEvent.getMessage()).contains(contextName.getValue());
-        assertThat(domainLogEvent.getLevel()).isAtLeast(DEBUG);
+        @BeforeEach
+        void closeContext() throws Exception {
+            BoundedContext context =
+                    BoundedContext.singleTenant(contextName.getValue())
+                                  .build();
+            domainInterceptor = new Interceptor(DomainContext.class);
+            domainInterceptor.intercept(debugLevel);
+            systemInterceptor = new Interceptor(SystemContext.class);
+            systemInterceptor.intercept(debugLevel);
 
-        SubstituteLoggingEvent systemLogEvent = log.poll();
-        assertThat(systemLogEvent.getMessage()).contains(systemContextName.getValue());
-        assertThat(systemLogEvent.getLevel()).isAtLeast(DEBUG);
+            context.close();
+        }
+
+        @AfterEach
+        void releaseInterceptors() {
+            domainInterceptor.release();
+            systemInterceptor.release();
+        }
+
+        @Test
+        @DisplayName("log its closing")
+        void logClosing() {
+            LogRecordSubject assertDomainLog =
+                    domainInterceptor.handler()
+                                     .assertRecord();
+            assertDomainLog.hasLevelThat()
+                           .isEqualTo(debugLevel);
+            assertDomainLog.hasMessageThat()
+                           .contains(contextName.getValue());
+        }
+
+        @Test
+        @DisplayName("close its System context")
+        void closeSystem() {
+            LogRecordSubject assertSystemLog =
+                    systemInterceptor.handler()
+                                     .assertRecord();
+            assertSystemLog.hasLevelThat()
+                           .isEqualTo(debugLevel);
+            assertSystemLog.hasMessageThat()
+                           .contains(systemContextName.getValue());
+        }
     }
 
     @Test
