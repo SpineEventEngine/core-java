@@ -39,14 +39,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("CommandHandler should")
 class CommandHandlerTest {
@@ -170,15 +167,6 @@ class CommandHandlerTest {
     void equality() {
         new EqualsTester().addEqualityGroup(handler, new TestCommandHandler())
                           .testEquals();
-    }
-
-    @Test
-    @DisplayName("have class-specific logger")
-    void haveClassSpecificLogger() {
-        Logger logger = handler.log();
-        assertNotNull(logger);
-        assertEquals(logger.getName(), handler.getClass()
-                                              .getName());
     }
 
     private static CommandEnvelope generate() {
