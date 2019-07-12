@@ -42,6 +42,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.flogger.LazyArgs.lazy;
 import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
 import static java.util.stream.Collectors.toList;
@@ -101,7 +102,8 @@ final class ModelVerifier implements Logging {
     private URLClassLoader createClassLoader(Project project) {
         Collection<JavaCompile> tasks = allJavaCompile(project);
         URL[] compiledCodePath = extractDestinationDirs(tasks);
-        log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
+        _debug().log("Initializing `ClassLoader` for URLs: `%s`.",
+                     lazy(() -> deepToString(compiledCodePath)));
         try {
             ClassLoader projectClassloader = project.getBuildscript()
                                                     .getClassLoader();
@@ -109,7 +111,7 @@ final class ModelVerifier implements Logging {
             URLClassLoader result = new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
         } catch (SecurityException e) {
-            String msg = format("Cannot create ClassLoader for the project %s", project);
+            String msg = format("Cannot create `ClassLoader` for the project `%s`.", project);
             throw new IllegalStateException(msg, e);
         }
     }
