@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.common.flogger.LoggerConfig;
 import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
@@ -56,6 +55,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static io.spine.tools.gradle.TaskName.compileJava;
@@ -159,7 +159,7 @@ class ModelVerifierTest {
         private final Class<?> aggregateClass = InvalidRestoreAggregate.class;
 
         WarnLogging() {
-            super(CommandHandlerSignature.class, java.util.logging.Level.WARNING);
+            super(CommandHandlerSignature.class, Level.WARNING);
         }
 
         @BeforeEach
@@ -167,9 +167,6 @@ class ModelVerifierTest {
             ModelVerifier verifier = new ModelVerifier(project);
             // Add handler here to avoid unnecessary logging.
             addHandler();
-            // Ensure we enable the logging.
-            LoggerConfig.getConfig(loggingClass())
-                        .setLevel(level());
             CommandHandlers model = CommandHandlers
                     .newBuilder()
                     .addCommandHandlingType(aggregateClass.getName())
@@ -187,7 +184,7 @@ class ModelVerifierTest {
         void onPrivateMethod() {
             LogRecordSubject assertRecord = handler().assertRecord();
             assertRecord.hasLevelThat()
-                        .isEqualTo(java.util.logging.Level.WARNING);
+                        .isEqualTo(level());
             assertRecord.hasMessageThat()
                         .contains(aggregateClass.getName());
         }
