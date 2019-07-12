@@ -21,6 +21,8 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.model.DuplicateHandlerCheck;
@@ -73,9 +75,24 @@ final class ModelVerifier implements Logging {
     void verify(CommandHandlers handlers) {
         ClassSet classSet = new ClassSet(projectClassLoader,
                                          handlers.getCommandHandlingTypeList());
-        classSet.reportNotFoundIfAny(log());
+        reportNotFoundIfAny(classSet);
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());
+    }
+
+    private void reportNotFoundIfAny(ClassSet classSet) {
+        ImmutableList<String> notFound = classSet.notFound();
+        if (notFound.isEmpty()) {
+            return;
+        }
+        String msg = "Failed to load "
+                + (notFound.size() > 1 ? "classes " : "the class ")
+                + Joiner.on(", ")
+                        .join(notFound)
+                + format(".%n")
+                + "Consider using the `io.spine.tools.spine-model-verifier` plugin" +
+                " only for the modules with the sufficient classpath.";
+        _warn().log(msg);
     }
 
     /**

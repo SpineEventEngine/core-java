@@ -76,11 +76,12 @@ public class CommandService
         }
     }
 
-    private void handleUnsupported(Command request, StreamObserver<Ack> responseObserver) {
-        UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
-        _error(unsupported, "Unsupported command posted to CommandService.");
+    private void handleUnsupported(Command command, StreamObserver<Ack> responseObserver) {
+        UnsupportedCommandException unsupported = new UnsupportedCommandException(command);
+        _error().withCause(unsupported)
+                .log("Unsupported command posted to `CommandService`.");
         Error error = unsupported.asError();
-        Ack response = reject(request.getId(), error);
+        Ack response = reject(command.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

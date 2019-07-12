@@ -70,7 +70,7 @@ public final class Server implements Logging {
         grpcContainer.start();
         grpcContainer.addShutdownHook();
 
-        log().info("Server started, listening to the port {}.", port);
+        _info().log("Server started, listening to the port %d.", port);
     }
 
     /**
@@ -85,7 +85,7 @@ public final class Server implements Logging {
      * Initiates an orderly shutdown in which existing calls continue but new calls are rejected.
      */
     public void shutdown() {
-        log().info("Shutting down the server...");
+        _info().log("Shutting down the server...");
         grpcContainer.shutdown();
         contexts.forEach(context -> {
             try {
@@ -93,7 +93,8 @@ public final class Server implements Logging {
             } catch (Exception e) {
                 String contextName = context.name()
                                             .getValue();
-                _error(e, "Unable to close Bounded Context {}.", contextName);
+                _error().withCause(e)
+                        .log("Unable to close the `%s` Context.", contextName);
             }
         });
     }

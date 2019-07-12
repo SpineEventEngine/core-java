@@ -91,13 +91,6 @@ class EventSubscriberTest {
     }
 
     @Test
-    @DisplayName("have log")
-    void haveLog() {
-        assertEquals(subscriber.getClass().getName(),
-                     subscriber.log().getName());
-    }
-
-    @Test
     @DisplayName("expose handled message classes")
     void exposeMessageClasses() {
         assertEquals(3, subscriber.messageClasses()
