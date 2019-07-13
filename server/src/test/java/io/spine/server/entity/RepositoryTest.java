@@ -195,6 +195,47 @@ class RepositoryTest {
         assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
+    @Test
+    @DisplayName("register with a bounded context")
+    void registered() {
+        TestRepo repo = new TestRepo();
+
+        assertFalse(repo.isRegistered());
+        repo.checkNotRegistered();
+        assertThrows(IllegalStateException.class, repo::checkRegistered);
+
+        BoundedContext context = BoundedContextBuilder
+                .assumingTests()
+                .build();
+        repo.registerWith(context);
+
+        assertTrue(repo.isRegistered());
+        repo.checkRegistered();
+        assertThrows(IllegalStateException.class, repo::checkNotRegistered);
+    }
+
+    @Test
+    @DisplayName("register twice with the same context")
+    void registerWithSameContext() {
+        TestRepo repo = new TestRepo();
+
+        String contextName = "test context";
+        BoundedContext context = BoundedContext.singleTenant(contextName).build();
+        repo.registerWith(context);
+
+        assertTrue(repo.isRegistered());
+
+        repo.registerWith(context);
+    }
+
+    @Test
+    @DisplayName("not register in another context")
+    void anotherContext() {
+        assertTrue(repository.isRegistered());
+        BoundedContext anotherContext = BoundedContext.singleTenant("another").build();
+        assertThrows(IllegalStateException.class, () -> repository.registerWith(anotherContext));
+    }
+
     private Iterator<ProjectEntity> iteratorAt(TenantId tenantId) {
         Iterator<ProjectEntity> result =
                 TenantAwareRunner.with(tenantId)

@@ -362,25 +362,25 @@
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -391,7 +391,8 @@
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -442,7 +443,7 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:39 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -759,25 +760,25 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -788,7 +789,8 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -839,7 +841,7 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:40 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1308,25 +1310,25 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -1337,7 +1339,8 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1388,7 +1391,7 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:40 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2014,25 +2017,25 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/junit-pioneer/junit-pioneer](https://github.com/junit-pioneer/junit-pioneer)
      * **POM License: The MIT License** - [https://github.com/junit-pioneer/junit-pioneer/blob/master/LICENSE](https://github.com/junit-pioneer/junit-pioneer/blob/master/LICENSE)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -2043,7 +2046,8 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2099,7 +2103,7 @@ This report was generated on **Wed Jul 10 17:44:06 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:07 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:42 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2580,25 +2584,25 @@ This report was generated on **Wed Jul 10 17:44:07 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -2609,7 +2613,8 @@ This report was generated on **Wed Jul 10 17:44:07 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2660,7 +2665,7 @@ This report was generated on **Wed Jul 10 17:44:07 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:42 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2817,17 +2822,17 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -2838,7 +2843,8 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3096,25 +3102,25 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -3125,7 +3131,8 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3176,7 +3183,7 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:44 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3333,25 +3340,25 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -3362,7 +3369,8 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3620,25 +3628,25 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -3649,7 +3657,8 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3700,7 +3709,7 @@ This report was generated on **Wed Jul 10 17:44:08 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:44 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3911,17 +3920,17 @@ This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-Lic
 1. **Group:** org.hamcrest **Name:** hamcrest-core **Version:** 1.3
      * **POM License: New BSD License** - [http://www.opensource.org/licenses/bsd-license.php](http://www.opensource.org/licenses/bsd-license.php)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -3932,7 +3941,8 @@ This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4244,25 +4254,25 @@ This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-Lic
      * **Manifest license URL:** [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
      * **POM License: Eclipse Public License v1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-api **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-engine **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.4.2
+1. **Group:** org.junit.jupiter **Name:** junit-jupiter-params **Version:** 5.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-commons **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
-1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.4.2
+1. **Group:** org.junit.platform **Name:** junit-platform-engine **Version:** 1.5.0
      * **POM Project URL:** [https://junit.org/junit5/](https://junit.org/junit5/)
-     * **POM License: Eclipse Public License v2.0** - [http://www.eclipse.org/legal/epl-v20.html](http://www.eclipse.org/legal/epl-v20.html)
+     * **POM License: Eclipse Public License v2.0** - [https://www.eclipse.org/legal/epl-v20.html](https://www.eclipse.org/legal/epl-v20.html)
 
 1. **Group:** org.mockito **Name:** mockito-core **Version:** 2.12.0
      * **POM Project URL:** [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
@@ -4273,7 +4283,8 @@ This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-Lic
      * **POM Project URL:** [http://objenesis.org](http://objenesis.org)
      * **POM License: Apache 2** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.1.1
+1. **Group:** org.opentest4j **Name:** opentest4j **Version:** 1.2.0
+     * **Manifest License:** The Apache License, Version 2.0 (Not packaged)
      * **POM Project URL:** [https://github.com/ota4j-team/opentest4j](https://github.com/ota4j-team/opentest4j)
      * **POM License: The Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4324,4 +4335,4 @@ This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Wed Jul 10 17:44:09 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Sat Jul 13 11:19:45 EEST 2019** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
