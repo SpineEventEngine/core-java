@@ -87,7 +87,7 @@ abstract class PmEndpoint<I,
             } else if (outcome.hasError()) {
                 Error error = outcome.getError();
                 repository().lifecycleOf(manager.id())
-                            .onHandlerFailed(envelope().messageId(), error);
+                            .onDispatchingFailed(envelope().messageId(), error);
             }
         } catch (RuntimeException ex) {
             store(manager);
