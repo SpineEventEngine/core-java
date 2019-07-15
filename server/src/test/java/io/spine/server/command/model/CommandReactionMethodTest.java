@@ -125,8 +125,10 @@ class CommandReactionMethodTest {
         }
     }
 
-    @Nested
-    abstract class EmptyReturn {
+    /**
+     * Abstract base for tests checking empty method result.
+     */
+    abstract static class EmptyReturn {
 
         private final Supplier<TestCommandReactor> supplier;
 
