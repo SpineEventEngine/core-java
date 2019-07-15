@@ -90,9 +90,12 @@ public final class BoundedContextBuilder implements Logging {
 
     private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
 
+    private final SystemFeatures systemFeatures = SystemFeatures.defaults();
+
     private Stand.Builder stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
     private TenantIndex tenantIndex;
+
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
@@ -473,6 +476,10 @@ public final class BoundedContextBuilder implements Logging {
     setAggregateRootDirectory(Supplier<AggregateRootDirectory> directory) {
         this.rootDirectory = checkNotNull(directory);
         return this;
+    }
+
+    public SystemFeatures systemFeatures() {
+        return systemFeatures;
     }
 
     /**

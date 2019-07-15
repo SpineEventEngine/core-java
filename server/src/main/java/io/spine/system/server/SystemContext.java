@@ -24,6 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.SystemFeatures;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.trace.TracerFactory;
@@ -66,16 +67,20 @@ public final class SystemContext extends BoundedContext {
         EventEnricher enricher = SystemEnricher.create(commandLog);
         BoundedContextBuilder preparedBuilder = builder.enrichEventsUsing(enricher);
         SystemContext result = new SystemContext(preparedBuilder);
-        result.registerRepositories(commandLog);
+        result.registerRepositories(commandLog, builder.systemFeatures());
         result.registerTracing();
         result.init();
         return result;
     }
 
-    private void registerRepositories(CommandLogRepository commandLog) {
-        register(commandLog);
-        register(new ScheduledCommandRepository());
-        register(new MirrorRepository());
+    private void registerRepositories(CommandLogRepository commandLog, SystemFeatures features) {
+        if (features.includeCommandLog()) {
+            register(commandLog);
+            register(new ScheduledCommandRepository());
+        }
+        if (features.includeAggregateMirroring()) {
+            register(new MirrorRepository());
+        }
     }
 
     private void registerTracing() {
