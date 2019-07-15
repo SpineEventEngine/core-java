@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import io.spine.base.EventMessage;
+import io.spine.server.dispatch.Success;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;
@@ -46,7 +47,17 @@ public final class CommandReactionMethod
     }
 
     @Override
-    public EventClass getMessageClass() {
+    public EventClass messageClass() {
         return EventClass.from(rawMessageClass());
+    }
+
+    /**
+     * Returns an empty {@code Success} instance which means that the method ignored
+     * the incoming event.
+     */
+    @Override
+    public Success fromEmpty(EventEnvelope handledSignal) {
+        return Success.newBuilder()
+                      .build();
     }
 }
