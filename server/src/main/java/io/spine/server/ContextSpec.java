@@ -22,7 +22,9 @@ package io.spine.server;
 
 import com.google.common.base.Objects;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
 
@@ -35,30 +37,38 @@ public final class ContextSpec {
 
     private final BoundedContextName name;
     private final boolean multitenant;
+    private final boolean system;
 
-    private ContextSpec(BoundedContextName name, boolean multitenant) {
+    private ContextSpec(BoundedContextName name, boolean multitenant, boolean system) {
         this.name = checkNotNull(name);
         this.multitenant = multitenant;
+        this.system = system;
     }
 
     /**
      * Creates a spec of a single tenant context with the given name.
      */
     public static ContextSpec singleTenant(String name) {
-        return create(name, false);
+        return createDomain(name, false);
     }
 
     /**
      * Creates a spec of a multitenant context with the given name.
      */
     public static ContextSpec multitenant(String name) {
-        return create(name, true);
+        return createDomain(name, true);
     }
 
-    private static ContextSpec create(String name, boolean multitenant) {
+    private static ContextSpec createDomain(String name, boolean multitenant) {
         checkNotNull(name);
         BoundedContextName contextName = newName(name);
-        return new ContextSpec(contextName, multitenant);
+        return new ContextSpec(contextName, multitenant, false);
+    }
+
+    ContextSpec toSystem() {
+        checkArgument(!isSystem());
+        BoundedContextName systemName = BoundedContextNames.system(name);
+        return new ContextSpec(systemName, multitenant, true);
     }
 
     /**
@@ -73,6 +83,10 @@ public final class ContextSpec {
      */
     public boolean isMultitenant() {
         return multitenant;
+    }
+
+    public boolean isSystem() {
+        return false;
     }
 
     /**

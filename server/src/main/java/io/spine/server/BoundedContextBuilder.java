@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
@@ -553,11 +552,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem() {
-        String name = BoundedContextNames.system(spec.name()).getValue();
-        boolean multitenant = isMultitenant();
-        BoundedContextBuilder system = multitenant
-                                       ? BoundedContext.multitenant(name)
-                                       : BoundedContext.singleTenant(name);
+        BoundedContextBuilder system = new BoundedContextBuilder(spec.toSystem());
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
