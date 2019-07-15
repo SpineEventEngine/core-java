@@ -41,7 +41,7 @@ final class EitTaskAggregate extends Aggregate<EitTaskId, EitTask, EitTask.Build
     }
 
     @Apply
-    void event(EitTaskCreated event) {
+    private void event(EitTaskCreated event) {
         builder().setId(event.getTask())
                  .setName(event.getName())
                  .setDescription(event.getDescription());
