@@ -52,7 +52,7 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
     private Schema(Factory<M, C> factory) {
         this.map = ImmutableMap.copyOf(factory.schemaMap);
         this.size = factory.functions.size();
-        _debug("Created enrichment schema with {} entries.", this.size);
+        _debug().log("Created enrichment schema with %d entries.", this.size);
     }
 
     boolean isEmpty() {

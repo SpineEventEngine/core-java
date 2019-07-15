@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.flogger.LazyArgs.lazy;
 
 /**
  * The checker of a {@link Method} access level.
@@ -124,9 +125,12 @@ public class MethodAccessChecker implements Logging {
      */
     @VisibleForTesting
     void warnOnWrongModifier(String messageFormat) {
-        String methodFullName = method.getDeclaringClass()
-                                      .getName() + '.' + method.getName() + "()";
-        log().warn(messageFormat, methodFullName);
+        _warn().log(messageFormat, lazy(this::methodFullName));
+    }
+
+    private String methodFullName() {
+        String result = method.getDeclaringClass().getName() + '.' + method.getName() + "()";
+        return result;
     }
 
     /**

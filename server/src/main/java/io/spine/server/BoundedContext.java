@@ -508,7 +508,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         importBus.close();
         shutDownRepositories();
 
-        log().debug(closed(nameForLogging()));
+        _debug().log(closed(nameForLogging()));
     }
 
     /**

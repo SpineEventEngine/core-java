@@ -21,6 +21,8 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.model.DuplicateHandlerCheck;
@@ -40,6 +42,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.flogger.LazyArgs.lazy;
 import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
 import static java.util.stream.Collectors.toList;
@@ -73,9 +76,24 @@ final class ModelVerifier implements Logging {
     void verify(CommandHandlers handlers) {
         ClassSet classSet = new ClassSet(projectClassLoader,
                                          handlers.getCommandHandlingTypeList());
-        classSet.reportNotFoundIfAny(log());
+        reportNotFoundIfAny(classSet);
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());
+    }
+
+    private void reportNotFoundIfAny(ClassSet classSet) {
+        ImmutableList<String> notFound = classSet.notFound();
+        if (notFound.isEmpty()) {
+            return;
+        }
+        String msg = "Failed to load "
+                + (notFound.size() > 1 ? "classes " : "the class ")
+                + Joiner.on(", ")
+                        .join(notFound)
+                + format(".%n")
+                + "Consider using the `io.spine.tools.spine-model-verifier` plugin" +
+                " only for the modules with the sufficient classpath.";
+        _warn().log(msg);
     }
 
     /**
@@ -84,7 +102,8 @@ final class ModelVerifier implements Logging {
     private URLClassLoader createClassLoader(Project project) {
         Collection<JavaCompile> tasks = allJavaCompile(project);
         URL[] compiledCodePath = extractDestinationDirs(tasks);
-        log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
+        _debug().log("Initializing `ClassLoader` for URLs: `%s`.",
+                     lazy(() -> deepToString(compiledCodePath)));
         try {
             ClassLoader projectClassloader = project.getBuildscript()
                                                     .getClassLoader();
@@ -92,7 +111,7 @@ final class ModelVerifier implements Logging {
             URLClassLoader result = new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
         } catch (SecurityException e) {
-            String msg = format("Cannot create ClassLoader for the project %s", project);
+            String msg = format("Cannot create `ClassLoader` for the project `%s`.", project);
             throw new IllegalStateException(msg, e);
         }
     }

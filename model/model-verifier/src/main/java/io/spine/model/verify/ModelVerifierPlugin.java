@@ -20,6 +20,7 @@
 
 package io.spine.model.verify;
 
+import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Experimental;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
@@ -30,7 +31,6 @@ import io.spine.tools.type.MoreKnownTypes;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +55,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
 
     @Override
     public void apply(Project project) {
-        log().debug("Applying Spine model verifier plugin.");
+        _debug().log("Applying Spine model verifier plugin.");
         Path rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
         if (project.getTasks()
@@ -65,7 +65,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     private void createTask(Path rawModelStorage, Project project) {
-        log().debug("Adding task {}", verifyModel);
+        _debug().log("Adding task `%s`.", verifyModel);
         newTask(verifyModel, action(rawModelStorage))
                 .insertBeforeTask(classes)
                 .insertAfterTask(compileJava)
@@ -104,7 +104,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         @Override
         public void execute(Task task) {
             if (!exists(rawModelPath)) {
-                _warn("No Spine model definition found under {}.", rawModelPath);
+                _warn().log("No Spine model definition found under `%s`.", rawModelPath);
             } else {
                 Project project = task.getProject();
                 extendKnownTypes(project);
@@ -118,17 +118,20 @@ public final class ModelVerifierPlugin extends SpinePlugin {
                 File descriptorFile = getMainDescriptorSet(project);
                 tryExtend(descriptorFile);
             } else {
-                _warn("{} plugin extension is not found. Apply the Spine model compiler plugin.",
-                      pluginExtensionName);
+                _warn().log(
+                        "`%s` plugin extension is not found." +
+                                " Please apply the Spine model compiler plugin.",
+                        pluginExtensionName
+                );
             }
         }
 
         private void tryExtend(File descriptorFile) {
             if (descriptorFile.exists()) {
-                _debug("Extending known types with types from {}.", descriptorFile);
+                _debug().log("Extending known types with types from `%s`.", descriptorFile);
                 MoreKnownTypes.extendWith(descriptorFile);
             } else {
-                _warn("Descriptor file {} does not exist.", descriptorFile);
+                _warn().log("Descriptor file `%s` does not exist.", descriptorFile);
             }
         }
 
@@ -152,8 +155,8 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         }
 
         @Override
-        public Logger log() {
-            return parent.log();
+        public FluentLogger logger() {
+            return parent.logger();
         }
     }
 }

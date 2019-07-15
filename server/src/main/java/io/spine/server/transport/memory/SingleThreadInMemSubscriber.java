@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+import static com.google.common.flogger.LazyArgs.lazy;
+
 /**
  * The in-memory subscriber, which uses single-thread delivery of messages.
  *
@@ -60,12 +62,10 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging 
      * @return {@code null} always
      */
     private @Nullable Void logError(Throwable throwable, ExternalMessage message) {
-        Object id = Identifier.unpack(message.getId());
-        _error(throwable,
-               "Error dispatching an external message `{}` with ID `{}`: {}",
-               message.getOriginalMessage().getTypeUrl(),
-               id,
-               throwable.getLocalizedMessage());
+        _error().withCause(throwable)
+                .log("Error dispatching an external message `%s` with ID `%s`.",
+                     message.getOriginalMessage().getTypeUrl(),
+                     lazy(() -> Identifier.unpack(message.getId())));
         return null;
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.Aggregate;
@@ -29,7 +30,6 @@ import io.spine.server.command.AbstractCommander;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelClass;
 import io.spine.server.procman.ProcessManager;
-import org.slf4j.Logger;
 
 import java.util.function.Function;
 
@@ -80,7 +80,7 @@ public final class DuplicateHandlerCheck implements Logging {
      * Performs the check for the passed classes.
      */
     public void check(Iterable<Class<?>> classes) {
-        log().debug("Dropping models...");
+        _debug().log("Dropping models...");
         Model.dropAllModels();
         for (Class<?> cls : classes) {
             add(cls);
@@ -95,18 +95,18 @@ public final class DuplicateHandlerCheck implements Logging {
      * known to the Model.
      */
     public void add(Class<?> cls) {
-        Logger log = log();
+        FluentLogger.Api debug = _debug();
         for (Class<?> keyClass : appenders.keySet()) {
             if (keyClass.isAssignableFrom(cls)) {
                 Appender appender = appenders.get(keyClass);
                 appender.apply(cls);
-                log.debug("`{}` added to the Model");
+                debug.log("`%s` has been added to the Model.");
                 return;
             }
         }
 
         throw newIllegalArgumentException(
-                "Class %s is not a command handling type.", cls.getName()
+                "Class `%s` is not a command handling type.", cls.getName()
         );
     }
 
