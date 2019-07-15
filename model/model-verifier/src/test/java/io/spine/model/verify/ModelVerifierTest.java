@@ -34,7 +34,7 @@ import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.testing.logging.LogRecordSubject;
-import io.spine.testing.logging.LoggerTest;
+import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
 import org.gradle.api.Project;
 import org.gradle.api.initialization.dsl.ScriptHandler;
@@ -154,7 +154,7 @@ class ModelVerifierTest {
 
     @Nested
     @DisplayName("produce a warning")
-    class WarnLogging extends LoggerTest {
+    class WarnLogging extends LoggingTest {
 
         private final Class<?> aggregateClass = InvalidRestoreAggregate.class;
 
@@ -166,7 +166,7 @@ class ModelVerifierTest {
         void verifyModel() {
             ModelVerifier verifier = new ModelVerifier(project);
             // Add handler here to avoid unnecessary logging.
-            addHandler();
+            interceptLogging();
             CommandHandlers model = CommandHandlers
                     .newBuilder()
                     .addCommandHandlingType(aggregateClass.getName())
@@ -176,13 +176,13 @@ class ModelVerifierTest {
 
         @AfterEach
         void removeLogHook() {
-            removeHandler();
+            restoreLogging();
         }
 
         @Test
         @DisplayName("on `private` command handling methods")
         void onPrivateMethod() {
-            LogRecordSubject assertRecord = handler().assertRecord();
+            LogRecordSubject assertRecord = assertLog().record();
             assertRecord.hasLevelThat()
                         .isEqualTo(level());
             assertRecord.hasMessageThat()

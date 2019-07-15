@@ -432,10 +432,10 @@ class BoundedContextTest {
             BoundedContext context =
                     BoundedContext.singleTenant(contextName.getValue())
                                   .build();
-            domainInterceptor = new Interceptor(DomainContext.class);
-            domainInterceptor.intercept(debugLevel);
-            systemInterceptor = new Interceptor(SystemContext.class);
-            systemInterceptor.intercept(debugLevel);
+            domainInterceptor = new Interceptor(DomainContext.class, debugLevel);
+            domainInterceptor.intercept();
+            systemInterceptor = new Interceptor(SystemContext.class, debugLevel);
+            systemInterceptor.intercept();
 
             context.close();
         }
@@ -450,8 +450,8 @@ class BoundedContextTest {
         @DisplayName("log its closing")
         void logClosing() {
             LogRecordSubject assertDomainLog =
-                    domainInterceptor.handler()
-                                     .assertRecord();
+                    domainInterceptor.assertLog()
+                                     .record();
             assertDomainLog.hasLevelThat()
                            .isEqualTo(debugLevel);
             assertDomainLog.hasMessageThat()
@@ -462,8 +462,8 @@ class BoundedContextTest {
         @DisplayName("close its System context")
         void closeSystem() {
             LogRecordSubject assertSystemLog =
-                    systemInterceptor.handler()
-                                     .assertRecord();
+                    systemInterceptor.assertLog()
+                                     .record();
             assertSystemLog.hasLevelThat()
                            .isEqualTo(debugLevel);
             assertSystemLog.hasMessageThat()

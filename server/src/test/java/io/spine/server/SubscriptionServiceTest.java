@@ -40,8 +40,7 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.logging.LogRecordSubject;
-import io.spine.testing.logging.LoggerTest;
+import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -351,7 +350,7 @@ class SubscriptionServiceTest {
 
     @Nested
     @DisplayName("when cancelling non-existent subscription")
-    class WarnOnCancelling extends LoggerTest {
+    class WarnOnCancelling extends LoggingTest {
 
         private BoundedContext context;
         private MemoizingObserver<Response> cancellationObserver;
@@ -366,7 +365,7 @@ class SubscriptionServiceTest {
             Subscription invalidSubscription = createSubscription();
 
             // Hook the log here to minimize the trapped output.
-            addHandler();
+            interceptLogging();
 
             cancellationObserver = new MemoizingObserver<>();
             subscriptionService.cancel(invalidSubscription, cancellationObserver);
@@ -396,7 +395,7 @@ class SubscriptionServiceTest {
 
         @AfterEach
         void tearDown() throws Exception {
-            removeHandler();
+            restoreLogging();
             context.close();
         }
 
@@ -414,9 +413,9 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("log warning")
         void nonExistingSubscription() {
-            LogRecordSubject assertRecord = handler().assertRecord();
-            assertRecord.hasLevelThat()
-                        .isEqualTo(level());
+            assertLog().record()
+                       .hasLevelThat()
+                       .isEqualTo(level());
         }
     }
 
