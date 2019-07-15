@@ -562,6 +562,7 @@ public final class BoundedContextBuilder implements Logging {
         BoundedContextBuilder system = new BoundedContextBuilder(spec.toSystem());
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
+        system.systemFeatures.populateFrom(this.systemFeatures);
 
         SystemContext result =
                 system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);

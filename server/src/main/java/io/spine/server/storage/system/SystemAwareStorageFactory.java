@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.system;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
@@ -51,6 +52,11 @@ public final class SystemAwareStorageFactory implements StorageFactory {
         } else {
             return new SystemAwareStorageFactory(factory);
         }
+    }
+
+    @VisibleForTesting
+    public StorageFactory delegate() {
+        return delegate;
     }
 
     @Override

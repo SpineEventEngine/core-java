@@ -86,7 +86,7 @@ public final class ContextSpec {
     }
 
     public boolean isSystem() {
-        return false;
+        return system;
     }
 
     /**

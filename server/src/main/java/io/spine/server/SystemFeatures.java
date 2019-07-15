@@ -20,6 +20,10 @@
 
 package io.spine.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * System bounded context feature configuration.
  */
@@ -40,21 +44,25 @@ public final class SystemFeatures {
                 .enableAggregateQuerying();
     }
 
+    @CanIgnoreReturnValue
     public SystemFeatures enableCommandLog() {
         this.commandLog = true;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public SystemFeatures disableCommandLog() {
         this.commandLog = false;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public SystemFeatures enableAggregateQuerying() {
         this.aggregateMirrors = true;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public SystemFeatures disableAggregateQuerying() {
         this.aggregateMirrors = false;
         return this;
@@ -66,5 +74,11 @@ public final class SystemFeatures {
 
     public boolean includeAggregateMirroring() {
         return aggregateMirrors;
+    }
+
+    void populateFrom(SystemFeatures other) {
+        checkNotNull(other);
+        this.aggregateMirrors = other.aggregateMirrors;
+        this.commandLog = other.commandLog;
     }
 }
