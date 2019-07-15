@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.system;
 
+import io.spine.annotation.Internal;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
@@ -34,12 +35,22 @@ import io.spine.server.storage.StorageFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@Internal
 public final class SystemAwareStorageFactory implements StorageFactory {
 
     private final StorageFactory delegate;
 
-    public SystemAwareStorageFactory(StorageFactory delegate) {
-        this.delegate = checkNotNull(delegate);
+    private SystemAwareStorageFactory(StorageFactory delegate) {
+        this.delegate = delegate;
+    }
+
+    public static SystemAwareStorageFactory wrap(StorageFactory factory) {
+        checkNotNull(factory);
+        if (factory instanceof SystemAwareStorageFactory) {
+            return (SystemAwareStorageFactory) factory;
+        } else {
+            return new SystemAwareStorageFactory(factory);
+        }
     }
 
     @Override
