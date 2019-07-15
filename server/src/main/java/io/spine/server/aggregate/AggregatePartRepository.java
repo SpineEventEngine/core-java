@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.model.AggregatePartClass;
@@ -37,6 +38,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  * @param <R>
  *         the type of the aggregate root associated with the type of parts
  */
+@Experimental
 public abstract class AggregatePartRepository<I,
                                               A extends AggregatePart<I, ?, ?, R>,
                                               R extends AggregateRoot<I>>
