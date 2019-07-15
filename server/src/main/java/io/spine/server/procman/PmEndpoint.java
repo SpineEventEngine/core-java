@@ -70,28 +70,15 @@ abstract class PmEndpoint<I,
     @Override
     public void dispatchTo(I id) {
         P manager = repository().findOrCreate(id);
-        tryDispatchAndSave(manager);
-    }
-
-    /**
-     * Dispatches the message to a process manager and saves the entity state regardless of
-     * successful delivery.
-     */
-    private void tryDispatchAndSave(P manager) {
-        try {
-            DispatchOutcome outcome = runTransactionFor(manager);
-            store(manager);
-            if (outcome.hasSuccess()) {
-                postMessages(outcome.getSuccess());
-                afterDispatched(manager.id());
-            } else if (outcome.hasError()) {
-                Error error = outcome.getError();
-                repository().lifecycleOf(manager.id())
-                            .onHandlerFailed(envelope().messageId(), error);
-            }
-        } catch (RuntimeException ex) {
-            store(manager);
-            throw ex;
+        DispatchOutcome outcome = runTransactionFor(manager);
+        store(manager);
+        if (outcome.hasSuccess()) {
+            postMessages(outcome.getSuccess());
+            afterDispatched(id);
+        } else if (outcome.hasError()) {
+            Error error = outcome.getError();
+            repository().lifecycleOf(id)
+                        .onDispatchingFailed(envelope().messageId(), error);
         }
     }
 

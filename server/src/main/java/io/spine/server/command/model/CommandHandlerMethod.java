@@ -56,8 +56,8 @@ public final class CommandHandlerMethod
     public Success toSuccessfulOutcome(@Nullable Object rawResult,
                                        CommandHandler target,
                                        MessageEnvelope<?, ?, ?> handledSignal) {
-        Success outcome = EventProducingMethod.super.toSuccessfulOutcome(rawResult, target,
-                                                                         handledSignal);
+        Success outcome =
+                EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
             String errorMessage = format(
                     "Command handler %s did not produce any events when processing command %s",

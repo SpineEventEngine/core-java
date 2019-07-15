@@ -22,6 +22,7 @@ package io.spine.model.verify;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import io.spine.testing.SlowTest;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.TaskName;
@@ -43,6 +44,7 @@ import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SlowTest
 @ExtendWith(TempDirectory.class)
 @DisplayName("ModelVerifierPlugin should")
 class ModelVerifierPluginTest {

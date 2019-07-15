@@ -65,35 +65,15 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
-        String format = "The aggregate (class: %s, id: %s) produced empty response for " +
-                        "the command (class: %s, id: %s).";
-        onUnhandledCommand(aggregate, cmd, format);
-    }
-
-    /**
-     * Throws {@link IllegalStateException} with the diagnostics message on the unhandled command.
-     *
-     * @param aggregate
-     *         the aggregate which failed to handle the command
-     * @param cmd
-     *         the envelope with the command
-     * @param format
-     *         the format string with the parameters as follows:
-     *          <ol>
-     *              <li>the name of the aggregate class;
-     *              <li>the ID of the aggregate;
-     *              <li>the name of the command class;
-     *              <li>the ID of the command.
-     *          </ol>
-     * @throws IllegalStateException
-     *         always
-     */
-    private void onUnhandledCommand(A aggregate, CommandEnvelope cmd, String format) {
         String entityId = aggregate.idAsString();
         String entityClass = aggregate.getClass()
                                       .getName();
-        String commandId = cmd.idAsString();
+        String commandId = cmd.id().value();
         CommandClass commandClass = cmd.messageClass();
-        throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
+        throw newIllegalStateException(
+                "The aggregate (class: %s, ID: %s) produced empty response for " +
+                        "the command (class: %s, ID: %s).",
+                entityClass, entityId, commandClass, commandId
+        );
     }
 }

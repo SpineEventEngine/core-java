@@ -36,7 +36,9 @@ import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
@@ -84,7 +86,7 @@ public class TestAggregate
     }
 
     @Assign
-    AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
+    AggTaskAdded handle(AggAddTask cmd) {
         addTaskCommandHandled = true;
         AggTaskAdded event = taskAdded(cmd.getProjectId());
         return event.toBuilder()
@@ -93,7 +95,7 @@ public class TestAggregate
     }
 
     @Assign
-    List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
+    List<AggProjectStarted> handle(AggStartProject cmd) {
         startProjectCommandHandled = true;
         AggProjectStarted message = projectStarted(cmd.getProjectId());
         return ImmutableList.of(message);
@@ -119,6 +121,20 @@ public class TestAggregate
                  .setStatus(Status.STARTED);
 
         projectStartedEventApplied = true;
+    }
+
+    @React
+    AggProjectArchived on(AggProjectDeleted event) {
+        return AggProjectArchived
+                .newBuilder()
+                .setProjectId(event.getProjectId())
+                .buildPartial();
+    }
+
+    @Apply
+    private void event(AggProjectArchived e) {
+        builder().setId(e.getProjectId())
+                 .setStatus(Status.CANCELLED);
     }
 
     @React

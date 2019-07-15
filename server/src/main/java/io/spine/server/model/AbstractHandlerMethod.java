@@ -44,9 +44,9 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.base.Errors.causeOf;
 import static io.spine.base.Errors.fromThrowable;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
@@ -257,9 +257,7 @@ public abstract class AbstractHandlerMethod<T,
                 outcome.setError(error);
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            Message message = envelope.message();
-            Message context = envelope.context();
-            throw new HandlerMethodFailedException(target, message, context, getRootCause(e));
+            throw illegalStateWithCauseOf(e);
         }
         return outcome.vBuild();
     }

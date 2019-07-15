@@ -21,12 +21,17 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.extensions.proto.ProtoSubject;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
+import io.spine.server.dispatch.Success;
+import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.MatchCriterion;
 import io.spine.server.model.declare.SignatureMismatch;
 import io.spine.server.test.shared.EmptyAggregate;
@@ -43,11 +48,13 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EventApplierMethod should")
@@ -102,10 +109,51 @@ class ApplierTest {
 
         Collection<SignatureMismatch> mismatches = signature.match(method);
         assertEquals(1, mismatches.size());
-        SignatureMismatch mismatch = mismatches.iterator()
-                                           .next();
+        SignatureMismatch mismatch = mismatches.iterator().next();
         assertNotNull(mismatch);
         assertEquals(MatchCriterion.ACCESS_MODIFIER, mismatch.getUnmetCriterion());
+    }
+
+    @Test
+    @DisplayName("convert `null` result to Success")
+    void convertToSuccess() {
+        ValidApplier applierObject = new ValidApplier();
+        Optional<Applier> method = signature.create(applierObject.getMethod());
+        assertTrue(method.isPresent());
+        Applier applier = method.get();
+
+        Void result = null;
+        Event event = Event
+                .newBuilder()
+                .setMessage(pack(RefProjectCreated.getDefaultInstance()))
+                .build();
+        EventEnvelope envelope = EventEnvelope.of(event);
+        Success success = applier.toSuccessfulOutcome(result, applierObject, envelope);
+        ProtoSubject<?, Message> assertSuccess = ProtoTruth.assertThat(success);
+        assertSuccess.isNotNull();
+        assertSuccess.isEqualToDefaultInstance();
+    }
+
+    @Test
+    @DisplayName("throw on non-`null` return value")
+    void failIfReturnsValue() {
+        ValidApplier applierObject = new ValidApplier();
+        Optional<Applier> method = signature.create(applierObject.getMethod());
+        assertTrue(method.isPresent());
+        Applier applier = method.get();
+
+        Event event = Event
+                .newBuilder()
+                .setMessage(pack(RefProjectCreated.getDefaultInstance()))
+                .build();
+        EventEnvelope envelope = EventEnvelope.of(event);
+        String result = "hello there";
+        IllegalOutcomeException exception =
+                assertThrows(IllegalOutcomeException.class,
+                             () -> applier.toSuccessfulOutcome(result,
+                                                               applierObject,
+                                                               envelope));
+        assertThat(exception).hasMessageThat().endsWith(result);
     }
 
     @Nested
