@@ -25,6 +25,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.server.command.model.given.reaction.ReEitherWithNothing;
 import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
@@ -45,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
@@ -117,28 +119,36 @@ class CommandReactionMethodTest {
         @Test
         @DisplayName("when returning value")
         void returnValue() {
-            CmdProjectCreated message = createEvent(id);
+            CmdProjectCreated message = createInitEvent(id);
             DispatchOutcome outcome = method.invoke(target, envelope(message));
             assertResult(outcome, this.id);
         }
     }
 
-    @Nested
-    @DisplayName("support Optional return value")
-    class OptionalReturn {
+    /**
+     * Abstract base for tests checking empty method result.
+     */
+    abstract static class EmptyReturn {
 
-        private final Method rawMethod = new ReOptionalResult().getMethod();
+        private final Supplier<TestCommandReactor> supplier;
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we surely get the result
-        private final CommandReactionMethod method = signature.create(rawMethod)
-                                                              .get();
+        private TestCommandReactor target;
+        private Method rawMethod;
+        private CommandReactionMethod method;
 
-        private EventReceiver target;
         private ProjectId id;
 
+        EmptyReturn(Supplier<TestCommandReactor> supplier) {
+            this.supplier = supplier;
+        }
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we surely get the result
         @BeforeEach
         void setUp() {
-            target = new ReOptionalResult();
+            target = supplier.get();
+            rawMethod = target.getMethod();
+            method = signature.create(rawMethod)
+                                .get();
             id = ProjectId.newBuilder()
                           .setId(newUuid())
                           .build();
@@ -161,7 +171,7 @@ class CommandReactionMethodTest {
         @DisplayName("when returning value")
         void returnValue() {
             ProjectId givenId = this.id;
-            CmdProjectCreated message = createEvent(givenId);
+            CmdProjectCreated message = createInitEvent(givenId);
 
             DispatchOutcome outcome = method.invoke(target, envelope(message));
 
@@ -169,25 +179,64 @@ class CommandReactionMethodTest {
         }
 
         @Test
-        @DisplayName("when returning Optional.empty()")
         void returnEmpty() {
-            CmdProjectCreated message = CmdProjectCreated
-                    .newBuilder()
-                    .setProjectId(id)
-                    .setInitialize(false) // This will make the method return `Optional.empty()`.
-                    .build();
+            CmdProjectCreated message = createVoidEvent(id);
 
             DispatchOutcome outcome = method.invoke(target, envelope(message));
 
-            assertThat(outcome.getSuccess().getProducedCommands().getCommandList()).isEmpty();
+            assertThat(outcome.getSuccess().getProducedCommands().getCommandList())
+                    .isEmpty();
         }
     }
 
-    private static CmdProjectCreated createEvent(ProjectId givenId) {
+    @Nested
+    @DisplayName("support `Optional` return value")
+    class OptionalReturn extends EmptyReturn {
+
+        OptionalReturn() {
+            super(ReOptionalResult::new);
+        }
+
+        @Test
+        @Override
+        @DisplayName("when returning `Optional.empty()`")
+        void returnEmpty() {
+            super.returnEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("support `Either` with `Nothing`")
+    class EitherReturn extends EmptyReturn {
+
+        EitherReturn() {
+            super(ReEitherWithNothing::new);
+        }
+
+        @Test
+        @Override
+        @DisplayName("when returning `Either` with `Nothing`")
+        void returnEmpty() {
+            super.returnEmpty();
+        }
+    }
+
+    /**
+     * Creates the event message which will cause the handling method return non-empty result.
+     */
+    private static CmdProjectCreated createInitEvent(ProjectId givenId) {
         return CmdProjectCreated
                 .newBuilder()
                 .setProjectId(givenId)
-                .setInitialize(true) // This will make the method return Optional with value.
+                .setInitialize(true) // This will make the method return result with a value.
+                .build();
+    }
+
+    private static CmdProjectCreated createVoidEvent(ProjectId givenId) {
+        return CmdProjectCreated
+                .newBuilder()
+                .setProjectId(givenId)
+                .setInitialize(false) // This will make the method return `Optional.empty()`.
                 .build();
     }
 

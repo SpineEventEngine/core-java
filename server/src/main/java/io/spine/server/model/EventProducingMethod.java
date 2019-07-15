@@ -54,9 +54,7 @@ public interface EventProducingMethod<T extends EventProducer,
         extends HandlerMethod<T, C, E, EventClass> {
 
     @Override
-    default Success toSuccessfulOutcome(@Nullable Object rawResult,
-                                        T target,
-                                        MessageEnvelope<?, ?, ?> handledSignal) {
+    default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
         MethodResult result = MethodResult.from(rawResult);
         EventFactory eventFactory = EventFactory.on(handledSignal, target.producerId());
         Version version = target.version();

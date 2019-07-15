@@ -18,32 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.command.model.given.reaction;
 
-import io.spine.server.event.EventReactor;
-import io.spine.server.event.React;
-import io.spine.server.model.EventProducingMethod;
-import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-
-import java.lang.reflect.Method;
+import io.spine.server.command.Command;
+import io.spine.server.model.Nothing;
+import io.spine.server.tuple.EitherOf3;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdStartTask;
+import io.spine.test.command.event.CmdProjectCreated;
 
 /**
- * A wrapper for a method which {@linkplain React reacts} on events.
+ * Optionally generates a command.
  *
- * @see React
+ * <p>To make it generate a command pass the event {@link CmdProjectCreated} with
+ * {@link CmdProjectCreated#getInitialize() initialize} attribute set to {@code true}.
  */
-public final class EventReactorMethod
-        extends EventHandlerMethod<EventReactor, EventClass>
-        implements EventProducingMethod<EventReactor, EventClass, EventEnvelope> {
+public class ReEitherWithNothing extends TestCommandReactor {
 
-    EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
-        super(method, params);
-    }
-
-    @Override
-    public EventClass messageClass() {
-        return EventClass.from(rawMessageClass());
+    @Command
+    EitherOf3<CmdAddTask, CmdStartTask, Nothing> commandOn(CmdProjectCreated event) {
+        if (event.getInitialize()) {
+            return EitherOf3.withA(CmdAddTask.newBuilder()
+                                         .setProjectId(event.getProjectId())
+                                         .build());
+        }
+        return EitherOf3.withC(Nothing.getDefaultInstance());
     }
 }

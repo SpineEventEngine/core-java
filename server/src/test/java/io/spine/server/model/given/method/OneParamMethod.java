@@ -44,7 +44,7 @@ public class OneParamMethod
     }
 
     @Override
-    public EventClass getMessageClass() {
+    public EventClass messageClass() {
         return EventClass.from(rawMessageClass());
     }
 

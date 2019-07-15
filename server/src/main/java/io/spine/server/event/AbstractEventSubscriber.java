@@ -128,7 +128,7 @@ public abstract class AbstractEventSubscriber
     private DispatchOutcome notSupported(EventEnvelope event) {
         Ignore ignore = Ignore
                 .newBuilder()
-                .setReason(format("Event %s[%s] does not match subscriber filters in %s.",
+                .setReason(format("Event `%s[%s]` does not match subscriber filters in `%s`.",
                                   event.messageClass(),
                                   event.id().value(),
                                   this.getClass().getCanonicalName()))

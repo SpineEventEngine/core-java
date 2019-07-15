@@ -53,7 +53,7 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
     }
 
     @Override
-    public CommandClass getMessageClass() {
+    public CommandClass messageClass() {
         return CommandClass.from(rawMessageClass());
     }
 

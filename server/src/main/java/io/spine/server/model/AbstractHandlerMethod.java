@@ -307,7 +307,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public HandlerId id() {
-        return Handlers.createId(getMessageClass());
+        return Handlers.createId(messageClass());
     }
 
     @Override
