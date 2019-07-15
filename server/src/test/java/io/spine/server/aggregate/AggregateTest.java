@@ -45,12 +45,15 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.CannotDispatchDuplicateCommand;
+import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -63,6 +66,7 @@ import io.spine.test.aggregate.command.AggPauseProject;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.event.AggTaskAssigned;
@@ -82,6 +86,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
@@ -99,6 +104,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
@@ -176,6 +182,14 @@ public class AggregateTest {
     @AfterEach
     void tearDown() throws Exception {
         boundedContext.close();
+    }
+
+    @Test
+    @DisplayName("not allow a negative event count after last snapshot")
+    void negativeEventCount() {
+        Aggregate<?, ?, ?> aggregate = this.aggregate;
+        assertThrows(IllegalArgumentException.class,
+                     () -> aggregate.setEventCountAfterLastSnapshot(-1));
     }
 
     @Nested
@@ -728,8 +742,6 @@ public class AggregateTest {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-        // We're not interested in what dispatch() returns
     @MuteLogging
     @Test
     @DisplayName("throw DuplicateCommandException for a duplicated command")
@@ -742,10 +754,58 @@ public class AggregateTest {
         CommandEnvelope envelope = CommandEnvelope.of(createCommand);
         repository.dispatch(envelope);
         repository.dispatch(envelope);
-        List<CannotDispatchDuplicateCommand> duplicateCommandEvents = monitor.duplicateCommandEvents();
+        List<CannotDispatchDuplicateCommand> duplicateCommandEvents =
+                monitor.duplicateCommandEvents();
         assertThat(duplicateCommandEvents).hasSize(1);
         CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
         assertThat(event.getCommand()).isEqualTo(envelope.id());
+    }
+
+    @Test
+    @DisplayName("run Idempotency guard when dispatching commands")
+    void checkCommandsUponHistory() {
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
+        Command createCommand = command(createProject);
+        CommandEnvelope cmd = CommandEnvelope.of(createCommand);
+        TenantId tenantId = newTenantId();
+        Supplier<MessageEndpoint<ProjectId, ?>> endpoint =
+                () -> new AggregateCommandEndpoint<>(repository, cmd);
+        dispatch(tenantId, endpoint);
+        dispatch(tenantId, endpoint);
+        List<CannotDispatchDuplicateCommand> events = monitor.duplicateCommandEvents();
+        assertThat(events).hasSize(1);
+        CannotDispatchDuplicateCommand systemEvent = events.get(0);
+        assertThat(systemEvent.getCommand()).isEqualTo(cmd.id());
+    }
+
+    @Test
+    @DisplayName("run Idempotency guard when dispatching events")
+    void checkEventsUponHistory() {
+        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        boundedContext.registerEventDispatcher(monitor);
+        AggProjectDeleted eventMessage = AggProjectDeleted
+                .newBuilder()
+                .setProjectId(ID)
+                .vBuild();
+        Event event = event(eventMessage, 2);
+        EventEnvelope envelope = EventEnvelope.of(event);
+        Supplier<MessageEndpoint<ProjectId, ?>> endpoint =
+                () -> new AggregateEventReactionEndpoint<>(repository, envelope);
+        TenantId tenantId = newTenantId();
+        dispatch(tenantId, endpoint);
+        dispatch(tenantId, endpoint);
+        List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
+        assertThat(events).hasSize(1);
+        CannotDispatchDuplicateEvent systemEvent = events.get(0);
+        assertThat(systemEvent.getEvent()).isEqualTo(envelope.id());
+    }
+
+    private static void dispatch(TenantId tenant,
+                                 Supplier<MessageEndpoint<ProjectId, ?>> endpoint) {
+        with(tenant).run(
+                () -> endpoint.get().dispatchTo(ID)
+        );
     }
 
     @Nested

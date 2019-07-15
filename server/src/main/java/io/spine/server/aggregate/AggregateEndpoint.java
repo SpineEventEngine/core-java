@@ -78,7 +78,7 @@ abstract class AggregateEndpoint<I,
         } else if (outcome.hasError()) {
             Error error = outcome.getError();
             repository().lifecycleOf(aggregateId)
-                        .onHandlerFailed(envelope().messageId(), error);
+                        .onDispatchingFailed(envelope().messageId(), error);
         }
     }
 
@@ -143,7 +143,7 @@ abstract class AggregateEndpoint<I,
         BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events);
         if (batchDispatchOutcome.getSuccessful()) {
             tx.commitIfActive();
-            return correctProducedCommands(commandOutcome, batchDispatchOutcome);
+            return correctProducedEvents(commandOutcome, batchDispatchOutcome);
         } else {
             return firstErroneousOutcome(batchDispatchOutcome);
         }
@@ -159,7 +159,7 @@ abstract class AggregateEndpoint<I,
      * @return the same command outcome but with the events of the correct versions
      */
     private static DispatchOutcome
-    correctProducedCommands(DispatchOutcome commandOutcome, BatchDispatchOutcome eventDispatch) {
+    correctProducedEvents(DispatchOutcome commandOutcome, BatchDispatchOutcome eventDispatch) {
         DispatchOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
         ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
                                                                       .getProducedEventsBuilder();

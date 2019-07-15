@@ -51,23 +51,6 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
         this.numberOfShards = numberOfShards;
     }
 
-    @Override
-    public ShardIndex indexFor(Object entityId) {
-        if (1 == numberOfShards) {
-            return newIndex(0, 1);
-        }
-        int hashValue = entityId.hashCode();
-        int totalShards = shardCount();
-        int indexValue = abs(hashValue % totalShards);
-        ShardIndex result = newIndex(indexValue, totalShards);
-        return result;
-    }
-
-    @Override
-    public int shardCount() {
-        return numberOfShards;
-    }
-
     /**
      * Creates a strategy of uniform target distribution across shards, for a given shard number.
      *
@@ -80,10 +63,27 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
         return result;
     }
 
-    private static ShardIndex newIndex(int indexValue, int totalShards) {
+    @Override
+    public ShardIndex indexFor(Object entityId) {
+        if (1 == numberOfShards) {
+            return newIndex(0);
+        }
+        int hashValue = entityId.hashCode();
+        int totalShards = shardCount();
+        int indexValue = abs(hashValue % totalShards);
+        ShardIndex result = newIndex(indexValue);
+        return result;
+    }
+
+    @Override
+    public int shardCount() {
+        return numberOfShards;
+    }
+
+    private ShardIndex newIndex(int indexValue) {
         return ShardIndex.newBuilder()
                          .setIndex(indexValue)
-                         .setOfTotal(totalShards)
+                         .setOfTotal(shardCount())
                          .build();
     }
 

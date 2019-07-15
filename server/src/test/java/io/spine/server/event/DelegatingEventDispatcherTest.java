@@ -21,11 +21,14 @@
 package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.DummyEventDispatcherDelegate;
+import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.DomesticEventDispatcherDelegate;
+import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.ExternalEventDispatcherDelegate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DisplayName("DelegatingEventDispatcher should")
 class DelegatingEventDispatcherTest {
@@ -34,7 +37,16 @@ class DelegatingEventDispatcherTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(EventDispatcherDelegate.class, new DummyEventDispatcherDelegate())
+                .setDefault(EventDispatcherDelegate.class, new ExternalEventDispatcherDelegate())
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
+    }
+
+    @Test
+    @DisplayName("obtain no external dispatcher if dispatches not external events")
+    void noExternalEvents() {
+        EventDispatcherDelegate dispatcher = new DomesticEventDispatcherDelegate();
+        assertFalse(dispatcher.dispatchesExternalEvents());
+        DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
+        assertThat(delegate.createExternalDispatcher()).isEmpty();
     }
 }

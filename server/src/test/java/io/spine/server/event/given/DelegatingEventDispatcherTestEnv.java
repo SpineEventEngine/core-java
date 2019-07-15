@@ -34,7 +34,7 @@ public class DelegatingEventDispatcherTestEnv {
     private DelegatingEventDispatcherTestEnv() {
     }
 
-    public static final class DummyEventDispatcherDelegate
+    public static final class ExternalEventDispatcherDelegate
             implements EventDispatcherDelegate {
 
         @Override
@@ -46,6 +46,25 @@ public class DelegatingEventDispatcherTestEnv {
         public Set<EventClass> externalEvents() {
             // Return at least one event class so that we can create external delegate.
             return EventClass.setOf(EvTeamCreated.class);
+        }
+
+        @Override
+        public void dispatchEvent(EventEnvelope event) {
+            // Do nothing.
+        }
+    }
+
+    public static final class DomesticEventDispatcherDelegate
+            implements EventDispatcherDelegate {
+
+        @Override
+        public Set<EventClass> domesticEvents() {
+            return EventClass.setOf(EvTeamCreated.class);
+        }
+
+        @Override
+        public Set<EventClass> externalEvents() {
+            return ImmutableSet.of();
         }
 
         @Override

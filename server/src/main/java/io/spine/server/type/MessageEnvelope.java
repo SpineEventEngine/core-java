@@ -22,7 +22,6 @@ package io.spine.server.type;
 
 import com.google.protobuf.Message;
 import io.spine.core.Origin;
-import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
 /**
@@ -38,16 +37,6 @@ public interface MessageEnvelope<I extends Message, T, C extends Message> {
      * The ID of the message.
      */
     I id();
-
-    /**
-     * Obtains string representation of the message identifier.
-     *
-     * @apiNote The primary purpose of this method is to display the identifier in human-readable
-     *          form in debug and error messages.
-     */
-    default String idAsString() {
-        return Stringifiers.toString(id());
-    }
 
     /**
      * Obtains the object which contains the message of interest.
