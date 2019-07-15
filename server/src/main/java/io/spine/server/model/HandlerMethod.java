@@ -55,7 +55,7 @@ public interface HandlerMethod<T,
     /**
      * Obtains the type of the incoming message class.
      */
-    C getMessageClass();
+    C messageClass();
 
     @PostConstruct
     void discoverAttributes();
@@ -97,7 +97,7 @@ public interface HandlerMethod<T,
      */
     Success toSuccessfulOutcome(@Nullable Object rawResult,
                                 T target,
-                                MessageEnvelope<?, ?, ?> handledSignal)
+                                E handledSignal)
             throws IllegalOutcomeException;
 
     /**

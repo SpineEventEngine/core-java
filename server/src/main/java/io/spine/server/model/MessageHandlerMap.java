@@ -239,7 +239,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
         ImmutableSet<M> result = Streams.stream(handlerMethods)
-                                        .map(HandlerMethod::getMessageClass)
+                                        .map(HandlerMethod::messageClass)
                                         .collect(toImmutableSet());
         return result;
     }

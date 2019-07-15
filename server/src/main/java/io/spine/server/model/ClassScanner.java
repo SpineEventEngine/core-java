@@ -149,7 +149,7 @@ public final class ClassScanner {
         }
 
         private void checkNotClashes(H handler) {
-            MessageClass handledClass = handler.getMessageClass();
+            MessageClass handledClass = handler.messageClass();
             FieldPath field = handler.filter().getField();
             if (isNotDefault(field)) {
                 FilteredHandler<H> previousValue = fieldFilters.put(
