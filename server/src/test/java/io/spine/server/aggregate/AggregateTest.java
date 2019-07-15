@@ -184,6 +184,14 @@ public class AggregateTest {
         boundedContext.close();
     }
 
+    @Test
+    @DisplayName("not allow a negative event count after last snapshot")
+    void negativeEventCount() {
+        Aggregate<?, ?, ?> aggregate = this.aggregate;
+        assertThrows(IllegalArgumentException.class,
+                     () -> aggregate.setEventCountAfterLastSnapshot(-1));
+    }
+
     @Nested
     @DisplayName("expose")
     class Expose {
