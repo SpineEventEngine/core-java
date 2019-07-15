@@ -132,7 +132,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (!warnings.isEmpty()) {
             warnings.stream()
                     .map(SignatureMismatch::toString)
-                    .forEach(this::_warn);
+                    .forEach(this._warn()::log);
         }
         return true;
     }

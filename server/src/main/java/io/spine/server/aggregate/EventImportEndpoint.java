@@ -34,7 +34,8 @@ import io.spine.server.type.EventEnvelope;
  *
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
-class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>> extends AggregateEventEndpoint<I, A> {
+final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
+    extends AggregateEventEndpoint<I, A> {
 
     EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope event) {
         super(repository, event);
@@ -72,7 +73,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>> extends AggregateEven
 
     @Override
     protected void onEmptyResult(A aggregate, EventEnvelope event) {
-        _error("The aggregate `{}` was not modified during the import of the event `{}`.",
-               aggregate, event);
+        _error().log("The aggregate `%s` was not modified during the import of the event `%s`.",
+                     aggregate, event);
     }
 }

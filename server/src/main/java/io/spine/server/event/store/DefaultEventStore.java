@@ -21,6 +21,8 @@ package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.common.flogger.FluentLogger;
+import com.google.common.flogger.LoggerConfig;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.Timestamps;
@@ -37,17 +39,18 @@ import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import org.slf4j.Logger;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.flogger.LazyArgs.lazy;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -210,13 +213,17 @@ public final class DefaultEventStore
      */
     final class Log {
 
-        private final Logger log = log();
-        private final boolean debugEnabled = log.isDebugEnabled();
+        private final FluentLogger.Api debug = logger().atFine();
+        private final boolean debugEnabled = debugEnabled();
+
+        private boolean debugEnabled() {
+            Level level = LoggerConfig.getConfig(getClass())
+                                      .getLevel();
+            return level != null && level.intValue() <= Level.FINE.intValue();
+        }
 
         private void stored(Event event) {
-            if (debugEnabled) {
-                log.debug("Stored: {}.", TextFormat.shortDebugString(event));
-            }
+            debug.log("Stored: %s.", lazy(() -> TextFormat.shortDebugString(event)));
         }
 
         private void stored(Iterable<Event> events) {
@@ -228,18 +235,13 @@ public final class DefaultEventStore
         }
 
         private void readingStart(EventStreamQuery query, StreamObserver<Event> observer) {
-            if (log.isDebugEnabled()) {
-                String requestData = TextFormat.shortDebugString(query);
-                log.debug("Creating stream on request: {} for observer: {}.",
-                          requestData,
-                          observer);
-            }
+            debug.log("Creating stream on request: `%s` for observer: `%s`.",
+                      lazy(() -> TextFormat.shortDebugString(query)),
+                      observer);
         }
 
         private void readingComplete(StreamObserver<Event> observer) {
-            if (log.isDebugEnabled()) {
-                log.debug("Observer {} got all queried events.", observer);
-            }
+            debug.log("Observer `%s` got all queried events.", observer);
         }
     }
 }

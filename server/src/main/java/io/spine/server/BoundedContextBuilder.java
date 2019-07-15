@@ -499,7 +499,7 @@ public final class BoundedContextBuilder implements Logging {
     public BoundedContext build() {
         SystemContext system = buildSystem();
         BoundedContext result = buildDomain(system);
-        log().debug("{} created.", result.nameForLogging());
+        _debug().log("%s created.", result.nameForLogging());
 
         registerRepositories(result);
         registerDispatchers(result);
@@ -535,7 +535,7 @@ public final class BoundedContextBuilder implements Logging {
     private void registerRepositories(BoundedContext result) {
         for (Repository<?, ?> repository : repositories) {
             result.register(repository);
-            log().debug("{} registered.", repository);
+            _debug().log("`%s` registered.", repository);
         }
     }
 

@@ -30,7 +30,6 @@ import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.logging.Logging;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
@@ -41,17 +40,17 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.event.SubstituteLoggingEvent;
-import org.slf4j.helpers.SubstituteLogger;
 
-import java.util.ArrayDeque;
 import java.util.List;
+import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
@@ -63,7 +62,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.slf4j.event.Level.WARN;
 
 @SuppressWarnings("deprecation")
 // The deprecated `Stand.post()` method will become test-only in the future.
@@ -350,41 +348,75 @@ class SubscriptionServiceTest {
         verify(activateSubscription, never()).onCompleted();
     }
 
-    @Test
-    @DisplayName("produce a warning and complete silently on cancelling non-existent subscription")
-    void warnOnCancellingNonExistent() {
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        BoundedContext boundedContext = boundedContextWith(repository);
+    @Nested
+    @DisplayName("when cancelling non-existent subscription")
+    class WarnOnCancelling extends LoggingTest {
 
-        SubscriptionService subscriptionService = SubscriptionService
-                .newBuilder()
-                .add(boundedContext)
-                .build();
+        private BoundedContext context;
+        private MemoizingObserver<Response> cancellationObserver;
 
-        // Try cancelling a subscription to `Customer` entity which is not present in BC.
-        Topic invalidTopic = requestFactory.topic()
-                                           .allOf(Customer.class);
-        Subscription invalidSubscription = Subscription
-                .newBuilder()
-                .setTopic(invalidTopic)
-                .build();
+        WarnOnCancelling() {
+            super(SubscriptionService.class, Level.WARNING);
+        }
 
-        // Redirect `SubscriptionService` logging so we can check it.
-        SubstituteLogger serviceLogger = (SubstituteLogger) Logging.get(SubscriptionService.class);
-        ArrayDeque<SubstituteLoggingEvent> loggedMessages = new ArrayDeque<>();
-        Logging.redirect(serviceLogger, loggedMessages);
+        @BeforeEach
+        void cancelSubscription() {
+            SubscriptionService subscriptionService = createService();
+            Subscription invalidSubscription = createSubscription();
 
-        MemoizingObserver<Response> cancellationObserver = new MemoizingObserver<>();
-        subscriptionService.cancel(invalidSubscription, cancellationObserver);
+            // Hook the log here to minimize the trapped output.
+            interceptLogging();
 
-        // Check observer is completed and contains nothing.
-        assertThat(cancellationObserver.isCompleted()).isTrue();
-        assertThat(cancellationObserver.responses()).isEmpty();
-        assertThat(cancellationObserver.getError()).isNull();
+            cancellationObserver = new MemoizingObserver<>();
+            subscriptionService.cancel(invalidSubscription, cancellationObserver);
+        }
 
-        // Check the last logged message is a warning.
-        SubstituteLoggingEvent lastMessage = loggedMessages.getLast();
-        assertThat(lastMessage.getLevel()).isEqualTo(WARN);
+        private SubscriptionService createService() {
+            ProjectAggregateRepository repository = new ProjectAggregateRepository();
+            context = boundedContextWith(repository);
+            return SubscriptionService
+                    .newBuilder()
+                    .add(context)
+                    .build();
+        }
+
+        /**
+         * Creates a subscription with the entity state {@code Customer}, which is not present
+         * in the context under the test.
+         */
+        private Subscription createSubscription() {
+            Topic invalidTopic = requestFactory.topic()
+                                               .allOf(Customer.class);
+            return Subscription
+                    .newBuilder()
+                    .setTopic(invalidTopic)
+                    .build();
+        }
+
+        @AfterEach
+        void tearDown() throws Exception {
+            restoreLogging();
+            context.close();
+        }
+
+        @Test
+        @DisplayName("do not return the error to the observer")
+        void observerIsEmpty() {
+            assertThat(cancellationObserver.isCompleted())
+                    .isTrue();
+            assertThat(cancellationObserver.responses())
+                    .isEmpty();
+            assertThat(cancellationObserver.getError())
+                    .isNull();
+        }
+
+        @Test
+        @DisplayName("log warning")
+        void nonExistingSubscription() {
+            assertLog().record()
+                       .hasLevelThat()
+                       .isEqualTo(level());
+        }
     }
 
     @Nested

@@ -84,11 +84,12 @@ public class TestClient implements Logging {
         TypeName commandType = TypeName.of(domainCommand);
         Ack result = null;
         try {
-            _debug("Sending command: {} ...", commandType);
+            _debug().log("Sending command: `%s` ...", commandType);
             result = commandClient.post(command);
-            _debug("Ack: {}", result.toString());
+            _debug().log("Ack: `%s`.", result.toString());
         } catch (RuntimeException e) {
-            _warn(RPC_FAILED, e);
+            _warn().withCause(e)
+                   .log(RPC_FAILED);
         }
         return Optional.ofNullable(result);
     }
@@ -107,10 +108,11 @@ public class TestClient implements Logging {
             return result;
         } catch (StatusRuntimeException e) {
             String message = e.getMessage();
-            _error("Error occurred when executing query: {}",
-                   StreamObservers.fromStreamError(e)
-                                  .map(Stringifiers::toString)
-                                  .orElse(message));
+            _error().withCause(e)
+                    .log("Error occurred when executing query: %s.",
+                         StreamObservers.fromStreamError(e)
+                                        .map(Stringifiers::toString)
+                                        .orElse(message));
             throw newIllegalStateException(e, message);
         }
     }

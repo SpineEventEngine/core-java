@@ -20,9 +20,12 @@
 
 package io.spine.model.verify;
 
-import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.slf4j.Logger;
+import com.google.common.collect.Ordering;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.String.format;
 
@@ -33,7 +36,7 @@ final class ClassSet {
 
     private final ClassLoader classLoader;
     private final ImmutableSet<Class<?>> elements;
-    private final ImmutableSet<String> notFound;
+    private final ImmutableList<String> notFound;
 
     ClassSet(ClassLoader classLoader, Iterable<String> classNames) {
         this.classLoader = classLoader;
@@ -50,28 +53,26 @@ final class ClassSet {
             }
         }
         this.elements = elements.build();
-        this.notFound = notFound.build();
+        List<String> sorted = new ArrayList<>(notFound.build());
+        sorted.sort(Ordering.natural());
+        this.notFound = ImmutableList.copyOf(sorted);
     }
 
     private Class<?> createRawClass(String fqn) throws ClassNotFoundException {
         return Class.forName(fqn, false, classLoader);
     }
 
+    /**
+     * Obtains classes of this set.
+     */
     ImmutableSet<Class<?>> elements() {
         return elements;
     }
 
-    void reportNotFoundIfAny(Logger log) {
-        if (notFound.isEmpty()) {
-            return;
-        }
-        String msg = "Failed to load "
-                + (notFound.size() > 1 ? "classes " : "the class ")
-                + Joiner.on(", ")
-                        .join(notFound)
-                + format(".%n")
-                + "Consider using the `io.spine.tools.spine-model-verifier` plugin" +
-                " only for the modules with the sufficient classpath.";
-        log.warn(msg);
+    /**
+     * Obtains the sorted list of class names that are not found in the classpath.
+     */
+    ImmutableList<String> notFound() {
+        return notFound;
     }
 }

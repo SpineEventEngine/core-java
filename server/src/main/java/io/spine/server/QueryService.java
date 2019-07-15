@@ -62,7 +62,7 @@ public class QueryService
 
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-        _debug("Incoming query: {}", query);
+        _debug().log("Incoming query: %s.", query);
 
         TypeUrl type = Queries.typeOf(query);
         BoundedContext boundedContext = typeToContextMap.get(type);
@@ -80,18 +80,20 @@ public class QueryService
         try {
             stand.execute(query, responseObserver);
         } catch (InvalidRequestException e) {
-            _error("Invalid request. {}", e.asError());
+            _error().log("Invalid request. `%s`", e.asError());
             StatusRuntimeException exception = invalidArgumentWithCause(e);
             responseObserver.onError(exception);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error(e, "Error processing query.");
+            _error().withCause(e)
+                    .log("Error processing query.");
             responseObserver.onError(e);
         }
     }
 
     private void handleUnsupported(TypeUrl type, StreamObserver<QueryResponse> observer) {
         UnknownEntityTypeException exception = new UnknownEntityTypeException(type);
-        _error(exception, "Unknown type encountered.");
+        _error().withCause(exception)
+                .log("Unknown type encountered.");
         observer.onError(exception);
     }
 
