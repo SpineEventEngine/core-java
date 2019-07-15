@@ -95,9 +95,7 @@ public interface HandlerMethod<T,
      * @throws IllegalOutcomeException
      *         if the method produced result of an unexpected format
      */
-    Success toSuccessfulOutcome(@Nullable Object rawResult,
-                                T target,
-                                E handledSignal)
+    Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal)
             throws IllegalOutcomeException;
 
     /**
