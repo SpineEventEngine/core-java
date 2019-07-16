@@ -225,7 +225,7 @@ public class TestProcessManager
 
     @Command(external = true)
     PmCreateProject on(PmQuizStarted event) {
-        return PmCreateProject.getDefaultInstance();
+        return messageOfType(PmCreateProject.class);
     }
 
     @React(external = true)

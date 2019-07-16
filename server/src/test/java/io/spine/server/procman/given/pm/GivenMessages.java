@@ -34,6 +34,8 @@ import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmOwnerChanged;
+import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.test.procman.quiz.event.PmQuizStarted;
 
 import static io.spine.server.procman.given.pm.TestProcessManager.ID;
 import static io.spine.testdata.Sample.messageOfType;
@@ -97,6 +99,13 @@ public class GivenMessages {
         return PmOwnerChanged
                 .newBuilder()
                 .setProjectId(ID)
+                .build();
+    }
+
+    public static PmQuizStarted quizStarted() {
+        return PmQuizStarted
+                .newBuilder()
+                .setQuizId(messageOfType(PmQuizId.class))
                 .build();
     }
 }

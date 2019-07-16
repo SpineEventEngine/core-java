@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -95,6 +96,7 @@ import static io.spine.server.procman.given.pm.GivenMessages.createProject;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
+import static io.spine.server.procman.given.pm.GivenMessages.quizStarted;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
@@ -361,6 +363,14 @@ class ProcessManagerTest {
             void commandOnEvent() {
                 boundedContext.receivesEvent(ownerChanged())
                               .assertThat(emittedCommand(PmReviewBacklog.class));
+            }
+
+            @Test
+            @DisplayName("on incoming external event")
+            void commandOnExternalEvent() {
+                boundedContext.receivesExternalEvent(BoundedContextNames.assumingTests(),
+                                                     quizStarted())
+                              .assertThat(emittedCommand(PmCreateProject.class));
             }
         }
 
