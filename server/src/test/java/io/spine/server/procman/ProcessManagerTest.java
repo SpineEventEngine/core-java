@@ -432,8 +432,8 @@ class ProcessManagerTest {
         /**
          * This test executes two commands, thus checks for 2 Acks:
          * <ol>
-         * <li>{@link PmStartQuiz Start Quiz} — to start the process;
-         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         *     <li>{@link PmStartQuiz Start Quiz} — to start the process;
+         *     <li>{@link PmAnswerQuestion Answer Question } — a target
          * command that produces either of 3 events.
          * </ol>
          *
