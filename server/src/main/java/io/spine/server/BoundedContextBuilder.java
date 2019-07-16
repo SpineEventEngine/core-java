@@ -47,6 +47,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
+import io.spine.system.server.SystemFeatures;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 

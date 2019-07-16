@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Internal;
 
 /**
  * System bounded context feature configuration.
@@ -47,7 +48,7 @@ public final class SystemFeatures {
      *     <li>Does not store system events.
      * </ol>
      */
-    static SystemFeatures defaults() {
+    public static SystemFeatures defaults() {
         return new SystemFeatures()
                 .disableCommandLog()
                 .enableAggregateQuerying()
@@ -135,7 +136,7 @@ public final class SystemFeatures {
      *
      * @return {@code true} if the Command log should be stored, {@code false} otherwise
      */
-    public boolean includeCommandLog() {
+    boolean includeCommandLog() {
         return commandLog;
     }
 
@@ -144,7 +145,7 @@ public final class SystemFeatures {
      *
      * @return {@code true} if the Aggregate mirrors should be stored, {@code false} otherwise
      */
-    public boolean includeAggregateMirroring() {
+    boolean includeAggregateMirroring() {
         return aggregateMirrors;
     }
 
@@ -153,6 +154,7 @@ public final class SystemFeatures {
      *
      * @return {@code true} if system events should be stored, {@code false} otherwise
      */
+    @Internal
     public boolean includePersistentEvents() {
         return storeEvents;
     }
