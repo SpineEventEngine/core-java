@@ -455,9 +455,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
             Message idAsMessage = unpack(idAsAny);
 
-            @SuppressWarnings("unchecked") /* As the message class is the same as expected,
-                                              the conversion is safe. */
-                    I id = (I) idAsMessage;
+            @SuppressWarnings("unchecked")
+                // As the message class is the same as expected, the conversion is safe.
+            I id = (I) idAsMessage;
             return id;
         }
 
