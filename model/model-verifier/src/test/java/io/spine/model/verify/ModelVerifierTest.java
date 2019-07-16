@@ -156,7 +156,7 @@ class ModelVerifierTest {
 
     @Test
     @DisplayName("fail on command receiving methods marked as external")
-    void failOnExternalCommandHandlers() {
+    void failOnExternalCommandReceivers() {
         ModelVerifier verifier = new ModelVerifier(project);
         String invalidProcman = InvalidCommander.class.getName();
         CommandHandlers spineModel = CommandHandlers
