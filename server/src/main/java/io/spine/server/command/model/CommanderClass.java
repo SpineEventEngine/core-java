@@ -25,6 +25,8 @@ import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
+import io.spine.server.model.ExternalCommandReceiverMethodError;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -33,6 +35,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Provides information on message handling for a class of {@link Commander}s.
@@ -50,6 +53,7 @@ public final class CommanderClass<C extends Commander>
     private CommanderClass(Class<C> cls) {
         super(cls, new CommandSubstituteSignature());
         this.delegate = new EventReceivingClassDelegate<>(cls, new CommandReactionSignature());
+        validateExternalMethods();
     }
 
     public static <C extends Commander> CommanderClass<C> delegateFor(Class<C> cls) {
@@ -95,5 +99,27 @@ public final class CommanderClass<C extends Commander>
     public Set<CommandClass> outgoingCommands() {
         SetView<CommandClass> result = union(commandOutput(), delegate.producedTypes());
         return result;
+    }
+
+    /**
+     * Makes sure no command substitution methods are marked as
+     * {@linkplain io.spine.server.command.Command#external()} external} in the class.
+     *
+     * <p>Command substitution methods accept {@linkplain io.spine.base.CommandMessage commands} as
+     * input and there is no notion of "external" commands in the system. Thus, such method
+     * declarations, although technically possible, should be avoided to prevent confusion.
+     *
+     * @throws ExternalCommandReceiverMethodError
+     *         in case external command substitution methods are found within the class
+     */
+    private void validateExternalMethods() {
+        Set<CommandSubstituteMethod> methods = commands()
+                         .stream()
+                         .map(this::handlerOf)
+                         .filter(HandlerMethod::isExternal)
+                         .collect(toSet());
+        if (!methods.isEmpty()) {
+            throw new ExternalCommandReceiverMethodError(this, methods);
+        }
     }
 }

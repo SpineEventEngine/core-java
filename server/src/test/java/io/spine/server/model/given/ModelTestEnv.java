@@ -97,7 +97,7 @@ public class ModelTestEnv {
 
     /**
      * A commander that declares an {@code external} command substitution method, which is
-     * forbidden by the {@linkplain io.spine.server.procman.model.ProcessManagerClass model}.
+     * forbidden by the {@linkplain io.spine.server.command.model.CommanderClass model}.
      */
     public static class FaultyCommander
             extends ProcessManager<Long, EmptyProcess, EmptyProcess.Builder> {
