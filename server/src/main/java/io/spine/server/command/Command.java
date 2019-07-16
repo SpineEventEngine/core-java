@@ -90,9 +90,8 @@ public @interface Command {
      * <p>Should only be applied to commander methods that accept an event or rejection as a
      * parameter.
      *
-     * <p>If applied to a command receiving method, the
-     * {@linkplain io.spine.server.model.ExternalCommandReceiverMethodError Model error} is
-     * produced.
+     * <p>If applied to a command receiving method, the Model
+     * {@linkplain io.spine.server.model.ExternalCommandReceiverMethodError error} is produced.
      */
     boolean external() default false;
 }
