@@ -22,11 +22,11 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
 
@@ -40,12 +40,12 @@ public final class ContextSpec {
 
     private final BoundedContextName name;
     private final boolean multitenant;
-    private final boolean system;
+    private final boolean storeEvents;
 
-    private ContextSpec(BoundedContextName name, boolean multitenant, boolean system) {
+    private ContextSpec(BoundedContextName name, boolean multitenant, boolean storeEvents) {
         this.name = checkNotNull(name);
         this.multitenant = multitenant;
-        this.system = system;
+        this.storeEvents = storeEvents;
     }
 
     /**
@@ -67,13 +67,16 @@ public final class ContextSpec {
     private static ContextSpec createDomain(String name, boolean multitenant) {
         checkNotNull(name);
         BoundedContextName contextName = newName(name);
-        return new ContextSpec(contextName, multitenant, false);
+        return new ContextSpec(contextName, multitenant, true);
     }
 
     ContextSpec toSystem() {
-        checkArgument(!isSystem());
         BoundedContextName systemName = BoundedContextNames.system(name);
-        return new ContextSpec(systemName, multitenant, true);
+        return new ContextSpec(systemName, multitenant, storeEvents);
+    }
+
+    ContextSpec notStoringEvents() {
+        return new ContextSpec(name, multitenant, false);
     }
 
     /**
@@ -90,8 +93,9 @@ public final class ContextSpec {
         return multitenant;
     }
 
-    public boolean isSystem() {
-        return system;
+    @Internal
+    public boolean storesEvents() {
+        return storeEvents;
     }
 
     /**

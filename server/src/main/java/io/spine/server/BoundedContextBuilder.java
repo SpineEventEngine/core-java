@@ -90,7 +90,7 @@ public final class BoundedContextBuilder implements Logging {
 
     private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
 
-    private final SystemFeatures systemFeatures = SystemFeatures.defaults();
+    private final SystemFeatures systemFeatures;
 
     private Stand.Builder stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
@@ -109,7 +109,20 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#multitenant
      */
     BoundedContextBuilder(ContextSpec spec) {
+        this(spec, SystemFeatures.defaults());
+    }
+
+    /**
+     * Prevents direct instantiation.
+     *
+     * @param spec
+     *         the context spec for the built context
+     * @see BoundedContext#singleTenant
+     * @see BoundedContext#multitenant
+     */
+    private BoundedContextBuilder(ContextSpec spec, SystemFeatures systemFeatures) {
         this.spec = checkNotNull(spec);
+        this.systemFeatures = checkNotNull(systemFeatures);
     }
 
     /**
@@ -559,14 +572,20 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem() {
-        BoundedContextBuilder system = new BoundedContextBuilder(spec.toSystem());
+        BoundedContextBuilder system = new BoundedContextBuilder(systemSpec(), systemFeatures);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
-        system.systemFeatures.populateFrom(this.systemFeatures);
-
         SystemContext result =
                 system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
         return result;
+    }
+    
+    private ContextSpec systemSpec() {
+        ContextSpec systemSpec = this.spec.toSystem();
+        if (!systemFeatures.includePersistentEvents()) {
+            systemSpec = systemSpec.notStoringEvents();
+        }
+        return systemSpec;
     }
 
     private <B extends BoundedContext>

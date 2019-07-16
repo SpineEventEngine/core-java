@@ -47,11 +47,9 @@ public final class SystemAwareStorageFactory implements StorageFactory {
 
     public static SystemAwareStorageFactory wrap(StorageFactory factory) {
         checkNotNull(factory);
-        if (factory instanceof SystemAwareStorageFactory) {
-            return (SystemAwareStorageFactory) factory;
-        } else {
-            return new SystemAwareStorageFactory(factory);
-        }
+        return factory instanceof SystemAwareStorageFactory
+               ? (SystemAwareStorageFactory) factory
+               : new SystemAwareStorageFactory(factory);
     }
 
     @VisibleForTesting
@@ -86,11 +84,9 @@ public final class SystemAwareStorageFactory implements StorageFactory {
 
     @Override
     public EventStore createEventStore(ContextSpec context) {
-        if (context.isSystem()) {
-            return new EmptyEventStore();
-        } else {
-            return delegate.createEventStore(context);
-        }
+        return context.storesEvents()
+               ? delegate.createEventStore(context)
+               : new EmptyEventStore();
     }
 
     @Override

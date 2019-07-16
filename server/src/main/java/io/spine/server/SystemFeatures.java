@@ -22,8 +22,6 @@ package io.spine.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * System bounded context feature configuration.
  */
@@ -31,6 +29,7 @@ public final class SystemFeatures {
 
     private boolean commandLog;
     private boolean aggregateMirrors;
+    private boolean storeEvents;
 
     /**
      * Prevents direct instantiation.
@@ -41,7 +40,8 @@ public final class SystemFeatures {
     static SystemFeatures defaults() {
         return new SystemFeatures()
                 .disableCommandLog()
-                .enableAggregateQuerying();
+                .enableAggregateQuerying()
+                .forgetEvents();
     }
 
     @CanIgnoreReturnValue
@@ -68,6 +68,16 @@ public final class SystemFeatures {
         return this;
     }
 
+    public SystemFeatures persistEvents() {
+        this.storeEvents = true;
+        return this;
+    }
+
+    public SystemFeatures forgetEvents() {
+        this.storeEvents = false;
+        return this;
+    }
+
     public boolean includeCommandLog() {
         return commandLog;
     }
@@ -76,9 +86,7 @@ public final class SystemFeatures {
         return aggregateMirrors;
     }
 
-    void populateFrom(SystemFeatures other) {
-        checkNotNull(other);
-        this.aggregateMirrors = other.aggregateMirrors;
-        this.commandLog = other.commandLog;
+    public boolean includePersistentEvents() {
+        return storeEvents;
     }
 }
