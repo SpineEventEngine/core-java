@@ -18,6 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Contains the environment for the {@link io.spine.server.storage.system.SystemAwareStorageFactory}
+ * tests.
+ */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.storage.system.given;

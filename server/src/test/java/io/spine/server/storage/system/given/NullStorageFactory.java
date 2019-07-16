@@ -37,6 +37,10 @@ import java.util.List;
 
 import static io.spine.testing.Tests.nullRef;
 
+/**
+ * A test-only {@link StorageFactory} which always returns {@code null}s instead of storages and
+ * memoizes the requested storage types.
+ */
 public final class NullStorageFactory implements StorageFactory {
 
     private final List<Class<?>> requestedStorages = new ArrayList<>();
