@@ -25,18 +25,18 @@ import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
 
 import java.util.Collection;
-import java.util.Set;
 
 import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
 
 /**
- * An error thrown when the {@link CommandHandlingClass} marks one or more of its command handler
- * methods as {@code external}.
+ * An error thrown when one or more of the command accepting methods are marked {@code external}
+ * in the {@link CommandHandlingClass}.
  *
  * <p>Although technically it's possible for entities like
- * {@linkplain io.spine.server.command.Commander commanders} to declare their command accepting
+ * {@linkplain io.spine.server.command.Command commanders} to declare their command substitution
  * methods as {@linkplain io.spine.server.command.Command#external() external}, there is no notion
- * of "external" commands in the system. So, to avoid confusion, such declarations are forbidden.
+ * of "external" commands in the system, and, to avoid confusion, such declarations should be
+ * removed.
  *
  * <p>Example of a faulty method:
  * <pre>
@@ -47,17 +47,18 @@ import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumerat
  *     }
  * </pre>
  */
-public final class ExternalCommandHandlerError extends ModelError {
+public final class ExternalCommandReceiverMethodError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
     private static final String MESSAGE =
-            "The class `%s` declares `external` command handlers for command types: %s. " +
+            "The class `%s` declares `external` command receiver methods for command types: %s. " +
                     "Only event accepting methods should be marked as `external`.";
 
-    ExternalCommandHandlerError(CommandHandlingClass classWithViolation,
-                                Set<? extends CommandAcceptingMethod<?, ?>> invalidHandlers) {
-        super(MESSAGE, classWithViolation, handledCommandTypes(invalidHandlers));
+    public ExternalCommandReceiverMethodError(
+            CommandHandlingClass classWithViolation,
+            Collection<? extends CommandAcceptingMethod<?, ?>> invalidMethods) {
+        super(MESSAGE, classWithViolation, handledCommandTypes(invalidMethods));
     }
 
     private static String

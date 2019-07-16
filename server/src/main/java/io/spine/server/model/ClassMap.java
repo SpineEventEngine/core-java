@@ -22,7 +22,6 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
 
@@ -31,7 +30,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.collect.Sets.intersection;
-import static java.util.stream.Collectors.toSet;
 
 /**
  * Maps a Java class to its {@link ModelClass}.
@@ -105,9 +103,7 @@ final class ClassMap {
         ModelClass<T> modelClass;
         modelClass = supplier.get();
         if (modelClass instanceof CommandHandlingClass) {
-            CommandHandlingClass<?, ?> theClass = (CommandHandlingClass<?, ?>) modelClass;
-            checkDuplicates(theClass);
-            checkExternalCommandHandlers(theClass);
+            checkDuplicates((CommandHandlingClass<?, ?>) modelClass);
         }
         classes.put(key, modelClass);
         return modelClass;
@@ -138,28 +134,6 @@ final class ClassMap {
         ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = duplicates.build();
         if (!currentHandlers.isEmpty()) {
             throw new DuplicateCommandHandlerError(candidate, currentHandlers);
-        }
-    }
-
-    /**
-     * Checks that the class does not declare any {@code external} command handling methods.
-     *
-     * <p>There is no notion of "external" commands in the system and such declarations, although
-     * technically possible, should be eliminated to avoid confusion.
-     *
-     * @throws ExternalCommandHandlerError
-     *         in case external command handler declarations are found within the class
-     */
-    private static <H extends CommandAcceptingMethod<?, ?>> void
-    checkExternalCommandHandlers(CommandHandlingClass<?, H> candidate) {
-        Set<H> externalCommandHandlers =
-                candidate.commands()
-                         .stream()
-                         .map(candidate::handlerOf)
-                         .filter(HandlerMethod::isExternal)
-                         .collect(toSet());
-        if (!externalCommandHandlers.isEmpty()) {
-            throw new ExternalCommandHandlerError(candidate, externalCommandHandlers);
         }
     }
 }
