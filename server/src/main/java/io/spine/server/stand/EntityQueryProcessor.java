@@ -52,22 +52,30 @@ class EntityQueryProcessor implements QueryProcessor {
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         Target target = query.getTarget();
-        FieldMask fieldMask = query.getFieldMask();
-
-        Iterator<EntityRecord> entities;
-        if (target.getIncludeAll() && fieldMask.getPathsList()
-                                               .isEmpty()) {
-            entities = repository.loadAllRecords();
-        } else {
-            TargetFilters filters = target.getFilters();
-            OrderBy orderBy = query.getOrderBy();
-            Pagination pagination = query.getPagination();
-            entities = repository.findRecords(filters, orderBy, pagination, fieldMask);
-        }
+        Iterator<EntityRecord> entities = target.getIncludeAll()
+                                          ? loadAll(query)
+                                          : loadByQuery(query);
         ImmutableList<EntityStateWithVersion> result = stream(entities)
                 .map(EntityQueryProcessor::toEntityState)
                 .collect(toImmutableList());
         return result;
+    }
+
+    private Iterator<EntityRecord> loadByQuery(Query query) {
+        Target target = query.getTarget();
+        TargetFilters filters = target.getFilters();
+        OrderBy orderBy = query.getOrderBy();
+        Pagination pagination = query.getPagination();
+        FieldMask mask = query.getFieldMask();
+        Iterator<EntityRecord> entities =
+                repository.findRecords(filters, orderBy, pagination, mask);
+        return entities;
+    }
+
+    private Iterator<EntityRecord> loadAll(Query query) {
+        FieldMask mask = query.getFieldMask();
+        Iterator<EntityRecord> entities = repository.loadAllRecords(mask);
+        return entities;
     }
 
     private static EntityStateWithVersion toEntityState(EntityRecord record) {

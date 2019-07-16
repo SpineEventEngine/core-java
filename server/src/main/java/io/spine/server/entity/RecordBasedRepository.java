@@ -297,6 +297,26 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
+     * Obtains iterator over all present {@linkplain EntityRecord entity records}.
+     *
+     * <p>The resulting entity states have only the specified in the {@code mask} fields. However,
+     * if the {@code mask} is empty, all the fields are retrieved.
+     *
+     * @return an iterator over all records
+     */
+    @Internal
+    public Iterator<EntityRecord> loadAllRecords(FieldMask mask) {
+        checkNotNull(mask);
+        if (mask.getPathsCount() == 0) {
+            return loadAllRecords();
+        } else {
+            RecordStorage<I> storage = recordStorage();
+            Iterator<EntityRecord> records = storage.readAll(mask);
+            return records;
+        }
+    }
+
+    /**
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
      * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
      * OrderBy in which to look for and return results in is specified by the {@link OrderBy}.
