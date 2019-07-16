@@ -67,7 +67,7 @@ message OrderBy {
         // An order in which every following value is greater than the previous one.
         //
         // For example, collections sorted in an ascending order are `[1, 2, 3]` and 
-        // `["2 cherries", "apple", "appricot", "orange"]`.
+        // `["2 cherries", "apple", "apricot", "orange"]`.
         //
         // The missing values are placed at the beginning of a collection in an ascending order:
         // `[null, -2211760924, 0, 943912800]`.
