@@ -70,15 +70,6 @@ public final class ContextSpec {
         return new ContextSpec(contextName, multitenant, true);
     }
 
-    ContextSpec toSystem() {
-        BoundedContextName systemName = BoundedContextNames.system(name);
-        return new ContextSpec(systemName, multitenant, storeEvents);
-    }
-
-    ContextSpec notStoringEvents() {
-        return new ContextSpec(name, multitenant, false);
-    }
-
     /**
      * Obtains the context name.
      */
@@ -96,6 +87,15 @@ public final class ContextSpec {
     @Internal
     public boolean storesEvents() {
         return storeEvents;
+    }
+
+    ContextSpec toSystem() {
+        BoundedContextName systemName = BoundedContextNames.system(name);
+        return new ContextSpec(systemName, multitenant, storeEvents);
+    }
+
+    ContextSpec notStoringEvents() {
+        return new ContextSpec(name, multitenant, false);
     }
 
     /**
