@@ -87,7 +87,12 @@ public @interface Command {
      * When {@code true}, the annotated method receives an event generated from outside of the
      * Bounded Context to which the annotated method's class belongs.
      *
-     * <p>Has no effect when applied to method that accepts commands.
+     * <p>Should only be applied to commander methods that accept an event or rejection as a
+     * parameter.
+     *
+     * <p>If applied to a command receiving method, the
+     * {@linkplain io.spine.server.model.ExternalCommandReceiverMethodError Model error} is
+     * produced.
      */
     boolean external() default false;
 }
