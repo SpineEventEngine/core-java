@@ -46,6 +46,8 @@ import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.quiz.event.PmQuestionAnswered;
+import io.spine.test.procman.quiz.event.PmQuizStarted;
 
 import java.util.Optional;
 
@@ -215,6 +217,20 @@ public class TestProcessManager
     PmNotificationSent on(PmProjectStarted event) {
         remember(event);
         return messageOfType(PmNotificationSent.class);
+    }
+
+    /*
+     * Reactions on external events
+     **************************/
+
+    @React(external = true)
+    Nothing on(PmQuizStarted event) {
+        return nothing();
+    }
+
+    @Command(external = true)
+    PmCreateProject on(PmQuestionAnswered event) {
+        return PmCreateProject.getDefaultInstance();
     }
 
     /*

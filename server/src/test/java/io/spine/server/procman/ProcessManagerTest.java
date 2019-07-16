@@ -49,6 +49,7 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
+import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
@@ -431,8 +432,8 @@ class ProcessManagerTest {
         /**
          * This test executes two commands, thus checks for 2 Acks:
          * <ol>
-         *     <li>{@link PmStartQuiz Start Quiz} — to start the process;
-         *     <li>{@link PmAnswerQuestion Answer Question } — a target
+         * <li>{@link PmStartQuiz Start Quiz} — to start the process;
+         * <li>{@link PmAnswerQuestion Answer Question } — a target
          * command that produces either of 3 events.
          * </ol>
          *
@@ -481,6 +482,7 @@ class ProcessManagerTest {
                     asProcessManagerClass(TestProcessManager.class);
             Set<CommandClass> commands = pmClass.outgoingCommands();
             assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
+                    PmCreateProject.class,
                     PmAddTask.class,
                     PmReviewBacklog.class,
                     PmScheduleRetrospective.class,
@@ -501,6 +503,18 @@ class ProcessManagerTest {
                     PmNotificationSent.class,
                     PmIterationPlanned.class,
                     PmIterationStarted.class
+            ));
+        }
+
+        @Test
+        @DisplayName("handled external event classes")
+        void handledExternalEvents() {
+            ProcessManagerClass<TestProcessManager> pmClass =
+                    asProcessManagerClass(TestProcessManager.class);
+            Set<EventClass> externalEvents = pmClass.externalEvents();
+            assertThat(externalEvents).containsExactlyElementsIn(EventClass.setOf(
+                    PmQuizStarted.class,
+                    PmQuestionAnswered.class
             ));
         }
     }
