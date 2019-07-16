@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.spine.server.command.model.CommandAcceptingMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
 
@@ -30,6 +31,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.collect.Sets.intersection;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Maps a Java class to its {@link ModelClass}.
@@ -103,7 +105,9 @@ final class ClassMap {
         ModelClass<T> modelClass;
         modelClass = supplier.get();
         if (modelClass instanceof CommandHandlingClass) {
-            checkDuplicates((CommandHandlingClass<?, ?>) modelClass);
+            CommandHandlingClass<?, ?> theClass = (CommandHandlingClass<?, ?>) modelClass;
+            checkDuplicates(theClass);
+            checkExternalCommandHandlers(theClass);
         }
         classes.put(key, modelClass);
         return modelClass;
@@ -134,6 +138,19 @@ final class ClassMap {
         ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = duplicates.build();
         if (!currentHandlers.isEmpty()) {
             throw new DuplicateCommandHandlerError(candidate, currentHandlers);
+        }
+    }
+
+    private static <H extends CommandAcceptingMethod<?, ?>> void
+    checkExternalCommandHandlers(CommandHandlingClass<?, H> candidate) {
+        Set<H> externalCommandHandlers =
+                candidate.commands()
+                         .stream()
+                         .map(candidate::handlerOf)
+                         .filter(HandlerMethod::isExternal)
+                         .collect(toSet());
+        if (!externalCommandHandlers.isEmpty()) {
+            throw new ExternalCommandHandlerError(candidate, externalCommandHandlers);
         }
     }
 }
