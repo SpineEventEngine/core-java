@@ -36,6 +36,15 @@ import io.spine.server.storage.StorageFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * An implementation of {@link StorageFactory} which may produce an empty {@link EventStore} for
+ * system context.
+ *
+ * <p>Delegates storage creation to another factory.
+ *
+ * <p>When asked for a {@link EventStore}, creates an {@link EmptyEventStore} if the given context
+ * does not store events. Otherwise, delegates to the associated delegate factory.
+ */
 @Internal
 public final class SystemAwareStorageFactory implements StorageFactory {
 
@@ -45,6 +54,14 @@ public final class SystemAwareStorageFactory implements StorageFactory {
         this.delegate = delegate;
     }
 
+    /**
+     * Wraps the given factory into a {@code SystemAwareStorageFactory}.
+     *
+     * @param factory
+     *         the {@link StorageFactory} to use as the delegate for storage construction
+     * @return a new {@code SystemAwareStorageFactory} of the given {@code factory} if it is
+     *         an instance of {@code SystemAwareStorageFactory}
+     */
     public static SystemAwareStorageFactory wrap(StorageFactory factory) {
         checkNotNull(factory);
         return factory instanceof SystemAwareStorageFactory
@@ -52,6 +69,9 @@ public final class SystemAwareStorageFactory implements StorageFactory {
                : new SystemAwareStorageFactory(factory);
     }
 
+    /**
+     * Obtains the wrapped factory.
+     */
     @VisibleForTesting
     public StorageFactory delegate() {
         return delegate;
@@ -82,6 +102,12 @@ public final class SystemAwareStorageFactory implements StorageFactory {
         return delegate.createInboxStorage(multitenant);
     }
 
+    /**
+     * Creates a new {@link EventStore}.
+     *
+     * <p>If the given context does not store events, returns an {@link EmptyEventStore}. Otherwise,
+     * delegates to the wrapped instance.
+     */
     @Override
     public EventStore createEventStore(ContextSpec context) {
         return context.storesEvents()
@@ -89,6 +115,9 @@ public final class SystemAwareStorageFactory implements StorageFactory {
                : new EmptyEventStore();
     }
 
+    /**
+     * Closes the associated delegate factory.
+     */
     @Override
     public void close() throws Exception {
         delegate.close();

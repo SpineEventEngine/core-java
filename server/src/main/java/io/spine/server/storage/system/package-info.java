@@ -18,6 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Contains an implementation of {@link io.spine.server.storage.StorageFactory} aware of the system
+ * context specifics.
+ */
+
 @Internal
 @CheckReturnValue
 @ParametersAreNonnullByDefault

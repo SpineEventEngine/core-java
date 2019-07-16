@@ -27,6 +27,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 
+/**
+ * An implementation of {@link EventStore} which never stores any events.
+ */
 @Internal
 public final class EmptyEventStore implements EventStore {
 
