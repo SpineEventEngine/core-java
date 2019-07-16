@@ -22,11 +22,17 @@ package io.spine.server.delivery;
 
 import io.spine.server.type.CommandEnvelope;
 
+/**
+ * An endpoint which accepts commands.
+ *
+ * @param <I>
+ *         the type of target identifier
+ */
 public interface CommandEndpoint<I> extends MessageEndpoint<I, CommandEnvelope> {
 
     @Override
     default void onDuplicate(I target, CommandEnvelope envelope) {
         repository().lifecycleOf(target)
-                    .onDuplicateCommand(envelope);
+                    .onDuplicateCommand(envelope.id());
     }
 }

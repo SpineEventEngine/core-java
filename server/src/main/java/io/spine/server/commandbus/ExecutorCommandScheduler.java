@@ -54,7 +54,7 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
     @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.
     @Override
     protected void doSchedule(Command command) {
-        final long delayMillis = getDelayMilliseconds(command);
+        final long delayMillis = delayMillisecondsOf(command);
         executorService.schedule(() -> safePost(command),
                                  delayMillis, MILLISECONDS);
     }
@@ -71,16 +71,16 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
         try {
             post(command);
         } catch (Throwable t) {
-            _error(t,
-                   "Error scheduling command `{}` with ID `{}`: {}",
-                   command.typeUrl(),
-                   command.getId()
-                          .getUuid(),
-                   t.getLocalizedMessage());
+            _error().withCause(t)
+                    .log("Error scheduling command `%s` with ID `%s`: `%s`.",
+                         command.typeUrl(),
+                         command.getId()
+                                .getUuid(),
+                         t.getLocalizedMessage());
         }
     }
 
-    private static long getDelayMilliseconds(Command command) {
+    private static long delayMillisecondsOf(Command command) {
         Schedule schedule = command.getContext()
                                    .getSchedule();
         Duration delay = schedule.getDelay();

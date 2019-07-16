@@ -18,34 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.command.model.given.reaction;
 
-import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.type.CommandEnvelope;
-
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.server.command.Command;
+import io.spine.server.model.Nothing;
+import io.spine.server.tuple.EitherOf3;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdStartTask;
+import io.spine.test.command.event.CmdProjectCreated;
 
 /**
- * A wrapper for a handled {@linkplain io.spine.base.ThrowableMessage rejection}.
+ * Optionally generates a command.
  *
- * <p>Performs no action on {@link #rethrowOnce()} and returns the given rejection event
- * on {@link #asRejection()}.
+ * <p>To make it generate a command pass the event {@link CmdProjectCreated} with
+ * {@link CmdProjectCreated#getInitialize() initialize} attribute set to {@code true}.
  */
-final class CaughtRejection implements CaughtError {
+public class ReEitherWithNothing extends TestCommandReactor {
 
-    private final RejectionEnvelope rejection;
-
-    CaughtRejection(CommandEnvelope origin, RuntimeException exception) {
-        checkNotNull(origin);
-        checkNotNull(exception);
-
-        this.rejection = RejectionEnvelope.from(origin, exception);
-    }
-
-    @Override
-    public Optional<RejectionEnvelope> asRejection() {
-        return Optional.of(rejection);
+    @Command
+    EitherOf3<CmdAddTask, CmdStartTask, Nothing> commandOn(CmdProjectCreated event) {
+        if (event.getInitialize()) {
+            return EitherOf3.withA(CmdAddTask.newBuilder()
+                                         .setProjectId(event.getProjectId())
+                                         .build());
+        }
+        return EitherOf3.withC(Nothing.getDefaultInstance());
     }
 }

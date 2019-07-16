@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Experimental;
 import io.spine.server.BoundedContext;
 
 import java.util.Optional;
@@ -33,6 +34,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @param <I> the type for IDs of this class of aggregates
  */
+@Experimental
 public class AggregateRoot<I> {
 
     /** The {@code BoundedContext} to which the aggregate belongs. */

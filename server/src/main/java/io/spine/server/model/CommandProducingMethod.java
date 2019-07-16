@@ -35,7 +35,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -54,29 +53,32 @@ public interface CommandProducingMethod<T,
                                         E extends MessageEnvelope<?, ?, ?>>
         extends HandlerMethod<T, C, E, CommandClass> {
 
+    /**
+     * Creates success result from the empty result of the method execution.
+     *
+     * @param handledSignal
+     *          the signal passed to the method
+     * @throws IllegalOutcomeException
+     *           if the method is not allowed to return empty result
+     */
+    Success fromEmpty(E handledSignal);
+
     @Override
-    default Success toSuccessfulOutcome(@Nullable Object rawResult,
-                                        T target,
-                                        MessageEnvelope<?, ?, ?> handledSignal) {
+    default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
         MethodResult result = MethodResult.from(rawResult);
-        ActorContext actorContext = handledSignal.asMessageOrigin()
-                                                 .getActorContext();
+        if (result.isEmpty()) {
+            return fromEmpty(handledSignal);
+        }
+        ActorContext actorContext =
+                handledSignal.asMessageOrigin()
+                             .getActorContext();
         CommandFactory commandFactory = ActorRequestFactory
                 .fromContext(actorContext)
                 .command();
-        List<Command> commands = result
-                .messages(CommandMessage.class)
+        List<Command> commands = result.messages(CommandMessage.class)
                 .stream()
                 .map(commandFactory::create)
                 .collect(toList());
-        if (commands.isEmpty()) {
-            String errorMessage = format(
-                    "Commander method `%s` did not produce any result for command with ID %s.",
-                    this,
-                    handledSignal.id()
-            );
-            throw new IllegalOutcomeException(errorMessage);
-        }
         ProducedCommands signals = ProducedCommands
                 .newBuilder()
                 .addAllCommand(commands)

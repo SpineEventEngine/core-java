@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -31,7 +32,6 @@ import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.code.proto.EntityStateOption;
 import io.spine.core.MessageId;
-import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.EntityVisibility;
@@ -43,7 +43,6 @@ import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EntityUnarchived;
 import io.spine.type.TypeUrl;
-import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -70,10 +69,9 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  *
  * <p>In other cases, an entity won't have a {@link Mirror}.
  */
-final class MirrorRepository
-        extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    private static final Logger log = Logging.get(MirrorRepository.class);
+    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
     private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
             Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER
     );
@@ -115,9 +113,9 @@ final class MirrorRepository
         Kind kind = option.map(EntityOption::getKind)
                           .orElse(KIND_UNKNOWN);
         if (kind == KIND_UNKNOWN) {
-            log.warn("Received a state update of entity `{}`. The entity kind is unknown. " +
-                             "Please use (entity) option to define entity states.",
-                     type);
+            logger.atWarning()
+                  .log("Received a state update of entity `%s`. The entity kind is unknown. " +
+                               "Please use `(entity)` option to define entity states.", type);
         }
         return kind;
     }

@@ -68,7 +68,7 @@ public final class Applier
     }
 
     @Override
-    public EventClass getMessageClass() {
+    public EventClass messageClass() {
         return EventClass.from(rawMessageClass());
     }
 

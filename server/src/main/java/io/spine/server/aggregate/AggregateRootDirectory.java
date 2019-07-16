@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.SPI;
 
 import java.util.Optional;
@@ -31,6 +32,7 @@ import java.util.Optional;
  * <p>In the directory, the aggregate root is represented by its type and the parts - by their
  * repositories.
  */
+@Experimental
 @SPI
 public interface AggregateRootDirectory {
 

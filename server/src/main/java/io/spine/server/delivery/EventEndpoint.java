@@ -22,11 +22,17 @@ package io.spine.server.delivery;
 
 import io.spine.server.type.EventEnvelope;
 
+/**
+ * An endpoint which accepts events.
+ *
+ * @param <I>
+ *         the type of target identifier
+ */
 public interface EventEndpoint<I> extends MessageEndpoint<I, EventEnvelope> {
 
     @Override
     default void onDuplicate(I target, EventEnvelope envelope) {
         repository().lifecycleOf(target)
-                    .onDuplicateEvent(envelope);
+                    .onDuplicateEvent(envelope.id());
     }
 }

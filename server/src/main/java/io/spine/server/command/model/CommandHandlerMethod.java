@@ -28,7 +28,6 @@ import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.MessageEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -55,9 +54,9 @@ public final class CommandHandlerMethod
     @Override
     public Success toSuccessfulOutcome(@Nullable Object rawResult,
                                        CommandHandler target,
-                                       MessageEnvelope<?, ?, ?> handledSignal) {
-        Success outcome = EventProducingMethod.super.toSuccessfulOutcome(rawResult, target,
-                                                                         handledSignal);
+                                       CommandEnvelope handledSignal) {
+        Success outcome =
+                EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
             String errorMessage = format(
                     "Command handler %s did not produce any events when processing command %s",

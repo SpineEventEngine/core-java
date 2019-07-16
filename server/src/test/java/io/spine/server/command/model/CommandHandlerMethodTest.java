@@ -50,7 +50,6 @@ import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsLi
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
@@ -337,7 +336,7 @@ class CommandHandlerMethodTest {
             CommandEnvelope envelope = newCommand(createProject());
             try {
                 handler.dispatch(envelope);
-            } catch (HandlerMethodFailedException e) {
+            } catch (IllegalStateException e) {
                 assertCauseAndId(e, handler.id());
             }
         }
@@ -352,12 +351,12 @@ class CommandHandlerMethodTest {
             CommandEnvelope cmd = newCommand(commandMessage);
             try {
                 AggregateMessageDispatcher.dispatchCommand(entity, cmd);
-            } catch (HandlerMethodFailedException e) {
+            } catch (IllegalStateException e) {
                 assertCauseAndId(e, entity.id());
             }
         }
 
-        private void assertCauseAndId(HandlerMethodFailedException e, Object handlerId) {
+        private void assertCauseAndId(Throwable e, Object handlerId) {
             Throwable cause = getRootCause(e);
 
             assertTrue(cause instanceof ThrowableMessage);

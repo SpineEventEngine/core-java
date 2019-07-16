@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.reflect.GenericTypeIndex;
@@ -58,6 +59,7 @@ import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePart
  *         the type of the aggregate root
  * @see Aggregate
  */
+@Experimental
 public abstract class AggregatePart<I,
                                     S extends Message,
                                     B extends ValidatingBuilder<S>,

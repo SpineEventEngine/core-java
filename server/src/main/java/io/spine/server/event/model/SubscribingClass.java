@@ -56,10 +56,10 @@ public interface SubscribingClass extends Logging {
         if (foundSubscriber.isPresent()) {
             return foundSubscriber;
         } else {
-            _debug("None of the subscriber methods could handle the `%s` event." +
-                           "%n  Methods: %s" +
-                           "%n  Event message: %s.",
-                   event.messageClass(), subscribers, event.message());
+            _debug().log("None of the subscriber methods could handle the `%s` event." +
+                                 "%n  Methods: %s" +
+                                 "%n  Event message: %s.",
+                         event.messageClass(), subscribers, event.message());
             return Optional.empty();
         }
     }

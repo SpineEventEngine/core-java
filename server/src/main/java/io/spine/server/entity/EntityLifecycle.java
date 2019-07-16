@@ -30,8 +30,10 @@ import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.CommandValidationError;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.core.EventValidationError;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Version;
@@ -70,6 +72,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Time.currentTime;
+import static io.spine.core.CommandValidationError.DUPLICATE_COMMAND_VALUE;
+import static io.spine.core.EventValidationError.DUPLICATE_EVENT_VALUE;
 import static io.spine.server.entity.EventFilter.allowAll;
 
 /**
@@ -83,7 +87,8 @@ import static io.spine.server.entity.EventFilter.allowAll;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings("OverlyCoupledClass") // Posts system messages in multiple cases.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+    // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
     /**
@@ -338,34 +343,42 @@ public class EntityLifecycle {
         postEvent(event);
     }
 
-    public final void onHandlerFailed(MessageId handledSignal, Error error) {
-        checkNotNull(handledSignal);
+    /**
+     * Posts a diagnostic event on a dispatching error.
+     *
+     * <p>Depending on the error type and code, may emit {@link HandlerFailedUnexpectedly},
+     * {@link CannotDispatchDuplicateEvent}, or {@link CannotDispatchDuplicateCommand}.
+     *
+     * @param dispatchedSignal
+     *         the ID of the dispatched signal
+     * @param error
+     *         the dispatching error
+     */
+    public final void onDispatchingFailed(MessageId dispatchedSignal, Error error) {
+        checkNotNull(dispatchedSignal);
         checkNotNull(error);
-        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                .newBuilder()
-                .setEntity(entityId)
-                .setHandledSignal(handledSignal)
-                .setError(error)
-                .vBuild();
-        postEvent(systemEvent);
+        boolean duplicate = postIfDuplicate(dispatchedSignal, error);
+        if (!duplicate) {
+            postHandlerFailed(dispatchedSignal, error);
+        }
     }
 
-    public void onDuplicateEvent(EventEnvelope envelope) {
-        checkNotNull(envelope);
+    public void onDuplicateEvent(EventId eventId) {
+        checkNotNull(eventId);
         CannotDispatchDuplicateEvent event = CannotDispatchDuplicateEvent
                 .newBuilder()
                 .setEntity(entityId)
-                .setEvent(envelope.id())
+                .setEvent(eventId)
                 .vBuild();
         postEvent(event);
     }
 
-    public void onDuplicateCommand(CommandEnvelope envelope) {
-        checkNotNull(envelope);
+    public void onDuplicateCommand(CommandId commandId) {
+        checkNotNull(commandId);
         CannotDispatchDuplicateCommand event = CannotDispatchDuplicateCommand
                 .newBuilder()
                 .setEntity(entityId)
-                .setCommand(envelope.id())
+                .setCommand(commandId)
                 .vBuild();
         postEvent(event);
     }
@@ -473,6 +486,45 @@ public class EntityLifecycle {
                     .vBuild();
             postEvent(event);
         }
+    }
+
+    private boolean postIfDuplicate(MessageId handledSignal, Error error) {
+        return postIfDuplicateCommand(handledSignal, error)
+            || postIfDuplicateEvent(handledSignal, error);
+    }
+
+    private boolean postIfDuplicateCommand(MessageId handledSignal, Error error) {
+        String errorType = error.getType();
+        int errorCode = error.getCode();
+        boolean duplicateCommand =
+                errorType.equals(CommandValidationError.class.getSimpleName())
+                        && errorCode == DUPLICATE_COMMAND_VALUE;
+        if (duplicateCommand) {
+            onDuplicateCommand(handledSignal.asCommandId());
+        }
+        return duplicateCommand;
+    }
+
+    private boolean postIfDuplicateEvent(MessageId handledSignal, Error error) {
+        String errorType = error.getType();
+        int errorCode = error.getCode();
+        boolean duplicateEvent =
+                errorType.equals(EventValidationError.class.getSimpleName())
+                        && errorCode == DUPLICATE_EVENT_VALUE;
+        if (duplicateEvent) {
+            onDuplicateEvent(handledSignal.asEventId());
+        }
+        return duplicateEvent;
+    }
+
+    private void postHandlerFailed(MessageId handledSignal, Error error) {
+        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
+                .newBuilder()
+                .setEntity(entityId)
+                .setHandledSignal(handledSignal)
+                .setError(error)
+                .vBuild();
+        postEvent(systemEvent);
     }
 
     protected void postEvent(EventMessage event, Origin explicitOrigin) {

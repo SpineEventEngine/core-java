@@ -55,6 +55,13 @@ final class MethodResult {
         this.messages = messages;
     }
 
+    /**
+     * Tells if this result is empty.
+     */
+    boolean isEmpty() {
+        return messages.isEmpty();
+    }
+
     static MethodResult from(@Nullable Object rawMethodOutput) {
         List<Message> messages = toMessages(rawMethodOutput);
         ImmutableList<Message> filtered = filterIgnored(messages);

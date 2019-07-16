@@ -20,7 +20,9 @@
 
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 
@@ -33,6 +35,7 @@ import static io.spine.core.BoundedContextNames.newName;
  *
  * <p>The spec includes the values required to build a {@link BoundedContext}.
  */
+@SPI
 public final class ContextSpec {
 
     private final BoundedContextName name;
@@ -48,6 +51,7 @@ public final class ContextSpec {
     /**
      * Creates a spec of a single tenant context with the given name.
      */
+    @VisibleForTesting
     public static ContextSpec singleTenant(String name) {
         return createDomain(name, false);
     }
@@ -55,6 +59,7 @@ public final class ContextSpec {
     /**
      * Creates a spec of a multitenant context with the given name.
      */
+    @VisibleForTesting
     public static ContextSpec multitenant(String name) {
         return createDomain(name, true);
     }

@@ -46,9 +46,7 @@ public interface VoidMethod<T,
         extends HandlerMethod<T, C, E, EmptyClass> {
 
     @Override
-    default Success toSuccessfulOutcome(@Nullable Object result,
-                                        T target,
-                                        MessageEnvelope<?, ?, ?> handledSignal) {
+    default Success toSuccessfulOutcome(@Nullable Object result, T target, E handledSignal) {
         if (result != null) {
             String errorMessage = format(
                     "Method `%s` should NOT produce any result. Produced: %s",
