@@ -223,14 +223,14 @@ public class TestProcessManager
      * Reactions on external events
      **************************/
 
-    @React(external = true)
-    Nothing on(PmQuizStarted event) {
-        return nothing();
+    @Command(external = true)
+    PmCreateProject on(PmQuizStarted event) {
+        return PmCreateProject.getDefaultInstance();
     }
 
-    @Command(external = true)
-    PmCreateProject on(PmQuestionAnswered event) {
-        return PmCreateProject.getDefaultInstance();
+    @React(external = true)
+    Nothing on(PmQuestionAnswered event) {
+        return nothing();
     }
 
     /*
