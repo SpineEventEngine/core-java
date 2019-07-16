@@ -141,6 +141,15 @@ final class ClassMap {
         }
     }
 
+    /**
+     * Checks that the class does not declare any {@code external} command handling methods.
+     *
+     * <p>There is no notion of "external" commands in the system and such declarations, although
+     * technically possible, should be eliminated to avoid confusion.
+     *
+     * @throws ExternalCommandHandlerError
+     *         in case external command handler declarations are found within the class
+     */
     private static <H extends CommandAcceptingMethod<?, ?>> void
     checkExternalCommandHandlers(CommandHandlingClass<?, H> candidate) {
         Set<H> externalCommandHandlers =
