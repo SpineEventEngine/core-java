@@ -41,11 +41,12 @@ import static io.spine.testing.Tests.nullRef;
  * A test-only {@link StorageFactory} which always returns {@code null}s instead of storages and
  * memoizes the requested storage types.
  */
-public final class NullStorageFactory implements StorageFactory {
+public final class MemoizingStorageFactory implements StorageFactory {
 
     private final List<Class<?>> requestedStorages = new ArrayList<>();
     private boolean requestedInbox = false;
     private boolean requestedEventStore = false;
+    private boolean closed = false;
 
     @Override
     public <I> AggregateStorage<I>
@@ -84,7 +85,7 @@ public final class NullStorageFactory implements StorageFactory {
 
     @Override
     public void close() {
-        // Do nothing.
+        closed = true;
     }
 
     public ImmutableList<Class<?>> requestedStorages() {
@@ -97,5 +98,9 @@ public final class NullStorageFactory implements StorageFactory {
 
     public boolean requestedEventStore() {
         return requestedEventStore;
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 }

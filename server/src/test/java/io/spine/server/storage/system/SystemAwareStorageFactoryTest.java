@@ -36,7 +36,7 @@ import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.storage.system.given.NullStorageFactory;
+import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
 import io.spine.server.storage.system.given.TestProjection;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +66,7 @@ class SystemAwareStorageFactoryTest {
         Environment.instance().setToProduction();
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
-        StorageFactory productionStorage = new NullStorageFactory();
+        StorageFactory productionStorage = new MemoizingStorageFactory();
         serverEnv.configureStorage(productionStorage);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
@@ -91,7 +91,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate aggregate storage creation to given factory")
     void delegateAggregateStorage() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestAggregate> aggregateClass = TestAggregate.class;
         AggregateStorage<String> storage =
@@ -103,7 +103,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate projection storage creation to given factory")
     void delegateProjectionStorage() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestProjection> projectionClass = TestProjection.class;
         ProjectionStorage<String> storage =
@@ -115,7 +115,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate record storage creation to given factory")
     void delegateRecordStorage() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         Class<TestProjection> projectionClass = TestProjection.class;
         RecordStorage<String> storage = systemAware.createRecordStorage(CONTEXT, projectionClass);
@@ -126,7 +126,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate inbox storage creation to given factory")
     void delegateInboxStorage() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         InboxStorage storage = systemAware.createInboxStorage(CONTEXT.isMultitenant());
         assertThat(storage).isNull();
@@ -136,7 +136,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate EventStore creation to given factory")
     void delegateNormalEventStore() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         EventStore store = systemAware.createEventStore(CONTEXT);
         assertThat(store).isNull();
@@ -146,7 +146,7 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("create EmptyEventStore if event persistence is disabled")
     void createEmptyEventStore() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
         BoundedContextBuilder contextBuilder =
                 BoundedContext.multitenant(CONTEXT.name().getValue());
@@ -164,10 +164,20 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap other factories only once")
     void wrapIdempotently() {
-        NullStorageFactory factory = new NullStorageFactory();
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
         SystemAwareStorageFactory wrapped = SystemAwareStorageFactory.wrap(factory);
         SystemAwareStorageFactory wrappedTwice = SystemAwareStorageFactory.wrap(wrapped);
         assertThat(wrappedTwice).isEqualTo(wrapped);
         assertThat(wrappedTwice.delegate()).isEqualTo(factory);
+    }
+
+    @Test
+    @DisplayName("close delegate")
+    void close() throws Exception {
+        MemoizingStorageFactory factory = new MemoizingStorageFactory();
+        SystemAwareStorageFactory wrapped = SystemAwareStorageFactory.wrap(factory);
+        assertFalse(factory.isClosed());
+        wrapped.close();
+        assertTrue(factory.isClosed());
     }
 }
