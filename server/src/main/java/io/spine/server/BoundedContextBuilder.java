@@ -492,6 +492,13 @@ public final class BoundedContextBuilder implements Logging {
         return this;
     }
 
+    /**
+     * Obtains the system context feature configuration.
+     *
+     * <p>Users may enable or disable some features of the system context.
+     *
+     * @see SystemFeatures
+     */
     public SystemFeatures systemFeatures() {
         return systemFeatures;
     }
