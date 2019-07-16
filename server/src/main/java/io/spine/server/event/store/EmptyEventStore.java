@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.store;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.event.EventStore;
+import io.spine.server.event.EventStreamQuery;
 
 @Internal
 public final class EmptyEventStore implements EventStore {
