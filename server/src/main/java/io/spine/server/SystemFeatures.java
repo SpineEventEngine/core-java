@@ -37,6 +37,16 @@ public final class SystemFeatures {
     private SystemFeatures() {
     }
 
+    /**
+     * Obtains the default configuration.
+     *
+     * <p>By default, the system context:
+     * <ol>
+     *     <li>Stores Aggregate mirrors for querying.
+     *     <li>Does not store {@link io.spine.system.server.CommandLog CommandLog}.
+     *     <li>Does not store system events.
+     * </ol>
+     */
     static SystemFeatures defaults() {
         return new SystemFeatures()
                 .disableCommandLog()
@@ -44,48 +54,105 @@ public final class SystemFeatures {
                 .forgetEvents();
     }
 
+    /**
+     * Enables the configured system context to store
+     * {@linkplain io.spine.system.server.CommandLog logs} for domain commands.
+     *
+     * @return self for method chaining
+     * @see #disableCommandLog()
+     */
     @CanIgnoreReturnValue
     public SystemFeatures enableCommandLog() {
         this.commandLog = true;
         return this;
     }
 
+    /**
+     * Disables {@linkplain io.spine.system.server.CommandLog CommandLog}.
+     *
+     * <p>This is the default setting.
+     *
+     * @return self for method chaining
+     * @see #enableCommandLog()
+     */
     @CanIgnoreReturnValue
     public SystemFeatures disableCommandLog() {
         this.commandLog = false;
         return this;
     }
 
+    /**
+     * Enables the configured system context to store
+     * {@linkplain io.spine.system.server.Mirror mirrors} for domain aggregates.
+     *
+     * <p>This is the default setting.
+     *
+     * @return self for method chaining
+     * @see #disableAggregateQuerying()
+     */
     @CanIgnoreReturnValue
     public SystemFeatures enableAggregateQuerying() {
         this.aggregateMirrors = true;
         return this;
     }
 
+    /**
+     * Disables domain Aggregate mirrors.
+     *
+     * @return self for method chaining
+     * @see #enableAggregateQuerying()
+     */
     @CanIgnoreReturnValue
     public SystemFeatures disableAggregateQuerying() {
         this.aggregateMirrors = false;
         return this;
     }
 
+    /**
+     * Configures the the system context to store system events.
+     *
+     * @return self for method chaining
+     */
     public SystemFeatures persistEvents() {
         this.storeEvents = true;
         return this;
     }
 
+    /**
+     * Configures the the system context NOT to store system events for better performance.
+     *
+     * <p>This is the default setting.
+     *
+     * @return self for method chaining
+     */
     public SystemFeatures forgetEvents() {
         this.storeEvents = false;
         return this;
     }
 
+    /**
+     * Obtains the Command log setting.
+     *
+     * @return {@code true} if the Command log should be stored, {@code false} otherwise
+     */
     public boolean includeCommandLog() {
         return commandLog;
     }
 
+    /**
+     * Obtains the Aggregate mirrors setting.
+     *
+     * @return {@code true} if the Aggregate mirrors should be stored, {@code false} otherwise
+     */
     public boolean includeAggregateMirroring() {
         return aggregateMirrors;
     }
 
+    /**
+     * Obtains the system events persistence setting.
+     *
+     * @return {@code true} if system events should be stored, {@code false} otherwise
+     */
     public boolean includePersistentEvents() {
         return storeEvents;
     }
