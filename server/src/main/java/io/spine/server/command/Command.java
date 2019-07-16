@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  * <em>if, and only if</em> it accepts a command message. This means that the incoming command
  * may be either rejected, or substituting command(s) must be generated.
  *
- * <p>Throwing {@linkplain Throwable other types} in command transforming methods in not allowed.
+ * <p>Throwing {@linkplain Throwable other types} in command transforming methods is not allowed.
  *
  * <p>Commanding methods accepting events or rejections may not throw.
  *
@@ -82,4 +82,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Command {
+
+    /**
+     * When {@code true}, the annotated method receives an event generated from outside of the
+     * Bounded Context to which the annotated method's class belongs.
+     *
+     * <p>Has no effect when applied to method that accepts commands.
+     */
+    boolean external() default false;
 }
