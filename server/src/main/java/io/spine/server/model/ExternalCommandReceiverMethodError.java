@@ -36,7 +36,7 @@ import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumerat
  * {@linkplain io.spine.server.command.Command commanders} to declare their command substitution
  * methods as {@linkplain io.spine.server.command.Command#external() external}, there is no notion
  * of "external" commands in the system, and, to avoid confusion, such declarations should be
- * removed.
+ * avoided.
  *
  * <p>Example of a faulty method:
  * <pre>

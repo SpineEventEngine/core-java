@@ -146,7 +146,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
      *
      * <p>Command substitution methods accept {@linkplain io.spine.base.CommandMessage commands} as
      * input and there is no notion of "external" commands in the system. Thus, such method
-     * declarations, although technically possible, should be eliminated to avoid confusion.
+     * declarations, although technically possible, should be avoided to prevent confusion.
      *
      * @throws ExternalCommandReceiverMethodError
      *         in case external command substitution methods are found within the class
