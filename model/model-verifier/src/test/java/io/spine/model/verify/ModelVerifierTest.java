@@ -25,6 +25,7 @@ import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandHandler;
 import io.spine.model.verify.given.EditAggregate;
+import io.spine.model.verify.given.InvalidCommander;
 import io.spine.model.verify.given.InvalidDeleteAggregate;
 import io.spine.model.verify.given.InvalidEnhanceAggregate;
 import io.spine.model.verify.given.InvalidRestoreAggregate;
@@ -32,6 +33,7 @@ import io.spine.model.verify.given.RenameProcMan;
 import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
+import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
@@ -150,6 +152,18 @@ class ModelVerifierTest {
                 .addCommandHandlingType(secondType)
                 .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
+    }
+
+    @Test
+    @DisplayName("fail on command receiving methods marked as external")
+    void failOnExternalCommandHandlers() {
+        ModelVerifier verifier = new ModelVerifier(project);
+        String invalidProcman = InvalidCommander.class.getName();
+        CommandHandlers spineModel = CommandHandlers
+                .newBuilder()
+                .addCommandHandlingType(invalidProcman)
+                .build();
+        assertThrows(ExternalCommandReceiverMethodError.class, () -> verifier.verify(spineModel));
     }
 
     @Nested
