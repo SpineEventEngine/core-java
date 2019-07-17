@@ -141,11 +141,6 @@ public class TestProjection
         return id().toString();
     }
 
-    @Override
-    public String toString() {
-        return String.format("{id: %s, name: %s}", id(), state().getName());
-    }
-
     public static class Repository
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
     }
