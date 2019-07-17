@@ -326,8 +326,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities);
-            assertThat(foundList).hasSize(count);
-            assertEquals(expectedList, foundList);
+            assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 
         @Test
@@ -345,8 +344,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = reverse(orderedByName(entities));
-            assertThat(foundList).hasSize(count);
-            assertEquals(expectedList, foundList);
+            assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 
         @Test
@@ -359,15 +357,14 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
 
             ResponseFormat format = ResponseFormat
                     .newBuilder()
-                    .setOrderBy(orderByName(DESCENDING))
+                    .setOrderBy(orderByName(ASCENDING))
                     .setPagination(Pagination.newBuilder().setPageSize(pageSize))
                     .vBuild();
             Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities).subList(0, pageSize);
-            assertThat(foundList).hasSize(pageSize);
-            assertEquals(expectedList, foundList);
+            assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 
         @Test

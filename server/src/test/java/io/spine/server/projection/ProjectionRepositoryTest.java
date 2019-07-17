@@ -189,8 +189,7 @@ class ProjectionRepositoryTest
     protected List<TestProjection> orderedByName(List<TestProjection> entities) {
         return entities.stream()
                        .sorted(comparing(ProjectionRepositoryTest::entityName))
-                       .collect(
-                               toList());
+                       .collect(toList());
     }
 
     private static String entityName(TestProjection entity) {
