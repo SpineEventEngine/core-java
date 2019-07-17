@@ -113,8 +113,9 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         if (format.hasOrderBy()) {
             stream = stream.sorted(orderedBy(format.getOrderBy()));
         }
-        if (format.hasPagination()) {
-            stream = stream.limit(format.getPagination().getPageSize());
+        int limit = format.getLimit();
+        if (limit > 0) {
+            stream = stream.limit(limit);
         }
         return stream;
     }

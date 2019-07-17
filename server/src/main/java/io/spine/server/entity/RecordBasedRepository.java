@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.BoundedContext;
@@ -277,8 +276,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /**
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
-     * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
-     * OrderBy in which to look for and return results in is specified by the {@link OrderBy}.
+     * to the results.
+     *
+     * <p>A number of elements to retrieve can be limited to a certain number. Order in
+     * which to look for and return results in is specified by the {@link OrderBy}.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *

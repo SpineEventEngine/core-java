@@ -86,17 +86,6 @@ message OrderBy {
     }
 }
 
-// Pagination parameters for query results.
-//
-message Pagination {
-
-    // An amount of entities to be returned by executing a `Query`.
-    //
-    // A minimum of 1 items per page can be requested.
-    //
-    uint32 page_size = 1 [(min).value = "1"];
-}
-
 // Allows clients to form the requests to the read-side through the `QueryService`.
 //
 // `Query` execution typically results in a `QueryResponse` object.
@@ -133,10 +122,8 @@ message ResponseFormat {
     OrderBy orderBy = 2 [(validate) = true,
                          (if_invalid).msg_format = "Invalid query order"];
 
-    // A specification for a way to paginate the Query results.
-    Pagination pagination = 3 [(validate) = true,
-                               (goes).with = "orderBy",
-                               (if_invalid).msg_format = "Invalid query pagination"];
+    // The max number of entities to retrieve.
+    uint32 limit = 3 [(goes).with = "orderBy"];
 }
 
 // The result of `Query` processing.

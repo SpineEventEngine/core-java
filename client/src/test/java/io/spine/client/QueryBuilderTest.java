@@ -58,13 +58,11 @@ import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
 import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER_BY;
-import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_PAGINATION;
 import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
-import static io.spine.client.given.QueryBuilderTestEnv.pagination;
 import static io.spine.client.given.TestEntities.randomId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
@@ -153,8 +151,8 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
-            assertEquals(EMPTY_ORDER_BY, format.getOrderBy());
-            assertEquals(EMPTY_PAGINATION, format.getPagination());
+            assertThat(format.getOrderBy()).isEqualTo(EMPTY_ORDER_BY);
+            assertThat(format.getLimit()).isEqualTo(0);
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
         }
@@ -172,7 +170,7 @@ class QueryBuilderTest {
             OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
             assertEquals(expectedOrderBy, format.getOrderBy());
 
-            assertEquals(EMPTY_PAGINATION, format.getPagination());
+            assertThat(format.getLimit()).isEqualTo(0);
 
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
@@ -195,8 +193,7 @@ class QueryBuilderTest {
             OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
             assertEquals(expectedOrderBy, format.getOrderBy());
 
-            Pagination expectedPagination = pagination(limit);
-            assertEquals(expectedPagination, format.getPagination());
+            assertThat(format.getLimit()).isEqualTo(limit);
 
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
@@ -458,8 +455,7 @@ class QueryBuilderTest {
             OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
             assertEquals(expectedOrderBy, format.getOrderBy());
 
-            Pagination expectedPagination = pagination(limit);
-            assertEquals(expectedPagination, format.getPagination());
+            assertThat(format.getLimit()).isEqualTo(limit);
         }
 
         private Filter findByName(Iterable<Filter> filters, String name) {
@@ -541,9 +537,7 @@ class QueryBuilderTest {
                                  .limit(expectedLimit)
                                  .build();
             assertNotNull(query);
-            assertEquals(expectedLimit, query.getFormat()
-                                             .getPagination()
-                                             .getPageSize());
+            assertEquals(expectedLimit, query.getFormat().getLimit());
         }
 
         @Test

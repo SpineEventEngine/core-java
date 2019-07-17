@@ -30,7 +30,6 @@ import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.client.IdFilter;
 import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
@@ -70,7 +69,6 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
         tester.setDefault(OrderBy.class, OrderBy.getDefaultInstance())
-              .setDefault(Pagination.class, Pagination.getDefaultInstance())
               .setDefault(TargetFilters.class, TargetFilters.getDefaultInstance())
               .setDefault(RecordStorage.class, mock(RecordStorage.class))
               .testStaticMethods(getUtilityClass(), NullPointerTester.Visibility.PACKAGE);

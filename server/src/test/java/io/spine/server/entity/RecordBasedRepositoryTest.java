@@ -33,7 +33,6 @@ import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
-import io.spine.client.Pagination;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.EntityColumnCache;
@@ -351,19 +350,19 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         @DisplayName("limited number of entities")
         void limitedNumberOfEntities() {
             int totalCount = 10;
-            int pageSize = 5;
+            int limit = 5;
             // UUIDs are guaranteed to produced a collection with unordered names. 
             List<E> entities = createAndStoreNamed(repository(), totalCount, Identifier::newUuid);
 
             ResponseFormat format = ResponseFormat
                     .newBuilder()
                     .setOrderBy(orderByName(ASCENDING))
-                    .setPagination(Pagination.newBuilder().setPageSize(pageSize))
+                    .setLimit(limit)
                     .vBuild();
             Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
-            List<E> expectedList = orderedByName(entities).subList(0, pageSize);
+            List<E> expectedList = orderedByName(entities).subList(0, limit);
             assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 

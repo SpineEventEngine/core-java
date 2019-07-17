@@ -30,8 +30,6 @@ import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.CompositeFilter.CompositeOperator;
 import io.spine.client.Filter;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
 import io.spine.server.storage.RecordStorage;
 
@@ -61,8 +59,8 @@ public final class EntityQueries {
     }
 
     /**
-     * Creates new {@link EntityQuery} instances for the given {@link OrderBy},
-     * {@link TargetFilters}, {@link Pagination}, and {@link RecordStorage}.
+     * Creates new {@link EntityQuery} instances for the given {@link TargetFilters} and
+     * {@link RecordStorage}.
      *
      * @param filters
      *         filters for the Entities specifying the query predicate

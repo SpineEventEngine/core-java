@@ -187,7 +187,7 @@ public final class QueryFactory {
                        @Nullable Set<CompositeFilter> filters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-        ResponseFormat format = responseFormat(fieldMask, null, null);
+        ResponseFormat format = responseFormat(fieldMask, null, 0);
         Query.Builder builder = queryBuilderFor(entityClass, ids, filters)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -196,7 +196,7 @@ public final class QueryFactory {
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        ResponseFormat format = responseFormat(fieldMask, null, null);
+        ResponseFormat format = responseFormat(fieldMask, null, 0);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -208,7 +208,7 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        ResponseFormat format = responseFormat(fieldMask, orderBy, null);
+        ResponseFormat format = responseFormat(fieldMask, orderBy, 0);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -217,13 +217,12 @@ public final class QueryFactory {
 
     Query composeQuery(Target target,
                        OrderBy orderBy,
-                       Pagination pagination,
+                       int limit,
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        checkNotNull(pagination);
 
-        ResponseFormat format = responseFormat(fieldMask, orderBy, pagination);
+        ResponseFormat format = responseFormat(fieldMask, orderBy, limit);
         Query.Builder builder = queryBuilderFor(target)
                 .setFormat(format);
         Query query = newQuery(builder);
@@ -242,8 +241,7 @@ public final class QueryFactory {
 
     private static ResponseFormat responseFormat(@Nullable FieldMask mask,
                                                  @Nullable OrderBy ordering,
-                                                 @Nullable Pagination pagination) {
-
+                                                 int limit) {
         ResponseFormat.Builder result = ResponseFormat
                 .newBuilder();
         if (mask != null) {
@@ -252,8 +250,8 @@ public final class QueryFactory {
         if (ordering != null) {
             result.setOrderBy(ordering);
         }
-        if (pagination != null) {
-            result.setPagination(pagination);
+        if (limit > 0) {
+            result.setLimit(limit);
         }
         return result.vBuild();
     }
