@@ -84,8 +84,10 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         Stream<EntityRecordWithColumns> records = activeRecords()
                 .values()
                 .stream();
+        FieldMask fieldMask = format.getFieldMask();
         return orderAndLimit(records, format)
                 .map(UNPACKER)
+                .map(new FieldMaskApplier(fieldMask))
                 .iterator();
     }
 
