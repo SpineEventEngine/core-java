@@ -66,9 +66,8 @@ import static io.spine.server.entity.storage.QueryParameters.activeEntityQueryPa
  *
  * <p>If the query specifies the values of
  * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
- * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery,
- * com.google.protobuf.FieldMask) default behavior} will be overridden meaning that the records resulting
- * to such query may active or inactive.
+ * the {@linkplain io.spine.server.storage.RecordStorage#readAll default behavior} will be
+ * overridden meaning that the records resulting to such query may active or inactive.
  *
  * @param <I>
  *         the type of the IDs of the query target

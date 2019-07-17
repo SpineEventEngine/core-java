@@ -31,6 +31,7 @@ import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import io.spine.testing.core.given.GivenVersion;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -284,20 +285,18 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         }
         storage.write(initial);
 
-        Collection<EntityRecord> actual = newArrayList(
-                storage.readMultiple(initial.keySet())
-        );
+        Iterator<@Nullable EntityRecord> records =
+                storage.readMultiple(initial.keySet(), FieldMask.getDefaultInstance());
+        Collection<@Nullable EntityRecord> actual = newArrayList(records);
 
-        Collection<EntityRecord> expected =
+        Collection<@Nullable EntityRecord> expected =
                 initial.values()
                        .stream()
                        .map(recordWithColumns -> recordWithColumns != null
                                                  ? recordWithColumns.getRecord()
                                                  : null)
                        .collect(toList());
-
-        assertEquals(expected.size(), actual.size());
-        assertTrue(actual.containsAll(expected));
+        assertThat(actual).containsExactlyElementsIn(expected);
 
         close(storage);
     }

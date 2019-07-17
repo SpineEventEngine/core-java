@@ -166,7 +166,7 @@ public abstract class ProjectionStorageTest
             // Get a subset of IDs
             List<ProjectId> ids = fillStorage(10).subList(0, 5);
 
-            Iterator<EntityRecord> read = storage.readMultiple(ids);
+            Iterator<EntityRecord> read = storage.readMultiple(ids, FieldMask.getDefaultInstance());
             Collection<EntityRecord> readRecords = newArrayList(read);
             assertThat(readRecords).hasSize(ids.size());
 

@@ -156,7 +156,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     }
 
     private Iterator<E> loadMany(List<I> ids) {
-        return repository().loadAll(ids);
+        return repository().loadAll(ids, FieldMask.getDefaultInstance());
     }
 
     private E loadOrCreate(I id) {

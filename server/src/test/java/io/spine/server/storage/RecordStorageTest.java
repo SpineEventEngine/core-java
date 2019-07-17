@@ -372,7 +372,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
         ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
-        Iterable<EntityRecord> read = () -> storage.readMultiple(targetIds);
+        Iterable<EntityRecord> read =
+                () -> storage.readMultiple(targetIds, FieldMask.getDefaultInstance());
 
         assertSingleValueAndNulls(2, read);
     }

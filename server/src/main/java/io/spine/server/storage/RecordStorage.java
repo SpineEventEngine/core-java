@@ -222,14 +222,6 @@ public abstract class RecordStorage<I>
      */
     public abstract boolean delete(I id);
 
-    @Override
-    public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids) {
-        checkNotClosed();
-        checkNotNull(ids);
-
-        return readMultipleRecords(ids);
-    }
-
     /**
      * Reads multiple active items from the storage and applies {@link FieldMask} to the results.
      *
@@ -242,6 +234,7 @@ public abstract class RecordStorage<I>
      *         the mask to apply
      * @return the items with the given IDs and with the given {@code FieldMask} applied
      */
+    @Override
     public Iterator<@Nullable EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(ids);
@@ -368,26 +361,16 @@ public abstract class RecordStorage<I>
     protected abstract Optional<EntityRecord> readRecord(I id);
 
     /**
-     * Obtains an iterator for reading multiple records by IDs.
-     *
-     * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
-     * with nulls in place of missing or inactive entities.
-     *
-     * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
-     */
-    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids);
-
-    /**
      * Obtains an iterator for reading multiple records by IDs, and
      * applying the passed field mask to the results.
      *
      * <p>The size of the returned {@code Iterator} matches the size of the given {@code ids},
      * with nulls in place of missing or inactive entities.
      *
-     * @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable)
+     * @see BulkStorageOperationsMixin#readMultiple
      */
-    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                                            FieldMask fieldMask);
+    protected abstract Iterator<@Nullable EntityRecord>
+    readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
 
     /**
      * Obtains an iterator for reading all records.

@@ -245,29 +245,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param ids
      *         entity IDs to search for
-     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
-     */
-    public Iterator<E> loadAll(Iterable<I> ids) {
-        return loadAll(ids, FieldMask.getDefaultInstance());
-    }
-
-    /**
-     * Loads all the entities in this repository by their IDs and
-     * applies the {@link FieldMask} to each of them.
-     *
-     * <p>Acts in the same way as {@link #loadAll(Iterable)} with
-     * the {@code FieldMask} applied to the results.
-     *
-     * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
-     *
-     * <p>Note: The storage must be assigned before calling this method.
-     *
-     * @param ids
-     *         entity IDs to search for
      * @param fieldMask
-     *         mask to apply on entities
-     * @return all the entities in this repository with the IDs contained in the given {@code ids}
-     * @see #loadAll(Iterable)
+     *         the entity state fields to load; note that the resulting state must be valid,
+     *         otherwise an exception is thrown
+     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         RecordStorage<I> storage = recordStorage();
