@@ -103,7 +103,7 @@ public final class CommanderClass<C extends Commander>
 
     /**
      * Ensures no command substitution methods are marked as
-     * {@linkplain io.spine.server.command.Command#external()} external} in the class.
+     * {@linkplain io.spine.server.command.Command#external() external} in the class.
      *
      * <p>Command substitution methods accept {@linkplain io.spine.base.CommandMessage commands} as
      * input and there is no notion of "external" commands in the system. Thus, such method
