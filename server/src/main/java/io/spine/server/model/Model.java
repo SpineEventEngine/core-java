@@ -21,8 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
+import io.spine.code.java.ClassName;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.reflect.PackageInfo;
@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.google.common.collect.Maps.newConcurrentMap;
+
 /**
  * Stores information of message handling classes.
  */
@@ -42,7 +44,15 @@ public class Model {
     /**
      * Maps a raw class of a model object to corresponding Model instance.
      */
-    private static final Map<Class<?>, Model> models = Maps.newConcurrentMap();
+    private static final Map<Class<?>, Model> models = newConcurrentMap();
+
+    /**
+     * The cache of {@code BoundedContextName}s searched for particular raw classes.
+     *
+     * @see #findContext(Class)
+     */
+    private static final
+    Map<ClassName, Optional<BoundedContextName>> knownContexts = newConcurrentMap();
 
     /** The name of the Bounded Context to which this instance belongs. */
     private final BoundedContextName context;
@@ -100,15 +110,25 @@ public class Model {
      */
     @VisibleForTesting
     static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
+        ClassName clazzName = ClassName.of(rawClass);
+        if (knownContexts.containsKey(clazzName)) {
+            return knownContexts.get(clazzName);
+        }
+
+        Optional<BoundedContextName> result;
+
         PackageInfo pkg = PackageInfo.of(rawClass);
         Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
         if (!annotation.isPresent()) {
-            return Optional.empty();
+            result = Optional.empty();
+        } else {
+            String nameAsString = annotation.get()
+                                            .value();
+            BoundedContextName contextName = BoundedContextNames.newName(nameAsString);
+            result = Optional.of(contextName);
         }
-        String contextName = annotation.get()
-                                       .value();
-        BoundedContextName result = BoundedContextNames.newName(contextName);
-        return Optional.of(result);
+        knownContexts.put(clazzName, result);
+        return result;
     }
 
     /** Obtains the name of the bounded context which encapsulates this model. */
