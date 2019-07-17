@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -49,6 +50,7 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
+import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
@@ -94,6 +96,7 @@ import static io.spine.server.procman.given.pm.GivenMessages.createProject;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.iterationPlanned;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
+import static io.spine.server.procman.given.pm.GivenMessages.quizStarted;
 import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
@@ -361,6 +364,14 @@ class ProcessManagerTest {
                 boundedContext.receivesEvent(ownerChanged())
                               .assertThat(emittedCommand(PmReviewBacklog.class));
             }
+
+            @Test
+            @DisplayName("on incoming external event")
+            void commandOnExternalEvent() {
+                boundedContext.receivesExternalEvent(BoundedContextNames.assumingTests(),
+                                                     quizStarted())
+                              .assertThat(emittedCommand(PmCreateProject.class));
+            }
         }
 
         @Nested
@@ -481,6 +492,7 @@ class ProcessManagerTest {
                     asProcessManagerClass(TestProcessManager.class);
             Set<CommandClass> commands = pmClass.outgoingCommands();
             assertThat(commands).containsExactlyElementsIn(CommandClass.setOf(
+                    PmCreateProject.class,
                     PmAddTask.class,
                     PmReviewBacklog.class,
                     PmScheduleRetrospective.class,
@@ -501,6 +513,18 @@ class ProcessManagerTest {
                     PmNotificationSent.class,
                     PmIterationPlanned.class,
                     PmIterationStarted.class
+            ));
+        }
+
+        @Test
+        @DisplayName("handled external event classes")
+        void handledExternalEvents() {
+            ProcessManagerClass<TestProcessManager> pmClass =
+                    asProcessManagerClass(TestProcessManager.class);
+            Set<EventClass> externalEvents = pmClass.externalEvents();
+            assertThat(externalEvents).containsExactlyElementsIn(EventClass.setOf(
+                    PmQuizStarted.class,
+                    PmQuestionAnswered.class
             ));
         }
     }
