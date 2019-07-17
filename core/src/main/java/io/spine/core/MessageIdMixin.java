@@ -23,6 +23,7 @@ package io.spine.core;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -32,6 +33,10 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 @GeneratedMixin
 interface MessageIdMixin extends MessageIdOrBuilder {
+
+    String EVENT_ID_TYPE_URL = TypeUrl.from(EventId.getDescriptor()).value();
+
+    String COMMAND_ID_TYPE_URL = TypeUrl.from(CommandId.getDescriptor()).value();
 
     /**
      * Obtains the ID of the message.
@@ -45,7 +50,7 @@ interface MessageIdMixin extends MessageIdOrBuilder {
      */
     default boolean isEvent() {
         Any id = getId();
-        return id.is(EventId.class);
+        return EVENT_ID_TYPE_URL.equals(id.getTypeUrl());
     }
 
     /**
@@ -63,7 +68,7 @@ interface MessageIdMixin extends MessageIdOrBuilder {
      */
     default boolean isCommand() {
         Any id = getId();
-        return id.is(CommandId.class);
+        return COMMAND_ID_TYPE_URL.equals(id.getTypeUrl());
     }
 
     /**
