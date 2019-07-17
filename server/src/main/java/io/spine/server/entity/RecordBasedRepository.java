@@ -217,7 +217,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @VisibleForTesting
     public Iterator<E> loadAll(ResponseFormat format) {
-        Iterator<EntityRecord> records = loadAllRecords(ResponseFormat.getDefaultInstance());
+        Iterator<EntityRecord> records = loadAllRecords(format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
