@@ -247,7 +247,9 @@ public class EventBus
         EventEnvelope enrichedEnvelope = enrich(event);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", event.message()));
+                   format("Message of type `%s` and ID `%s` has no dispatchers.",
+                          event.messageClass(),
+                          event.id().getValue()));
     }
 
     @Override
