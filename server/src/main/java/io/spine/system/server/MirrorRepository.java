@@ -28,6 +28,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
+import io.spine.client.ResponseFormat;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.code.proto.EntityStateOption;
@@ -148,13 +149,15 @@ final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjec
      * @see SystemReadSide#readDomainAggregate(Query)
      */
     Iterator<EntityStateWithVersion> execute(Query query) {
-        FieldMask aggregateFields = query.getFieldMask();
+        ResponseFormat requestedFormat = query.getFormat();
+        FieldMask aggregateFields = requestedFormat.getFieldMask();
+        ResponseFormat responseFormat = requestedFormat
+                                             .toBuilder()
+                                             .setFieldMask(AGGREGATE_STATE_WITH_VERSION)
+                                             .vBuild();
         Target target = query.getTarget();
         TargetFilters filters = buildFilters(target);
-        Iterator<MirrorProjection> mirrors = find(filters, 
-                                                  query.getOrderBy(), 
-                                                  query.getPagination(),
-                                                  AGGREGATE_STATE_WITH_VERSION);
+        Iterator<MirrorProjection> mirrors = find(filters, responseFormat);
         Iterator<EntityStateWithVersion> result = aggregateStates(mirrors, aggregateFields);
         return result;
     }

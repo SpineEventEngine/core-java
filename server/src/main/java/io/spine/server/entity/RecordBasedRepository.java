@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.storage.Column;
@@ -127,7 +128,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
-        Iterator<E> allEntities = loadAll();
+        Iterator<E> allEntities = loadAll(ResponseFormat.getDefaultInstance());
         Iterator<E> result = filter(allEntities, filter::test);
         return result;
     }
@@ -214,6 +215,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    @VisibleForTesting
+    public Iterator<E> loadAll(ResponseFormat format) {
+        Iterator<EntityRecord> records = loadAllRecords(ResponseFormat.getDefaultInstance());
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
+        Iterator<E> result = transform(records, toEntity::apply);
+        return result;
+    }
+
     /**
      * Loads all the entities in this repository with IDs,
      * contained within the passed {@code ids} values.
@@ -270,33 +279,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Loads all the entities in this repository.
-     *
-     * <p>Note: The storage must be assigned before calling this method.
-     *
-     * @return all the entities in this repository
-     * @see #loadAll(Iterable)
-     */
-    public Iterator<E> loadAll() {
-        Iterator<EntityRecord> records = loadAllRecords();
-        Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
-        return result;
-    }
-
-    /**
-     * Obtains iterator over all present {@linkplain EntityRecord entity records}.
-     *
-     * @return an iterator over all records
-     */
-    @Internal
-    public Iterator<EntityRecord> loadAllRecords() {
-        RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll();
-        return records;
-    }
-
-    /**
      * Obtains iterator over all present {@linkplain EntityRecord entity records}.
      *
      * <p>The resulting entity states have only the specified in the {@code mask} fields. However,
@@ -305,15 +287,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return an iterator over all records
      */
     @Internal
-    public Iterator<EntityRecord> loadAllRecords(FieldMask mask) {
-        checkNotNull(mask);
-        if (mask.getPathsCount() == 0) {
-            return loadAllRecords();
-        } else {
-            RecordStorage<I> storage = recordStorage();
-            Iterator<EntityRecord> records = storage.readAll(mask);
-            return records;
-        }
+    public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+        checkNotNull(format);
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll(format);
+        return records;
     }
 
     /**
@@ -332,23 +310,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param filters
      *         the entity filters
-     * @param orderBy
-     *         an orderBy to sort the filtered results before pagination
-     * @param pagination
-     *         the pagination to apply to the sorted result set
-     * @param fieldMask
-     *         the mask to apply to the entities
+     * @param format
+     *         the expected format of the query response
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(TargetFilters filters, OrderBy orderBy,
-                            Pagination pagination, FieldMask fieldMask) {
+    public Iterator<E> find(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
-        checkNotNull(orderBy);
-        checkNotNull(pagination);
-        checkNotNull(fieldMask);
+        checkNotNull(format);
 
-        Iterator<EntityRecord> records = findRecords(filters, orderBy, pagination, fieldMask);
+        Iterator<EntityRecord> records = findRecords(filters, format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -359,25 +330,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param filters
      *         entity filters
-     * @param orderBy
-     *         the orderBy to sort the filtered results before pagination
-     * @param pagination
-     *         the pagination to apply to the sorted result set
-     * @param fieldMask
      *         the mask to apply to the entities
      * @return the iterator over the matching records
      */
     @Internal
-    public Iterator<EntityRecord> findRecords(TargetFilters filters, OrderBy orderBy,
-                                              Pagination pagination, FieldMask fieldMask) {
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
-        checkNotNull(orderBy);
-        checkNotNull(pagination);
-        checkNotNull(fieldMask);
+        checkNotNull(format);
 
         RecordStorage<I> storage = recordStorage();
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
-        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, storage);
+        Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }
 

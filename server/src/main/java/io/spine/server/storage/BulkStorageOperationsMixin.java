@@ -20,6 +20,7 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Message;
+import io.spine.client.ResponseFormat;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -66,5 +67,5 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * @throws IllegalStateException
      *         if the storage was closed before finishing
      */
-    Iterator<R> readAll();
+    Iterator<R> readAll(ResponseFormat format);
 }

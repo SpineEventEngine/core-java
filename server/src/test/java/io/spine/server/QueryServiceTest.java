@@ -22,6 +22,7 @@ package io.spine.server;
 import com.google.common.truth.ThrowableSubject;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.client.ResponseFormat;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectDetailsRepository;
@@ -136,7 +137,8 @@ class QueryServiceTest {
     @MuteLogging
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAllRecords()).thenThrow(RuntimeException.class);
+        when(projectDetailsRepository.loadAllRecords(ResponseFormat.getDefaultInstance()))
+                .thenThrow(RuntimeException.class);
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);

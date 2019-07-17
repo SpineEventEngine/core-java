@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.client.ResponseFormat;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -248,24 +249,18 @@ public abstract class RecordStorage<I>
         return readMultipleRecords(ids, fieldMask);
     }
 
-    @Override
-    public Iterator<EntityRecord> readAll() {
-        checkNotClosed();
-
-        return readAllRecords();
-    }
-
     /**
      * Reads all active items from the storage and apply {@link FieldMask} to each of the results.
      *
-     * @param fieldMask
-     *         the {@code FieldMask} to apply
+     * @param format
+     *         the expected format of the response
      * @return all items from this repository with the given {@code FieldMask} applied
      */
-    public Iterator<EntityRecord> readAll(FieldMask fieldMask) {
+    @Override
+    public Iterator<EntityRecord> readAll(ResponseFormat format) {
         checkNotClosed();
 
-        return readAllRecords(fieldMask);
+        return readAllRecords(format);
     }
 
     /**
@@ -278,16 +273,16 @@ public abstract class RecordStorage<I>
      *
      * @param query
      *         the query to execute
-     * @param fieldMask
-     *         the fields to retrieve
+     * @param format
+     *         the format of the query response
      * @return the matching records mapped upon their IDs
      */
-    public Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
+    public Iterator<EntityRecord> readAll(EntityQuery<I> query, ResponseFormat format) {
         checkNotClosed();
         checkNotNull(query);
-        checkNotNull(fieldMask);
+        checkNotNull(format);
 
-        return readAllRecords(query, fieldMask);
+        return readAllRecords(query, format);
     }
 
     /**
@@ -303,7 +298,7 @@ public abstract class RecordStorage<I>
      * @return the matching records mapped upon their IDs
      */
     public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
-        return readAll(query, FieldMask.getDefaultInstance());
+        return readAll(query, ResponseFormat.getDefaultInstance());
     }
 
     /**
@@ -399,19 +394,11 @@ public abstract class RecordStorage<I>
      *
      * <p>Only active entities are returned.
      *
-     * @see BulkStorageOperationsMixin#readAll()
+     * @param format
+     *         the expected format of the query response
+     * @see BulkStorageOperationsMixin#readAll
      */
-    protected abstract Iterator<EntityRecord> readAllRecords();
-
-    /**
-     * Obtains an iterator for reading all records, and applying the passed field mask to
-     * the results.
-     *
-     * <p>Only active entities are returned.
-     *
-     * @see BulkStorageOperationsMixin#readAll()
-     */
-    protected abstract Iterator<EntityRecord> readAllRecords(FieldMask fieldMask);
+    protected abstract Iterator<EntityRecord> readAllRecords(ResponseFormat format);
 
     /**
      * Obtains an iterator for reading records matching the query,
@@ -421,10 +408,10 @@ public abstract class RecordStorage<I>
      * lifecycle flags}. In order to read inactive entities, the corresponding filters must be set
      * to the provided {@link EntityQuery query}.
      *
-     * @see #readAll(EntityQuery, FieldMask)
+     * @see #readAll(EntityQuery, ResponseFormat)
      */
-    protected abstract Iterator<EntityRecord> readAllRecords(EntityQuery<I> query,
-                                                             FieldMask fieldMask);
+    protected abstract Iterator<EntityRecord>
+    readAllRecords(EntityQuery<I> query, ResponseFormat format);
 
     /**
      * Writes a record and the associated {@link EntityColumn} values into the storage.

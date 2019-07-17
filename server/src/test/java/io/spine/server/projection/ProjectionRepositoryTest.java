@@ -25,6 +25,7 @@ import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
+import io.spine.client.ResponseFormat;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
@@ -247,7 +248,7 @@ class ProjectionRepositoryTest
             PrjProjectCreated msg = projectCreated();
 
             // Ensure no instances are present in the repository now.
-            assertFalse(repository().loadAll()
+            assertFalse(repository().loadAll(ResponseFormat.getDefaultInstance())
                                     .hasNext());
             // And no instances of `TestProjection` processed the event message we are posting.
             assertTrue(TestProjection.whoProcessed(msg)
@@ -261,7 +262,8 @@ class ProjectionRepositoryTest
                                              .next();
 
             // Check that the projection item has actually been stored and now can be loaded.
-            Iterator<TestProjection> allItems = repository().loadAll();
+            Iterator<TestProjection> allItems =
+                    repository().loadAll(ResponseFormat.getDefaultInstance());
             assertTrue(allItems.hasNext());
             TestProjection storedProjection = allItems.next();
             assertFalse(allItems.hasNext());
@@ -488,13 +490,13 @@ class ProjectionRepositoryTest
         NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
-        assertFalse(repo.loadAll()
+        assertFalse(repo.loadAll(ResponseFormat.getDefaultInstance())
                         .hasNext());
 
         Event event = createEvent(tenantId(), projectCreated(), currentTime());
         repo.dispatch(EventEnvelope.of(event));
 
-        Iterator<?> items = repo.loadAll();
+        Iterator<?> items = repo.loadAll(ResponseFormat.getDefaultInstance());
         assertFalse(items.hasNext());
     }
 

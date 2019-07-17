@@ -24,6 +24,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
 import io.spine.client.Pagination;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.AbstractEntity;
 
@@ -43,18 +44,10 @@ public final class RecordBasedRepositoryTestEnv {
         assertMatchesMask(state, fieldMask);
     }
 
-    public static Pagination emptyPagination() {
-        return Pagination.getDefaultInstance();
-    }
-
     public static Pagination pagination(int pageSize) {
         return Pagination.newBuilder()
                                  .setPageSize(pageSize)
                                  .build();
-    }
-
-    public static OrderBy emptyOrder() {
-        return OrderBy.getDefaultInstance();
     }
 
     /**
@@ -71,7 +64,7 @@ public final class RecordBasedRepositoryTestEnv {
         return TargetFilters.getDefaultInstance();
     }
 
-    public static FieldMask emptyFieldMask() {
-        return FieldMask.getDefaultInstance();
+    public static ResponseFormat emptyFormat() {
+        return ResponseFormat.getDefaultInstance();
     }
 }

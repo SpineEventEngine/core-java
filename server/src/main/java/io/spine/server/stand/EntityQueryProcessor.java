@@ -21,12 +21,10 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityStateWithVersion;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.Query;
+import io.spine.client.ResponseFormat;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.Entity;
@@ -53,7 +51,7 @@ class EntityQueryProcessor implements QueryProcessor {
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         Target target = query.getTarget();
         Iterator<EntityRecord> entities = target.getIncludeAll()
-                                          ? loadAll(query)
+                                          ? loadAll(query.getFormat())
                                           : loadByQuery(query);
         ImmutableList<EntityStateWithVersion> result = stream(entities)
                 .map(EntityQueryProcessor::toEntityState)
@@ -64,17 +62,12 @@ class EntityQueryProcessor implements QueryProcessor {
     private Iterator<EntityRecord> loadByQuery(Query query) {
         Target target = query.getTarget();
         TargetFilters filters = target.getFilters();
-        OrderBy orderBy = query.getOrderBy();
-        Pagination pagination = query.getPagination();
-        FieldMask mask = query.getFieldMask();
-        Iterator<EntityRecord> entities =
-                repository.findRecords(filters, orderBy, pagination, mask);
+        Iterator<EntityRecord> entities = repository.findRecords(filters, query.getFormat());
         return entities;
     }
 
-    private Iterator<EntityRecord> loadAll(Query query) {
-        FieldMask mask = query.getFieldMask();
-        Iterator<EntityRecord> entities = repository.loadAllRecords(mask);
+    private Iterator<EntityRecord> loadAll(ResponseFormat format) {
+        Iterator<EntityRecord> entities = repository.loadAllRecords(format);
         return entities;
     }
 

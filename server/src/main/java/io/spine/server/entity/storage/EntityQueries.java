@@ -66,52 +66,38 @@ public final class EntityQueries {
      *
      * @param filters
      *         filters for the Entities specifying the query predicate
-     * @param orderBy
-     *         an order to sort the data matching filters by
-     * @param pagination
-     *         a specification of a way to paginate the query results
      * @param storage
      *         a storage for which the query is created
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(TargetFilters filters,
-                                          OrderBy orderBy,
-                                          Pagination pagination,
                                           RecordStorage<I> storage) {
-        checkNotNull(orderBy);
         checkNotNull(filters);
-        checkNotNull(pagination);
         checkNotNull(storage);
 
         Collection<EntityColumn> entityColumns = storage.entityColumns();
-        EntityQuery<I> result = from(filters, orderBy, pagination, entityColumns);
+        EntityQuery<I> result = from(filters, entityColumns);
         return result;
     }
 
     @VisibleForTesting
     static <I> EntityQuery<I> from(TargetFilters filters,
-                                   OrderBy orderBy,
-                                   Pagination pagination,
                                    Collection<EntityColumn> columns) {
-        checkNotNull(orderBy);
         checkNotNull(filters);
-        checkNotNull(pagination);
         checkNotNull(columns);
 
-        QueryParameters queryParams = toQueryParams(orderBy, filters, pagination, columns);
+        QueryParameters queryParams = toQueryParams(filters, columns);
         List<I> ids = toIdentifiers(filters);
 
         EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
-    private static QueryParameters toQueryParams(OrderBy orderBy,
-                                                 TargetFilters filters,
-                                                 Pagination pagination,
+    private static QueryParameters toQueryParams(TargetFilters filters,
                                                  Collection<EntityColumn> entityColumns) {
 
         List<CompositeQueryParameter> parameters = getFiltersQueryParams(filters, entityColumns);
-        return newQueryParameters(parameters, orderBy, pagination);
+        return newQueryParameters(parameters);
     }
 
     private static List<CompositeQueryParameter>
@@ -122,12 +108,9 @@ public final class EntityQueries {
                       .collect(toList());
     }
 
-    private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters,
-                                                      OrderBy orderBy, Pagination pagination) {
+    private static QueryParameters newQueryParameters(List<CompositeQueryParameter> parameters) {
         return QueryParameters.newBuilder()
                               .addAll(parameters)
-                              .limit(pagination.getPageSize())
-                              .orderBy(orderBy)
                               .build();
     }
 

@@ -21,9 +21,9 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -140,8 +140,12 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .addPaths("invalid-path")
                 .build();
+        ResponseFormat format = ResponseFormat
+                .newBuilder()
+                .setFieldMask(nonEmptyFieldMask)
+                .vBuild();
         RecordStorage storage = storage();
-        Iterator empty = storage.readAll(nonEmptyFieldMask);
+        Iterator empty = storage.readAll(format);
 
         assertNotNull(empty);
         assertFalse(empty.hasNext(), "Iterator is not empty!");
@@ -221,7 +225,6 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         storage.write(id, record);
 
         Message state = newState(id);
-        Descriptor descriptor = state.getDescriptorForType();
         FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
         RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
@@ -321,12 +324,13 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         }
 
         storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
-        Iterator<EntityRecord> firstRevision = storage.readAll();
+        Iterator<EntityRecord> firstRevision = storage.readAll(ResponseFormat.getDefaultInstance());
         RecordStorageTestEnv.assertIteratorsEqual(v1Records.values()
                                                            .iterator(), firstRevision);
 
         storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
-        Iterator<EntityRecord> secondRevision = storage.readAll();
+        Iterator<EntityRecord> secondRevision =
+                storage.readAll(ResponseFormat.getDefaultInstance());
         RecordStorageTestEnv.assertIteratorsEqual(v2Records.values()
                                                            .iterator(), secondRevision);
     }

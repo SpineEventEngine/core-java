@@ -33,6 +33,8 @@ import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
+import io.spine.client.Pagination;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -66,12 +68,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.assertMatches;
-import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFieldMask;
-import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFilters;
-import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyOrder;
-import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyPagination;
+import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFormat;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
-import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.pagination;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -237,7 +235,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     class FindMultiple {
 
         private Iterator<EntityRecord> loadAllRecords() {
-            return repository.loadAllRecords();
+            return repository.loadAllRecords(ResponseFormat.getDefaultInstance());
         }
 
         @Test
@@ -284,9 +282,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
                     .newBuilder()
                     .addFilter(aggregatingFilter)
                     .build();
-            Collection<E> found = newArrayList(
-                    repository().find(filters, emptyOrder(), emptyPagination(), emptyFieldMask())
-            );
+            Collection<E> found = newArrayList(repository().find(filters, emptyFormat()));
 
             IterableSubject assertThatFound = assertThat(found);
             assertThatFound.hasSize(1);
@@ -322,8 +318,11 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             // UUIDs are guaranteed to produced a collection with unordered names. 
             List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
 
-            Iterator<E> readEntities = repository().find(emptyFilters(), orderByName(ASCENDING),
-                                                         emptyPagination(), emptyFieldMask());
+            ResponseFormat format = ResponseFormat
+                    .newBuilder()
+                    .setOrderBy(orderByName(ASCENDING))
+                    .vBuild();
+            Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities);
@@ -338,8 +337,11 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             // UUIDs are guaranteed to produced a collection with unordered names. 
             List<E> entities = createAndStoreNamed(repository(), count, Identifier::newUuid);
 
-            Iterator<E> readEntities = repository().find(emptyFilters(), orderByName(DESCENDING),
-                                                         emptyPagination(), emptyFieldMask());
+            ResponseFormat format = ResponseFormat
+                    .newBuilder()
+                    .setOrderBy(orderByName(DESCENDING))
+                    .vBuild();
+            Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = reverse(orderedByName(entities));
@@ -355,8 +357,12 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
             // UUIDs are guaranteed to produced a collection with unordered names. 
             List<E> entities = createAndStoreNamed(repository(), totalCount, Identifier::newUuid);
 
-            Iterator<E> readEntities = repository().find(emptyFilters(), orderByName(ASCENDING),
-                                                         pagination(pageSize), emptyFieldMask());
+            ResponseFormat format = ResponseFormat
+                    .newBuilder()
+                    .setOrderBy(orderByName(DESCENDING))
+                    .setPagination(Pagination.newBuilder().setPageSize(pageSize))
+                    .vBuild();
+            Iterator<E> readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
             List<E> expectedList = orderedByName(entities).subList(0, pageSize);
@@ -398,7 +404,11 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         }
 
         private Iterator<E> find(TargetFilters filters, FieldMask firstFieldOnly) {
-            return repository().find(filters, emptyOrder(), emptyPagination(), firstFieldOnly);
+            ResponseFormat format = ResponseFormat
+                    .newBuilder()
+                    .setFieldMask(firstFieldOnly)
+                    .vBuild();
+            return repository().find(filters, format);
         }
 
         private List<E> createAndStoreNamed(RecordBasedRepository<I, E, S> repo, int count,
@@ -439,7 +449,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         }
 
         private Iterator<E> loadAll() {
-            return repository().loadAll();
+            return repository().loadAll(ResponseFormat.getDefaultInstance());
         }
     }
 
@@ -531,8 +541,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        Iterator<E> found = repository().find(emptyFilters(), emptyOrder(), emptyPagination(),
-                                              emptyFieldMask());
+        Iterator<E> found = repository().loadAll(emptyFormat());
         List<E> foundList = newArrayList(found);
         // Check results
         assertThat(foundList).hasSize(1);
@@ -560,8 +569,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
                 .addFilter(filter)
                 .build();
 
-        Iterator<E> found = repository().find(filters, emptyOrder(), emptyPagination(),
-                                              emptyFieldMask());
+        Iterator<E> found = repository().find(filters, emptyFormat());
         Collection<E> foundList = newArrayList(found);
         // Check result
         IterableSubject assertFoundList = assertThat(foundList);

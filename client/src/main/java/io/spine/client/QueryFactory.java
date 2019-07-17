@@ -187,14 +187,18 @@ public final class QueryFactory {
                        @Nullable Set<CompositeFilter> filters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-        Query.Builder builder = queryBuilderFor(entityClass, ids, filters, fieldMask);
+        ResponseFormat format = responseFormat(fieldMask, null, null);
+        Query.Builder builder = queryBuilderFor(entityClass, ids, filters)
+                .setFormat(format);
         Query query = newQuery(builder);
         return query;
     }
 
     Query composeQuery(Target target, @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
-        Query.Builder builder = queryBuilderFor(target, fieldMask);
+        ResponseFormat format = responseFormat(fieldMask, null, null);
+        Query.Builder builder = queryBuilderFor(target)
+                .setFormat(format);
         Query query = newQuery(builder);
         return query;
     }
@@ -204,9 +208,9 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
-        Query.Builder builder =
-                queryBuilderFor(target, fieldMask)
-                        .setOrderBy(orderBy);
+        ResponseFormat format = responseFormat(fieldMask, orderBy, null);
+        Query.Builder builder = queryBuilderFor(target)
+                .setFormat(format);
         Query query = newQuery(builder);
         return query;
     }
@@ -218,10 +222,10 @@ public final class QueryFactory {
         checkTargetNotNull(target);
         checkNotNull(orderBy);
         checkNotNull(pagination);
-        Query.Builder builder =
-                queryBuilderFor(target, fieldMask)
-                        .setOrderBy(orderBy)
-                        .setPagination(pagination);
+
+        ResponseFormat format = responseFormat(fieldMask, orderBy, pagination);
+        Query.Builder builder = queryBuilderFor(target)
+                .setFormat(format);
         Query query = newQuery(builder);
         return query;
     }
@@ -234,5 +238,23 @@ public final class QueryFactory {
         return builder.setId(newQueryId())
                       .setContext(actorContext)
                       .vBuild();
+    }
+
+    private static ResponseFormat responseFormat(@Nullable FieldMask mask,
+                                                 @Nullable OrderBy ordering,
+                                                 @Nullable Pagination pagination) {
+
+        ResponseFormat.Builder result = ResponseFormat
+                .newBuilder();
+        if (mask != null) {
+            result.setFieldMask(mask);
+        }
+        if (ordering != null) {
+            result.setOrderBy(ordering);
+        }
+        if (pagination != null) {
+            result.setPagination(pagination);
+        }
+        return result.vBuild();
     }
 }

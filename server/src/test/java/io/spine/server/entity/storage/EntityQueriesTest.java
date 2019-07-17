@@ -51,9 +51,6 @@ import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
-import static io.spine.client.OrderBy.Direction.ASCENDING;
-import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.order;
-import static io.spine.server.entity.storage.given.EntityQueriesTestEnv.pagination;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -81,20 +78,8 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
 
     private static EntityQuery<?> createEntityQuery(TargetFilters filters,
                                                     Class<? extends Entity<?, ?>> entityClass) {
-        return createEntityQuery(filters, OrderBy.getDefaultInstance(),
-                                 Pagination.getDefaultInstance(), entityClass);
-    }
-
-    /**
-     * This method is not placed in test environment because it uses package-private
-     * {@link EntityQueries#from(EntityFilters, OrderBy, Pagination, Collection)}.
-     */
-    private static EntityQuery<?> createEntityQuery(TargetFilters filters,
-                                                    OrderBy orderBy,
-                                                    Pagination pagination,
-                                                    Class<? extends Entity<?, ?>> entityClass) {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        return EntityQueries.from(filters, orderBy, pagination, entityColumns);
+        return EntityQueries.from(filters, entityColumns);
     }
 
     @Test
@@ -138,8 +123,6 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
 
         QueryParameters parameters = query.getParameters();
         assertEquals(0, size(parameters.iterator()));
-        assertFalse(parameters.limited());
-        assertFalse(parameters.ordered());
     }
 
     @Test
@@ -182,37 +165,11 @@ class EntityQueriesTest extends UtilityClassTest<EntityQueries> {
         List<CompositeQueryParameter> values = newArrayList(parameters);
         assertThat(values).hasSize(1);
 
-        assertFalse(parameters.limited());
-        assertFalse(parameters.ordered());
-
         CompositeQueryParameter singleParam = values.get(0);
         Collection<Filter> columnFilters = singleParam.getFilters()
                                                       .values();
         assertEquals(EITHER, singleParam.getOperator());
         IterableSubject assertColumnFilters = assertThat(columnFilters);
         assertColumnFilters.contains(archivedFilter);
-    }
-
-    @Test
-    @DisplayName("construct queries with limit and order")
-    void constructWithLimitAndOrder() {
-        String expectedColumn = "test";
-        OrderBy.Direction expectedDirection = ASCENDING;
-        int expectedLimit = 10;
-        EntityQuery<?> query = createEntityQuery(TargetFilters.getDefaultInstance(),
-                                                 order(expectedColumn, expectedDirection),
-                                                 pagination(expectedLimit),
-                                                 TestEntity.class);
-        assertNotNull(query);
-
-        QueryParameters parameters = query.getParameters();
-        assertTrue(parameters.ordered());
-        assertTrue(parameters.limited());
-
-        OrderBy orderBy = parameters.orderBy();
-        assertEquals(expectedColumn, orderBy.getColumn());
-        assertEquals(expectedDirection, orderBy.getDirection());
-
-        assertEquals(expectedLimit, parameters.limit());
     }
 }

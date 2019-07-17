@@ -26,6 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.client.ResponseFormat;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -128,7 +129,7 @@ public abstract class ProjectionStorageTest
         void all() {
             List<ProjectId> ids = fillStorage(5);
 
-            Iterator<EntityRecord> read = storage.readAll();
+            Iterator<EntityRecord> read = storage.readAll(ResponseFormat.getDefaultInstance());
             Collection<EntityRecord> readRecords = newArrayList(read);
             assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {
@@ -145,7 +146,11 @@ public abstract class ProjectionStorageTest
 
             FieldMask fieldMask = fromStringList(Project.class, ImmutableList.of("id", "name"));
 
-            Iterator<EntityRecord> read = storage.readAll(fieldMask);
+            ResponseFormat format = ResponseFormat
+                    .newBuilder()
+                    .setFieldMask(fieldMask)
+                    .vBuild();
+            Iterator<EntityRecord> read = storage.readAll(format);
             Collection<EntityRecord> readRecords = newArrayList(read);
             assertThat(readRecords).hasSize(ids.size());
             for (EntityRecord record : readRecords) {

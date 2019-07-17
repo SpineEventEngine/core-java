@@ -23,10 +23,10 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.QueryParameters;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -80,44 +80,39 @@ final class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns
         return activeRecords;
     }
 
-    Iterator<EntityRecord> readAll() {
-        return activeRecords()
+    Iterator<EntityRecord> readAll(ResponseFormat format) {
+        Stream<EntityRecordWithColumns> records = activeRecords()
                 .values()
-                .stream()
+                .stream();
+        return orderAndLimit(records, format)
                 .map(UNPACKER)
                 .iterator();
     }
 
-    Iterator<EntityRecord> readAll(FieldMask fieldMask) {
-        if (fieldMask.getPathsCount() == 0) {
-            return readAll();
-        }
-
-        return activeRecords()
-                .values()
-                .stream()
+    Iterator<EntityRecord> readAll(EntityQuery<I> query, ResponseFormat format) {
+        FieldMask fieldMask = format.getFieldMask();
+        return findRecords(query, format)
                 .map(UNPACKER)
                 .map(new FieldMaskApplier(fieldMask))
                 .iterator();
     }
 
-    Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
-        return findRecords(query)
-                .map(UNPACKER)
-                .map(new FieldMaskApplier(fieldMask))
-                .iterator();
-    }
-
-    private Stream<EntityRecordWithColumns> findRecords(EntityQuery<I> query) {
+    private Stream<EntityRecordWithColumns>
+    findRecords(EntityQuery<I> query, ResponseFormat format) {
         Map<I, EntityRecordWithColumns> records = filterRecords(query);
-        QueryParameters parameters = query.getParameters();
         Stream<EntityRecordWithColumns> stream = records.values()
                                                         .stream();
-        if (parameters.ordered()) {
-            stream = stream.sorted(orderedBy(parameters.orderBy()));
+        return orderAndLimit(stream, format);
+    }
+
+    private static Stream<EntityRecordWithColumns>
+    orderAndLimit(Stream<EntityRecordWithColumns> data, ResponseFormat format) {
+        Stream<EntityRecordWithColumns> stream = data;
+        if (format.hasOrderBy()) {
+            stream = stream.sorted(orderedBy(format.getOrderBy()));
         }
-        if (parameters.limited()) {
-            stream = stream.limit(parameters.limit());
+        if (format.hasPagination()) {
+            stream = stream.limit(format.getPagination().getPageSize());
         }
         return stream;
     }
