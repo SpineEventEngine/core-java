@@ -43,11 +43,6 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
     }
 
     @Override
-    EventSubject assertWithSubjectThat(Iterable<Event> messages) {
-        return EventSubject.assertThat(messages);
-    }
-
-    @Override
     Event createMessage() {
         TuTaskId taskId = generateTaskId();
         TuCommentAdded event = TuCommentAdded
