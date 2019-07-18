@@ -385,23 +385,4 @@ public class EventBus
             return exception;
         }
     }
-
-    /**
-     * Ensures that the passed object has a valid reference to {@code EventBus}.
-     *
-     * @param holder
-     *         the object which holds the reference
-     * @param value
-     *         the value of the reference to check
-     * @return the passed value, if it's not null
-     * @throws NullPointerException
-     *         if the passed value is null
-     */
-    public static EventBus checkAssigned(Object holder, @Nullable EventBus value) {
-        return checkNotNull(
-                value,
-                "`%s` does not have `EventBus` assigned.",
-                holder
-        );
-    }
 }

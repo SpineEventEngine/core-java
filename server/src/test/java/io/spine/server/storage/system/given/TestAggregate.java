@@ -18,28 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.enrich.given;
+package io.spine.server.storage.system.given;
 
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
-import io.spine.server.enrich.given.command.EitCreateProject;
-import io.spine.server.enrich.given.event.EitProjectCreated;
+import io.spine.server.model.Nothing;
 
-final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitProject.Builder> {
-
-    @Assign
-    EitProjectCreated handle(EitCreateProject cmd) {
-        return EitProjectCreated
-                .newBuilder()
-                .setProject(cmd.getProject())
-                .build();
-    }
-
-    @Apply
-    private void event(EitProjectCreated event) {
-        builder().setId(event.getProject())
-                 .setName(event.getName())
-                 .setDescription(event.getDescription());
-    }
+public class TestAggregate extends Aggregate<String, Nothing, Nothing.Builder> {
 }

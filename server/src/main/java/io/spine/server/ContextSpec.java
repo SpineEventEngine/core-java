@@ -22,8 +22,10 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
@@ -38,10 +40,12 @@ public final class ContextSpec {
 
     private final BoundedContextName name;
     private final boolean multitenant;
+    private final boolean storeEvents;
 
-    private ContextSpec(BoundedContextName name, boolean multitenant) {
+    private ContextSpec(BoundedContextName name, boolean multitenant, boolean storeEvents) {
         this.name = checkNotNull(name);
         this.multitenant = multitenant;
+        this.storeEvents = storeEvents;
     }
 
     /**
@@ -49,7 +53,7 @@ public final class ContextSpec {
      */
     @VisibleForTesting
     public static ContextSpec singleTenant(String name) {
-        return create(name, false);
+        return createDomain(name, false);
     }
 
     /**
@@ -57,13 +61,13 @@ public final class ContextSpec {
      */
     @VisibleForTesting
     public static ContextSpec multitenant(String name) {
-        return create(name, true);
+        return createDomain(name, true);
     }
 
-    private static ContextSpec create(String name, boolean multitenant) {
+    private static ContextSpec createDomain(String name, boolean multitenant) {
         checkNotNull(name);
         BoundedContextName contextName = newName(name);
-        return new ContextSpec(contextName, multitenant);
+        return new ContextSpec(contextName, multitenant, true);
     }
 
     /**
@@ -78,6 +82,28 @@ public final class ContextSpec {
      */
     public boolean isMultitenant() {
         return multitenant;
+    }
+
+    /**
+     * Checks if the specified context stores its event log.
+     *
+     * <p>All domain-specific contexts store their events. A System context may be configured
+     * to store or not to store its events.
+     *
+     * @return {@code true} if the context persists its event log, {@code false otherwise}
+     */
+    @Internal
+    public boolean storesEvents() {
+        return storeEvents;
+    }
+
+    ContextSpec toSystem() {
+        BoundedContextName systemName = BoundedContextNames.system(name);
+        return new ContextSpec(systemName, multitenant, storeEvents);
+    }
+
+    ContextSpec notStoringEvents() {
+        return new ContextSpec(name, multitenant, false);
     }
 
     /**
