@@ -41,6 +41,7 @@ import io.spine.test.stand.MenuId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.type.TypeName;
+import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -135,7 +136,7 @@ class EntityQueryProcessorTest {
                 .setContext(factory.newActorContext())
                 .setTarget(target)
                 .buildPartial();
-        assertThrows(IllegalArgumentException.class, () -> processor.process(query));
+        assertThrows(ValidationException.class, () -> processor.process(query));
     }
 
     private void fill() {
