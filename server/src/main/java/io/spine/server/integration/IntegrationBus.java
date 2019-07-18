@@ -145,10 +145,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      */
     private ConfigurationChangeObserver observeConfigurationChanges() {
         return new ConfigurationChangeObserver(
+                this,
                 boundedContextName,
-                message -> {
-                    checkNotNull(message);
-                    return adapterFor(message);
+                messageClass -> {
+                    checkNotNull(messageClass);
+                    return adapterFor(messageClass);
                 });
     }
 
@@ -282,6 +283,10 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                     .publish(pack(newUuid()), externalMessage);
     }
 
+    void notifyOfCurrentNeeds() {
+        notifyOfNeeds(subscriberHub.ids());
+    }
+
     /**
      * Registers the passed event subscriber as an external event dispatcher
      * by taking only external subscriptions into account.
@@ -306,12 +311,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
         IntegrationBus integrationBus = this;
-        Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
-        for (ExternalMessageClass imClass : transformed) {
-            ChannelId channelId = toId(imClass);
+        Iterable<ExternalMessageClass> receivedTypes = dispatcher.messageClasses();
+        for (ExternalMessageClass type : receivedTypes) {
+            ChannelId channelId = toId(type);
             Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.addObserver(new ExternalMessageObserver(boundedContextName,
-                                                               imClass.value(),
+                                                               type.value(),
                                                                integrationBus));
         }
     }
