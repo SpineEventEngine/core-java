@@ -18,23 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.pm;
+package io.spine.model.verify.given;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.route.EventRouting;
-import io.spine.server.test.shared.AnyProcess;
-import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.quiz.event.PmQuizStarted;
+import io.spine.server.command.Command;
+import io.spine.server.procman.ProcessManager;
+import io.spine.test.model.verify.command.RestorePhoto;
+import io.spine.test.model.verify.command.UploadPhoto;
+import io.spine.test.model.verify.given.EditState;
 
-import static io.spine.server.route.EventRoute.withId;
+/**
+ * A procman that declares an {@code external} command substitution method and thus shouldn't pass
+ * the model verification.
+ */
+public class InvalidCommander extends ProcessManager<String, EditState, EditState.Builder> {
 
-public final class TestProcessManagerRepo
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, AnyProcess> {
+    protected InvalidCommander(String id) {
+        super(id);
+    }
 
-    @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(PmQuizStarted.class,
-                      (event, context) -> withId(TestProcessManager.ID));
+    @Command(external = true)
+    UploadPhoto handle(RestorePhoto command) {
+        return UploadPhoto.getDefaultInstance();
     }
 }

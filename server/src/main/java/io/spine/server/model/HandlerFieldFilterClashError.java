@@ -36,7 +36,7 @@ import static java.lang.String.format;
  *     public void onProject(ProjectStarted event) {
  *     }
  *
-       \@Subscribe(filter = @ByField(path = "by.admin", value = "false"))
+ *     \@Subscribe(filter = @ByField(path = "by.admin", value = "false"))
  *     public void onStarted(ProjectStarted event) {
  *     }
  *     }
@@ -46,7 +46,7 @@ import static java.lang.String.format;
  * filter the events by {@code member_count} and {@code by.admin} fields respectively. This is
  * an invalid situation, since both filters could be satisfied simultaneously.
  */
-public class HandlerFieldFilterClashError extends ModelError {
+public final class HandlerFieldFilterClashError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
