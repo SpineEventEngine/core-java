@@ -128,7 +128,7 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
 
     private @Nullable Constructor<E> idConstructorIn(Constructor<?>[] constructors) {
         @SuppressWarnings("unchecked") // ensured by the generic parameter of this class.
-                Constructor<E> result = (Constructor<E>)
+        Constructor<E> result = (Constructor<E>)
                 Arrays.stream(constructors)
                       .filter(c -> {
                           Class<?>[] parameterTypes = c.getParameterTypes();
@@ -192,8 +192,8 @@ public final class DefaultEntityFactory<E extends Entity> extends AbstractEntity
         if (usesDefaultConstructor) {
             checkArgument(
                     idClass.isAssignableFrom(actualArgumentType),
-                    "`%s()` argument type mismatch: expected `%s`, but was: `%s`.",
-                    SET_ID_METHOD_NAME, idClass, actualArgumentType
+                    "`%s()` argument type mismatch: expected `%s`, but was: `%s`.%s",
+                    SET_ID_METHOD_NAME, idClass, actualArgumentType, ADVISE_CHECK_ROUTING
             );
             return;
         }
