@@ -24,7 +24,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 
 /**
- * System bounded context feature configuration.
+ * A configuration of features of a system context.
+ *
+ * <p>Users may choose to turn certain system features on or off depending on the required
+ * performance.
  */
 public final class SystemFeatures {
 
