@@ -60,7 +60,7 @@ public final class SystemFeatures {
 
     /**
      * Enables the configured system context to store
-     * {@linkplain io.spine.system.server.CommandLog logs} for domain commands.
+     * {@link io.spine.system.server.CommandLog CommandLog}s for domain commands.
      *
      * @return self for method chaining
      * @see #disableCommandLog()
@@ -135,9 +135,9 @@ public final class SystemFeatures {
     }
 
     /**
-     * Obtains the Command log setting.
+     * Obtains the {@link io.spine.system.server.CommandLog CommandLog} setting.
      *
-     * @return {@code true} if the Command log should be stored, {@code false} otherwise
+     * @return {@code true} if the {@code CommandLog} should be stored, {@code false} otherwise
      */
     boolean includeCommandLog() {
         return commandLog;
