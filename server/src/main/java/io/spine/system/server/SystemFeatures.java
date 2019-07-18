@@ -46,7 +46,7 @@ public final class SystemFeatures {
      *
      * <p>By default, the system context:
      * <ol>
-     *     <li>Stores Aggregate mirrors for querying.
+     *     <li>Enables querying of the latest {@code Aggregate} states.
      *     <li>Does not store {@link io.spine.system.server.CommandLog CommandLog}.
      *     <li>Does not store system events.
      * </ol>
@@ -86,8 +86,10 @@ public final class SystemFeatures {
     }
 
     /**
-     * Enables the configured system context to store
-     * {@linkplain io.spine.system.server.Mirror mirrors} for domain aggregates.
+     * Enables querying of the latest domain {@code Aggregate} states.
+     *
+     * <p>The system context stores domain {@code Aggregate} states in the form of
+     * {@link io.spine.system.server.Mirror} projections.
      *
      * <p>This is the default setting.
      *
@@ -101,7 +103,7 @@ public final class SystemFeatures {
     }
 
     /**
-     * Disables domain Aggregate mirrors.
+     * Disables querying of the latest domain {@code Aggregate} states.
      *
      * @return self for method chaining
      * @see #enableAggregateQuerying()
@@ -144,7 +146,7 @@ public final class SystemFeatures {
     }
 
     /**
-     * Obtains the Aggregate mirrors setting.
+     * Obtains the {@code Aggregate} mirrors setting.
      *
      * @return {@code true} if the Aggregate mirrors should be stored, {@code false} otherwise
      */
