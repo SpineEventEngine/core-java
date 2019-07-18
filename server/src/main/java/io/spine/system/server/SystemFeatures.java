@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 
@@ -162,5 +163,27 @@ public final class SystemFeatures {
     @Internal
     public boolean includePersistentEvents() {
         return storeEvents;
+    }
+
+    @SuppressWarnings("NonFinalFieldReferenceInEquals")
+        // `SystemFeatures` is designed to be mutable.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SystemFeatures)) {
+            return false;
+        }
+        SystemFeatures features = (SystemFeatures) o;
+        return commandLog == features.commandLog &&
+                aggregateMirrors == features.aggregateMirrors &&
+                storeEvents == features.storeEvents;
+    }
+
+    @SuppressWarnings("NonFinalFieldReferencedInHashCode") // See `equals`.
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(commandLog, aggregateMirrors, storeEvents);
     }
 }
