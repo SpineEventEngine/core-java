@@ -40,7 +40,7 @@ class EitUserAggregate extends Aggregate<UserId, EitUserAccount, EitUserAccount.
     }
 
     @Apply
-    void event(EitUserAccountCreated event) {
+    private void event(EitUserAccountCreated event) {
         builder().setId(event.getUser())
                  .setGivenName(event.getGivenName())
                  .setFamilyName(event.getFamilyName());

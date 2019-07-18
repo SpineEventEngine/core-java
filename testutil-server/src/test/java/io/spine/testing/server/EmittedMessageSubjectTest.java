@@ -26,6 +26,7 @@ import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
 import io.spine.base.SerializableMessage;
 import io.spine.core.Signal;
+import io.spine.testing.SubjectTest;
 import io.spine.testing.server.EmittedMessageSubject.FactKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,8 +42,6 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
                                          W extends Signal,
                                          M extends SerializableMessage>
         extends SubjectTest<S, Iterable<W>> {
-
-    abstract S assertWithSubjectThat(Iterable<W> messages);
 
     abstract W createMessage();
 

@@ -18,28 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.enrich.given;
+/**
+ * Contains an implementation of {@link io.spine.server.storage.StorageFactory} aware of the system
+ * context specifics.
+ */
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
-import io.spine.server.enrich.given.command.EitCreateProject;
-import io.spine.server.enrich.given.event.EitProjectCreated;
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.system;
 
-final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitProject.Builder> {
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-    @Assign
-    EitProjectCreated handle(EitCreateProject cmd) {
-        return EitProjectCreated
-                .newBuilder()
-                .setProject(cmd.getProject())
-                .build();
-    }
-
-    @Apply
-    private void event(EitProjectCreated event) {
-        builder().setId(event.getProject())
-                 .setName(event.getName())
-                 .setDescription(event.getDescription());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
