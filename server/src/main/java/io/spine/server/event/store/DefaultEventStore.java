@@ -186,8 +186,13 @@ public final class DefaultEventStore
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
-        TargetFilters filters = QueryToFilters.convert(query);
-        return find(filters, ResponseFormat.getDefaultInstance());
+        ResponseFormat format = ResponseFormat.getDefaultInstance();
+        if (query.includeAll()) {
+            return loadAll(format);
+        } else {
+            TargetFilters filters = QueryToFilters.convert(query);
+            return find(filters, format);
+        }
     }
 
     private void store(Event event) {
