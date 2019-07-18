@@ -25,7 +25,7 @@ import static java.lang.String.format;
  * Indicates that more than one handling method for the same message class are present
  * in the declaring class.
  */
-public class DuplicateHandlerMethodError extends ModelError {
+public final class DuplicateHandlerMethodError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
