@@ -35,7 +35,6 @@ import java.util.Iterator;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
-import static io.spine.validate.Validate.checkValid;
 
 /**
  * Processes the queries targeting {@link io.spine.server.entity.Entity Entity} objects.
@@ -63,7 +62,6 @@ class EntityQueryProcessor implements QueryProcessor {
     private Iterator<EntityRecord> loadByQuery(Query query) {
         Target target = query.getTarget();
         TargetFilters filters = target.getFilters();
-        checkValid(filters);
         Iterator<EntityRecord> entities = repository.findRecords(filters, query.getFormat());
         return entities;
     }

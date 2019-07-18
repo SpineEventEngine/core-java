@@ -56,6 +56,7 @@ import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkValid;
 
 /**
  * The base class for repositories that store entities as records.
@@ -318,6 +319,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
+        checkValid(filters);
         checkNotNull(format);
 
         RecordStorage<I> storage = recordStorage();
