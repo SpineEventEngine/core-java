@@ -144,7 +144,8 @@ final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjec
      * <p>In a multitenant environment, this method should only be invoked if the current tenant is
      * set to the one in the {@link Query}.
      *
-     * @param query an aggregate query
+     * @param query
+     *         an aggregate query
      * @return an {@code Iterator} over the result aggregate states
      * @see SystemReadSide#readDomainAggregate(Query)
      */
@@ -152,9 +153,9 @@ final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjec
         ResponseFormat requestedFormat = query.getFormat();
         FieldMask aggregateFields = requestedFormat.getFieldMask();
         ResponseFormat responseFormat = requestedFormat
-                                             .toBuilder()
-                                             .setFieldMask(AGGREGATE_STATE_WITH_VERSION)
-                                             .vBuild();
+                .toBuilder()
+                .setFieldMask(AGGREGATE_STATE_WITH_VERSION)
+                .vBuild();
         Target target = query.getTarget();
         TargetFilters filters = buildFilters(target);
         Iterator<MirrorProjection> mirrors = find(filters, responseFormat);
