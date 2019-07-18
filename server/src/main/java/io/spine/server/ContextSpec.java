@@ -84,6 +84,14 @@ public final class ContextSpec {
         return multitenant;
     }
 
+    /**
+     * Checks if the specified context stores its event log.
+     *
+     * <p>All domain-specific contexts store their events. A System context may be configured
+     * to store or not to store its events.
+     *
+     * @return {@code true} if the context persists its event log, {@code false otherwise}
+     */
     @Internal
     public boolean storesEvents() {
         return storeEvents;
