@@ -28,15 +28,19 @@ import com.google.protobuf.Any;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
+import io.spine.client.QueryId;
+import io.spine.client.Target;
 import io.spine.server.BoundedContext;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.MenuRepository;
+import io.spine.system.server.Mirror;
 import io.spine.test.stand.Dish;
 import io.spine.test.stand.DishAdded;
 import io.spine.test.stand.Menu;
 import io.spine.test.stand.MenuId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,17 +49,20 @@ import org.junit.jupiter.api.Test;
 import java.util.Comparator;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.given.MenuProjection.UUID;
 import static java.util.Comparator.comparing;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("EntityQueryProcessor should")
 class EntityQueryProcessorTest {
 
     private static final int MENU_COUNT = 16;
-    private static final QueryFactory queries =
-            new TestActorRequestFactory(EntityQueryProcessorTest.class).query();
+    private static final TestActorRequestFactory factory =
+            new TestActorRequestFactory(EntityQueryProcessorTest.class);
+    private static final QueryFactory queries = factory.query();
 
     private BlackBoxBoundedContext<?> context;
     private EntityQueryProcessor processor;
@@ -113,6 +120,22 @@ class EntityQueryProcessorTest {
                 (EntityStateWithVersion record) -> state(record).getId().getUuid()
         );
         assertRecords.isOrdered(uuidOrder.reversed());
+    }
+
+    @Test
+    @DisplayName("fail if the query does not specify filters and `include_all` is not set")
+    void failOnInvalidQuery() {
+        Target target = Target
+                .newBuilder()
+                .setType(TypeName.of(Mirror.class).value())
+                .buildPartial();
+        Query query = Query
+                .newBuilder()
+                .setId(QueryId.newBuilder().setValue(newUuid()))
+                .setContext(factory.newActorContext())
+                .setTarget(target)
+                .buildPartial();
+        assertThrows(IllegalArgumentException.class, () -> processor.process(query));
     }
 
     private void fill() {
