@@ -54,9 +54,8 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(
-            IntegrationBus integrationBus,
-            BoundedContextName boundedContextName,
+    ConfigurationChangeObserver(IntegrationBus integrationBus,
+                                BoundedContextName boundedContextName,
                                 Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByCls) {
         super(boundedContextName, RequestForExternalMessages.class);
         this.integrationBus = integrationBus;

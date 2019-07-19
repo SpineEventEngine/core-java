@@ -36,7 +36,6 @@ public final class BoundedContextNames {
 
     /** The name of a Bounded Context to be used if the name was explicitly set. */
     private static final BoundedContextName ASSUMING_TESTS = newName("AssumingTests");
-    private static final String SYSTEM_TEMPLATE = "%s_System";
 
     /**
      * Prevents the utility class instantiation.

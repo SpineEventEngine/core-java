@@ -23,7 +23,7 @@ package io.spine.experiment;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.transport.TransportFactory;
-import io.spine.server.transport.memory.SingleThreadInMemTransportFactory;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.Test;
 
@@ -36,17 +36,17 @@ class Experiment {
 
     @Test
     void a() {
-        TransportFactory transport = SingleThreadInMemTransportFactory.newInstance();
+        TransportFactory transport = InMemoryTransportFactory.newInstance();
         ServerEnvironment
                 .instance()
                 .configureTransport(transport);
-        BoundedContext photos = BoundedContext
-                .singleTenant("photos")
-                .add(PhotosProcMan.class)
-                .build();
         BoundedContext billing = BoundedContext
                 .singleTenant("billing")
                 .add(BillingAggregate.class)
+                .build();
+        BoundedContext photos = BoundedContext
+                .singleTenant("photos")
+                .add(PhotosProcMan.class)
                 .build();
         photos.commandBus()
               .post(requests.createCommand(UploadPhotos.generate()), noOpObserver());
