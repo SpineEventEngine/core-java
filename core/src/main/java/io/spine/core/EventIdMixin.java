@@ -20,16 +20,26 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Descriptors;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.validate.FieldAwareMessage;
 
 /**
  * A mixin interface for {@link EventId}.
  */
 @GeneratedMixin
-interface EventIdMixin extends SignalId, EventIdOrBuilder {
+interface EventIdMixin extends SignalId, FieldAwareMessage, EventIdOrBuilder {
 
     @Override
     default String value() {
         return getValue();
+    }
+
+    @Override
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        if(0 == field.getIndex()) {
+            return getValue();
+        }
+        return getField(field);
     }
 }

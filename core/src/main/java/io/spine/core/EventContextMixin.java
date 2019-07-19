@@ -21,7 +21,9 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Descriptors;
 import io.spine.base.Identifier;
+import io.spine.validate.FieldAwareMessage;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -29,7 +31,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * Mixin interface for {@link EventContext}s.
  */
 @Immutable
-public interface EventContextMixin extends EnrichableMessageContext {
+public interface EventContextMixin extends EnrichableMessageContext,
+                                           EventContextOrBuilder,
+                                           FieldAwareMessage {
 
     /**
      * Obtains an actor context for the event context.
@@ -108,5 +112,47 @@ public interface EventContextMixin extends EnrichableMessageContext {
         @SuppressWarnings("ClassReferencesSubclass")  // which is the only impl.
         EventContext thisContext = (EventContext) this;
         return Identifier.unpack(thisContext.getProducerId());
+    }
+
+    /**
+     * Reads the values of the fields without using the reflection.
+     *
+     * <p>During the validation of the contents this call reduces the cost of value extraction.
+     * It is needed to improve the performance. However, some of the fields in {@code EventContext}
+     * are deprecated, so the respective warnings are suppressed.
+     */
+    @SuppressWarnings({"OverlyComplexMethod", "MagicNumber", "deprecation"})    // see the docs.
+    @Override
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getTimestamp();
+            case 1:
+                return getCommandContext();
+            case 2:
+                return getEventContext();
+            case 3:
+                return getPastMessage();
+            case 4:
+                return getImportContext();
+            case 5:
+                return getCommandId();
+            case 6:
+                return getEventId();
+            case 7:
+                return getRootCommandId();
+            case 8:
+                return getProducerId();
+            case 9:
+                return getVersion();
+            case 10:
+                return getEnrichment();
+            case 11:
+                return getExternal();
+            case 12:
+                return getRejection();
+            default:
+                return getField(field);
+        }
     }
 }

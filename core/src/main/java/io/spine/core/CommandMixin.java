@@ -21,9 +21,11 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
+import io.spine.validate.FieldAwareMessage;
 import io.spine.validate.Validate;
 
 import java.util.Optional;
@@ -35,8 +37,9 @@ import static io.spine.validate.Validate.isNotDefault;
  * Mixin interface for command objects.
  */
 @Immutable
-public interface CommandMixin
-        extends Signal<CommandId, CommandMessage, CommandContext> {
+public interface CommandMixin extends Signal<CommandId, CommandMessage, CommandContext>,
+                                      CommandOrBuilder,
+                                      FieldAwareMessage {
 
     /**
      * Obtains the ID of the tenant of the command.
@@ -87,5 +90,21 @@ public interface CommandMixin
             return true;
         }
         return false;
+    }
+
+    @Override
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getId();
+            case 1:
+                return getMessage();
+            case 2:
+                return getContext();
+            case 3:
+                return getSystemProperties();
+            default:
+                return getField(field);
+        }
     }
 }
