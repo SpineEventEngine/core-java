@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
@@ -32,10 +33,6 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * A {@link HandlerMethod} which produces commands in response to a signal.
@@ -75,14 +72,12 @@ public interface CommandProducingMethod<T,
         CommandFactory commandFactory = ActorRequestFactory
                 .fromContext(actorContext)
                 .command();
-        List<Command> commands = result.messages(CommandMessage.class)
-                .stream()
-                .map(commandFactory::create)
-                .collect(toList());
-        ProducedCommands signals = ProducedCommands
-                .newBuilder()
-                .addAllCommand(commands)
-                .vBuild();
+        ProducedCommands.Builder signals = ProducedCommands.newBuilder();
+        ImmutableList<CommandMessage> messages = result.messages(CommandMessage.class);
+        for (CommandMessage msg : messages) {
+            Command command = commandFactory.create(msg);
+            signals.addCommand(command);
+        }
         return Success
                 .newBuilder()
                 .setProducedCommands(signals)
