@@ -21,9 +21,11 @@
 package io.spine.core;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.type.TypeUrl;
+import io.spine.validate.FieldAwareMessage;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -32,7 +34,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * A mixin interface for the {@link MessageId} type.
  */
 @GeneratedMixin
-interface MessageIdMixin extends MessageIdOrBuilder {
+interface MessageIdMixin extends MessageIdOrBuilder, FieldAwareMessage {
 
     String EVENT_ID_TYPE_URL = TypeUrl.from(EventId.getDescriptor()).value();
 
@@ -79,5 +81,19 @@ interface MessageIdMixin extends MessageIdOrBuilder {
     default CommandId asCommandId() {
         checkState(isCommand(), "%s is not a command ID.", getId().getTypeUrl());
         return unpack(getId(), CommandId.class);
+    }
+
+    @Override
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getId();
+            case 1:
+                return getTypeUrl();
+            case 2:
+                return getVersion();
+            default:
+                return getField(field);
+        }
     }
 }
