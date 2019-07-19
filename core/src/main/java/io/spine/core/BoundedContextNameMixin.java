@@ -17,24 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.core;
+package io.spine.core;
 
-import "spine/options.proto";
+import io.spine.annotation.GeneratedMixin;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.core";
-option java_multiple_files = true;
-option java_outer_classname = "BoundedContextProto";
+@SuppressWarnings("ClassReferencesSubclass")
+@GeneratedMixin
+interface BoundedContextNameMixin extends BoundedContextNameOrBuilder {
 
-// A name of `BoundedContext` used to distinguish an instance of bounded context among other
-// bounded contexts that exist in the same application.
-//
-// Must be unique in scope of the application.
-//
-message BoundedContextName {
-    option (is).java_type = "BoundedContextNameMixin";
+    default String value() {
+        return getValue();
+    }
 
-    string value = 1 [(required) = true];
+    default BoundedContextName toSystem() {
+        String value = value() + "_System";
+        BoundedContextName result = BoundedContextName
+                .newBuilder()
+                .setValue(value)
+                .build();
+        return result;
+    }
+
+    default boolean isSystemOf(BoundedContextName name) {
+        return this.toSystem()
+                   .equals(name);
+    }
 }

@@ -26,7 +26,6 @@ import io.spine.annotation.Internal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
-import static java.lang.String.format;
 
 /**
  * Utility class for working with Bounded Context names.
@@ -110,21 +109,5 @@ public final class BoundedContextNames {
     @VisibleForTesting
     public static BoundedContextName assumingTests() {
         return ASSUMING_TESTS;
-    }
-
-    /**
-     * Obtains the name of the system bounded context for the bounded context with the given name.
-     *
-     * @param name the name of the original bounded context
-     * @return the name of the system bounded context
-     */
-    @Internal
-    public static BoundedContextName system(BoundedContextName name) {
-        String value = format(SYSTEM_TEMPLATE, name.getValue());
-        BoundedContextName result = BoundedContextName
-                .newBuilder()
-                .setValue(value)
-                .build();
-        return result;
     }
 }
