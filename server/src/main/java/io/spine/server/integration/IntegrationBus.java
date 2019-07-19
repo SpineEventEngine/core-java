@@ -102,6 +102,7 @@ import static java.lang.String.format;
  * external message. The event will be dispatched to the external event handler of
  * {@code ProjectListView} projection.
  */
+@SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus
         extends MulticastBus<ExternalMessage,
                              ExternalMessageEnvelope,
@@ -268,7 +269,7 @@ public class IntegrationBus
      * <p>Sends out an instance of {@linkplain RequestForExternalMessages
      * request for external messages} for that purpose.
      *
-     * @param  currentlyRequested
+     * @param currentlyRequested
      *         the set of message types that are now requested by this instance of
      *         integration bus
      */
