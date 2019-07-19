@@ -47,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -138,7 +137,7 @@ class QueryServiceTest {
     @MuteLogging
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
-        when(projectDetailsRepository.loadAllRecords(any(ResponseFormat.class)))
+        when(projectDetailsRepository.loadAllRecords(ResponseFormat.getDefaultInstance()))
                 .thenThrow(RuntimeException.class);
         Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
