@@ -63,8 +63,8 @@ public final class ForeignContextConfig {
         return BoundedContextBuilder.assumingTests().build();
     }
 
-    private static CommandDispatcher<String> newCommandDispatcher() {
-        return new CommandDispatcher<String>() {
+    private static CommandDispatcher newCommandDispatcher() {
+        return new CommandDispatcher() {
             @Override
             public Set<CommandClass> messageClasses() {
                 return ImmutableSet.of();
@@ -79,8 +79,8 @@ public final class ForeignContextConfig {
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    private static EventDispatcher<String> newEventDispatcher() {
-        return new EventDispatcher<String>() {
+    private static EventDispatcher newEventDispatcher() {
+        return new EventDispatcher() {
             @Override
             public Set<EventClass> externalEventClasses() {
                 return ImmutableSet.of();
@@ -98,7 +98,7 @@ public final class ForeignContextConfig {
             }
 
             @Override
-            public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+            public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
                 return Optional.empty();
             }
         };

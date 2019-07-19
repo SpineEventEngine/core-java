@@ -109,7 +109,7 @@ import static java.lang.String.format;
 public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageEnvelope,
                                                  ExternalMessageClass,
-                                                 ExternalMessageDispatcher<?>> {
+                                                 ExternalMessageDispatcher> {
 
     /**
      * An identification of the channel serving to exchange {@linkplain RequestForExternalMessages
@@ -219,7 +219,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * @param dispatcher the dispatcher to register
      */
     @Override
-    public void register(ExternalMessageDispatcher<?> dispatcher) {
+    public void register(ExternalMessageDispatcher dispatcher) {
         super.register(dispatcher);
 
         // Remember the channel IDs, that we have been subscribed before.
@@ -243,7 +243,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * @param dispatcher the dispatcher to unregister
      */
     @Override
-    public void unregister(ExternalMessageDispatcher<?> dispatcher) {
+    public void unregister(ExternalMessageDispatcher dispatcher) {
         super.unregister(dispatcher);
 
         // Remember the IDs of channels for which we have been subscribed before.
@@ -304,7 +304,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         unregister(wrapped);
     }
 
-    private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
+    private void subscribeToIncoming(ExternalMessageDispatcher dispatcher) {
         IntegrationBus integrationBus = this;
         Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass imClass : transformed) {
@@ -316,7 +316,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
     }
 
-    private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
+    private void unsubscribeFromIncoming(ExternalMessageDispatcher dispatcher) {
         IntegrationBus integrationBus = this;
         Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass imClass : transformed) {
@@ -366,7 +366,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                    ExternalMessage,
                                                    ExternalMessageEnvelope,
                                                    ExternalMessageClass,
-                                                   ExternalMessageDispatcher<?>> {
+                                                   ExternalMessageDispatcher> {
 
         /**
          * Buses that act inside the bounded context, for example {@code EventBus}, which allow

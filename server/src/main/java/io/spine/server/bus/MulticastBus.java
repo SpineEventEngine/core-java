@@ -36,7 +36,7 @@ import java.util.Collection;
 public abstract class MulticastBus<M extends Message,
                                    E extends MessageEnvelope<?, M, ?>,
                                    C extends MessageClass<? extends Message>,
-                                   D extends MessageDispatcher<C, E, ?>>
+                                   D extends MessageDispatcher<C, E>>
         extends Bus<M, E, C, D> {
 
     protected MulticastBus(BusBuilder<?, M, E, C, D> builder) {

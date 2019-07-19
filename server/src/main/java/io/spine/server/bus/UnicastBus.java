@@ -37,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class UnicastBus<T extends Message,
                                  E extends MessageEnvelope<?, T, ?>,
                                  C extends MessageClass<? extends Message>,
-                                 D extends MessageDispatcher<C, E, ?>>
+                                 D extends MessageDispatcher<C, E>>
         extends Bus<T, E, C, D> {
 
     protected UnicastBus(BusBuilder<?, T, E, C, D> builder) {

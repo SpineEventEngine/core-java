@@ -46,7 +46,7 @@ class DelegatingEventDispatcherTest {
     void noExternalEvents() {
         EventDispatcherDelegate dispatcher = new DomesticEventDispatcherDelegate();
         assertFalse(dispatcher.dispatchesExternalEvents());
-        DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
+        DelegatingEventDispatcher delegate = DelegatingEventDispatcher.of(dispatcher);
         assertThat(delegate.createExternalDispatcher()).isEmpty();
     }
 }

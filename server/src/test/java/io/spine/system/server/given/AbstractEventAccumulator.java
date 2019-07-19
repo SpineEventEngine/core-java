@@ -43,9 +43,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * An {@link EventDispatcher} which can {@linkplain #remember(Message) remember} received events.
  */
-public abstract class AbstractEventAccumulator implements EventDispatcher<String> {
-
-    private final String id = getClass().getName();
+public abstract class AbstractEventAccumulator implements EventDispatcher {
 
     private final List<EventMessage> events = newArrayList();
     private final List<EventMessage> nonCheckedEvents = newArrayList();
@@ -76,7 +74,7 @@ public abstract class AbstractEventAccumulator implements EventDispatcher<String
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         return Optional.empty();
     }
 

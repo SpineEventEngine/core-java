@@ -41,12 +41,12 @@ public enum NoOpSystemReadSide implements SystemReadSide {
     INSTANCE;
 
     @Override
-    public void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher dispatcher) {
         // NOP.
     }
 
     @Override
-    public void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher dispatcher) {
         // NOP.
     }
 
