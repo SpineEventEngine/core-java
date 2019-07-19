@@ -27,6 +27,7 @@ import io.spine.validate.Validated;
 import java.util.List;
 
 import static com.google.common.collect.Streams.stream;
+import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -87,12 +88,14 @@ public interface InboxStorage
      *
      * @param messages
      *         the messages to mark as delivered
+     * @implNote The messages aren't additionally validated after marking as delivered to
+     *         improve the performance.
      */
     default void markDelivered(Iterable<InboxMessage> messages) {
         List<@Validated InboxMessage> updated =
                 stream(messages).map((m) -> m.toBuilder()
-                                             .setStatus(InboxMessageStatus.DELIVERED)
-                                             .vBuild())
+                                             .setStatus(DELIVERED)
+                                             .build())
                                 .collect(toList());
         writeAll(updated);
     }
