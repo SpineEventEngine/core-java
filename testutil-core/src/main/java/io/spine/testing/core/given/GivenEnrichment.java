@@ -23,8 +23,8 @@ package io.spine.testing.core.given;
 import com.google.protobuf.Any;
 import io.spine.core.Enrichment;
 
-import static com.google.protobuf.Any.pack;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 
 /**

@@ -33,7 +33,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.Any.pack;
+import static io.spine.protobuf.AnyPacker.pack;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
