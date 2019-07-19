@@ -40,6 +40,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
+import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 
 /**
  * The server conditions and configuration under which the application operates.
@@ -243,7 +244,7 @@ public final class ServerEnvironment implements AutoCloseable {
                 "%s cannot be used for production storage.",
                 InMemoryStorageFactory.class.getName()
         );
-        this.productionStorageFactory = productionStorageFactory;
+        this.productionStorageFactory = wrap(productionStorageFactory);
     }
 
     /**
@@ -252,7 +253,8 @@ public final class ServerEnvironment implements AutoCloseable {
      * @see #configureStorage(StorageFactory)
      */
     public void configureStorageForTests(StorageFactory factory) {
-        this.storageFactoryForTests = checkNotNull(factory);
+        checkNotNull(factory);
+        this.storageFactoryForTests = wrap(factory);
     }
 
     /**
@@ -280,7 +282,7 @@ public final class ServerEnvironment implements AutoCloseable {
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
             if (storageFactoryForTests == null) {
-                this.storageFactoryForTests = InMemoryStorageFactory.newInstance();
+                configureStorageForTests(InMemoryStorageFactory.newInstance());
             }
             return storageFactoryForTests;
         }

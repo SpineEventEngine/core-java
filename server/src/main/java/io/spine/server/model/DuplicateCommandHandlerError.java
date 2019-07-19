@@ -20,27 +20,26 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Joiner;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.model.ModelError.MessageFormatter.backtick;
+import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 /**
  * An error thrown on attempt to add a class which declares a
  * {@linkplain CommandHandlerMethod method} that handles a command which is
  * already handled by a class already added to the {@link Model}.
  */
-public class DuplicateCommandHandlerError extends ModelError {
+public final class DuplicateCommandHandlerError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
@@ -89,14 +88,11 @@ public class DuplicateCommandHandlerError extends ModelError {
             builder.append(newLine);
             if (commandClasses.size() > 1) {
                 builder.append(" Commands ");
-                List<String> commandsBackTicked =
+                String commandsBackTicked =
                         commandClasses.stream()
-                                      .map(DuplicateCommandHandlerError::backtick)
-                                      .collect(toList());
-                builder.append(
-                        Joiner.on(", ")
-                              .join(commandsBackTicked)
-                );
+                                      .map(MessageFormatter::backtick)
+                                      .collect(toStringEnumeration());
+                builder.append(commandsBackTicked);
                 builder.append(" are handled by ");
             } else {
                 // One command.
@@ -111,9 +107,5 @@ public class DuplicateCommandHandlerError extends ModelError {
             builder.append('.');
         }
         return builder.toString();
-    }
-
-    private static String backtick(Object obj) {
-        return format("`%s`", obj);
     }
 }

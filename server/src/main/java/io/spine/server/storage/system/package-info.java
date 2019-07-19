@@ -18,23 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.pm;
+/**
+ * Contains an implementation of {@link io.spine.server.storage.StorageFactory} aware of the system
+ * context specifics.
+ */
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.route.EventRouting;
-import io.spine.server.test.shared.AnyProcess;
-import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.quiz.event.PmQuizStarted;
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.system;
 
-import static io.spine.server.route.EventRoute.withId;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-public final class TestProcessManagerRepo
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, AnyProcess> {
-
-    @Override
-    protected void setupEventRouting(EventRouting<ProjectId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(PmQuizStarted.class,
-                      (event, context) -> withId(TestProcessManager.ID));
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

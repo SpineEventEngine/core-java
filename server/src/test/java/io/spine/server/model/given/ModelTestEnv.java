@@ -24,6 +24,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
+import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
 import io.spine.test.reflect.Project;
@@ -91,6 +92,23 @@ public class ModelTestEnv {
         @Assign
         RefProjectStarted on(RefStartProject cmd) {
             return RefProjectStarted.getDefaultInstance();
+        }
+    }
+
+    /**
+     * A commander that declares an {@code external} command substitution method, which is
+     * forbidden by the {@linkplain io.spine.server.command.model.CommanderClass model}.
+     */
+    public static class FaultyCommander
+            extends ProcessManager<Long, EmptyProcess, EmptyProcess.Builder> {
+
+        private FaultyCommander(Long id) {
+            super(id);
+        }
+
+        @Command(external = true)
+        RefStartProject handle(RefCreateProject cmd) {
+            return RefStartProject.getDefaultInstance();
         }
     }
 }

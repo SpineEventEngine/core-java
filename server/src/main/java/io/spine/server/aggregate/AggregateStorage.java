@@ -195,8 +195,8 @@ public abstract class AggregateStorage<I>
      *         the read request
      * @return new iterator instance
      */
-    protected abstract Iterator<AggregateEventRecord> historyBackward(
-            AggregateReadRequest<I> request);
+    protected abstract Iterator<AggregateEventRecord>
+    historyBackward(AggregateReadRequest<I> request);
 
     /**
      * Truncates the storage, dropping all records which occur before the Nth snapshot for each

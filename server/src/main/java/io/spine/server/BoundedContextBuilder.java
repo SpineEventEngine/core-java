@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
@@ -48,6 +47,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
+import io.spine.system.server.SystemFeatures;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 
@@ -91,9 +91,12 @@ public final class BoundedContextBuilder implements Logging {
 
     private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
 
+    private final SystemFeatures systemFeatures;
+
     private Stand.Builder stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
     private TenantIndex tenantIndex;
+
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
@@ -107,7 +110,20 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#multitenant
      */
     BoundedContextBuilder(ContextSpec spec) {
+        this(spec, SystemFeatures.defaults());
+    }
+
+    /**
+     * Prevents direct instantiation.
+     *
+     * @param spec
+     *         the context spec for the built context
+     * @see BoundedContext#singleTenant
+     * @see BoundedContext#multitenant
+     */
+    private BoundedContextBuilder(ContextSpec spec, SystemFeatures systemFeatures) {
         this.spec = checkNotNull(spec);
+        this.systemFeatures = checkNotNull(systemFeatures);
     }
 
     /**
@@ -477,6 +493,17 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
+     * Obtains the system context feature configuration.
+     *
+     * <p>Users may enable or disable some features of the system context.
+     *
+     * @see SystemFeatures
+     */
+    public SystemFeatures systemFeatures() {
+        return systemFeatures;
+    }
+
+    /**
      * Creates a new instance of {@code BoundedContext} with the set configurations.
      *
      * <p>The resulting domain-specific Bounded Context has as internal System Bounded Context.
@@ -553,17 +580,20 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem() {
-        String name = BoundedContextNames.system(spec.name()).getValue();
-        boolean multitenant = isMultitenant();
-        BoundedContextBuilder system = multitenant
-                                       ? BoundedContext.multitenant(name)
-                                       : BoundedContext.singleTenant(name);
+        BoundedContextBuilder system = new BoundedContextBuilder(systemSpec(), systemFeatures);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
-
         SystemContext result =
                 system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
         return result;
+    }
+    
+    private ContextSpec systemSpec() {
+        ContextSpec systemSpec = this.spec.toSystem();
+        if (!systemFeatures.includePersistentEvents()) {
+            systemSpec = systemSpec.notStoringEvents();
+        }
+        return systemSpec;
     }
 
     private <B extends BoundedContext>

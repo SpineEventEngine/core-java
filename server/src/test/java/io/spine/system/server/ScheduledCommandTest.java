@@ -69,9 +69,10 @@ class ScheduledCommandTest {
         scheduler = new TestCommandScheduler();
         ServerEnvironment.instance()
                          .scheduleCommandsUsing(() -> scheduler);
-        context = BoundedContextBuilder
-                .assumingTests()
-                .build();
+        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
+        contextBuilder.systemFeatures()
+                      .enableCommandLog();
+        context = contextBuilder.build();
         context.register(DefaultRepository.of(CompanyAggregate.class));
         BoundedContext system = systemOf(this.context);
         Optional<Repository> found = system.findRepository(ScheduledCommandRecord.class);

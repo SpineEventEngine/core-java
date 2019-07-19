@@ -22,6 +22,7 @@ package io.spine.server.model;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.core.Subscribe;
+import io.spine.server.command.Command;
 import io.spine.server.event.React;
 
 import java.lang.reflect.Method;
@@ -34,6 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @see Subscribe#external()
  * @see React#external()
+ * @see Command#external()
  */
 @Immutable
 @Internal
@@ -51,7 +53,6 @@ public enum ExternalAttribute implements MethodAttribute<Boolean> {
         this.value = value;
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // "duplicates" have different semantic.
     @Override
     public String getName() {
         return "external";
@@ -65,18 +66,34 @@ public enum ExternalAttribute implements MethodAttribute<Boolean> {
     /**
      * Obtains the value of this attribute for a given method.
      *
-     * @param method the method to inspect
+     * @param method
+     *         the method to inspect
      * @return the value of {@code ExternalAttribute} for the given {@code Method}
      */
     public static ExternalAttribute of(Method method) {
         checkNotNull(method);
-        React reactAnnotation = method.getAnnotation(React.class);
-        boolean isExternal = (reactAnnotation != null && reactAnnotation.external());
-        if(!isExternal) {
-            Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
-            isExternal = (subscribeAnnotation != null && subscribeAnnotation.external());
-        }
-
+        boolean isExternal =
+                isExternalReactor(method)
+                        || isExternalSubscriber(method)
+                        || isExternalCommander(method);
         return isExternal ? EXTERNAL : DOMESTIC;
+    }
+
+    private static boolean isExternalReactor(Method method) {
+        React reactAnnotation = method.getAnnotation(React.class);
+        boolean result = (reactAnnotation != null && reactAnnotation.external());
+        return result;
+    }
+
+    private static boolean isExternalSubscriber(Method method) {
+        Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
+        boolean result = (subscribeAnnotation != null && subscribeAnnotation.external());
+        return result;
+    }
+
+    private static boolean isExternalCommander(Method method) {
+        Command commandAnnotation = method.getAnnotation(Command.class);
+        boolean result = (commandAnnotation != null && commandAnnotation.external());
+        return result;
     }
 }

@@ -66,16 +66,20 @@ public final class SystemContext extends BoundedContext {
         EventEnricher enricher = SystemEnricher.create(commandLog);
         BoundedContextBuilder preparedBuilder = builder.enrichEventsUsing(enricher);
         SystemContext result = new SystemContext(preparedBuilder);
-        result.registerRepositories(commandLog);
+        result.registerRepositories(commandLog, builder.systemFeatures());
         result.registerTracing();
         result.init();
         return result;
     }
 
-    private void registerRepositories(CommandLogRepository commandLog) {
-        register(commandLog);
-        register(new ScheduledCommandRepository());
-        register(new MirrorRepository());
+    private void registerRepositories(CommandLogRepository commandLog, SystemFeatures features) {
+        if (features.includeCommandLog()) {
+            register(commandLog);
+            register(new ScheduledCommandRepository());
+        }
+        if (features.includeAggregateMirroring()) {
+            register(new MirrorRepository());
+        }
     }
 
     private void registerTracing() {

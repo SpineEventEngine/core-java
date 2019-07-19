@@ -37,7 +37,7 @@ final class EitProjectAggregate extends Aggregate<EitProjectId, EitProject, EitP
     }
 
     @Apply
-    void event(EitProjectCreated event) {
+    private void event(EitProjectCreated event) {
         builder().setId(event.getProject())
                  .setName(event.getName())
                  .setDescription(event.getDescription());
