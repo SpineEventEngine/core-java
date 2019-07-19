@@ -177,7 +177,8 @@ abstract class AggregateEndpoint<I,
             event.getContextBuilder()
                  .setVersion(signalVersion);
         }
-        return correctedCommandOutcome.vBuild();
+        // The validation is not triggered, as the previously valid message is only updated.
+        return correctedCommandOutcome.build();
     }
 
     /**
