@@ -19,15 +19,7 @@
  */
 
 /**
- * This package provides test utilities and base classes for the unit tests of
- * Spine entities (aggregates, aggregate parts, process manager, projections, event subscribers).
-
- * @see io.spine.testing.server.aggregate.AggregateCommandTest
- * @see io.spine.testing.server.aggregate.AggregateEventReactionTest
- * @see io.spine.testing.server.procman.PmCommandTest
- * @see io.spine.testing.server.procman.PmEventReactionTest
- * @see io.spine.testing.server.projection.ProjectionTest
- * @see io.spine.testing.server.EventSubscriptionTest
+ * This package provides test utilities for testing Spine entities.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
