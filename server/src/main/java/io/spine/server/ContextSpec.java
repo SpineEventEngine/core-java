@@ -25,7 +25,6 @@ import com.google.common.base.Objects;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
@@ -98,8 +97,7 @@ public final class ContextSpec {
     }
 
     ContextSpec toSystem() {
-        BoundedContextName systemName = BoundedContextNames.system(name);
-        return new ContextSpec(systemName, multitenant, storeEvents);
+        return new ContextSpec(name.toSystem(), multitenant, storeEvents);
     }
 
     ContextSpec notStoringEvents() {

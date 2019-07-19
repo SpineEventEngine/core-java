@@ -51,7 +51,8 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
      *
      * <p>This behaviour is specific to the particular channel observer implementation.
      *
-     * @param message the received message
+     * @param message
+     *         the received message
      */
     protected abstract void handle(ExternalMessage message);
 
@@ -73,10 +74,12 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         checkNotNull(message);
 
         BoundedContextName source = message.getBoundedContextName();
-        if (this.boundedContextName.equals(source)){
-            return;
+        boolean sameContext = boundedContextName.equals(source)
+                           || boundedContextName.isSystemOf(source)
+                           || source.isSystemOf(boundedContextName);
+        if (!sameContext) {
+            handle(message);
         }
-        handle(message);
     }
 
     @Override
