@@ -67,7 +67,7 @@ public class Given {
         }
     }
 
-    public static class NoOpCommandDispatcher implements CommandDispatcher<ProjectId> {
+    public static class NoOpCommandDispatcher implements CommandDispatcher {
 
         private final CommandClass commandClass = CommandClass.from(BcCreateProject.class);
 
@@ -83,7 +83,7 @@ public class Given {
         }
     }
 
-    public static class NoOpEventDispatcher implements EventDispatcher<ProjectId> {
+    public static class NoOpEventDispatcher implements EventDispatcher {
 
         private final EventClass eventClass = EventClass.from(BcProjectCreated.class);
 
@@ -104,7 +104,7 @@ public class Given {
         }
 
         @Override
-        public Optional<ExternalMessageDispatcher<ProjectId>> createExternalDispatcher() {
+        public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
             return Optional.empty();
         }
     }

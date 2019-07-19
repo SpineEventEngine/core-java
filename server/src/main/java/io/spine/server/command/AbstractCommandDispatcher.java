@@ -46,8 +46,7 @@ import static io.spine.protobuf.AnyPacker.pack;
  * The abstract base for non-aggregate classes that dispatch commands to their methods
  * and post resulting events to {@link EventBus}.
  */
-public abstract class AbstractCommandDispatcher
-        implements CommandDispatcher<String>, ContextAware {
+public abstract class AbstractCommandDispatcher implements CommandDispatcher, ContextAware {
 
     /** The {@code EventBus} to which the dispatcher posts events it produces. */
     @LazyInit

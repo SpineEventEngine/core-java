@@ -85,7 +85,7 @@ public final class SystemContext extends BoundedContext {
     private void registerTracing() {
         Optional<TracerFactory> tracing = ServerEnvironment.instance().tracing();
         tracing.ifPresent(factory -> {
-            EventDispatcher<?> observer = new TraceEventObserver(spec(), factory);
+            EventDispatcher observer = new TraceEventObserver(spec(), factory);
             registerEventDispatcher(observer);
         });
     }

@@ -36,7 +36,7 @@ public class MulticastDispatcherIdentityTestEnv {
     }
 
     public static class NoOpDispatcher
-            implements MulticastDispatcher<MessageClass, MessageEnvelope, String> {
+            implements MulticastDispatcher<MessageClass, MessageEnvelope> {
 
         public static final String ID = newUuid();
 

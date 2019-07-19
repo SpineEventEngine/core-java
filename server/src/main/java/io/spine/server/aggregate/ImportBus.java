@@ -110,7 +110,7 @@ public final class ImportBus
 
     @Override
     protected void dispatch(EventEnvelope event) {
-        EventDispatcher<?> dispatcher = dispatcherOf(event);
+        EventDispatcher dispatcher = dispatcherOf(event);
         dispatcher.dispatch(event);
     }
 

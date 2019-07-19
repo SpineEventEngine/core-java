@@ -43,7 +43,7 @@ public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractEntity<I, S>,
                                                  S extends Message>
         extends DefaultRecordBasedRepository<I, E, S>
-        implements EventDispatcher<I> {
+        implements EventDispatcher {
 
     private final EventRouting<I> eventRouting;
 
@@ -137,7 +137,7 @@ public abstract class EventDispatchingRepository<I,
      * the {@code EventDispatchingRepository} instances to handle external events.
      */
     protected abstract class AbstractExternalEventDispatcher
-            implements ExternalMessageDispatcher<I> {
+            implements ExternalMessageDispatcher {
 
         @Override
         public void dispatch(ExternalMessageEnvelope externalEvent) {
