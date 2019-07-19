@@ -375,13 +375,10 @@ class DeliveryTest {
                             reactEventsCallables(context, eventsToReact)
                     );
             Collection<Callable<Object>> signals = signalStream.collect(toList());
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-            try {
-                executorService.invokeAll(signals);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } finally {
-                executorService.shutdown();
+            if (1 == threadCount) {
+                runSync(signals);
+            } else {
+                runAsync(signals);
             }
         }
 
