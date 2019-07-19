@@ -143,7 +143,6 @@ public class IntegrationBus
                 new ConfigurationBroadcast(boundedContextName, configurationPublisher);
         subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                      .addObserver(configurationChangeObserver);
-        notifyOfSubscriptions();
     }
 
     @Override
