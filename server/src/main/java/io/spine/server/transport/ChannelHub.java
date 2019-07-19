@@ -41,8 +41,7 @@ import static java.util.Collections.synchronizedMap;
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
-    private final Map<ChannelId, C> channels =
-            synchronizedMap(new HashMap<>());
+    private final Map<ChannelId, C> channels = synchronizedMap(new HashMap<>());
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
@@ -75,11 +74,8 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * @return a channel with the key
      */
     public synchronized C get(ChannelId channelId) {
-        if(!channels.containsKey(channelId)) {
-            C newChannel = newChannel(channelId);
-            channels.put(channelId, newChannel);
-        }
-        return channels.get(channelId);
+        C channel = channels.computeIfAbsent(channelId, this::newChannel);
+        return channel;
     }
 
     /**
@@ -96,7 +92,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
         Set<ChannelId> toRemove = newHashSet();
         for (ChannelId id : channels.keySet()) {
             C channel = channels.get(id);
-            if(channel.isStale()) {
+            if (channel.isStale()) {
                 try {
                     channel.close();
                 } catch (Exception e) {
