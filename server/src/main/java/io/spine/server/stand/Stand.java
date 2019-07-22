@@ -21,7 +21,6 @@ package io.spine.server.stand;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
@@ -63,7 +62,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -112,11 +110,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private final EventRegistry eventRegistry;
 
-    /**
-     * An instance of executor used to invoke callbacks.
-     */
-    private final Executor callbackExecutor;
-
     private final boolean multitenant;
 
     private final TopicValidator topicValidator;
@@ -127,7 +120,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     private Stand(Builder builder) {
         super();
-        this.callbackExecutor = builder.callbackExecutor();
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
@@ -193,7 +185,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                                 .stream()
                                 .filter(SubscriptionRecord::isActive)
                                 .filter(record -> record.matches(event))
-                                .forEach(record -> runSubscriptionUpdate(record, event));
+                                .forEach(record -> record.update(event));
         }
     }
 
@@ -323,14 +315,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             }
         };
         op.execute();
-    }
-
-    /**
-     * Runs the subscription record update via the dedicated executor.
-     */
-    private void runSubscriptionUpdate(SubscriptionRecord record, EventEnvelope event) {
-        Runnable action = () -> record.update(event);
-        callbackExecutor.execute(action);
     }
 
     /**
@@ -485,16 +469,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private final TypeRegistry typeRegistry = InMemoryTypeRegistry.newInstance();
         private final EventRegistry eventRegistry = InMemoryEventRegistry.newInstance();
 
-        private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
         private SystemReadSide systemReadSide;
-
-        private Executor callbackExecutor() {
-            return callbackExecutor;
-        }
 
         @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
@@ -553,17 +532,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         @Internal
         public Stand build() {
             checkState(systemReadSide != null, "SystemWriteSide is not set.");
-
             boolean multitenant = this.multitenant == null
                                   ? false
                                   : this.multitenant;
-
-            if (callbackExecutor == null) {
-                callbackExecutor = MoreExecutors.directExecutor();
-            }
-
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
-
             topicValidator = new TopicValidator(typeRegistry, eventRegistry);
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
