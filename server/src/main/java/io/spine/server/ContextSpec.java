@@ -96,10 +96,17 @@ public final class ContextSpec {
         return storeEvents;
     }
 
+    /**
+     * Converts this spec into the System spec for the counterpart of this domain context.
+     */
     ContextSpec toSystem() {
         return new ContextSpec(name.toSystem(), multitenant, storeEvents);
     }
 
+    /**
+     * Creates a spec which has all the attributes of this instance and does NOT
+     * {@linkplain #storesEvents() store events}.
+     */
     ContextSpec notStoringEvents() {
         return new ContextSpec(name, multitenant, false);
     }
