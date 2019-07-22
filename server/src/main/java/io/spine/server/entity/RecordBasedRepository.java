@@ -265,9 +265,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Obtains iterator over all present {@linkplain EntityRecord entity records}.
      *
-     * <p>The resulting entity states have only the specified in the {@code mask} fields. However,
-     * if the {@code mask} is empty, all the fields are retrieved.
+     * <p>The maximum number of resulting entity states is limited by
+     * the {@code ResponseFormat.limit}. If the limit is {@code 0}, all the entity states are
+     * retrieved.
      *
+     * <p>The order of the resulting entity states is defined by {@code ResponseFormat.order_by}.
+     *
+     * <p>The resulting entity states have only the specified in {@code ResponseFormat.field_mask}
+     * fields. If the mask is empty, all the fields are retrieved.
+     *
+     * @param format
+     *         the expected format of the response
      * @return an iterator over all records
      */
     @Internal
