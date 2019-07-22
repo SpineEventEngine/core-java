@@ -29,7 +29,6 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateWithVersion;
@@ -49,7 +48,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.MessageId;
-import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
@@ -96,7 +94,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
@@ -145,8 +142,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({
         "OverlyCoupledClass",
         "ClassWithTooManyMethods",
-        "UnsecureRandomNumberGeneration",
-        "deprecation" /* The `Stand.post()` method will become test-only in the future. */
+        "UnsecureRandomNumberGeneration"
 })
 @DisplayName("Stand should")
 class StandTest extends TenantAwareTest {
@@ -242,44 +238,6 @@ class StandTest extends TenantAwareTest {
             checkHasExactlyOne(stand.exposedTypes(), customerEntityDescriptor);
             checkHasExactlyOne(stand.exposedAggregateTypes(), customerEntityDescriptor);
         }
-    }
-
-    @Test
-    @DisplayName("use provided executor upon update of watched type")
-    void useProvidedExecutor() {
-        Executor executor = mock(Executor.class);
-        BoundedContext boundedContext = BoundedContextBuilder
-                .assumingTests()
-                .setStand(Stand.newBuilder().setCallbackExecutor(executor))
-                .build();
-        Stand stand = boundedContext.stand();
-
-        StandTestProjectionRepository repository = new StandTestProjectionRepository();
-        boundedContext.register(repository);
-
-        Topic projectProjections = requestFactory.topic()
-                                                 .allOf(Project.class);
-
-        MemoizingObserver<Subscription> observer = memoizingObserver();
-        stand.subscribe(projectProjections, observer);
-        Subscription subscription = observer.firstResponse();
-
-        StreamObserver<Response> noopObserver = noOpObserver();
-        stand.activate(subscription, emptyUpdateCallback(), noopObserver);
-        assertNotNull(subscription);
-
-        verify(executor, never()).execute(any(Runnable.class));
-
-        ProjectId someId = ProjectId.getDefaultInstance();
-        int version = 1;
-        StandTestProjection entity = projectionOfClass(StandTestProjection.class)
-                .withId(someId)
-                .withState(Project.getDefaultInstance())
-                .withVersion(version)
-                .build();
-        stand.post(entity, repository.lifecycleOf(someId));
-
-        verify(executor, times(1)).execute(any(Runnable.class));
     }
 
     @Nested
@@ -406,57 +364,6 @@ class StandTest extends TenantAwareTest {
             stand.execute(query, observer);
 
             verifyObserver(observer);
-        }
-    }
-
-    @Nested
-    @DisplayName("receive updates")
-    class ReceiveUpdates {
-
-        @Test
-        @DisplayName("when observed entity state changes")
-        void ofEntities() {
-            checkReceivesUpdatesOn(Customer.class);
-        }
-
-        @Test
-        @DisplayName("when event of observed type occurs in the system")
-        void ofEvents() {
-            checkReceivesUpdatesOn(CustomerCreated.class);
-        }
-
-        private void checkReceivesUpdatesOn(Class<? extends Message> targetType) {
-            // Subscribe to updates of entity or event.
-            CustomerAggregateRepository repository = new CustomerAggregateRepository();
-            Executor executor = mock(Executor.class);
-            Stand stand = createStandWithExecutor(executor, repository);
-            Topic topic = requestFactory.topic()
-                                        .allOf(targetType);
-            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, topic, action);
-
-            // Send a command creating customer.
-            Customer customer = fillSampleCustomers(1)
-                    .iterator()
-                    .next();
-            CustomerId customerId = customer.getId();
-            CreateCustomer createCustomer = CreateCustomer
-                    .newBuilder()
-                    .setCustomerId(customerId)
-                    .setCustomer(customer)
-                    .build();
-            Command command = requestFactory.command()
-                                            .create(createCustomer);
-            CommandEnvelope cmd = CommandEnvelope.of(command);
-            repository.dispatch(cmd);
-
-            // Check the subscription callback is run, notifying about new customer created.
-            verify(executor, times(1)).execute(any(Runnable.class));
-        }
-
-        private Stand createStandWithExecutor(Executor executor,
-                                              Repository<?, ?>... repositories) {
-            return newStand(isMultitenant(), executor, repositories);
         }
     }
 

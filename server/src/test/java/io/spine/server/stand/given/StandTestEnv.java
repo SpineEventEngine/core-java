@@ -20,7 +20,6 @@
 
 package io.spine.server.stand.given;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.EntityStateUpdate;
@@ -37,8 +36,6 @@ import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.concurrent.Executor;
-
 public class StandTestEnv {
 
     /** Prevents instantiation of this utility class. */
@@ -50,17 +47,11 @@ public class StandTestEnv {
                         new CustomerAggregateRepository(), new StandTestProjectionRepository());
     }
 
-    public static Stand newStand(boolean multitenant, Repository... repositories) {
-        return newStand(multitenant, MoreExecutors.directExecutor(), repositories);
-    }
-
     @SuppressWarnings("unchecked") // Generic type matching issues. OK for tests.
-    public static Stand
-    newStand(boolean multitenant, Executor executor, Repository... repositories) {
+    public static Stand newStand(boolean multitenant, Repository... repositories) {
         Stand.Builder standBuilder = Stand
                 .newBuilder()
                 .setMultitenant(multitenant)
-                .setCallbackExecutor(executor)
                 .setSystemReadSide(NoOpSystemReadSide.INSTANCE);
         BoundedContext boundedContext = BoundedContextBuilder
                 .assumingTests(multitenant)

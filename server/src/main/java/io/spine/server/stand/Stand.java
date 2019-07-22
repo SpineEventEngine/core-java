@@ -492,23 +492,8 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private SubscriptionValidator subscriptionValidator;
         private SystemReadSide systemReadSide;
 
-        public Executor callbackExecutor() {
+        private Executor callbackExecutor() {
             return callbackExecutor;
-        }
-
-        /**
-         * Sets an {@code Executor} to be used for executing callback methods.
-         *
-         * <p>If the {@code Executor} is not set,
-         * {@link MoreExecutors#directExecutor() directExecutor()} will be used.
-         *
-         * @param callbackExecutor
-         *         the instance of {@code Executor}
-         * @return this instance of {@code Builder}
-         */
-        public Builder setCallbackExecutor(Executor callbackExecutor) {
-            this.callbackExecutor = checkNotNull(callbackExecutor);
-            return this;
         }
 
         @Internal

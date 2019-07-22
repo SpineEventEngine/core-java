@@ -37,7 +37,6 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
-import io.spine.server.stand.Stand;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -523,12 +522,11 @@ class SubscriptionServiceTest {
     }
 
     private static BoundedContext boundedContextWith(ProjectAggregateRepository repository) {
-        BoundedContext boundedContext = BoundedContextBuilder
+        BoundedContext context = BoundedContextBuilder
                 .assumingTests()
-                .setStand(Stand.newBuilder())
+                .add(repository)
                 .build();
-        boundedContext.register(repository);
-        return boundedContext;
+        return context;
     }
 
     private static Target getProjectQueryTarget() {
