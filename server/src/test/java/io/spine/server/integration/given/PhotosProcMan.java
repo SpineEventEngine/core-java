@@ -18,23 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.experiment;
+package io.spine.server.integration.given;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
+import io.spine.experiment.CreditsHeld;
+import io.spine.experiment.PhotosPm;
+import io.spine.experiment.PhotosProcessed;
+import io.spine.experiment.PhotosUploaded;
+import io.spine.experiment.UploadPhotos;
+import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.procman.ProcessManager;
 
-public class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
+public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
 
-    @React(external = true)
-    CreditsHeld on(PhotosUploaded event) {
-        return CreditsHeld.newBuilder()
-                          .setUuid(event.getUuid())
-                          .vBuild();
+    @Assign
+    PhotosUploaded handle(UploadPhotos command) {
+        return PhotosUploaded
+                .newBuilder()
+                .setUuid(command.getUuid())
+                .vBuild();
     }
 
-    @Apply
-    private void on(CreditsHeld event) {
-        builder().setId(event.getUuid());
+    @React(external = true)
+    PhotosProcessed on(CreditsHeld event) {
+        return PhotosProcessed
+                .newBuilder()
+                .setUuid(event.getUuid())
+                .vBuild();
     }
 }

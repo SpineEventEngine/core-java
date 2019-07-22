@@ -21,10 +21,15 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
+import io.spine.experiment.CreditsHeld;
+import io.spine.experiment.PhotosProcessed;
+import io.spine.experiment.PhotosUploaded;
+import io.spine.experiment.UploadPhotos;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
@@ -40,6 +45,7 @@ import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.AfterEach;
@@ -146,7 +152,6 @@ class IntegrationBusTest {
             sourceContext.eventBus()
                          .post(event);
             assertEquals(2, MemoizingProjection.events().size());
-
             sourceContext.close();
             destination1.close();
             destination2.close();
@@ -295,6 +300,31 @@ class IntegrationBusTest {
         destinationCtx.close();
     }
 
+    @Test
+    @DisplayName("send messages between two contexts regardless of registration order")
+    void mutual() {
+        BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
+                .multiTenant("Photos-" + IntegrationBusTest.class.getSimpleName());
+        BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
+                .singleTenant("Billing-" + IntegrationBusTest.class.getSimpleName());
+        photos.receivesCommand(UploadPhotos.generate());
+        assertReceived(photos, PhotosUploaded.class);
+        assertReceived(billing, PhotosUploaded.class);
+        assertReceived(billing, CreditsHeld.class);
+        assertReceived(photos, CreditsHeld.class);
+        assertReceived(photos, PhotosProcessed.class);
+
+        photos.close();
+        billing.close();
+    }
+
+    private static void assertReceived(BlackBoxBoundedContext<?> context,
+                                       Class<? extends EventMessage> eventClass) {
+        context.assertEvents()
+               .withType(eventClass)
+               .hasSize(1);
+    }
+
     @Nested
     @DisplayName("not dispatch to domestic subscribers if they requested external")
     class NotDispatchToDomestic {
@@ -333,8 +363,7 @@ class IntegrationBusTest {
         BoundedContextName name = BoundedContextNames.newName("External context ID");
         ExternalMessage externalMessage = ExternalMessages.of(event, name);
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.integrationBus()
-                      .post(externalMessage, observer);
+        context.integrationBus().post(externalMessage, observer);
         Error error = observer.firstResponse()
                               .getStatus()
                               .getError();
