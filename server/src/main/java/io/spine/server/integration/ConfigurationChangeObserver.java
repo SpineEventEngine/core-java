@@ -81,7 +81,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
      * @param value {@link RequestForExternalMessages} form another Bounded Context
      */
     @Override
-    public synchronized void handle(ExternalMessage value) {
+    public void handle(ExternalMessage value) {
         RequestForExternalMessages request = unpack(value.getOriginalMessage(),
                                                     RequestForExternalMessages.class);
         BoundedContextName origin = value.getBoundedContextName();
@@ -181,7 +181,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
      * Removes all the current subscriptions from the local buses.
      */
     @Override
-    public synchronized void close() {
+    public void close() {
         for (ExternalMessageType currentlyRequestedMessage : requestedTypes.keySet()) {
             unregisterInAdapter(currentlyRequestedMessage);
         }
