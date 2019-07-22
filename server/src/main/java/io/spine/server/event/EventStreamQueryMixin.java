@@ -18,13 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.event;
+
+import com.google.protobuf.Message;
+
 /**
- * This package provides test utilities for testing Spine entities.
+ * An interface for the generated {@link EventStreamQuery} type.
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server;
+interface EventStreamQueryMixin extends Message, EventStreamQueryOrBuilder {
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * Checks if the query should retrieve all the events in the store.
+     *
+     * <p>If the query specifies no filters and no time bounds, it is aimed for all the events.
+     *
+     * @return {@code true} if this is a default instance, {@code false} otherwise
+     */
+    default boolean includeAll() {
+        return getFilterCount() == 0
+           && !hasBefore()
+           && !hasAfter();
+    }
+}

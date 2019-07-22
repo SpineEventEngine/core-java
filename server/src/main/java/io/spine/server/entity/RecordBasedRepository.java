@@ -56,6 +56,7 @@ import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkValid;
 
 /**
  * The base class for repositories that store entities as records.
@@ -240,13 +241,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>If the IDs contain duplicates, the result may also contain duplicates
      * depending on a particular implementation.
      *
+     * <p>The resulting entity state must be valid in terms of {@code (required)},
+     * {@code (required_fields)}, and {@code (goes).with} options after the mask is applied.
+     * Otherwise, an {@link InvalidEntityStateException} is thrown.
+     *
      * <p>Note: The storage must be assigned before calling this method.
      *
      * @param ids
      *         entity IDs to search for
      * @param fieldMask
-     *         the entity state fields to load; note that the resulting state must be valid,
-     *         otherwise an exception is thrown
+     *         the entity state fields to load
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
@@ -261,9 +265,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Obtains iterator over all present {@linkplain EntityRecord entity records}.
      *
-     * <p>The resulting entity states have only the specified in the {@code mask} fields. However,
-     * if the {@code mask} is empty, all the fields are retrieved.
+     * <p>The maximum number of resulting entity states is limited by
+     * the {@code ResponseFormat.limit}. If the limit is {@code 0}, all the entity states are
+     * retrieved.
      *
+     * <p>The order of the resulting entity states is defined by {@code ResponseFormat.order_by}.
+     *
+     * <p>The resulting entity states have only the specified in {@code ResponseFormat.field_mask}
+     * fields. If the mask is empty, all the fields are retrieved.
+     *
+     * @param format
+     *         the expected format of the response
      * @return an iterator over all records
      */
     @Internal
@@ -278,8 +290,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
      * to the results.
      *
-     * <p>A number of elements to retrieve can be limited to a certain number. Order in
-     * which to look for and return results in is specified by the {@link OrderBy}.
+     * <p>A number of elements to retrieve can be limited to a certain number. The order of
+     * the resulting entities is specified by the {@link OrderBy}.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
@@ -318,6 +330,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
+        checkValid(filters);
         checkNotNull(format);
 
         RecordStorage<I> storage = recordStorage();

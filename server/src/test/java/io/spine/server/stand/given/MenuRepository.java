@@ -18,13 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides test utilities for testing Spine entities.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server;
+package io.spine.server.stand.given;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.test.stand.DishAdded;
+import io.spine.test.stand.DishRemoved;
+import io.spine.test.stand.Menu;
+import io.spine.test.stand.MenuId;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static io.spine.server.route.EventRoute.withId;
+
+public class MenuRepository extends ProjectionRepository<MenuId, MenuProjection, Menu> {
+
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    protected void setupEventRouting(EventRouting<MenuId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(DishAdded.class, (message, context) -> withId(message.getId()))
+               .route(DishRemoved.class, (message, context) -> withId(message.getId()));
+    }
+}

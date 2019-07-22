@@ -119,11 +119,11 @@ message ResponseFormat {
     google.protobuf.FieldMask field_mask = 1;
 
     // An order for entities returned by the Query.
-    OrderBy orderBy = 2 [(validate) = true,
+    OrderBy order_by = 2 [(validate) = true,
                          (if_invalid).msg_format = "Invalid query order"];
 
     // The max number of entities to retrieve.
-    uint32 limit = 3 [(goes).with = "orderBy"];
+    uint32 limit = 3 [(goes).with = "order_by"];
 }
 
 // The result of `Query` processing.
