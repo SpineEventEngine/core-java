@@ -241,13 +241,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>If the IDs contain duplicates, the result may also contain duplicates
      * depending on a particular implementation.
      *
+     * <p>The resulting entity state must be valid in terms of {@code (required)},
+     * {@code (required_fields)}, and {@code (goes).with} options after the mask is applied.
+     * Otherwise, an {@link InvalidEntityStateException} is thrown.
+     *
      * <p>Note: The storage must be assigned before calling this method.
      *
      * @param ids
      *         entity IDs to search for
      * @param fieldMask
-     *         the entity state fields to load; note that the resulting state must be valid,
-     *         otherwise an exception is thrown
+     *         the entity state fields to load
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
