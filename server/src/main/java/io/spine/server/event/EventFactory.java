@@ -82,7 +82,7 @@ public class EventFactory {
      *
      * <p>In the message is an instance of {@code Any}, it is unpacked for validation.
      *
-     * <p>It is recommended to use a corresponding {@linkplain io.spine.validate.ValidatingBuilder
+     * <p>It is recommended to use a corresponding {@linkplain io.spine.protobuf.ValidatingBuilder
      * ValidatingBuilder} implementation to create a message.
      *
      * @param message
