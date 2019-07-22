@@ -33,8 +33,9 @@ import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.system.server.NoOpSystemReadSide;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Arrays;
 
 public class StandTestEnv {
 
@@ -47,21 +48,12 @@ public class StandTestEnv {
                         new CustomerAggregateRepository(), new StandTestProjectionRepository());
     }
 
-    @SuppressWarnings("unchecked") // Generic type matching issues. OK for tests.
     public static Stand newStand(boolean multitenant, Repository... repositories) {
-        Stand.Builder standBuilder = Stand
-                .newBuilder()
-                .setMultitenant(multitenant)
-                .setSystemReadSide(NoOpSystemReadSide.INSTANCE);
-        BoundedContext boundedContext = BoundedContextBuilder
-                .assumingTests(multitenant)
-                .setStand(standBuilder)
-                .build();
-        Stand stand = boundedContext.stand();
-        for (Repository repository : repositories) {
-            boundedContext.register(repository);
-        }
-        return stand;
+        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(multitenant);
+        Arrays.stream(repositories)
+              .forEach(builder::add);
+        BoundedContext context = builder.build();
+        return context.stand();
     }
 
     /**

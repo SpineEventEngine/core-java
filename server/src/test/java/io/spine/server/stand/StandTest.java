@@ -1048,7 +1048,7 @@ class StandTest extends TenantAwareTest {
         return result;
     }
 
-    protected static Collection<Customer> fillSampleCustomers(int numberOfCustomers) {
+    static Collection<Customer> fillSampleCustomers(int numberOfCustomers) {
         return generate(numberOfCustomers,
                         numericId -> Customer.newBuilder()
                                              .setId(customerIdFor(numericId))
