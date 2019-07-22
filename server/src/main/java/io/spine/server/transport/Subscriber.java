@@ -101,7 +101,9 @@ public abstract class Subscriber extends AbstractChannel {
 
     @Override
     public void close() {
-        observers.forEach(StreamObserver::onCompleted);
+        for (StreamObserver<ExternalMessage> observer : observers) {
+            observer.onCompleted();
+        }
         observers.clear();
     }
 }
