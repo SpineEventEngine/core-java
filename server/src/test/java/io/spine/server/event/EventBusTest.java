@@ -139,7 +139,7 @@ public class EventBusTest {
             EventClass eventClass = EventClass.from(ProjectCreated.class);
             assertTrue(eventBus.hasDispatchers(eventClass));
 
-            Collection<? extends EventDispatcher<?>> dispatchers =
+            Collection<? extends EventDispatcher> dispatchers =
                     eventBus.dispatchersOf(eventClass);
             assertTrue(dispatchers.contains(subscriberOne));
             assertTrue(dispatchers.contains(subscriberTwo));
@@ -174,7 +174,7 @@ public class EventBusTest {
 
             // Check that the 2nd subscriber with the same event subscriber method remains
             // after the 1st subscriber unregisters.
-            Collection<? extends EventDispatcher<?>> subscribers =
+            Collection<? extends EventDispatcher> subscribers =
                     eventBus.dispatchersOf(eventClass);
             assertFalse(subscribers.contains(subscriberOne));
             assertTrue(subscribers.contains(subscriberTwo));
@@ -196,7 +196,7 @@ public class EventBusTest {
             eventBus.register(dispatcherTwo);
 
             eventBus.unregister(dispatcherOne);
-            Set<? extends EventDispatcher<?>> dispatchers = eventBus.dispatchersOf(eventClass);
+            Set<? extends EventDispatcher> dispatchers = eventBus.dispatchersOf(eventClass);
 
             // Check we don't have 1st dispatcher, but have 2nd.
             assertFalse(dispatchers.contains(dispatcherOne));

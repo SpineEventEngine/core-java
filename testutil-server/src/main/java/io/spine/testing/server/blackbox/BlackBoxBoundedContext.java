@@ -259,12 +259,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * @return current instance
      */
     @CanIgnoreReturnValue
-    public final T withHandlers(CommandDispatcher<?>... dispatchers) {
+    public final T withHandlers(CommandDispatcher... dispatchers) {
         registerAll(this::registerCommandDispatcher, dispatchers);
         return thisRef();
     }
 
-    private void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
+    private void registerCommandDispatcher(CommandDispatcher dispatcher) {
         if (dispatcher instanceof Repository) {
             registerRepository((Repository<?, ?>) dispatcher);
         } else {
@@ -280,12 +280,12 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      *         dispatchers to register with the event bus of this bounded context
      */
     @CanIgnoreReturnValue
-    public final T withEventDispatchers(EventDispatcher<?>... dispatchers) {
+    public final T withEventDispatchers(EventDispatcher... dispatchers) {
         registerAll(this::registerEventDispatcher, dispatchers);
         return thisRef();
     }
 
-    private void registerEventDispatcher(EventDispatcher<?> dispatcher) {
+    private void registerEventDispatcher(EventDispatcher dispatcher) {
         if (dispatcher instanceof Repository) {
             registerRepository((Repository<?, ?>) dispatcher);
         } else {

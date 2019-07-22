@@ -38,11 +38,11 @@ import "spine/base/field_path.proto";
 // various criteria.
 message Target {
 
-    // The type of the event or entity of interest.
+    // The type of the entity or event of interest.
     //
     // Queries support only entity targets while subscriptions work with both event and entity
     // types.
-    string type = 1;
+    string type = 1 [(required) = true];
 
     // The filters which are applied to the received entity state or event message.
     oneof criterion {
@@ -51,18 +51,22 @@ message Target {
         bool include_all = 2;
 
         // Filter the objects by a certain criteria.
-        TargetFilters filters = 3;
+        //
+        // Filters must not be empty unless `include_all` if set.
+        //
+        TargetFilters filters = 3 [(validate) = true];
     }
 }
 
 // The set of filters to narrow down the query results/subscription updates.
 message TargetFilters {
+    option (required_field) = "id_filter|filter";
 
     // Match objects by their IDs.
-    IdFilter id_filter = 1;
+    IdFilter id_filter = 1 [(validate) = true];
 
     // Match objects by the values of their fields.
-    repeated CompositeFilter filter = 2;
+    repeated CompositeFilter filter = 2 [(validate) = true];
 }
 
 // The filter grouping a number of simple filters with a specified logical operator.
@@ -71,7 +75,7 @@ message CompositeFilter {
     // The list of filters.
     //
     // If empty, any record is considered matching this filter.
-    repeated Filter filter = 1;
+    repeated Filter filter = 1 [(required) = true, (validate) = true];
 
     // The value of the composite operator which determines the behavior of the filter matching.
     CompositeOperator operator = 2 [(required) = true];
@@ -135,5 +139,8 @@ message Filter {
 message IdFilter {
 
     // The collection of IDs.
-    repeated google.protobuf.Any id = 1;
+    //
+    // Must not be empty.
+    //
+    repeated google.protobuf.Any id = 1 [(required) = true, (validate) = true];
 }

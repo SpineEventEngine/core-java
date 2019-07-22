@@ -23,8 +23,7 @@ package io.spine.server.entity.given;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
-import io.spine.client.TargetFilters;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.AbstractEntity;
 
 import static io.spine.testing.Tests.assertMatchesMask;
@@ -43,20 +42,6 @@ public final class RecordBasedRepositoryTestEnv {
         assertMatchesMask(state, fieldMask);
     }
 
-    public static Pagination emptyPagination() {
-        return Pagination.getDefaultInstance();
-    }
-
-    public static Pagination pagination(int pageSize) {
-        return Pagination.newBuilder()
-                                 .setPageSize(pageSize)
-                                 .build();
-    }
-
-    public static OrderBy emptyOrder() {
-        return OrderBy.getDefaultInstance();
-    }
-
     /**
      * An order by {@linkplain #ENTITY_NAME_COLUMN entity name column}.
      */
@@ -67,11 +52,7 @@ public final class RecordBasedRepositoryTestEnv {
                               .build();
     }
 
-    public static TargetFilters emptyFilters() {
-        return TargetFilters.getDefaultInstance();
-    }
-
-    public static FieldMask emptyFieldMask() {
-        return FieldMask.getDefaultInstance();
+    public static ResponseFormat emptyFormat() {
+        return ResponseFormat.getDefaultInstance();
     }
 }

@@ -144,7 +144,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("throw on an attempt to register a null command dispatcher")
     void throwOnNullCommandDispatcher() {
         assertThrows(NullPointerException.class,
-                     () -> context.withHandlers((CommandDispatcher<?>) null));
+                     () -> context.withHandlers((CommandDispatcher) null));
     }
 
     @Test
@@ -176,7 +176,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("throw on an attempt to register a null event dispatcher")
     void throwOnNullEventDispatcher() {
         assertThrows(NullPointerException.class,
-                     () -> context.withEventDispatchers((EventDispatcher<?>) null));
+                     () -> context.withEventDispatchers((EventDispatcher) null));
     }
 
     @Test
@@ -393,8 +393,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         private final CommandClass commandClass =
                 CommandClass.from(BbRegisterCommandDispatcher.class);
-        private CommandDispatcher<?> commandDispatcher;
-        private EventDispatcher<?> eventDispatcher;
+        private CommandDispatcher commandDispatcher;
+        private EventDispatcher eventDispatcher;
 
         private final Set<TypeName> types = toTypes(repositories);
 

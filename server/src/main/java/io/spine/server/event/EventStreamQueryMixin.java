@@ -18,27 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.event;
 
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import com.google.protobuf.Message;
 
-public class EntityQueriesTestEnv {
+/**
+ * An interface for the generated {@link EventStreamQuery} type.
+ */
+interface EventStreamQueryMixin extends Message, EventStreamQueryOrBuilder {
 
-    /** Prevent instantiation of this utility class. */
-    private EntityQueriesTestEnv() {
-    }
-
-    public static Pagination pagination(int size) {
-        return Pagination.newBuilder()
-                                 .setPageSize(size)
-                                 .build();
-    }
-
-    public static OrderBy order(String column, OrderBy.Direction direction) {
-        return OrderBy.newBuilder()
-                              .setColumn(column)
-                              .setDirection(direction)
-                              .build();
+    /**
+     * Checks if the query should retrieve all the events in the store.
+     *
+     * <p>If the query specifies no filters and no time bounds, it is aimed for all the events.
+     *
+     * @return {@code true} if this is a default instance, {@code false} otherwise
+     */
+    default boolean includeAll() {
+        return getFilterCount() == 0
+           && !hasBefore()
+           && !hasAfter();
     }
 }

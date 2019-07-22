@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandDispatcher;
@@ -114,7 +113,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
+            CommandDispatcher dispatcher = new AllCommandDispatcher();
 
             registry.register(dispatcher);
             registry.unregister(dispatcher);

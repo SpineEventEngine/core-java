@@ -23,12 +23,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LoggerConfig;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -188,11 +186,13 @@ public final class DefaultEventStore
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<EEntity> find(EventStreamQuery query) {
-        TargetFilters filters = QueryToFilters.convert(query);
-        return find(filters,
-                    OrderBy.getDefaultInstance(),
-                    Pagination.getDefaultInstance(),
-                    FieldMask.getDefaultInstance());
+        ResponseFormat format = ResponseFormat.getDefaultInstance();
+        if (query.includeAll()) {
+            return loadAll(format);
+        } else {
+            TargetFilters filters = QueryToFilters.convert(query);
+            return find(filters, format);
+        }
     }
 
     private void store(Event event) {

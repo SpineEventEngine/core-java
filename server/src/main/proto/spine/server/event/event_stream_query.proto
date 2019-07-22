@@ -32,8 +32,13 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/server/event/event_filter.proto";
 
-// The query specifies event to return from the event store.
+// A query for events in an EventStore.
+//
+// If the query is empty, all the events are loaded.
+//
 message EventStreamQuery {
+    option (is).java_type = "EventStreamQueryMixin";
+
     // Include events with timestamp after this value.
     //
     // If this parameter is not specified, all events since the start of

@@ -24,14 +24,12 @@ import java.util.Optional;
 
 /**
  * Creates external message dispatcher.
- *
- * @param <I> the type of IDs of entities to which messages are dispatched
  */
-public interface ExternalDispatcherFactory<I> {
+public interface ExternalDispatcherFactory {
 
     /**
      * Creates and returns new {@link ExternalMessageDispatcher} if implementing object
      * dispatches at least one external message. Returns {@code Optional.empty()} otherwise.
      */
-    Optional<ExternalMessageDispatcher<I>> createExternalDispatcher();
+    Optional<ExternalMessageDispatcher> createExternalDispatcher();
 }

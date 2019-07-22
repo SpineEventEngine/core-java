@@ -63,7 +63,7 @@ import static java.lang.String.format;
  * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
-        implements EventDispatcher<String>, EventSubscriber, ContextAware {
+        implements EventDispatcher, EventSubscriber, ContextAware {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
@@ -158,14 +158,14 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         return Optional.of(new ExternalDispatcher());
     }
 
     /**
      * Dispatches external events to this subscriber.
      */
-    private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
+    private final class ExternalDispatcher implements ExternalMessageDispatcher, Logging {
 
         @Override
         public Set<ExternalMessageClass> messageClasses() {

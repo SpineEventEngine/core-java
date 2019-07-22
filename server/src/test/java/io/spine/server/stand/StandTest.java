@@ -32,10 +32,9 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateWithVersion;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.client.ResponseFormat;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionValidationError;
@@ -996,13 +995,11 @@ class StandTest extends TenantAwareTest {
                     .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 
-        when(projectionRepository.loadAllRecords())
+        when(projectionRepository.loadAllRecords(ResponseFormat.getDefaultInstance()))
                 .thenReturn(allRecords.iterator());
 
         when(projectionRepository.findRecords(argThat(entityFilterMatcher(projectIds)),
-                                              eq(OrderBy.getDefaultInstance()),
-                                              eq(Pagination.getDefaultInstance()),
-                                              any(FieldMask.class)))
+                                              any(ResponseFormat.class)))
                 .thenReturn(allRecords.iterator());
     }
 

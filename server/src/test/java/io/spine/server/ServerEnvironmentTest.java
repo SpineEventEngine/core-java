@@ -33,6 +33,7 @@ import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
@@ -182,7 +183,7 @@ class ServerEnvironmentTest {
         void productionFactory() {
             StubStorageFactory factory = new StubStorageFactory();
             serverEnvironment.configureStorage(factory);
-            assertThat(serverEnvironment.storageFactory())
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
 
@@ -191,8 +192,11 @@ class ServerEnvironmentTest {
         void testsFactory() {
             environment.setToTests();
 
-            assertThat(serverEnvironment.storageFactory())
-                    .isInstanceOf(InMemoryStorageFactory.class);
+            StorageFactory factory = serverEnvironment.storageFactory();
+            assertThat(factory)
+                    .isInstanceOf(SystemAwareStorageFactory.class);
+            SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
+            assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
         }
     }
 
@@ -211,7 +215,7 @@ class ServerEnvironmentTest {
             StorageFactory factory = new StubStorageFactory();
 
             serverEnvironment.configureStorageForTests(factory);
-            assertThat(serverEnvironment.storageFactory())
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
     }

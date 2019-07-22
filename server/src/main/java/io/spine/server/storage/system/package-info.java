@@ -18,26 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+/**
+ * Contains an implementation of {@link io.spine.server.storage.StorageFactory} aware of the system
+ * context specifics.
+ */
 
-import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.NoOpDispatcher;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.system;
 
-import java.util.Set;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-@DisplayName("MulticastDispatcher.Identity utility should")
-class MulticastDispatcherIdentityTest {
-
-    @Test
-    @DisplayName("return dispatcher identity")
-    void returnDispatcherIdentity() {
-        Set<String> set = new NoOpDispatcher().identity();
-
-        assertTrue(set.contains(NoOpDispatcher.ID));
-        assertEquals(1, set.size());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

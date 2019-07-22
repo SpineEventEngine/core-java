@@ -75,7 +75,7 @@ public class QueryFactoryTestEnv {
     }
 
     public static void checkFieldMaskEmpty(Query query) {
-        FieldMask fieldMask = query.getFieldMask();
+        FieldMask fieldMask = query.getFormat().getFieldMask();
         assertNotNull(fieldMask);
         assertEquals(FieldMask.getDefaultInstance(), fieldMask);
     }
@@ -108,8 +108,8 @@ public class QueryFactoryTestEnv {
     }
 
     public static void verifySinglePathInQuery(String expectedEntityPath, Query query) {
-        FieldMask fieldMask = query.getFieldMask();
-        assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
+        FieldMask fieldMask = query.getFormat().getFieldMask();
+        assertEquals(1, fieldMask.getPathsCount()); // As we set the only path value.
 
         String firstPath = fieldMask.getPaths(0);
         assertEquals(expectedEntityPath, firstPath);
@@ -124,7 +124,7 @@ public class QueryFactoryTestEnv {
 
     public static void verifyMultiplePathsInQuery(String[] paths,
                                                   Query readAllWithPathFilteringQuery) {
-        FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+        FieldMask fieldMask = readAllWithPathFilteringQuery.getFormat().getFieldMask();
         assertEquals(paths.length, fieldMask.getPathsCount());
         ProtocolStringList pathsList = fieldMask.getPathsList();
         for (String expectedPath : paths) {

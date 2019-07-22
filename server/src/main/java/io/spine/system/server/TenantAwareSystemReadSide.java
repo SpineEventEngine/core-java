@@ -53,12 +53,12 @@ final class TenantAwareSystemReadSide implements SystemReadSide {
     }
 
     @Override
-    public void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher dispatcher) {
         runner.run(() -> delegate.register(dispatcher));
     }
 
     @Override
-    public void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher dispatcher) {
         runner.run(() -> delegate.unregister(dispatcher));
     }
 

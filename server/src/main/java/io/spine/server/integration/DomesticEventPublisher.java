@@ -46,7 +46,7 @@ import static io.spine.server.integration.IntegrationChannels.toId;
  * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
  * configuration messages}, received by this instance of {@code IntegrationBus}.
  */
-final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
+final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     private final BoundedContextName originContextName;
     private final PublisherHub publisherHub;
@@ -83,7 +83,7 @@ final class DomesticEventPublisher implements EventDispatcher<String>, Logging {
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         return Optional.empty();
     }
 

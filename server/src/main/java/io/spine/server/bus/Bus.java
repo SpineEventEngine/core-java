@@ -54,7 +54,7 @@ import static java.util.Collections.singleton;
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
-                          D extends MessageDispatcher<C, E, ?>>
+                          D extends MessageDispatcher<C, E>>
         implements AutoCloseable {
 
     /** A queue of envelopes to post. */
@@ -384,11 +384,12 @@ public abstract class Bus<T extends Message,
         private FilterChain<E> buildChain() {
             Collection<BusFilter<E>> tail = filterChainTail();
             tail.forEach(chainBuilder::append);
+
             BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(deadMessageHandler(), registry());
             BusFilter<E> validatingFilter = new ValidatingFilter<>(validator());
-
             chainBuilder.prepend(deadMsgFilter);
             chainBuilder.prepend(validatingFilter);
+
             Collection<BusFilter<E>> head = filterChainHead();
             head.forEach(chainBuilder::prepend);
 
