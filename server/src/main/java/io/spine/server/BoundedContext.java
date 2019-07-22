@@ -114,7 +114,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         checkInheritance();
         this.spec = builder.spec();
         this.eventBus = builder.buildEventBus(this);
-        this.stand = builder.buildStand();
+        this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
 
         this.commandBus = builder.buildCommandBus();

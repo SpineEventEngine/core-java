@@ -59,7 +59,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
@@ -91,7 +90,7 @@ public final class BoundedContextBuilder implements Logging {
 
     private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
 
-    private Stand.Builder stand;
+    private Stand stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
     private TenantIndex tenantIndex;
 
@@ -156,6 +155,24 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(tenantIndex);
     }
 
+    /**
+     * Obtains the instance of the {@code Stand} for the context to be built.
+     *
+     * <p>This method must be invoked only from the
+     * {@link BoundedContext#BoundedContext(BoundedContextBuilder) constructor} of
+     * the {@code BoundedContext}.
+     */
+    Stand stand() {
+        return checkNotNull(stand);
+    }
+
+    /**
+     * Obtains the instance of the {@code TenantIndex} for the context to be built.
+     *
+     * <p>This method must be invoked only from the
+     * {@link BoundedContext#BoundedContext(BoundedContextBuilder) constructor} of
+     * the {@code BoundedContext}.
+     */
     TenantIndex buildTenantIndex() {
         TenantIndex result = isMultitenant()
             ? checkNotNull(tenantIndex)
@@ -185,10 +202,6 @@ public final class BoundedContextBuilder implements Logging {
      */
     public Optional<EventEnricher> eventEnricher() {
         return eventBus.enricher();
-    }
-
-    public Optional<Stand.Builder> stand() {
-        return Optional.ofNullable(stand);
     }
 
     @CanIgnoreReturnValue
@@ -522,16 +535,6 @@ public final class BoundedContextBuilder implements Logging {
         return integrationBus.build();
     }
 
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setStand(Stand.Builder stand) {
-        this.stand = checkNotNull(stand);
-        return this;
-    }
-
-    Stand buildStand() {
-        return stand.build();
-    }
-
     private void registerRepositories(BoundedContext result) {
         for (Repository<?, ?> repository : repositories) {
             result.register(repository);
@@ -570,8 +573,7 @@ public final class BoundedContextBuilder implements Logging {
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        initStand(client.readSide());
-
+        this.stand = createStand(client.readSide());
         B result = instanceFactory.apply(this);
         return result;
     }
@@ -590,40 +592,11 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private void initStand(SystemReadSide systemReadSide) {
-        if (stand == null) {
-            stand = createStand();
-        } else {
-            Boolean standMultitenant = stand.isMultitenant();
-            // Check that both either multi-tenant or single-tenant.
-            if (standMultitenant == null) {
-                stand.setMultitenant(isMultitenant());
-            } else {
-                checkSameValue("`Stand` must match multitenancy of `BoundedContext`. " +
-                                       "Status in `BoundedContext.Builder`: %s, `Stand`: %s.",
-                               standMultitenant);
-            }
-        }
-        stand.setSystemReadSide(systemReadSide);
-    }
-
-    /**
-     * Ensures that the value of the passed flag is equal to the value of
-     * the {@link BoundedContextBuilder#isMultitenant()}.
-     *
-     * @throws IllegalStateException if the flags values do not match
-     */
-    private void checkSameValue(String errMsgFmt, boolean partMultitenancy) {
-        boolean multitenant = isMultitenant();
-        checkState(multitenant == partMultitenancy,
-                   errMsgFmt,
-                   String.valueOf(multitenant),
-                   String.valueOf(partMultitenancy));
-    }
-
-    private Stand.Builder createStand() {
-        Stand.Builder result = Stand.newBuilder()
-                                    .setMultitenant(isMultitenant());
-        return result;
+    private Stand createStand(SystemReadSide systemReadSide) {
+        Stand.Builder result = Stand
+                .newBuilder()
+                .setMultitenant(isMultitenant())
+                .setSystemReadSide(systemReadSide);
+        return result.build();
     }
 }
