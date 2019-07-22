@@ -69,7 +69,7 @@ import static org.mockito.Mockito.verify;
 class SubscriptionServiceTest {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(SubscriptionServiceTest.class);
+            new TestActorRequestFactory(SubscriptionServiceTest.class);
 
     /** Creates a new multi-tenant BoundedContext with the passed name. */
     private static BoundedContext ctx(String name) {

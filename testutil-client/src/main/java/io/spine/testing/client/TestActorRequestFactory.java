@@ -72,32 +72,8 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         this(GivenUserId.of(actor), zoneId);
     }
 
-    public static TestActorRequestFactory newInstance(UserId actor, ZoneId zoneId) {
-        return new TestActorRequestFactory(actor, zoneId);
-    }
-
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(Class)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(Class<?> testClass) {
-        return new TestActorRequestFactory(testClass);
-    }
-
     public TestActorRequestFactory(Class<?> testClass) {
         this(testClass.getName(), ZoneIds.systemDefault());
-    }
-
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(UserId)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(UserId actor) {
-        return newInstance(actor, ZoneIds.systemDefault());
     }
 
     public TestActorRequestFactory(UserId actor) {
