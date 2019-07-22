@@ -20,12 +20,12 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.experiment.BillingAgg;
-import io.spine.experiment.CreditsHeld;
-import io.spine.experiment.PhotosUploaded;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
+import io.spine.server.integration.BillingAgg;
+import io.spine.server.integration.CreditsHeld;
+import io.spine.server.integration.PhotosUploaded;
 
 public class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 

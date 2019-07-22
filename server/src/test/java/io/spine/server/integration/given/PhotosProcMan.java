@@ -20,13 +20,13 @@
 
 package io.spine.server.integration.given;
 
-import io.spine.experiment.CreditsHeld;
-import io.spine.experiment.PhotosPm;
-import io.spine.experiment.PhotosProcessed;
-import io.spine.experiment.PhotosUploaded;
-import io.spine.experiment.UploadPhotos;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
+import io.spine.server.integration.CreditsHeld;
+import io.spine.server.integration.PhotosPm;
+import io.spine.server.integration.PhotosProcessed;
+import io.spine.server.integration.PhotosUploaded;
+import io.spine.server.integration.UploadPhotos;
 import io.spine.server.procman.ProcessManager;
 
 public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
