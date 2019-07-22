@@ -301,7 +301,7 @@ class IntegrationBusTest {
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
         BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
-                .multiTenant("Photos-" + IntegrationBusTest.class.getSimpleName());
+                .singleTenant("Photos-" + IntegrationBusTest.class.getSimpleName());
         BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
                 .singleTenant("Billing-" + IntegrationBusTest.class.getSimpleName());
         photos.receivesCommand(UploadPhotos.generate());
