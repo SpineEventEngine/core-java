@@ -113,5 +113,6 @@ public class InMemoryTransportFactory implements TransportFactory {
     @Override
     public synchronized void close() {
         closed = true;
+        subscribers.clear();
     }
 }
