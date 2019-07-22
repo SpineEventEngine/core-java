@@ -228,8 +228,6 @@ class QueryParametersTest {
         QueryParameters parameters = QueryParameters.activeEntityQueryParams(storage);
 
         assertTrue(parameters.isLifecycleAttributesSet());
-        assertFalse(parameters.limited());
-        assertFalse(parameters.ordered());
 
         Iterator<CompositeQueryParameter> paramsIterator = parameters.iterator();
         CompositeQueryParameter lifecycleParameter = paramsIterator.next();

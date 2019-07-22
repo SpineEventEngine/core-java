@@ -18,29 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client.given;
+package io.spine.server.event;
 
 import com.google.protobuf.Message;
-import io.spine.client.OrderBy;
-import io.spine.test.client.TestEntity;
-import io.spine.type.TypeUrl;
 
-public class QueryBuilderTestEnv {
+/**
+ * An interface for the generated {@link EventStreamQuery} type.
+ */
+interface EventStreamQueryMixin extends Message, EventStreamQueryOrBuilder {
 
-    public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
-    public static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
-    public static final OrderBy EMPTY_ORDER_BY = OrderBy.getDefaultInstance();
-    public static final String SECOND_FIELD = "second_field";
-    public static final String FIRST_FIELD = "first_field";
-
-    /** Prevents instantiation of this test environment class. */
-    private QueryBuilderTestEnv() {
-    }
-
-    public static OrderBy orderBy(String column, OrderBy.Direction direction) {
-        return OrderBy.newBuilder()
-                      .setColumn(column)
-                      .setDirection(direction)
-                      .build();
+    /**
+     * Checks if the query should retrieve all the events in the store.
+     *
+     * <p>If the query specifies no filters and no time bounds, it is aimed for all the events.
+     *
+     * @return {@code true} if this is a default instance, {@code false} otherwise
+     */
+    default boolean includeAll() {
+        return getFilterCount() == 0
+           && !hasBefore()
+           && !hasAfter();
     }
 }

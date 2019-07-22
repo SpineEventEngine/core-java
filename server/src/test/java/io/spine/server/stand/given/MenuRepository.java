@@ -18,29 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client.given;
+package io.spine.server.stand.given;
 
-import com.google.protobuf.Message;
-import io.spine.client.OrderBy;
-import io.spine.test.client.TestEntity;
-import io.spine.type.TypeUrl;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.test.stand.DishAdded;
+import io.spine.test.stand.DishRemoved;
+import io.spine.test.stand.Menu;
+import io.spine.test.stand.MenuId;
 
-public class QueryBuilderTestEnv {
+import static io.spine.server.route.EventRoute.withId;
 
-    public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
-    public static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
-    public static final OrderBy EMPTY_ORDER_BY = OrderBy.getDefaultInstance();
-    public static final String SECOND_FIELD = "second_field";
-    public static final String FIRST_FIELD = "first_field";
+public class MenuRepository extends ProjectionRepository<MenuId, MenuProjection, Menu> {
 
-    /** Prevents instantiation of this test environment class. */
-    private QueryBuilderTestEnv() {
-    }
-
-    public static OrderBy orderBy(String column, OrderBy.Direction direction) {
-        return OrderBy.newBuilder()
-                      .setColumn(column)
-                      .setDirection(direction)
-                      .build();
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    protected void setupEventRouting(EventRouting<MenuId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(DishAdded.class, (message, context) -> withId(message.getId()))
+               .route(DishRemoved.class, (message, context) -> withId(message.getId()));
     }
 }

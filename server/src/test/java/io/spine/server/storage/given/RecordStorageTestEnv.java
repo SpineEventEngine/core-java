@@ -26,8 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.TargetFilters;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
@@ -136,15 +134,7 @@ public class RecordStorageTestEnv {
 
     public static <T> EntityQuery<T>
     newEntityQuery(TargetFilters filters, RecordStorage<T> storage) {
-        return EntityQueries.from(filters, emptyOrderBy(), emptyPagination(), storage);
-    }
-
-    public static OrderBy emptyOrderBy() {
-        return OrderBy.getDefaultInstance();
-    }
-
-    public static Pagination emptyPagination() {
-        return Pagination.getDefaultInstance();
+        return EntityQueries.from(filters, storage);
     }
 
     public static TargetFilters emptyFilters() {

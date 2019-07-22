@@ -28,7 +28,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.storage.Column;
@@ -56,6 +56,7 @@ import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.checkValid;
 
 /**
  * The base class for repositories that store entities as records.
@@ -127,7 +128,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
-        Iterator<E> allEntities = loadAll();
+        Iterator<E> allEntities = loadAll(ResponseFormat.getDefaultInstance());
         Iterator<E> result = filter(allEntities, filter::test);
         return result;
     }
@@ -214,6 +215,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    @VisibleForTesting
+    public Iterator<E> loadAll(ResponseFormat format) {
+        Iterator<EntityRecord> records = loadAllRecords(format);
+        Function<EntityRecord, E> toEntity = storageConverter().reverse();
+        Iterator<E> result = transform(records, toEntity::apply);
+        return result;
+    }
+
     /**
      * Loads all the entities in this repository with IDs,
      * contained within the passed {@code ids} values.
@@ -232,33 +241,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>If the IDs contain duplicates, the result may also contain duplicates
      * depending on a particular implementation.
      *
-     * <p>Note: The storage must be assigned before calling this method.
-     *
-     * @param ids
-     *         entity IDs to search for
-     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
-     */
-    public Iterator<E> loadAll(Iterable<I> ids) {
-        return loadAll(ids, FieldMask.getDefaultInstance());
-    }
-
-    /**
-     * Loads all the entities in this repository by their IDs and
-     * applies the {@link FieldMask} to each of them.
-     *
-     * <p>Acts in the same way as {@link #loadAll(Iterable)} with
-     * the {@code FieldMask} applied to the results.
-     *
-     * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
+     * <p>The resulting entity state must be valid in terms of {@code (required)},
+     * {@code (required_fields)}, and {@code (goes).with} options after the mask is applied.
+     * Otherwise, an {@link InvalidEntityStateException} is thrown.
      *
      * <p>Note: The storage must be assigned before calling this method.
      *
      * @param ids
      *         entity IDs to search for
      * @param fieldMask
-     *         mask to apply on entities
-     * @return all the entities in this repository with the IDs contained in the given {@code ids}
-     * @see #loadAll(Iterable)
+     *         the entity state fields to load
+     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         RecordStorage<I> storage = recordStorage();
@@ -270,36 +263,35 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Loads all the entities in this repository.
-     *
-     * <p>Note: The storage must be assigned before calling this method.
-     *
-     * @return all the entities in this repository
-     * @see #loadAll(Iterable)
-     */
-    public Iterator<E> loadAll() {
-        Iterator<EntityRecord> records = loadAllRecords();
-        Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
-        return result;
-    }
-
-    /**
      * Obtains iterator over all present {@linkplain EntityRecord entity records}.
      *
+     * <p>The maximum number of resulting entity states is limited by
+     * the {@code ResponseFormat.limit}. If the limit is {@code 0}, all the entity states are
+     * retrieved.
+     *
+     * <p>The order of the resulting entity states is defined by {@code ResponseFormat.order_by}.
+     *
+     * <p>The resulting entity states have only the specified in {@code ResponseFormat.field_mask}
+     * fields. If the mask is empty, all the fields are retrieved.
+     *
+     * @param format
+     *         the expected format of the response
      * @return an iterator over all records
      */
     @Internal
-    public Iterator<EntityRecord> loadAllRecords() {
+    public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+        checkNotNull(format);
         RecordStorage<I> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll();
+        Iterator<EntityRecord> records = storage.readAll(format);
         return records;
     }
 
     /**
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
-     * to the results. A number of elements to retrieve can be limited by {@link Pagination}.
-     * OrderBy in which to look for and return results in is specified by the {@link OrderBy}.
+     * to the results.
+     *
+     * <p>A number of elements to retrieve can be limited to a certain number. The order of
+     * the resulting entities is specified by the {@link OrderBy}.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
@@ -312,23 +304,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param filters
      *         the entity filters
-     * @param orderBy
-     *         an orderBy to sort the filtered results before pagination
-     * @param pagination
-     *         the pagination to apply to the sorted result set
-     * @param fieldMask
-     *         the mask to apply to the entities
+     * @param format
+     *         the expected format of the query response
      * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
-    public Iterator<E> find(TargetFilters filters, OrderBy orderBy,
-                            Pagination pagination, FieldMask fieldMask) {
+    public Iterator<E> find(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
-        checkNotNull(orderBy);
-        checkNotNull(pagination);
-        checkNotNull(fieldMask);
+        checkNotNull(format);
 
-        Iterator<EntityRecord> records = findRecords(filters, orderBy, pagination, fieldMask);
+        Iterator<EntityRecord> records = findRecords(filters, format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
@@ -339,25 +324,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param filters
      *         entity filters
-     * @param orderBy
-     *         the orderBy to sort the filtered results before pagination
-     * @param pagination
-     *         the pagination to apply to the sorted result set
-     * @param fieldMask
      *         the mask to apply to the entities
      * @return the iterator over the matching records
      */
     @Internal
-    public Iterator<EntityRecord> findRecords(TargetFilters filters, OrderBy orderBy,
-                                              Pagination pagination, FieldMask fieldMask) {
+    public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
-        checkNotNull(orderBy);
-        checkNotNull(pagination);
-        checkNotNull(fieldMask);
+        checkValid(filters);
+        checkNotNull(format);
 
         RecordStorage<I> storage = recordStorage();
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, orderBy, pagination, storage);
-        Iterator<EntityRecord> records = storage.readAll(entityQuery, fieldMask);
+        EntityQuery<I> entityQuery = EntityQueries.from(filters, storage);
+        Iterator<EntityRecord> records = storage.readAll(entityQuery, format);
         return records;
     }
 
@@ -435,9 +413,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
             Message idAsMessage = unpack(idAsAny);
 
-            @SuppressWarnings("unchecked") /* As the message class is the same as expected,
-                                              the conversion is safe. */
-                    I id = (I) idAsMessage;
+            @SuppressWarnings("unchecked")
+                // As the message class is the same as expected, the conversion is safe.
+            I id = (I) idAsMessage;
             return id;
         }
 

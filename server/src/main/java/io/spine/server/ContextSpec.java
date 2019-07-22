@@ -128,12 +128,13 @@ public final class ContextSpec {
         }
         ContextSpec spec = (ContextSpec) o;
         return isMultitenant() == spec.isMultitenant() &&
+                storeEvents == spec.storeEvents &&
                 Objects.equal(name, spec.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name, isMultitenant());
+        return Objects.hashCode(name, isMultitenant(), storeEvents);
     }
 
     @Override

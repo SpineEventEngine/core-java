@@ -18,27 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.stand.given;
 
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import io.spine.core.Subscribe;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.projection.Projection;
+import io.spine.test.stand.Dish;
+import io.spine.test.stand.DishAdded;
+import io.spine.test.stand.DishRemoved;
+import io.spine.test.stand.Menu;
+import io.spine.test.stand.MenuId;
 
-public class EntityQueriesTestEnv {
+import java.util.List;
 
-    /** Prevent instantiation of this utility class. */
-    private EntityQueriesTestEnv() {
+public final class MenuProjection extends Projection<MenuId, Menu, Menu.Builder> {
+
+    public static final String UUID = "uid";
+
+    @Subscribe
+    void on(DishAdded event) {
+        builder().addDish(event.getDish());
     }
 
-    public static Pagination pagination(int size) {
-        return Pagination.newBuilder()
-                                 .setPageSize(size)
-                                 .build();
+    @Subscribe
+    void on(DishRemoved event) {
+        List<Dish> dishes = builder().getDishList();
+        for (int i = 0; i < dishes.size(); i++) {
+            Dish dish = dishes.get(i);
+            if (event.getDish().equals(dish)) {
+                builder().removeDish(i);
+                return;
+            }
+        }
     }
 
-    public static OrderBy order(String column, OrderBy.Direction direction) {
-        return OrderBy.newBuilder()
-                              .setColumn(column)
-                              .setDirection(direction)
-                              .build();
+    @Column(name = UUID)
+    public String getUuid() {
+        return id().getUuid();
     }
 }

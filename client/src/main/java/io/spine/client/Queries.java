@@ -19,7 +19,6 @@
  */
 package io.spine.client;
 
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -82,24 +81,20 @@ public final class Queries {
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<?> ids,
-                                         @Nullable Set<CompositeFilter> filters,
-                                         @Nullable FieldMask fieldMask) {
+                                         @Nullable Set<CompositeFilter> filters) {
         checkNotNull(entityClass);
 
         Target target = composeTarget(entityClass, ids, filters);
-        Query.Builder builder = queryBuilderFor(target, fieldMask);
+        Query.Builder builder = queryBuilderFor(target);
         return builder;
     }
 
     @SuppressWarnings("CheckReturnValue")
-    static Query.Builder queryBuilderFor(Target target, @Nullable FieldMask fieldMask) {
+    static Query.Builder queryBuilderFor(Target target) {
         checkNotNull(target);
 
         Query.Builder builder = Query.newBuilder()
                                      .setTarget(target);
-        if (fieldMask != null) {
-            builder.setFieldMask(fieldMask);
-        }
         return builder;
     }
 }

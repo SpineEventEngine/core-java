@@ -23,6 +23,7 @@ package io.spine.server.projection.e2e;
 import com.google.common.truth.IterableSubject;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.client.ResponseFormat;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -170,7 +171,8 @@ class ProjectionEndToEndTest {
                 .build();
         repository.dispatch(EventEnvelope.of(event));
 
-        Iterator<GroupProjection> allGroups = repository.loadAll();
+        Iterator<GroupProjection> allGroups =
+                repository.loadAll(ResponseFormat.getDefaultInstance());
         assertTrue(allGroups.hasNext());
         GroupProjection singleGroup = allGroups.next();
         assertFalse(allGroups.hasNext());

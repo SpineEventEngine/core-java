@@ -21,12 +21,10 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityStateWithVersion;
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.client.Query;
+import io.spine.client.ResponseFormat;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.Entity;
@@ -52,22 +50,25 @@ class EntityQueryProcessor implements QueryProcessor {
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         Target target = query.getTarget();
-        FieldMask fieldMask = query.getFieldMask();
-
-        Iterator<EntityRecord> entities;
-        if (target.getIncludeAll() && fieldMask.getPathsList()
-                                               .isEmpty()) {
-            entities = repository.loadAllRecords();
-        } else {
-            TargetFilters filters = target.getFilters();
-            OrderBy orderBy = query.getOrderBy();
-            Pagination pagination = query.getPagination();
-            entities = repository.findRecords(filters, orderBy, pagination, fieldMask);
-        }
+        Iterator<EntityRecord> entities = target.getIncludeAll()
+                                          ? loadAll(query.getFormat())
+                                          : loadByQuery(query);
         ImmutableList<EntityStateWithVersion> result = stream(entities)
                 .map(EntityQueryProcessor::toEntityState)
                 .collect(toImmutableList());
         return result;
+    }
+
+    private Iterator<EntityRecord> loadByQuery(Query query) {
+        Target target = query.getTarget();
+        TargetFilters filters = target.getFilters();
+        Iterator<EntityRecord> entities = repository.findRecords(filters, query.getFormat());
+        return entities;
+    }
+
+    private Iterator<EntityRecord> loadAll(ResponseFormat format) {
+        Iterator<EntityRecord> entities = repository.loadAllRecords(format);
+        return entities;
     }
 
     private static EntityStateWithVersion toEntityState(EntityRecord record) {
