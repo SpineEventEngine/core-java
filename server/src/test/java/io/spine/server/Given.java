@@ -121,7 +121,9 @@ public class Given {
          * Creates a new {@code ACommand} with the given command message, userId and
          * timestamp using default {@code ACommand} instance.
          */
-        private static Command create(io.spine.base.CommandMessage command, UserId userId, Timestamp when) {
+        private static Command create(io.spine.base.CommandMessage command,
+                                      UserId userId,
+                                      Timestamp when) {
             TenantId generatedTenantId = TenantId.newBuilder()
                                                  .setValue(newUuid())
                                                  .build();

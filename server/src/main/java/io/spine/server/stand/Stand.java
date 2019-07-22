@@ -21,7 +21,6 @@ package io.spine.server.stand;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
@@ -63,7 +62,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -93,20 +91,6 @@ import static java.util.Collections.singleton;
 public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     /**
-     * The event ID used as the origin of entity state change system events.
-     *
-     * @deprecated This {@code EventId} is used in {@link #post} in order to satisfy the system
-     *             event validation rules. Do not use this value in other places and/or for other
-     *             purposes.
-     */
-    @Deprecated
-    private static final MessageId STAND_POST_ORIGIN = MessageId
-            .newBuilder()
-            .setId(Identifier.pack("Stand-received-entity-update"))
-            .setTypeUrl(TypeUrl.of(Empty.class).value())
-            .vBuild();
-
-    /**
      * Used to return an empty result collection for {@link Query}.
      */
     private static final QueryProcessor NO_OP_PROCESSOR = new NoOpQueryProcessor();
@@ -126,11 +110,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      */
     private final EventRegistry eventRegistry;
 
-    /**
-     * An instance of executor used to invoke callbacks.
-     */
-    private final Executor callbackExecutor;
-
     private final boolean multitenant;
 
     private final TopicValidator topicValidator;
@@ -141,7 +120,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     private Stand(Builder builder) {
         super();
-        this.callbackExecutor = builder.callbackExecutor();
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
@@ -159,7 +137,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Posts the state of an entity to this stand.
+     * Test-only method that posts the state of an entity to this stand.
      *
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
@@ -171,11 +149,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *         the entity whose state to post
      * @param lifecycle
      *         the lifecycle of the entity
-     * @deprecated Avoid posting entity state to the Stand directly and prefer relying on the
-     *             proper entity lifecycle via event dispatch.
      */
-    @Deprecated
-    public void post(Entity entity, EntityLifecycle lifecycle) {
+    @VisibleForTesting
+    void post(Entity entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
         EntityRecord record = EntityRecord
@@ -187,8 +163,14 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setNewValue(record)
                 .vBuild();
+        MessageId origin = MessageId
+                .newBuilder()
+                .setId(Identifier.pack("Stand-received-entity-update"))
+                .setTypeUrl(TypeUrl.of(Empty.class)
+                                   .value())
+                .vBuild();
         lifecycle.onStateChanged(change,
-                                 ImmutableSet.of(STAND_POST_ORIGIN),
+                                 ImmutableSet.of(origin),
                                  Origin.getDefaultInstance());
     }
 
@@ -203,7 +185,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                                 .stream()
                                 .filter(SubscriptionRecord::isActive)
                                 .filter(record -> record.matches(event))
-                                .forEach(record -> runSubscriptionUpdate(record, event));
+                                .forEach(record -> record.update(event));
         }
     }
 
@@ -333,14 +315,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             }
         };
         op.execute();
-    }
-
-    /**
-     * Runs the subscription record update via the dedicated executor.
-     */
-    private void runSubscriptionUpdate(SubscriptionRecord record, EventEnvelope event) {
-        Runnable action = () -> record.update(event);
-        callbackExecutor.execute(action);
     }
 
     /**
@@ -495,31 +469,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         private final TypeRegistry typeRegistry = InMemoryTypeRegistry.newInstance();
         private final EventRegistry eventRegistry = InMemoryEventRegistry.newInstance();
 
-        private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
         private SystemReadSide systemReadSide;
-
-        public Executor callbackExecutor() {
-            return callbackExecutor;
-        }
-
-        /**
-         * Sets an {@code Executor} to be used for executing callback methods.
-         *
-         * <p>If the {@code Executor} is not set,
-         * {@link MoreExecutors#directExecutor() directExecutor()} will be used.
-         *
-         * @param callbackExecutor
-         *         the instance of {@code Executor}
-         * @return this instance of {@code Builder}
-         */
-        public Builder setCallbackExecutor(Executor callbackExecutor) {
-            this.callbackExecutor = checkNotNull(callbackExecutor);
-            return this;
-        }
 
         @Internal
         public Builder setMultitenant(@Nullable Boolean multitenant) {
@@ -578,17 +532,10 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
         @Internal
         public Stand build() {
             checkState(systemReadSide != null, "SystemWriteSide is not set.");
-
             boolean multitenant = this.multitenant == null
                                   ? false
                                   : this.multitenant;
-
-            if (callbackExecutor == null) {
-                callbackExecutor = MoreExecutors.directExecutor();
-            }
-
             subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
-
             topicValidator = new TopicValidator(typeRegistry, eventRegistry);
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
