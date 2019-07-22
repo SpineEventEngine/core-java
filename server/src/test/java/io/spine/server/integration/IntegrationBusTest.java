@@ -217,7 +217,7 @@ class IntegrationBusTest {
     }
 
     @Test
-    @DisplayName("update local subscriptions upon repeated RequestedMessageTypes")
+    @DisplayName("update local subscriptions upon repeated RequestForExternalMessages")
     void updateLocalSubscriptions() {
         BoundedContext sourceContext = newContext();
         BoundedContext destinationCtx = newContext();
