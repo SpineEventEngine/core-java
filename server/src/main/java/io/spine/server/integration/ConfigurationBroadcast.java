@@ -31,6 +31,11 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 import static io.spine.server.integration.IntegrationChannels.fromId;
 
+/**
+ * A client of the {@code RequestForExternalMessages} {@link Publisher}.
+ *
+ * <p>Posts the updates on the requested messages.
+ */
 final class ConfigurationBroadcast {
 
     private final BoundedContextName contextName;
@@ -43,6 +48,15 @@ final class ConfigurationBroadcast {
         this.needsPublisher = checkNotNull(publisher);
     }
 
+    /**
+     * Notifies other Bounded contexts about a change in the requested messages.
+     *
+     * <p>If the given {@code needs} are the same as previous ones, i.e. the needs did not change,
+     * the request is not sent.
+     *
+     * @param needs
+     *         the new needs of current context
+     */
     synchronized void onNeedsUpdated(Set<ChannelId> needs) {
         checkNotNull(needs);
         ImmutableSet<ChannelId> newNeeds = ImmutableSet.copyOf(needs);
@@ -52,6 +66,9 @@ final class ConfigurationBroadcast {
         }
     }
 
+    /**
+     * Notifies other Bounded contexts about current requested messages.
+     */
     synchronized void send() {
         RequestForExternalMessages.Builder request = RequestForExternalMessages.newBuilder();
         for (ChannelId channelId : knownNeeds) {
