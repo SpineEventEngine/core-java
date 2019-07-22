@@ -107,7 +107,7 @@ public class IntegrationBus
         extends MulticastBus<ExternalMessage,
                              ExternalMessageEnvelope,
                              ExternalMessageClass,
-                             ExternalMessageDispatcher<?>>
+                             ExternalMessageDispatcher>
         implements ContextAware {
 
     /**
@@ -221,7 +221,7 @@ public class IntegrationBus
      * @param dispatcher the dispatcher to register
      */
     @Override
-    public void register(ExternalMessageDispatcher<?> dispatcher) {
+    public void register(ExternalMessageDispatcher dispatcher) {
         super.register(dispatcher);
         Iterable<ExternalMessageClass> receivedTypes = dispatcher.messageClasses();
         for (ExternalMessageClass cls : receivedTypes) {
@@ -240,7 +240,7 @@ public class IntegrationBus
      * @param dispatcher the dispatcher to unregister
      */
     @Override
-    public void unregister(ExternalMessageDispatcher<?> dispatcher) {
+    public void unregister(ExternalMessageDispatcher dispatcher) {
         super.unregister(dispatcher);
         Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass cls : transformed) {
@@ -351,7 +351,7 @@ public class IntegrationBus
                                                    ExternalMessage,
                                                    ExternalMessageEnvelope,
                                                    ExternalMessageClass,
-                                                   ExternalMessageDispatcher<?>> {
+                                                   ExternalMessageDispatcher> {
 
         @Override
         protected DomesticDispatcherRegistry newRegistry() {

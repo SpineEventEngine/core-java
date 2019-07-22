@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class DomesticDispatcherRegistry
         extends DispatcherRegistry<ExternalMessageClass,
                                    ExternalMessageEnvelope,
-                                   ExternalMessageDispatcher<?>> {
+                                   ExternalMessageDispatcher> {
     @Override
     protected void checkDispatcher(ExternalMessageDispatcher dispatcher)
             throws IllegalArgumentException {

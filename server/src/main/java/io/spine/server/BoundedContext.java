@@ -229,7 +229,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *          if called from outside the framework
      */
     @Internal
-    public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
+    public void registerCommandDispatcher(CommandDispatcher dispatcher) {
         checkNotNull(dispatcher);
         Security.allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
@@ -249,15 +249,15 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * @throws SecurityException
      *          if called from outside the framework
      */
-    private void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
+    private void registerCommandDispatcher(CommandDispatcherDelegate dispatcher) {
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
         }
     }
 
-    private void registerWithIntegrationBus(ExternalDispatcherFactory<?> dispatcher) {
-        ExternalMessageDispatcher<?> externalDispatcher =
+    private void registerWithIntegrationBus(ExternalDispatcherFactory dispatcher) {
+        ExternalMessageDispatcher externalDispatcher =
                 dispatcher.createExternalDispatcher()
                           .orElseThrow(missingExternalDispatcherFrom(dispatcher));
 
@@ -277,7 +277,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      * @see #registerEventDispatcher(EventDispatcherDelegate)
      */
     @Internal
-    public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
+    public void registerEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         Security.allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
@@ -306,7 +306,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      */
     private void registerEventDispatcher(EventDispatcherDelegate dispatcher) {
         checkNotNull(dispatcher);
-        DelegatingEventDispatcher<?> delegate = DelegatingEventDispatcher.of(dispatcher);
+        DelegatingEventDispatcher delegate = DelegatingEventDispatcher.of(dispatcher);
         registerEventDispatcher(delegate);
     }
 

@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
@@ -132,7 +131,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
+            CommandDispatcher dispatcher = new AddTaskDispatcher();
             commandBus.register(dispatcher);
             commandBus.unregister(dispatcher);
 

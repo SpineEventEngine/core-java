@@ -122,7 +122,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class EmptyDispatcher implements CommandDispatcher<Message> {
+    public static class EmptyDispatcher implements CommandDispatcher {
 
         @Override
         public Set<CommandClass> messageClasses() {
@@ -140,7 +140,7 @@ public class CommandDispatcherRegistryTestEnv {
 
     }
 
-    public static class AllCommandDispatcher implements CommandDispatcher<Message> {
+    public static class AllCommandDispatcher implements CommandDispatcher {
 
         @Override
         public Set<CommandClass> messageClasses() {
@@ -155,7 +155,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class CreateProjectDispatcher implements CommandDispatcher<Message> {
+    public static class CreateProjectDispatcher implements CommandDispatcher {
 
         @Override
         public Set<CommandClass> messageClasses() {
@@ -168,7 +168,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class AddTaskDispatcher implements CommandDispatcher<Message> {
+    public static class AddTaskDispatcher implements CommandDispatcher {
 
         @Override
         public Set<CommandClass> messageClasses() {

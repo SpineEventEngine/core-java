@@ -91,7 +91,7 @@ import static java.lang.String.format;
  */
 @Internal
 public class EventBus
-        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>>
+        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher>
         implements ContextAware {
 
     /*
@@ -143,7 +143,7 @@ public class EventBus
     }
 
     @VisibleForTesting
-    final Set<? extends EventDispatcher<?>> dispatchersOf(EventClass eventClass) {
+    final Set<? extends EventDispatcher> dispatchersOf(EventClass eventClass) {
         return registry().dispatchersOf(eventClass);
     }
 
@@ -289,7 +289,7 @@ public class EventBus
     /** The {@code Builder} for {@code EventBus}. */
     @CanIgnoreReturnValue
     public static class Builder
-            extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+            extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher> {
 
         /**
          * Optional enricher for events.
@@ -308,7 +308,7 @@ public class EventBus
         }
 
         @Override
-        protected DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> newRegistry() {
+        protected DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher> newRegistry() {
             return new EventDispatcherRegistry();
         }
 
