@@ -20,7 +20,6 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Message;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -39,7 +38,7 @@ import java.util.Set;
  * <p>Enables dispatch for all commands posted by the {@code TestProcessManager} commanding
  * methods.
  */
-public class TestProcessManagerDispatcher implements CommandDispatcher<Message> {
+public class TestProcessManagerDispatcher implements CommandDispatcher {
 
     @Override
     public Set<CommandClass> messageClasses() {

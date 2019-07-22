@@ -36,7 +36,7 @@ import static io.spine.util.Exceptions.unsupported;
  * A simple dispatcher class, which only dispatch and does not have own event
  * subscribing methods.
  */
-public class BareDispatcher implements EventDispatcher<String> {
+public class BareDispatcher implements EventDispatcher {
 
     private boolean dispatchCalled = false;
 
@@ -51,7 +51,7 @@ public class BareDispatcher implements EventDispatcher<String> {
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         throw unsupported();
     }
 

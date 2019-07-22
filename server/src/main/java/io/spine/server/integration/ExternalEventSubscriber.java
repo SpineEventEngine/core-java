@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * <p>Allows to register {@code EventSubscriber}s as dispatchers of
  * {@code IntegrationBus}.
  */
-final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>, Logging {
+final class ExternalEventSubscriber implements ExternalMessageDispatcher, Logging {
 
     private final AbstractEventSubscriber delegate;
 

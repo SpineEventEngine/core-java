@@ -29,8 +29,8 @@ import io.spine.server.type.CommandEnvelope;
  *
  * <p>A dispatcher can deliver more than one class of commands.
  */
-public interface CommandDispatcher<I>
-        extends UnicastDispatcher<CommandClass, CommandEnvelope, I> {
+public interface CommandDispatcher
+        extends UnicastDispatcher<CommandClass, CommandEnvelope> {
 
     /**
      * Verifies if this instance dispatches at least one command.

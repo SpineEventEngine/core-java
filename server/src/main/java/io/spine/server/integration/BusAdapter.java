@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <D> the type of dispatchers suitable for the local bus, which is being adapted
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
-                          D extends MessageDispatcher<?, E, ?>> {
+                          D extends MessageDispatcher<?, E>> {
 
     /**
      * The wrapped local bus.
@@ -129,7 +129,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
      */
     abstract static class AbstractBuilder<B extends AbstractBuilder<B, E, D>,
                                           E extends MessageEnvelope<?, ?, ?>,
-                                          D extends MessageDispatcher<?, E, ?>> {
+                                          D extends MessageDispatcher<?, E>> {
 
         private final Bus<?, E, ?, D> targetBus;
         private final BoundedContextName boundedContextName;
