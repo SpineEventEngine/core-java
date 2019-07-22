@@ -26,7 +26,6 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
-import io.spine.experiment.CreditsHeld;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
@@ -64,7 +63,6 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCre
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -311,9 +309,7 @@ class IntegrationBusTest {
                 .with(DefaultRepository.of(BillingAggregate.class));
         photos.receivesCommand(UploadPhotos.generate());
         assertReceived(photos, PhotosUploaded.class);
-        assertReceived(billing, PhotosUploaded.class);
         assertReceived(billing, CreditsHeld.class);
-        assertReceived(photos, CreditsHeld.class);
         assertReceived(photos, PhotosProcessed.class);
 
         photos.close();
