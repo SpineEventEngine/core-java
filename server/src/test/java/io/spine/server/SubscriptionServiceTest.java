@@ -23,13 +23,17 @@ package io.spine.server;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Message;
+import io.spine.client.EntityStateUpdate;
+import io.spine.client.EntityUpdates;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.core.Command;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectAggregateRepository;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.Entity;
@@ -37,6 +41,7 @@ import io.spine.server.stand.Stand;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -53,6 +58,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,8 +69,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings("deprecation")
-// The deprecated `Stand.post()` method will become test-only in the future.
 @DisplayName("SubscriptionService should")
 class SubscriptionServiceTest {
 
@@ -73,7 +77,8 @@ class SubscriptionServiceTest {
 
     /** Creates a new multi-tenant BoundedContext with the passed name. */
     private static BoundedContext ctx(String name) {
-        return BoundedContext.multitenant(name).build();
+        return BoundedContext.multitenant(name)
+                             .build();
     }
 
     @BeforeEach
@@ -229,11 +234,11 @@ class SubscriptionServiceTest {
     @DisplayName("activate subscription")
     void activateSubscription() {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        BoundedContext boundedContext = boundedContextWith(repository);
+        BoundedContext context = boundedContextWith(repository);
 
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
-                .add(boundedContext)
+                .add(context)
                 .build();
         Target target = getProjectQueryTarget();
 
@@ -253,19 +258,37 @@ class SubscriptionServiceTest {
                 .newBuilder()
                 .setId("some-id")
                 .build();
-        Message projectState = Project
-                .newBuilder()
-                .setId(projectId)
-                .build();
-        int version = 1;
 
-        Entity entity = newEntity(projectId, projectState, version);
-        boundedContext.stand()
-                      .post(entity, repository.lifecycleOf(projectId));
+        createProject(context, projectId);
 
         // `isCompleted` set to false since we don't expect
         // activationObserver::onCompleted to be called.
         verifyState(activationObserver, false);
+
+        Project actual = memoizedEntity(activationObserver, Project.class);
+        Project expected = Project.newBuilder()
+                                  .setId(projectId)
+                                  .build();
+        ProtoTruth.assertThat(actual)
+                  .comparingExpectedFieldsOnly()
+                  .isEqualTo(expected);
+    }
+
+    private void createProject(BoundedContext context, ProjectId projectId) {
+        AggCreateProject cmd = Given.CommandMessage.createProject(projectId);
+        Command command = requestFactory.createCommand(cmd);
+        context.commandBus()
+               .post(command, StreamObservers.noOpObserver());
+    }
+
+    private static <T extends Message>
+    T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> entityCls) {
+        SubscriptionUpdate update = observer.firstResponse();
+        EntityUpdates entityUpdates = update.getEntityUpdates();
+        assertThat(entityUpdates.getUpdateCount()).isEqualTo(1);
+
+        EntityStateUpdate projectUpdate = entityUpdates.getUpdate(0);
+        return unpack(projectUpdate.getState(), entityCls);
     }
 
     private static <T> void verifyState(MemoizingObserver<T> observer, boolean completed) {
@@ -307,16 +330,17 @@ class SubscriptionServiceTest {
     @DisplayName("cancel subscription")
     void cancelSubscription() {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        BoundedContext boundedContext = boundedContextWith(repository);
+        BoundedContext context = boundedContextWith(repository);
 
         SubscriptionService subscriptionService = SubscriptionService
                 .newBuilder()
-                .add(boundedContext)
+                .add(context)
                 .build();
 
         Target target = getProjectQueryTarget();
 
-        Topic topic = requestFactory.topic().forTarget(target);
+        Topic topic = requestFactory.topic()
+                                    .forTarget(target);
 
         // Subscribe.
         MemoizingObserver<Subscription> subscribeObserver = new MemoizingObserver<>();
@@ -334,14 +358,7 @@ class SubscriptionServiceTest {
                 .newBuilder()
                 .setId("some-other-id")
                 .build();
-        Message projectState = Project
-                .newBuilder()
-                .setId(projectId)
-                .build();
-        int version = 1;
-        Entity entity = newEntity(projectId, projectState, version);
-        boundedContext.stand()
-                      .post(entity, repository.lifecycleOf(projectId));
+        createProject(context, projectId);
 
         // The update must not be handled by the observer.
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -490,7 +507,8 @@ class SubscriptionServiceTest {
             assertFalse(observer.isCompleted());
             assertThat(observer.getError())
                     .isInstanceOf(RuntimeException.class);
-            assertThat(observer.getError().getMessage())
+            assertThat(observer.getError()
+                               .getMessage())
                     .isEqualTo(rejectionMessage);
         }
     }
