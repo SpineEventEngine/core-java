@@ -155,9 +155,9 @@ public final class QueryFactory {
      * are silently ignored.
      *
      * @param entityClass
-     *        the class of a target entity
+     *         the class of a target entity
      * @param maskPaths
-     *        the property paths for the {@code FieldMask} applied to each of the results
+     *         the property paths for the {@code FieldMask} applied to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
