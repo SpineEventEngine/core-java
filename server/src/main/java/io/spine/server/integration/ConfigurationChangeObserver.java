@@ -44,6 +44,12 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     private final IntegrationBus integrationBus;
     private final BoundedContextName boundedContextName;
     private final Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByClass;
+
+    /**
+     * Names of Bounded Contexts already known to this observer.
+     *
+     * <p>If a context is unknown, the observer publishes a {@code RequestForExternalMessages}.
+     */
     private final Set<BoundedContextName> knownContexts = synchronizedSet(new HashSet<>());
 
     /**
@@ -64,6 +70,16 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
         this.knownContexts.add(boundedContextName);
     }
 
+    /**
+     * Handles the {@code RequestForExternalMessages} by creating local publishers for the requested
+     * types.
+     *
+     * <p>If the request originates from a previously unknown Bounded Context,
+     * {@linkplain IntegrationBus#notifyOfCurrentNeeds() publishes} the needs of current context,
+     * since they may be unknown to the new context.
+     *
+     * @param value {@link RequestForExternalMessages} form another Bounded Context
+     */
     @Override
     public void handle(ExternalMessage value) {
         RequestForExternalMessages request = unpack(value.getOriginalMessage(),
