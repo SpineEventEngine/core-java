@@ -34,12 +34,4 @@ public class InMemorySubscriber extends Subscriber {
     public InMemorySubscriber(ChannelId channelId) {
         super(channelId);
     }
-
-    /**
-     * Does nothing as there are no resources to close in the in-memory implementation.
-     */
-    @Override
-    public void close() {
-        // Do nothing.
-    }
 }

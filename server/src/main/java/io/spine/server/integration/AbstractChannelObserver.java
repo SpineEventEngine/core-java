@@ -23,11 +23,14 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.logging.Logging;
 import io.spine.server.transport.Subscriber;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -35,10 +38,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * subscriber observers}.
  */
 @SPI
-public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage> {
+public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage>, Logging {
 
     private final BoundedContextName boundedContextName;
     private final Class<? extends Message> messageClass;
+    private final AtomicBoolean completed = new AtomicBoolean(false);
 
     protected AbstractChannelObserver(BoundedContextName boundedContextName,
                                       Class<? extends Message> messageClass) {
@@ -58,21 +62,28 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
 
     @Override
     public void onError(Throwable t) {
+        boolean wasCompleted = !completed.compareAndSet(false, true);
+        if (wasCompleted) {
+            _warn().log("Observer for `%s` received an error despite being closed.",
+                        messageClass.getName());
+        }
         throw newIllegalStateException("Error caught when observing the incoming " +
                                                "messages of type %s", messageClass);
     }
 
     @Override
     public void onCompleted() {
-        throw newIllegalStateException("Unexpected 'onCompleted' when observing " +
-                                               "the incoming messages of type %s",
-                                       messageClass);
+        boolean wasNotCompleted = completed.compareAndSet(false, true);
+        checkState(wasNotCompleted, "Observer of `%s` is already closed.", messageClass.getName());
     }
 
     @Override
     public final void onNext(ExternalMessage message) {
         checkNotNull(message);
-
+        checkState(!completed.get(),
+                   "Channel %s received message (%s[%s]) despite being closed.",
+                   message.getClass().getName(),
+                   message.getOriginalMessage().getTypeUrl());
         BoundedContextName source = message.getBoundedContextName();
         boolean sameContext = boundedContextName.equals(source)
                            || boundedContextName.isSystemOf(source)

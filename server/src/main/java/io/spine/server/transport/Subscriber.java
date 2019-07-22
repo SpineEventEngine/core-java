@@ -53,7 +53,7 @@ public abstract class Subscriber extends AbstractChannel {
      *
      * @return observers for this subscriber
      */
-    public Iterable<StreamObserver<ExternalMessage>> getObservers() {
+    public Iterable<StreamObserver<ExternalMessage>> observers() {
         return ImmutableSet.copyOf(observers);
     }
 
@@ -94,8 +94,14 @@ public abstract class Subscriber extends AbstractChannel {
     }
 
     protected final void callObservers(ExternalMessage message) {
-        for (StreamObserver<ExternalMessage> observer : getObservers()) {
+        for (StreamObserver<ExternalMessage> observer : observers()) {
             observer.onNext(message);
         }
+    }
+
+    @Override
+    public void close() {
+        observers.forEach(StreamObserver::onCompleted);
+        observers.clear();
     }
 }

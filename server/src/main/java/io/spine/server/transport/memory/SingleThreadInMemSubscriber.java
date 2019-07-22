@@ -17,6 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.transport.memory;
 
 import io.spine.base.Identifier;
@@ -71,6 +72,7 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging 
 
     @Override
     public void close() {
+        super.close();
         executor.shutdown();
     }
 }
