@@ -93,20 +93,6 @@ import static java.util.Collections.singleton;
 public class Stand extends AbstractEventSubscriber implements AutoCloseable {
 
     /**
-     * The event ID used as the origin of entity state change system events.
-     *
-     * @deprecated This {@code EventId} is used in {@link #post} in order to satisfy the system
-     *             event validation rules. Do not use this value in other places and/or for other
-     *             purposes.
-     */
-    @Deprecated
-    private static final MessageId STAND_POST_ORIGIN = MessageId
-            .newBuilder()
-            .setId(Identifier.pack("Stand-received-entity-update"))
-            .setTypeUrl(TypeUrl.of(Empty.class).value())
-            .vBuild();
-
-    /**
      * Used to return an empty result collection for {@link Query}.
      */
     private static final QueryProcessor NO_OP_PROCESSOR = new NoOpQueryProcessor();
@@ -159,7 +145,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     }
 
     /**
-     * Posts the state of an entity to this stand.
+     * Test-only method that posts the state of an entity to this stand.
      *
      * @implNote
      * The only purpose of this method is to deliver the new entity state to the subscribers
@@ -171,11 +157,9 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      *         the entity whose state to post
      * @param lifecycle
      *         the lifecycle of the entity
-     * @deprecated Avoid posting entity state to the Stand directly and prefer relying on the
-     *             proper entity lifecycle via event dispatch.
      */
-    @Deprecated
-    public void post(Entity entity, EntityLifecycle lifecycle) {
+    @VisibleForTesting
+    void post(Entity entity, EntityLifecycle lifecycle) {
         Any id = Identifier.pack(entity.id());
         Any state = AnyPacker.pack(entity.state());
         EntityRecord record = EntityRecord
@@ -187,8 +171,14 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
                 .newBuilder()
                 .setNewValue(record)
                 .vBuild();
+        MessageId origin = MessageId
+                .newBuilder()
+                .setId(Identifier.pack("Stand-received-entity-update"))
+                .setTypeUrl(TypeUrl.of(Empty.class)
+                                   .value())
+                .vBuild();
         lifecycle.onStateChanged(change,
-                                 ImmutableSet.of(STAND_POST_ORIGIN),
+                                 ImmutableSet.of(origin),
                                  Origin.getDefaultInstance());
     }
 
