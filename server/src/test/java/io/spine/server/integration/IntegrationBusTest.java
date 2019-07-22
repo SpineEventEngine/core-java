@@ -92,7 +92,7 @@ class IntegrationBusTest {
 
         @Test
         @DisplayName("to entities with external subscribers of another BC")
-        void toEntitiesOfBc() {
+        void toEntitiesOfBc() throws Exception {
             BoundedContext sourceContext = newContext();
             contextWithExtEntitySubscribers();
 
@@ -108,11 +108,13 @@ class IntegrationBusTest {
             assertEquals(expectedMessage, ProjectDetails.getExternalEvent());
             assertEquals(expectedMessage, ProjectWizard.getExternalEvent());
             assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
+
+            sourceContext.close();
         }
 
         @Test
         @DisplayName("to external subscribers of another BC")
-        void toBcSubscribers() {
+        void toBcSubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             contextWithExternalSubscribers();
 
@@ -123,11 +125,13 @@ class IntegrationBusTest {
                          .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
                          ProjectEventsSubscriber.getExternalEvent());
+
+            sourceContext.close();
         }
 
         @Test
         @DisplayName("to entities with external subscribers of multiple BCs")
-        void toEntitiesOfMultipleBcs() {
+        void toEntitiesOfMultipleBcs() throws Exception {
             BoundedContext sourceContext = newContext();
 
             BoundedContext destination1 = newContext();
@@ -142,12 +146,16 @@ class IntegrationBusTest {
             sourceContext.eventBus()
                          .post(event);
             assertEquals(2, MemoizingProjection.events().size());
+
+            sourceContext.close();
+            destination1.close();
+            destination2.close();
         }
 
         @SuppressWarnings("unused") // Variables declared for readability.
         @Test
         @DisplayName("to two BCs with different needs")
-        void toTwoBcSubscribers() {
+        void toTwoBcSubscribers() throws Exception {
             InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = newContext();
@@ -168,6 +176,10 @@ class IntegrationBusTest {
 
             assertEquals(AnyPacker.unpack(eventB.getMessage()),
                          ProjectStartedExtSubscriber.getExternalEvent());
+
+            sourceContext.close();
+            destA.close();
+            destB.close();
         }
     }
 
@@ -177,7 +189,7 @@ class IntegrationBusTest {
 
         @Test
         @DisplayName("to domestic entity subscribers of another BC")
-        void toDomesticEntitySubscribers() {
+        void toDomesticEntitySubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExtEntitySubscribers();
 
@@ -194,11 +206,14 @@ class IntegrationBusTest {
             destContext.eventBus()
                        .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
+
+            sourceContext.close();
+            destContext.close();
         }
 
         @Test
         @DisplayName("to domestic standalone subscribers of another BC")
-        void toDomesticStandaloneSubscribers() {
+        void toDomesticStandaloneSubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExternalSubscribers();
 
@@ -216,12 +231,15 @@ class IntegrationBusTest {
                        .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
                          ProjectEventsSubscriber.getDomesticEvent());
+
+            sourceContext.close();
+            destContext.close();
         }
     }
 
     @Test
     @DisplayName("update local subscriptions upon repeated RequestForExternalMessages")
-    void updateLocalSubscriptions() {
+    void updateLocalSubscriptions() throws Exception {
         BoundedContext sourceContext = newContext();
         BoundedContext destinationCtx = newContext();
 
@@ -272,6 +290,9 @@ class IntegrationBusTest {
         assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertEquals(AnyPacker.unpack(eventB.getMessage()),
                      ProjectStartedExtSubscriber.getExternalEvent());
+
+        sourceContext.close();
+        destinationCtx.close();
     }
 
     @Nested
@@ -280,7 +301,7 @@ class IntegrationBusTest {
 
         @Test
         @DisplayName("events")
-        void eventsIfNeedExternal() {
+        void eventsIfNeedExternal() throws Exception {
             BoundedContext context = contextWithExtEntitySubscribers();
             ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
             EventBus eventBus = context.eventBus();
@@ -298,12 +319,14 @@ class IntegrationBusTest {
             assertNull(ProjectDetails.getExternalEvent());
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
+
+            context.close();
         }
     }
 
     @Test
     @DisplayName("emit unsupported external message exception if message type is unknown")
-    void throwOnUnknownMessage() {
+    void throwOnUnknownMessage() throws Exception {
         BoundedContext context = newContext();
 
         Event event = projectCreated();
@@ -320,5 +343,7 @@ class IntegrationBusTest {
                                                    .getFullName(),
                      error.getType());
         assertEquals(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber(), error.getCode());
+
+        context.close();
     }
 }
