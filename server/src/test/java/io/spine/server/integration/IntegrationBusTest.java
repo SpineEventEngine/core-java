@@ -40,6 +40,7 @@ import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +70,7 @@ class IntegrationBusTest {
 
     @BeforeEach
     void setUp() {
+        ModelTests.dropAllModels();
         ProjectDetails.clear();
         ProjectWizard.clear();
         ProjectCountAggregate.clear();
@@ -81,6 +83,7 @@ class IntegrationBusTest {
     void tearDown() {
         ServerEnvironment.instance()
                          .reset();
+        ModelTests.dropAllModels();
     }
 
     @Nested
