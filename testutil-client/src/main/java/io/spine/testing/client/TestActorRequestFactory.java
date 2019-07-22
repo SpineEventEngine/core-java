@@ -68,16 +68,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         );
     }
 
-    /**
-     * Deprecated.
-     *
-     * @deprecated use {@link #TestActorRequestFactory(String, ZoneId)}
-     */
-    @Deprecated
-    public static TestActorRequestFactory newInstance(String actor, ZoneId zoneId) {
-        return new TestActorRequestFactory(actor, zoneId);
-    }
-
     public TestActorRequestFactory(String actor, ZoneId zoneId) {
         this(GivenUserId.of(actor), zoneId);
     }

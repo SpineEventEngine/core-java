@@ -53,7 +53,6 @@ import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("ServerEnvironment should")
@@ -65,23 +64,6 @@ class ServerEnvironmentTest {
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(ServerEnvironment.class);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    @DisplayName("tell when not running under AppEngine")
-    void tellIfNotInAppEngine() {
-        // Tests are not run by AppEngine by default.
-        assertFalse(serverEnvironment.isAppEngine());
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    @DisplayName("obtain AppEngine version as optional string")
-    void getAppEngineVersion() {
-        // By default we're not running under AppEngine.
-        assertFalse(serverEnvironment.appEngineVersion()
-                                     .isPresent());
     }
 
     @Test
