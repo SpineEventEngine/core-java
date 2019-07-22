@@ -31,11 +31,14 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.given.BillingAggregate;
 import io.spine.server.integration.given.MemoizingProjectDetails1Repository;
 import io.spine.server.integration.given.MemoizingProjectDetails2Repository;
 import io.spine.server.integration.given.MemoizingProjection;
+import io.spine.server.integration.given.PhotosProcMan;
 import io.spine.server.integration.given.ProjectCountAggregate;
 import io.spine.server.integration.given.ProjectDetails;
 import io.spine.server.integration.given.ProjectEventsSubscriber;
@@ -301,9 +304,11 @@ class IntegrationBusTest {
     @DisplayName("send messages between two contexts regardless of registration order")
     void mutual() {
         BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
-                .singleTenant("Photos-" + IntegrationBusTest.class.getSimpleName());
+                .singleTenant("Photos-" + IntegrationBusTest.class.getSimpleName())
+                .with(DefaultRepository.of(PhotosProcMan.class));
         BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
-                .singleTenant("Billing-" + IntegrationBusTest.class.getSimpleName());
+                .singleTenant("Billing-" + IntegrationBusTest.class.getSimpleName())
+                .with(DefaultRepository.of(BillingAggregate.class));
         photos.receivesCommand(UploadPhotos.generate());
         assertReceived(photos, PhotosUploaded.class);
         assertReceived(billing, PhotosUploaded.class);
