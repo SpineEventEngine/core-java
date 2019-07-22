@@ -290,8 +290,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds the entities passing the given filters and applies the given {@link FieldMask}
      * to the results.
      *
-     * <p>A number of elements to retrieve can be limited to a certain number. Order in
-     * which to look for and return results in is specified by the {@link OrderBy}.
+     * <p>A number of elements to retrieve can be limited to a certain number. The order of
+     * the resulting entities is specified by the {@link OrderBy}.
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
