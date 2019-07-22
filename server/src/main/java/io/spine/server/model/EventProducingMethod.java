@@ -50,6 +50,13 @@ public interface EventProducingMethod<T extends EventProducer,
                                       E extends MessageEnvelope<?, ?, ?>>
         extends HandlerMethod<T, C, E, EventClass> {
 
+    /**
+     * Produces an outcome in case the event producing method call finished successfully.
+     *
+     * @implNote This method does not perform the validation of the resulting
+     *          {@code Success} message, as all of its parts (mostly {@link Event} instances)
+     *          are validated beforehand.
+     */
     @Override
     default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
         MethodResult result = MethodResult.from(rawResult);
@@ -65,6 +72,6 @@ public interface EventProducingMethod<T extends EventProducer,
         return Success
                 .newBuilder()
                 .setProducedEvents(producedEvents)
-                .vBuild();
+                .build();
     }
 }

@@ -54,12 +54,19 @@ public interface CommandProducingMethod<T,
      * Creates success result from the empty result of the method execution.
      *
      * @param handledSignal
-     *          the signal passed to the method
+     *         the signal passed to the method
      * @throws IllegalOutcomeException
-     *           if the method is not allowed to return empty result
+     *         if the method is not allowed to return empty result
      */
     Success fromEmpty(E handledSignal);
 
+    /**
+     * Produces an outcome in case the command producing method call finished successfully.
+     *
+     * @implNote This method does not perform the validation of the resulting
+     *          {@code Success} message, as all of its parts (mostly {@link Command} instances)
+     *          are validated beforehand.
+     */
     @Override
     default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
         MethodResult result = MethodResult.from(rawResult);
@@ -81,6 +88,6 @@ public interface CommandProducingMethod<T,
         return Success
                 .newBuilder()
                 .setProducedCommands(signals)
-                .vBuild();
+                .build();
     }
 }
