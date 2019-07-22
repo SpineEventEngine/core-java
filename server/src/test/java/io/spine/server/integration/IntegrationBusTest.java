@@ -71,6 +71,7 @@ class IntegrationBusTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
+        ServerEnvironment.instance().reset();
         ProjectDetails.clear();
         ProjectWizard.clear();
         ProjectCountAggregate.clear();
@@ -81,8 +82,7 @@ class IntegrationBusTest {
 
     @AfterEach
     void tearDown() {
-        ServerEnvironment.instance()
-                         .reset();
+        ServerEnvironment.instance().reset();
         ModelTests.dropAllModels();
     }
 
