@@ -42,7 +42,6 @@ public interface BatchDispatchOutcomeMixin
                 return getSuccessful();
             default:
                 return getField(field);
-
         }
     }
 }
