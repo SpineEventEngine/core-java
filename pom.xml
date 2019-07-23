@@ -51,12 +51,6 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
-    <artifactId>grpc-netty</artifactId>
-    <version>1.22.0</version>
-    <scope>compile</scope>
-  </dependency>
-  <dependency>
-    <groupId>io.grpc</groupId>
     <artifactId>grpc-okhttp</artifactId>
     <version>1.22.0</version>
     <scope>compile</scope>
@@ -125,6 +119,12 @@ all modules and does not describe the project structure per-subproject.
     <groupId>com.google.guava</groupId>
     <artifactId>guava-testlib</artifactId>
     <version>28.0-jre</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.grpc</groupId>
+    <artifactId>grpc-netty</artifactId>
+    <version>1.22.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
