@@ -68,6 +68,13 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Integration tests on message delivery that use different settings of sharding configuration and
+ * post {@code Command}s and {@code Events} via multiple threads.
+ *
+ * @implNote Some of the test methods in this test class use underscores to improve the
+ *         readability and allow to distinguish one test from another by their names faster.
+ */
 @SlowTest
 @DisplayName("Delivery of messages to entities should deliver those via")
 class DeliveryTest {
@@ -177,7 +184,8 @@ class DeliveryTest {
     @DisplayName("multiple shards and " +
             "keep them as `TO_DELIVER` right after they are written to `InboxStorage`, " +
             "and mark every as `DELIVERED` after they are actually delivered.")
-    @SuppressWarnings("MethodWithMultipleLoops")    // Traversing over the storage.
+    @SuppressWarnings("MethodWithMultipleLoops")
+        // Traversing over the storage.
     void markDelivered() {
 
         FixedShardStrategy strategy = new FixedShardStrategy(3);
