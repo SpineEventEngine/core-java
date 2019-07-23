@@ -227,6 +227,14 @@ public abstract class AbstractHandlerMethod<T,
         return ImmutableSet.of(externalAttribute);
     }
 
+    /**
+     * Feeds the given {@code envelope} to the given {@code target} and returns the outcome.
+     *
+     * @implNote the outcome of this method is not validated, as its fields in fact consist
+     *         of the parts, such as wrapped {@code Command}s and {@code Event}s that are validated
+     *         upon their creation. Such an approach allows to improve the overall performance of
+     *         the signal propagation.
+     */
     @Override
     public DispatchOutcome invoke(T target, E envelope) {
         checkNotNull(target);
@@ -259,7 +267,7 @@ public abstract class AbstractHandlerMethod<T,
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw illegalStateWithCauseOf(e);
         }
-        return outcome.vBuild();
+        return outcome.build();
     }
 
     private RuntimeException cannotThrowRejections() {
