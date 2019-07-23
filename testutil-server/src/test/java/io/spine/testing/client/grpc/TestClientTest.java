@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests for {@link TestClient}.
  *
- * This test suite is placed under {@code testutil-server} and not {@code testutil-client} due to
+ * <p>This test suite is placed under {@code testutil-server} and not {@code testutil-client} due to
  * a dependency onto server-only components, such as {@link Server}.
  */
 @MuteLogging
