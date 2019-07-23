@@ -21,10 +21,9 @@
 package io.spine.server.transport.memory;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.Identifier;
-import io.spine.server.integration.ChannelId;
+import io.spine.server.model.Nothing;
 import io.spine.server.transport.TransportFactory;
-import io.spine.testing.TestValues;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,7 @@ class InMemoryTransportFactoryTest {
 
         assertThrows(
                 IllegalStateException.class, () ->
-                transportFactory.createPublisher(newChannelId())
+                transportFactory.createPublisher(TypeUrl.of(Nothing.class))
         );
     }
 
@@ -56,11 +55,5 @@ class InMemoryTransportFactoryTest {
     @DisplayName("reject null arguments")
     void nulls() {
         new NullPointerTester().testAllPublicInstanceMethods(transportFactory);
-    }
-
-    static ChannelId newChannelId() {
-        return ChannelId.newBuilder()
-                        .setIdentifier(Identifier.pack(TestValues.newUuidValue()))
-                        .build();
     }
 }

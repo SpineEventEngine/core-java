@@ -19,7 +19,7 @@
  */
 package io.spine.server.transport;
 
-import io.spine.server.integration.ChannelId;
+import io.spine.type.TypeUrl;
 
 /**
  * A channel dedicated to exchanging the messages.
@@ -30,16 +30,14 @@ import io.spine.server.integration.ChannelId;
 public interface MessageChannel extends AutoCloseable {
 
     /**
-     * An identifier of this channel.
-     *
-     * @return the value of the channel identifier
-     */
-    ChannelId id();
-
-    /**
      * Allows to understand whether this channel is stale and can be closed.
      *
      * @return {@code true} if the channel is stale, {@code false} otherwise
      */
     boolean isStale();
+
+    /**
+     * Obtains the type of the messages transferred through this channel.
+     */
+    TypeUrl targetType();
 }

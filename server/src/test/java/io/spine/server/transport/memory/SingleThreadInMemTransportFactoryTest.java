@@ -20,13 +20,14 @@
 
 package io.spine.server.transport.memory;
 
+import io.spine.server.model.Nothing;
 import io.spine.server.transport.TransportFactory;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.transport.memory.InMemoryTransportFactoryTest.newChannelId;
 
 @DisplayName("`SingleThreadInMemTransportFactory` should")
 class SingleThreadInMemTransportFactoryTest {
@@ -41,7 +42,7 @@ class SingleThreadInMemTransportFactoryTest {
     @Test
     @DisplayName("create `SingleThreadInMemSubscriber`")
     void subscribers() {
-        assertThat(transportFactory.createSubscriber(newChannelId()))
+        assertThat(transportFactory.createSubscriber(TypeUrl.of(Nothing.class)))
                 .isInstanceOf(SingleThreadInMemSubscriber.class);
     }
 }

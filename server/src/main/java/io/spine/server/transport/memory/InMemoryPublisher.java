@@ -22,11 +22,11 @@ package io.spine.server.transport.memory;
 import com.google.protobuf.Any;
 import io.spine.core.Ack;
 import io.spine.server.bus.Buses;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.AbstractChannel;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
+import io.spine.type.TypeUrl;
 
 import java.util.function.Function;
 
@@ -40,25 +40,24 @@ public final class InMemoryPublisher extends AbstractChannel implements Publishe
     /**
      * A provider of subscribers per channel ID.
      */
-    private final Function<ChannelId, Iterable<Subscriber>> subscriberProvider;
+    private final Function<TypeUrl, Iterable<Subscriber>> subscriberProvider;
 
-    InMemoryPublisher(ChannelId channelId,
-                      Function<ChannelId, Iterable<Subscriber>> provider) {
-        super(channelId);
+    InMemoryPublisher(TypeUrl targetType, Function<TypeUrl, Iterable<Subscriber>> provider) {
+        super(targetType);
         this.subscriberProvider = provider;
     }
 
     @Override
     public Ack publish(Any messageId, ExternalMessage message) {
-        Iterable<Subscriber> localSubscribers = subscribersOf(id());
+        Iterable<Subscriber> localSubscribers = subscribersOf(targetType());
         for (Subscriber localSubscriber : localSubscribers) {
             localSubscriber.onMessage(message);
         }
         return Buses.acknowledge(messageId);
     }
 
-    private Iterable<Subscriber> subscribersOf(ChannelId channelId) {
-        return subscriberProvider.apply(channelId);
+    private Iterable<Subscriber> subscribersOf(TypeUrl targetType) {
+        return subscriberProvider.apply(targetType);
     }
 
     /**

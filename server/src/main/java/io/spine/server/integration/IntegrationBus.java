@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
@@ -38,11 +39,11 @@ import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.integration.IntegrationChannels.toId;
-import static io.spine.server.integration.IntegrationChannels.typesTransferedIn;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
@@ -109,13 +110,10 @@ public class IntegrationBus
                              ExternalMessageDispatcher>
         implements ContextAware {
 
-    /**
-     * An identification of the channel serving to exchange {@linkplain RequestForExternalMessages
-     * configuration messages} with other parties, such as instances of {@code IntegrationBus}
-     * from other {@code BoundedContext}s.
-     */
-    private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID =
-            toId(RequestForExternalMessages.class);
+    private static final TypeUrl CONFIG_EXCHANGE_CHANNEL =
+            TypeUrl.of(RequestForExternalMessages.class);
+    private static final TypeUrl EVENT =
+            TypeUrl.of(Event.class);
 
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
@@ -138,10 +136,10 @@ public class IntegrationBus
         this.boundedContextName = context.name();
         this.localBusAdapters = createAdapters(context);
         this.configurationChangeObserver = observeConfigurationChanges();
-        Publisher configurationPublisher = publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID);
+        Publisher configurationPublisher = publisherHub.get(CONFIG_EXCHANGE_CHANNEL);
         this.configurationBroadcast =
                 new ConfigurationBroadcast(boundedContextName, configurationPublisher);
-        subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
+        subscriberHub.get(CONFIG_EXCHANGE_CHANNEL)
                      .addObserver(configurationChangeObserver);
     }
 
@@ -224,8 +222,8 @@ public class IntegrationBus
         super.register(dispatcher);
         Iterable<ExternalMessageClass> receivedTypes = dispatcher.messageClasses();
         for (ExternalMessageClass cls : receivedTypes) {
-            ChannelId channelId = toId(cls);
-            Subscriber subscriber = subscriberHub.get(channelId);
+            TypeUrl targetType = TypeUrl.of(cls.value());
+            Subscriber subscriber = subscriberHub.get(targetType);
             ExternalMessageObserver observer = observerFor(cls);
             subscriber.addObserver(observer);
             notifyOfUpdatedNeeds();
@@ -243,8 +241,8 @@ public class IntegrationBus
         super.unregister(dispatcher);
         Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass cls : transformed) {
-            ChannelId channelId = toId(cls);
-            Subscriber subscriber = subscriberHub.get(channelId);
+            TypeUrl targetType = TypeUrl.of(cls.value());
+            Subscriber subscriber = subscriberHub.get(targetType);
             ExternalMessageObserver observer = observerFor(cls);
             subscriber.removeObserver(observer);
         }
@@ -265,7 +263,15 @@ public class IntegrationBus
      * request for external messages} for that purpose.
      */
     private void notifyOfUpdatedNeeds() {
-        ImmutableSet<ExternalMessageType> needs = typesTransferedIn(subscriberHub);
+        ImmutableSet<ExternalMessageType> needs = subscriberHub
+                .types()
+                .stream()
+                .map(type -> ExternalMessageType
+                        .newBuilder()
+                        .setMessageTypeUrl(type.value())
+                        .setWrapperTypeUrl(EVENT.value())
+                        .buildPartial())
+                .collect(toImmutableSet());
         configurationBroadcast.onNeedsUpdated(needs);
     }
 

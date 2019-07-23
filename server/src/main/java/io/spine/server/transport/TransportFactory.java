@@ -20,7 +20,7 @@
 package io.spine.server.transport;
 
 import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
+import io.spine.type.TypeUrl;
 
 /**
  * A factory for creating channel-based transport for {@code Message} inter-exchange between the
@@ -38,7 +38,7 @@ public interface TransportFactory extends AutoCloseable {
      * @param channelId the ID of the channel.
      * @return a new {@code Publisher} instance
      */
-    Publisher createPublisher(ChannelId channelId);
+    Publisher createPublisher(TypeUrl targetType);
 
     /**
      * Creates a {@link Subscriber} channel with the given ID.
@@ -46,5 +46,5 @@ public interface TransportFactory extends AutoCloseable {
      * @param messageClass the ID of the channel.
      * @return a new {@code Subscriber} instance
      */
-    Subscriber createSubscriber(ChannelId messageClass);
+    Subscriber createSubscriber(TypeUrl targetType);
 }

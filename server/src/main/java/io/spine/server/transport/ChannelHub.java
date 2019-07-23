@@ -21,7 +21,7 @@ package io.spine.server.transport;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
+import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +41,7 @@ import static java.util.Collections.synchronizedMap;
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
-    private final Map<ChannelId, C> channels = synchronizedMap(new HashMap<>());
+    private final Map<TypeUrl, C> channels = synchronizedMap(new HashMap<>());
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
@@ -53,16 +53,12 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * @param channelId the channel ID to use
      * @return the created channel.
      */
-    protected abstract C newChannel(ChannelId channelId);
+    protected abstract C newChannel(TypeUrl targetType);
 
-    /**
-     * Returns a set of channel identifiers that are already served by this hub.
-     *
-     * @return a set of channel IDs served by this instance of channel hub
-     */
-    public synchronized Set<ChannelId> ids() {
+    public synchronized ImmutableSet<TypeUrl> types() {
         return ImmutableSet.copyOf(channels.keySet());
     }
+
 
     /**
      * Obtains a channel from this hub according to the channel ID.
@@ -70,11 +66,11 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * <p>If there is no channel with this ID in this hub, creates it and adds to the hub
      * prior to returning it as a result of this method call.
      *
-     * @param channelId the channel ID to obtain a channel with
+     * @param type the channel ID to obtain a channel with
      * @return a channel with the key
      */
-    public synchronized C get(ChannelId channelId) {
-        C channel = channels.computeIfAbsent(channelId, this::newChannel);
+    public synchronized C get(TypeUrl targetType) {
+        C channel = channels.computeIfAbsent(targetType, this::newChannel);
         return channel;
     }
 
@@ -82,23 +78,23 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * Closes the stale channels and removes those from the hub.
      */
     public void closeStaleChannels() {
-        Set<ChannelId> staleChannels = detectStale();
-        for (ChannelId id : staleChannels) {
+        Set<TypeUrl> staleChannels = detectStale();
+        for (TypeUrl id : staleChannels) {
             channels.remove(id);
         }
     }
 
-    private Set<ChannelId> detectStale() {
-        Set<ChannelId> toRemove = newHashSet();
-        for (ChannelId id : channels.keySet()) {
-            C channel = channels.get(id);
+    private Set<TypeUrl> detectStale() {
+        Set<TypeUrl> toRemove = newHashSet();
+        for (TypeUrl type : channels.keySet()) {
+            C channel = channels.get(type);
             if (channel.isStale()) {
                 try {
                     channel.close();
                 } catch (Exception e) {
                     throw illegalStateWithCauseOf(e);
                 } finally {
-                    toRemove.add(id);
+                    toRemove.add(type);
                 }
             }
         }

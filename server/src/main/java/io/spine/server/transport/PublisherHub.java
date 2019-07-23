@@ -19,7 +19,7 @@
  */
 package io.spine.server.transport;
 
-import io.spine.server.integration.ChannelId;
+import io.spine.type.TypeUrl;
 
 /**
  * The hub of {@link Publisher}s.
@@ -34,7 +34,7 @@ public class PublisherHub extends ChannelHub<Publisher> {
     }
 
     @Override
-    protected Publisher newChannel(ChannelId channelId) {
-        return transportFactory().createPublisher(channelId);
+    protected Publisher newChannel(TypeUrl targetType) {
+        return transportFactory().createPublisher(targetType);
     }
 }

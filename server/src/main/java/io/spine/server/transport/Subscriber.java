@@ -22,8 +22,8 @@ package io.spine.server.transport;
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.type.TypeUrl;
 
 import java.util.Set;
 
@@ -43,8 +43,8 @@ public abstract class Subscriber extends AbstractChannel {
      */
     private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-    protected Subscriber(ChannelId channelId) {
-        super(channelId);
+    protected Subscriber(TypeUrl targetType) {
+        super(targetType);
     }
 
     /**

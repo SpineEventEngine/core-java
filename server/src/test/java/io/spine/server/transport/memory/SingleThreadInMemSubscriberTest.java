@@ -23,10 +23,11 @@ package io.spine.server.transport.memory;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.model.Nothing;
 import io.spine.server.transport.memory.given.SingleThreadInMemSubscriberTestEnv.ThrowingObserver;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +51,7 @@ class SingleThreadInMemSubscriberTest {
     @DisplayName("not halt after observer throws an error")
     void recoverFromObserverError() {
         SingleThreadInMemSubscriber subscriber =
-                new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());
+                new SingleThreadInMemSubscriber(TypeUrl.of(Nothing.class));
 
         StreamObserver<ExternalMessage> throwingObserver = spy(new ThrowingObserver());
         subscriber.addObserver(throwingObserver);

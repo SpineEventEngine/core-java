@@ -22,8 +22,8 @@ package io.spine.server.transport.memory;
 
 import io.spine.base.Identifier;
 import io.spine.logging.Logging;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -46,8 +46,8 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging 
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    SingleThreadInMemSubscriber(ChannelId channelId) {
-        super(channelId);
+    SingleThreadInMemSubscriber(TypeUrl targetType) {
+        super(targetType);
     }
 
     @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.

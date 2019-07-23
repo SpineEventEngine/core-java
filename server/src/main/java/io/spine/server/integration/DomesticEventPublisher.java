@@ -30,13 +30,13 @@ import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.type.TypeUrl;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.integration.IntegrationChannels.toId;
 
 /**
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
@@ -71,9 +71,10 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
     public void dispatch(EventEnvelope event) {
         Event outerObject = event.outerObject();
         ExternalMessage msg = ExternalMessages.of(outerObject, originContextName);
-        ExternalMessageClass messageClass = ExternalMessageClass.of(event.messageClass());
-        ChannelId channelId = toId(messageClass);
-        Publisher channel = publisherHub.get(channelId);
+        EventClass eventClass = event.messageClass();
+
+        TypeUrl eventType = TypeUrl.of(eventClass.value());
+        Publisher channel = publisherHub.get(eventType);
         channel.publish(AnyPacker.pack(event.id()), msg);
     }
 

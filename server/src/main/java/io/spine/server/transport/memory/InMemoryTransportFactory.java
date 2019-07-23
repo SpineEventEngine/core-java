@@ -21,10 +21,10 @@ package io.spine.server.transport.memory;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
+import io.spine.type.TypeUrl;
 
 import java.util.function.Function;
 
@@ -43,7 +43,7 @@ public class InMemoryTransportFactory implements TransportFactory {
     /**
      * An in-memory storage of subscribers per message class.
      */
-    private final Multimap<ChannelId, Subscriber> subscribers =
+    private final Multimap<TypeUrl, Subscriber> subscribers =
             synchronizedMultimap(HashMultimap.create());
 
     /** Turns {@code true} upon {@linkplain #close()} closing} the factory. */
@@ -62,17 +62,17 @@ public class InMemoryTransportFactory implements TransportFactory {
     }
 
     @Override
-    public final synchronized Publisher createPublisher(ChannelId channelId) {
-        checkNotNull(channelId);
-        InMemoryPublisher result = new InMemoryPublisher(channelId, providerOf(subscribers()));
+    public final synchronized Publisher createPublisher(TypeUrl targetType) {
+        checkNotNull(targetType);
+        InMemoryPublisher result = new InMemoryPublisher(targetType, providerOf(subscribers()));
         return result;
     }
 
     @Override
-    public final synchronized Subscriber createSubscriber(ChannelId channelId) {
-        checkNotNull(channelId);
-        Subscriber subscriber = newSubscriber(channelId);
-        subscribers().put(channelId, subscriber);
+    public final synchronized Subscriber createSubscriber(TypeUrl targetType) {
+        checkNotNull(targetType);
+        Subscriber subscriber = newSubscriber(targetType);
+        subscribers().put(targetType, subscriber);
         return subscriber;
     }
 
@@ -85,9 +85,9 @@ public class InMemoryTransportFactory implements TransportFactory {
      * @param channelId the channel ID to create a subscriber for
      * @return an instance of subscriber
      */
-    protected Subscriber newSubscriber(ChannelId channelId) {
-        checkNotNull(channelId);
-        return new InMemorySubscriber(channelId);
+    protected Subscriber newSubscriber(TypeUrl targetType) {
+        checkNotNull(targetType);
+        return new InMemorySubscriber(targetType);
     }
 
     /**
@@ -97,15 +97,15 @@ public class InMemoryTransportFactory implements TransportFactory {
      * @param subscribers currently registered subscribers and their channel identifiers
      * @return a provider function allowing to fetch subscribers by the channel ID.
      */
-    private static Function<ChannelId, Iterable<Subscriber>>
-    providerOf(Multimap<ChannelId, Subscriber> subscribers) {
+    private static Function<TypeUrl, Iterable<Subscriber>>
+    providerOf(Multimap<TypeUrl, Subscriber> subscribers) {
         return channelId -> {
             checkNotNull(channelId);
             return subscribers.get(channelId);
         };
     }
 
-    private synchronized Multimap<ChannelId, Subscriber> subscribers() {
+    private synchronized Multimap<TypeUrl, Subscriber> subscribers() {
         checkState(!closed, "`%s` is already closed.", getClass().getName());
         return subscribers;
     }
