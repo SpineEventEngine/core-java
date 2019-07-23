@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.protobuf.Descriptors;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
 import io.spine.validate.FieldAwareMessage;
 
 /**
@@ -35,9 +36,10 @@ interface CommandIdMixin extends SignalId, FieldAwareMessage, CommandIdOrBuilder
         return getUuid();
     }
 
+    @Internal
     @Override
     default Object readValue(Descriptors.FieldDescriptor field) {
-        if(0 == field.getIndex()) {
+        if (0 == field.getIndex()) {
             return getUuid();
         }
         return getField(field);

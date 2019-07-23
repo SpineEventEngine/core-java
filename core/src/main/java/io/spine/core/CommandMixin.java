@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
 import io.spine.validate.FieldAwareMessage;
 import io.spine.validate.Validate;
@@ -92,6 +93,7 @@ public interface CommandMixin extends Signal<CommandId, CommandMessage, CommandC
         return false;
     }
 
+    @Internal
     @Override
     default Object readValue(Descriptors.FieldDescriptor field) {
         switch (field.getIndex()) {

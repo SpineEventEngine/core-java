@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.protobuf.Descriptors;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
 import io.spine.validate.FieldAwareMessage;
 
 import static io.spine.validate.Validate.isNotDefault;
@@ -50,6 +51,7 @@ interface OriginMixin extends OriginOrBuilder, FieldAwareMessage {
     }
 
     @Override
+    @Internal
     default Object readValue(Descriptors.FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:

@@ -161,6 +161,7 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext>,
     }
 
     @Override
+    @Internal
     default Object readValue(Descriptors.FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:

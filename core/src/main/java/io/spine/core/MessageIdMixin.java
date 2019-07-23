@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
 import io.spine.type.TypeUrl;
 import io.spine.validate.FieldAwareMessage;
 
@@ -84,6 +85,7 @@ interface MessageIdMixin extends MessageIdOrBuilder, FieldAwareMessage {
     }
 
     @Override
+    @Internal
     default Object readValue(Descriptors.FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:

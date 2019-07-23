@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.validate.FieldAwareMessage;
 
@@ -123,6 +124,7 @@ public interface EventContextMixin extends EnrichableMessageContext,
      */
     @SuppressWarnings({"OverlyComplexMethod", "MagicNumber", "deprecation"})    // see the docs.
     @Override
+    @Internal
     default Object readValue(Descriptors.FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:
