@@ -25,8 +25,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.server.entity.rejection.StandardRejections;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
+import io.spine.test.mixin.command.MixinCreateProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
@@ -56,13 +55,10 @@ public final class CoreMixinsTestEnv {
 
     public static Command command() {
         TestActorRequestFactory factory = new TestActorRequestFactory(CoreMixinsTestEnv.class);
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(newUuid())
-                                       .build();
-        AggCreateProject cmdMessage = AggCreateProject.newBuilder()
-                                                      .setProjectId(projectId)
-                                                      .setName("A Project")
-                                                      .build();
+        MixinCreateProject cmdMessage = MixinCreateProject.newBuilder()
+                                                        .setProjectId(newUuid().hashCode())
+                                                        .setName("A Project")
+                                                        .build();
         return factory.createCommand(cmdMessage);
     }
 
