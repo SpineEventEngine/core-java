@@ -50,7 +50,8 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
     /**
      * Creates a new channel under the specified ID.
      *
-     * @param channelId the channel ID to use
+     * @param targetType
+     *         type of the messages transmitted in the resulting channel
      * @return the created channel.
      */
     protected abstract C newChannel(TypeUrl targetType);
@@ -66,7 +67,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * <p>If there is no channel with this ID in this hub, creates it and adds to the hub
      * prior to returning it as a result of this method call.
      *
-     * @param type the channel ID to obtain a channel with
+     * @param targetType the message
      * @return a channel with the key
      */
     public synchronized C get(TypeUrl targetType) {

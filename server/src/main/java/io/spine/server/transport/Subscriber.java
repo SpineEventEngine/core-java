@@ -31,9 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 /**
- * Subscriber for messages of a channel with the {@linkplain MessageChannel#id() specified ID}.
+ * Subscriber for messages of a specific type.
  *
- * <p>There can be many subscribers per channel ID.
+ * <p>There can be many subscribers per message type.
  */
 @SPI
 public abstract class Subscriber extends AbstractChannel {

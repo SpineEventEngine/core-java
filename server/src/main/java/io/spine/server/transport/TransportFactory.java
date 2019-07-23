@@ -33,17 +33,19 @@ import io.spine.type.TypeUrl;
 public interface TransportFactory extends AutoCloseable {
 
     /**
-     * Creates a {@link Publisher} channel with the given ID.
+     * Creates a {@link Publisher} channel for the given message type.
      *
-     * @param channelId the ID of the channel.
+     * @param targetType
+     *         the type of the messages published by the resulting {@link Publisher}
      * @return a new {@code Publisher} instance
      */
     Publisher createPublisher(TypeUrl targetType);
 
     /**
-     * Creates a {@link Subscriber} channel with the given ID.
+     * Creates a {@link Subscriber} channel for the given message type.
      *
-     * @param messageClass the ID of the channel.
+     * @param targetType
+     *         the type of messages received by the resulting {@link Subscriber}
      * @return a new {@code Subscriber} instance
      */
     Subscriber createSubscriber(TypeUrl targetType);

@@ -50,7 +50,8 @@ public class InMemoryTransportFactory implements TransportFactory {
     private boolean closed;
 
     /** Prevent direct instantiation from outside of the inheritance tree. */
-    protected InMemoryTransportFactory() {}
+    protected InMemoryTransportFactory() {
+    }
 
     /**
      * Creates a new instance of {@code InMemoryTransportFactory}.
@@ -82,8 +83,9 @@ public class InMemoryTransportFactory implements TransportFactory {
      * <p>The descendants may override this method to customize the implementation of subscribers
      * to use within this {@code TransportFactory} instance.
      *
-     * @param channelId the channel ID to create a subscriber for
-     * @return an instance of subscriber
+     * @param targetType
+     *         the type of received messages
+     * @return an instance of subscribe
      */
     protected Subscriber newSubscriber(TypeUrl targetType) {
         checkNotNull(targetType);
@@ -94,7 +96,8 @@ public class InMemoryTransportFactory implements TransportFactory {
      * Wraps currently registered in-memory subscribers into a function that returns a subset
      * of subscribers per channel ID.
      *
-     * @param subscribers currently registered subscribers and their channel identifiers
+     * @param subscribers
+     *         currently registered subscribers and their channel identifiers
      * @return a provider function allowing to fetch subscribers by the channel ID.
      */
     private static Function<TypeUrl, Iterable<Subscriber>>
