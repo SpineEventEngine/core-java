@@ -133,8 +133,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
 
-    protected BlackBoxBoundedContext(boolean multitenant, 
-                                     EventEnricher enricher, 
+    protected BlackBoxBoundedContext(boolean multitenant,
+                                     EventEnricher enricher,
                                      String name) {
         this.commands = new CommandCollector();
         this.postedCommands = new HashSet<>();
@@ -150,16 +150,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                 .build();
         this.observer = memoizingObserver();
         this.repositories = newHashMap();
-    }
-
-    /**
-     * Creates new single-tenant instance with the default configuration.
-     *
-     * @deprecated use {@link #singleTenant()} or {@link #multiTenant()} instead
-     */
-    @Deprecated
-    public static SingleTenantBlackBoxContext newInstance() {
-        return singleTenant();
     }
 
     /**

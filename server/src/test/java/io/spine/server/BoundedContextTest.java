@@ -297,23 +297,6 @@ class BoundedContextTest {
     }
 
     @Nested
-    @DisplayName("match multitenancy state of")
-    class MatchMultitenancyState {
-
-        @Test
-        @DisplayName("Stand")
-        void ofStand() {
-            Stand.Builder stand = Stand.newBuilder()
-                                       .setMultitenant(false);
-            assertThrows(IllegalStateException.class,
-                         () -> BoundedContextBuilder
-                                 .assumingTests(true)
-                                 .setStand(stand)
-                                 .build());
-        }
-    }
-
-    @Nested
     @DisplayName("assign own multitenancy state to")
     class AssignMultitenancyState {
 

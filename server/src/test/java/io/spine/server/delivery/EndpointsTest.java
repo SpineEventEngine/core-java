@@ -85,8 +85,7 @@ class EndpointsTest {
 
     private static CommandEnvelope cmdEnvelope() {
         TestActorRequestFactory commandFactory =
-                TestActorRequestFactory.newInstance(GivenUserId.generated(),
-                                                    ZoneIds.systemDefault());
+                new TestActorRequestFactory(GivenUserId.generated(), ZoneIds.systemDefault());
         return CommandEnvelope.of(commandFactory.generateCommand());
     }
 
