@@ -18,27 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.model.verify.given;
 
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import io.spine.server.command.Command;
+import io.spine.server.procman.ProcessManager;
+import io.spine.test.model.verify.command.RestorePhoto;
+import io.spine.test.model.verify.command.UploadPhoto;
+import io.spine.test.model.verify.given.EditState;
 
-public class EntityQueriesTestEnv {
+/**
+ * A procman that declares an {@code external} command substitution method and thus shouldn't pass
+ * the model verification.
+ */
+public class InvalidCommander extends ProcessManager<String, EditState, EditState.Builder> {
 
-    /** Prevent instantiation of this utility class. */
-    private EntityQueriesTestEnv() {
+    protected InvalidCommander(String id) {
+        super(id);
     }
 
-    public static Pagination pagination(int size) {
-        return Pagination.newBuilder()
-                                 .setPageSize(size)
-                                 .build();
-    }
-
-    public static OrderBy order(String column, OrderBy.Direction direction) {
-        return OrderBy.newBuilder()
-                              .setColumn(column)
-                              .setDirection(direction)
-                              .build();
+    @Command(external = true)
+    UploadPhoto handle(RestorePhoto command) {
+        return UploadPhoto.getDefaultInstance();
     }
 }

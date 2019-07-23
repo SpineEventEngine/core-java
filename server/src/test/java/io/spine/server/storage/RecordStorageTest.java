@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
+import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.core.Version;
@@ -371,7 +372,8 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
 
         ImmutableSet<ProjectId> targetIds = ImmutableSet.of(activeId, archivedId, deletedId);
-        Iterable<EntityRecord> read = () -> storage.readMultiple(targetIds);
+        Iterable<EntityRecord> read =
+                () -> storage.readMultiple(targetIds, FieldMask.getDefaultInstance());
 
         assertSingleValueAndNulls(2, read);
     }
@@ -423,9 +425,13 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         FieldMask fieldMask = FieldMask.getDefaultInstance();
 
+        ResponseFormat format = ResponseFormat
+                .newBuilder()
+                .setFieldMask(fieldMask)
+                .vBuild();
         // Create the record.
         storage.write(id, recordWithColumns);
-        Iterator<EntityRecord> recordsBefore = storage.readAll(query, fieldMask);
+        Iterator<EntityRecord> recordsBefore = storage.readAll(query, format);
         assertSingleRecord(record, recordsBefore);
 
         // Update the entity columns of the record.
@@ -434,7 +440,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage);
         storage.write(id, updatedRecordWithColumns);
 
-        Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
+        Iterator<EntityRecord> recordsAfter = storage.readAll(query, format);
         assertFalse(recordsAfter.hasNext());
     }
 

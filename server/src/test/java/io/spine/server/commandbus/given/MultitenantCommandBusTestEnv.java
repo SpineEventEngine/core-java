@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.protobuf.Message;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -40,7 +39,7 @@ public class MultitenantCommandBusTestEnv {
      * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()}
      * was called.
      */
-    public static class AddTaskDispatcher implements CommandDispatcher<Message> {
+    public static class AddTaskDispatcher implements CommandDispatcher {
 
         private boolean dispatcherInvoked = false;
 

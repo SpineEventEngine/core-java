@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import io.spine.client.ResponseFormat;
 import io.spine.core.TenantId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
@@ -102,26 +103,14 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        Iterator<@Nullable EntityRecord> result = recordStorage.readMultiple(ids);
-        return result;
-    }
-
-    @Override
     protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                                    FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Iterator<EntityRecord> readAllRecords() {
-        Iterator<EntityRecord> result = recordStorage.readAll();
-        return result;
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        Iterator<EntityRecord> result = recordStorage.readAll(fieldMask);
+    protected Iterator<EntityRecord> readAllRecords(ResponseFormat format) {
+        Iterator<EntityRecord> result = recordStorage.readAll(format);
         return result;
     }
 }

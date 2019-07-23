@@ -60,7 +60,7 @@ public class CommandHandlerTestEnv {
     private CommandHandlerTestEnv() {
     }
 
-    public static final class EventCatcher implements EventDispatcher<String> {
+    public static final class EventCatcher implements EventDispatcher {
 
         private final List<EventEnvelope> dispatched = newLinkedList();
 
@@ -79,7 +79,7 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+        public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
             throw unsupported();
         }
 

@@ -46,11 +46,6 @@ class CommandSubjectTest
     }
 
     @Override
-    CommandSubject assertWithSubjectThat(Iterable<Command> messages) {
-        return CommandSubject.assertThat(messages);
-    }
-
-    @Override
     Command createMessage() {
         return newCommand(
                 TuAddComment

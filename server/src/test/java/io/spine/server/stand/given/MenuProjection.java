@@ -18,12 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman.given;
+package io.spine.server.stand.given;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.testing.server.given.entity.TuPmState;
-import io.spine.testing.server.given.entity.TuTaskId;
+import io.spine.core.Subscribe;
+import io.spine.server.entity.storage.Column;
+import io.spine.server.projection.Projection;
+import io.spine.test.stand.Dish;
+import io.spine.test.stand.DishAdded;
+import io.spine.test.stand.DishRemoved;
+import io.spine.test.stand.Menu;
+import io.spine.test.stand.MenuId;
 
-public class CommandHandlingPmRepo
-        extends ProcessManagerRepository<TuTaskId, CommandHandlingPm, TuPmState> {
+import java.util.List;
+
+public final class MenuProjection extends Projection<MenuId, Menu, Menu.Builder> {
+
+    public static final String UUID = "uid";
+
+    @Subscribe
+    void on(DishAdded event) {
+        builder().addDish(event.getDish());
+    }
+
+    @Subscribe
+    void on(DishRemoved event) {
+        List<Dish> dishes = builder().getDishList();
+        for (int i = 0; i < dishes.size(); i++) {
+            Dish dish = dishes.get(i);
+            if (event.getDish().equals(dish)) {
+                builder().removeDish(i);
+                return;
+            }
+        }
+    }
+
+    @Column(name = UUID)
+    public String getUuid() {
+        return id().getUuid();
+    }
 }

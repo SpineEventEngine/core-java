@@ -36,7 +36,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * An adapter for {@link EventBus} to use it along with {@link IntegrationBus}.
  */
-final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>> {
+final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher> {
 
     private EventBusAdapter(Builder builder) {
         super(builder);
@@ -79,7 +79,7 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     }
 
     @Override
-    EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
+    EventDispatcher createDispatcher(Class<? extends Message> messageClass) {
         @SuppressWarnings("unchecked") // Logically checked.
         Class<? extends EventMessage> eventClass = (Class<? extends EventMessage>) messageClass;
         EventClass eventType = EventClass.from(eventClass);
@@ -89,7 +89,7 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
         return result;
     }
 
-    static class Builder extends AbstractBuilder<Builder, EventEnvelope, EventDispatcher<?>> {
+    static class Builder extends AbstractBuilder<Builder, EventEnvelope, EventDispatcher> {
 
         Builder(EventBus eventBus, BoundedContextName boundedContextName) {
             super(eventBus, boundedContextName);

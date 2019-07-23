@@ -48,13 +48,13 @@ final class DefaultSystemReadSide implements SystemReadSide {
     }
 
     @Override
-    public void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         eventBus.register(dispatcher);
     }
 
     @Override
-    public void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         eventBus.unregister(dispatcher);
     }

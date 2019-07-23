@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.FieldMask;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
@@ -88,24 +89,15 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return readMultipleRecords(ids, FieldMask.getDefaultInstance());
+    protected Iterator<EntityRecord> readAllRecords(ResponseFormat format) {
+        return records().readAll(format);
     }
 
     @Override
-    protected Iterator<EntityRecord> readAllRecords() {
-        return records().readAll();
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return records().readAll(fieldMask);
-    }
-
-    @Override
-    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+    protected Iterator<EntityRecord>
+    readAllRecords(EntityQuery<I> query, ResponseFormat format) {
         EntityQuery<I> completeQuery = toCompleteQuery(query);
-        return records().readAll(completeQuery, fieldMask);
+        return records().readAll(completeQuery, format);
     }
 
     /**

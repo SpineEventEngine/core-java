@@ -62,14 +62,13 @@ import static com.google.common.base.Suppliers.memoize;
  * <p>To use one, do the following:
  * <ol>
  *     <li>Create an instance, specifying the event bus which receives emitted events.
- *     <li>{@linkplain BoundedContext#registerEventDispatcher(EventDispatcher) Register}.
+ *     <li>{@linkplain io.spine.server.BoundedContextBuilder#addEventDispatcher(EventDispatcher) Register}.
  * </ol>
  *
  * @see React reactors
- * @see BoundedContext#registerEventDispatcher(EventDispatcher)
  */
 public abstract class AbstractEventReactor
-        implements EventReactor, EventDispatcher<String>, ContextAware {
+        implements EventReactor, EventDispatcher, ContextAware {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
     private final MessageId eventAnchor = MessageId
@@ -136,7 +135,7 @@ public abstract class AbstractEventReactor
      * <p>Never returns an empty {@code Optional}.
      */
     @Override
-    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         return Optional.of(new ExternalDispatcher());
     }
 
@@ -157,7 +156,7 @@ public abstract class AbstractEventReactor
         return thisClass.externalEvents();
     }
 
-    private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
+    private final class ExternalDispatcher implements ExternalMessageDispatcher, Logging {
 
         @Override
         public Set<ExternalMessageClass> messageClasses() {

@@ -85,7 +85,7 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
         extends EventDispatchingRepository<I, P, S>
-        implements CommandDispatcherDelegate<I> {
+        implements CommandDispatcherDelegate {
 
     /** The command routing schema used by this repository. */
     private final Supplier<CommandRouting<I>> commandRouting;
@@ -391,7 +391,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {
             return Optional.empty();
         }

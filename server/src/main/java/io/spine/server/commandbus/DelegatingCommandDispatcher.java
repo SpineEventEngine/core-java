@@ -33,14 +33,14 @@ import java.util.Set;
  * @see CommandDispatcherDelegate
  */
 @Internal
-public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
+public class DelegatingCommandDispatcher implements CommandDispatcher {
 
     /**
      * A target delegate.
      */
-    private final CommandDispatcherDelegate<I> delegate;
+    private final CommandDispatcherDelegate delegate;
 
-    private DelegatingCommandDispatcher(CommandDispatcherDelegate<I> delegate) {
+    private DelegatingCommandDispatcher(CommandDispatcherDelegate delegate) {
         this.delegate = delegate;
     }
 
@@ -50,8 +50,8 @@ public class DelegatingCommandDispatcher<I> implements CommandDispatcher<I> {
      *
      * @param delegate a delegate to pass the dispatching duties to
      */
-    public static <I> DelegatingCommandDispatcher<I> of(CommandDispatcherDelegate<I> delegate) {
-        return new DelegatingCommandDispatcher<>(delegate);
+    public static DelegatingCommandDispatcher of(CommandDispatcherDelegate delegate) {
+        return new DelegatingCommandDispatcher(delegate);
     }
 
     @Override

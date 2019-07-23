@@ -49,7 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         register} with an {@code ImportBus} of their parent Bounded Context.
  */
 @Internal
-public final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
+public final class EventImportDispatcher<I> implements EventDispatcher, Logging {
 
     private final AggregateRepository<I, ?> repository;
 
@@ -82,7 +82,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         return Optional.empty();
     }
 }

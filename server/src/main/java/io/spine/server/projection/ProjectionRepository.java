@@ -221,7 +221,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         if (!dispatchesExternalEvents()) {
             return Optional.empty();
         }

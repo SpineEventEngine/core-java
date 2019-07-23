@@ -21,9 +21,9 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -31,6 +31,7 @@ import io.spine.server.storage.given.RecordStorageTestEnv;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
 import io.spine.testing.core.given.GivenVersion;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -140,8 +141,12 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .addPaths("invalid-path")
                 .build();
+        ResponseFormat format = ResponseFormat
+                .newBuilder()
+                .setFieldMask(nonEmptyFieldMask)
+                .vBuild();
         RecordStorage storage = storage();
-        Iterator empty = storage.readAll(nonEmptyFieldMask);
+        Iterator empty = storage.readAll(format);
 
         assertNotNull(empty);
         assertFalse(empty.hasNext(), "Iterator is not empty!");
@@ -221,7 +226,6 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         storage.write(id, record);
 
         Message state = newState(id);
-        Descriptor descriptor = state.getDescriptorForType();
         FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
 
         RecordReadRequest<I> readRequest = new RecordReadRequest<>(id);
@@ -281,20 +285,18 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         }
         storage.write(initial);
 
-        Collection<EntityRecord> actual = newArrayList(
-                storage.readMultiple(initial.keySet())
-        );
+        Iterator<@Nullable EntityRecord> records =
+                storage.readMultiple(initial.keySet(), FieldMask.getDefaultInstance());
+        Collection<@Nullable EntityRecord> actual = newArrayList(records);
 
-        Collection<EntityRecord> expected =
+        Collection<@Nullable EntityRecord> expected =
                 initial.values()
                        .stream()
                        .map(recordWithColumns -> recordWithColumns != null
                                                  ? recordWithColumns.getRecord()
                                                  : null)
                        .collect(toList());
-
-        assertEquals(expected.size(), actual.size());
-        assertTrue(actual.containsAll(expected));
+        assertThat(actual).containsExactlyElementsIn(expected);
 
         close(storage);
     }
@@ -321,12 +323,13 @@ public abstract class AbstractRecordStorageTest<I, S extends RecordStorage<I>>
         }
 
         storage.write(transformValues(v1Records, RecordStorageTestEnv::withLifecycleColumns));
-        Iterator<EntityRecord> firstRevision = storage.readAll();
+        Iterator<EntityRecord> firstRevision = storage.readAll(ResponseFormat.getDefaultInstance());
         RecordStorageTestEnv.assertIteratorsEqual(v1Records.values()
                                                            .iterator(), firstRevision);
 
         storage.write(transformValues(v2Records, RecordStorageTestEnv::withLifecycleColumns));
-        Iterator<EntityRecord> secondRevision = storage.readAll();
+        Iterator<EntityRecord> secondRevision =
+                storage.readAll(ResponseFormat.getDefaultInstance());
         RecordStorageTestEnv.assertIteratorsEqual(v2Records.values()
                                                            .iterator(), secondRevision);
     }

@@ -29,11 +29,9 @@ import java.util.Set;
 
 /**
  * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
- *
- * @param <I> the type of entity IDs
  */
-public interface EventDispatcher<I>
-        extends MulticastDispatcher<EventClass, EventEnvelope, I>, ExternalDispatcherFactory<I> {
+public interface EventDispatcher
+        extends MulticastDispatcher<EventClass, EventEnvelope>, ExternalDispatcherFactory {
 
     /**
      * Obtains classes of domestic events processed by this dispatcher.

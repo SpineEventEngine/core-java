@@ -22,7 +22,7 @@ package io.spine.testing.server.entity;
 
 import com.google.common.truth.Subject;
 import io.spine.server.entity.Entity;
-import io.spine.testing.server.SubjectTest;
+import io.spine.testing.SubjectTest;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbProjectView;
 import io.spine.testing.server.entity.given.Given;

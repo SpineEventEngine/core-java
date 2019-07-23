@@ -139,7 +139,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Subscribe {
 
     /**
-     * When {@code true}, the annotated method of receives an event generated from outside of the
+     * When {@code true}, the annotated method receives an event generated from outside of the
      * Bounded Context to which the annotated method's class belongs.
      */
     boolean external() default false;

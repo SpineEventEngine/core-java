@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.emptyToNull;
+import static io.spine.server.storage.system.SystemAwareStorageFactory.wrap;
 
 /**
  * The server conditions and configuration under which the application operates.
@@ -48,21 +48,12 @@ public final class ServerEnvironment implements AutoCloseable {
 
     private static final ServerEnvironment INSTANCE = new ServerEnvironment();
 
-    /** The key of the Google AppEngine runtime version system property. */
-    private static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION =
-            "com.google.appengine.runtime.version";
-
-    /** If set, contains the version of AppEngine obtained from the system property. */
-    @SuppressWarnings("AccessOfSystemProperties") /*  Based on system property. */
-    private static final @Nullable String appEngineRuntimeVersion =
-            emptyToNull(System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION));
-
     /**
      * The deployment detector is instantiated with a system {@link DeploymentDetector} and
      * can be reassigned the value using {@link #configureDeployment(Supplier)}.
      *
-     * <p>Value from this supplier are used to {@linkplain #deploymentType() get the deployment
-     * type}.
+     * <p>Value from this supplier are used to {@linkplain #deploymentType()
+     * get the deployment type}.
      */
     private Supplier<DeploymentType> deploymentDetector = DeploymentDetector.newInstance();
 
@@ -129,32 +120,6 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     public DeploymentType deploymentType() {
         return deploymentDetector.get();
-    }
-
-    /**
-     * Returns {@code true} if the code is running on the Google App Engine,
-     * {@code false} otherwise.
-     *
-     * @deprecated this method will be removed in 1.0, please verify {@linkplain #deploymentType()
-     *         deployment type} to match any of
-     *         {@link DeploymentType#APPENGINE_EMULATOR APPENGINE_EMULATOR} or
-     *         {@link DeploymentType#APPENGINE_CLOUD APPENGINE_CLOUD} instead.
-     */
-    @Deprecated
-    public boolean isAppEngine() {
-        boolean isVersionPresent = appEngineRuntimeVersion != null;
-        return isVersionPresent;
-    }
-
-    /**
-     * Returns an optional with current Google App Engine version
-     * or {@code empty} if the program is not running on the App Engine.
-     *
-     * @deprecated this method will be removed in 1.0.
-     */
-    @Deprecated
-    public Optional<String> appEngineVersion() {
-        return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
     /**
@@ -243,7 +208,7 @@ public final class ServerEnvironment implements AutoCloseable {
                 "%s cannot be used for production storage.",
                 InMemoryStorageFactory.class.getName()
         );
-        this.productionStorageFactory = productionStorageFactory;
+        this.productionStorageFactory = wrap(productionStorageFactory);
     }
 
     /**
@@ -252,7 +217,8 @@ public final class ServerEnvironment implements AutoCloseable {
      * @see #configureStorage(StorageFactory)
      */
     public void configureStorageForTests(StorageFactory factory) {
-        this.storageFactoryForTests = checkNotNull(factory);
+        checkNotNull(factory);
+        this.storageFactoryForTests = wrap(factory);
     }
 
     /**
@@ -280,7 +246,7 @@ public final class ServerEnvironment implements AutoCloseable {
     public StorageFactory storageFactory() {
         if (environment().isTests()) {
             if (storageFactoryForTests == null) {
-                this.storageFactoryForTests = InMemoryStorageFactory.newInstance();
+                configureStorageForTests(InMemoryStorageFactory.newInstance());
             }
             return storageFactoryForTests;
         }

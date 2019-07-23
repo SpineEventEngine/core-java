@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import io.spine.core.BoundedContextName;
+import io.spine.server.model.given.ModelTestEnv.FaultyCommander;
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
 import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
 import io.spine.server.model.given.ModelTestEnv.MProcessManager;
@@ -84,6 +85,17 @@ class ModelTest {
         }
     }
 
+    @Test
+    @DisplayName("check for command receiving methods marked as external")
+    void checkExternalCommandHandlers() {
+        try {
+            asProcessManagerClass(FaultyCommander.class);
+            fail(ExternalCommandReceiverMethodError.class.getName() + " is expected");
+        } catch (ExternalCommandReceiverMethodError error) {
+            assertContainsClassName(error, RefCreateProject.class);
+        }
+    }
+
     /**
      * Tests that:
      * <ol>
@@ -103,7 +115,7 @@ class ModelTest {
         assertEquals(ctx1, ctx2);
     }
 
-    private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {
+    private static void assertContainsClassName(ModelError error, Class<?> cls) {
         String errorMessage = error.getMessage();
         assertTrue(errorMessage.contains(cls.getName()));
     }

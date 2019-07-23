@@ -228,7 +228,7 @@ class BoundedContextBuilderTest {
     class CommandDispatchers {
 
         private BoundedContextBuilder builder;
-        private CommandDispatcher<?> dispatcher;
+        private CommandDispatcher dispatcher;
         private AggregateRepository<?, ?> repository;
 
         @BeforeEach
@@ -288,7 +288,7 @@ class BoundedContextBuilderTest {
     class EventDispatchers {
 
         private BoundedContextBuilder builder;
-        private EventDispatcher<?> dispatcher;
+        private EventDispatcher dispatcher;
         private ProjectionRepository<?, ?, ?> repository;
 
         @BeforeEach

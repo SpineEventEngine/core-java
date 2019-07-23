@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see EventDispatcherDelegate
  */
 @Internal
-public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
+public final class DelegatingEventDispatcher implements EventDispatcher {
 
     /**
      * A target delegate.
@@ -54,9 +54,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      * @param delegate a delegate to pass the dispatching duties to
      * @return new instance
      */
-    public static <I> DelegatingEventDispatcher<I> of(EventDispatcherDelegate delegate) {
+    public static DelegatingEventDispatcher of(EventDispatcherDelegate delegate) {
         checkNotNull(delegate);
-        return new DelegatingEventDispatcher<>(delegate);
+        return new DelegatingEventDispatcher(delegate);
     }
 
     private DelegatingEventDispatcher(EventDispatcherDelegate delegate) {
@@ -84,9 +84,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      * @return the external rejection dispatcher proxying calls to the underlying instance
      */
     @Override
-    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+    public Optional<ExternalMessageDispatcher> createExternalDispatcher() {
         return dispatchesExternalEvents()
-               ? Optional.of(new ExternalDispatcher<>(delegate))
+               ? Optional.of(new ExternalDispatcher(delegate))
                : Optional.empty();
     }
 
@@ -106,11 +106,9 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     /**
      * An implementation of {@link ExternalMessageDispatcher} which delegates all its calls to
      * a given {@link EventDispatcherDelegate}.
-     *
-     * @param <I> the type of the dispatcher ID
      */
-    private static final class ExternalDispatcher<I>
-            implements ExternalMessageDispatcher<I> {
+    private static final class ExternalDispatcher
+            implements ExternalMessageDispatcher {
 
         private final EventDispatcherDelegate delegate;
 

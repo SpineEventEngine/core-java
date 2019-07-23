@@ -22,7 +22,6 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.IterableSubject;
-import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -37,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
@@ -58,13 +58,11 @@ import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
 import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_ORDER_BY;
-import static io.spine.client.given.QueryBuilderTestEnv.EMPTY_PAGINATION;
 import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
 import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
 import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
-import static io.spine.client.given.QueryBuilderTestEnv.pagination;
 import static io.spine.client.given.TestEntities.randomId;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Durations2.fromHours;
@@ -147,13 +145,14 @@ class QueryBuilderTest {
             Query query = factory.select(TEST_ENTITY_TYPE)
                                  .build();
             assertNotNull(query);
-            assertFalse(query.hasFieldMask());
+            ResponseFormat format = query.getFormat();
+            assertFalse(format.hasFieldMask());
 
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
-            assertEquals(EMPTY_ORDER_BY, query.getOrderBy());
-            assertEquals(EMPTY_PAGINATION, query.getPagination());
+            assertThat(format.getOrderBy()).isEqualTo(EMPTY_ORDER_BY);
+            assertThat(format.getLimit()).isEqualTo(0);
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
         }
@@ -165,12 +164,13 @@ class QueryBuilderTest {
                                  .orderBy(FIRST_FIELD, ASCENDING)
                                  .build();
             assertNotNull(query);
-            assertFalse(query.hasFieldMask());
+            ResponseFormat format = query.getFormat();
+            assertFalse(format.hasFieldMask());
 
             OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
-            assertEquals(expectedOrderBy, query.getOrderBy());
+            assertEquals(expectedOrderBy, format.getOrderBy());
 
-            assertEquals(EMPTY_PAGINATION, query.getPagination());
+            assertThat(format.getLimit()).isEqualTo(0);
 
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
@@ -187,13 +187,13 @@ class QueryBuilderTest {
                                  .limit(limit)
                                  .build();
             assertNotNull(query);
-            assertFalse(query.hasFieldMask());
+            ResponseFormat format = query.getFormat();
+            assertFalse(format.hasFieldMask());
 
             OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrderBy, query.getOrderBy());
+            assertEquals(expectedOrderBy, format.getOrderBy());
 
-            Pagination expectedPagination = pagination(limit);
-            assertEquals(expectedPagination, query.getPagination());
+            assertThat(format.getLimit()).isEqualTo(limit);
 
             Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
@@ -210,7 +210,7 @@ class QueryBuilderTest {
                                  .byId(id1, id2)
                                  .build();
             assertNotNull(query);
-            assertFalse(query.hasFieldMask());
+            assertFalse(query.getFormat().hasFieldMask());
 
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
@@ -223,9 +223,9 @@ class QueryBuilderTest {
                     .map(id -> toObject(id, int.class))
                     .collect(toList());
 
-            Truth.assertThat(idValues)
+            assertThat(idValues)
                  .hasSize(2);
-            assertThat(intIdValues, containsInAnyOrder(id1, id2));
+            assertThat(intIdValues).containsExactly(id1, id2);
         }
 
         @Test
@@ -236,12 +236,13 @@ class QueryBuilderTest {
                                  .withMask(fieldName)
                                  .build();
             assertNotNull(query);
-            assertTrue(query.hasFieldMask());
+            ResponseFormat format = query.getFormat();
+            assertTrue(format.hasFieldMask());
 
-            FieldMask mask = query.getFieldMask();
+            FieldMask mask = format.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
 
-            IterableSubject assertFieldNames = Truth.assertThat(fieldNames);
+            IterableSubject assertFieldNames = assertThat(fieldNames);
 
             assertFieldNames.hasSize(1);
             assertFieldNames.contains(fieldName);
@@ -262,11 +263,11 @@ class QueryBuilderTest {
 
             TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
-            Truth.assertThat(aggregatingFilters)
+            assertThat(aggregatingFilters)
                  .hasSize(1);
             CompositeFilter aggregatingFilter = aggregatingFilters.get(0);
             Collection<Filter> filters = aggregatingFilter.getFilterList();
-            Truth.assertThat(filters)
+            assertThat(filters)
                  .hasSize(1);
             Any actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
@@ -293,7 +294,7 @@ class QueryBuilderTest {
 
             TargetFilters entityFilters = target.getFilters();
             List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
-            Truth.assertThat(aggregatingFilters)
+            assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
                                                            .getFilterList();
@@ -329,7 +330,7 @@ class QueryBuilderTest {
             Target target = query.getTarget();
             List<CompositeFilter> filters = target.getFilters()
                                                   .getFilterList();
-            Truth.assertThat(filters)
+            assertThat(filters)
                  .hasSize(2);
 
             CompositeFilter firstFilter = filters.get(0);
@@ -347,9 +348,9 @@ class QueryBuilderTest {
                 allFilters = secondFilter.getFilterList();
             }
 
-            Truth.assertThat(allFilters)
+            assertThat(allFilters)
                  .hasSize(2);
-            Truth.assertThat(eitherFilters)
+            assertThat(eitherFilters)
                  .hasSize(2);
 
             Filter companySizeLowerBound = allFilters.get(0);
@@ -408,12 +409,10 @@ class QueryBuilderTest {
                                  .build();
             assertNotNull(query);
 
-            // Check FieldMask
-            FieldMask mask = query.getFieldMask();
+            ResponseFormat format = query.getFormat();
+            FieldMask mask = format.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
-
-            IterableSubject assertFieldNames = Truth.assertThat(fieldNames);
-
+            IterableSubject assertFieldNames = assertThat(fieldNames);
             assertFieldNames.hasSize(1);
             assertFieldNames.containsExactly(fieldName);
 
@@ -421,7 +420,6 @@ class QueryBuilderTest {
             assertFalse(target.getIncludeAll());
             TargetFilters entityFilters = target.getFilters();
 
-            // Check IDs
             IdFilter idFilter = entityFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
@@ -429,7 +427,7 @@ class QueryBuilderTest {
                     .map(id -> toObject(id, int.class))
                     .collect(toList());
 
-            Truth.assertThat(idValues)
+            assertThat(idValues)
                  .hasSize(2);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
@@ -437,11 +435,11 @@ class QueryBuilderTest {
             List<CompositeFilter> aggregatingFilters =
                     entityFilters.getFilterList();
 
-            Truth.assertThat(aggregatingFilters)
+            assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
                                                            .getFilterList();
-            Truth.assertThat(filters)
+            assertThat(filters)
                  .hasSize(2);
 
             Any actualValue1 = findByName(filters, columnName1).getValue();
@@ -455,10 +453,9 @@ class QueryBuilderTest {
             assertEquals(columnValue2, actualGenericValue2);
 
             OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrderBy, query.getOrderBy());
+            assertEquals(expectedOrderBy, format.getOrderBy());
 
-            Pagination expectedPagination = pagination(limit);
-            assertEquals(expectedPagination, query.getPagination());
+            assertThat(format.getLimit()).isEqualTo(limit);
         }
 
         private Filter findByName(Iterable<Filter> filters, String name) {
@@ -501,7 +498,7 @@ class QueryBuilderTest {
             TargetFilters filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
                                                .getIdList();
-            Truth.assertThat(entityIds)
+            assertThat(entityIds)
                  .hasSize(messageIds.length);
             Iterable<? extends Message> actualValues = entityIds
                     .stream()
@@ -521,10 +518,10 @@ class QueryBuilderTest {
                                  .withMask(arrayFields)
                                  .build();
             assertNotNull(query);
-            FieldMask mask = query.getFieldMask();
+            FieldMask mask = query.getFormat().getFieldMask();
 
             Collection<String> maskFields = mask.getPathsList();
-            Truth.assertThat(maskFields)
+            assertThat(maskFields)
                  .hasSize(arrayFields.length);
             assertThat(maskFields, contains(arrayFields));
         }
@@ -540,8 +537,7 @@ class QueryBuilderTest {
                                  .limit(expectedLimit)
                                  .build();
             assertNotNull(query);
-            assertEquals(expectedLimit, query.getPagination()
-                                             .getPageSize());
+            assertEquals(expectedLimit, query.getFormat().getLimit());
         }
 
         @Test
@@ -554,7 +550,7 @@ class QueryBuilderTest {
                                  .orderBy(FIRST_FIELD, DESCENDING)
                                  .build();
             assertNotNull(query);
-            assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getOrderBy());
+            assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getFormat().getOrderBy());
         }
     }
 

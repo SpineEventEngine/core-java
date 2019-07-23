@@ -118,31 +118,17 @@ public final class QueryBuilder extends AbstractTargetBuilder<Query, QueryBuilde
     @Override
     public Query build() {
         Optional<OrderBy> orderBy = orderBy();
-        Optional<Pagination> pagination = pagination();
-
-        checkState(orderBy.isPresent() || !pagination.isPresent(),
-                   "Pagination cannot be set for unordered Queries");
-
         Target target = buildTarget();
         FieldMask mask = composeMask();
 
-        if (pagination.isPresent()) {
-            return queryFactory.composeQuery(target, orderBy.get(), pagination.get(), mask);
+        if (limit > 0) {
+            checkState(orderBy.isPresent(), "Limit cannot be set for unordered Queries.");
+            return queryFactory.composeQuery(target, orderBy.get(), limit, mask);
         }
         if (orderBy.isPresent()) {
             return queryFactory.composeQuery(target, orderBy.get(), mask);
         }
         return queryFactory.composeQuery(target, mask);
-    }
-
-    private Optional<Pagination> pagination() {
-        if (limit == 0) {
-            return Optional.empty();
-        }
-        Pagination result = Pagination.newBuilder()
-                                      .setPageSize(limit)
-                                      .build();
-        return Optional.of(result);
     }
 
     private Optional<OrderBy> orderBy() {
