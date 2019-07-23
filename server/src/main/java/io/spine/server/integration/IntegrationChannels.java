@@ -19,15 +19,20 @@
  */
 package io.spine.server.integration;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.transport.ChannelHub;
 import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
 
+import java.util.Set;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -81,6 +86,16 @@ final class IntegrationChannels {
         return channelId;
     }
 
+    static ImmutableSet<ExternalMessageType> typesTransferedIn(ChannelHub<?> hub) {
+        checkNotNull(hub);
+        Set<ChannelId> channelIds = hub.ids();
+        ImmutableSet<ExternalMessageType> types = channelIds
+                .stream()
+                .map(IntegrationChannels::fromId)
+                .collect(toImmutableSet());
+        return types;
+    }
+
     /**
      * Unpacks the channel ID and interprets it as {@code ExternalMessageType}.
      *
@@ -90,7 +105,7 @@ final class IntegrationChannels {
      * @param channelId the channel identifier to be interpreted as {@code ExternalMessageType}
      * @return the type of external messages, that are being exchanged through this channel
      */
-    static ExternalMessageType fromId(ChannelId channelId) {
+    private static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
         StringValue rawValue = unpack(channelId.getIdentifier(), StringValue.class);

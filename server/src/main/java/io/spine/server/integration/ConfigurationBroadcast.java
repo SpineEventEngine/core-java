@@ -29,7 +29,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
-import static io.spine.server.integration.IntegrationChannels.fromId;
 
 /**
  * A client of the {@code RequestForExternalMessages} {@link Publisher}.
@@ -41,7 +40,7 @@ final class ConfigurationBroadcast {
     private final BoundedContextName contextName;
     private final Publisher needsPublisher;
 
-    private ImmutableSet<ChannelId> knownNeeds = ImmutableSet.of();
+    private ImmutableSet<ExternalMessageType> knownNeeds = ImmutableSet.of();
 
     ConfigurationBroadcast(BoundedContextName contextName, Publisher publisher) {
         this.contextName = checkNotNull(contextName);
@@ -57,9 +56,9 @@ final class ConfigurationBroadcast {
      * @param needs
      *         the new needs of current context
      */
-    synchronized void onNeedsUpdated(Set<ChannelId> needs) {
+    synchronized void onNeedsUpdated(Set<ExternalMessageType> needs) {
         checkNotNull(needs);
-        ImmutableSet<ChannelId> newNeeds = ImmutableSet.copyOf(needs);
+        ImmutableSet<ExternalMessageType> newNeeds = ImmutableSet.copyOf(needs);
         if (!knownNeeds.equals(newNeeds)) {
             knownNeeds = newNeeds;
             send();
@@ -70,12 +69,11 @@ final class ConfigurationBroadcast {
      * Notifies other Bounded contexts about current requested messages.
      */
     synchronized void send() {
-        RequestForExternalMessages.Builder request = RequestForExternalMessages.newBuilder();
-        for (ChannelId channelId : knownNeeds) {
-            ExternalMessageType type = fromId(channelId);
-            request.addRequestedMessageType(type);
-        }
-        ExternalMessage externalMessage = ExternalMessages.of(request.build(), contextName);
+        RequestForExternalMessages request = RequestForExternalMessages
+                .newBuilder()
+                .addAllRequestedMessageType(knownNeeds)
+                .buildPartial();
+        ExternalMessage externalMessage = ExternalMessages.of(request, contextName);
         needsPublisher.publish(pack(newUuid()), externalMessage);
     }
 }

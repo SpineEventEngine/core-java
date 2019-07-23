@@ -40,10 +40,9 @@ import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.integration.IntegrationChannels.toId;
+import static io.spine.server.integration.IntegrationChannels.typesTransferedIn;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
@@ -229,7 +228,7 @@ public class IntegrationBus
             Subscriber subscriber = subscriberHub.get(channelId);
             ExternalMessageObserver observer = observerFor(cls);
             subscriber.addObserver(observer);
-            notifyOfSubscriptions();
+            notifyOfUpdatedNeeds();
         }
     }
 
@@ -258,30 +257,23 @@ public class IntegrationBus
         return observer;
     }
 
-    private void notifyOfSubscriptions() {
-        notifyOfNeeds(subscriberHub.ids());
-    }
-
     /**
      * Notifies other parts of the application that this integration bus instance now requests
      * for a different set of message types.
      *
      * <p>Sends out an instance of {@linkplain RequestForExternalMessages
      * request for external messages} for that purpose.
-     *
-     * @param currentlyRequested
-     *         the set of message types that are now requested by this instance of
-     *         integration bus
      */
-    private void notifyOfNeeds(Set<ChannelId> currentlyRequested) {
-        configurationBroadcast.onNeedsUpdated(currentlyRequested);
+    private void notifyOfUpdatedNeeds() {
+        ImmutableSet<ExternalMessageType> needs = typesTransferedIn(subscriberHub);
+        configurationBroadcast.onNeedsUpdated(needs);
     }
 
     /**
-     * Notifies the other contexts about the current needs on this bus.
+     * Notifies other parts of the application about the types requested by this integration bus.
      *
-     * <p>Sends a {@link RequestForExternalMessages} message with the details about which messages
-     * are required by this bus.
+     * <p>Sends out an instance of {@linkplain RequestForExternalMessages
+     * request for external messages} for that purpose.
      */
     void notifyOfCurrentNeeds() {
         configurationBroadcast.send();
@@ -317,8 +309,7 @@ public class IntegrationBus
         super.close();
 
         configurationChangeObserver.close();
-        // Declare that this instance has no needs.
-        notifyOfNeeds(ImmutableSet.of());
+        notifyOfUpdatedNeeds();
 
         subscriberHub.close();
         publisherHub.close();
