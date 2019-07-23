@@ -28,7 +28,7 @@ import io.spine.validate.FieldAwareMessage;
  * A mixin interface for the {@link Ignore} message type.
  */
 @GeneratedMixin
-public interface IgnoreMixin extends IgnoreOrBuilder, FieldAwareMessage {
+interface IgnoreMixin extends IgnoreOrBuilder, FieldAwareMessage {
 
     @Override
     default Object readValue(FieldDescriptor field) {

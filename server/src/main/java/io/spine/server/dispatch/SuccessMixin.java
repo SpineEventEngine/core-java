@@ -28,7 +28,7 @@ import io.spine.validate.FieldAwareMessage;
  * A mixin interface for the {@link Success} message type.
  */
 @GeneratedMixin
-public interface SuccessMixin extends SuccessOrBuilder, FieldAwareMessage {
+interface SuccessMixin extends SuccessOrBuilder, FieldAwareMessage {
 
     @Override
     default Object readValue(FieldDescriptor field) {

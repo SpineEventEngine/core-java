@@ -28,7 +28,7 @@ import io.spine.validate.FieldAwareMessage;
  * A mixin interface for the {@link Interruption} message type.
  */
 @GeneratedMixin
-public interface InterruptionMixin extends InterruptionOrBuilder, FieldAwareMessage {
+interface InterruptionMixin extends InterruptionOrBuilder, FieldAwareMessage {
 
     @Override
     default Object readValue(FieldDescriptor field) {

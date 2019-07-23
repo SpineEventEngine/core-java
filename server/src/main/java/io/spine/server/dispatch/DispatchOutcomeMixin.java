@@ -28,7 +28,7 @@ import io.spine.validate.FieldAwareMessage;
  * A mixin interface for the {@link DispatchOutcome} message type.
  */
 @GeneratedMixin
-public interface DispatchOutcomeMixin extends DispatchOutcomeOrBuilder, FieldAwareMessage {
+interface DispatchOutcomeMixin extends DispatchOutcomeOrBuilder, FieldAwareMessage {
 
     @Override
     default Object readValue(FieldDescriptor field) {

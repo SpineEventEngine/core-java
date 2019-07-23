@@ -28,7 +28,7 @@ import io.spine.validate.FieldAwareMessage;
  * A mixin interface for the {@link ProducedCommands} message type.
  */
 @GeneratedMixin
-public interface ProducedCommandsMixin extends ProducedCommandsOrBuilder, FieldAwareMessage {
+interface ProducedCommandsMixin extends ProducedCommandsOrBuilder, FieldAwareMessage {
 
     @Override
     default Object readValue(FieldDescriptor field) {
