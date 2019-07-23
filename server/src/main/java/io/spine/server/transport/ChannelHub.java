@@ -60,14 +60,14 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
         return ImmutableSet.copyOf(channels.keySet());
     }
 
-
     /**
-     * Obtains a channel from this hub according to the channel ID.
+     * Obtains a channel from this hub according to the target message type.
      *
-     * <p>If there is no channel with this ID in this hub, creates it and adds to the hub
+     * <p>If there is no channel for this type in this hub, creates it and adds to the hub
      * prior to returning it as a result of this method call.
      *
-     * @param targetType the message
+     * @param targetType
+     *         type of messages transmitted through the channel
      * @return a channel with the key
      */
     public synchronized C get(TypeUrl targetType) {

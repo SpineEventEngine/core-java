@@ -23,11 +23,13 @@ import io.spine.type.TypeUrl;
 
 /**
  * A channel dedicated to exchanging the messages.
- *
- * <p>Equipped with a channel identifier, serving to distinguish this channel among other channels
- * in the application.
  */
 public interface MessageChannel extends AutoCloseable {
+
+    /**
+     * Obtains the type of the messages transferred through this channel.
+     */
+    TypeUrl targetType();
 
     /**
      * Allows to understand whether this channel is stale and can be closed.
@@ -35,9 +37,4 @@ public interface MessageChannel extends AutoCloseable {
      * @return {@code true} if the channel is stale, {@code false} otherwise
      */
     boolean isStale();
-
-    /**
-     * Obtains the type of the messages transferred through this channel.
-     */
-    TypeUrl targetType();
 }

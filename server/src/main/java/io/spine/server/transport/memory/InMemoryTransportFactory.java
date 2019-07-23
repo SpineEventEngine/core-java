@@ -94,11 +94,11 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     /**
      * Wraps currently registered in-memory subscribers into a function that returns a subset
-     * of subscribers per channel ID.
+     * of subscribers per message type.
      *
      * @param subscribers
-     *         currently registered subscribers and their channel identifiers
-     * @return a provider function allowing to fetch subscribers by the channel ID.
+     *         currently registered subscribers
+     * @return a provider function allowing to fetch subscribers by the message type
      */
     private static Function<TypeUrl, Iterable<Subscriber>>
     providerOf(Multimap<TypeUrl, Subscriber> subscribers) {

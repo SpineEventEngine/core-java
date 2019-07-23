@@ -38,7 +38,7 @@ import java.util.function.Function;
 public final class InMemoryPublisher extends AbstractChannel implements Publisher {
 
     /**
-     * A provider of subscribers per channel ID.
+     * A provider of subscribers per message type.
      */
     private final Function<TypeUrl, Iterable<Subscriber>> subscriberProvider;
 
