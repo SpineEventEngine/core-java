@@ -18,30 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.dispatch;
 
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.annotation.GeneratedMixin;
-import io.spine.annotation.Internal;
 import io.spine.validate.FieldAwareMessage;
 
 /**
- * A mixin interface for {@link EventId}.
+ * A mixin interface for the {@link Success} message type.
  */
 @GeneratedMixin
-interface EventIdMixin extends SignalId, FieldAwareMessage, EventIdOrBuilder {
+interface SuccessMixin extends SuccessOrBuilder, FieldAwareMessage {
 
     @Override
-    default String value() {
-        return getValue();
-    }
-
-    @Override
-    @Internal
-    default Object readValue(Descriptors.FieldDescriptor field) {
-        if (0 == field.getIndex()) {
-            return getValue();
+    default Object readValue(FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getProducedEvents();
+            case 1:
+                return getProducedCommands();
+            case 2:
+                return getRejection();
+            default:
+                return getField(field);
         }
-        return getField(field);
     }
 }

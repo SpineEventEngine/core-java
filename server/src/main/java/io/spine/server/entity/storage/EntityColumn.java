@@ -297,7 +297,7 @@ public class EntityColumn implements Serializable {
         try {
             Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
-                checkNotNull(result, "Not null getter `%s` returned null.", getter.getName());
+                checkNotNull(result, "Non-null getter `%s` returned null.", getter.getName());
             }
             Serializable value = toPersistedValue(result);
             return value;

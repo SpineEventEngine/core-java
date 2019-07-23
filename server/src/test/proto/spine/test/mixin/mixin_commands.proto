@@ -17,31 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.core;
+package spine.test.mixin.command;
 
-import com.google.protobuf.Descriptors;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.annotation.Internal;
-import io.spine.validate.FieldAwareMessage;
+import "spine/options.proto";
 
-/**
- * A mixin interface for {@link EventId}.
- */
-@GeneratedMixin
-interface EventIdMixin extends SignalId, FieldAwareMessage, EventIdOrBuilder {
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.mixin.command";
+option java_outer_classname = "MixinCommandsProto";
+option java_multiple_files = true;
 
-    @Override
-    default String value() {
-        return getValue();
-    }
+// The messages used in `CoreMixinsTest`.
 
-    @Override
-    @Internal
-    default Object readValue(Descriptors.FieldDescriptor field) {
-        if (0 == field.getIndex()) {
-            return getValue();
-        }
-        return getField(field);
-    }
+message MixinCreateProject {
+    int32 project_id = 1;
+    string name = 2;
 }

@@ -18,30 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
-
-import com.google.protobuf.Descriptors;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.annotation.Internal;
-import io.spine.validate.FieldAwareMessage;
-
 /**
- * A mixin interface for {@link EventId}.
+ * Test environment classes for {@code core} tests.
  */
-@GeneratedMixin
-interface EventIdMixin extends SignalId, FieldAwareMessage, EventIdOrBuilder {
 
-    @Override
-    default String value() {
-        return getValue();
-    }
+@ParametersAreNonnullByDefault
+@CheckReturnValue
+package io.spine.core.given;
 
-    @Override
-    @Internal
-    default Object readValue(Descriptors.FieldDescriptor field) {
-        if (0 == field.getIndex()) {
-            return getValue();
-        }
-        return getField(field);
-    }
-}
+import javax.annotation.CheckReturnValue;
+import javax.annotation.ParametersAreNonnullByDefault;
