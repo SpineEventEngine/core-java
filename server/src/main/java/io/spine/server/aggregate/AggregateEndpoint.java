@@ -180,7 +180,6 @@ abstract class AggregateEndpoint<I,
             event.getContextBuilder()
                  .setVersion(signalVersion);
         }
-
         return correctedCommandOutcome.build();
     }
 
