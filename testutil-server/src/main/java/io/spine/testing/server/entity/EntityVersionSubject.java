@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.truth.Truth.assertAbout;
 
 @VisibleForTesting
-public class EntityVersionSubject extends ProtoSubject<EntityVersionSubject, Version> {
+public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubject, Version> {
 
     private EntityVersionSubject(FailureMetadata failureMetadata,
                                  @Nullable Version message) {

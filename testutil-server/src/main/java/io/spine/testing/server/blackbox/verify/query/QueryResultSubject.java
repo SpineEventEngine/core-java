@@ -37,16 +37,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.assertResponseStatus;
 import static io.spine.testing.server.entity.IterableEntityVersionSubject.assertEntityVersions;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * assertQueryResult(query)
@@ -130,9 +127,8 @@ public final class QueryResultSubject
         assertContainsSingleItem();
         Message entityState = actual().iterator()
                                       .next();
-        ProtoSubject<?, Message> subject =
-                check("iterator().next()").about(protos())
-                                          .that(entityState);
+        ProtoSubject<?, Message> subject = check("iterator().next()").about(protos())
+                                                                     .that(entityState);
         return subject;
     }
 
@@ -142,25 +138,6 @@ public final class QueryResultSubject
 
     public IterableEntityVersionSubject containsEntityVersionsSuchThat() {
         return versionsSubject;
-    }
-
-    // todo try to parameterize the class instead of this ugliness
-    @SuppressWarnings("unchecked")
-    // It's up to user to provide the predicate matching the stored entity states.
-    public <M extends Message> void containsAllMatching(Predicate<M> predicate) {
-        Iterable<Message> entityStates = actual();
-        entityStates.forEach(state -> {
-            try {
-                M cast = (M) state;
-                assertTrue(predicate.test(cast));
-            } catch (ClassCastException e) {
-                throw newIllegalArgumentException(
-                        e, "Query response contains an entity state of type %s which doesn't " +
-                                "match the specified predicate type", state.getClass()
-                                                                           .getName()
-                );
-            }
-        });
     }
 
     private void assertContainsSingleItem() {

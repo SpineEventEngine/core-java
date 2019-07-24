@@ -32,7 +32,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 
 @VisibleForTesting
-public class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
+public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
 
     private ResponseStatusSubject(FailureMetadata failureMetadata,
                                   @Nullable Status message) {

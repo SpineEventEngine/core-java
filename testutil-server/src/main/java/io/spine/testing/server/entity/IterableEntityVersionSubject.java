@@ -31,7 +31,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVersion;
 
 @VisibleForTesting
-public class IterableEntityVersionSubject
+public final class IterableEntityVersionSubject
         extends IterableOfProtosSubject<IterableEntityVersionSubject, Version, Iterable<Version>> {
 
     private IterableEntityVersionSubject(FailureMetadata failureMetadata,
