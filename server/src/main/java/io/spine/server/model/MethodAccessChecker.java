@@ -23,7 +23,6 @@ package io.spine.server.model;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
-import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -34,8 +33,8 @@ import static com.google.common.flogger.LazyArgs.lazy;
 /**
  * The checker of a {@link Method} access level.
  *
- * <p>If the access level check fails, the {@linkplain Logger#warn(String) warning} will be output
- * to the log. If the check passes, no action is performed.
+ * <p>If the access level check fails, the warning message will be put to the log.
+ * If the check passes, no action is performed.
  *
  * @implNote This class is effectively {@code final} since it has a single {@code private}
  *           constructor. Though, the modifier "{@code final}" is absent to make it possible to
@@ -64,8 +63,8 @@ public class MethodAccessChecker implements Logging {
     /**
      * Checks that method access is {@code public}.
      *
-     * <p>If the access is not {@code public}, {@linkplain Logger#warn(String) prints} the warning
-     * to the log with the specified {@code warningMessageFormat}.
+     * <p>If the access is not {@code public}, the warning message will be put into the log
+     * with the specified {@code warningMessageFormat}.
      *
      * <p>{@code warningMessageFormat} should contain a placeholder for the method name.
      *
@@ -82,8 +81,8 @@ public class MethodAccessChecker implements Logging {
     /**
      * Checks that method access is {@code package-private}.
      *
-     * <p>If the access is not {@code package-private}, {@linkplain Logger#warn(String) prints}
-     * the warning to the log with the specified {@code warningMessageFormat}.
+     * <p>If the access is not {@code package-private}, prints the warning to the log with
+     * the specified {@code warningMessageFormat}.
      *
      * <p>{@code warningMessageFormat} should contain a placeholder for the method name.
      *
@@ -100,8 +99,8 @@ public class MethodAccessChecker implements Logging {
     /**
      * Checks that method access is {@code private}.
      *
-     * <p>If the access is not {@code private}, {@linkplain Logger#warn(String) prints} the warning
-     * to the log with the specified {@code warningMessageFormat}.
+     * <p>If the access is not {@code private}, prints the warning to the log with
+     * the specified {@code warningMessageFormat}.
      *
      * <p>{@code warningMessageFormat} should contain a placeholder for the method name.
      *
