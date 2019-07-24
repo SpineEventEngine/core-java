@@ -42,6 +42,7 @@ import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -116,8 +117,16 @@ public final class QueryResultSubject
     public <M extends Message> void containsAllMatching(Predicate<M> predicate) {
         Iterable<Message> entityStates = actual();
         entityStates.forEach(state -> {
-            M cast = (M) state;
-            assertTrue(predicate.test(cast));
+            try {
+                M cast = (M) state;
+                assertTrue(predicate.test(cast));
+            } catch (ClassCastException e) {
+                throw newIllegalArgumentException(
+                        e, "Query response contains an entity state of type %s which doesn't " +
+                                "match the specified predicate type", state.getClass()
+                                                                           .getName()
+                );
+            }
         });
     }
 
