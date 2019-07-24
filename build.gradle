@@ -136,24 +136,22 @@ subprojects {
         // For dependencies config. based on version of Java, see:
         //  https://github.com/epeee/junit-jupiter-extension-testing/blob/57b7ba75ab64ed8c229d2a5b14a954d6ae359189/gradle/errorprone.gradle
 
-        implementation deps.build.guava
+        implementation (
+            deps.build.guava,
+            deps.build.jsr305Annotations, // See: https://github.com/SpineEventEngine/base/issues/108
+            deps.build.checkerAnnotations,
+            deps.build.errorProneAnnotations
+        )
 
-        // See: https://github.com/SpineEventEngine/base/issues/108
-        implementation deps.build.jsr305Annotations
 
-        implementation deps.build.checkerAnnotations
-        implementation deps.build.errorProneAnnotations
-
-        implementation deps.build.slf4j
-
-        //Use jdk14 bindings for test purposes only.
-        testImplementation deps.test.slf4j
-        testImplementation deps.test.hamcrest
-        testImplementation deps.test.mockito
-        testImplementation deps.test.guavaTestlib
-        testImplementation deps.test.junit5Api
-        testImplementation deps.test.junit5Runner
-        testImplementation "io.spine.tools:spine-mute-logging:$spineBaseVersion"
+        testImplementation (
+            deps.test.hamcrest,
+            deps.test.mockito,
+            deps.test.guavaTestlib,
+            deps.test.junit5Api,
+            deps.test.junit5Runner,
+            "io.spine.tools:spine-mute-logging:$spineBaseVersion"
+        )
     }
 
     forceConfiguration(project)
