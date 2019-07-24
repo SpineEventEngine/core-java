@@ -80,6 +80,17 @@ public interface QueryResponseMixin {
     }
 
     /**
+     * Obtains immutable list of entity states returned in this query response.
+     */
+    default List<Version> versions() {
+        ImmutableList<Version> result = getMessageList()
+                .stream()
+                .map(EntityStateWithVersion::getVersion)
+                .collect(toImmutableList());
+        return result;
+    }
+
+    /**
      * Obtains the version of the entity at the given index.
      *
      * @throws IndexOutOfBoundsException
