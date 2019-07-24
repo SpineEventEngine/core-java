@@ -19,7 +19,7 @@
  */
 package io.spine.server.transport.memory;
 
-import io.spine.server.integration.ChannelId;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Subscriber;
 
 /**

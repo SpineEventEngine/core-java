@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package spine.test.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "SystemFeaturesProto";
+option java_multiple_files = true;
+
+message EmptyEntityState {
+    option (entity).kind = ENTITY;
+    option (entity).visibility = FULL;
+}

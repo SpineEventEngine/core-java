@@ -27,11 +27,13 @@ import io.spine.core.BoundedContextName;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static java.util.Collections.synchronizedSet;
 
 /**
  * An observer, which reacts to the configuration update messages sent by
@@ -39,8 +41,16 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 final class ConfigurationChangeObserver extends AbstractChannelObserver implements AutoCloseable {
 
+    private final IntegrationBus integrationBus;
     private final BoundedContextName boundedContextName;
     private final Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByClass;
+
+    /**
+     * Names of Bounded Contexts already known to this observer.
+     *
+     * <p>If a context is unknown, the observer publishes a {@code RequestForExternalMessages}.
+     */
+    private final Set<BoundedContextName> knownContexts = synchronizedSet(new HashSet<>());
 
     /**
      * Current set of message type URLs, requested by other parties via sending the
@@ -50,13 +60,26 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(BoundedContextName boundedContextName,
+    ConfigurationChangeObserver(IntegrationBus integrationBus,
+                                BoundedContextName boundedContextName,
                                 Function<Class<? extends Message>, BusAdapter<?, ?>> adapterByCls) {
         super(boundedContextName, RequestForExternalMessages.class);
+        this.integrationBus = integrationBus;
         this.boundedContextName = boundedContextName;
         this.adapterByClass = adapterByCls;
+        this.knownContexts.add(boundedContextName);
     }
 
+    /**
+     * Handles the {@code RequestForExternalMessages} by creating local publishers for the requested
+     * types.
+     *
+     * <p>If the request originates from a previously unknown Bounded Context,
+     * {@linkplain IntegrationBus#notifyOfCurrentNeeds() publishes} the needs of current context,
+     * since they may be unknown to the new context.
+     *
+     * @param value {@link RequestForExternalMessages} form another Bounded Context
+     */
     @Override
     public void handle(ExternalMessage value) {
         RequestForExternalMessages request = unpack(value.getOriginalMessage(),
@@ -64,6 +87,10 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
         BoundedContextName origin = value.getBoundedContextName();
         addNewSubscriptions(request.getRequestedMessageTypeList(), origin);
         clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
+        if (!knownContexts.contains(origin)) {
+            knownContexts.add(origin);
+            integrationBus.notifyOfCurrentNeeds();
+        }
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,

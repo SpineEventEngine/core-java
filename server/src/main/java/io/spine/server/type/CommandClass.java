@@ -27,6 +27,7 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -42,6 +43,10 @@ public final class CommandClass extends MessageClass<CommandMessage> {
 
     private CommandClass(Class<? extends CommandMessage> value) {
         super(value);
+    }
+
+    private CommandClass(Class<? extends CommandMessage> value, TypeUrl typeUrl) {
+        super(value, typeUrl);
     }
 
     /**
@@ -68,7 +73,8 @@ public final class CommandClass extends MessageClass<CommandMessage> {
      */
     public static CommandClass of(Message commandOrMessage) {
         CommandMessage commandMessage = Commands.ensureMessage(commandOrMessage);
-        return from(commandMessage.getClass());
+        TypeUrl typeUrl = TypeUrl.of(commandMessage.getDefaultInstanceForType());
+        return new CommandClass(commandMessage.getClass(), typeUrl);
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */

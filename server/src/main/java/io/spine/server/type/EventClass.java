@@ -45,6 +45,10 @@ public final class EventClass extends MessageClass<EventMessage> {
         super(value);
     }
 
+    private EventClass(Class<? extends EventMessage> value, TypeUrl typeUrl) {
+        super(value, typeUrl);
+    }
+
     /**
      * Creates a new instance of the event class.
      *
@@ -67,7 +71,7 @@ public final class EventClass extends MessageClass<EventMessage> {
         checkArgument(EventMessage.class.isAssignableFrom(messageClass),
                       "Event class constructed from non-EventMessage type URL: %s",
                       typeUrl.value());
-        return from((Class<? extends EventMessage>) messageClass);
+        return new EventClass((Class<? extends EventMessage>) messageClass, typeUrl);
     }
 
     /**
@@ -93,7 +97,8 @@ public final class EventClass extends MessageClass<EventMessage> {
      */
     public static EventClass of(Message eventOrMessage) {
         EventMessage eventMessage = ensureMessage(eventOrMessage);
-        return from(eventMessage.getClass());
+        TypeUrl typeUrl = TypeUrl.of(eventMessage.getDefaultInstanceForType());
+        return new EventClass(eventMessage.getClass(), typeUrl);
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */

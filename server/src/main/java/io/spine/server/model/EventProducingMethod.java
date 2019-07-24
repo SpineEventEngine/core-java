@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -32,10 +33,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * A {@link HandlerMethod} which produces events in response to a signal.
@@ -53,23 +50,28 @@ public interface EventProducingMethod<T extends EventProducer,
                                       E extends MessageEnvelope<?, ?, ?>>
         extends HandlerMethod<T, C, E, EventClass> {
 
+    /**
+     * Produces an outcome in case the event producing method call finished successfully.
+     *
+     * @implNote This method does not perform the validation of the resulting
+     *          {@code Success} message, as all of its parts (mostly {@link Event} instances)
+     *          are validated beforehand.
+     */
     @Override
     default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
         MethodResult result = MethodResult.from(rawResult);
         EventFactory eventFactory = EventFactory.on(handledSignal, target.producerId());
         Version version = target.version();
-        List<Event> events = result
-                .messages(EventMessage.class)
-                .stream()
-                .map(msg -> eventFactory.createEvent(msg, version))
-                .collect(toList());
-        ProducedEvents producedEvents = ProducedEvents
-                .newBuilder()
-                .addAllEvent(events)
-                .buildPartial();
+
+        ProducedEvents.Builder producedEvents = ProducedEvents.newBuilder();
+        ImmutableList<EventMessage> eventMessages = result.messages(EventMessage.class);
+        for (EventMessage msg : eventMessages) {
+            Event event = eventFactory.createEvent(msg, version);
+            producedEvents.addEvent(event);
+        }
         return Success
                 .newBuilder()
                 .setProducedEvents(producedEvents)
-                .vBuild();
+                .build();
     }
 }

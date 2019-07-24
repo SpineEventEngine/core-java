@@ -19,9 +19,7 @@
  */
 package io.spine.server.transport;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +28,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.synchronizedMap;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * The hub of channels grouped in some logical way.
@@ -41,45 +40,37 @@ import static java.util.Collections.synchronizedMap;
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
-    private final Map<ChannelId, C> channels =
-            synchronizedMap(new HashMap<>());
+    private final Map<ChannelId, C> channels = synchronizedMap(new HashMap<>());
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
     }
 
-    /**
-     * Creates a new channel under the specified ID.
-     *
-     * @param channelId the channel ID to use
-     * @return the created channel.
-     */
-    protected abstract C newChannel(ChannelId channelId);
-
-    /**
-     * Returns a set of channel identifiers that are already served by this hub.
-     *
-     * @return a set of channel IDs served by this instance of channel hub
-     */
-    public synchronized Set<ChannelId> ids() {
-        return ImmutableSet.copyOf(channels.keySet());
+    public Set<ChannelId> ids() {
+        return unmodifiableSet(channels.keySet());
     }
 
     /**
-     * Obtains a channel from this hub according to the channel ID.
+     * Creates a new channel under the specified ID.
+     *
+     * @param id
+     * @return the created channel.
+     */
+    protected abstract C newChannel(ChannelId id);
+
+    /**
+     * Obtains a channel from this hub by the given channel ID.
      *
      * <p>If there is no channel with this ID in this hub, creates it and adds to the hub
      * prior to returning it as a result of this method call.
      *
-     * @param channelId the channel ID to obtain a channel with
+     * @param channelId
+     *         the identifier of the resulting channel
      * @return a channel with the key
      */
     public synchronized C get(ChannelId channelId) {
-        if(!channels.containsKey(channelId)) {
-            C newChannel = newChannel(channelId);
-            channels.put(channelId, newChannel);
-        }
-        return channels.get(channelId);
+        C channel = channels.computeIfAbsent(channelId, targetType1 -> newChannel(channelId));
+        return channel;
     }
 
     /**
@@ -94,15 +85,15 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
 
     private Set<ChannelId> detectStale() {
         Set<ChannelId> toRemove = newHashSet();
-        for (ChannelId id : channels.keySet()) {
-            C channel = channels.get(id);
-            if(channel.isStale()) {
+        for (ChannelId channelId : channels.keySet()) {
+            C channel = channels.get(channelId);
+            if (channel.isStale()) {
                 try {
                     channel.close();
                 } catch (Exception e) {
                     throw illegalStateWithCauseOf(e);
                 } finally {
-                    toRemove.add(id);
+                    toRemove.add(channelId);
                 }
             }
         }

@@ -17,12 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.transport.memory;
 
 import io.spine.base.Identifier;
 import io.spine.logging.Logging;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
+import io.spine.server.transport.ChannelId;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -45,8 +46,8 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging 
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    SingleThreadInMemSubscriber(ChannelId channelId) {
-        super(channelId);
+    SingleThreadInMemSubscriber(ChannelId id) {
+        super(id);
     }
 
     @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.
@@ -71,6 +72,7 @@ class SingleThreadInMemSubscriber extends InMemorySubscriber implements Logging 
 
     @Override
     public void close() {
+        super.close();
         executor.shutdown();
     }
 }
