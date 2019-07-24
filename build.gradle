@@ -143,7 +143,6 @@ subprojects {
             deps.build.errorProneAnnotations
         )
 
-
         testImplementation (
             deps.test.hamcrest,
             deps.test.mockito,
