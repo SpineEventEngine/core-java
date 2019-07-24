@@ -20,30 +20,37 @@
 
 package io.spine.testing.server.blackbox.verify.query;
 
+import com.google.common.truth.Subject;
+import com.google.protobuf.Message;
+import io.spine.client.QueryResponse;
+import io.spine.testing.SubjectTest;
 import io.spine.testing.server.blackbox.BbTask;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Predicate;
 
+import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.queryResult;
 import static io.spine.testing.server.blackbox.verify.query.given.GivenQueryResponse.TASK_TITLE;
 import static io.spine.testing.server.blackbox.verify.query.given.GivenQueryResponse.responseWithSingleState;
 
 @DisplayName("QueryResultSubjectShould")
-class QueryResultSubjectTest {
+class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Message>> {
 
-    private QueryResultSubject subject;
-
-    @BeforeEach
-    void initSubject() {
-        subject = QueryResultSubject.assertQueryResult(responseWithSingleState());
+    @Override
+    protected Subject.Factory<QueryResultSubject, Iterable<Message>> subjectFactory() {
+        return queryResult();
     }
 
     @Test
     @DisplayName("check contains all matching the provided Predicate")
     void checkContainsAllMatching() {
         Predicate<BbTask> taskPredicate = task -> TASK_TITLE.equals(task.getTitle());
-        subject.containsAllMatching(taskPredicate);
+        assertWithSubjectThat(responseWithSingleState())
+                .containsAllMatching(taskPredicate);
+    }
+
+    private static QueryResultSubject assertWithSubjectThat(QueryResponse queryResponse) {
+        return QueryResultSubject.assertQueryResponse(queryResponse);
     }
 }
