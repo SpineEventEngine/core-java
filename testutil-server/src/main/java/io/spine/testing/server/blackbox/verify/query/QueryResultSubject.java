@@ -44,50 +44,45 @@ import static io.spine.testing.server.entity.IterableEntityVersionSubject.entity
 import static java.util.stream.Collectors.toList;
 
 /**
- * assertQueryResult(query)
- *      .ignoringFieldAbsence()
- *      .containsExactly(state1, state2)
- *      or
- *      .containsElementsIn(ImmutableList.of(state1, state2, state3))
- *      or
- *      .containsSingleEntityStateThat()
- *      or
- *      .containsSingleEntityVersionThat()
- *      or
- *      .containsEntityVersionsSuchThat()
- *      .ignoringFieldAbsence()
- *      .contains(version)
- *      or
- *      .hasStatus(Status)
- */
-
-/**
- * ...
+ * A set of assertions for {@link io.spine.client.Query Query} execution result.
+ *
+ * <p>The class base methods check the {@code Iterable} of entity states received in the
+ * {@link QueryResponse} in the {@link Message} form as follows:
+ * <pre>
+ *     {@code
+ *          context.assertQueryResult(query)
+ *                 .comparingExpectedFieldsOnly()
+ *                 .containsExactly(state1, state2);
+ *      }
+ * </pre>
+ *
+ * <p>There are also convenience methods for checking response {@link Status} and entity
+ * {@linkplain Version versions}, as well as some others.
+ *
+ * <p>This class is not a "typical" {@link Subject} in a sense that it's not accessible to the
+ * outer world through it's {@linkplain #queryResult() factory}, but is rather created with
+ * {@link #assertQueryResponse(QueryResponse)} {@code static} method.
  */
 @VisibleForTesting
 public final class QueryResultSubject
         extends IterableOfProtosSubject<QueryResultSubject, Message, Iterable<Message>> {
 
     /**
-     * ...
+     * The helper {@code Subject} to check the{@link QueryResponse} status.
      *
-     * <p>Is effectively {@code final}.
+     * <p>Is effectively {@code final}, as the only way to create an instance of
+     * {@code QueryResultSubject} is to use the {@link #assertQueryResponse(QueryResponse)} method.
      */
     private ResponseStatusSubject statusSubject;
 
     /**
-     * ...
+     * The helper {@code Subject} to assess received entity {@linkplain Version versions}.
      *
-     * <p>Is effectively {@code final}.
+     * <p>Is effectively {@code final}, as the only way to create an instance of
+     * {@code QueryResultSubject} is to use the {@link #assertQueryResponse(QueryResponse)} method.
      */
     private IterableEntityVersionSubject versionsSubject;
 
-    /**
-     * ...
-     *
-     * <p>The {@code entityStates} is never actually {@code null}, but may be an empty
-     * {@code Iterable}.
-     */
     private QueryResultSubject(FailureMetadata failureMetadata,
                                Iterable<Message> entityStates) {
         super(failureMetadata, entityStates);
@@ -103,6 +98,12 @@ public final class QueryResultSubject
                                                       .that(versions);
     }
 
+    /**
+     * Creates an instance of {@code QueryResultSubject}.
+     *
+     * <p>Unlike other {@code Subject}s factory methods, does not accept {@code null} arguments, as
+     * it's always an error to receive a {@code null} {@code QueryResponse}.
+     */
     public static
     QueryResultSubject assertQueryResponse(QueryResponse queryResponse) {
         checkNotNull(queryResponse, "`QueryResponse` must never be `null`");
@@ -112,15 +113,25 @@ public final class QueryResultSubject
         return subject;
     }
 
+    /**
+     * Verifies the status of the received {@link QueryResponse}.
+     */
     public void hasStatus(StatusCase status) {
         checkNotNull(status);
         statusSubject.hasStatusCase(status);
     }
 
+    /**
+     * Obtains a {@code Subject} for more detailed status checks.
+     */
     public ResponseStatusSubject hasStatusThat() {
         return statusSubject;
     }
 
+    /**
+     * Verifies that the {@link QueryResponse} yields a single entity and returns a
+     * {@code ProtoSubject} for its {@link Message state}.
+     */
     public ProtoSubject<?, Message> containsSingleEntityStateThat() {
         assertContainsSingleItem();
         Message entityState = actual().iterator()
@@ -130,10 +141,18 @@ public final class QueryResultSubject
         return subject;
     }
 
+    /**
+     * Verifies that the {@link QueryResponse} yields a single entity and returns a {@code Subject}
+     * for its {@link Version}.
+     */
     public EntityVersionSubject containsSingleEntityVersionThat() {
         return versionsSubject.containsSingleEntityVersionThat();
     }
 
+    /**
+     * Returns a {@code Subject} to assess the versions of entities yielded in the
+     * {@link QueryResponse}.
+     */
     public IterableEntityVersionSubject containsEntityVersionListThat() {
         return versionsSubject;
     }
@@ -159,8 +178,7 @@ public final class QueryResultSubject
                             .getStatus();
     }
 
-    static
-    Subject.Factory<QueryResultSubject, Iterable<Message>> queryResult() {
+    static Subject.Factory<QueryResultSubject, Iterable<Message>> queryResult() {
         return QueryResultSubject::new;
     }
 }

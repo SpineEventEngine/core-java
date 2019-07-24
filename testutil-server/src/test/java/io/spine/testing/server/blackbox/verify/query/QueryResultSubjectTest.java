@@ -40,6 +40,13 @@ import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSub
 import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.version2;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * The test for the {@link QueryResultSubject}.
+ *
+ * <p>This test uses own {@code static} versions for some of the methods provided in
+ * {@link SubjectTest} due to the non-standard
+ * {@linkplain QueryResultSubject#assertQueryResponse(QueryResponse) way} of subject creation.
+ */
 @DisplayName("QueryResultSubject should")
 class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Message>> {
 

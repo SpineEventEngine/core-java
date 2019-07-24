@@ -25,21 +25,36 @@ import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.validate.FieldAwareMessage;
 
+/**
+ * A mixin interface for the {@link Version} message type.
+ */
 @GeneratedMixin
 public interface VersionMixin extends VersionOrBuilder, FieldAwareMessage {
 
+    /**
+     * Checks if the version is an increment relative to the {@code other} version.
+     */
     default boolean isIncrement(VersionOrBuilder other) {
         return getNumber() > other.getNumber();
     }
 
+    /**
+     * Checks if the version is an increment or at least equal to the {@code other} version.
+     */
     default boolean isIncrementOrEqual(VersionOrBuilder other) {
         return getNumber() >= other.getNumber();
     }
 
+    /**
+     * Checks if the version is a decrement relative to the {@code other} version.
+     */
     default boolean isDecrement(VersionOrBuilder other) {
         return getNumber() < other.getNumber();
     }
 
+    /**
+     * Checks if the version is a decrement or at least equal to the {@code other} version.
+     */
     default boolean isDecrementOrEqual(VersionOrBuilder other) {
         return getNumber() <= other.getNumber();
     }

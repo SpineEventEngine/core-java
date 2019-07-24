@@ -30,6 +30,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 
+/**
+ * A set of checks for the {@link io.spine.server.entity.Entity Entity} version.
+ */
 @VisibleForTesting
 public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubject, Version> {
 
@@ -42,6 +45,9 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
         return assertAbout(entityVersion()).that(version);
     }
 
+    /**
+     * Verifies the version is an increment of the {@code other}.
+     */
     public void isNewerThan(Version other) {
         checkNotNull(other);
         assertExists();
@@ -49,6 +55,9 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
                               .isTrue();
     }
 
+    /**
+     * Verifies the version is an increment or at least equal to the {@code other}.
+     */
     public void isNewerOrEqualTo(Version other) {
         checkNotNull(other);
         assertExists();
@@ -56,6 +65,9 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
                                      .isTrue();
     }
 
+    /**
+     * Verifies the version is a decrement of the {@code other}.
+     */
     public void isOlderThan(Version other) {
         checkNotNull(other);
         assertExists();
@@ -63,6 +75,9 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
                               .isTrue();
     }
 
+    /**
+     * Verifies the version is a decrement or at least equal to the {@code other}.
+     */
     public void isOlderOrEqualTo(Version other) {
         checkNotNull(other);
         assertExists();

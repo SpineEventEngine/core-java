@@ -34,10 +34,11 @@ import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.core.Status.StatusCase.REJECTION;
 
+/**
+ * A set of checks for the {@linkplain io.spine.client.QueryResponse query response} status.
+ */
 @VisibleForTesting
 public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
-
-    private static final String STATUS_CASE = "statusCase()";
 
     private ResponseStatusSubject(FailureMetadata failureMetadata,
                                   @Nullable Status message) {
@@ -48,29 +49,35 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
         return assertAbout(responseStatus()).that(status);
     }
 
+    /**
+     * Verifies that the response status is {@link StatusCase#OK OK}.
+     */
     public void isOk() {
-        assertExists();
-        check(STATUS_CASE).that(statusCase())
-                          .isEqualTo(OK);
+        hasStatusCase(OK);
     }
 
+    /**
+     * Verifies that the response status is {@link StatusCase#ERROR ERROR}.
+     */
     public void isError() {
-        assertExists();
-        check(STATUS_CASE).that(statusCase())
-                          .isEqualTo(ERROR);
+        hasStatusCase(ERROR);
     }
 
+    /**
+     * Verifies that the response status is {@link StatusCase#REJECTION REJECTION}.
+     */
     public void isRejection() {
-        assertExists();
-        check(STATUS_CASE).that(statusCase())
-                          .isEqualTo(REJECTION);
+        hasStatusCase(REJECTION);
     }
 
+    /**
+     * Verifies the response status matches the specified {@code statusCase}.
+     */
     public void hasStatusCase(StatusCase statusCase) {
         checkNotNull(statusCase);
         assertExists();
-        check(STATUS_CASE).that(statusCase())
-                          .isEqualTo(statusCase);
+        check("statusCase()").that(statusCase())
+                             .isEqualTo(statusCase);
     }
 
     private StatusCase statusCase() {

@@ -31,6 +31,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
 
+/**
+ * A set of checks for {@link Iterable several} {@link io.spine.server.entity.Entity Entity}
+ * versions.
+ */
 @VisibleForTesting
 public final class IterableEntityVersionSubject
         extends IterableOfProtosSubject<IterableEntityVersionSubject, Version, Iterable<Version>> {
@@ -45,30 +49,46 @@ public final class IterableEntityVersionSubject
         return assertAbout(entityVersions()).that(versions);
     }
 
+    /**
+     * Verifies that all versions are newer than the specified {@code version}.
+     */
     public void containsAllNewerThan(Version version) {
         checkNotNull(version);
         assertExists();
         actual().forEach(v -> assertVersion(v).isNewerThan(version));
     }
 
+    /**
+     * Verifies that all versions are newer or at least equal to the specified {@code version}.
+     */
     public void containsAllNewerOrEqualTo(Version version) {
         checkNotNull(version);
         assertExists();
         actual().forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
     }
 
+    /**
+     * Verifies that all versions are older than the specified {@code version}.
+     */
     public void containsAllOlderThan(Version version) {
         checkNotNull(version);
         assertExists();
         actual().forEach(v -> assertVersion(v).isOlderThan(version));
     }
 
+    /**
+     * Verifies that all versions are older or at least equal to the specified {@code version}.
+     */
     public void containsAllOlderOrEqualTo(Version version) {
         checkNotNull(version);
         assertExists();
         actual().forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
     }
 
+    /**
+     * Verifies that the {@code Iterable} stores exactly one entity {@link Version} and returns a
+     * {@code Subject} for it.
+     */
     public EntityVersionSubject containsSingleEntityVersionThat() {
         assertContainsSingleItem();
         Version version = actual().iterator()
