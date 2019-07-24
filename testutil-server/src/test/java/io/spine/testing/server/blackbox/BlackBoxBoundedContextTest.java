@@ -23,6 +23,8 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
+import io.spine.client.Query;
+import io.spine.client.QueryFactory;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
@@ -560,6 +562,27 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
             assertThat(context.assertEvents())
                     .isNotNull();
         }
+    }
+
+    @Test
+    @DisplayName("provide `Subject` for a specified `Query` result")
+    void obtainQueryResultSubject() {
+        BbProjectId id = newProjectId();
+        context.receivesCommand(createProject(id));
+
+        QueryFactory queryFactory = context.requestFactory()
+                                           .query();
+        Query query = queryFactory.all(BbProject.class);
+
+        BbProject expected = BbProject
+                .newBuilder()
+                .setId(id)
+                .build();
+
+        context.assertQueryResult(query)
+               .containsSingleEntityStateThat()
+               .comparingExpectedFieldsOnly()
+               .isEqualTo(expected);
     }
 
     @Nested
