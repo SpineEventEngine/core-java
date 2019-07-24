@@ -28,7 +28,6 @@ import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.common.truth.Truth.assertThat;
 
 @VisibleForTesting
 public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubject, Version> {
@@ -44,22 +43,26 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
 
     public void isNewerThan(Version other) {
         assertExists();
-        assertThat(actual().isIncrement(other)).isTrue();
+        check("isIncrement()").that(actual().isIncrement(other))
+                              .isTrue();
     }
 
     public void isNewerOrEqualTo(Version other) {
         assertExists();
-        assertThat(actual().isIncrementOrEqual(other)).isTrue();
+        check("isIncrementOrEqual()").that(actual().isIncrementOrEqual(other))
+                                     .isTrue();
     }
 
     public void isOlderThan(Version other) {
         assertExists();
-        assertThat(actual().isDecrement(other)).isTrue();
+        check("isDecrement()").that(actual().isDecrement(other))
+                              .isTrue();
     }
 
     public void isOlderOrEqualTo(Version other) {
         assertExists();
-        assertThat(actual().isDecrementOrEqual(other)).isTrue();
+        check("isDecrementOrEqual()").that(actual().isDecrementOrEqual(other))
+                                     .isTrue();
     }
 
     private void assertExists() {
