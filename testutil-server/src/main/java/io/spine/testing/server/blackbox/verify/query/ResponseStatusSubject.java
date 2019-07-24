@@ -28,14 +28,16 @@ import io.spine.core.Status;
 import io.spine.core.Status.StatusCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.core.Status.StatusCase.REJECTION;
 
 @VisibleForTesting
 public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
+
+    private static final String STATUS_CASE = "statusCase()";
 
     private ResponseStatusSubject(FailureMetadata failureMetadata,
                                   @Nullable Status message) {
@@ -48,22 +50,27 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
 
     public void isOk() {
         assertExists();
-        assertThat(statusCase()).isEqualTo(OK);
+        check(STATUS_CASE).that(statusCase())
+                          .isEqualTo(OK);
     }
 
     public void isError() {
         assertExists();
-        assertThat(statusCase()).isEqualTo(ERROR);
+        check(STATUS_CASE).that(statusCase())
+                          .isEqualTo(ERROR);
     }
 
     public void isRejection() {
         assertExists();
-        assertThat(statusCase()).isEqualTo(REJECTION);
+        check(STATUS_CASE).that(statusCase())
+                          .isEqualTo(REJECTION);
     }
 
     public void hasStatusCase(StatusCase statusCase) {
+        checkNotNull(statusCase);
         assertExists();
-        assertThat(statusCase()).isEqualTo(statusCase);
+        check(STATUS_CASE).that(statusCase())
+                          .isEqualTo(statusCase);
     }
 
     private StatusCase statusCase() {
@@ -74,8 +81,7 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
         isNotNull();
     }
 
-    static
-    Subject.Factory<ResponseStatusSubject, Status> responseStatus() {
+    static Subject.Factory<ResponseStatusSubject, Status> responseStatus() {
         return ResponseStatusSubject::new;
     }
 }
