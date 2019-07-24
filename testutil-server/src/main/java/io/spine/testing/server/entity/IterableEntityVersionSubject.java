@@ -28,6 +28,7 @@ import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
+import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVersion;
 
 @VisibleForTesting
 public class IterableEntityVersionSubject
@@ -41,6 +42,18 @@ public class IterableEntityVersionSubject
     public static IterableEntityVersionSubject
     assertEntityVersions(@Nullable Iterable<Version> versions) {
         return assertAbout(entityVersions()).that(versions);
+    }
+
+    public EntityVersionSubject containsSingleEntityVersionThat() {
+        assertContainsSingleItem();
+        Version version = actual().iterator()
+                                  .next();
+        return assertEntityVersion(version);
+    }
+
+    private void assertContainsSingleItem() {
+        isNotNull();
+        hasSize(1);
     }
 
     static

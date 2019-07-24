@@ -22,17 +22,34 @@ package io.spine.testing.server.blackbox.verify.query;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import io.spine.core.Status;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import io.spine.core.Status.StatusCase;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static com.google.common.truth.Truth.assertAbout;
+import static com.google.common.truth.Truth.assertThat;
 
 @VisibleForTesting
 public class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
 
     private ResponseStatusSubject(FailureMetadata failureMetadata,
-                                  @NullableDecl Status message) {
+                                  @Nullable Status message) {
         super(failureMetadata, message);
     }
 
+    public static ResponseStatusSubject assertResponseStatus(@Nullable Status status) {
+        return assertAbout(responseStatus()).that(status);
+    }
 
+    public void hasStatusCase(StatusCase statusCase) {
+        isNotNull();
+        assertThat(actual().getStatusCase()).isEqualTo(statusCase);
+    }
+
+    static
+    Subject.Factory<ResponseStatusSubject, Status> responseStatus() {
+        return ResponseStatusSubject::new;
+    }
 }

@@ -35,16 +35,14 @@ import io.spine.testing.server.entity.EntityVersionSubject;
 import io.spine.testing.server.entity.IterableEntityVersionSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
-import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVersion;
+import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.assertResponseStatus;
 import static io.spine.testing.server.entity.IterableEntityVersionSubject.assertEntityVersions;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
@@ -67,21 +65,45 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *      or
  *      .hasStatus(Status)
  */
+
+/**
+ * ...
+ */
 @VisibleForTesting
 public final class QueryResultSubject
         extends IterableOfProtosSubject<QueryResultSubject, Message, Iterable<Message>> {
 
-    private final Collection<Version> entityVersions = new ArrayList<>();
-    private Status status;
+    /**
+     * ...
+     *
+     * <p>Is effectively {@code final}.
+     */
+    private ResponseStatusSubject statusSubject;
 
+    /**
+     * ...
+     *
+     * <p>Is effectively {@code final}.
+     */
+    private IterableEntityVersionSubject versionsSubject;
+
+    /**
+     * ...
+     *
+     * <p>The {@code entityStates} is never actually {@code null}, but may be an empty
+     * {@code Iterable}.
+     */
     private QueryResultSubject(FailureMetadata failureMetadata,
                                Iterable<Message> entityStates) {
         super(failureMetadata, entityStates);
     }
 
-    private void setResponseData(QueryResponse queryResponse) {
-        entityVersions.addAll(extractEntityVersions(queryResponse));
-        status = extractStatus(queryResponse);
+    private void initChildSubjects(QueryResponse queryResponse) {
+        Status status = extractStatus(queryResponse);
+        statusSubject = assertResponseStatus(status);
+
+        Iterable<Version> versions = extractEntityVersions(queryResponse);
+        versionsSubject = assertEntityVersions(versions);
     }
 
     public static
@@ -92,22 +114,20 @@ public final class QueryResultSubject
             subject.failWithoutActual(simpleFact("`QueryResponse` must never be `null`"));
             return subject;
         }
-        subject.setResponseData(queryResponse);
+        subject.initChildSubjects(queryResponse);
         return subject;
     }
 
-    // todo try to parameterize the class instead of this ugliness
-    public void hasStatus(StatusCase statusCase) {
-        assertThat(status.getStatusCase()).isEqualTo(statusCase);
+    public ResponseStatusSubject hasStatusThat() {
+        return statusSubject;
     }
 
-    public ProtoSubject<?, Message> hasStatusThat() {
-        return check("getResponse().getStatus()").about(protos())
-                                                 .that(status);
+    public void hasStatus(StatusCase status) {
+        statusSubject.hasStatusCase(status);
     }
 
     public ProtoSubject<?, Message> containsSingleEntityStateThat() {
-        assertSingleEntityState();
+        assertContainsSingleItem();
         Message entityState = actual().iterator()
                                       .next();
         ProtoSubject<?, Message> subject =
@@ -117,16 +137,14 @@ public final class QueryResultSubject
     }
 
     public EntityVersionSubject containsSingleEntityVersionThat() {
-        assertSingleEntityVersion();
-        Version version = entityVersions.iterator()
-                                        .next();
-        return assertEntityVersion(version);
+        return versionsSubject.containsSingleEntityVersionThat();
     }
 
     public IterableEntityVersionSubject containsEntityVersionsSuchThat() {
-        return assertEntityVersions(entityVersions);
+        return versionsSubject;
     }
 
+    // todo try to parameterize the class instead of this ugliness
     @SuppressWarnings("unchecked")
     // It's up to user to provide the predicate matching the stored entity states.
     public <M extends Message> void containsAllMatching(Predicate<M> predicate) {
@@ -145,12 +163,8 @@ public final class QueryResultSubject
         });
     }
 
-    private void assertSingleEntityState() {
+    private void assertContainsSingleItem() {
         hasSize(1);
-    }
-
-    private void assertSingleEntityVersion() {
-        assertThat(entityVersions).hasSize(1);
     }
 
     private static Iterable<Message> extractEntityStates(@Nullable QueryResponse queryResponse) {
