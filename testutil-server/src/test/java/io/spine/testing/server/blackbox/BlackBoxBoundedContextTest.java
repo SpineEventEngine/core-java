@@ -580,9 +580,8 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 .build();
 
         context.assertQueryResult(query)
-               .containsSingleEntityStateThat()
                .comparingExpectedFieldsOnly()
-               .isEqualTo(expected);
+               .containsExactly(expected);
     }
 
     @Nested
