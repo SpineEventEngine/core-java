@@ -55,7 +55,7 @@ public final class EntitySubject
     EntitySubject assertEntity(@Nullable E entity) {
         return assertAbout(entities()).that(entity);
     }
-
+// todo add method with version here
     /**
      * Verifies if the entity exists.
      */

@@ -18,13 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides classes for verification of a black box bounded context.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox.verify;
+package io.spine.testing.server.entity;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.common.annotations.VisibleForTesting;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+@VisibleForTesting
+public class EntityVersionSubject {
+
+}

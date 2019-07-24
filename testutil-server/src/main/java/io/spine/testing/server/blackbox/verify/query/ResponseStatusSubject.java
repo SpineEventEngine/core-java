@@ -18,13 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides classes for verification of a black box bounded context.
- */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox.verify;
+package io.spine.testing.server.blackbox.verify.query;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.extensions.proto.ProtoSubject;
+import io.spine.core.Status;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+@VisibleForTesting
+public class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
+
+    private ResponseStatusSubject(FailureMetadata failureMetadata,
+                                  @NullableDecl Status message) {
+        super(failureMetadata, message);
+    }
+
+
+}

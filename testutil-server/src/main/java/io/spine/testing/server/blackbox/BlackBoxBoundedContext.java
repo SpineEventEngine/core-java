@@ -21,16 +21,21 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.truth.Truth;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.client.Query;
 import io.spine.client.QueryFactory;
+import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
@@ -48,6 +53,7 @@ import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
@@ -71,6 +77,7 @@ import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This class provides means for integration testing of Bounded Contexts.
@@ -773,5 +780,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     public EventSubject assertEvents() {
         return EventSubject.assertThat(events());
+    }
+
+    public QueryResultSubject assertQueryResult(Query query) {
+        MemoizingObserver<QueryResponse> observer = memoizingObserver();
+        context.stand()
+               .execute(query, observer);
+        assertTrue(observer.isCompleted());
+        QueryResponse response = observer.firstResponse();
+        QueryResultSubject subject = QueryResultSubject.assertQueryResult(response);
+        Status status = response.getResponse()
+                                .getStatus();
+        return subject;
     }
 }

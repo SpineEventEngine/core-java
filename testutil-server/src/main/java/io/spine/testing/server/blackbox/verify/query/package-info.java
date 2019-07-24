@@ -19,11 +19,12 @@
  */
 
 /**
- * This package provides classes for verification of a black box bounded context.
+ * Tools for {@link io.spine.client.Query Query} result verification in a black box bounded
+ * context.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox.verify;
+package io.spine.testing.server.blackbox.verify.query;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
