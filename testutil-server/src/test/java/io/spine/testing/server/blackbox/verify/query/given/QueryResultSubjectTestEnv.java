@@ -20,11 +20,9 @@
 
 package io.spine.testing.server.blackbox.verify.query.given;
 
-import com.google.protobuf.Empty;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.QueryResponse;
 import io.spine.core.Response;
-import io.spine.core.Status;
 import io.spine.core.Version;
 import io.spine.testing.server.blackbox.BbTask;
 import io.spine.testing.server.blackbox.BbTaskId;
@@ -32,6 +30,7 @@ import io.spine.testing.server.blackbox.BbTaskId;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.testing.server.blackbox.verify.query.given.GivenResponseStatus.ok;
 
 public final class QueryResultSubjectTestEnv {
 
@@ -41,7 +40,7 @@ public final class QueryResultSubjectTestEnv {
     public static final String TASK_2_TITLE = "Do the laundry";
     public static final String TASK_2_DESCRIPTION = "Do the laundry very efficiently";
 
-    /** Prevents instantiation of this utility class. */
+    /** Prevents instantiation of this test env class. */
     private QueryResultSubjectTestEnv() {
     }
 
@@ -122,12 +121,8 @@ public final class QueryResultSubjectTestEnv {
     }
 
     private static Response responseOk() {
-        Status status = Status
-                .newBuilder()
-                .setOk(Empty.getDefaultInstance())
-                .vBuild();
         return Response.newBuilder()
-                       .setStatus(status)
+                       .setStatus(ok())
                        .vBuild();
     }
 }
