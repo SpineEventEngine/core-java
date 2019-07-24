@@ -22,9 +22,6 @@
  * This package provides test utilities and base classes for the unit tests of
  * {@linkplain io.spine.server.aggregate.Aggregate aggregates} and
  * {@linkplain io.spine.server.aggregate.AggregatePart aggregate parts}.
-
- * @see io.spine.testing.server.aggregate.AggregateCommandTest
- * @see io.spine.testing.server.aggregate.AggregateEventReactionTest
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

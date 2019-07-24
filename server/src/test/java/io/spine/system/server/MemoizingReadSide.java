@@ -78,7 +78,7 @@ public final class MemoizingReadSide implements SystemReadSide {
      */
     @Deprecated
     @Override
-    public void register(EventDispatcher<?> dispatcher) throws UnsupportedOperationException {
+    public void register(EventDispatcher dispatcher) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Method register is not implemented!");
     }
 
@@ -90,7 +90,7 @@ public final class MemoizingReadSide implements SystemReadSide {
      */
     @Deprecated
     @Override
-    public void unregister(EventDispatcher<?> dispatcher) throws UnsupportedOperationException {
+    public void unregister(EventDispatcher dispatcher) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Method unregister is not implemented!");
     }
 

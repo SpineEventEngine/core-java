@@ -91,7 +91,7 @@ import static java.lang.String.format;
  */
 @Internal
 public class EventBus
-        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>>
+        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher>
         implements ContextAware {
 
     /*
@@ -143,7 +143,7 @@ public class EventBus
     }
 
     @VisibleForTesting
-    final Set<? extends EventDispatcher<?>> dispatchersOf(EventClass eventClass) {
+    final Set<? extends EventDispatcher> dispatchersOf(EventClass eventClass) {
         return registry().dispatchersOf(eventClass);
     }
 
@@ -247,7 +247,9 @@ public class EventBus
         EventEnvelope enrichedEnvelope = enrich(event);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", event.message()));
+                   format("Message of type `%s` and ID `%s` has no dispatchers.",
+                          event.messageClass(),
+                          event.id().getValue()));
     }
 
     @Override
@@ -289,7 +291,7 @@ public class EventBus
     /** The {@code Builder} for {@code EventBus}. */
     @CanIgnoreReturnValue
     public static class Builder
-            extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+            extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher> {
 
         /**
          * Optional enricher for events.
@@ -308,7 +310,7 @@ public class EventBus
         }
 
         @Override
-        protected DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> newRegistry() {
+        protected DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher> newRegistry() {
             return new EventDispatcherRegistry();
         }
 
@@ -384,24 +386,5 @@ public class EventBus
             UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }
-    }
-
-    /**
-     * Ensures that the passed object has a valid reference to {@code EventBus}.
-     *
-     * @param holder
-     *         the object which holds the reference
-     * @param value
-     *         the value of the reference to check
-     * @return the passed value, if it's not null
-     * @throws NullPointerException
-     *         if the passed value is null
-     */
-    public static EventBus checkAssigned(Object holder, @Nullable EventBus value) {
-        return checkNotNull(
-                value,
-                "`%s` does not have `EventBus` assigned.",
-                holder
-        );
     }
 }

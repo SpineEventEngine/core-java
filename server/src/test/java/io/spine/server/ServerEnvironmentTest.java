@@ -27,12 +27,13 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.entity.Entity;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.server.storage.system.SystemAwareStorageFactory;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
@@ -53,7 +54,6 @@ import static io.spine.server.DeploymentType.STANDALONE;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("ServerEnvironment should")
@@ -65,23 +65,6 @@ class ServerEnvironmentTest {
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(ServerEnvironment.class);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    @DisplayName("tell when not running under AppEngine")
-    void tellIfNotInAppEngine() {
-        // Tests are not run by AppEngine by default.
-        assertFalse(serverEnvironment.isAppEngine());
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    @DisplayName("obtain AppEngine version as optional string")
-    void getAppEngineVersion() {
-        // By default we're not running under AppEngine.
-        assertFalse(serverEnvironment.appEngineVersion()
-                                     .isPresent());
     }
 
     @Test
@@ -200,7 +183,7 @@ class ServerEnvironmentTest {
         void productionFactory() {
             StubStorageFactory factory = new StubStorageFactory();
             serverEnvironment.configureStorage(factory);
-            assertThat(serverEnvironment.storageFactory())
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
 
@@ -209,8 +192,11 @@ class ServerEnvironmentTest {
         void testsFactory() {
             environment.setToTests();
 
-            assertThat(serverEnvironment.storageFactory())
-                    .isInstanceOf(InMemoryStorageFactory.class);
+            StorageFactory factory = serverEnvironment.storageFactory();
+            assertThat(factory)
+                    .isInstanceOf(SystemAwareStorageFactory.class);
+            SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) factory;
+            assertThat(systemAware.delegate()).isInstanceOf(InMemoryStorageFactory.class);
         }
     }
 
@@ -229,7 +215,7 @@ class ServerEnvironmentTest {
             StorageFactory factory = new StubStorageFactory();
 
             serverEnvironment.configureStorageForTests(factory);
-            assertThat(serverEnvironment.storageFactory())
+            assertThat(((SystemAwareStorageFactory) serverEnvironment.storageFactory()).delegate())
                     .isEqualTo(factory);
         }
     }
@@ -353,13 +339,13 @@ class ServerEnvironmentTest {
         private final TransportFactory delegate = InMemoryTransportFactory.newInstance();
 
         @Override
-        public Publisher createPublisher(ChannelId channelId) {
-            return delegate.createPublisher(channelId);
+        public Publisher createPublisher(ChannelId id) {
+            return delegate.createPublisher(id);
         }
 
         @Override
-        public Subscriber createSubscriber(ChannelId messageClass) {
-            return delegate.createSubscriber(messageClass);
+        public Subscriber createSubscriber(ChannelId id) {
+            return delegate.createSubscriber(id);
         }
 
         @Override

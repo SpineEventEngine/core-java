@@ -20,32 +20,17 @@
 
 package io.spine.server.bus;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
 
 /**
  * Dispatches a message to several entities of the same type.
  *
- * @param <C> the type of dispatched messages
- * @param <E> the type of envelopes for dispatched objects that contain messages
- * @param <I> the type of IDs of entities to which messages are dispatched
+ * @param <C>
+ *         the type of dispatched messages
+ * @param <E>
+ *         the type of envelopes for dispatched objects that contain messages
  */
-public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope, I>
-        extends MessageDispatcher<C, E, Set<I>> {
-
-    /**
-     * Returns immutable set with one element with the identity of the multicast dispatcher
-     * that dispatches messages to itself.
-     *
-     * @implNote The identity obtained as the result of {@link Object#toString()
-     * MulticastDispatcher.toString()}.
-     *
-     * @return immutable set with the dispatcher identity
-     */
-    default Set<String> identity() {
-        return ImmutableSet.of(this.toString());
-    }
+public interface MulticastDispatcher<C extends MessageClass, E extends MessageEnvelope>
+        extends MessageDispatcher<C, E> {
 }

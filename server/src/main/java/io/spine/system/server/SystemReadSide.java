@@ -43,7 +43,7 @@ public interface SystemReadSide {
      * @param dispatcher
      *         a system event dispatcher
      */
-    void register(EventDispatcher<?> dispatcher);
+    void register(EventDispatcher dispatcher);
 
     /**
      * Removes the given system event dispatcher.
@@ -52,7 +52,7 @@ public interface SystemReadSide {
      *         a registered system event dispatcher
      * @see #register(EventDispatcher)
      */
-    void unregister(EventDispatcher<?> dispatcher);
+    void unregister(EventDispatcher dispatcher);
 
     /**
      * Executes the given query for a domain aggregate state.

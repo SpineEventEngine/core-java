@@ -61,6 +61,13 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         return Optional.of(asSession(record));
     }
 
+    /**
+     * Updates the {@code picked_by} field or clears it if {@code null} is passed.
+     *
+     * @return the updated record value.
+     * @implNote As the field is only updated, the record message isn't validated. It allows
+     *         to save some CPU cycles.
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")      // `Builder` methods called in `if-else`.
     @CanIgnoreReturnValue
     private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
@@ -71,7 +78,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         } else {
             builder.setPickedBy(nodeId);
         }
-        ShardSessionRecord updatedRecord = builder.vBuild();
+        ShardSessionRecord updatedRecord = builder.build();
         workByNode.put(record.getIndex(), updatedRecord);
         return updatedRecord;
     }

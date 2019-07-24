@@ -37,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>There can be only one dispatcher per command class.
  */
 class CommandDispatcherRegistry
-        extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher<?>> {
+        extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher> {
 
     /**
      * {@inheritDoc}
@@ -53,7 +53,7 @@ class CommandDispatcherRegistry
      * @param dispatcher the dispatcher to register
      */
     @Override
-    public void register(CommandDispatcher<?> dispatcher) {
+    public void register(CommandDispatcher dispatcher) {
         if (dispatcher instanceof DelegatingCommandDispatcher
                 && dispatcher.messageClasses().isEmpty()) {
             return;
@@ -72,7 +72,7 @@ class CommandDispatcherRegistry
      *                               that already has a registered dispatcher
      */
     @Override
-    protected void checkDispatcher(CommandDispatcher<?> dispatcher)
+    protected void checkDispatcher(CommandDispatcher dispatcher)
             throws IllegalArgumentException {
         super.checkDispatcher(dispatcher);
         checkNotAlreadyRegistered(dispatcher);
@@ -85,12 +85,12 @@ class CommandDispatcherRegistry
      * @throws IllegalArgumentException if at least one command class already has
      *                                  a registered dispatcher
      */
-    private void checkNotAlreadyRegistered(CommandDispatcher<?> dispatcher) {
+    private void checkNotAlreadyRegistered(CommandDispatcher dispatcher) {
         Set<CommandClass> commandClasses = dispatcher.messageClasses();
-        Map<CommandClass, CommandDispatcher<?>> alreadyRegistered = new HashMap<>();
+        Map<CommandClass, CommandDispatcher> alreadyRegistered = new HashMap<>();
         // Gather command classes from this dispatcher that are registered.
         for (CommandClass commandClass : commandClasses) {
-            Optional<? extends CommandDispatcher<?>> registeredDispatcher =
+            Optional<? extends CommandDispatcher> registeredDispatcher =
                     getDispatcherForType(commandClass);
             registeredDispatcher.ifPresent(d -> alreadyRegistered.put(commandClass, d));
         }
@@ -107,7 +107,7 @@ class CommandDispatcherRegistry
      * @param registeringObject the object which tries to register dispatching or handling
      * @throws IllegalArgumentException if the set is not empty
      */
-    private static void doCheck(Map<CommandClass, CommandDispatcher<?>> alreadyRegistered,
+    private static void doCheck(Map<CommandClass, CommandDispatcher> alreadyRegistered,
                                 Object registeringObject) {
         if (!alreadyRegistered.isEmpty()) {
             throw newIllegalArgumentException(

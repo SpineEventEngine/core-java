@@ -18,27 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage.given;
+package io.spine.server.dispatch;
 
-import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.validate.FieldAwareMessage;
 
-public class EntityQueriesTestEnv {
+/**
+ * A mixin interface for the {@link Interruption} message type.
+ */
+@GeneratedMixin
+interface InterruptionMixin extends InterruptionOrBuilder, FieldAwareMessage {
 
-    /** Prevent instantiation of this utility class. */
-    private EntityQueriesTestEnv() {
-    }
-
-    public static Pagination pagination(int size) {
-        return Pagination.newBuilder()
-                                 .setPageSize(size)
-                                 .build();
-    }
-
-    public static OrderBy order(String column, OrderBy.Direction direction) {
-        return OrderBy.newBuilder()
-                              .setColumn(column)
-                              .setDirection(direction)
-                              .build();
+    @Override
+    default Object readValue(FieldDescriptor field) {
+        if (field.getIndex() == 0) {
+            return getStoppedAt();
+        }
+        return getField(field);
     }
 }

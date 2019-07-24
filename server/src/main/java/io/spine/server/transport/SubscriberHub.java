@@ -19,8 +19,6 @@
  */
 package io.spine.server.transport;
 
-import io.spine.server.integration.ChannelId;
-
 /**
  * The hub of {@link Subscriber}s.
  *
@@ -34,7 +32,7 @@ public class SubscriberHub extends ChannelHub<Subscriber> {
     }
 
     @Override
-    protected Subscriber newChannel(ChannelId channelId) {
-        return transportFactory().createSubscriber(channelId);
+    protected Subscriber newChannel(ChannelId id) {
+        return transportFactory().createSubscriber(id);
     }
 }

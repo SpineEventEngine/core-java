@@ -62,7 +62,7 @@ import static io.spine.system.server.WriteSideFunction.delegatingTo;
  */
 @Internal
 public class CommandBus
-        extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher<?>> {
+        extends UnicastBus<Command, CommandEnvelope, CommandClass, CommandDispatcher> {
 
     /** Consumes tenant IDs from incoming commands. */
     private final Consumer<TenantId> tenantConsumer;
@@ -177,7 +177,7 @@ public class CommandBus
 
     @Override
     protected void dispatch(CommandEnvelope command) {
-        CommandDispatcher<?> dispatcher = dispatcherOf(command);
+        CommandDispatcher dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);
         dispatcher.dispatch(command);
     }
@@ -239,7 +239,7 @@ public class CommandBus
                                                    Command,
                                                    CommandEnvelope,
                                                    CommandClass,
-                                                   CommandDispatcher<?>> {
+                                                   CommandDispatcher> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.

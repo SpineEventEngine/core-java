@@ -20,10 +20,10 @@
 
 package io.spine.server.projection;
 
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
+import io.spine.client.ResponseFormat;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
@@ -78,9 +78,10 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+    protected Iterator<EntityRecord>
+    readAllRecords(EntityQuery<I> query, ResponseFormat format) {
         RecordStorage<I> storage = recordStorage();
-        return storage.readAll(query, fieldMask);
+        return storage.readAll(query, format);
     }
 
     /**

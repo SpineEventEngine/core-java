@@ -20,7 +20,7 @@
 package io.spine.server.transport.memory;
 
 import io.grpc.Internal;
-import io.spine.server.integration.ChannelId;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Subscriber;
 
 /**
@@ -31,15 +31,7 @@ import io.spine.server.transport.Subscriber;
 @Internal
 public class InMemorySubscriber extends Subscriber {
 
-    public InMemorySubscriber(ChannelId channelId) {
-        super(channelId);
-    }
-
-    /**
-     * Does nothing as there are no resources to close in the in-memory implementation.
-     */
-    @Override
-    public void close() {
-        // Do nothing.
+    public InMemorySubscriber(ChannelId id) {
+        super(id);
     }
 }

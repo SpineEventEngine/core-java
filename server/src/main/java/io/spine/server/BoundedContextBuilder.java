@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
@@ -48,6 +47,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.NoOpSystemClient;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
+import io.spine.system.server.SystemFeatures;
 import io.spine.system.server.SystemReadSide;
 import io.spine.system.server.SystemWriteSide;
 
@@ -59,7 +59,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
@@ -79,7 +78,7 @@ public final class BoundedContextBuilder implements Logging {
      * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
      * Context creation.
      */
-    private final Collection<CommandDispatcher<?>> commandDispatchers = new ArrayList<>();
+    private final Collection<CommandDispatcher> commandDispatchers = new ArrayList<>();
 
     private final EventBus.Builder eventBus = EventBus.newBuilder();
 
@@ -87,11 +86,13 @@ public final class BoundedContextBuilder implements Logging {
      * Event dispatchers to be registered with the context {@link EventBus} and/or
      * {@link IntegrationBus} after the Bounded Context creation.
      */
-    private final Collection<EventDispatcher<?>> eventDispatchers = new ArrayList<>();
+    private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 
     private final IntegrationBus.Builder integrationBus = IntegrationBus.newBuilder();
 
-    private Stand.Builder stand;
+    private final SystemFeatures systemFeatures;
+
+    private Stand stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
     private TenantIndex tenantIndex;
 
@@ -107,7 +108,20 @@ public final class BoundedContextBuilder implements Logging {
      * @see BoundedContext#multitenant
      */
     BoundedContextBuilder(ContextSpec spec) {
+        this(spec, SystemFeatures.defaults());
+    }
+
+    /**
+     * Prevents direct instantiation.
+     *
+     * @param spec
+     *         the context spec for the built context
+     * @see BoundedContext#singleTenant
+     * @see BoundedContext#multitenant
+     */
+    private BoundedContextBuilder(ContextSpec spec, SystemFeatures systemFeatures) {
         this.spec = checkNotNull(spec);
+        this.systemFeatures = checkNotNull(systemFeatures);
     }
 
     /**
@@ -156,6 +170,24 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(tenantIndex);
     }
 
+    /**
+     * Obtains the instance of the {@code Stand} for the context to be built.
+     *
+     * <p>This method must be invoked only from the
+     * {@link BoundedContext#BoundedContext(BoundedContextBuilder) constructor} of
+     * the {@code BoundedContext}.
+     */
+    Stand stand() {
+        return checkNotNull(stand);
+    }
+
+    /**
+     * Obtains the instance of the {@code TenantIndex} for the context to be built.
+     *
+     * <p>This method must be invoked only from the
+     * {@link BoundedContext#BoundedContext(BoundedContextBuilder) constructor} of
+     * the {@code BoundedContext}.
+     */
     TenantIndex buildTenantIndex() {
         TenantIndex result = isMultitenant()
             ? checkNotNull(tenantIndex)
@@ -185,10 +217,6 @@ public final class BoundedContextBuilder implements Logging {
      */
     public Optional<EventEnricher> eventEnricher() {
         return eventBus.enricher();
-    }
-
-    public Optional<Stand.Builder> stand() {
-        return Optional.ofNullable(stand);
     }
 
     @CanIgnoreReturnValue
@@ -222,7 +250,7 @@ public final class BoundedContextBuilder implements Logging {
      *         the type of the dispatchers
      * @return this builder
      */
-    private <D extends MessageDispatcher<?, ?, ?>>
+    private <D extends MessageDispatcher<?, ?>>
     BoundedContextBuilder ifRepository(D dispatcher,
                                        Consumer<Repository<?, ?>> repositoryConsumer,
                                        Consumer<D> dispatcherConsumer) {
@@ -243,7 +271,7 @@ public final class BoundedContextBuilder implements Logging {
      *         should be preferred for this purpose.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder addCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+    public BoundedContextBuilder addCommandDispatcher(CommandDispatcher commandDispatcher) {
         checkNotNull(commandDispatcher);
         return ifRepository(commandDispatcher, this::add, commandDispatchers::add);
     }
@@ -278,7 +306,7 @@ public final class BoundedContextBuilder implements Logging {
      *         should be preferred for this purpose.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder addEventDispatcher(EventDispatcher<?> eventDispatcher) {
+    public BoundedContextBuilder addEventDispatcher(EventDispatcher eventDispatcher) {
         checkNotNull(eventDispatcher);
         return ifRepository(eventDispatcher, this::add, eventDispatchers::add);
     }
@@ -331,7 +359,7 @@ public final class BoundedContextBuilder implements Logging {
      * Removes the passed command dispatcher from the corresponding registration list.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+    public BoundedContextBuilder removeCommandDispatcher(CommandDispatcher commandDispatcher) {
         checkNotNull(commandDispatcher);
         return ifRepository(commandDispatcher, this::remove, commandDispatchers::remove);
     }
@@ -340,7 +368,7 @@ public final class BoundedContextBuilder implements Logging {
      * Removes the passed event dispatcher from the corresponding registration list.
      */
     @CanIgnoreReturnValue
-    public BoundedContextBuilder removeEventDispatcher(EventDispatcher<?> eventDispatcher) {
+    public BoundedContextBuilder removeEventDispatcher(EventDispatcher eventDispatcher) {
         checkNotNull(eventDispatcher);
         return ifRepository(eventDispatcher, this::remove, eventDispatchers::remove);
     }
@@ -371,7 +399,7 @@ public final class BoundedContextBuilder implements Logging {
      * of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    boolean hasCommandDispatcher(CommandDispatcher<?> commandDispatcher) {
+    boolean hasCommandDispatcher(CommandDispatcher commandDispatcher) {
         checkNotNull(commandDispatcher);
         if (commandDispatcher instanceof Repository) {
             return hasRepository((Repository<?, ?>) commandDispatcher);
@@ -385,7 +413,7 @@ public final class BoundedContextBuilder implements Logging {
      * of the Bounded Context this builder is going to build.
      */
     @VisibleForTesting
-    boolean hasEventDispatcher(EventDispatcher<?> eventDispatcher) {
+    boolean hasEventDispatcher(EventDispatcher eventDispatcher) {
         checkNotNull(eventDispatcher);
         if (eventDispatcher instanceof Repository) {
             return hasRepository((Repository<?, ?>) eventDispatcher);
@@ -435,7 +463,7 @@ public final class BoundedContextBuilder implements Logging {
      * <p>Adding dispatchers to the builder after this method returns will not update the
      * returned list.
      */
-    public ImmutableList<CommandDispatcher<?>> commandDispatchers() {
+    public ImmutableList<CommandDispatcher> commandDispatchers() {
         return ImmutableList.copyOf(commandDispatchers);
     }
 
@@ -445,7 +473,7 @@ public final class BoundedContextBuilder implements Logging {
      * <p>Adding dispatchers to the builder after this method returns will not update the
      * returned list.
      */
-    public ImmutableList<EventDispatcher<?>> eventDispatchers() {
+    public ImmutableList<EventDispatcher> eventDispatchers() {
         return ImmutableList.copyOf(eventDispatchers);
     }
 
@@ -474,6 +502,17 @@ public final class BoundedContextBuilder implements Logging {
     setAggregateRootDirectory(Supplier<AggregateRootDirectory> directory) {
         this.rootDirectory = checkNotNull(directory);
         return this;
+    }
+
+    /**
+     * Obtains the system context feature configuration.
+     *
+     * <p>Users may enable or disable some features of the system context.
+     *
+     * @see SystemFeatures
+     */
+    public SystemFeatures systemFeatures() {
+        return systemFeatures;
     }
 
     /**
@@ -516,20 +555,8 @@ public final class BoundedContextBuilder implements Logging {
         return commandBus.build();
     }
 
-    IntegrationBus buildIntegrationBus(BoundedContext context) {
-        integrationBus.setContextName(context.spec().name())
-                      .setEventBus(context.eventBus());
+    IntegrationBus buildIntegrationBus() {
         return integrationBus.build();
-    }
-
-    @CanIgnoreReturnValue
-    public BoundedContextBuilder setStand(Stand.Builder stand) {
-        this.stand = checkNotNull(stand);
-        return this;
-    }
-
-    Stand buildStand() {
-        return stand.build();
     }
 
     private void registerRepositories(BoundedContext result) {
@@ -553,25 +580,27 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem() {
-        String name = BoundedContextNames.system(spec.name()).getValue();
-        boolean multitenant = isMultitenant();
-        BoundedContextBuilder system = multitenant
-                                       ? BoundedContext.multitenant(name)
-                                       : BoundedContext.singleTenant(name);
+        BoundedContextBuilder system = new BoundedContextBuilder(systemSpec(), systemFeatures);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
-
         SystemContext result =
                 system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
         return result;
+    }
+
+    private ContextSpec systemSpec() {
+        ContextSpec systemSpec = this.spec.toSystem();
+        if (!systemFeatures.includePersistentEvents()) {
+            systemSpec = systemSpec.notStoringEvents();
+        }
+        return systemSpec;
     }
 
     private <B extends BoundedContext>
     B buildPartial(Function<BoundedContextBuilder, B> instanceFactory, SystemClient client) {
         initTenantIndex();
         initCommandBus(client.writeSide());
-        initStand(client.readSide());
-
+        this.stand = createStand(client.readSide());
         B result = instanceFactory.apply(this);
         return result;
     }
@@ -590,40 +619,11 @@ public final class BoundedContextBuilder implements Logging {
                   .injectTenantIndex(tenantIndex);
     }
 
-    private void initStand(SystemReadSide systemReadSide) {
-        if (stand == null) {
-            stand = createStand();
-        } else {
-            Boolean standMultitenant = stand.isMultitenant();
-            // Check that both either multi-tenant or single-tenant.
-            if (standMultitenant == null) {
-                stand.setMultitenant(isMultitenant());
-            } else {
-                checkSameValue("`Stand` must match multitenancy of `BoundedContext`. " +
-                                       "Status in `BoundedContext.Builder`: %s, `Stand`: %s.",
-                               standMultitenant);
-            }
-        }
-        stand.setSystemReadSide(systemReadSide);
-    }
-
-    /**
-     * Ensures that the value of the passed flag is equal to the value of
-     * the {@link BoundedContextBuilder#isMultitenant()}.
-     *
-     * @throws IllegalStateException if the flags values do not match
-     */
-    private void checkSameValue(String errMsgFmt, boolean partMultitenancy) {
-        boolean multitenant = isMultitenant();
-        checkState(multitenant == partMultitenancy,
-                   errMsgFmt,
-                   String.valueOf(multitenant),
-                   String.valueOf(partMultitenancy));
-    }
-
-    private Stand.Builder createStand() {
-        Stand.Builder result = Stand.newBuilder()
-                                    .setMultitenant(isMultitenant());
-        return result;
+    private Stand createStand(SystemReadSide systemReadSide) {
+        Stand.Builder result = Stand
+                .newBuilder()
+                .setMultitenant(isMultitenant())
+                .setSystemReadSide(systemReadSide);
+        return result.build();
     }
 }

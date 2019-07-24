@@ -38,8 +38,8 @@ public final class SingleTenantBlackBoxContext
     private final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(SingleTenantBlackBoxContext.class);
 
-    SingleTenantBlackBoxContext(EventEnricher enricher) {
-        super(false, enricher);
+    SingleTenantBlackBoxContext(String name, EventEnricher enricher) {
+        super(false, enricher, name);
     }
 
     @Override

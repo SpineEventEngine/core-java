@@ -57,7 +57,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  T extends Message,
                                  E extends MessageEnvelope<?, T, ?>,
                                  C extends MessageClass<? extends Message>,
-                                 D extends MessageDispatcher<C, E, ?>> {
+                                 D extends MessageDispatcher<C, E>> {
 
     private final ChainBuilder<E> chainBuilder;
     private final Set<Listener<E>> listeners = new HashSet<>();

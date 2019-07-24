@@ -17,32 +17,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.integration;
+package io.spine.server.dispatch;
 
-import "spine/options.proto";
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.validate.FieldAwareMessage;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.integration";
-option java_multiple_files = true;
-option java_outer_classname = "ChannelProto";
+/**
+ * A mixin interface for the {@link DispatchOutcome} message type.
+ */
+@GeneratedMixin
+interface DispatchOutcomeMixin extends DispatchOutcomeOrBuilder, FieldAwareMessage {
 
-import "google/protobuf/any.proto";
-
-// The message which is used to identify the message channel.
-message ChannelId {
-
-    // The packed value, serving as an identifier for a channel.
-    //
-    // As a channel ID is a high-level abstraction, the particular contents of this field
-    // solely depend on the usage scenario.
-    //
-    // One of the possible applications is to pack type URLs of messages, that are being served
-    // through the channel identified by this ID.
-    //
-    // `Any` is so far the best way for the framework to provide some extensibility to users,
-    // providing a complete freedom in satisfying their needs.
-    //
-    google.protobuf.Any identifier = 1 [(required) = true];
+    @Override
+    default Object readValue(FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getPropagatedSignal();
+            case 1:
+                return getSuccess();
+            case 2:
+                return getError();
+            case 3:
+                return getInterrupted();
+            case 4:
+                return getIgnored();
+            default:
+                return getField(field);
+        }
+    }
 }

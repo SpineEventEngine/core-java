@@ -18,26 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.integration.given;
 
-import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.NoOpDispatcher;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.server.command.Assign;
+import io.spine.server.event.React;
+import io.spine.server.integration.CreditsHeld;
+import io.spine.server.integration.PhotosPm;
+import io.spine.server.integration.PhotosProcessed;
+import io.spine.server.integration.PhotosUploaded;
+import io.spine.server.integration.UploadPhotos;
+import io.spine.server.procman.ProcessManager;
 
-import java.util.Set;
+public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+    @Assign
+    PhotosUploaded handle(UploadPhotos command) {
+        return PhotosUploaded
+                .newBuilder()
+                .setUuid(command.getUuid())
+                .vBuild();
+    }
 
-@DisplayName("MulticastDispatcher.Identity utility should")
-class MulticastDispatcherIdentityTest {
-
-    @Test
-    @DisplayName("return dispatcher identity")
-    void returnDispatcherIdentity() {
-        Set<String> set = new NoOpDispatcher().identity();
-
-        assertTrue(set.contains(NoOpDispatcher.ID));
-        assertEquals(1, set.size());
+    @React(external = true)
+    PhotosProcessed on(CreditsHeld event) {
+        return PhotosProcessed
+                .newBuilder()
+                .setUuid(event.getUuid())
+                .vBuild();
     }
 }

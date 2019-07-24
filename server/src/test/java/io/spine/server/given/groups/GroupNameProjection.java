@@ -37,8 +37,7 @@ public final class GroupNameProjection
 
     @Subscribe(external = true)
     void onUpdate(Organization organization) {
-        builder().setId(id())
-                 .setName(organization.getName());
+        builder().setName(organization.getName());
     }
 
     public static final class Repository
@@ -48,8 +47,7 @@ public final class GroupNameProjection
         protected void setupStateRouting(StateUpdateRouting<GroupId> routing) {
             routing.route(Organization.class, (org, ctx) -> withId(
                     GroupId.newBuilder()
-                           .setUuid(org.getId()
-                                       .getUuid())
+                           .setUuid(org.getId().getUuid())
                            .build()));
         }
     }

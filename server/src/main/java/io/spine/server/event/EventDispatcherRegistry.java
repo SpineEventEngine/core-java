@@ -35,10 +35,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>There can be multiple dispatchers per event class.
  */
 class EventDispatcherRegistry
-        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher<?>> {
+        extends DispatcherRegistry<EventClass, EventEnvelope, EventDispatcher> {
 
     @Override
-    public void register(EventDispatcher<?> dispatcher) {
+    public void register(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         Set<EventClass> eventClasses = dispatcher.messageClasses();
         checkNotEmpty(dispatcher, eventClasses);
@@ -47,7 +47,7 @@ class EventDispatcherRegistry
     }
 
     @Override
-    public void unregister(EventDispatcher<?> dispatcher) {
+    public void unregister(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         Set<EventClass> eventClasses = dispatcher.messageClasses();
         checkNotEmpty(dispatcher, eventClasses);
@@ -62,7 +62,7 @@ class EventDispatcherRegistry
      * {@linkplain EventBus#dispatchersOf(EventClass)}) EventBus}.
      */
     @Override
-    protected Set<EventDispatcher<?>> dispatchersOf(EventClass messageClass) {
+    protected Set<EventDispatcher> dispatchersOf(EventClass messageClass) {
         return super.dispatchersOf(messageClass);
     }
 
@@ -82,7 +82,7 @@ class EventDispatcherRegistry
      * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
      * @throws NullPointerException     if the dispatcher returns null set
      */
-    private void checkNotEmpty(EventDispatcher<?> dispatcher, Set<EventClass> messageClasses) {
+    private void checkNotEmpty(EventDispatcher dispatcher, Set<EventClass> messageClasses) {
         checkArgument(!messageClasses.isEmpty(),
                       "%s: No message types are forwarded by this dispatcher: %s",
                       getClass().getName(),  dispatcher);

@@ -26,7 +26,6 @@ import com.google.common.collect.Sets;
 import com.google.common.truth.Truth8;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregate;
@@ -68,6 +67,7 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -297,23 +297,6 @@ class BoundedContextTest {
     }
 
     @Nested
-    @DisplayName("match multitenancy state of")
-    class MatchMultitenancyState {
-
-        @Test
-        @DisplayName("Stand")
-        void ofStand() {
-            Stand.Builder stand = Stand.newBuilder()
-                                       .setMultitenant(false);
-            assertThrows(IllegalStateException.class,
-                         () -> BoundedContextBuilder
-                                 .assumingTests(true)
-                                 .setStand(stand)
-                                 .build());
-        }
-    }
-
-    @Nested
     @DisplayName("assign own multitenancy state to")
     class AssignMultitenancyState {
 
@@ -418,10 +401,8 @@ class BoundedContextTest {
     @DisplayName("when closing")
     class ClosingContext {
 
-        private final BoundedContextName contextName =
-                BoundedContextNames.newName("TestDomain");
-        private final BoundedContextName systemContextName =
-                BoundedContextNames.system(contextName);
+        private final BoundedContextName contextName = newName("TestDomain");
+        private final BoundedContextName systemContextName = contextName.toSystem();
         private final Level debugLevel = Logging.debugLevel();
 
         private Interceptor domainInterceptor;

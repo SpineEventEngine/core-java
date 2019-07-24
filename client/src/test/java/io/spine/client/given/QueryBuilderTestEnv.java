@@ -22,7 +22,6 @@ package io.spine.client.given;
 
 import com.google.protobuf.Message;
 import io.spine.client.OrderBy;
-import io.spine.client.Pagination;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
 
@@ -30,19 +29,12 @@ public class QueryBuilderTestEnv {
 
     public static final Class<? extends Message> TEST_ENTITY_TYPE = TestEntity.class;
     public static final TypeUrl TEST_ENTITY_TYPE_URL = TypeUrl.of(TEST_ENTITY_TYPE);
-    public static final Pagination EMPTY_PAGINATION = Pagination.getDefaultInstance();
     public static final OrderBy EMPTY_ORDER_BY = OrderBy.getDefaultInstance();
     public static final String SECOND_FIELD = "second_field";
     public static final String FIRST_FIELD = "first_field";
 
     /** Prevents instantiation of this test environment class. */
     private QueryBuilderTestEnv() {
-    }
-
-    public static Pagination pagination(int pageSize) {
-        return Pagination.newBuilder()
-                         .setPageSize(pageSize)
-                         .build();
     }
 
     public static OrderBy orderBy(String column, OrderBy.Direction direction) {

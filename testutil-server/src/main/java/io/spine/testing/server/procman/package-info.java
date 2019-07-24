@@ -21,9 +21,6 @@
 /**
  * This package provides test utilities and base classes for the unit tests of
  * {@linkplain io.spine.server.procman.ProcessManager process managers}.
-
- * @see io.spine.testing.server.procman.PmCommandTest
- * @see io.spine.testing.server.procman.PmEventReactionTest
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

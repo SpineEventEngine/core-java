@@ -68,6 +68,13 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Integration tests on message delivery that use different settings of sharding configuration and
+ * post {@code Command}s and {@code Events} via multiple threads.
+ *
+ * @implNote Some of the test methods in this test class use underscores to improve the
+ *         readability and allow to distinguish one test from another by their names faster.
+ */
 @SlowTest
 @DisplayName("Delivery of messages to entities should deliver those via")
 class DeliveryTest {
@@ -88,7 +95,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to a single target in a multi-threaded env")
-    void singleTargetSingleShardManyThreads() {
+    void singleTarget_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
         new ThreadSimulator(42).runWith(aTarget);
@@ -96,7 +103,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to multiple targets in a multi-threaded env")
-    void manyTargetsSingleShardManyThreads() {
+    void manyTargets_singleShard_manyThreads() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(7);
         new ThreadSimulator(10).runWith(targets);
@@ -104,7 +111,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to a single target in a multi-threaded env")
-    void singleTargetManyShardsManyThreads() {
+    void singleTarget_manyShards_manyThreads() {
         changeShardCountTo(1986);
         ImmutableSet<String> targets = singleTarget();
         new ThreadSimulator(15).runWith(targets);
@@ -112,7 +119,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to multiple targets in a multi-threaded env")
-    void manyTargetsManyShardsManyThreads() {
+    void manyTargets_manyShards_manyThreads() {
         changeShardCountTo(2004);
         ImmutableSet<String> targets = manyTargets(13);
         new ThreadSimulator(19).runWith(targets);
@@ -120,7 +127,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to a single target in a single-threaded env")
-    void singleTargetManyShardsSingleThread() {
+    void singleTarget_manyShards_singleThread() {
         changeShardCountTo(12);
         ImmutableSet<String> aTarget = singleTarget();
         new ThreadSimulator(1).runWith(aTarget);
@@ -128,7 +135,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to a single target in a single-threaded env")
-    void singleTargetSingleShardSingleThread() {
+    void singleTarget_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> aTarget = singleTarget();
         new ThreadSimulator(1).runWith(aTarget);
@@ -136,7 +143,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("a single shard to mutiple targets in a single-threaded env")
-    void manyTargetsSingleShardSingleThread() {
+    void manyTargets_singleShard_singleThread() {
         changeShardCountTo(1);
         ImmutableSet<String> targets = manyTargets(11);
         new ThreadSimulator(1).runWith(targets);
@@ -144,7 +151,7 @@ class DeliveryTest {
 
     @Test
     @DisplayName("multiple shards to multiple targets in a single-threaded env")
-    void manyTargetsManyShardsSingleThread() {
+    void manyTargets_manyShards_singleThread() {
         changeShardCountTo(2019);
         ImmutableSet<String> targets = manyTargets(13);
         new ThreadSimulator(1).runWith(targets);
@@ -177,7 +184,8 @@ class DeliveryTest {
     @DisplayName("multiple shards and " +
             "keep them as `TO_DELIVER` right after they are written to `InboxStorage`, " +
             "and mark every as `DELIVERED` after they are actually delivered.")
-    @SuppressWarnings("MethodWithMultipleLoops")    // Traversing over the storage.
+    @SuppressWarnings("MethodWithMultipleLoops")
+        // Traversing over the storage.
     void markDelivered() {
 
         FixedShardStrategy strategy = new FixedShardStrategy(3);
@@ -375,6 +383,14 @@ class DeliveryTest {
                             reactEventsCallables(context, eventsToReact)
                     );
             Collection<Callable<Object>> signals = signalStream.collect(toList());
+            if (1 == threadCount) {
+                runSync(signals);
+            } else {
+                runAsync(signals);
+            }
+        }
+
+        private void runAsync(Collection<Callable<Object>> signals) {
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
             try {
                 executorService.invokeAll(signals);
@@ -382,6 +398,16 @@ class DeliveryTest {
                 throw new RuntimeException(e);
             } finally {
                 executorService.shutdown();
+            }
+        }
+
+        private static void runSync(Collection<Callable<Object>> signals) {
+            for (Callable<Object> signal : signals) {
+                try {
+                    signal.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 

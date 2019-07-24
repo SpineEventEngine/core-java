@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 
@@ -38,10 +39,12 @@ public final class ContextSpec {
 
     private final BoundedContextName name;
     private final boolean multitenant;
+    private final boolean storeEvents;
 
-    private ContextSpec(BoundedContextName name, boolean multitenant) {
+    private ContextSpec(BoundedContextName name, boolean multitenant, boolean storeEvents) {
         this.name = checkNotNull(name);
         this.multitenant = multitenant;
+        this.storeEvents = storeEvents;
     }
 
     /**
@@ -49,7 +52,7 @@ public final class ContextSpec {
      */
     @VisibleForTesting
     public static ContextSpec singleTenant(String name) {
-        return create(name, false);
+        return createDomain(name, false);
     }
 
     /**
@@ -57,13 +60,13 @@ public final class ContextSpec {
      */
     @VisibleForTesting
     public static ContextSpec multitenant(String name) {
-        return create(name, true);
+        return createDomain(name, true);
     }
 
-    private static ContextSpec create(String name, boolean multitenant) {
+    private static ContextSpec createDomain(String name, boolean multitenant) {
         checkNotNull(name);
         BoundedContextName contextName = newName(name);
-        return new ContextSpec(contextName, multitenant);
+        return new ContextSpec(contextName, multitenant, true);
     }
 
     /**
@@ -78,6 +81,34 @@ public final class ContextSpec {
      */
     public boolean isMultitenant() {
         return multitenant;
+    }
+
+    /**
+     * Checks if the specified context stores its event log.
+     *
+     * <p>All domain-specific contexts store their events. A System context may be configured
+     * to store or not to store its events.
+     *
+     * @return {@code true} if the context persists its event log, {@code false otherwise}
+     */
+    @Internal
+    public boolean storesEvents() {
+        return storeEvents;
+    }
+
+    /**
+     * Converts this spec into the System spec for the counterpart of this domain context.
+     */
+    ContextSpec toSystem() {
+        return new ContextSpec(name.toSystem(), multitenant, storeEvents);
+    }
+
+    /**
+     * Creates a spec which has all the attributes of this instance and does NOT
+     * {@linkplain #storesEvents() store events}.
+     */
+    ContextSpec notStoringEvents() {
+        return new ContextSpec(name, multitenant, false);
     }
 
     /**
@@ -102,12 +133,13 @@ public final class ContextSpec {
         }
         ContextSpec spec = (ContextSpec) o;
         return isMultitenant() == spec.isMultitenant() &&
+                storeEvents == spec.storeEvents &&
                 Objects.equal(name, spec.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name, isMultitenant());
+        return Objects.hashCode(name, isMultitenant(), storeEvents);
     }
 
     @Override

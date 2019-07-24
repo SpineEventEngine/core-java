@@ -18,12 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman.given;
+/**
+ * Contains an implementation of {@link io.spine.server.storage.StorageFactory} aware of the system
+ * context specifics.
+ */
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.testing.server.given.entity.TuPmState;
-import io.spine.testing.server.given.entity.TuProjectId;
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.system;
 
-public class CommandingPmRepo
-        extends ProcessManagerRepository<TuProjectId, CommandingPm, TuPmState> {
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
+
+import javax.annotation.ParametersAreNonnullByDefault;

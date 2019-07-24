@@ -21,7 +21,7 @@ package io.spine.server.transport.memory;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.spine.server.integration.ChannelId;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
@@ -50,7 +50,8 @@ public class InMemoryTransportFactory implements TransportFactory {
     private boolean closed;
 
     /** Prevent direct instantiation from outside of the inheritance tree. */
-    protected InMemoryTransportFactory() {}
+    protected InMemoryTransportFactory() {
+    }
 
     /**
      * Creates a new instance of {@code InMemoryTransportFactory}.
@@ -62,17 +63,17 @@ public class InMemoryTransportFactory implements TransportFactory {
     }
 
     @Override
-    public final synchronized Publisher createPublisher(ChannelId channelId) {
-        checkNotNull(channelId);
-        InMemoryPublisher result = new InMemoryPublisher(channelId, providerOf(subscribers()));
+    public final synchronized Publisher createPublisher(ChannelId id) {
+        checkNotNull(id);
+        InMemoryPublisher result = new InMemoryPublisher(id, providerOf(subscribers()));
         return result;
     }
 
     @Override
-    public final synchronized Subscriber createSubscriber(ChannelId channelId) {
-        checkNotNull(channelId);
-        Subscriber subscriber = newSubscriber(channelId);
-        subscribers().put(channelId, subscriber);
+    public final synchronized Subscriber createSubscriber(ChannelId id) {
+        checkNotNull(id);
+        Subscriber subscriber = newSubscriber(id);
+        subscribers().put(id, subscriber);
         return subscriber;
     }
 
@@ -82,20 +83,22 @@ public class InMemoryTransportFactory implements TransportFactory {
      * <p>The descendants may override this method to customize the implementation of subscribers
      * to use within this {@code TransportFactory} instance.
      *
-     * @param channelId the channel ID to create a subscriber for
-     * @return an instance of subscriber
+     * @param id
+     *         the identifier of the resulting subscriber
+     * @return an instance of subscribe
      */
-    protected Subscriber newSubscriber(ChannelId channelId) {
-        checkNotNull(channelId);
-        return new InMemorySubscriber(channelId);
+    protected Subscriber newSubscriber(ChannelId id) {
+        checkNotNull(id);
+        return new InMemorySubscriber(id);
     }
 
     /**
      * Wraps currently registered in-memory subscribers into a function that returns a subset
-     * of subscribers per channel ID.
+     * of subscribers per message type.
      *
-     * @param subscribers currently registered subscribers and their channel identifiers
-     * @return a provider function allowing to fetch subscribers by the channel ID.
+     * @param subscribers
+     *         currently registered subscribers
+     * @return a provider function allowing to fetch subscribers by the message type
      */
     private static Function<ChannelId, Iterable<Subscriber>>
     providerOf(Multimap<ChannelId, Subscriber> subscribers) {
@@ -113,5 +116,6 @@ public class InMemoryTransportFactory implements TransportFactory {
     @Override
     public synchronized void close() {
         closed = true;
+        subscribers.clear();
     }
 }

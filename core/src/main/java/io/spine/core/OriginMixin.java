@@ -20,7 +20,10 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Descriptors;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
+import io.spine.validate.FieldAwareMessage;
 
 import static io.spine.validate.Validate.isNotDefault;
 
@@ -28,7 +31,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * A mixin interface for the {@link Origin} message type.
  */
 @GeneratedMixin
-interface OriginMixin extends OriginOrBuilder {
+interface OriginMixin extends OriginOrBuilder, FieldAwareMessage {
 
     default MessageId messageId() {
         return getMessage();
@@ -45,5 +48,20 @@ interface OriginMixin extends OriginOrBuilder {
             root = root.getGrandOrigin();
         }
         return root.messageId();
+    }
+
+    @Override
+    @Internal
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getMessage();
+            case 1:
+                return getGrandOrigin();
+            case 2:
+                return getActorContext();
+            default:
+                return getField(field);
+        }
     }
 }

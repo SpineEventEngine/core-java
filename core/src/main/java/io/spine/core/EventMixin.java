@@ -21,9 +21,11 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
+import io.spine.validate.FieldAwareMessage;
 import io.spine.validate.Validate;
 
 import java.util.Optional;
@@ -35,7 +37,7 @@ import static io.spine.validate.Validate.isDefault;
  * Mixin interface for event objects.
  */
 @Immutable
-public interface EventMixin extends Signal<EventId, EventMessage, EventContext> {
+public interface EventMixin extends Signal<EventId, EventMessage, EventContext>, FieldAwareMessage {
 
     /**
      * Obtains the ID of the tenant of the event.
@@ -155,6 +157,21 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext> 
         return Signal.super.messageId()
                            .toBuilder()
                            .setVersion(context().getVersion())
-                           .vBuild();
+                           .build();
+    }
+
+    @Override
+    @Internal
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        switch (field.getIndex()) {
+            case 0:
+                return getId();
+            case 1:
+                return getMessage();
+            case 2:
+                return getContext();
+            default:
+                return getField(field);
+        }
     }
 }
