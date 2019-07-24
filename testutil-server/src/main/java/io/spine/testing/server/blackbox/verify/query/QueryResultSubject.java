@@ -21,7 +21,6 @@
 package io.spine.testing.server.blackbox.verify.query;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
@@ -33,12 +32,11 @@ import io.spine.core.Status.StatusCase;
 import io.spine.core.Version;
 import io.spine.testing.server.entity.EntityVersionSubject;
 import io.spine.testing.server.entity.IterableEntityVersionSubject;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.truth.Fact.simpleFact;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.assertResponseStatus;
@@ -104,31 +102,29 @@ public final class QueryResultSubject
     }
 
     public static
-    QueryResultSubject assertQueryResponse(@Nullable QueryResponse queryResponse) {
+    QueryResultSubject assertQueryResponse(QueryResponse queryResponse) {
+        checkNotNull(queryResponse, "`QueryResponse` must never be `null`");
         Iterable<Message> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
-        if (queryResponse == null) {
-            subject.failWithoutActual(simpleFact("`QueryResponse` must never be `null`"));
-            return subject;
-        }
         subject.initChildSubjects(queryResponse);
         return subject;
+    }
+
+    public void hasStatus(StatusCase status) {
+        checkNotNull(status);
+        statusSubject.hasStatusCase(status);
     }
 
     public ResponseStatusSubject hasStatusThat() {
         return statusSubject;
     }
 
-    public void hasStatus(StatusCase status) {
-        statusSubject.hasStatusCase(status);
-    }
-
     public ProtoSubject<?, Message> containsSingleEntityStateThat() {
         assertContainsSingleItem();
         Message entityState = actual().iterator()
                                       .next();
-        ProtoSubject<?, Message> subject = check("iterator().next()").about(protos())
-                                                                     .that(entityState);
+        ProtoSubject<?, Message> subject = check("singleEntityState()").about(protos())
+                                                                       .that(entityState);
         return subject;
     }
 
@@ -144,10 +140,7 @@ public final class QueryResultSubject
         hasSize(1);
     }
 
-    private static Iterable<Message> extractEntityStates(@Nullable QueryResponse queryResponse) {
-        if (queryResponse == null) {
-            return ImmutableList.of();
-        }
+    private static Iterable<Message> extractEntityStates(QueryResponse queryResponse) {
         List<Message> result = queryResponse.states()
                                             .stream()
                                             .map(Message.class::cast)
@@ -156,7 +149,7 @@ public final class QueryResultSubject
     }
 
     private static Collection<Version> extractEntityVersions(QueryResponse queryResponse) {
-        return ImmutableList.of();
+        return queryResponse.versions();
     }
 
     private static Status extractStatus(QueryResponse queryResponse) {
