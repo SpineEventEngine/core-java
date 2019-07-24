@@ -44,31 +44,30 @@ import static io.spine.testing.server.entity.IterableEntityVersionSubject.entity
 import static java.util.stream.Collectors.toList;
 
 /**
- * A set of assertions for {@link io.spine.client.Query Query} execution result.
+ * A set of assertions for a {@link io.spine.client.Query Query} execution result.
  *
- * <p>The class base methods check the {@code Iterable} of entity states received in the
- * {@link QueryResponse} in the {@link Message} form as follows:
+ * <p>The class base methods check a set of entity states received in the {@link QueryResponse} in
+ * form of {@link Message messages}. The subject can be used as follows:
  * <pre>
  *     {@code
  *          context.assertQueryResult(query)
- *                 .comparingExpectedFieldsOnly()
  *                 .containsExactly(state1, state2);
  *      }
  * </pre>
  *
- * <p>There are also convenience methods for checking response {@link Status} and entity
+ * <p>There are also convenience methods for checking response {@link Status} and received entity
  * {@linkplain Version versions}, as well as some others.
  *
  * <p>This class is not a "typical" {@link Subject} in a sense that it's not accessible to the
- * outer world through it's {@linkplain #queryResult() factory}, but is rather created with
- * {@link #assertQueryResponse(QueryResponse)} {@code static} method.
+ * outer world through it's {@linkplain #queryResult() factory}, but is rather created with a
+ * custom {@code static} {@linkplain #assertQueryResponse(QueryResponse) method}.
  */
 @VisibleForTesting
 public final class QueryResultSubject
         extends IterableOfProtosSubject<QueryResultSubject, Message, Iterable<Message>> {
 
     /**
-     * The helper {@code Subject} to check the{@link QueryResponse} status.
+     * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
      *
      * <p>Is effectively {@code final}, as the only way to create an instance of
      * {@code QueryResultSubject} is to use the {@link #assertQueryResponse(QueryResponse)} method.
@@ -76,7 +75,8 @@ public final class QueryResultSubject
     private ResponseStatusSubject statusSubject;
 
     /**
-     * The helper {@code Subject} to assess received entity {@linkplain Version versions}.
+     * A helper {@code Subject} which allows to verify the {@linkplain Version versions} of
+     * entities in {@link QueryResponse}.
      *
      * <p>Is effectively {@code final}, as the only way to create an instance of
      * {@code QueryResultSubject} is to use the {@link #assertQueryResponse(QueryResponse)} method.
@@ -99,14 +99,15 @@ public final class QueryResultSubject
     }
 
     /**
-     * Creates an instance of {@code QueryResultSubject}.
+     * Creates a new instance of the subject.
      *
-     * <p>Unlike other {@code Subject}s factory methods, does not accept {@code null} arguments, as
-     * it's always an error to receive a {@code null} {@code QueryResponse}.
+     * <p>Unlike other {@code Subject}s, the {@code QueryResultSubject} does not accept
+     * {@code null} arguments, as {@code null} {@code QueryResponse} always indicates an error.
      */
     public static
     QueryResultSubject assertQueryResponse(QueryResponse queryResponse) {
         checkNotNull(queryResponse, "`QueryResponse` must never be `null`");
+
         Iterable<Message> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
         subject.initChildSubjects(queryResponse);
@@ -122,7 +123,7 @@ public final class QueryResultSubject
     }
 
     /**
-     * Obtains a {@code Subject} for more detailed status checks.
+     * Obtains a {@code ResponseStatusSubject} for more detailed status checks.
      */
     public ResponseStatusSubject hasStatusThat() {
         return statusSubject;

@@ -19,8 +19,8 @@
  */
 
 /**
- * Tools for {@link io.spine.client.Query Query} result verification in a black box bounded
- * context.
+ * Tools that assess the {@code BlackBoxBoundedContext} state through
+ * {@link io.spine.client.Query Query} execution.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

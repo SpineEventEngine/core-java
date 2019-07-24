@@ -70,11 +70,7 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
         hasStatusCase(REJECTION);
     }
 
-    /**
-     * Verifies the response status matches the specified {@code statusCase}.
-     */
-    public void hasStatusCase(StatusCase statusCase) {
-        checkNotNull(statusCase);
+    void hasStatusCase(StatusCase statusCase) {
         assertExists();
         check("statusCase()").that(statusCase())
                              .isEqualTo(statusCase);

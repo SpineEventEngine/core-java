@@ -49,6 +49,7 @@ class ResponseStatusSubjectTest extends SubjectTest<ResponseStatusSubject, Statu
     void checkOk() {
         assertWithSubjectThat(ok())
                 .isOk();
+
         expectSomeFailure(whenTesting -> whenTesting.that(ok())
                                                     .isError());
     }
@@ -58,6 +59,7 @@ class ResponseStatusSubjectTest extends SubjectTest<ResponseStatusSubject, Statu
     void checkError() {
         assertWithSubjectThat(error())
                 .isError();
+
         expectSomeFailure(whenTesting -> whenTesting.that(error())
                                                     .isOk());
     }
@@ -67,6 +69,7 @@ class ResponseStatusSubjectTest extends SubjectTest<ResponseStatusSubject, Statu
     void checkRejection() {
         assertWithSubjectThat(rejection())
                 .isRejection();
+
         expectSomeFailure(whenTesting -> whenTesting.that(rejection())
                                                     .isOk());
     }

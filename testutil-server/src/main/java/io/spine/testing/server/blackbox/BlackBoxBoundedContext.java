@@ -815,7 +815,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Obtains the subject for checking the given {@code Query} execution result.
+     * Obtains the subject for checking the {@code Query} execution result.
      */
     public QueryResultSubject assertQueryResult(Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();

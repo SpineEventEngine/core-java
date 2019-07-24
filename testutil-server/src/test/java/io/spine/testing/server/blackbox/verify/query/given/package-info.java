@@ -19,7 +19,8 @@
  */
 
 /**
- * Test environment for tests of {@link io.spine.client.Query Query} verification tools.
+ * Test environment for tools that assess {@code BlackBoxBoundedContext} state by executing
+ * queries.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

@@ -578,7 +578,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 .newBuilder()
                 .setId(id)
                 .build();
-
         context.assertQueryResult(query)
                .comparingExpectedFieldsOnly()
                .containsExactly(expected);
