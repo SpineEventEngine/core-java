@@ -82,7 +82,7 @@ public final class QueryResultSubject
     }
 
     public static
-    QueryResultSubject assertQueryResult(@Nullable QueryResponse queryResponse) {
+    QueryResultSubject assertQueryResponse(@Nullable QueryResponse queryResponse) {
         Iterable<Message> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
         if (queryResponse == null) {

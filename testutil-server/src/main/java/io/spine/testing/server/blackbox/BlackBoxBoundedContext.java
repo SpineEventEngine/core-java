@@ -21,8 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.truth.Truth;
-import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -821,7 +819,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                .execute(query, observer);
         assertTrue(observer.isCompleted());
         QueryResponse response = observer.firstResponse();
-        QueryResultSubject subject = QueryResultSubject.assertQueryResult(response);
+        QueryResultSubject subject = QueryResultSubject.assertQueryResponse(response);
         Status status = response.getResponse()
                                 .getStatus();
         return subject;
