@@ -30,6 +30,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.core.Status.StatusCase.OK;
+import static io.spine.core.Status.StatusCase.REJECTION;
 
 @VisibleForTesting
 public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
@@ -43,9 +46,32 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
         return assertAbout(responseStatus()).that(status);
     }
 
+    public void isOk() {
+        assertNotNull();
+        assertThat(statusCase()).isEqualTo(OK);
+    }
+
+    public void isError() {
+        assertNotNull();
+        assertThat(statusCase()).isEqualTo(ERROR);
+    }
+
+    public void isRejection() {
+        assertNotNull();
+        assertThat(statusCase()).isEqualTo(REJECTION);
+    }
+
     public void hasStatusCase(StatusCase statusCase) {
+        assertNotNull();
+        assertThat(statusCase()).isEqualTo(statusCase);
+    }
+
+    private StatusCase statusCase() {
+        return actual().getStatusCase();
+    }
+
+    private void assertNotNull() {
         isNotNull();
-        assertThat(actual().getStatusCase()).isEqualTo(statusCase);
     }
 
     static
