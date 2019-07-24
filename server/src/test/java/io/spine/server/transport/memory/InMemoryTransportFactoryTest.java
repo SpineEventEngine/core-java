@@ -21,9 +21,8 @@
 package io.spine.server.transport.memory;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.server.model.Nothing;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.TransportFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +46,7 @@ class InMemoryTransportFactoryTest {
 
         assertThrows(
                 IllegalStateException.class, () ->
-                transportFactory.createPublisher(TypeUrl.of(Nothing.class))
+                transportFactory.createPublisher(ChannelId.getDefaultInstance())
         );
     }
 

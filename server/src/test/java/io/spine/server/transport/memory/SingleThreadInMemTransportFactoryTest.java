@@ -20,9 +20,8 @@
 
 package io.spine.server.transport.memory;
 
-import io.spine.server.model.Nothing;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.TransportFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,7 +41,7 @@ class SingleThreadInMemTransportFactoryTest {
     @Test
     @DisplayName("create `SingleThreadInMemSubscriber`")
     void subscribers() {
-        assertThat(transportFactory.createSubscriber(TypeUrl.of(Nothing.class)))
+        assertThat(transportFactory.createSubscriber(ChannelId.getDefaultInstance()))
                 .isInstanceOf(SingleThreadInMemSubscriber.class);
     }
 }

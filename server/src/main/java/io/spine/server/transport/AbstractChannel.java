@@ -20,7 +20,6 @@
 package io.spine.server.transport;
 
 import io.spine.annotation.SPI;
-import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,14 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class AbstractChannel implements MessageChannel {
 
-    private final TypeUrl targetType;
+    private final ChannelId id;
 
-    protected AbstractChannel(TypeUrl targetType) {
-        this.targetType = checkNotNull(targetType);
+    protected AbstractChannel(ChannelId id) {
+        this.id = checkNotNull(id);
     }
 
     @Override
-    public TypeUrl targetType() {
-        return targetType;
+    public ChannelId id() {
+        return id;
     }
 }

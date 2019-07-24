@@ -17,9 +17,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.transport;
 
-import io.spine.type.TypeUrl;
+package io.spine.server.transport;
 
 /**
  * The hub of {@link Publisher}s.
@@ -34,7 +33,7 @@ public class PublisherHub extends ChannelHub<Publisher> {
     }
 
     @Override
-    protected Publisher newChannel(TypeUrl targetType) {
-        return transportFactory().createPublisher(targetType);
+    protected Publisher newChannel(ChannelId channelId) {
+        return transportFactory().createPublisher(channelId);
     }
 }

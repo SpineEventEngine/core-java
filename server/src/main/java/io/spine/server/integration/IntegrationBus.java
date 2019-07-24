@@ -34,6 +34,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
@@ -44,6 +45,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.transport.MessageChannel.channelIdFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
@@ -110,10 +112,10 @@ public class IntegrationBus
                              ExternalMessageDispatcher>
         implements ContextAware {
 
-    private static final TypeUrl CONFIG_EXCHANGE_CHANNEL =
-            TypeUrl.of(RequestForExternalMessages.class);
-    private static final TypeUrl EVENT =
-            TypeUrl.of(Event.class);
+    private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID = channelIdFor(
+            TypeUrl.of(RequestForExternalMessages.class)
+    );
+    private static final TypeUrl EVENT = TypeUrl.of(Event.class);
 
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
@@ -136,10 +138,10 @@ public class IntegrationBus
         this.boundedContextName = context.name();
         this.localBusAdapters = createAdapters(context);
         this.configurationChangeObserver = observeConfigurationChanges();
-        Publisher configurationPublisher = publisherHub.get(CONFIG_EXCHANGE_CHANNEL);
+        Publisher configurationPublisher = publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID);
         this.configurationBroadcast =
                 new ConfigurationBroadcast(boundedContextName, configurationPublisher);
-        subscriberHub.get(CONFIG_EXCHANGE_CHANNEL)
+        subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                      .addObserver(configurationChangeObserver);
     }
 
@@ -222,8 +224,8 @@ public class IntegrationBus
         super.register(dispatcher);
         Iterable<ExternalMessageClass> receivedTypes = dispatcher.messageClasses();
         for (ExternalMessageClass cls : receivedTypes) {
-            TypeUrl targetType = TypeUrl.of(cls.value());
-            Subscriber subscriber = subscriberHub.get(targetType);
+            ChannelId channelId = toChannelId(cls);
+            Subscriber subscriber = subscriberHub.get(channelId);
             ExternalMessageObserver observer = observerFor(cls);
             subscriber.addObserver(observer);
             notifyOfUpdatedNeeds();
@@ -241,12 +243,17 @@ public class IntegrationBus
         super.unregister(dispatcher);
         Iterable<ExternalMessageClass> transformed = dispatcher.messageClasses();
         for (ExternalMessageClass cls : transformed) {
-            TypeUrl targetType = TypeUrl.of(cls.value());
-            Subscriber subscriber = subscriberHub.get(targetType);
+            ChannelId channelId = toChannelId(cls);
+            Subscriber subscriber = subscriberHub.get(channelId);
             ExternalMessageObserver observer = observerFor(cls);
             subscriber.removeObserver(observer);
         }
         subscriberHub.closeStaleChannels();
+    }
+
+    private static ChannelId toChannelId(ExternalMessageClass cls) {
+        TypeUrl targetType = TypeUrl.of(cls.value());
+        return channelIdFor(targetType);
     }
 
     private ExternalMessageObserver observerFor(ExternalMessageClass externalClass) {
@@ -264,11 +271,11 @@ public class IntegrationBus
      */
     private void notifyOfUpdatedNeeds() {
         ImmutableSet<ExternalMessageType> needs = subscriberHub
-                .types()
+                .ids()
                 .stream()
-                .map(type -> ExternalMessageType
+                .map(channelId -> ExternalMessageType
                         .newBuilder()
-                        .setMessageTypeUrl(type.value())
+                        .setMessageTypeUrl(channelId.getTargetType())
                         .setWrapperTypeUrl(EVENT.value())
                         .buildPartial())
                 .collect(toImmutableSet());

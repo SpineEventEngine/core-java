@@ -20,8 +20,8 @@
 package io.spine.server.transport.memory;
 
 import io.grpc.Internal;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Subscriber;
-import io.spine.type.TypeUrl;
 
 /**
  * An in-memory implementation of the {@link Subscriber}.
@@ -31,7 +31,7 @@ import io.spine.type.TypeUrl;
 @Internal
 public class InMemorySubscriber extends Subscriber {
 
-    public InMemorySubscriber(TypeUrl targetType) {
-        super(targetType);
+    public InMemorySubscriber(ChannelId id) {
+        super(id);
     }
 }

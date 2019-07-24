@@ -33,11 +33,11 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -339,13 +339,13 @@ class ServerEnvironmentTest {
         private final TransportFactory delegate = InMemoryTransportFactory.newInstance();
 
         @Override
-        public Publisher createPublisher(TypeUrl type) {
-            return delegate.createPublisher(type);
+        public Publisher createPublisher(ChannelId id) {
+            return delegate.createPublisher(id);
         }
 
         @Override
-        public Subscriber createSubscriber(TypeUrl type) {
-            return delegate.createSubscriber(type);
+        public Subscriber createSubscriber(ChannelId id) {
+            return delegate.createSubscriber(id);
         }
 
         @Override

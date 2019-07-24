@@ -19,8 +19,8 @@
  */
 package io.spine.server.transport.memory;
 
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Subscriber;
-import io.spine.type.TypeUrl;
 
 /**
  * The implementation of {@link io.spine.server.transport.TransportFactory TransportFactory}
@@ -37,7 +37,7 @@ public class SingleThreadInMemTransportFactory extends InMemoryTransportFactory 
     }
 
     @Override
-    protected Subscriber newSubscriber(TypeUrl targetType) {
-        return new SingleThreadInMemSubscriber(targetType);
+    protected Subscriber newSubscriber(ChannelId channelId) {
+        return new SingleThreadInMemSubscriber(channelId);
     }
 }

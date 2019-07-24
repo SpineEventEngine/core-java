@@ -21,15 +21,17 @@ package io.spine.server.transport;
 
 import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A channel dedicated to exchanging the messages.
  */
 public interface MessageChannel extends AutoCloseable {
 
     /**
-     * Obtains the type of the messages transferred through this channel.
+     * Obtains the channel identifier.
      */
-    TypeUrl targetType();
+    ChannelId id();
 
     /**
      * Allows to understand whether this channel is stale and can be closed.
@@ -37,4 +39,20 @@ public interface MessageChannel extends AutoCloseable {
      * @return {@code true} if the channel is stale, {@code false} otherwise
      */
     boolean isStale();
+
+    /**
+     * Obtains the type of the messages transferred through this channel.
+     */
+    default TypeUrl targetType() {
+        ChannelId channelId = id();
+        return TypeUrl.parse(channelId.getTargetType());
+    }
+
+    static ChannelId channelIdFor(TypeUrl messageType) {
+        checkNotNull(messageType);
+        ChannelId channelId = ChannelId.newBuilder()
+                                       .setTargetType(messageType.value())
+                                       .build();
+        return channelId;
+    }
 }
