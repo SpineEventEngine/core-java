@@ -48,6 +48,12 @@ public interface MessageChannel extends AutoCloseable {
         return TypeUrl.parse(channelId.getTargetType());
     }
 
+    /**
+     * Converts the given message type into a {@link ChannelId}.
+     *
+     * @param messageType the type of messages transmitted through the channel
+     * @return channel ID
+     */
     static ChannelId channelIdFor(TypeUrl messageType) {
         checkNotNull(messageType);
         ChannelId channelId = ChannelId.newBuilder()
