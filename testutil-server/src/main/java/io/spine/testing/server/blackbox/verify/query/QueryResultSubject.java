@@ -39,8 +39,8 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
-import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.assertResponseStatus;
-import static io.spine.testing.server.entity.IterableEntityVersionSubject.assertEntityVersions;
+import static io.spine.testing.server.blackbox.verify.query.ResponseStatusSubject.responseStatus;
+import static io.spine.testing.server.entity.IterableEntityVersionSubject.entityVersions;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -95,10 +95,12 @@ public final class QueryResultSubject
 
     private void initChildSubjects(QueryResponse queryResponse) {
         Status status = extractStatus(queryResponse);
-        statusSubject = assertResponseStatus(status);
+        statusSubject = check("getResponse().getStatus()").about(responseStatus())
+                                                          .that(status);
 
         Iterable<Version> versions = extractEntityVersions(queryResponse);
-        versionsSubject = assertEntityVersions(versions);
+        versionsSubject = check("getEntityVersions()").about(entityVersions())
+                                                      .that(versions);
     }
 
     public static

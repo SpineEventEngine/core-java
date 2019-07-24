@@ -27,8 +27,9 @@ import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
 import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
-import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVersion;
+import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
 
 @VisibleForTesting
 public final class IterableEntityVersionSubject
@@ -45,30 +46,39 @@ public final class IterableEntityVersionSubject
     }
 
     public void containsAllNewerThan(Version version) {
+        checkNotNull(version);
         assertExists();
-        actual().forEach(v -> assertEntityVersion(v).isNewerThan(version));
+        actual().forEach(v -> assertVersion(v).isNewerThan(version));
     }
 
     public void containsAllNewerOrEqualTo(Version version) {
+        checkNotNull(version);
         assertExists();
-        actual().forEach(v -> assertEntityVersion(v).isNewerOrEqualTo(version));
+        actual().forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
     }
 
     public void containsAllOlderThan(Version version) {
+        checkNotNull(version);
         assertExists();
-        actual().forEach(v -> assertEntityVersion(v).isOlderThan(version));
+        actual().forEach(v -> assertVersion(v).isOlderThan(version));
     }
 
     public void containsAllOlderOrEqualTo(Version version) {
+        checkNotNull(version);
         assertExists();
-        actual().forEach(v -> assertEntityVersion(v).isOlderOrEqualTo(version));
+        actual().forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
     }
 
     public EntityVersionSubject containsSingleEntityVersionThat() {
         assertContainsSingleItem();
         Version version = actual().iterator()
                                   .next();
-        return assertEntityVersion(version);
+        return assertVersion(version);
+    }
+
+    private EntityVersionSubject assertVersion(Version version) {
+        return check("singleEntityVersion()").about(entityVersion())
+                                             .that(version);
     }
 
     private void assertContainsSingleItem() {
@@ -80,7 +90,7 @@ public final class IterableEntityVersionSubject
         isNotNull();
     }
 
-    static
+    public static
     Subject.Factory<IterableEntityVersionSubject, Iterable<Version>> entityVersions() {
         return IterableEntityVersionSubject::new;
     }
