@@ -44,6 +44,26 @@ public final class IterableEntityVersionSubject
         return assertAbout(entityVersions()).that(versions);
     }
 
+    public void containsAllNewerThan(Version version) {
+        assertExists();
+        actual().forEach(v -> assertEntityVersion(v).isNewerThan(version));
+    }
+
+    public void containsAllNewerOrEqualTo(Version version) {
+        assertExists();
+        actual().forEach(v -> assertEntityVersion(v).isNewerOrEqualTo(version));
+    }
+
+    public void containsAllOlderThan(Version version) {
+        assertExists();
+        actual().forEach(v -> assertEntityVersion(v).isOlderThan(version));
+    }
+
+    public void containsAllOlderOrEqualTo(Version version) {
+        assertExists();
+        actual().forEach(v -> assertEntityVersion(v).isOlderOrEqualTo(version));
+    }
+
     public EntityVersionSubject containsSingleEntityVersionThat() {
         assertContainsSingleItem();
         Version version = actual().iterator()
@@ -52,8 +72,12 @@ public final class IterableEntityVersionSubject
     }
 
     private void assertContainsSingleItem() {
-        isNotNull();
+        assertExists();
         hasSize(1);
+    }
+
+    private void assertExists() {
+        isNotNull();
     }
 
     static

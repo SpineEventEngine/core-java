@@ -47,22 +47,22 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
     }
 
     public void isOk() {
-        assertNotNull();
+        assertExists();
         assertThat(statusCase()).isEqualTo(OK);
     }
 
     public void isError() {
-        assertNotNull();
+        assertExists();
         assertThat(statusCase()).isEqualTo(ERROR);
     }
 
     public void isRejection() {
-        assertNotNull();
+        assertExists();
         assertThat(statusCase()).isEqualTo(REJECTION);
     }
 
     public void hasStatusCase(StatusCase statusCase) {
-        assertNotNull();
+        assertExists();
         assertThat(statusCase()).isEqualTo(statusCase);
     }
 
@@ -70,7 +70,7 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
         return actual().getStatusCase();
     }
 
-    private void assertNotNull() {
+    private void assertExists() {
         isNotNull();
     }
 

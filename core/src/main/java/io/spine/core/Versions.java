@@ -78,12 +78,10 @@ public final class Versions {
     public static void checkIsIncrement(Version currentVersion, Version newVersion) {
         checkNotNull(currentVersion);
         checkNotNull(newVersion);
-        int currentNumber = currentVersion.getNumber();
-        int newNumber = newVersion.getNumber();
-        if (newNumber <= currentNumber) {
+        if (!newVersion.isIncrement(currentVersion)) {
             String errMsg = format(
                     "New version number (%d) cannot be less or equal to the current (%d).",
-                    newNumber, currentNumber);
+                    newVersion.getNumber(), currentVersion.getNumber());
             throw new IllegalArgumentException(errMsg);
         }
     }

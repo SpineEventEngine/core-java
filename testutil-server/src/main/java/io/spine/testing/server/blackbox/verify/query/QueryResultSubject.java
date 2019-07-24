@@ -136,7 +136,7 @@ public final class QueryResultSubject
         return versionsSubject.containsSingleEntityVersionThat();
     }
 
-    public IterableEntityVersionSubject containsEntityVersionsSuchThat() {
+    public IterableEntityVersionSubject containsEntityVersionListThat() {
         return versionsSubject;
     }
 

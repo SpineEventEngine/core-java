@@ -32,6 +32,7 @@ import "google/protobuf/timestamp.proto";
 
 // A version number with timestamp of the version creation.
 message Version {
+    option (is).java_type = "io.spine.core.VersionMixin";
 
     // A zero-based version number.
     //
