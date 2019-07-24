@@ -20,23 +20,166 @@
 
 package io.spine.testing.server.blackbox.verify.query;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
 import com.google.protobuf.Message;
 import io.spine.client.QueryResponse;
 import io.spine.testing.SubjectTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.ExpectFailure.assertThat;
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.core.Status.StatusCase.OK;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.assertQueryResponse;
 import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.queryResult;
+import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.responseWithMultipleEntities;
+import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.responseWithSingleEntity;
+import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.state2;
+import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.version2;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("QueryResultSubjectShould")
+@DisplayName("QueryResultSubject should")
 class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Message>> {
+
+    private static final String EXPECTED_ASSERTION_ERROR_TO_BE_THROWN =
+            "Expected `AssertionError` to be thrown";
 
     @Override
     protected Subject.Factory<QueryResultSubject, Iterable<Message>> subjectFactory() {
         return queryResult();
     }
 
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(QueryResultSubject.class);
+        new NullPointerTester()
+                .testAllPublicInstanceMethods(assertWithSubjectThat(responseWithSingleEntity()));
+    }
+
+    @Test
+    @DisplayName("check the response status")
+    void checkResponseStatus() {
+        AssertionError error = expectFailure(
+                () -> assertWithSubjectThat(responseWithSingleEntity())
+                        .hasStatus(ERROR)
+        );
+        assertThat(error).factValue(EXPECTED)
+                         .isEqualTo(ERROR.toString());
+        assertThat(error).factValue(BUT_WAS)
+                         .isEqualTo(OK.toString());
+    }
+
+    @Test
+    @DisplayName("provide subject for the response status")
+    void provideResponseStatusSubject() {
+        AssertionError error = expectFailure(
+                () -> assertWithSubjectThat(responseWithSingleEntity())
+                        .hasStatusThat()
+                        .isError()
+        );
+        assertThat(error).factValue(EXPECTED)
+                         .isEqualTo(ERROR.toString());
+        assertThat(error).factValue(BUT_WAS)
+                         .isEqualTo(OK.toString());
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
+    // Method called to raise an error.
+    @Test
+    @DisplayName("check contains a single entity state")
+    void checkSingleEntityState() {
+        AssertionError error = expectFailure(
+                () -> assertWithSubjectThat(responseWithMultipleEntities())
+                        .containsSingleEntityStateThat()
+        );
+        assertThat(error).factValue(EXPECTED)
+                         .contains("1");
+
+        String actualCount = String.valueOf(responseWithMultipleEntities().size());
+        assertThat(error).factValue(BUT_WAS)
+                         .contains(actualCount);
+    }
+
+    @Test
+    @DisplayName("provide a `ProtoSubject` for yielded entity state")
+    void provideEntityStateProtoSubject() {
+        expectSomeFailure(
+                () -> assertWithSubjectThat(responseWithSingleEntity())
+                        .containsSingleEntityStateThat()
+                .isEqualTo(state2())
+        );
+    }
+
+    @SuppressWarnings("CheckReturnValue") // Method called to raise an error.
+    @Test
+    @DisplayName("check contains a single entity version")
+    void checkSingleEntityVersion() {
+        AssertionError error = expectFailure(
+                () -> assertWithSubjectThat(responseWithMultipleEntities())
+                        .containsSingleEntityVersionThat()
+        );
+        assertThat(error).factValue(EXPECTED)
+                         .contains("1");
+
+        String actualCount = String.valueOf(responseWithMultipleEntities().size());
+        assertThat(error).factValue(BUT_WAS)
+                         .contains(actualCount);
+    }
+
+    @Test
+    @DisplayName("provide an `EntityVersionSubject` for yielded entity version")
+    void provideEntityVersionSubject() {
+        expectSomeFailure(
+                () -> assertWithSubjectThat(responseWithSingleEntity())
+                        .containsSingleEntityVersionThat()
+                        .isEqualTo(version2())
+        );
+    }
+
+    @SuppressWarnings("CheckReturnValue") // Method called to raise an error.
+    @Test
+    @DisplayName("provide a subject for yielded entity versions when they are multiple")
+    void provideIterableEntityVersionSubject() {
+        int expectedSize = 3;
+        AssertionError error = expectFailure(
+                () -> assertWithSubjectThat(responseWithMultipleEntities())
+                        .containsEntityVersionListThat()
+                        .hasSize(expectedSize)
+        );
+        assertThat(error).factValue(EXPECTED)
+                         .contains(String.valueOf(expectedSize));
+
+        String actualCount = String.valueOf(responseWithMultipleEntities().size());
+        assertThat(error).factValue(BUT_WAS)
+                         .contains(actualCount);
+    }
+
     private static QueryResultSubject assertWithSubjectThat(QueryResponse queryResponse) {
-        return QueryResultSubject.assertQueryResponse(queryResponse);
+        return assertQueryResponse(queryResponse);
+    }
+
+    @SuppressWarnings("ErrorNotRethrown") // Ignore the error.
+    private static void expectSomeFailure(Runnable call) {
+        try {
+            call.run();
+            fail(EXPECTED_ASSERTION_ERROR_TO_BE_THROWN);
+        } catch (AssertionError ignored) {
+        }
+    }
+
+    @SuppressWarnings({"ReturnOfNull" /* Not reachable. */,
+            "ErrorNotRethrown" /* Error is expected. */})
+    private static AssertionError expectFailure(Runnable call) {
+        try {
+            call.run();
+            fail(EXPECTED_ASSERTION_ERROR_TO_BE_THROWN);
+        } catch (AssertionError e) {
+            return e;
+        }
+        return null;
     }
 }
