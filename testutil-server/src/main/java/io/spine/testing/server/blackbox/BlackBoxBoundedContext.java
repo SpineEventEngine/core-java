@@ -33,12 +33,12 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.QueryService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
@@ -815,13 +815,14 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     public QueryResultSubject assertQueryResult(Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        context.stand()
-               .execute(query, observer);
+        QueryService queryService = QueryService.newBuilder()
+                                                .add(context)
+                                                .build();
+        queryService.read(query, observer);
         assertTrue(observer.isCompleted());
+
         QueryResponse response = observer.firstResponse();
         QueryResultSubject subject = QueryResultSubject.assertQueryResponse(response);
-        Status status = response.getResponse()
-                                .getStatus();
         return subject;
     }
 }
