@@ -22,17 +22,29 @@ package io.spine.testing.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
 import io.spine.core.Version;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static com.google.common.truth.Truth.assertAbout;
 
 @VisibleForTesting
-public class IterableEntityVersionSubject extends IterableOfProtosSubject<IterableEntityVersionSubject, Version, Iterable<Version>> {
+public class IterableEntityVersionSubject
+        extends IterableOfProtosSubject<IterableEntityVersionSubject, Version, Iterable<Version>> {
 
     private IterableEntityVersionSubject(FailureMetadata failureMetadata,
-                                         @NullableDecl Iterable<Version> messages) {
-        super(failureMetadata, messages);
+                                         @Nullable Iterable<Version> versions) {
+        super(failureMetadata, versions);
     }
 
+    public static IterableEntityVersionSubject
+    assertEntityVersions(@Nullable Iterable<Version> versions) {
+        return assertAbout(entityVersions()).that(versions);
+    }
 
+    static
+    Subject.Factory<IterableEntityVersionSubject, Iterable<Version>> entityVersions() {
+        return IterableEntityVersionSubject::new;
+    }
 }

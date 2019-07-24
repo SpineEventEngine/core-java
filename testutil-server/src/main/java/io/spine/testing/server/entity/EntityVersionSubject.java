@@ -21,8 +21,28 @@
 package io.spine.testing.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
+import com.google.common.truth.extensions.proto.ProtoSubject;
+import io.spine.core.Version;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static com.google.common.truth.Truth.assertAbout;
 
 @VisibleForTesting
-public class EntityVersionSubject {
+public class EntityVersionSubject extends ProtoSubject<EntityVersionSubject, Version> {
 
+    private EntityVersionSubject(FailureMetadata failureMetadata,
+                                 @Nullable Version message) {
+        super(failureMetadata, message);
+    }
+
+    public static EntityVersionSubject assertEntityVersion(Version version) {
+        return assertAbout(entityVersion()).that(version);
+    }
+
+    static
+    Subject.Factory<EntityVersionSubject, Version> entityVersion() {
+        return EntityVersionSubject::new;
+    }
 }

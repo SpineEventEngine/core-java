@@ -31,6 +31,8 @@ import io.spine.client.QueryResponse;
 import io.spine.core.Status;
 import io.spine.core.Status.StatusCase;
 import io.spine.core.Version;
+import io.spine.testing.server.entity.EntityVersionSubject;
+import io.spine.testing.server.entity.IterableEntityVersionSubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -42,6 +44,8 @@ import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
+import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVersion;
+import static io.spine.testing.server.entity.IterableEntityVersionSubject.assertEntityVersions;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,7 +67,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *      or
  *      .hasStatus(Status)
  */
-
 @VisibleForTesting
 public final class QueryResultSubject
         extends IterableOfProtosSubject<QueryResultSubject, Message, Iterable<Message>> {
@@ -86,31 +89,42 @@ public final class QueryResultSubject
         Iterable<Message> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
         if (queryResponse == null) {
-            subject.failWithoutActual(simpleFact("`QueryResult` should never be `null`"));
+            subject.failWithoutActual(simpleFact("`QueryResponse` must never be `null`"));
             return subject;
         }
         subject.setResponseData(queryResponse);
         return subject;
     }
 
-    private static Iterable<Message> extractEntityStates(@Nullable QueryResponse queryResponse) {
-        if (queryResponse == null) {
-            return ImmutableList.of();
-        }
-        List<Message> result = queryResponse.states()
-                                            .stream()
-                                            .map(Message.class::cast)
-                                            .collect(toList());
-        return result;
+    // todo try to parameterize the class instead of this ugliness
+    public void hasStatus(StatusCase statusCase) {
+        assertThat(status.getStatusCase()).isEqualTo(statusCase);
     }
 
-    private static Collection<Version> extractEntityVersions(QueryResponse queryResponse) {
-        return ImmutableList.of();
+    public ProtoSubject<?, Message> hasStatusThat() {
+        return check("getResponse().getStatus()").about(protos())
+                                                 .that(status);
     }
 
-    private static Status extractStatus(QueryResponse queryResponse) {
-        return queryResponse.getResponse()
-                            .getStatus();
+    public ProtoSubject<?, Message> containsSingleEntityStateThat() {
+        assertSingleEntityState();
+        Message entityState = actual().iterator()
+                                      .next();
+        ProtoSubject<?, Message> subject =
+                check("iterator().next()").about(protos())
+                                          .that(entityState);
+        return subject;
+    }
+
+    public EntityVersionSubject containsSingleEntityVersionThat() {
+        assertSingleEntityVersion();
+        Version version = entityVersions.iterator()
+                                        .next();
+        return assertEntityVersion(version);
+    }
+
+    public IterableEntityVersionSubject containsEntityVersionsSuchThat() {
+        return assertEntityVersions(entityVersions);
     }
 
     @SuppressWarnings("unchecked")
@@ -131,13 +145,32 @@ public final class QueryResultSubject
         });
     }
 
-    public void hasStatus(StatusCase statusCase) {
-        assertThat(status.getStatusCase()).isEqualTo(statusCase);
+    private void assertSingleEntityState() {
+        hasSize(1);
     }
 
-    public ProtoSubject<?, Message> hasStatusThat() {
-        return check("getResponse().getStatus()").about(protos())
-                                                 .that(status);
+    private void assertSingleEntityVersion() {
+        assertThat(entityVersions).hasSize(1);
+    }
+
+    private static Iterable<Message> extractEntityStates(@Nullable QueryResponse queryResponse) {
+        if (queryResponse == null) {
+            return ImmutableList.of();
+        }
+        List<Message> result = queryResponse.states()
+                                            .stream()
+                                            .map(Message.class::cast)
+                                            .collect(toList());
+        return result;
+    }
+
+    private static Collection<Version> extractEntityVersions(QueryResponse queryResponse) {
+        return ImmutableList.of();
+    }
+
+    private static Status extractStatus(QueryResponse queryResponse) {
+        return queryResponse.getResponse()
+                            .getStatus();
     }
 
     static
