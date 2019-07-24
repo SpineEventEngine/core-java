@@ -123,7 +123,7 @@ public abstract class TransactionalEntity<I,
     }
 
     /**
-     * Ensures that the entity has not null and active transaction.
+     * Ensures that the entity has non-null active transaction.
      *
      * @throws IllegalStateException if the transaction is null or not active
      */

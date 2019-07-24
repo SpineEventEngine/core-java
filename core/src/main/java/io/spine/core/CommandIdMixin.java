@@ -20,16 +20,28 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Descriptors;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
+import io.spine.validate.FieldAwareMessage;
 
 /**
  * A mixin interface for {@link CommandId}.
  */
 @GeneratedMixin
-interface CommandIdMixin extends SignalId, CommandIdOrBuilder {
+interface CommandIdMixin extends SignalId, FieldAwareMessage, CommandIdOrBuilder {
 
     @Override
     default String value() {
         return getUuid();
+    }
+
+    @Internal
+    @Override
+    default Object readValue(Descriptors.FieldDescriptor field) {
+        if (0 == field.getIndex()) {
+            return getUuid();
+        }
+        return getField(field);
     }
 }

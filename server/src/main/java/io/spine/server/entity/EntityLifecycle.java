@@ -397,7 +397,7 @@ public class EntityLifecycle {
                     .newBuilder()
                     .setEntity(entityId)
                     .setNewState(newState)
-                    .addAllSignalId(ImmutableList.copyOf(messageIds))
+                    .addAllSignalId(messageIds)
                     .setNewVersion(newVersion)
                     .vBuild();
             postEvent(event, origin);
