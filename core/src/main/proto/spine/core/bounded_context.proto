@@ -34,6 +34,7 @@ option java_outer_classname = "BoundedContextProto";
 // Must be unique in scope of the application.
 //
 message BoundedContextName {
+    option (is).java_type = "BoundedContextNameMixin";
 
     string value = 1 [(required) = true];
 }

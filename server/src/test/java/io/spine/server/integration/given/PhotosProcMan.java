@@ -17,32 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.integration;
+package io.spine.server.integration.given;
 
-import "spine/options.proto";
+import io.spine.server.command.Assign;
+import io.spine.server.event.React;
+import io.spine.server.integration.CreditsHeld;
+import io.spine.server.integration.PhotosPm;
+import io.spine.server.integration.PhotosProcessed;
+import io.spine.server.integration.PhotosUploaded;
+import io.spine.server.integration.UploadPhotos;
+import io.spine.server.procman.ProcessManager;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.integration";
-option java_multiple_files = true;
-option java_outer_classname = "ChannelProto";
+public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
 
-import "google/protobuf/any.proto";
+    @Assign
+    PhotosUploaded handle(UploadPhotos command) {
+        return PhotosUploaded
+                .newBuilder()
+                .setUuid(command.getUuid())
+                .vBuild();
+    }
 
-// The message which is used to identify the message channel.
-message ChannelId {
-
-    // The packed value, serving as an identifier for a channel.
-    //
-    // As a channel ID is a high-level abstraction, the particular contents of this field
-    // solely depend on the usage scenario.
-    //
-    // One of the possible applications is to pack type URLs of messages, that are being served
-    // through the channel identified by this ID.
-    //
-    // `Any` is so far the best way for the framework to provide some extensibility to users,
-    // providing a complete freedom in satisfying their needs.
-    //
-    google.protobuf.Any identifier = 1 [(required) = true];
+    @React(external = true)
+    PhotosProcessed on(CreditsHeld event) {
+        return PhotosProcessed
+                .newBuilder()
+                .setUuid(event.getUuid())
+                .vBuild();
+    }
 }

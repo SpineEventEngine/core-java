@@ -21,6 +21,7 @@ package io.spine.server.integration;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
@@ -29,17 +30,22 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventBus;
+import io.spine.server.integration.given.BillingAggregate;
 import io.spine.server.integration.given.MemoizingProjectDetails1Repository;
 import io.spine.server.integration.given.MemoizingProjectDetails2Repository;
 import io.spine.server.integration.given.MemoizingProjection;
+import io.spine.server.integration.given.PhotosProcMan;
 import io.spine.server.integration.given.ProjectCountAggregate;
 import io.spine.server.integration.given.ProjectDetails;
 import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.server.integration.given.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.ProjectWizard;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +75,8 @@ class IntegrationBusTest {
 
     @BeforeEach
     void setUp() {
+        ModelTests.dropAllModels();
+        ServerEnvironment.instance().reset();
         ProjectDetails.clear();
         ProjectWizard.clear();
         ProjectCountAggregate.clear();
@@ -79,8 +87,8 @@ class IntegrationBusTest {
 
     @AfterEach
     void tearDown() {
-        ServerEnvironment.instance()
-                         .reset();
+        ServerEnvironment.instance().reset();
+        ModelTests.dropAllModels();
     }
 
     @Nested
@@ -89,7 +97,7 @@ class IntegrationBusTest {
 
         @Test
         @DisplayName("to entities with external subscribers of another BC")
-        void toEntitiesOfBc() {
+        void toEntitiesOfBc() throws Exception {
             BoundedContext sourceContext = newContext();
             contextWithExtEntitySubscribers();
 
@@ -105,11 +113,13 @@ class IntegrationBusTest {
             assertEquals(expectedMessage, ProjectDetails.getExternalEvent());
             assertEquals(expectedMessage, ProjectWizard.getExternalEvent());
             assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
+
+            sourceContext.close();
         }
 
         @Test
         @DisplayName("to external subscribers of another BC")
-        void toBcSubscribers() {
+        void toBcSubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             contextWithExternalSubscribers();
 
@@ -120,11 +130,13 @@ class IntegrationBusTest {
                          .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
                          ProjectEventsSubscriber.getExternalEvent());
+
+            sourceContext.close();
         }
 
         @Test
         @DisplayName("to entities with external subscribers of multiple BCs")
-        void toEntitiesOfMultipleBcs() {
+        void toEntitiesOfMultipleBcs() throws Exception {
             BoundedContext sourceContext = newContext();
 
             BoundedContext destination1 = newContext();
@@ -139,12 +151,15 @@ class IntegrationBusTest {
             sourceContext.eventBus()
                          .post(event);
             assertEquals(2, MemoizingProjection.events().size());
+            sourceContext.close();
+            destination1.close();
+            destination2.close();
         }
 
         @SuppressWarnings("unused") // Variables declared for readability.
         @Test
         @DisplayName("to two BCs with different needs")
-        void toTwoBcSubscribers() {
+        void toTwoBcSubscribers() throws Exception {
             InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = newContext();
@@ -165,6 +180,10 @@ class IntegrationBusTest {
 
             assertEquals(AnyPacker.unpack(eventB.getMessage()),
                          ProjectStartedExtSubscriber.getExternalEvent());
+
+            sourceContext.close();
+            destA.close();
+            destB.close();
         }
     }
 
@@ -174,7 +193,7 @@ class IntegrationBusTest {
 
         @Test
         @DisplayName("to domestic entity subscribers of another BC")
-        void toDomesticEntitySubscribers() {
+        void toDomesticEntitySubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExtEntitySubscribers();
 
@@ -191,11 +210,14 @@ class IntegrationBusTest {
             destContext.eventBus()
                        .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()), ProjectDetails.getDomesticEvent());
+
+            sourceContext.close();
+            destContext.close();
         }
 
         @Test
         @DisplayName("to domestic standalone subscribers of another BC")
-        void toDomesticStandaloneSubscribers() {
+        void toDomesticStandaloneSubscribers() throws Exception {
             BoundedContext sourceContext = newContext();
             BoundedContext destContext = contextWithExternalSubscribers();
 
@@ -213,12 +235,15 @@ class IntegrationBusTest {
                        .post(event);
             assertEquals(AnyPacker.unpack(event.getMessage()),
                          ProjectEventsSubscriber.getDomesticEvent());
+
+            sourceContext.close();
+            destContext.close();
         }
     }
 
     @Test
-    @DisplayName("update local subscriptions upon repeated RequestedMessageTypes")
-    void updateLocalSubscriptions() {
+    @DisplayName("update local subscriptions upon repeated RequestForExternalMessages")
+    void updateLocalSubscriptions() throws Exception {
         BoundedContext sourceContext = newContext();
         BoundedContext destinationCtx = newContext();
 
@@ -269,6 +294,34 @@ class IntegrationBusTest {
         assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertEquals(AnyPacker.unpack(eventB.getMessage()),
                      ProjectStartedExtSubscriber.getExternalEvent());
+
+        sourceContext.close();
+        destinationCtx.close();
+    }
+
+    @Test
+    @DisplayName("send messages between two contexts regardless of registration order")
+    void mutual() {
+        BlackBoxBoundedContext<?> photos = BlackBoxBoundedContext
+                .singleTenant("Photos-" + IntegrationBusTest.class.getSimpleName())
+                .with(DefaultRepository.of(PhotosProcMan.class));
+        BlackBoxBoundedContext<?> billing = BlackBoxBoundedContext
+                .singleTenant("Billing-" + IntegrationBusTest.class.getSimpleName())
+                .with(DefaultRepository.of(BillingAggregate.class));
+        photos.receivesCommand(UploadPhotos.generate());
+        assertReceived(photos, PhotosUploaded.class);
+        assertReceived(billing, CreditsHeld.class);
+        assertReceived(photos, PhotosProcessed.class);
+
+        photos.close();
+        billing.close();
+    }
+
+    private static void assertReceived(BlackBoxBoundedContext<?> context,
+                                       Class<? extends EventMessage> eventClass) {
+        context.assertEvents()
+               .withType(eventClass)
+               .hasSize(1);
     }
 
     @Nested
@@ -277,7 +330,7 @@ class IntegrationBusTest {
 
         @Test
         @DisplayName("events")
-        void eventsIfNeedExternal() {
+        void eventsIfNeedExternal() throws Exception {
             BoundedContext context = contextWithExtEntitySubscribers();
             ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
             EventBus eventBus = context.eventBus();
@@ -295,20 +348,21 @@ class IntegrationBusTest {
             assertNull(ProjectDetails.getExternalEvent());
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
+
+            context.close();
         }
     }
 
     @Test
     @DisplayName("emit unsupported external message exception if message type is unknown")
-    void throwOnUnknownMessage() {
+    void throwOnUnknownMessage() throws Exception {
         BoundedContext context = newContext();
 
         Event event = projectCreated();
         BoundedContextName name = BoundedContextNames.newName("External context ID");
         ExternalMessage externalMessage = ExternalMessages.of(event, name);
         MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.integrationBus()
-                      .post(externalMessage, observer);
+        context.integrationBus().post(externalMessage, observer);
         Error error = observer.firstResponse()
                               .getStatus()
                               .getError();
@@ -317,5 +371,7 @@ class IntegrationBusTest {
                                                    .getFullName(),
                      error.getType());
         assertEquals(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber(), error.getCode());
+
+        context.close();
     }
 }

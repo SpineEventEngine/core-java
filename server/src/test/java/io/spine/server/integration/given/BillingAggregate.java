@@ -18,30 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.transport.memory;
+package io.spine.server.integration.given;
 
-import io.spine.server.transport.ChannelId;
-import io.spine.server.transport.TransportFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.BillingAgg;
+import io.spine.server.integration.CreditsHeld;
+import io.spine.server.integration.PhotosUploaded;
 
-import static com.google.common.truth.Truth.assertThat;
+public class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
-@DisplayName("`SingleThreadInMemTransportFactory` should")
-class SingleThreadInMemTransportFactoryTest {
-
-    private TransportFactory transportFactory;
-
-    @BeforeEach
-    void createInstance() {
-        transportFactory = SingleThreadInMemTransportFactory.newInstance();
+    @React(external = true)
+    CreditsHeld on(PhotosUploaded event) {
+        return CreditsHeld.newBuilder()
+                          .setUuid(event.getUuid())
+                          .vBuild();
     }
 
-    @Test
-    @DisplayName("create `SingleThreadInMemSubscriber`")
-    void subscribers() {
-        assertThat(transportFactory.createSubscriber(ChannelId.getDefaultInstance()))
-                .isInstanceOf(SingleThreadInMemSubscriber.class);
+    @Apply
+    private void on(CreditsHeld event) {
+        builder().setId(event.getUuid());
     }
 }

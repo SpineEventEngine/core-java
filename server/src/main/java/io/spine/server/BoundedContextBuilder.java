@@ -555,9 +555,7 @@ public final class BoundedContextBuilder implements Logging {
         return commandBus.build();
     }
 
-    IntegrationBus buildIntegrationBus(BoundedContext context) {
-        integrationBus.setContextName(context.spec().name())
-                      .setEventBus(context.eventBus());
+    IntegrationBus buildIntegrationBus() {
         return integrationBus.build();
     }
 

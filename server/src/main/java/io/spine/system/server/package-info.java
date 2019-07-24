@@ -26,8 +26,8 @@
  *
  * <p>{@link io.spine.server.BoundedContext BoundedContext}s serving entities
  * of this package will be created with
- * {@linkplain io.spine.core.BoundedContextNames#system(io.spine.core.BoundedContextName)
- * synthetic names} created after names of parent {@code BoundedContext}s.
+ * {@linkplain io.spine.core.BoundedContextName#toSystem() synthetic names} created after names of
+ * parent {@code BoundedContext}s.
  */
 @Internal
 @BoundedContext("_System")

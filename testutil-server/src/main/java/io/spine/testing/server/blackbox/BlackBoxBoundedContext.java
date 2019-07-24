@@ -66,6 +66,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -132,13 +133,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
 
-    protected BlackBoxBoundedContext(boolean multitenant, EventEnricher enricher) {
+    protected BlackBoxBoundedContext(boolean multitenant,
+                                     EventEnricher enricher,
+                                     String name) {
         this.commands = new CommandCollector();
         this.postedCommands = new HashSet<>();
         this.events = new EventCollector();
         this.postedEvents = new HashSet<>();
-        this.context = BoundedContextBuilder
-                .assumingTests(multitenant)
+        BoundedContextBuilder builder = multitenant
+                                      ? BoundedContext.multitenant(name)
+                                      : BoundedContext.singleTenant(name);
+        this.context = builder
                 .addCommandListener(commands)
                 .addEventListener(events)
                 .enrichEventsUsing(enricher)
@@ -151,28 +156,56 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * Creates a single-tenant instance with the default configuration.
      */
     public static SingleTenantBlackBoxContext singleTenant() {
-        return new SingleTenantBlackBoxContext(emptyEnricher());
+        return singleTenant(emptyEnricher());
+    }
+
+    /**
+     * Creates a single-tenant instance with the specified name.
+     */
+    public static SingleTenantBlackBoxContext singleTenant(String name) {
+        return singleTenant(name, emptyEnricher());
     }
 
     /**
      * Creates a single-tenant instance with the specified enricher.
      */
     public static SingleTenantBlackBoxContext singleTenant(EventEnricher enricher) {
-        return new SingleTenantBlackBoxContext(enricher);
+        return singleTenant(assumingTestsValue(), enricher);
+    }
+
+    /**
+     * Creates a single-tenant instance with the specified name and enricher.
+     */
+    public static SingleTenantBlackBoxContext singleTenant(String name, EventEnricher enricher) {
+        return new SingleTenantBlackBoxContext(name, enricher);
     }
 
     /**
      * Creates a multitenant instance the default configuration.
      */
     public static MultitenantBlackBoxContext multiTenant() {
-        return new MultitenantBlackBoxContext(emptyEnricher());
+        return multiTenant(emptyEnricher());
+    }
+
+    /**
+     * Creates a multitenant instance with the specified name.
+     */
+    public static MultitenantBlackBoxContext multiTenant(String name) {
+        return multiTenant(name, emptyEnricher());
     }
 
     /**
      * Creates a multitenant instance with the specified enricher.
      */
     public static MultitenantBlackBoxContext multiTenant(EventEnricher enricher) {
-        return new MultitenantBlackBoxContext(enricher);
+        return multiTenant(assumingTestsValue(), enricher);
+    }
+
+    /**
+     * Creates a multitenant instance with the specified name and enricher.
+     */
+    public static MultitenantBlackBoxContext multiTenant(String name, EventEnricher enricher) {
+        return new MultitenantBlackBoxContext(name, enricher);
     }
 
     /**

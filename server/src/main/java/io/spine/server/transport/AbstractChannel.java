@@ -20,7 +20,6 @@
 package io.spine.server.transport;
 
 import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,14 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class AbstractChannel implements MessageChannel {
 
-    private final ChannelId channelId;
+    private final ChannelId id;
 
-    protected AbstractChannel(ChannelId channelId) {
-        this.channelId = checkNotNull(channelId);
+    protected AbstractChannel(ChannelId id) {
+        this.id = checkNotNull(id);
     }
 
     @Override
     public ChannelId id() {
-        return channelId;
+        return id;
     }
 }

@@ -27,13 +27,13 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.entity.Entity;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.SystemAwareStorageFactory;
+import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
@@ -339,13 +339,13 @@ class ServerEnvironmentTest {
         private final TransportFactory delegate = InMemoryTransportFactory.newInstance();
 
         @Override
-        public Publisher createPublisher(ChannelId channelId) {
-            return delegate.createPublisher(channelId);
+        public Publisher createPublisher(ChannelId id) {
+            return delegate.createPublisher(id);
         }
 
         @Override
-        public Subscriber createSubscriber(ChannelId messageClass) {
-            return delegate.createSubscriber(messageClass);
+        public Subscriber createSubscriber(ChannelId id) {
+            return delegate.createSubscriber(id);
         }
 
         @Override

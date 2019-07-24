@@ -27,6 +27,7 @@ import io.spine.server.bus.given.stock.ShareAggregate;
 import io.spine.test.bus.Buy;
 import io.spine.test.bus.Sell;
 import io.spine.test.bus.ShareId;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,7 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SlowTest
 @DisplayName("When posting commands in parallel")
 class DispatchingQueueSynchronisationTest {
 

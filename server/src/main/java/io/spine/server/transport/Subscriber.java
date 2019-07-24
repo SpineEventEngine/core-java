@@ -22,7 +22,6 @@ package io.spine.server.transport;
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 
 import java.util.Set;
@@ -31,9 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 
 /**
- * Subscriber for messages of a channel with the {@linkplain MessageChannel#id() specified ID}.
+ * Subscriber for messages of a specific type.
  *
- * <p>There can be many subscribers per channel ID.
+ * <p>There can be many subscribers per message type.
  */
 @SPI
 public abstract class Subscriber extends AbstractChannel {
@@ -43,8 +42,8 @@ public abstract class Subscriber extends AbstractChannel {
      */
     private final Set<StreamObserver<ExternalMessage>> observers = newConcurrentHashSet();
 
-    protected Subscriber(ChannelId channelId) {
-        super(channelId);
+    protected Subscriber(ChannelId id) {
+        super(id);
     }
 
     /**
@@ -53,7 +52,7 @@ public abstract class Subscriber extends AbstractChannel {
      *
      * @return observers for this subscriber
      */
-    public Iterable<StreamObserver<ExternalMessage>> getObservers() {
+    public Iterable<StreamObserver<ExternalMessage>> observers() {
         return ImmutableSet.copyOf(observers);
     }
 
@@ -94,8 +93,16 @@ public abstract class Subscriber extends AbstractChannel {
     }
 
     protected final void callObservers(ExternalMessage message) {
-        for (StreamObserver<ExternalMessage> observer : getObservers()) {
+        for (StreamObserver<ExternalMessage> observer : observers()) {
             observer.onNext(message);
         }
+    }
+
+    @Override
+    public void close() {
+        for (StreamObserver<ExternalMessage> observer : observers) {
+            observer.onCompleted();
+        }
+        observers.clear();
     }
 }

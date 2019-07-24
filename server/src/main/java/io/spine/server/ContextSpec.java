@@ -25,7 +25,6 @@ import com.google.common.base.Objects;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
-import io.spine.core.BoundedContextNames;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.newName;
@@ -97,11 +96,17 @@ public final class ContextSpec {
         return storeEvents;
     }
 
+    /**
+     * Converts this spec into the System spec for the counterpart of this domain context.
+     */
     ContextSpec toSystem() {
-        BoundedContextName systemName = BoundedContextNames.system(name);
-        return new ContextSpec(systemName, multitenant, storeEvents);
+        return new ContextSpec(name.toSystem(), multitenant, storeEvents);
     }
 
+    /**
+     * Creates a spec which has all the attributes of this instance and does NOT
+     * {@linkplain #storesEvents() store events}.
+     */
     ContextSpec notStoringEvents() {
         return new ContextSpec(name, multitenant, false);
     }
