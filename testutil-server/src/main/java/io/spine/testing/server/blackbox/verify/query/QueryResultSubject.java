@@ -113,7 +113,8 @@ public final class QueryResultSubject
                             .getStatus();
     }
 
-    @SuppressWarnings("unchecked") // It's up to user to provide the matching predicate
+    @SuppressWarnings("unchecked")
+    // It's up to user to provide the predicate matching the stored entity states.
     public <M extends Message> void containsAllMatching(Predicate<M> predicate) {
         Iterable<Message> entityStates = actual();
         entityStates.forEach(state -> {
