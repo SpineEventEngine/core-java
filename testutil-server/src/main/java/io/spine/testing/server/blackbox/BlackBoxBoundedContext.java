@@ -74,7 +74,6 @@ import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.assertQueryResponse;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -826,6 +825,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         assertTrue(observer.isCompleted());
 
         QueryResponse response = observer.firstResponse();
-        return assertQueryResponse(response);
+        return QueryResultSubject.assertQueryResult(response);
     }
 }

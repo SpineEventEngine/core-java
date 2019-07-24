@@ -60,7 +60,7 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>This class is not a "typical" {@link Subject} in a sense that it's not accessible to the
  * outer world through it's {@linkplain #queryResult() factory}, but is rather created with a
- * custom {@code static} {@linkplain #assertQueryResponse(QueryResponse) method}.
+ * custom {@code static} {@linkplain #assertQueryResult(QueryResponse) method}.
  */
 @VisibleForTesting
 public final class QueryResultSubject
@@ -70,7 +70,7 @@ public final class QueryResultSubject
      * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
      *
      * <p>Is effectively {@code final}, as the only way to create an instance of
-     * {@code QueryResultSubject} is to use the {@link #assertQueryResponse(QueryResponse)} method.
+     * {@code QueryResultSubject} is to use the {@link #assertQueryResult(QueryResponse)} method.
      */
     private ResponseStatusSubject statusSubject;
 
@@ -79,7 +79,7 @@ public final class QueryResultSubject
      * entities in {@link QueryResponse}.
      *
      * <p>Is effectively {@code final}, as the only way to create an instance of
-     * {@code QueryResultSubject} is to use the {@link #assertQueryResponse(QueryResponse)} method.
+     * {@code QueryResultSubject} is to use the {@link #assertQueryResult(QueryResponse)} method.
      */
     private IterableEntityVersionSubject versionsSubject;
 
@@ -105,7 +105,7 @@ public final class QueryResultSubject
      * {@code null} arguments, as {@code null} {@code QueryResponse} always indicates an error.
      */
     public static
-    QueryResultSubject assertQueryResponse(QueryResponse queryResponse) {
+    QueryResultSubject assertQueryResult(QueryResponse queryResponse) {
         checkNotNull(queryResponse, "`QueryResponse` must never be `null`");
 
         Iterable<Message> entityStates = extractEntityStates(queryResponse);

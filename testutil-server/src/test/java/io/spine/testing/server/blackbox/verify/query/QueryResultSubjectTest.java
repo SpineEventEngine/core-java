@@ -32,7 +32,7 @@ import static com.google.common.truth.ExpectFailure.assertThat;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.assertQueryResponse;
+import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.assertQueryResult;
 import static io.spine.testing.server.blackbox.verify.query.QueryResultSubject.queryResult;
 import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.responseWithMultipleEntities;
 import static io.spine.testing.server.blackbox.verify.query.given.QueryResultSubjectTestEnv.responseWithSingleEntity;
@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * <p>This test uses own {@code static} versions for some of the methods provided in
  * {@link SubjectTest} due to the non-standard
- * {@linkplain QueryResultSubject#assertQueryResponse(QueryResponse) way} of subject creation.
+ * {@linkplain QueryResultSubject#assertQueryResult(QueryResponse) way} of subject creation.
  */
 @DisplayName("QueryResultSubject should")
 class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Message>> {
@@ -166,7 +166,7 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Me
     }
 
     private static QueryResultSubject assertWithSubjectThat(QueryResponse queryResponse) {
-        return assertQueryResponse(queryResponse);
+        return assertQueryResult(queryResponse);
     }
 
     @SuppressWarnings("ErrorNotRethrown") // Ignore the error.
