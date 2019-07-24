@@ -41,7 +41,7 @@ public interface VersionMixin extends VersionOrBuilder, FieldAwareMessage {
     }
 
     default boolean isDecrementOrEqual(VersionOrBuilder other) {
-        return getNumber() < other.getNumber();
+        return getNumber() <= other.getNumber();
     }
 
     @Override
