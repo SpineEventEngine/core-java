@@ -36,12 +36,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * assertQueryResult(query)
@@ -108,6 +110,15 @@ public final class QueryResultSubject
     private static Status extractStatus(QueryResponse queryResponse) {
         return queryResponse.getResponse()
                             .getStatus();
+    }
+
+    @SuppressWarnings("unchecked") // It's up to user to provide the matching predicate
+    public <M extends Message> void containsAllMatching(Predicate<M> predicate) {
+        Iterable<Message> entityStates = actual();
+        entityStates.forEach(state -> {
+            M cast = (M) state;
+            assertTrue(predicate.test(cast));
+        });
     }
 
     public void hasStatus(StatusCase statusCase) {
