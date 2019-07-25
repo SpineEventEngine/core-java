@@ -26,7 +26,9 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.client.Query;
 import io.spine.client.QueryFactory;
+import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -36,6 +38,7 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.QueryService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
@@ -48,6 +51,7 @@ import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
@@ -72,6 +76,7 @@ import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This class provides means for integration testing of Bounded Contexts.
@@ -806,5 +811,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     public EventSubject assertEvents() {
         return EventSubject.assertThat(events());
+    }
+
+    /**
+     * Obtains the subject for checking the {@code Query} execution result.
+     */
+    public QueryResultSubject assertQueryResult(Query query) {
+        MemoizingObserver<QueryResponse> observer = memoizingObserver();
+        QueryService queryService = QueryService.newBuilder()
+                                                .add(context)
+                                                .build();
+        queryService.read(query, observer);
+        assertTrue(observer.isCompleted());
+
+        QueryResponse response = observer.firstResponse();
+        return QueryResultSubject.assertQueryResult(response);
     }
 }

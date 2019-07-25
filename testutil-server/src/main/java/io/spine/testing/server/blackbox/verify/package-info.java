@@ -20,8 +20,6 @@
 
 /**
  * This package provides classes for verification of a black box bounded context.
- *
- * @see io.spine.testing.server.blackbox.verify.state.VerifyState
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

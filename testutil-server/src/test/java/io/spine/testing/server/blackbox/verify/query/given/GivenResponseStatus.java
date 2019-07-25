@@ -17,30 +17,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.core;
+package io.spine.testing.server.blackbox.verify.query.given;
 
-import "spine/options.proto";
+import com.google.protobuf.Empty;
+import io.spine.base.Error;
+import io.spine.core.Event;
+import io.spine.core.Status;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.core";
-option java_outer_classname = "VersionProto";
-option java_multiple_files = true;
+public final class GivenResponseStatus {
 
-import "google/protobuf/timestamp.proto";
+    /** Prevents instantiation of this test env class. */
+    private GivenResponseStatus() {
+    }
 
-// A version number with timestamp of the version creation.
-message Version {
-    option (is).java_type = "io.spine.core.VersionMixin";
+    public static Status ok() {
+        Status status = Status
+                .newBuilder()
+                .setOk(Empty.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
 
-    // A zero-based version number.
-    //
-    // When numbering versions of entities the zero value is reserved for
-    // the "pre-initialization" version of an entity.
-    //
-    int32 number = 1 [(min).value = "0"];
+    public static Status error() {
+        Status status = Status
+                .newBuilder()
+                .setError(Error.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
 
-    // A moment in time when the new version was created.
-    google.protobuf.Timestamp timestamp = 2 [(required) = true];
+    public static Status rejection() {
+        Status status = Status
+                .newBuilder()
+                .setRejection(Event.getDefaultInstance())
+                .vBuild();
+        return status;
+    }
 }
