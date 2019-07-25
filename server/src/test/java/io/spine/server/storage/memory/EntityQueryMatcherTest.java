@@ -105,7 +105,7 @@ class EntityQueryMatcherTest {
         Serializable acceptedValue = true;
         EntityColumn target = mock(EntityColumn.class);
         when(target.isNullable()).thenReturn(true);
-        when(target.storedName()).thenReturn(targetName);
+        when(target.name()).thenReturn(targetName);
         when(target.type()).thenReturn(Boolean.class);
         when(target.toPersistedValue(any())).thenReturn(acceptedValue);
 
@@ -151,7 +151,7 @@ class EntityQueryMatcherTest {
 
         EntityColumn column = mock(EntityColumn.class);
         when(column.type()).thenReturn(Any.class);
-        when(column.storedName()).thenReturn(columnName);
+        when(column.name()).thenReturn(columnName);
         when(column.toPersistedValue(any())).thenReturn(actualValue);
 
         EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);

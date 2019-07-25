@@ -44,6 +44,7 @@ import static io.spine.server.entity.storage.ColumnReader.forClass;
 import static io.spine.server.entity.storage.ColumnTests.assertContainsColumns;
 import static io.spine.server.entity.storage.ColumnTests.assertNotContainsColumns;
 import static io.spine.server.entity.storage.ColumnTests.defaultColumns;
+import static io.spine.server.entity.storage.given.column.EntityWithManyGetters.CUSTOM_COLUMN_NAME;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -92,7 +93,7 @@ class ColumnReaderTest {
             assertContainsColumns(
                     entityColumns,
                     archived.name(), deleted.name(),
-                    "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
+                    "boolean", "booleanWrapper", "someMessage", "floatNull", CUSTOM_COLUMN_NAME
             );
         }
 

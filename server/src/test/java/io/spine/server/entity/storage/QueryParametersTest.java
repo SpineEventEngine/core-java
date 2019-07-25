@@ -215,13 +215,13 @@ class QueryParametersTest {
         RecordStorage storage = mock(RecordStorage.class);
         Map<String, EntityColumn> columns = new HashMap<>();
 
-        String archivedStoredName = "archived-stored";
-        EntityColumn archivedColumn = mockColumn(archived, archivedStoredName);
-        columns.put(archived.name(), archivedColumn);
+        String archivedName = archived.name();
+        EntityColumn archivedColumn = mockColumn(archivedName);
+        columns.put(archivedName, archivedColumn);
 
-        String deletedStoredName = "deleted-stored";
-        EntityColumn deletedColumn = mockColumn(deleted, deletedStoredName);
-        columns.put(deleted.name(), deletedColumn);
+        String deletedName = deleted.name();
+        EntityColumn deletedColumn = mockColumn(deletedName);
+        columns.put(deletedName, deletedColumn);
 
         when(storage.entityLifecycleColumns()).thenReturn(columns);
 
@@ -238,12 +238,12 @@ class QueryParametersTest {
 
         ImmutableCollection<Filter> archivedFilters = filters.get(archivedColumn);
         UnmodifiableIterator<Filter> archivedFilterIterator = archivedFilters.iterator();
-        assertEquals(eq(archivedStoredName, false), archivedFilterIterator.next());
+        assertEquals(eq(archivedName, false), archivedFilterIterator.next());
         assertFalse(archivedFilterIterator.hasNext());
 
         ImmutableCollection<Filter> deletedFilters = filters.get(deletedColumn);
         UnmodifiableIterator<Filter> deletedFilterIterator = deletedFilters.iterator();
-        assertEquals(eq(deletedStoredName, false), deletedFilterIterator.next());
+        assertEquals(eq(deletedName, false), deletedFilterIterator.next());
         assertFalse(deletedFilterIterator.hasNext());
     }
 

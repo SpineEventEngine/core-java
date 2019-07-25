@@ -66,7 +66,6 @@ import static java.util.stream.Collectors.toList;
 final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder> {
 
     private static final String TYPE_COLUMN_NAME = "aggregate_type";
-    private static final String TYPE_COLUMN_QUERY_NAME = "aggregateType";
 
     MirrorProjection(MirrorId id) {
         super(id);
@@ -134,7 +133,7 @@ final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder
     static TargetFilters buildFilters(Target target) {
         IdFilter idFilter = buildIdFilter(target);
         TargetFilters filters = target.getFilters();
-        CompositeFilter typeFilter = all(eq(TYPE_COLUMN_QUERY_NAME, target.getType()));
+        CompositeFilter typeFilter = all(eq(TYPE_COLUMN_NAME, target.getType()));
         TargetFilters appendedFilters = filters
                 .toBuilder()
                 .setIdFilter(idFilter)

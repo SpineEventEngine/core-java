@@ -93,8 +93,8 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
         EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
         EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
         CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivedColumn, eq(archivedColumn.storedName(), false),
-                                     deletedColumn, eq(deletedColumn.storedName(), false)),
+                ImmutableMultimap.of(archivedColumn, eq(archivedColumn.name(), false),
+                                     deletedColumn, eq(deletedColumn.name(), false)),
                 ALL
         );
         return newBuilder().add(lifecycleParameter).build();
