@@ -133,7 +133,6 @@ final class ColumnReader {
                 .stream(properties)
                 .map(PropertyDescriptor::getReadMethod)
                 .filter(Objects::nonNull);
-
         MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
         Stream<Method> booleanWrapperGetters = Arrays
                 .stream(methodDescriptors)

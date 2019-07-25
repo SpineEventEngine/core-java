@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -136,6 +137,18 @@ class ColumnReaderTest {
                                   archived.name(), deleted.name(),
                                   "integerFieldValue");
         }
+
+        @Test
+        @DisplayName("from a private entity class")
+        void fromPrivateClass() {
+            ColumnReader columnReader = forClass(PrivateEntity.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+            assertThat(entityColumns).isNotEmpty();
+            List<String> columnNames = entityColumns.stream()
+                                                    .map(EntityColumn::name)
+                                                    .collect(toList());
+            assertThat(columnNames).contains(PrivateEntity.ANSWER_COLUMN);
+        }
     }
 
     @Test
@@ -232,6 +245,26 @@ class ColumnReaderTest {
         private Method method(String name, Class<?>... parameterTypes)
                 throws NoSuchMethodException {
             return EntityWithBooleanColumns.class.getDeclaredMethod(name, parameterTypes);
+        }
+    }
+
+    /**
+     * A private entity class which defines columns.
+     *
+     * <p>This class is placed inside the test case instead of being an upper level class in
+     * the {@code given} package so that it is accessible at compile time.
+     */
+    private static final class PrivateEntity extends EntityWithManyGetters {
+
+        private static final String ANSWER_COLUMN = "the_answer";
+
+        private PrivateEntity(String id) {
+            super(id);
+        }
+
+        @Column(name = ANSWER_COLUMN)
+        public String get42() {
+            return "42";
         }
     }
 }
