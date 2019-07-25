@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<Message>> {
 
     private static final String EXPECTED_ASSERTION_ERROR_TO_BE_THROWN =
-            "Expected `AssertionError` to be thrown";
+            "Expected `AssertionError` to be thrown.";
 
     @Override
     protected Subject.Factory<QueryResultSubject, Iterable<Message>> subjectFactory() {

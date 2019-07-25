@@ -106,7 +106,7 @@ public final class QueryResultSubject
      */
     public static
     QueryResultSubject assertQueryResult(QueryResponse queryResponse) {
-        checkNotNull(queryResponse, "`QueryResponse` must never be `null`");
+        checkNotNull(queryResponse, "`QueryResponse` must never be `null`.");
 
         Iterable<Message> entityStates = extractEntityStates(queryResponse);
         QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
