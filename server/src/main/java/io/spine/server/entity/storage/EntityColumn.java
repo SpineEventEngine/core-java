@@ -54,11 +54,9 @@ import static java.lang.String.format;
  * <p>An entity can inherit the columns from its parent classes and interfaces.
  * In this case column getter is annotated only once when it is first declared.
  *
- * <p>A {@linkplain #name() name} for working with {@linkplain EntityQueries queries} and storing
- * the column values is determined by the {@link Column#name()} annotation  property.
- * If the property is not defined, the name is extracted from the column getter method, for
- * example, {@code value} for {@code getValue()}. A client should specify the column name via
- * {@linkplain io.spine.client.TargetFilters column filters}.
+ * <p>The {@linkplain #name() name} of a column is determined by the {@link Column#name()}
+ * annotation property. If the property is not defined, the name is extracted from the column getter
+ * method, for example, {@code value} for {@code getValue()}.
  *
  * <h1>Examples</h1>
  *
