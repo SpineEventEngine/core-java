@@ -155,7 +155,7 @@ public class RecordStorageTestEnv {
 
         private int counter = 0;
 
-        public TestCounterEntity(ProjectId id) {
+        private TestCounterEntity(ProjectId id) {
             super(id);
         }
 
