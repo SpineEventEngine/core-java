@@ -27,6 +27,7 @@ import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
+import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVersion;
 
 /**
  * Assertions for entities.
@@ -96,6 +98,18 @@ public final class EntitySubject
 
     private LifecycleFlags flags() {
         return actual().lifecycleFlags();
+    }
+
+    /**
+     * Obtains the subject for the entity version.
+     */
+    public EntityVersionSubject version() {
+        if (actual() == null) {
+            shouldExistButDoesNot();
+            return assertEntityVersion(Version.getDefaultInstance());
+        } else {
+            return assertEntityVersion(actual().version());
+        }
     }
 
     /**
