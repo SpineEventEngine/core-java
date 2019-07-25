@@ -54,19 +54,11 @@ import static java.lang.String.format;
  * <p>An entity can inherit the columns from its parent classes and interfaces.
  * In this case column getter is annotated only once when it is first declared.
  *
- * <h1>Column names</h1>
+ * <p>The {@linkplain #name() name} of a column is determined by the {@link Column#name()}
+ * annotation property. If the property is not defined, the name is extracted from the column getter
+ * method, for example, {@code value} for {@code getValue()}.
  *
- * <p>A column can have different names for storing and for querying.
- *
- * <p>A {@linkplain #name() name} for working with {@linkplain EntityQueries queries}
- * is determined by a name of column getter, for example, {@code value} for {@code getValue()}.
- * A client should specify this value to a {@linkplain io.spine.client.TargetFilters
- * column filters}.
- *
- * <p>A {@linkplain #storedName() stored name} is used as a {@code Storage} column name
- * an is defined by the column annotation {@linkplain Column#name() property}.
- *
- * <h2>Examples</h2>
+ * <h1>Examples</h1>
  *
  * <p>These methods represent the columns:
  * <pre>
@@ -132,7 +124,7 @@ import static java.lang.String.format;
  *
  * <h1>Type policy</h1>
  *
- * <p>An entity column can be of any type. Most common types are already supported if an existing 
+ * <p>An entity column can be of any type. Most common types are already supported if an existing
  * implementation of the {@link io.spine.server.storage.Storage Spine Storage} is used.
  * However, their behavior can be overriden using {@link ColumnTypeRegistry}.
  *
@@ -141,13 +133,15 @@ import static java.lang.String.format;
  * into the {@link io.spine.server.storage.StorageFactory StorageFactory} upon creation.
  *
  * <p>Note that the column type must either be a primitive or implement {@link Serializable}.
- * To order the query results on a column value, it is also required to implement {@link Comparable}.
+ * To order the query results on a column value, it is also required to implement
+ * {@link Comparable}.
  *
  * <h1>Nullability</h1>
  *
- * <p>A column may contain {@code null} value if the getter which declares it is annotated as
- * {@link javax.annotation.Nullable javax.annotation.Nullable}.
- * Otherwise, the entity column is considered non-null.
+ * <p>A column may contain {@code null} value if the getter which declares it is marked as nullable.
+ * More formally, if the getter method is annotated with an annotation the simple name of which is
+ * {@code CheckForNull}, {@code Nullable}, {@code NullableDecl}, or {@code NullableType}, the column
+ * may be null. Otherwise, the entity column is considered non-null.
  *
  * <p>If a non-null getter method returns {@code null} when trying to get the value of a column,
  * a {@link RuntimeException} is thrown. See {@link #isNullable()}.
@@ -166,9 +160,9 @@ import static java.lang.String.format;
  *     }
  * </pre>
  *
- * <p>This class is effectively {@code final} since it has a single {@code private} constructor.
- * Though the modifier "{@code final}" is absent to make it possible to create mocks for testing.
- *
+ * @implNote This class is effectively {@code final} since it has a single {@code private}
+ *         constructor. Though the modifier "{@code final}" is absent to make it possible to create
+ *         mocks for testing.
  * @see ColumnType
  */
 @Immutable
@@ -201,8 +195,6 @@ public class EntityColumn implements Serializable {
 
     private final String name;
 
-    private final String storedName;
-
     private final boolean nullable;
 
     /**
@@ -219,7 +211,6 @@ public class EntityColumn implements Serializable {
 
     private EntityColumn(Method getter,
                          String name,
-                         String storedName,
                          boolean nullable) {
         this.getter = getter;
         // To allow calling on non-public classes.
@@ -227,7 +218,6 @@ public class EntityColumn implements Serializable {
         this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
-        this.storedName = storedName;
         this.nullable = nullable;
         this.valueConverter = ColumnValueConverters.of(getter);
     }
@@ -245,10 +235,10 @@ public class EntityColumn implements Serializable {
     @VisibleForTesting
     public static EntityColumn from(Method getter) {
         checkAnnotatedGetter(getter);
-        String nameForQuery = nameFromGetter(getter);
-        String nameForStore = nameFromAnnotation(getter).orElse(nameForQuery);
+        String nameForStore = nameFromAnnotation(getter)
+                .orElseGet(() -> nameFromGetter(getter));
         boolean nullable = mayReturnNull(getter);
-        return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
+        return new EntityColumn(getter, nameForStore, nullable);
     }
 
     /**
@@ -261,19 +251,6 @@ public class EntityColumn implements Serializable {
      */
     public String name() {
         return name;
-    }
-
-    /**
-     * Obtains the name of the column which is used to store it in a {@code Storage}.
-     *
-     * <p>The value is obtained from the annotation {@linkplain Column#name() property}.
-     * If the property value is empty, the value is equal
-     * to {@linkplain #name() name for querying}.
-     *
-     * @return the column name for storing
-     */
-    public String storedName() {
-        return storedName;
     }
 
     /**
@@ -358,7 +335,8 @@ public class EntityColumn implements Serializable {
      * The output value type will be the same as {@link #persistedType()}.
      *
      * <p>As the column value may be {@linkplain #isNullable() nullable}, and all {@code null}
-     * values are persisted in the data storage as {@code null}, for example, without any conversion.
+     * values are persisted in the data storage as {@code null}, for example, without any
+     * conversion.
      * For the {@code null} input argument this method will always return {@code null}.
      *
      * <p>The method is accessible outside of the {@code EntityColumn} class to enable the proper
@@ -464,7 +442,8 @@ public class EntityColumn implements Serializable {
     /**
      * A value of the associated {@code EntityColumn} saved at some point of time.
      *
-     * <p>The class associates the column value with its metadata, for example, {@linkplain EntityColumn}.
+     * <p>The class associates the column value with its metadata, for example,
+     * {@link EntityColumn}.
      *
      * @see EntityColumn#memoizeFor(Entity)
      */
@@ -532,7 +511,7 @@ public class EntityColumn implements Serializable {
             return (a, b) -> {
                 checkNotNull(a);
                 checkNotNull(b);
-                checkArgument(columnTypeOf(a).equals(columnTypeOf(b)),
+                checkArgument(a.columnType().equals(b.columnType()),
                               "Memoized value compared to mismatching value type.");
 
                 Serializable aValue = a.value();
@@ -568,10 +547,8 @@ public class EntityColumn implements Serializable {
             return COMPARATOR;
         }
 
-        private static Class columnTypeOf(MemoizedValue value) {
-            checkNotNull(value);
-            return value.sourceColumn()
-                        .type();
+        private Class columnType() {
+            return sourceColumn().type();
         }
 
         @Override

@@ -102,7 +102,7 @@ class ColumnsTest {
         assertContainsColumns(
                 entityColumns,
                 archived.name(), deleted.name(),
-                "boolean", "booleanWrapper", "someMessage", "integerFieldValue", "floatNull"
+                "boolean", "booleanWrapper", "someMessage", "floatNull", CUSTOM_COLUMN_NAME
         );
     }
 

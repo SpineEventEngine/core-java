@@ -133,7 +133,6 @@ final class ColumnReader {
                 .stream(properties)
                 .map(PropertyDescriptor::getReadMethod)
                 .filter(Objects::nonNull);
-
         MethodDescriptor[] methodDescriptors = entityDescriptor.getMethodDescriptors();
         Stream<Method> booleanWrapperGetters = Arrays
                 .stream(methodDescriptors)
@@ -162,7 +161,7 @@ final class ColumnReader {
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
         Collection<String> checkedNames = newLinkedList();
         for (EntityColumn column : columns) {
-            String columnName = column.storedName();
+            String columnName = column.name();
             if (checkedNames.contains(columnName)) {
                 throw newIllegalStateException(
                         "The entity `%s` has columns with the same name for storing `%s`.",

@@ -162,7 +162,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
 
     private static Optional<MemoizedValue> columnValue(EntityRecordWithColumns record,
                                                        EntityColumn column) {
-        String storedName = column.storedName();
+        String storedName = column.name();
         if (!record.getColumnNames()
                    .contains(storedName)) {
             return Optional.empty();

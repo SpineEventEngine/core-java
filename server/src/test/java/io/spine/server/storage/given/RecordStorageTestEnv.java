@@ -155,7 +155,7 @@ public class RecordStorageTestEnv {
 
         private int counter = 0;
 
-        public TestCounterEntity(ProjectId id) {
+        private TestCounterEntity(ProjectId id) {
             super(id);
         }
 
@@ -180,8 +180,7 @@ public class RecordStorageTestEnv {
             return id().toString();
         }
 
-        @Column(name = "COUNTER_VERSION" /* Custom name for storing
-                                            to check that querying is correct. */)
+        @Column
         public Version getCounterVersion() {
             return Version.newBuilder()
                           .setNumber(counter)
@@ -262,7 +261,7 @@ public class RecordStorageTestEnv {
         }
 
         public String columnName() {
-            return column.storedName();
+            return column.name();
         }
     }
 }

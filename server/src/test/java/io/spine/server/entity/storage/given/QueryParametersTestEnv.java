@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage.given;
 
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.storage.LifecycleFlagField;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,10 +34,9 @@ public class QueryParametersTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static EntityColumn mockColumn(LifecycleFlagField flag, String storedName) {
+    public static EntityColumn mockColumn(String name) {
         EntityColumn column = mock(EntityColumn.class);
-        when(column.storedName()).thenReturn(storedName);
-        when(column.name()).thenReturn(flag.name());
+        when(column.name()).thenReturn(name);
         return column;
     }
 

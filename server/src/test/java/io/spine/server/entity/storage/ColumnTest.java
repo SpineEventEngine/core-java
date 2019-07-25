@@ -309,8 +309,7 @@ class ColumnTest {
         @DisplayName("custom if specified")
         void custom() {
             EntityColumn column = forMethod("getValue", EntityWithCustomColumnNameForStoring.class);
-            assertEquals("value", column.name());
-            assertEquals(CUSTOM_COLUMN_NAME.trim(), column.storedName());
+            assertEquals(CUSTOM_COLUMN_NAME.trim(), column.name());
         }
 
         @Test
@@ -320,7 +319,7 @@ class ColumnTest {
                                             EntityWithDefaultColumnNameForStoring.class);
             String expectedName = "value";
             assertEquals(expectedName, column.name());
-            assertEquals(expectedName, column.storedName());
+            assertEquals(expectedName, column.name());
         }
     }
 
