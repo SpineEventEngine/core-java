@@ -76,6 +76,10 @@ message BbAssignProject {
     spine.core.UserId user_id = 2;
 }
 
+message BbFinalizeProject {
+    BbProjectId project_id = 1;
+}
+
 message BbRegisterCommandDispatcher {
     string dispatcher_name = 1;
 }

@@ -23,6 +23,7 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
+import io.spine.base.Identifier;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -38,10 +39,12 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
@@ -57,6 +60,7 @@ import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
+import io.spine.validate.Validated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,8 +85,10 @@ import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.eventDispatcherRegistered;
+import static io.spine.testing.server.blackbox.given.Given.finalizeProject;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.projectDone;
 import static io.spine.testing.server.blackbox.given.Given.registerCommandDispatcher;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
@@ -304,6 +310,36 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                .assertRejectedWith(Rejections.BbProjectAlreadyStarted.class);
     }
 
+    @Nested
+    @DisplayName("throw IAE on receiving an unsupported command")
+    class ThrowOnUnsupportedCommand {
+
+        @Test
+        @DisplayName("from the caller")
+        void fromCaller() {
+            // `BbFinalizeProject` doesn't have a handler within the context.
+            BbFinalizeProject command = finalizeProject(newProjectId());
+
+            assertThrows(IllegalArgumentException.class, () -> context.receivesCommand(command));
+        }
+
+        @Test
+        @DisplayName("generated as a response to some other signal")
+        void generatedWithinModel() {
+            // Should generate a `BbFinalizeProject` command in response.
+            BbProjectDone event = projectDone(newProjectId());
+
+            assertThrows(IllegalArgumentException.class, () -> context.receivesEvent(event));
+        }
+    }
+    @Test
+    @DisplayName("generated as a response to some other signal")
+    void generatedWithinModel() {
+        // Should generate a `BbFinalizeProject` command in response.
+        BbProjectDone event = projectDone(newProjectId());
+
+        assertThrows(IllegalArgumentException.class, () -> context.receivesEvent(event));
+    }
     @Test
     @DisplayName("receive and react on single event")
     void receivesEvent() {

@@ -28,10 +28,13 @@ import io.spine.testing.server.blackbox.BbInit;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.command.BbAssignScrumMaster;
 import io.spine.testing.server.blackbox.command.BbAssignTeam;
+import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbInitProject;
+import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbProjectInitialized;
 import io.spine.testing.server.blackbox.event.BbScrumMasterAssigned;
 import io.spine.testing.server.blackbox.event.BbTeamAssigned;
+import io.spine.validate.Validated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -63,6 +66,15 @@ public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbI
                         .build()
                 : null;
         return Pair.withNullable(assignTeam, assignScrumMaster);
+    }
+
+    @Command
+    BbFinalizeProject on(BbProjectDone event) {
+        BbFinalizeProject cmd = BbFinalizeProject
+                .newBuilder()
+                .setProjectId(event.getId())
+                .vBuild();
+        return cmd;
     }
 
     @Assign
