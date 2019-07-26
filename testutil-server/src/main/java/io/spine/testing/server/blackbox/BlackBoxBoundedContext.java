@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -31,7 +32,6 @@ import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
-import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
@@ -56,11 +56,11 @@ import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.SubscriptionActivator;
 import io.spine.testing.server.blackbox.verify.count.VerifyingCounter;
 import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
-import io.spine.testing.server.SubscriptionActivator;
-import io.spine.testing.server.blackbox.verify.subscription.SubscriptionItemSubject;
+import io.spine.testing.server.blackbox.verify.subscription.SubscriptionObserver;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -838,19 +838,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     @CanIgnoreReturnValue
     public VerifyingCounter
-    assertSubscriptionUpdates(Topic topic, Consumer<SubscriptionItemSubject> assertEachReceived) {
+    assertSubscriptionUpdates(Topic topic, Consumer<ProtoSubject<?, Message>> assertEachReceived) {
         SubscriptionService subscriptionService =
                 SubscriptionService.newBuilder()
                                    .add(context)
                                    .build();
-        VerifyingCounter counter = new VerifyingCounter();
-
-        StreamObserver<SubscriptionUpdate> updateObserver =
-                new SubscriptionItemSubject.Notifier(assertEachReceived, counter);
+        SubscriptionObserver updateObserver =
+                new SubscriptionObserver(assertEachReceived);
         StreamObserver<Subscription> activator =
                 new SubscriptionActivator(subscriptionService, updateObserver);
 
         subscriptionService.subscribe(topic, activator);
-        return counter;
+        return updateObserver.counter();
     }
 }

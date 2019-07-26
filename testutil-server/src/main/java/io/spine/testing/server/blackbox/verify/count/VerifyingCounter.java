@@ -55,7 +55,7 @@ public final class VerifyingCounter {
         actual -= num;
     }
 
-    public void verify(int expected) {
+    public void verifyEquals(int expected) {
         assertThat(actual).isEqualTo(expected);
     }
 }

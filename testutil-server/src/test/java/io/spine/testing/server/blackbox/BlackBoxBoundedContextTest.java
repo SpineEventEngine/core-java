@@ -605,8 +605,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                                                           .comparingExpectedFieldsOnly()
                                                           .isEqualTo(expected));
         context.receivesCommand(createProject(id));
-
-        counter.verify(1);
+        counter.verifyEquals(1);
     }
 
     @Nested
