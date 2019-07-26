@@ -54,7 +54,7 @@ import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.BbTaskViewProjection;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
-import io.spine.testing.server.blackbox.verify.count.VerifyCount;
+import io.spine.testing.server.blackbox.verify.count.VerifyingCounter;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
@@ -599,7 +599,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 .newBuilder()
                 .setId(id)
                 .build();
-        VerifyCount counter =
+        VerifyingCounter counter =
                 context.assertSubscriptionUpdates(topic,
                                                   assertEachReceived -> assertEachReceived
                                                           .comparingExpectedFieldsOnly()

@@ -22,14 +22,17 @@ package io.spine.testing.server.blackbox.verify.count;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public final class VerifyCount {
+/**
+ * A counter that can verify the stored value against some {@code expected}.
+ */
+public final class VerifyingCounter {
 
     private int actual;
 
-    public VerifyCount() {
+    public VerifyingCounter() {
     }
 
-    public VerifyCount(int actual) {
+    public VerifyingCounter(int actual) {
         this.actual = actual;
     }
 
