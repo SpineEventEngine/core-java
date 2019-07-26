@@ -56,6 +56,7 @@ import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.blackbox.verify.count.VerifyCount;
 import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
 import io.spine.testing.server.blackbox.verify.subscription.SubscriptionItemSubject;
@@ -74,12 +75,14 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Collections.singletonList;
@@ -835,17 +838,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         return QueryResultSubject.assertQueryResult(response);
     }
 
-    public void assertSubscriptionUpdates(Topic topic,
-                                          Consumer<SubscriptionItemSubject> assertEachReceived) {
+    @CanIgnoreReturnValue
+    public VerifyCount assertSubscriptionUpdates(Topic topic,
+                                                 Consumer<SubscriptionItemSubject> assertEachReceived) {
         SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                      .add(context)
                                                                      .build();
+        VerifyCount counter = new VerifyCount();
         StreamObserver<SubscriptionUpdate> updateObserver =
-                new SubjectNotifier(assertEachReceived);
+                new SubjectNotifier(assertEachReceived, counter);
         StreamObserver<Subscription> activator =
                 new SubscriptionActivator(subscriptionService, updateObserver);
 
         subscriptionService.subscribe(topic, activator);
+        return counter;
     }
 
     private static class SubscriptionActivator implements StreamObserver<Subscription> {
@@ -882,15 +888,20 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     private static class SubjectNotifier implements StreamObserver<SubscriptionUpdate> {
 
         private final Consumer<SubscriptionItemSubject> subjectConsumer;
+        private final VerifyCount counter;
 
-        private SubjectNotifier(Consumer<SubscriptionItemSubject> consumer) {
+        private SubjectNotifier(Consumer<SubscriptionItemSubject> consumer, VerifyCount counter) {
             this.subjectConsumer = consumer;
+            this.counter = counter;
         }
 
         @Override
         public void onNext(SubscriptionUpdate update) {
-            SubscriptionItemSubject.collectAll(update)
-                                   .forEach(subjectConsumer);
+            Iterable<SubscriptionItemSubject> items = SubscriptionItemSubject.collectAll(update);
+            items.forEach(subjectConsumer);
+
+            int itemCount = size(items);
+            counter.incrementActual(itemCount);
         }
 
         @Override
