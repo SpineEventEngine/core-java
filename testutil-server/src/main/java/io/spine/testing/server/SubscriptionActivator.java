@@ -52,7 +52,8 @@ public final class SubscriptionActivator implements StreamObserver<Subscription>
         subscriptionService.activate(subscription, updateObserver);
     }
 
-    @SuppressWarnings("AvoidThrowingRawExceptionTypes") // The real type is unknown at compile time.
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
+    // The real type is unknown at compile time.
     @Override
     public void onError(Throwable t) {
         throw new RuntimeException(t);
