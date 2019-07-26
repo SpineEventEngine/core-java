@@ -590,7 +590,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("provide a method for `Subscription` updates verification")
     void assertSubscriptionUpdates() {
         BbProjectId id = newProjectId();
-
         TopicFactory topicFactory = context.requestFactory()
                                            .topic();
         Topic topic = topicFactory.allOf(BbProject.class);
