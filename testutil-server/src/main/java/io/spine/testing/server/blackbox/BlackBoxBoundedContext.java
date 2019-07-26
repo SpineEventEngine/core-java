@@ -848,7 +848,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>The method may be used as follows:
      * <pre>
      *     {@code
-     *       VerifyingCounter updateCounter =
+     *         VerifyingCounter updateCounter =
      *               context.assertSubscriptionUpdates(
      *                       topic,
      *                       assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
