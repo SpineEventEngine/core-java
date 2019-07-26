@@ -20,11 +20,14 @@
 
 package io.spine.testing.server.blackbox.verify.count;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import static com.google.common.truth.Truth.assertThat;
 
 /**
  * A counter that can verify the stored value against some {@code expected}.
  */
+@VisibleForTesting
 public final class VerifyingCounter {
 
     private int actual;

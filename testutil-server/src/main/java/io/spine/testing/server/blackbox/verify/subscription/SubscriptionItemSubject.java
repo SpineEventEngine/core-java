@@ -20,18 +20,22 @@
 
 package io.spine.testing.server.blackbox.verify.subscription;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
+import io.spine.testing.server.blackbox.verify.count.VerifyingCounter;
 
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.truth.Truth.assertAbout;
 import static java.util.stream.Collectors.toList;
 
@@ -42,6 +46,7 @@ import static java.util.stream.Collectors.toList;
  * {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext#assertSubscriptionUpdates(
  * Topic, Consumer)} method.
  */
+@VisibleForTesting
 public final class SubscriptionItemSubject
         extends ProtoSubject<SubscriptionItemSubject, Message> {
 
@@ -53,8 +58,7 @@ public final class SubscriptionItemSubject
         return assertAbout(subscriptionItem()).that(message);
     }
 
-    @Internal
-    public static Iterable<SubscriptionItemSubject> collectAll(SubscriptionUpdate update) {
+    private static Iterable<SubscriptionItemSubject> collectAll(SubscriptionUpdate update) {
         switch (update.getUpdateCase()) {
             case ENTITY_UPDATES:
                 return collectEntitySubjects(update);
@@ -86,5 +90,41 @@ public final class SubscriptionItemSubject
 
     static Subject.Factory<SubscriptionItemSubject, Message> subscriptionItem() {
         return SubscriptionItemSubject::new;
+    }
+
+    /**
+     * Notifies the given {@link Consumer} with each received {@link SubscriptionUpdate}.
+     */
+    @Internal
+    @SuppressWarnings("AvoidThrowingRawExceptionTypes") // The real type is unknown at compile time.
+    public static class Notifier implements StreamObserver<SubscriptionUpdate> {
+
+        private final Consumer<SubscriptionItemSubject> subjectConsumer;
+        private final VerifyingCounter counter;
+
+        public Notifier(Consumer<SubscriptionItemSubject> consumer,
+                         VerifyingCounter counter) {
+            this.subjectConsumer = consumer;
+            this.counter = counter;
+        }
+
+        @Override
+        public void onNext(SubscriptionUpdate update) {
+            Iterable<SubscriptionItemSubject> items = collectAll(update);
+            items.forEach(subjectConsumer);
+
+            int itemCount = size(items);
+            counter.incrementActual(itemCount);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            throw new RuntimeException(t);
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
     }
 }

@@ -59,6 +59,7 @@ import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.verify.count.VerifyingCounter;
 import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.testing.server.SubscriptionActivator;
 import io.spine.testing.server.blackbox.verify.subscription.SubscriptionItemSubject;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
@@ -75,7 +76,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
@@ -83,7 +83,6 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -840,77 +839,18 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @CanIgnoreReturnValue
     public VerifyingCounter
     assertSubscriptionUpdates(Topic topic, Consumer<SubscriptionItemSubject> assertEachReceived) {
-        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                     .add(context)
-                                                                     .build();
+        SubscriptionService subscriptionService =
+                SubscriptionService.newBuilder()
+                                   .add(context)
+                                   .build();
         VerifyingCounter counter = new VerifyingCounter();
+
         StreamObserver<SubscriptionUpdate> updateObserver =
-                new SubjectNotifier(assertEachReceived, counter);
+                new SubscriptionItemSubject.Notifier(assertEachReceived, counter);
         StreamObserver<Subscription> activator =
                 new SubscriptionActivator(subscriptionService, updateObserver);
 
         subscriptionService.subscribe(topic, activator);
         return counter;
-    }
-
-    private static class SubscriptionActivator implements StreamObserver<Subscription> {
-
-        private final SubscriptionService subscriptionService;
-        private final StreamObserver<SubscriptionUpdate> updateObserver;
-
-        private SubscriptionActivator(SubscriptionService subscriptionService,
-                                      StreamObserver<SubscriptionUpdate> updateObserver) {
-            this.subscriptionService = subscriptionService;
-            this.updateObserver = updateObserver;
-        }
-
-        @Override
-        public void onNext(Subscription subscription) {
-            subscriptionService.activate(subscription, updateObserver);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            throw new RuntimeException(t);
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
-        }
-    }
-
-    /**
-     * Each time a new {@link SubscriptionUpdate} arrives, feeds all of the received items
-     * to the given {@link SubscriptionItemSubject} consumer.
-     */
-    private static class SubjectNotifier implements StreamObserver<SubscriptionUpdate> {
-
-        private final Consumer<SubscriptionItemSubject> subjectConsumer;
-        private final VerifyingCounter counter;
-
-        private SubjectNotifier(Consumer<SubscriptionItemSubject> consumer, VerifyingCounter counter) {
-            this.subjectConsumer = consumer;
-            this.counter = counter;
-        }
-
-        @Override
-        public void onNext(SubscriptionUpdate update) {
-            Iterable<SubscriptionItemSubject> items = SubscriptionItemSubject.collectAll(update);
-            items.forEach(subjectConsumer);
-
-            int itemCount = size(items);
-            counter.incrementActual(itemCount);
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            throw new RuntimeException(t);
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
-        }
     }
 }
