@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Can be specified to the {@link SubscriptionService#subscribe(Topic, StreamObserver)} method
  * to avoid any intermediate calls before subscription activation.
  *
- * <p>Re-throws all incoming errors as {@link RuntimeException}.
+ * <p>Re-throws all incoming errors as {@link IllegalStateException}.
  */
 @Internal
 public final class SubscriptionActivator implements StreamObserver<Subscription> {
@@ -54,11 +54,9 @@ public final class SubscriptionActivator implements StreamObserver<Subscription>
         subscriptionService.activate(subscription, updateObserver);
     }
 
-    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
-    // The real type is unknown at compile time.
     @Override
     public void onError(Throwable t) {
-        throw new RuntimeException(t);
+        throw new IllegalStateException(t);
     }
 
     @Override

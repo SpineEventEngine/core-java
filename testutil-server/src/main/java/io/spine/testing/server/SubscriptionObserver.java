@@ -33,7 +33,7 @@ import static java.lang.Math.max;
 /**
  * Counts the incoming subscription updates and feeds them to the given {@link Consumer}.
  *
- * <p>Re-throws all incoming errors as {@link RuntimeException}.
+ * <p>Re-throws all incoming errors as {@link IllegalStateException}.
  */
 @VisibleForTesting
 @Internal
@@ -53,11 +53,9 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
         updateCount(update);
     }
 
-    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
-    // The real type is unknown at compile time.
     @Override
     public void onError(Throwable t) {
-        throw new RuntimeException(t);
+        throw new IllegalStateException(t);
     }
 
     @Override
