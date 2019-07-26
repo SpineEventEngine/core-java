@@ -59,6 +59,9 @@ public final class VerifyingCounter {
         assertThat(value).isEqualTo(expected);
     }
 
+    /**
+     * Exists only for testing.
+     */
     int value() {
        return value;
     }

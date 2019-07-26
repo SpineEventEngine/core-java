@@ -843,7 +843,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * <p>The verification happens on a per-item basis, where item is a single entity state or
      * event update represented as {@link ProtoSubject}.
      *
-     * <p>The returned value allows to check the number of subscriptions received.
+     * <p>The returned value allows to check the number of updates received.
      *
      * <p>The method may be used as follows:
      * <pre>
