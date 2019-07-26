@@ -838,8 +838,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     @CanIgnoreReturnValue
-    public VerifyingCounter assertSubscriptionUpdates(Topic topic,
-                                                      Consumer<SubscriptionItemSubject> assertEachReceived) {
+    public VerifyingCounter
+    assertSubscriptionUpdates(Topic topic, Consumer<SubscriptionItemSubject> assertEachReceived) {
         SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                      .add(context)
                                                                      .build();
