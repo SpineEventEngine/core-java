@@ -28,6 +28,7 @@ import io.spine.client.SubscriptionUpdate;
 
 import java.util.function.Consumer;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.max;
 
 /**
@@ -42,17 +43,17 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
     private final VerifyingCounter counter;
 
     public SubscriptionObserver(Consumer<SubscriptionUpdate> consumer) {
-        this.consumer = consumer;
+        this.consumer = checkNotNull(consumer);
         this.counter = new VerifyingCounter();
     }
 
-    @SuppressWarnings("AvoidThrowingRawExceptionTypes") // The real type is unknown at compile time.
     @Override
     public void onNext(SubscriptionUpdate update) {
         consumer.accept(update);
         updateCount(update);
     }
 
+    @SuppressWarnings("AvoidThrowingRawExceptionTypes") // The real type is unknown at compile time.
     @Override
     public void onError(Throwable t) {
         throw new RuntimeException(t);
@@ -70,7 +71,7 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
                                .getEventCount();
         int updateCount = max(entityUpdateCount, eventCount);
 
-        counter.incrementActual(updateCount);
+        counter.increment(updateCount);
     }
 
     public VerifyingCounter counter() {

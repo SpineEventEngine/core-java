@@ -27,6 +27,8 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
 import io.spine.server.SubscriptionService;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A {@link StreamObserver} that activates the first received {@link Subscription}.
  *
@@ -41,8 +43,8 @@ public final class SubscriptionActivator implements StreamObserver<Subscription>
 
     public SubscriptionActivator(SubscriptionService subscriptionService,
                                  StreamObserver<SubscriptionUpdate> updateObserver) {
-        this.subscriptionService = subscriptionService;
-        this.updateObserver = updateObserver;
+        this.subscriptionService = checkNotNull(subscriptionService);
+        this.updateObserver = checkNotNull(updateObserver);
     }
 
     @Override

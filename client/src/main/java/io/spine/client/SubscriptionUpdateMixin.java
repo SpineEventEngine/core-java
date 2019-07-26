@@ -97,7 +97,8 @@ public interface SubscriptionUpdateMixin {
         ImmutableList<EventMessage> result =
                 events().stream()
                         .map(Event::getMessage)
-                        .map(any -> AnyPacker.unpack(any, EventMessage.class))
+                        .map(AnyPacker::unpack)
+                        .map(EventMessage.class::cast)
                         .collect(toImmutableList());
         return result;
     }

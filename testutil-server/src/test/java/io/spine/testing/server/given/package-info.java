@@ -18,48 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
-
-import com.google.common.annotations.VisibleForTesting;
-
-import static com.google.common.truth.Truth.assertThat;
-
 /**
- * A counter that can verify the stored value against some {@code expected} value.
+ * Test environment classes for the {@code io.spine.testing.server} package.
  */
-@VisibleForTesting
-public final class VerifyingCounter {
 
-    private int value;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.given;
 
-    public VerifyingCounter() {
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public VerifyingCounter(int value) {
-        this.value = value;
-    }
-
-    public void increment() {
-        value++;
-    }
-
-    public void increment(int num) {
-        value += num;
-    }
-
-    public void decrement() {
-        value--;
-    }
-
-    public void decrement(int num) {
-        value -= num;
-    }
-
-    public void verifyEquals(int expected) {
-        assertThat(value).isEqualTo(expected);
-    }
-
-    int value() {
-       return value;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
