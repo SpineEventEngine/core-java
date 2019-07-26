@@ -18,14 +18,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import static com.google.common.truth.Truth.assertThat;
+
 /**
- * Tools for checking the count of certain entities in the program or events that happened during
- * test.
+ * A counter that can verify the stored value against some {@code expected} value.
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox.verify.count;
+@VisibleForTesting
+public final class VerifyingCounter {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    private int actual;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public VerifyingCounter() {
+    }
+
+    public VerifyingCounter(int actual) {
+        this.actual = actual;
+    }
+
+    public void incrementActual() {
+        actual++;
+    }
+
+    public void incrementActual(int num) {
+        actual += num;
+    }
+
+    public void decrementActual() {
+        actual--;
+    }
+
+    public void decrementActual(int num) {
+        actual -= num;
+    }
+
+    public void verifyEquals(int expected) {
+        assertThat(actual).isEqualTo(expected);
+    }
+}

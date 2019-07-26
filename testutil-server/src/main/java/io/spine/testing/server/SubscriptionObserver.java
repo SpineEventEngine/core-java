@@ -18,23 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.verify.subscription;
+package io.spine.testing.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoSubject;
-import com.google.common.truth.extensions.proto.ProtoTruth;
-import com.google.protobuf.Message;
 import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.testing.server.blackbox.verify.count.VerifyingCounter;
 
-import java.util.List;
 import java.util.function.Consumer;
 
-import static com.google.common.collect.Iterables.size;
-import static java.util.stream.Collectors.toList;
+import static java.lang.Math.max;
 
 /**
  * Transforms the received subscription updates into the Truth {@link ProtoSubject subjects} and
@@ -44,10 +38,10 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class SubscriptionObserver implements StreamObserver<SubscriptionUpdate> {
 
-    private final Consumer<ProtoSubject<?, Message>> consumer;
+    private final Consumer<SubscriptionUpdate> consumer;
     private final VerifyingCounter counter;
 
-    public SubscriptionObserver(Consumer<ProtoSubject<?, Message>> consumer) {
+    public SubscriptionObserver(Consumer<SubscriptionUpdate> consumer) {
         this.consumer = consumer;
         this.counter = new VerifyingCounter();
     }
@@ -55,11 +49,8 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
     @SuppressWarnings("AvoidThrowingRawExceptionTypes") // The real type is unknown at compile time.
     @Override
     public void onNext(SubscriptionUpdate update) {
-        Iterable<ProtoSubject<?, Message>> items = collectAll(update);
-        items.forEach(consumer);
-
-        int itemCount = size(items);
-        counter.incrementActual(itemCount);
+        consumer.accept(update);
+        updateCount(update);
     }
 
     @Override
@@ -72,38 +63,17 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
         // Do nothing.
     }
 
+    private void updateCount(SubscriptionUpdate update) {
+        int entityUpdateCount = update.getEntityUpdates()
+                                      .getUpdateCount();
+        int eventCount = update.getEventUpdates()
+                               .getEventCount();
+        int updateCount = max(entityUpdateCount, eventCount);
+
+        counter.incrementActual(updateCount);
+    }
+
     public VerifyingCounter counter() {
         return counter;
-    }
-
-    private static Iterable<ProtoSubject<?, Message>> collectAll(SubscriptionUpdate update) {
-        switch (update.getUpdateCase()) {
-            case ENTITY_UPDATES:
-                return collectEntitySubjects(update);
-            case EVENT_UPDATES:
-                return collectEventSubjects(update);
-            case UPDATE_NOT_SET:
-            default:
-                return ImmutableList.of();
-        }
-    }
-
-    private static Iterable<ProtoSubject<?, Message>>
-    collectEntitySubjects(SubscriptionUpdate update) {
-        return toSubjects(update.states());
-    }
-
-    private static Iterable<ProtoSubject<?, Message>>
-    collectEventSubjects(SubscriptionUpdate update) {
-        return toSubjects(update.eventMessages());
-    }
-
-    private static Iterable<ProtoSubject<?, Message>>
-    toSubjects(List<? extends Message> messages) {
-        List<ProtoSubject<?, Message>> result =
-                messages.stream()
-                        .map(ProtoTruth::assertThat)
-                        .collect(toList());
-        return result;
     }
 }

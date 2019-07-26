@@ -57,10 +57,11 @@ import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.SubscriptionActivator;
-import io.spine.testing.server.blackbox.verify.count.VerifyingCounter;
+import io.spine.testing.server.SubscriptionObserver;
+import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
-import io.spine.testing.server.blackbox.verify.subscription.SubscriptionObserver;
+import io.spine.testing.server.blackbox.verify.subscription.ToProtoSubjects;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -843,8 +844,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                 SubscriptionService.newBuilder()
                                    .add(context)
                                    .build();
-        SubscriptionObserver updateObserver =
-                new SubscriptionObserver(assertEachReceived);
+        SubscriptionObserver updateObserver = new SubscriptionObserver(
+                update -> new ToProtoSubjects().apply(update)
+                                               .forEach(assertEachReceived)
+        );
         StreamObserver<Subscription> activator =
                 new SubscriptionActivator(subscriptionService, updateObserver);
 
