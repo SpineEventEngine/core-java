@@ -31,8 +31,12 @@ import io.spine.client.SubscriptionUpdate;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Converts the given {@link SubscriptionUpdate} to the proto subjects on a per-item basis.
+ */
 @VisibleForTesting
 @Internal
 public final class ToProtoSubjects
@@ -40,6 +44,7 @@ public final class ToProtoSubjects
 
     @Override
     public Iterable<ProtoSubject<?, Message>> apply(SubscriptionUpdate update) {
+        checkNotNull(update);
         return collectAll(update);
     }
 

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox.verify.subscription;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Message;
 import io.spine.client.SubscriptionUpdate;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 @DisplayName("ToProtoSubjects should")
 class ToProtoSubjectsTest {
@@ -40,6 +42,13 @@ class ToProtoSubjectsTest {
     @BeforeEach
     void newFunction() {
         function = new ToProtoSubjects();
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicInstanceMethods(function);
     }
 
     @Test
