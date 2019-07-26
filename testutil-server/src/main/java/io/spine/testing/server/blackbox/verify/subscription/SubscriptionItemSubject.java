@@ -26,11 +26,8 @@ import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.client.EntityStateUpdate;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Topic;
-import io.spine.core.Event;
-import io.spine.protobuf.AnyPacker;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -42,8 +39,8 @@ import static java.util.stream.Collectors.toList;
  * A set of checks for a single item received via {@link SubscriptionUpdate}.
  *
  * <p>Should not be created in the client code directly. Instead, is provided to the callers of
- * {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext#assertSubscriptionUpdates(Topic, Consumer)}
- * method.
+ * {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext#assertSubscriptionUpdates(
+ * Topic, Consumer)} method.
  */
 public final class SubscriptionItemSubject
         extends ProtoSubject<SubscriptionItemSubject, Message> {
@@ -55,10 +52,6 @@ public final class SubscriptionItemSubject
     private static SubscriptionItemSubject assertMessage(Message message) {
         return assertAbout(subscriptionItem()).that(message);
     }
-
-    /*
-    1. @Nullable fields `entityStateSubject` and `eventSubject` exposed through `isEventThat` and `isEntityStateThat`
-     */
 
     @Internal
     public static Iterable<SubscriptionItemSubject> collectAll(SubscriptionUpdate update) {
@@ -75,27 +68,19 @@ public final class SubscriptionItemSubject
 
     private static Iterable<SubscriptionItemSubject>
     collectEntitySubjects(SubscriptionUpdate update) {
-        List<EntityStateUpdate> updateList = update.getEntityUpdates()
-                                                   .getUpdateList();
-        List<SubscriptionItemSubject> result =
-                updateList.stream()
-                          .map(EntityStateUpdate::getState)
-                          .map(AnyPacker::unpack)
-                          .map(SubscriptionItemSubject::assertMessage)
-                          .collect(toList());
-        return result;
+        return toSubjects(update.states());
     }
 
     private static Iterable<SubscriptionItemSubject>
     collectEventSubjects(SubscriptionUpdate update) {
-        List<Event> events = update.getEventUpdates()
-                                   .getEventList();
+        return toSubjects(update.eventMessages());
+    }
+
+    private static Iterable<SubscriptionItemSubject> toSubjects(List<? extends Message> messages) {
         List<SubscriptionItemSubject> result =
-                events.stream()
-                      .map(Event::getMessage)
-                      .map(AnyPacker::unpack)
-                      .map(SubscriptionItemSubject::assertMessage)
-                      .collect(toList());
+                messages.stream()
+                        .map(SubscriptionItemSubject::assertMessage)
+                        .collect(toList());
         return result;
     }
 

@@ -20,10 +20,16 @@
 
 package io.spine.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
+import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+
+import java.util.List;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
  * Extends {@link SubscriptionUpdate} with useful methods.
@@ -52,6 +58,19 @@ public interface SubscriptionUpdateMixin {
     }
 
     /**
+     * Obtains an immutable list of stored entity states.
+     */
+    default List<Message> states() {
+        ImmutableList<Message> result =
+                getEntityUpdates().getUpdateList()
+                                  .stream()
+                                  .map(EntityStateUpdate::getState)
+                                  .map(AnyPacker::unpack)
+                                  .collect(toImmutableList());
+        return result;
+    }
+
+    /**
      * Obtains the event at the given index.
      *
      * @throws IndexOutOfBoundsException
@@ -59,6 +78,27 @@ public interface SubscriptionUpdateMixin {
      */
     default Event event(int index) {
         Event result = getEventUpdates().getEvent(index);
+        return result;
+    }
+
+    /**
+     * Obtains an immutable list of stored events.
+     */
+    default List<Event> events() {
+        List<Event> events = getEventUpdates().getEventList();
+        ImmutableList<Event> result = ImmutableList.copyOf(events);
+        return result;
+    }
+
+    /**
+     * Obtains an immutable list of stored event messages.
+     */
+    default List<EventMessage> eventMessages() {
+        ImmutableList<EventMessage> result =
+                events().stream()
+                        .map(Event::getMessage)
+                        .map(any -> AnyPacker.unpack(any, EventMessage.class))
+                        .collect(toImmutableList());
         return result;
     }
 }
