@@ -21,7 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -33,7 +32,6 @@ import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
@@ -843,7 +841,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                                                                      .add(context)
                                                                      .build();
         StreamObserver<SubscriptionUpdate> updateObserver =
-                new SubscriptionUpdateObserver(assertEachReceived);
+                new SubjectNotifier(assertEachReceived);
         StreamObserver<Subscription> activator =
                 new SubscriptionActivator(subscriptionService, updateObserver);
 
@@ -877,11 +875,15 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         }
     }
 
-    private static class SubscriptionUpdateObserver implements StreamObserver<SubscriptionUpdate> {
+    /**
+     * Each time a new {@link SubscriptionUpdate} arrives, feeds all of the received items
+     * to the given {@link SubscriptionItemSubject} consumer.
+     */
+    private static class SubjectNotifier implements StreamObserver<SubscriptionUpdate> {
 
         private final Consumer<SubscriptionItemSubject> subjectConsumer;
 
-        private SubscriptionUpdateObserver(Consumer<SubscriptionItemSubject> consumer) {
+        private SubjectNotifier(Consumer<SubscriptionItemSubject> consumer) {
             this.subjectConsumer = consumer;
         }
 

@@ -39,7 +39,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A set of checks for a single item received via {@link io.spine.client.SubscriptionUpdate}.
+ * A set of checks for a single item received via {@link SubscriptionUpdate}.
  *
  * <p>Should not be created in the client code directly. Instead, is provided to the callers of
  * {@link io.spine.testing.server.blackbox.BlackBoxBoundedContext#assertSubscriptionUpdates(Topic, Consumer)}
