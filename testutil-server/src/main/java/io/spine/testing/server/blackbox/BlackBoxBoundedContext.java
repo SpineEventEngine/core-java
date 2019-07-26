@@ -21,14 +21,20 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
+import io.spine.client.Subscription;
+import io.spine.client.SubscriptionUpdate;
+import io.spine.client.Target;
+import io.spine.client.Topic;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -39,6 +45,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.QueryService;
+import io.spine.server.SubscriptionService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
@@ -53,6 +60,7 @@ import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.verify.query.QueryResultSubject;
 import io.spine.testing.server.blackbox.verify.state.VerifyState;
+import io.spine.testing.server.blackbox.verify.subscription.SubscriptionItemSubject;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -75,6 +83,7 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -826,5 +835,70 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
         QueryResponse response = observer.firstResponse();
         return QueryResultSubject.assertQueryResult(response);
+    }
+
+    public void assertSubscriptionUpdates(Topic topic,
+                                          Consumer<SubscriptionItemSubject> assertEachReceived) {
+        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                     .add(context)
+                                                                     .build();
+        StreamObserver<SubscriptionUpdate> updateObserver =
+                new SubscriptionUpdateObserver(assertEachReceived);
+        StreamObserver<Subscription> activator =
+                new SubscriptionActivator(subscriptionService, updateObserver);
+
+        subscriptionService.subscribe(topic, activator);
+    }
+
+    private static class SubscriptionActivator implements StreamObserver<Subscription> {
+
+        private final SubscriptionService subscriptionService;
+        private final StreamObserver<SubscriptionUpdate> updateObserver;
+
+        private SubscriptionActivator(SubscriptionService subscriptionService,
+                                      StreamObserver<SubscriptionUpdate> updateObserver) {
+            this.subscriptionService = subscriptionService;
+            this.updateObserver = updateObserver;
+        }
+
+        @Override
+        public void onNext(Subscription subscription) {
+            subscriptionService.activate(subscription, updateObserver);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            throw new RuntimeException(t);
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
+    }
+
+    private static class SubscriptionUpdateObserver implements StreamObserver<SubscriptionUpdate> {
+
+        private final Consumer<SubscriptionItemSubject> subjectConsumer;
+
+        private SubscriptionUpdateObserver(Consumer<SubscriptionItemSubject> consumer) {
+            this.subjectConsumer = consumer;
+        }
+
+        @Override
+        public void onNext(SubscriptionUpdate update) {
+            SubscriptionItemSubject.collectAll(update)
+                                   .forEach(subjectConsumer);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            throw new RuntimeException(t);
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
     }
 }

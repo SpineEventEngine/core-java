@@ -589,7 +589,6 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("provide a method for `Subscription` updates verification")
     void assertSubscriptionUpdates() {
         BbProjectId id = newProjectId();
-        context.receivesCommand(createProject(id));
 
         TopicFactory topicFactory = context.requestFactory()
                                            .topic();
@@ -601,8 +600,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 .build();
         context.assertSubscriptionUpdates(
                 topic,
-                assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
-                                                        .isEqualTo(expected));
+                assertEachReceived -> assertEachReceived
+                        .comparingExpectedFieldsOnly()
+                        .isEqualTo(expected));
+        context.receivesCommand(createProject(id));
     }
 
     @Nested
