@@ -34,6 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Can be specified to the {@link SubscriptionService#subscribe(Topic, StreamObserver)} method
  * to avoid any intermediate calls before subscription activation.
+ *
+ * <p>Re-throws all incoming errors as {@link RuntimeException}.
  */
 @Internal
 public final class SubscriptionActivator implements StreamObserver<Subscription> {

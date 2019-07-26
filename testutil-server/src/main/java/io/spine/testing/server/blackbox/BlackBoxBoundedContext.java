@@ -837,6 +837,31 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         return QueryResultSubject.assertQueryResult(response);
     }
 
+    /**
+     * Subscribes to the {@code topic} and verifies the incoming updates.
+     *
+     * <p>The verification happens on a per-item basis, where item is a single entity state or
+     * event update represented as {@link ProtoSubject}.
+     *
+     * <p>The returned value allows to check the number of subscriptions received.
+     *
+     * <p>The method may be used as follows:
+     * <pre>
+     *     {@code
+     *       VerifyingCounter updateCounter =
+     *               context.assertSubscriptionUpdates(
+     *                       topic,
+     *                       assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
+     *                                                               .isEqualTo(expected)
+     *               );
+     *         context.receivesCommand(createProject); // Some command creating the `expected`.
+     *         updateCounter.verifyEquals(1);
+     *     }
+     * </pre>
+     *
+     * <p>Please note that the return value may be ignored, but then receiving {@code 0} incoming
+     * updates will count as valid and won't fail the test.
+     */
     @CanIgnoreReturnValue
     public VerifyingCounter
     assertSubscriptionUpdates(Topic topic, Consumer<ProtoSubject<?, Message>> assertEachReceived) {

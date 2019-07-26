@@ -21,7 +21,6 @@
 package io.spine.testing.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.SubscriptionUpdate;
@@ -32,8 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.max;
 
 /**
- * Transforms the received subscription updates into the Truth {@link ProtoSubject subjects} and
- * feeds to the given {@link Consumer}.
+ * Counts the incoming subscription updates and feeds them to the given {@link Consumer}.
+ *
+ * <p>Re-throws all incoming errors as {@link RuntimeException}.
  */
 @VisibleForTesting
 @Internal

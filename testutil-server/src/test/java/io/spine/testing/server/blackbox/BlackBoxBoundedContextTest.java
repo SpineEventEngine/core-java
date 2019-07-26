@@ -599,13 +599,14 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
                 .newBuilder()
                 .setId(id)
                 .build();
-        VerifyingCounter counter =
-                context.assertSubscriptionUpdates(topic,
-                                                  assertEachReceived -> assertEachReceived
-                                                          .comparingExpectedFieldsOnly()
-                                                          .isEqualTo(expected));
+        VerifyingCounter updateCounter =
+                context.assertSubscriptionUpdates(
+                        topic,
+                        assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
+                                                                .isEqualTo(expected)
+                );
         context.receivesCommand(createProject(id));
-        counter.verifyEquals(1);
+        updateCounter.verifyEquals(1);
     }
 
     @Nested
