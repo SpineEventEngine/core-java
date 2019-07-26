@@ -63,6 +63,14 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
         // Do nothing.
     }
 
+    /**
+     * Exposes a mutable counter that allows to verify how many updates were received at different
+     * points in time.
+     */
+    public VerifyingCounter counter() {
+        return counter;
+    }
+
     private void updateCount(SubscriptionUpdate update) {
         int entityUpdateCount = update.getEntityUpdates()
                                       .getUpdateCount();
@@ -71,9 +79,5 @@ public final class SubscriptionObserver implements StreamObserver<SubscriptionUp
         int updateCount = max(entityUpdateCount, eventCount);
 
         counter.increment(updateCount);
-    }
-
-    public VerifyingCounter counter() {
-        return counter;
     }
 }
