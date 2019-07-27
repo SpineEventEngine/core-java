@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
+import io.spine.client.Topic;
+import io.spine.client.TopicFactory;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
@@ -34,6 +36,7 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
+import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
@@ -581,6 +584,28 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         context.assertQueryResult(query)
                .comparingExpectedFieldsOnly()
                .containsExactly(expected);
+    }
+
+    @Test
+    @DisplayName("provide a method for `Subscription` updates verification")
+    void assertSubscriptionUpdates() {
+        BbProjectId id = newProjectId();
+        TopicFactory topicFactory = context.requestFactory()
+                                           .topic();
+        Topic topic = topicFactory.allOf(BbProject.class);
+
+        BbProject expected = BbProject
+                .newBuilder()
+                .setId(id)
+                .build();
+        VerifyingCounter updateCounter =
+                context.assertSubscriptionUpdates(
+                        topic,
+                        assertEachReceived -> assertEachReceived.comparingExpectedFieldsOnly()
+                                                                .isEqualTo(expected)
+                );
+        context.receivesCommand(createProject(id));
+        updateCounter.verifyEquals(1);
     }
 
     @Nested
