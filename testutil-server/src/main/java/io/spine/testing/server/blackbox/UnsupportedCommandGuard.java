@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.Error;
 import io.spine.core.CommandValidationError;
 import io.spine.system.server.event.CommandErrored;
@@ -71,6 +72,11 @@ final class UnsupportedCommandGuard {
         checkNotNull(commandType);
         fail(format("Handler for commands of type %s is not registered within the context.",
                     commandType));
+    }
+
+    @VisibleForTesting
+    String commandType() {
+        return commandType;
     }
 
     private static boolean isUnsupportedError(Error error) {
