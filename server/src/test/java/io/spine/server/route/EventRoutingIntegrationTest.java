@@ -36,15 +36,13 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Event routing should")
 class EventRoutingIntegrationTest {
 
-    //
-
     /**
      * A test that verifies that the {@linkplain io.spine.core.Event event} routing occurs at the
      * right moment in time.
      *
-     * <p>If the routing of `RUserConsentRequested` event is done before its origin
-     * (`RUserSignedIn`) is dispatched, the repository won't be able to route the event properly,
-     * making the corresponding field `false`.
+     * <p>If the routing of {@code RUserConsentRequested} event is done before its origin
+     * ({@code RUserSignedIn}) is dispatched, the repository won't be able to route the event
+     * properly, making the corresponding field {@code false}.
      */
     @Test
     @DisplayName("only occur after the event origin has already been dispatched")
