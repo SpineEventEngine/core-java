@@ -315,7 +315,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     class FailOnUnsupportedCommand {
 
         /**
-         * Cleans the inbox so the erroneous commands sent in tests do not remain there and do not
+         * Cleans the inbox so the erroneous commands sent in tests are not persisted and do not
          * fail the other tests.
          */
         @AfterEach
