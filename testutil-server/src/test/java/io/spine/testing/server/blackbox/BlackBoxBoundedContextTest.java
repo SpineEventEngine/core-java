@@ -30,7 +30,9 @@ import io.spine.client.TopicFactory;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
@@ -38,10 +40,12 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
@@ -81,8 +85,10 @@ import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.given.Given.eventDispatcherRegistered;
+import static io.spine.testing.server.blackbox.given.Given.finalizeProject;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
 import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.projectDone;
 import static io.spine.testing.server.blackbox.given.Given.registerCommandDispatcher;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
@@ -302,6 +308,37 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         // Attempt to start the project again.
         context.receivesCommand(startProject(projectId))
                .assertRejectedWith(Rejections.BbProjectAlreadyStarted.class);
+    }
+
+    @Nested
+    @DisplayName("throw `AssertionError` on receiving an unsupported command")
+    class FailOnUnsupportedCommand {
+
+        /**
+         * Cleans the inbox so the erroneous commands sent in tests are not persisted and do not
+         * fail the other tests.
+         */
+        @AfterEach
+        void cleanInbox() {
+            ServerEnvironment.instance()
+                             .configureDelivery(Delivery.local());
+        }
+
+        @Test
+        @DisplayName("directly from the caller")
+        void fromCaller() {
+            BbFinalizeProject command = finalizeProject(newProjectId());
+
+            assertThrows(AssertionError.class, () -> context.receivesCommand(command));
+        }
+
+        @Test
+        @DisplayName("generated as a response to some other signal")
+        void generatedWithinModel() {
+            BbProjectDone event = projectDone(newProjectId());
+
+            assertThrows(AssertionError.class, () -> context.receivesEvent(event));
+        }
     }
 
     @Test
