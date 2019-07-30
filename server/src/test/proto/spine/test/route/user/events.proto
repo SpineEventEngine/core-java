@@ -31,11 +31,11 @@ option java_multiple_files = true;
 import "spine/core/user_id.proto";
 import "spine/test/route/user/user.proto";
 
-message UserSignedIn {
+message RUserSignedIn {
     spine.core.UserId user_id = 1;
-    SessionId session_id = 2 [(required) = true];
+    RSessionId session_id = 2 [(required) = true];
 }
 
-message UserConsentRequested {
+message RUserConsentRequested {
     spine.core.UserId user_id = 1;
 }

@@ -25,10 +25,10 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.UserId;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
-import io.spine.server.route.given.user.event.UserConsentRequested;
-import io.spine.server.route.given.user.event.UserSignedIn;
-import io.spine.test.event.Session;
-import io.spine.test.event.SessionId;
+import io.spine.server.route.given.user.event.RUserConsentRequested;
+import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.test.event.RSession;
+import io.spine.test.event.RSessionId;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -37,24 +37,24 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toSet;
 
 public class SessionRepository
-        extends ProjectionRepository<SessionId, SessionProjection, Session> {
+        extends ProjectionRepository<RSessionId, SessionProjection, RSession> {
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    protected void setupEventRouting(EventRouting<SessionId> routing) {
+    protected void setupEventRouting(EventRouting<RSessionId> routing) {
         super.setupEventRouting(routing);
-        routing.route(UserSignedIn.class,
+        routing.route(RUserSignedIn.class,
                       (message, context) -> ImmutableSet.of(message.getSessionId()))
-               .route(UserConsentRequested.class,
+               .route(RUserConsentRequested.class,
                       (message, context) -> findByUserId(message.getUserId()));
     }
 
-    private Set<SessionId> findByUserId(UserId id) {
+    private Set<RSessionId> findByUserId(UserId id) {
         Iterator<SessionProjection> iterator =
                 iterator(projection -> projection.state()
                                                  .getUserId()
                                                  .equals(id));
-        Set<SessionId> ids = stream(iterator)
+        Set<RSessionId> ids = stream(iterator)
                 .map(SessionProjection::id)
                 .collect(toSet());
         return ids;

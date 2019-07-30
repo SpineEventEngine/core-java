@@ -25,9 +25,9 @@ import io.spine.server.DefaultRepository;
 import io.spine.server.route.given.user.SessionProjection;
 import io.spine.server.route.given.user.SessionRepository;
 import io.spine.server.route.given.user.UserAggregate;
-import io.spine.server.route.given.user.event.UserSignedIn;
-import io.spine.test.event.Session;
-import io.spine.test.event.SessionId;
+import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.test.event.RSession;
+import io.spine.test.event.RSessionId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import org.junit.jupiter.api.DisplayName;
@@ -50,13 +50,13 @@ class EventRoutingIntegrationTest {
     @DisplayName("only occur after the event origin has already been dispatched")
     void occurAfterOriginDispatched() {
         UserId userId = GivenUserId.generated();
-        SessionId sessionId = SessionId.generate();
-        UserSignedIn event = UserSignedIn
+        RSessionId sessionId = RSessionId.generate();
+        RUserSignedIn event = RUserSignedIn
                 .newBuilder()
                 .setUserId(userId)
                 .setSessionId(sessionId)
                 .build();
-        Session session = Session
+        RSession session = RSession
                 .newBuilder()
                 .setId(sessionId)
                 .setUserId(userId)

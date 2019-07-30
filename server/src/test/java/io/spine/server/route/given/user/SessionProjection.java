@@ -22,21 +22,21 @@ package io.spine.server.route.given.user;
 
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.server.route.given.user.event.UserConsentRequested;
-import io.spine.server.route.given.user.event.UserSignedIn;
-import io.spine.test.event.Session;
-import io.spine.test.event.SessionId;
+import io.spine.server.route.given.user.event.RUserConsentRequested;
+import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.test.event.RSession;
+import io.spine.test.event.RSessionId;
 
-public class SessionProjection extends Projection<SessionId, Session, Session.Builder> {
+public class SessionProjection extends Projection<RSessionId, RSession, RSession.Builder> {
 
     @Subscribe
-    void on(UserSignedIn event) {
+    void on(RUserSignedIn event) {
         builder().setId(event.getSessionId())
                  .setUserId(event.getUserId());
     }
 
     @Subscribe
-    void on(UserConsentRequested event) {
+    void on(RUserConsentRequested event) {
         builder().setUserConsentRequested(true);
     }
 }

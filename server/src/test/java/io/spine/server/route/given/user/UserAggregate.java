@@ -24,15 +24,15 @@ import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.route.given.user.event.UserConsentRequested;
-import io.spine.server.route.given.user.event.UserSignedIn;
-import io.spine.test.event.User;
+import io.spine.server.route.given.user.event.RUserConsentRequested;
+import io.spine.server.route.given.user.event.RUserSignedIn;
+import io.spine.test.event.RUser;
 
-public class UserAggregate extends Aggregate<UserId, User, User.Builder> {
+public class UserAggregate extends Aggregate<UserId, RUser, RUser.Builder> {
 
     @React
-    UserConsentRequested on(UserSignedIn event) {
-        UserConsentRequested react = UserConsentRequested
+    RUserConsentRequested on(RUserSignedIn event) {
+        RUserConsentRequested react = RUserConsentRequested
                 .newBuilder()
                 .setUserId(event.getUserId())
                 .build();
@@ -40,7 +40,7 @@ public class UserAggregate extends Aggregate<UserId, User, User.Builder> {
     }
 
     @Apply
-    private void on(UserConsentRequested event) {
+    private void on(RUserConsentRequested event) {
         builder().setUserConsentRequested(true);
     }
 }
