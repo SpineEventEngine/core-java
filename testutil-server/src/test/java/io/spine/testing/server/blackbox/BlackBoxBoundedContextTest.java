@@ -30,7 +30,9 @@ import io.spine.client.TopicFactory;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
@@ -309,11 +311,17 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     }
 
     @Nested
-    @DisplayName("throw IAE on receiving an unsupported command")
-    class ThrowOnUnsupportedCommand {
+    @DisplayName("throw `AssertionError` on receiving an unsupported command")
+    class FailOnUnsupportedCommand {
+
+        @AfterEach
+        void cleanInbox() {
+            ServerEnvironment.instance()
+                             .configureDelivery(Delivery.local());
+        }
 
         @Test
-        @DisplayName("from the caller")
+        @DisplayName("directly from the caller")
         void fromCaller() {
             BbFinalizeProject command = finalizeProject(newProjectId());
 
