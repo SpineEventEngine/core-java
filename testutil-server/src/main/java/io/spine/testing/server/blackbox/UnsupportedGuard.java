@@ -31,14 +31,25 @@ import static io.spine.server.commandbus.CommandException.ATTR_COMMAND_TYPE_NAME
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * A guard that verifies that the commands posted to the {@link BlackBoxBoundedContext} are not the
+ * {@linkplain io.spine.server.bus.DeadMessageHandler "dead"} messages.
+ */
 final class UnsupportedGuard {
 
     private static final String COMMAND_VALIDATION_ERROR_TYPE =
             CommandValidationError.getDescriptor()
                                   .getFullName();
 
+    /**
+     * A command type for which the violation occurs in printable form.
+     */
     private @Nullable String commandType;
 
+    /**
+     * Checks if the given {@link CommandErrored} event represents an "unsupported" error and,
+     * if so, remembers its data.
+     */
     boolean checkAndRemember(CommandErrored event) {
         Error error = event.getError();
         if (!isUnsupportedError(error)) {
@@ -50,10 +61,17 @@ final class UnsupportedGuard {
         return true;
     }
 
+    /**
+     * Throws an {@link AssertionError}.
+     *
+     * <p>The method is assumed to be called after a violation was found for some
+     * {@link #commandType}.
+     */
     void failTest() {
         checkNotNull(commandType);
         fail(format("Handler for commands of type %s is not registered within the context",
                     commandType));
+        commandType = null;
     }
 
     private static boolean isUnsupportedError(Error error) {

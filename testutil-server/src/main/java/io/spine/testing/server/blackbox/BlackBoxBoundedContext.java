@@ -152,6 +152,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     private final MemoizingObserver<Ack> observer;
 
+    /**
+     * A guard that verifies that unsupported commands do not get posted to the
+     * {@code BlackBoxBoundedContext}.
+     */
     private final UnsupportedGuard unsupportedGuard;
 
     private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
@@ -265,6 +269,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
+     * Throws an {@link AssertionError}.
+     *
+     * <p>Only reachable after {@code unsupportedGuard} has
+     * {@linkplain #canDispatch(EventEnvelope) detected} a violation.
      */
     @Override
     protected void handle(EventEnvelope event) {
@@ -272,7 +280,8 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if the given {@link CommandErrored} message represents an unsupported command
+     * {@linkplain io.spine.server.commandbus.UnsupportedCommandException error}.
      */
     @Override
     public boolean canDispatch(EventEnvelope eventEnvelope) {
@@ -280,9 +289,6 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         return unsupportedGuard.checkAndRemember(event);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<EventClass> messageClasses() {
         Set<EventClass> result = singleton(EventClass.from(CommandErrored.class));
