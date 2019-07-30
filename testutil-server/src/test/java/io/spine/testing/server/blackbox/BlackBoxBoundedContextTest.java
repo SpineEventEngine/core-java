@@ -23,7 +23,6 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.IterableSubject;
-import io.spine.base.Identifier;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -60,7 +59,6 @@ import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.type.TypeName;
-import io.spine.validate.Validated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -317,29 +315,20 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         @Test
         @DisplayName("from the caller")
         void fromCaller() {
-            // `BbFinalizeProject` doesn't have a handler within the context.
             BbFinalizeProject command = finalizeProject(newProjectId());
 
-            assertThrows(IllegalArgumentException.class, () -> context.receivesCommand(command));
+            assertThrows(AssertionError.class, () -> context.receivesCommand(command));
         }
 
         @Test
         @DisplayName("generated as a response to some other signal")
         void generatedWithinModel() {
-            // Should generate a `BbFinalizeProject` command in response.
             BbProjectDone event = projectDone(newProjectId());
 
-            assertThrows(IllegalArgumentException.class, () -> context.receivesEvent(event));
+            assertThrows(AssertionError.class, () -> context.receivesEvent(event));
         }
     }
-    @Test
-    @DisplayName("generated as a response to some other signal")
-    void generatedWithinModel() {
-        // Should generate a `BbFinalizeProject` command in response.
-        BbProjectDone event = projectDone(newProjectId());
 
-        assertThrows(IllegalArgumentException.class, () -> context.receivesEvent(event));
-    }
     @Test
     @DisplayName("receive and react on single event")
     void receivesEvent() {
