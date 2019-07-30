@@ -23,7 +23,7 @@ Please track our release announcement to be informed about the production versio
 
 There is a [template][server-quickstart] for a server application built in Spine.
 
-The introductory application examples are available [here][spine-examples].
+The introductory application examples are available from the [Spine Examples][spine-examples] GitHub organization.
 
 For more advanced example including a Spine server, a console client, and a web application, see [ToDo List app][todo-list].   
 
