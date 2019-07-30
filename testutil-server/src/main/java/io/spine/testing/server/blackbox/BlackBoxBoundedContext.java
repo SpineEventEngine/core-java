@@ -21,6 +21,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -48,9 +49,13 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.VerifyAcknowledgements;
@@ -84,6 +89,7 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,6 +115,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "OverlyCoupledClass"})
 @VisibleForTesting
 public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
+        extends AbstractEventSubscriber
         implements Logging {
 
     private final BoundedContext context;
@@ -145,8 +152,11 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     private final MemoizingObserver<Ack> observer;
 
+    private final UnsupportedGuard unsupportedGuard;
+
     private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
 
+    @SuppressWarnings("ThisEscapedInObjectConstruction")
     protected BlackBoxBoundedContext(boolean multitenant,
                                      EventEnricher enricher,
                                      String name) {
@@ -163,7 +173,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                 .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();
+        this.unsupportedGuard = new UnsupportedGuard();
         this.repositories = newHashMap();
+        this.context.registerEventDispatcher(this);
     }
 
     /**
@@ -249,6 +261,41 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                .forEach(result::withEventDispatchers);
 
         return result;
+    }
+
+    /**
+     */
+    @Override
+    protected void handle(EventEnvelope event) {
+        unsupportedGuard.failTest();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean canDispatch(EventEnvelope eventEnvelope) {
+        CommandErrored event = (CommandErrored) eventEnvelope.message();
+        return unsupportedGuard.checkAndRemember(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<EventClass> messageClasses() {
+        Set<EventClass> result = singleton(EventClass.from(CommandErrored.class));
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The {@code BlackBoxBoundedContext} does not consume external events.
+     */
+    @Override
+    public Set<EventClass> externalEventClasses() {
+        return ImmutableSet.of();
     }
 
     /** Obtains the name of this bounded context. */
