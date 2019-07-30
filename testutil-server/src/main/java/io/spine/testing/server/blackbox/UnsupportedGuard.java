@@ -79,4 +79,3 @@ final class UnsupportedGuard {
                 && error.getCode() == UNSUPPORTED_COMMAND_VALUE;
     }
 }
-
