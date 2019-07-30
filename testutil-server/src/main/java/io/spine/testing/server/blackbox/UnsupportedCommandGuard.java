@@ -71,7 +71,6 @@ final class UnsupportedCommandGuard {
         checkNotNull(commandType);
         fail(format("Handler for commands of type %s is not registered within the context.",
                     commandType));
-        commandType = null;
     }
 
     private static boolean isUnsupportedError(Error error) {
