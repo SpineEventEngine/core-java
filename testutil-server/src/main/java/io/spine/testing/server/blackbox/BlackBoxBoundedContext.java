@@ -156,7 +156,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * A guard that verifies that unsupported commands do not get posted to the
      * {@code BlackBoxBoundedContext}.
      */
-    private final UnsupportedGuard unsupportedGuard;
+    private final UnsupportedCommandGuard unsupportedCommandGuard;
 
     private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
 
@@ -178,7 +178,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
                 .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();
-        this.unsupportedGuard = new UnsupportedGuard();
+        this.unsupportedCommandGuard = new UnsupportedCommandGuard();
         this.repositories = newHashMap();
         this.context.registerEventDispatcher(this);
     }
@@ -276,7 +276,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @Override
     protected void handle(EventEnvelope event) {
-        unsupportedGuard.failTest();
+        unsupportedCommandGuard.failTest();
     }
 
     /**
@@ -286,7 +286,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     @Override
     public boolean canDispatch(EventEnvelope eventEnvelope) {
         CommandErrored event = (CommandErrored) eventEnvelope.message();
-        return unsupportedGuard.checkAndRemember(event);
+        return unsupportedCommandGuard.checkAndRemember(event);
     }
 
     @Override

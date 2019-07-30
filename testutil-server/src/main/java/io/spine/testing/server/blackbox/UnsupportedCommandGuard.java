@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * A guard that verifies that the commands posted to the {@link BlackBoxBoundedContext} are not the
  * {@linkplain io.spine.server.bus.DeadMessageHandler "dead"} messages.
  */
-final class UnsupportedGuard {
+final class UnsupportedCommandGuard {
 
     private static final String COMMAND_VALIDATION_ERROR_TYPE =
             CommandValidationError.getDescriptor()
