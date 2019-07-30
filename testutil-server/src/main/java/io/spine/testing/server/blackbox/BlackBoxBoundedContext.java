@@ -160,6 +160,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     protected BlackBoxBoundedContext(boolean multitenant,
                                      EventEnricher enricher,
                                      String name) {
+        super();
         this.commands = new CommandCollector();
         this.postedCommands = new HashSet<>();
         this.events = new EventCollector();
