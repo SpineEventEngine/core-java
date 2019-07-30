@@ -160,7 +160,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
 
     private final Map<Class<? extends Message>, Repository<?, ?>> repositories;
 
-    @SuppressWarnings("ThisEscapedInObjectConstruction")
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // to inject self as event dispatcher.
     protected BlackBoxBoundedContext(boolean multitenant,
                                      EventEnricher enricher,
                                      String name) {
