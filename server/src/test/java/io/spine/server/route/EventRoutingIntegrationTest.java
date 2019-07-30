@@ -36,6 +36,16 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Event routing should")
 class EventRoutingIntegrationTest {
 
+    //
+
+    /**
+     * A test that verifies that the {@linkplain io.spine.core.Event event} routing occurs at the
+     * right moment in time.
+     *
+     * <p>If the routing of `UserConsentRequested` event is done before its origin (`UserSignedIn`)
+     * is dispatched, the repository won't be able to route the event properly, making the
+     * corresponding field `false`.
+     */
     @Test
     @DisplayName("only occur after the event origin has already been dispatched")
     void occurAfterOriginDispatched() {
@@ -53,9 +63,6 @@ class EventRoutingIntegrationTest {
                 .setUserConsentRequested(true)
                 .build();
 
-        // If the routing of `UserConsentRequested` event is done before its origin
-        // (`UserSignedIn`) is dispatched, the repository won't be able to route the event
-        // properly, making the corresponding field `false`.
         BlackBoxBoundedContext.singleTenant()
                               .with(DefaultRepository.of(UserAggregate.class))
                               .with(new SessionRepository())
