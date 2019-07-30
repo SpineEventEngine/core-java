@@ -314,6 +314,10 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("throw `AssertionError` on receiving an unsupported command")
     class FailOnUnsupportedCommand {
 
+        /**
+         * Cleans the inbox so the erroneous commands sent in tests do not remain there and do not
+         * fail the other tests.
+         */
         @AfterEach
         void cleanInbox() {
             ServerEnvironment.instance()
