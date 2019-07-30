@@ -69,7 +69,7 @@ final class UnsupportedCommandGuard {
      */
     void failTest() {
         checkNotNull(commandType);
-        fail(format("Handler for commands of type %s is not registered within the context",
+        fail(format("Handler for commands of type %s is not registered within the context.",
                     commandType));
         commandType = null;
     }
