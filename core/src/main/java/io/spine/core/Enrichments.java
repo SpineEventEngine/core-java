@@ -26,8 +26,10 @@ import io.spine.core.Enrichment.Container;
 import io.spine.core.Enrichment.ModeCase;
 import io.spine.type.TypeName;
 
+import java.util.Deque;
 import java.util.Optional;
 
+import static com.google.common.collect.Queues.newArrayDeque;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -85,5 +87,75 @@ final class Enrichments {
         Optional<E> result = Optional.ofNullable(any)
                                      .map(packed -> unpack(packed, enrichmentClass));
         return result;
+    }
+
+    /**
+     * Clears the enrichments from the {@code event} and its origin.
+     */
+    @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
+    static Event clear(Event event) {
+        EventContext context = event.getContext();
+        EventContext.OriginCase originCase = context.getOriginCase();
+        EventContext.Builder resultContext = context.toBuilder()
+                                                    .clearEnrichment();
+        if (originCase == EventContext.OriginCase.EVENT_CONTEXT) {
+            resultContext.setEventContext(context.getEventContext()
+                                                 .toBuilder()
+                                                 .clearEnrichment()
+                                                 .build());
+        }
+        Event result = event.toBuilder()
+                            .setContext(resultContext.build())
+                            .build();
+        return result;
+    }
+
+    /**
+     * Clears the enrichments from the {@code event} and all of its parent contexts.
+     */
+    @SuppressWarnings({
+            "deprecation" /* Uses the deprecated field to be sure to clean up old data. */,
+            "ConstantConditions" /* Checked logically. */})
+    static Event clearAll(Event event) {
+        EventContext.Builder eventContext = event.getContext()
+                                                 .toBuilder()
+                                                 .clearEnrichment();
+        Deque<EventContext.Builder> contexts = eventContextHierarchy(eventContext);
+
+        EventContext.Builder context = contexts.pollLast();
+        EventContext.Builder next = contexts.pollLast();
+        while (next != null) {
+            context = next.setEventContext(context);
+            next = contexts.pollLast();
+        }
+        Event result = event.toBuilder()
+                            .setContext(context.build())
+                            .build();
+        return result;
+    }
+
+    /**
+     * Traverses the event parent context hierarchy until non-{@link EventContext} origin is found.
+     *
+     * <p>All of the {@link EventContext}-kind origins are collected and returned as
+     * {@code Deque<EventContext.Builder>}, where the deepest origin resides last.
+     */
+    @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
+    private static Deque<EventContext.Builder>
+    eventContextHierarchy(EventContext.Builder eventContext) {
+
+        EventContext.Builder child = eventContext;
+        EventContext.OriginCase originCase = child.getOriginCase();
+        Deque<EventContext.Builder> contexts = newArrayDeque();
+        contexts.add(child);
+        while (originCase == EventContext.OriginCase.EVENT_CONTEXT) {
+            EventContext.Builder origin = child.getEventContext()
+                                               .toBuilder()
+                                               .clearEnrichment();
+            contexts.add(origin);
+            child = origin;
+            originCase = child.getOriginCase();
+        }
+        return contexts;
     }
 }

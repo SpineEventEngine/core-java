@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
  */
-@DisplayName("Event should")
+@DisplayName("`Event` should")
 public class EventTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
@@ -204,11 +204,6 @@ public class EventTest extends UtilityClassTest<Events> {
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
         }
-
-        private EventContext.Builder contextWithoutOrigin() {
-            return context.toBuilder()
-                          .clearOrigin();
-        }
     }
 
     @Test
@@ -233,5 +228,71 @@ public class EventTest extends UtilityClassTest<Events> {
     void tellWhenNotRejection() {
         assertThat(event.isRejection())
                 .isFalse();
+    }
+
+    @SuppressWarnings("deprecation") // Required for backward compatibility.
+    @Test
+    @DisplayName("clear enrichments from the event and its origin")
+    void clearEnrichments() {
+        Enrichment someEnrichment = Enrichment
+                .newBuilder()
+                .setDoNotEnrich(true)
+                .build();
+        EventContext.Builder grandOriginContext =
+                context.toBuilder()
+                       .setEnrichment(someEnrichment);
+        EventContext.Builder originContext =
+                contextWithoutOrigin()
+                        .setEventContext(grandOriginContext)
+                        .setEnrichment(someEnrichment);
+        EventContext eventContext =
+                contextWithoutOrigin()
+                        .setEventContext(originContext)
+                        .setEnrichment(someEnrichment)
+                        .build();
+        Event event = event(eventContext);
+
+        Event eventWithoutEnrichments = event.clearEnrichments();
+
+        EventContext context = eventWithoutEnrichments.getContext();
+        EventContext origin = context.getEventContext();
+        EventContext grandOrigin = origin.getEventContext();
+
+        assertThat(context.hasEnrichment()).isFalse();
+        assertThat(origin.hasEnrichment()).isFalse();
+        assertThat(grandOrigin.hasEnrichment()).isTrue();
+    }
+
+    @SuppressWarnings("deprecation") // Required for backward compatibility.
+    @Test
+    @DisplayName("clear enrichment hierarchy")
+    void clearEnrichmentHierarchy() {
+        Enrichment someEnrichment = Enrichment
+                .newBuilder()
+                .setDoNotEnrich(true)
+                .build();
+        EventContext.Builder grandOriginContext =
+                context.toBuilder()
+                       .setEnrichment(someEnrichment);
+        EventContext.Builder originContext =
+                contextWithoutOrigin()
+                        .setEventContext(grandOriginContext);
+        EventContext context =
+                contextWithoutOrigin()
+                        .setEventContext(originContext)
+                        .build();
+        Event event = event(context);
+
+        Event eventWithoutEnrichments = event.clearAllEnrichments();
+
+        EventContext grandOrigin = eventWithoutEnrichments.getContext()
+                                                          .getEventContext()
+                                                          .getEventContext();
+        assertThat(grandOrigin.hasEnrichment()).isFalse();
+    }
+
+    private EventContext.Builder contextWithoutOrigin() {
+        return context.toBuilder()
+                      .clearOrigin();
     }
 }
