@@ -120,7 +120,7 @@ final class Enrichments {
         EventContext.Builder eventContext = event.getContext()
                                             .toBuilder()
                                             .clearEnrichment();
-        Deque<EventContext.Builder> contexts = eventContextHierarchy(eventContext);
+        Deque<EventContext.Builder> contexts = eventOriginHierarchy(eventContext);
 
         EventContext.Builder context = contexts.pollLast();
         EventContext.Builder next = contexts.pollLast();
@@ -137,11 +137,12 @@ final class Enrichments {
     /**
      * Traverses the event origin hierarchy until non-{@link EventContext} origin is found.
      *
-     * @return gathered origins in the form of {@code Deque<EventContext.Builder>}
+     * <p>All of the {@link EventContext}-kind origins are collected and returned as
+     * {@code Deque<EventContext.Builder>}.
      */
     @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
     private static Deque<EventContext.Builder>
-    eventContextHierarchy(EventContext.Builder eventContext) {
+    eventOriginHierarchy(EventContext.Builder eventContext) {
 
         EventContext.Builder child = eventContext;
         EventContext.OriginCase originCase = child.getOriginCase();
