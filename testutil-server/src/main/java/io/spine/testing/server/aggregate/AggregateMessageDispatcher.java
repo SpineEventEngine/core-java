@@ -33,9 +33,6 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.NoOpLifecycle;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * A test utility to dispatch commands to an {@code Aggregate} in test purposes.
@@ -58,7 +55,8 @@ public class AggregateMessageDispatcher {
     dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
         checkNotNull(aggregate);
         checkNotNull(command);
-        return AggregateTestSupport.dispatchCommand(mockRepository(), aggregate, command);
+        return AggregateTestSupport.dispatchCommand(
+                new TestAggregateRepository<>(), aggregate, command);
     }
 
     /**
@@ -73,7 +71,8 @@ public class AggregateMessageDispatcher {
         checkNotNull(aggregate);
         checkNotNull(command);
         CommandEnvelope ce = CommandEnvelope.of(command);
-        return AggregateTestSupport.dispatchCommand(mockRepository(), aggregate, ce);
+        return AggregateTestSupport.dispatchCommand(
+                new TestAggregateRepository<>(), aggregate, ce);
     }
 
     /**
@@ -87,7 +86,8 @@ public class AggregateMessageDispatcher {
     dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
-        return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, event);
+        return AggregateTestSupport.dispatchEvent(
+                new TestAggregateRepository<>(), aggregate, event);
     }
 
     /**
@@ -102,7 +102,7 @@ public class AggregateMessageDispatcher {
         checkNotNull(aggregate);
         checkNotNull(event);
         EventEnvelope env = EventEnvelope.of(event);
-        return AggregateTestSupport.dispatchEvent(mockRepository(), aggregate, env);
+        return AggregateTestSupport.dispatchEvent(new TestAggregateRepository<>(), aggregate, env);
     }
 
     /**
@@ -111,7 +111,7 @@ public class AggregateMessageDispatcher {
     public static void importEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
-        AggregateTestSupport.importEvent(mockRepository(), aggregate, event);
+        AggregateTestSupport.importEvent(new TestAggregateRepository<>(), aggregate, event);
     }
 
     /**
@@ -121,19 +121,11 @@ public class AggregateMessageDispatcher {
         checkNotNull(aggregate);
         checkNotNull(event);
         EventEnvelope env = EventEnvelope.of(event);
-        AggregateTestSupport.importEvent(mockRepository(), aggregate, env);
-    }
-
-    @SuppressWarnings("unchecked") // It is OK when mocking
-    private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
-        TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
-        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.idClass()).thenReturn(Object.class);
-        return mockedRepo;
+        AggregateTestSupport.importEvent(new TestAggregateRepository<>(), aggregate, env);
     }
 
     /**
-     * Test-only aggregate repository that exposes {@code Repository.Lifecycle} class.
+     * Test-only aggregate repository that uses {@linkplain NoOpLifecycle NO-OP entity lifecycle}.
      */
     private static class TestAggregateRepository<I, A extends Aggregate<I, ?, ?>>
             extends AggregateRepository<I, A> {
