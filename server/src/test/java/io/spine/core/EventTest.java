@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
  */
-@DisplayName("Event should")
+@DisplayName("`Event` should")
 public class EventTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
