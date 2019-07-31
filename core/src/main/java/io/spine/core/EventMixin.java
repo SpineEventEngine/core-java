@@ -103,32 +103,41 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext>,
      *     <li>the enrichment from the first-level origin.</li>
      * </ul>
      *
-     * <p>Enrichments will not be removed from second-level and deeper origins,
-     * because it's a heavy performance operation.
+     * <p>This method does not remove enrichments from second-level and deeper origins to avoid a
+     * heavy performance operation.
+     *
+     * <p>To remove enrichments from the whole origin hierarchy, use {@link #clearAllEnrichments()}.
      *
      * @return the event without enrichments
      */
-    @SuppressWarnings({
-            "ClassReferencesSubclass", //`Event` is the only case of this mixin.
-            "deprecation" // Uses the `event_context` field to be sure to clean up old data.
-    })
+    @SuppressWarnings("ClassReferencesSubclass") // `Event` is the only case of this mixin.
     @Internal
     default Event clearEnrichments() {
-        EventContext context = context();
-        EventContext.OriginCase originCase = context.getOriginCase();
-        EventContext.Builder resultContext = context.toBuilder()
-                                                    .clearEnrichment();
-        if (originCase == EventContext.OriginCase.EVENT_CONTEXT) {
-            resultContext.setEventContext(context.getEventContext()
-                                                 .toBuilder()
-                                                 .clearEnrichment()
-                                                 .build());
-        }
-        Event thisEvent = (Event) this;
-        Event result = thisEvent.toBuilder()
-                                .setContext(resultContext.build())
-                                .build();
-        return result;
+        return Enrichments.clear((Event) this);
+    }
+
+    /**
+     * Creates a copy of this instance with enrichments cleared from self and origin hierarchy.
+     *
+     * <p>Use this method to decrease a size of an event, if enrichments aren't important.
+     *
+     * <p>A result won't contain:
+     * <ul>
+     *     <li>the enrichment from the event context;</li>
+     *     <li>the enrichment from the first-level origin;</li>
+     *     <li>the enrichment from the second-level and deeper origins.</li>
+     * </ul>
+     *
+     * <p>This method is performance-heavy.
+     *
+     * <p>For the "lightweight" version of the method, see {@link #clearEnrichments()}.
+     *
+     * @return the event without enrichments
+     */
+    @SuppressWarnings("ClassReferencesSubclass") // `Event` is the only case of this mixin.
+    @Internal
+    default Event clearAllEnrichments() {
+        return Enrichments.clearAll((Event) this);
     }
 
     /**

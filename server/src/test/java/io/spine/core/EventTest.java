@@ -244,7 +244,6 @@ public class EventTest extends UtilityClassTest<Events> {
                 .newBuilder()
                 .setDoNotEnrich(true)
                 .build();
-
         EventContext.Builder grandOriginContext =
                 context.toBuilder()
                        .setEnrichment(someEnrichment);
@@ -256,7 +255,8 @@ public class EventTest extends UtilityClassTest<Events> {
                         .build();
         Event event = event(context);
 
-        Event eventWithoutEnrichments = event.clearEnrichmentHierarchy();
+        Event eventWithoutEnrichments = event.clearAllEnrichments();
+
         EventContext grandOrigin = eventWithoutEnrichments.getContext()
                                                           .getEventContext()
                                                           .getEventContext();
