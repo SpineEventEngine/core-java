@@ -111,7 +111,7 @@ public interface ErrorCriterion extends MessageCriterion<Error> {
      * criterion}.
      *
      * <p>An error attribute verifier checks that the error contains an
-     * {@link Error#getAttributes() attribute} with a provided name.
+     * {@link Error#getAttributesMap() attribute} with a provided name.
      *
      * @param name name of an attribute which looked for by this criterion
      * @return a new {@link ErrorAttributeCriterion error attribute criterion} instance
