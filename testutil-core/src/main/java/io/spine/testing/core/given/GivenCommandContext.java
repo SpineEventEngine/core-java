@@ -57,7 +57,7 @@ public final class GivenCommandContext {
      * @return a new {@code CommandContext} instance
      */
     public static CommandContext withActorAndTime(UserId actor, Timestamp when) {
-        TenantId tenantId = GivenTenantId.newUuid();
+        TenantId tenantId = GivenTenantId.generate();
         ActorContext actorContext = ActorContext.newBuilder()
                                                 .setActor(actor)
                                                 .setTimestamp(when)

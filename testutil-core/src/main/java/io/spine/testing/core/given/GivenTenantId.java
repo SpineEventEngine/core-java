@@ -42,7 +42,7 @@ public final class GivenTenantId {
     /**
      * Generates a new UUID-based {@code TenantId}.
      */
-    public static TenantId newUuid() {
+    public static TenantId generate() {
         return of(TENANT_PREFIX + Identifier.newUuid());
     }
 

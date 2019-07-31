@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,7 +50,7 @@ class TenantRepositoryTest {
     @Test
     @DisplayName("cache passed value")
     void cachePassedValue() {
-        TenantId tenantId = newUuid();
+        TenantId tenantId = generate();
 
         repository.keep(tenantId);
 
@@ -64,7 +64,7 @@ class TenantRepositoryTest {
     @Test
     @DisplayName("evict from cache")
     void evictFromCache() {
-        TenantId tenantId = newUuid();
+        TenantId tenantId = generate();
 
         repository.keep(tenantId);
         assertTrue(repository.unCache(tenantId));
@@ -74,7 +74,7 @@ class TenantRepositoryTest {
     @Test
     @DisplayName("clear cache")
     void clearCache() {
-        TenantId tenantId = newUuid();
+        TenantId tenantId = generate();
 
         repository.keep(tenantId);
 

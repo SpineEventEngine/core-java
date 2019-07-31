@@ -169,16 +169,17 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
         this.postedCommands = new HashSet<>();
         this.events = new EventCollector();
         this.postedEvents = new HashSet<>();
-        BoundedContextBuilder builder = multitenant
-                                      ? BoundedContext.multitenant(name)
-                                      : BoundedContext.singleTenant(name);
+        BoundedContextBuilder builder =
+                multitenant
+                ? BoundedContext.multitenant(name)
+                : BoundedContext.singleTenant(name);
         this.context = builder
                 .addCommandListener(commands)
                 .addEventListener(events)
                 .enrichEventsUsing(enricher)
                 .build();
         this.observer = memoizingObserver();
-        this.unsupportedCommandGuard = new UnsupportedCommandGuard();
+        this.unsupportedCommandGuard = new UnsupportedCommandGuard(name);
         this.repositories = newHashMap();
         this.context.registerEventDispatcher(this);
     }

@@ -42,10 +42,15 @@ final class UnsupportedCommandGuard {
             CommandValidationError.getDescriptor()
                                   .getFullName();
 
-    /**
-     * A command type for which the violation occurs in printable form.
-     */
+    /** The name of the guarded Bounded Context. */
+    private final String context;
+
+    /** A command type for which the violation occurs in printable form. */
     private @Nullable String commandType;
+
+    UnsupportedCommandGuard(String context) {
+        this.context = context;
+    }
 
     /**
      * Checks if the given {@link CommandErrored} event represents an "unsupported" error and,
@@ -70,8 +75,11 @@ final class UnsupportedCommandGuard {
      */
     void failTest() {
         checkNotNull(commandType);
-        fail(format("Handler for commands of type %s is not registered within the context.",
-                    commandType));
+        String msg = format(
+                "The command type `%s` does not have a handler in the context `%s`.",
+                commandType, context
+        );
+        fail(msg);
     }
 
     @VisibleForTesting

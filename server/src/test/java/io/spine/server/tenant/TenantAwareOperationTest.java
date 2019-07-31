@@ -25,7 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.Tests.nullRef;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,10 +51,10 @@ class TenantAwareOperationTest {
     @Test
     @DisplayName("remember and restore current tenant")
     void rememberCurrentTenant() {
-        TenantId previousTenant = newUuid();
+        TenantId previousTenant = generate();
         CurrentTenant.set(previousTenant);
 
-        TenantId newTenant = newUuid();
+        TenantId newTenant = generate();
         TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction of the operation does not change the current tenant.
@@ -78,7 +78,7 @@ class TenantAwareOperationTest {
         CurrentTenant.clear();
 
         // Create new operation.
-        TenantId newTenant = newUuid();
+        TenantId newTenant = generate();
         TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction did not set the tenant.
@@ -98,7 +98,7 @@ class TenantAwareOperationTest {
     @Test
     @DisplayName("create instance for non-command execution context")
     void createForNonCommand() {
-        TenantId tenant = newUuid();
+        TenantId tenant = generate();
         CurrentTenant.set(tenant);
 
         TenantAwareOperation op = createOperation();
