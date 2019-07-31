@@ -92,8 +92,7 @@ final class Enrichments {
     /**
      * Clears the enrichments from the {@code event} and its origin.
      */
-    @SuppressWarnings("deprecation")
-    // Uses the `event_context` field to be sure to clean up old data.
+    @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
     static Event clear(Event event) {
         EventContext context = event.getContext();
         EventContext.OriginCase originCase = context.getOriginCase();
@@ -115,7 +114,7 @@ final class Enrichments {
      * Clears the enrichments from the {@code event} and all of its origin hierarchy.
      */
     @SuppressWarnings({
-            "deprecation" /* Uses the `event_context` field to be sure to clean up old data. */,
+            "deprecation" /* Uses the deprecated field to be sure to clean up old data. */,
             "ConstantConditions" /* Checked logically. */})
     static Event clearAll(Event event) {
         EventContext.Builder eventContext = event.getContext()
@@ -140,8 +139,7 @@ final class Enrichments {
      *
      * @return gathered origins in the form of {@code Deque<EventContext.Builder>}
      */
-    @SuppressWarnings("deprecation")
-    // Uses the `event_context` field to be sure to clean up old data.
+    @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
     private static Deque<EventContext.Builder>
     eventContextHierarchy(EventContext.Builder eventContext) {
 
