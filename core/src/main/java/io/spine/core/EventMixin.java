@@ -106,7 +106,8 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext>,
      * <p>This method does not remove enrichments from second-level and deeper origins to avoid a
      * heavy performance operation.
      *
-     * <p>To remove enrichments from the whole origin hierarchy, use {@link #clearAllEnrichments()}.
+     * <p>To remove enrichments from the whole parent context hierarchy, use
+     * {@link #clearAllEnrichments()}.
      *
      * @return the event without enrichments
      */
@@ -117,7 +118,7 @@ public interface EventMixin extends Signal<EventId, EventMessage, EventContext>,
     }
 
     /**
-     * Creates a copy of this instance with enrichments cleared from self and origin hierarchy.
+     * Creates a copy of this instance with enrichments cleared from self and all parent contexts.
      *
      * <p>Use this method to decrease a size of an event, if enrichments aren't important.
      *
