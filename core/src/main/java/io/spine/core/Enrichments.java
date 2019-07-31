@@ -118,9 +118,9 @@ final class Enrichments {
             "ConstantConditions" /* Checked logically. */})
     static Event clearAll(Event event) {
         EventContext.Builder eventContext = event.getContext()
-                                            .toBuilder()
-                                            .clearEnrichment();
-        Deque<EventContext.Builder> contexts = eventOriginHierarchy(eventContext);
+                                                 .toBuilder()
+                                                 .clearEnrichment();
+        Deque<EventContext.Builder> contexts = eventContextHierarchy(eventContext);
 
         EventContext.Builder context = contexts.pollLast();
         EventContext.Builder next = contexts.pollLast();
@@ -142,7 +142,7 @@ final class Enrichments {
      */
     @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
     private static Deque<EventContext.Builder>
-    eventOriginHierarchy(EventContext.Builder eventContext) {
+    eventContextHierarchy(EventContext.Builder eventContext) {
 
         EventContext.Builder child = eventContext;
         EventContext.OriginCase originCase = child.getOriginCase();
