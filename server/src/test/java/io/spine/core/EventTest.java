@@ -204,11 +204,6 @@ public class EventTest extends UtilityClassTest<Events> {
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
         }
-
-        private EventContext.Builder contextWithoutOrigin() {
-            return context.toBuilder()
-                          .clearOrigin();
-        }
     }
 
     @Test
@@ -233,5 +228,43 @@ public class EventTest extends UtilityClassTest<Events> {
     void tellWhenNotRejection() {
         assertThat(event.isRejection())
                 .isFalse();
+    }
+
+    @Test
+    @DisplayName("clear enrichments")
+    void clearEnrichments() {
+
+    }
+
+    @SuppressWarnings("deprecation") // Required for backward compatibility.
+    @Test
+    @DisplayName("clear enrichment hierarchy")
+    void clearEnrichmentHierarchy() {
+        Enrichment someEnrichment = Enrichment
+                .newBuilder()
+                .setDoNotEnrich(true)
+                .build();
+
+        EventContext.Builder grandOriginContext =
+                context.toBuilder()
+                       .setEnrichment(someEnrichment);
+        EventContext.Builder originContext = contextWithoutOrigin()
+                .setEventContext(grandOriginContext);
+        EventContext context =
+                contextWithoutOrigin()
+                        .setEventContext(originContext)
+                        .build();
+        Event event = event(context);
+
+        Event eventWithoutEnrichments = event.clearEnrichmentHierarchy();
+        EventContext grandOrigin = eventWithoutEnrichments.getContext()
+                                                          .getEventContext()
+                                                          .getEventContext();
+        assertThat(grandOrigin.hasEnrichment()).isFalse();
+    }
+
+    private EventContext.Builder contextWithoutOrigin() {
+        return context.toBuilder()
+                      .clearOrigin();
     }
 }
