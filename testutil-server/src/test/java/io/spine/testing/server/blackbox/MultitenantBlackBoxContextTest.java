@@ -27,9 +27,10 @@ import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
@@ -37,22 +38,34 @@ import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
 import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Multi-tenant Black Box Bounded Context should")
+@DisplayName("Multi-tenant `BlackBoxContext` should")
 class MultitenantBlackBoxContextTest
         extends BlackBoxBoundedContextTest<MultitenantBlackBoxContext> {
 
     @Override
     MultitenantBlackBoxContext newInstance() {
         return BlackBoxBoundedContext.multiTenant()
-                                     .withTenant(newUuid());
+                                     .withTenant(generate());
+    }
+
+    @Test
+    @DisplayName("create builder instance with the context name")
+    void createByName() {
+        String name = getClass().getName();
+        MultitenantBlackBoxContext context =
+                BlackBoxBoundedContext.multiTenant(name);
+        assertThat(context)
+                .isNotNull();
+        assertThat(context.name().value())
+                .isEqualTo(name);
     }
 
     @Test
     @DisplayName("verify using a particular tenant ID")
     void verifyForDifferentTenants() {
-        TenantId john = newUuid();
-        TenantId carl = newUuid();
-        TenantId newUser = newUuid();
+        TenantId john = generate();
+        TenantId carl = generate();
+        TenantId newUser = generate();
         BbCreateProject createJohnProject = createProject();
         BbCreateProject createCarlProject = createProject();
         MultitenantBlackBoxContext context = boundedContext()
