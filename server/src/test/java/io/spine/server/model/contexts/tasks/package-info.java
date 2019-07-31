@@ -27,6 +27,6 @@
 package io.spine.server.model.contexts.tasks;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
+import io.spine.core.BoundedContext;
 
 import javax.annotation.ParametersAreNonnullByDefault;

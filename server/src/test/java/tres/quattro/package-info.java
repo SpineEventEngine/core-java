@@ -25,4 +25,4 @@
 @BoundedContext("Counting")
 package tres.quattro;
 
-import io.spine.server.annotation.BoundedContext;
+import io.spine.core.BoundedContext;

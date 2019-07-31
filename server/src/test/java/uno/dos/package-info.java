@@ -25,4 +25,4 @@
 @BoundedContext("Counting")
 package uno.dos;
 
-import io.spine.server.annotation.BoundedContext;
+import io.spine.core.BoundedContext;
