@@ -138,7 +138,7 @@ final class Enrichments {
      * Traverses the event origin hierarchy until non-{@link EventContext} origin is found.
      *
      * <p>All of the {@link EventContext}-kind origins are collected and returned as
-     * {@code Deque<EventContext.Builder>}.
+     * {@code Deque<EventContext.Builder>}, where the deepest origin resides last.
      */
     @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
     private static Deque<EventContext.Builder>
