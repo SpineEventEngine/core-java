@@ -230,10 +230,37 @@ public class EventTest extends UtilityClassTest<Events> {
                 .isFalse();
     }
 
+    @SuppressWarnings("deprecation") // Required for backward compatibility.
     @Test
-    @DisplayName("clear enrichments")
+    @DisplayName("clear enrichments from the event and its origin")
     void clearEnrichments() {
+        Enrichment someEnrichment = Enrichment
+                .newBuilder()
+                .setDoNotEnrich(true)
+                .build();
+        EventContext.Builder grandOriginContext =
+                context.toBuilder()
+                       .setEnrichment(someEnrichment);
+        EventContext.Builder originContext =
+                contextWithoutOrigin()
+                        .setEventContext(grandOriginContext)
+                        .setEnrichment(someEnrichment);
+        EventContext eventContext =
+                contextWithoutOrigin()
+                        .setEventContext(originContext)
+                        .setEnrichment(someEnrichment)
+                        .build();
+        Event event = event(eventContext);
 
+        Event eventWithoutEnrichments = event.clearEnrichments();
+
+        EventContext context = eventWithoutEnrichments.getContext();
+        EventContext origin = context.getEventContext();
+        EventContext grandOrigin = origin.getEventContext();
+
+        assertThat(context.hasEnrichment()).isFalse();
+        assertThat(origin.hasEnrichment()).isFalse();
+        assertThat(grandOrigin.hasEnrichment()).isTrue();
     }
 
     @SuppressWarnings("deprecation") // Required for backward compatibility.
@@ -247,8 +274,9 @@ public class EventTest extends UtilityClassTest<Events> {
         EventContext.Builder grandOriginContext =
                 context.toBuilder()
                        .setEnrichment(someEnrichment);
-        EventContext.Builder originContext = contextWithoutOrigin()
-                .setEventContext(grandOriginContext);
+        EventContext.Builder originContext =
+                contextWithoutOrigin()
+                        .setEventContext(grandOriginContext);
         EventContext context =
                 contextWithoutOrigin()
                         .setEventContext(originContext)
