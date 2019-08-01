@@ -332,6 +332,7 @@ class ProjectionRepositoryTest
             TestEventFactory eventFactory = newInstance(id, ProjectionRepositoryTest.class);
             TestProjection project = new TestProjection(id);
             dispatch(project, eventFactory.createEvent(projectCreated));
+            Any oldState = pack(project.state());
             dispatch(project, eventFactory.createEvent(taskAdded));
             Any newState = pack(project.state());
             MessageId entityId = MessageId
@@ -343,6 +344,7 @@ class ProjectionRepositoryTest
                     .newBuilder()
                     .setEntity(entityId)
                     .setWhen(currentTime())
+                    .setOldState(oldState)
                     .setNewState(newState)
                     .addSignalId(dispatchedEventId())
                     .build();

@@ -22,6 +22,7 @@ package io.spine.server.procman;
 
 import com.google.common.truth.Truth8;
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
@@ -565,6 +566,7 @@ class ProcessManagerRepositoryTest
               .isPresent();
 
         Any newState = pack(currentTime());
+        Any oldState = pack(Timestamp.getDefaultInstance());
         MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState)
@@ -574,6 +576,7 @@ class ProcessManagerRepositoryTest
         EventMessage discardedEvent = EntityStateChanged
                 .newBuilder()
                 .setEntity(entityId)
+                .setOldState(oldState)
                 .setNewState(newState)
                 .build();
         Truth8.assertThat(filter.filter(discardedEvent))

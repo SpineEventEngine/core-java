@@ -164,13 +164,14 @@ class ProjectionTest {
                 .setTitle("test task " + random(42))
                 .build();
         String projectName = "test project name " + randomString();
-        Project aggregateState = Project
+        Project.Builder stateBuilder = Project
                 .newBuilder()
                 .setId(id)
                 .setName(projectName)
                 .setStatus(STARTED)
-                .addTask(task)
-                .build();
+                .addTask(task);
+        Project aggregateState = stateBuilder.build();
+        Project previousAggState = stateBuilder.setName("Old " + stateBuilder.getName()).build();
         MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(TypeUrl.of(aggregateState).value())
@@ -184,6 +185,7 @@ class ProjectionTest {
         EntityStateChanged systemEvent = EntityStateChanged
                 .newBuilder()
                 .setEntity(entityId)
+                .setOldState(pack(previousAggState))
                 .setNewState(pack(aggregateState))
                 .setWhen(currentTime())
                 .addSignalId(MessageId.newBuilder()

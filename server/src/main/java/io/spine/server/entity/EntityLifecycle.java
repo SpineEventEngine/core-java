@@ -396,6 +396,7 @@ public class EntityLifecycle {
             EntityStateChanged event = EntityStateChanged
                     .newBuilder()
                     .setEntity(entityId)
+                    .setOldState(oldState)
                     .setNewState(newState)
                     .addAllSignalId(messageIds)
                     .setNewVersion(newVersion)

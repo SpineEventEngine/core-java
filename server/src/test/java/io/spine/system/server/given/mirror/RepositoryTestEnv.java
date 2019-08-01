@@ -101,6 +101,7 @@ public class RepositoryTestEnv {
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
                 .setEntity(entityId)
+                .setOldState(pack(state))
                 .setNewState(pack(state))
                 .setWhen(currentTime())
                 .addSignalId(cause())

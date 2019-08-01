@@ -267,6 +267,7 @@ class MirrorRepositoryTest {
                     .newBuilder()
                     .setEntity(historyId)
                     .setWhen(currentTime())
+                    .setOldState(pack(state.getDefaultInstanceForType()))
                     .setNewState(pack(state))
                     .addSignalId(cause())
                     .build();

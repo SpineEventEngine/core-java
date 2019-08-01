@@ -55,18 +55,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SubscriptionRecordTest {
 
     private static final String TARGET_ID = "target-ID";
+    public static final Project FRESH_PROJECT = Project.getDefaultInstance();
 
     @Test
     @DisplayName("fail to match improper type")
     void notMatchImproperType() {
         SubscriptionRecord record = newRecordFor(subscription());
         ProjectId id = ProjectId.getDefaultInstance();
-        Project state = Project.getDefaultInstance();
 
-        EventEnvelope envelope = stateChangedEnvelope(id, state);
+        EventEnvelope envelope = stateChangedEnvelope(id, FRESH_PROJECT, FRESH_PROJECT);
         assertTrue(record.matches(envelope));
 
-        EventEnvelope envelope2 = stateChangedEnvelope(id, state, OTHER_TYPE);
+        EventEnvelope envelope2 = stateChangedEnvelope(id, FRESH_PROJECT, FRESH_PROJECT, OTHER_TYPE);
         assertFalse(record.matches(envelope2));
     }
 
@@ -84,14 +84,14 @@ class SubscriptionRecordTest {
             Project state = Project.getDefaultInstance();
             SubscriptionRecord record = newRecordFor(subscription(targetId));
 
-            EventEnvelope envelope = stateChangedEnvelope(targetId, state);
+            EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
             assertTrue(record.matches(envelope));
 
             ProjectId otherId = ProjectId
                     .newBuilder()
                     .setId("some-other-ID")
                     .build();
-            EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
+            EventEnvelope envelope2 = stateChangedEnvelope(otherId, state, state);
             assertFalse(record.matches(envelope2));
         }
 
@@ -143,14 +143,14 @@ class SubscriptionRecordTest {
                     .newBuilder()
                     .setName(targetName)
                     .build();
-            EventEnvelope envelope = stateChangedEnvelope(targetId, matching);
+            EventEnvelope envelope = stateChangedEnvelope(targetId, FRESH_PROJECT, matching);
             assertTrue(record.matches(envelope));
 
             Project nonMatching = Project
                     .newBuilder()
                     .setName("some-other-name")
                     .build();
-            EventEnvelope envelope2 = stateChangedEnvelope(targetId, nonMatching);
+            EventEnvelope envelope2 = stateChangedEnvelope(targetId, FRESH_PROJECT, nonMatching);
             assertFalse(record.matches(envelope2));
         }
 

@@ -143,15 +143,17 @@ class ProjectionEndToEndTest {
                 .setId(pack(organizationHead))
                 .vBuild();
         String organizationName = "Contributors";
-        Organization newState = Organization
+        Organization.Builder stateBuilder = Organization
                 .newBuilder()
                 .setHead(organizationHead)
                 .setName(organizationName)
-                .addMember(UserId.getDefaultInstance())
-                .build();
+                .addMember(UserId.getDefaultInstance());
+        Organization newState = stateBuilder.build();
+        Organization oldState = stateBuilder.setName("Old " + stateBuilder.getName()).build();
         EntityStateChanged stateChanged = EntityStateChanged
                 .newBuilder()
                 .setEntity(entityId)
+                .setOldState(pack(oldState))
                 .setNewState(pack(newState))
                 .setWhen(currentTime())
                 .addSignalId(dispatchedEventId())
