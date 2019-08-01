@@ -31,13 +31,13 @@ import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
+import io.spine.testing.core.given.GivenTenantId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.stand.given.StandTestEnv.newStand;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -49,7 +49,7 @@ class MultitenantStandTest extends StandTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        TenantId tenantId = newUuid();
+        TenantId tenantId = GivenTenantId.generate();
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
@@ -73,7 +73,7 @@ class MultitenantStandTest extends StandTest {
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
-        TenantId anotherTenant = newUuid();
+        TenantId anotherTenant = GivenTenantId.generate();
         ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
         MemoizeNotifySubscriptionAction anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);

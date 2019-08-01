@@ -62,7 +62,7 @@ import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -174,7 +174,7 @@ abstract class AbstractCommandBusTestSuite {
                 .build();
         requestFactory =
                 multitenant
-                ? new TestActorRequestFactory(getClass(), newUuid())
+                ? new TestActorRequestFactory(getClass(), generate())
                 : new TestActorRequestFactory(getClass());
         createProjectHandler = new CreateProjectHandler();
         context.registerCommandDispatcher(createProjectHandler);

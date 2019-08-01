@@ -24,6 +24,6 @@
 package io.spine.server.trace.given.airport;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.server.annotation.BoundedContext;
+import io.spine.core.BoundedContext;
 
 import javax.annotation.ParametersAreNonnullByDefault;

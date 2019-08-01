@@ -70,7 +70,7 @@ import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.assertMa
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFormat;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -125,7 +125,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Mes
     protected void setUp() {
         ModelTests.dropAllModels();
         this.repository = createRepository();
-        setCurrentTenant(newUuid());
+        setCurrentTenant(generate());
     }
 
     @AfterEach

@@ -91,7 +91,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
@@ -388,7 +388,7 @@ public class AggregateRepositoryTest {
         givenStoredAggregate();
 
         // Store a troublesome entity, which cannot be loaded.
-        TenantAwareOperation op = new TenantAwareOperation(newUuid()) {
+        TenantAwareOperation op = new TenantAwareOperation(generate()) {
             @Override
             public void run() {
                 givenStoredAggregateWithId(ProjectAggregateRepository.troublesome.getId());

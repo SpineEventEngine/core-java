@@ -41,7 +41,7 @@ import java.util.Iterator;
 
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -68,7 +68,7 @@ class RepositoryTest {
                 .build();
         repository = new TestRepo();
         context.register(repository);
-        tenantId = newUuid();
+        tenantId = generate();
     }
 
     @AfterEach

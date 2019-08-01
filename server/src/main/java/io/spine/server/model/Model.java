@@ -25,11 +25,11 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.spine.annotation.Internal;
 import io.spine.code.java.ClassName;
+import io.spine.core.BoundedContext;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.reflect.PackageInfo;
 import io.spine.security.InvocationGuard;
-import io.spine.server.annotation.BoundedContext;
 
 import java.util.Map;
 import java.util.Optional;

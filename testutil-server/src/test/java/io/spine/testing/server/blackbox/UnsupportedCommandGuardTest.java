@@ -36,7 +36,7 @@ class UnsupportedCommandGuardTest {
 
     @BeforeEach
     void initGuard() {
-        guard = new UnsupportedCommandGuard();
+        guard = new UnsupportedCommandGuard(getClass().getName());
     }
 
     @Test
