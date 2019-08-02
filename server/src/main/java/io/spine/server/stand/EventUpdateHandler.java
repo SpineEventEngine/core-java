@@ -20,27 +20,66 @@
 
 package io.spine.server.stand;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.client.EventUpdates;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
+import io.spine.client.TargetFilters;
 import io.spine.core.Event;
+import io.spine.core.EventId;
 import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
+import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 /**
- * Updates an event subscription based on the incoming event.
+ * The update handler of {@code Subscription}s for {@code Event}s.
  */
-final class EventSubscriptionCallback extends SubscriptionCallback {
+class EventUpdateHandler extends UpdateHandler {
 
-    EventSubscriptionCallback(Subscription subscription) {
+    EventUpdateHandler(Subscription subscription) {
         super(subscription);
+    }
+
+    @Override
+    Optional<SubscriptionUpdate> findUpdates(EventEnvelope event) {
+        boolean matches = isTypeMatching(event) && (includeAll() || matchByFilters(event));
+        if (!matches) {
+            return Optional.empty();
+        }
+        SubscriptionUpdate update = createSubscriptionUpdate(event);
+        return Optional.of(update);
+    }
+
+    @Override
+    protected Any extractId(EventEnvelope event) {
+        EventId eventId = event.id();
+        Any result = Identifier.pack(eventId);
+        return result;
+    }
+
+    @Override
+    boolean isTypeMatching(EventEnvelope event) {
+        String expectedTypeUrl = target().getType();
+        String actualTypeUrl = TypeUrl.of(event.message())
+                                      .value();
+        return expectedTypeUrl.equals(actualTypeUrl);
+    }
+
+    /**
+     * Matches an event to the subscription filters.
+     */
+    private boolean matchByFilters(EventEnvelope event) {
+        return isIdMatching(event) && checkEventMessageMatches(event);
     }
 
     /**
      * Creates a subscription update with a single {@link Event} obtained from the envelope.
      */
-    @Override
-    protected SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
+    private SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
         EventUpdates updates = extractEventUpdates(event);
         SubscriptionUpdate result = SubscriptionUpdate
                 .newBuilder()
@@ -57,6 +96,19 @@ final class EventSubscriptionCallback extends SubscriptionCallback {
                 .newBuilder()
                 .addEvent(eventObject)
                 .build();
+        return result;
+    }
+
+    /**
+     * Checks if the event message matches the subscription filters.
+     */
+    private boolean checkEventMessageMatches(EventEnvelope event) {
+        Message message = event.message();
+        TargetFilters filters = target().getFilters();
+        boolean result = filters
+                .getFilterList()
+                .stream()
+                .allMatch(f -> checkPasses(message, f));
         return result;
     }
 }

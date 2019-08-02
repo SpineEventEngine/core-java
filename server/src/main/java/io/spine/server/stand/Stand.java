@@ -184,7 +184,6 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
             subscriptionRegistry.byType(typeUrl)
                                 .stream()
                                 .filter(SubscriptionRecord::isActive)
-                                .filter(record -> record.matches(event))
                                 .forEach(record -> record.update(event));
         }
     }

@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.Targets.composeTarget;
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
@@ -47,9 +48,7 @@ import static io.spine.server.stand.given.SubscriptionRecordTestEnv.stateChanged
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("SubscriptionRecord should")
 class SubscriptionRecordTest {
@@ -64,10 +63,10 @@ class SubscriptionRecordTest {
         ProjectId id = ProjectId.getDefaultInstance();
 
         EventEnvelope envelope = stateChangedEnvelope(id, FRESH_PROJECT, FRESH_PROJECT);
-        assertTrue(record.matches(envelope));
+        assertThat(record.findUpdates(envelope)).isPresent();
 
         EventEnvelope envelope2 = stateChangedEnvelope(id, FRESH_PROJECT, FRESH_PROJECT, OTHER_TYPE);
-        assertFalse(record.matches(envelope2));
+        assertThat(record.findUpdates(envelope2)).isEmpty();
     }
 
     @Nested
@@ -85,14 +84,14 @@ class SubscriptionRecordTest {
             SubscriptionRecord record = newRecordFor(subscription(targetId));
 
             EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
-            assertTrue(record.matches(envelope));
+            assertThat(record.findUpdates(envelope)).isPresent();
 
             ProjectId otherId = ProjectId
                     .newBuilder()
                     .setId("some-other-ID")
                     .build();
             EventEnvelope envelope2 = stateChangedEnvelope(otherId, state, state);
-            assertFalse(record.matches(envelope2));
+            assertThat(record.findUpdates(envelope2)).isEmpty();
         }
 
         @Test
@@ -107,14 +106,14 @@ class SubscriptionRecordTest {
             SubscriptionRecord record = newRecordFor(subscription);
 
             EventEnvelope envelope = projectCreatedEnvelope(targetId);
-            assertTrue(record.matches(envelope));
+            assertThat(record.findUpdates(envelope)).isPresent();
 
             EventId otherId = EventId
                     .newBuilder()
                     .setValue("other-event-ID")
                     .build();
             EventEnvelope nonMatching = projectCreatedEnvelope(otherId);
-            assertFalse(record.matches(nonMatching));
+            assertThat(record.findUpdates(nonMatching)).isEmpty();
         }
     }
 
@@ -144,14 +143,14 @@ class SubscriptionRecordTest {
                     .setName(targetName)
                     .build();
             EventEnvelope envelope = stateChangedEnvelope(targetId, FRESH_PROJECT, matching);
-            assertTrue(record.matches(envelope));
+            assertThat(record.findUpdates(envelope)).isPresent();
 
             Project nonMatching = Project
                     .newBuilder()
                     .setName("some-other-name")
                     .build();
             EventEnvelope envelope2 = stateChangedEnvelope(targetId, FRESH_PROJECT, nonMatching);
-            assertFalse(record.matches(envelope2));
+            assertThat(record.findUpdates(envelope2)).isEmpty();
         }
 
         @Test
@@ -180,7 +179,7 @@ class SubscriptionRecordTest {
                     .setTeamId(matchingTeamId)
                     .build();
             EventEnvelope envelope = projectCreatedEnvelope(targetId, matching);
-            assertTrue(record.matches(envelope));
+            assertThat(record.findUpdates(envelope)).isPresent();
 
             EvTeamId otherTeamId = EvTeamId
                     .newBuilder()
@@ -191,7 +190,7 @@ class SubscriptionRecordTest {
                     .setTeamId(otherTeamId)
                     .build();
             EventEnvelope nonMatching = projectCreatedEnvelope(targetId, other);
-            assertFalse(record.matches(nonMatching));
+            assertThat(record.findUpdates(nonMatching)).isEmpty();
         }
     }
 
