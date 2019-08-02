@@ -333,7 +333,6 @@ public abstract class AggregateStorageTest
         Iterator<ProjectId> index = storage.index();
 
         List<ProjectId> result = stream(index).collect(toImmutableList());
-        assertThat(result).hasSize(1);
         assertThat(result).containsExactly(id);
     }
 
