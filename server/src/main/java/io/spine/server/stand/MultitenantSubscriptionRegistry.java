@@ -79,7 +79,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     @Override
-    public boolean containsId(SubscriptionId subscriptionId) {
+    public synchronized boolean containsId(SubscriptionId subscriptionId) {
         return registrySlice().containsId(subscriptionId);
     }
 
