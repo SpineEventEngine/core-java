@@ -119,7 +119,7 @@ class EntityUpdateHandler extends UpdateHandler {
 
     private static Message oldStateFrom(EventEnvelope event) {
         EntityStateChanged eventMessage = asEntityEvent(event);
-        Any newState = eventMessage.getNewState();
+        Any newState = eventMessage.getOldState();
         Message result = AnyPacker.unpack(newState);
         return result;
     }

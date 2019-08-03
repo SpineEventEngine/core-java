@@ -21,13 +21,16 @@
 package io.spine.server.stand;
 
 import io.spine.client.CompositeFilter;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
+import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.core.EventId;
+import io.spine.server.stand.given.SubscriptionRecordTestEnv;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -37,6 +40,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth8.assertThat;
@@ -49,47 +54,42 @@ import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("SubscriptionRecord should")
 class SubscriptionRecordTest {
 
     private static final String TARGET_ID = "target-ID";
-    public static final Project FRESH_PROJECT = Project.getDefaultInstance();
+    private static final Project EMPTY_PRJ = Project.getDefaultInstance();
 
     @Test
-    @DisplayName("fail to match improper type")
+    @DisplayName("detect an update according to type")
     void notMatchImproperType() {
         SubscriptionRecord record = newRecordFor(subscription());
         ProjectId id = ProjectId.getDefaultInstance();
 
-        EventEnvelope envelope = stateChangedEnvelope(id, FRESH_PROJECT, FRESH_PROJECT);
-        assertThat(record.detectUpdate(envelope)).isPresent();
+        EventEnvelope matches = stateChangedEnvelope(id, EMPTY_PRJ, EMPTY_PRJ);
+        assertThat(record.detectUpdate(matches)).isPresent();
 
-        EventEnvelope envelope2 = stateChangedEnvelope(id, FRESH_PROJECT, FRESH_PROJECT, OTHER_TYPE);
-        assertThat(record.detectUpdate(envelope2)).isEmpty();
+        EventEnvelope notMatches = stateChangedEnvelope(id, EMPTY_PRJ, EMPTY_PRJ, OTHER_TYPE);
+        assertThat(record.detectUpdate(notMatches)).isEmpty();
     }
 
     @Nested
-    @DisplayName("fail to match improper ID")
+    @DisplayName("detect an update by comparing IDs")
     class MatchById {
 
         @Test
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
-            ProjectId targetId = ProjectId
-                    .newBuilder()
-                    .setId(TARGET_ID)
-                    .build();
+            ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
             Project state = Project.getDefaultInstance();
             SubscriptionRecord record = newRecordFor(subscription(targetId));
 
             EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
             assertThat(record.detectUpdate(envelope)).isPresent();
 
-            ProjectId otherId = ProjectId
-                    .newBuilder()
-                    .setId("some-other-ID")
-                    .build();
+            ProjectId otherId = SubscriptionRecordTestEnv.projectId("some-other-ID");
             EventEnvelope envelope2 = stateChangedEnvelope(otherId, state, state);
             assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
@@ -118,38 +118,22 @@ class SubscriptionRecordTest {
     }
 
     @Nested
-    @DisplayName("fail to match improper state")
+    @DisplayName("detect an update by analyzing state")
     class MatchByState {
 
         @Test
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
-            ProjectId targetId = ProjectId
-                    .newBuilder()
-                    .setId(TARGET_ID)
-                    .build();
             String targetName = "super-project";
-
-            Filter filter = Filters.eq("name", targetName);
-            CompositeFilter compositeFilter = Filters.all(filter);
-            Set<CompositeFilter> filters = singleton(compositeFilter);
-            Target target = composeTarget(Project.class, singleton(targetId), filters);
-
-            Subscription subscription = subscription(target);
-            SubscriptionRecord record = newRecordFor(subscription);
-
-            Project matching = Project
-                    .newBuilder()
-                    .setName(targetName)
-                    .build();
-            EventEnvelope envelope = stateChangedEnvelope(targetId, FRESH_PROJECT, matching);
+            ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+            SubscriptionRecord record = projectRecord(targetId,
+                                                      Filters.eq("name", targetName));
+            Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
+            EventEnvelope envelope = stateChangedEnvelope(targetId, EMPTY_PRJ, matching);
             assertThat(record.detectUpdate(envelope)).isPresent();
 
-            Project nonMatching = Project
-                    .newBuilder()
-                    .setName("some-other-name")
-                    .build();
-            EventEnvelope envelope2 = stateChangedEnvelope(targetId, FRESH_PROJECT, nonMatching);
+            Project nonMatching = SubscriptionRecordTestEnv.projectWithName("some-other-name");
+            EventEnvelope envelope2 = stateChangedEnvelope(targetId, EMPTY_PRJ, nonMatching);
             assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
 
@@ -195,6 +179,32 @@ class SubscriptionRecordTest {
     }
 
     @Test
+    @DisplayName("detect that the entity state stopped matching the subscription criteria")
+    void tellNotMatchingAnymore() {
+        ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+        String targetName = "previously-matching-project";
+
+        SubscriptionRecord record = projectRecord(targetId,
+                                                  Filters.eq("name", targetName));
+
+        Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
+        Project nonMatching = SubscriptionRecordTestEnv.projectWithName("not-matching-anymore");
+
+        EventEnvelope envelope = stateChangedEnvelope(targetId, matching, nonMatching);
+        Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
+        assertThat(maybeUpdate).isPresent();
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat(..)`.
+                SubscriptionUpdate update = maybeUpdate.get();
+        List<EntityStateUpdate> updateList = update.getEntityUpdates()
+                                                   .getUpdateList();
+        assertEquals(1, updateList.size());
+
+        EntityStateUpdate stateUpdate = updateList.get(0);
+        assertTrue(stateUpdate.getNotMatchingAnymore());
+    }
+
+    @Test
     @DisplayName("be equal only to SubscriptionRecord that has same subscription")
     void beEqualToSame() {
         Subscription oneSubscription = subscription();
@@ -210,4 +220,21 @@ class SubscriptionRecordTest {
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }
+
+    /**
+     * Creates a {@code SubscriptionRecord} with the target referring to the passed {@code TargetId}
+     * and with the passed {@code filter} applied.
+     *
+     * @implNote This method accesses the package-private API, hence it isn't moved to the
+     *         corresponding test environment.
+     */
+    private static SubscriptionRecord projectRecord(ProjectId targetId, Filter filter) {
+        CompositeFilter compositeFilter = Filters.all(filter);
+        Set<CompositeFilter> filters = singleton(compositeFilter);
+        Target target = composeTarget(Project.class, singleton(targetId), filters);
+
+        Subscription subscription = subscription(target);
+        return newRecordFor(subscription);
+    }
+
 }

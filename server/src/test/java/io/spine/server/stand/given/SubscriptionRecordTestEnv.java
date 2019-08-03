@@ -135,4 +135,18 @@ public final class SubscriptionRecordTestEnv {
         Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
         return target;
     }
+
+    public static Project projectWithName(String name) {
+        return Project
+                .newBuilder()
+                .setName(name)
+                .build();
+    }
+
+    public static ProjectId projectId(String id) {
+        return ProjectId
+                .newBuilder()
+                .setId(id)
+                .build();
+    }
 }
