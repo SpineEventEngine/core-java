@@ -34,9 +34,6 @@ import io.spine.testing.server.NoOpLifecycle;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching events to a {@code Projection} in test purposes.
@@ -81,22 +78,13 @@ public class ProjectionEventDispatcher {
             extends ProjectionEndpoint<I, P> {
 
         private TestProjectionEndpoint(EventEnvelope event) {
-            super(mockRepository(), event);
+            super(new TestProjectionRepository<>(), event);
         }
 
         private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope event) {
             TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(event);
             endpoint.runTransactionFor(projection);
-        }
-
-        @SuppressWarnings("unchecked") // It is OK when mocking
-        private static <I, P extends Projection<I, S, ?>, S extends Message>
-        ProjectionRepository<I, P, S> mockRepository() {
-            TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
-            when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-            when(mockedRepo.idClass()).thenReturn(Object.class);
-            return mockedRepo;
         }
     }
 

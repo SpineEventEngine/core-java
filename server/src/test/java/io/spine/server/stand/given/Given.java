@@ -21,8 +21,12 @@
 package io.spine.server.stand.given;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.annotation.Internal;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
@@ -30,7 +34,10 @@ import io.spine.server.route.EventRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
@@ -42,8 +49,17 @@ public class Given {
     private Given() {
     }
 
+    /**
+     * An implementation of a projection repository, which allows to
+     * {@linkplain StandTestProjectionRepository#setRecords(Iterator) pre-set} the records to return
+     * in {@code find...()} and {@code load...()} calls.
+     *
+     * <p>If the records were not pre-set, the repository behaves as usual.
+     */
     public static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+
+        private @Nullable Iterator<EntityRecord> records;
 
         private static final EventRoute<ProjectId, PrjProjectCreated> EVENT_TARGETS_FN =
                 new EventRoute<ProjectId, PrjProjectCreated>() {
@@ -56,6 +72,27 @@ public class Given {
                                                         .build());
                     }
                 };
+
+        public void setRecords(Iterator<EntityRecord> records) {
+            this.records = records;
+        }
+
+        @Internal
+        @Override
+        public Iterator<EntityRecord> loadAllRecords(ResponseFormat format) {
+            return records == null ? super.loadAllRecords(format) : records;
+        }
+
+        @Internal
+        @Override
+        public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
+            return records == null ? super.findRecords(filters, format) : records;
+        }
+
+        @Override
+        public Optional<StandTestProjection> find(ProjectId id) {
+            return Optional.of(new StandTestProjection(id));
+        }
 
         @Override
         protected void setupEventRouting(EventRouting<ProjectId> routing) {

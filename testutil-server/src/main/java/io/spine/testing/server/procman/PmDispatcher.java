@@ -43,9 +43,6 @@ import io.spine.testing.server.NoOpLifecycle;
 import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching commands and events to a {@code ProcessManager} in test purposes.
@@ -104,8 +101,8 @@ public final class PmDispatcher {
                                                S extends Message>
             extends PmCommandEndpoint<I, P> {
 
-        private TestPmCommandEndpoint(CommandEnvelope envelope) {
-            super(mockRepository(), envelope);
+        private TestPmCommandEndpoint(CommandEnvelope cmd) {
+            super(new TestPmRepository<>(), cmd);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
@@ -119,9 +116,12 @@ public final class PmDispatcher {
      * A test-only implementation of an {@link PmEventEndpoint}, that dispatches
      * events to an instance of {@code ProcessManager} and returns the list of events.
      *
-     * @param <I> the type of {@code ProcessManager} identifier
-     * @param <P> the type of {@code ProcessManager}
-     * @param <S> the type of {@code ProcessManager} state object
+     * @param <I>
+     *         the type of {@code ProcessManager} identifier
+     * @param <P>
+     *         the type of {@code ProcessManager}
+     * @param <S>
+     *         the type of {@code ProcessManager} state object
      */
     private static class TestPmEventEndpoint<I,
                                              P extends ProcessManager<I, S, ?>,
@@ -129,7 +129,7 @@ public final class PmDispatcher {
             extends PmEventEndpoint<I, P> {
 
         private TestPmEventEndpoint(EventEnvelope event) {
-            super(mockRepository(), event);
+            super(new TestPmRepository<>(), event);
         }
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
@@ -139,18 +139,9 @@ public final class PmDispatcher {
         }
     }
 
-    @SuppressWarnings("unchecked") // It is OK when mocking
-    private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-    ProcessManagerRepository<I, P, S> mockRepository() {
-        TestPmRepository mockedRepo = mock(TestPmRepository.class);
-        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.idClass()).thenReturn(Object.class);
-        when(mockedRepo.beginTransactionFor(any())).thenCallRealMethod();
-        return mockedRepo;
-    }
-
     /**
-     * Test-only process manager repository that exposes {@code Repository.Lifecycle} class.
+     * Test-only process manager repository which uses {@link TestPmTransaction} and
+     * {@linkplain NoOpLifecycle NO-OP entity lifecycle}.
      */
     private static class TestPmRepository<I, P extends ProcessManager<I, S, ?>, S extends Message>
             extends ProcessManagerRepository<I, P, S> {

@@ -30,9 +30,8 @@ import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
+import io.spine.testing.server.procman.given.CommandHandlingPm;
 import org.junit.jupiter.api.DisplayName;
-
-import static org.mockito.Mockito.mock;
 
 @DisplayName("ProcessManagerDispatcher utility should")
 class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
@@ -53,6 +52,6 @@ class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
                           CommandEnvelope.of(command))
               .setDefault(EventEnvelope.class,
                           EventEnvelope.of(event))
-              .setDefault(ProcessManager.class, mock(ProcessManager.class));
+              .setDefault(ProcessManager.class, CommandHandlingPm.newInstance());
     }
 }

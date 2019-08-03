@@ -26,10 +26,6 @@ dependencies {
     api deps.test.junit5Api
     runtimeClasspath deps.test.junit5Runner
 
-    // Depend on Mockito in the production code because this module exposes testing utilities
-    // based on this library.
-    api deps.test.mockito
-
     // General purpose test utilities.
     api "io.spine:spine-testlib:$spineBaseVersion"
 }

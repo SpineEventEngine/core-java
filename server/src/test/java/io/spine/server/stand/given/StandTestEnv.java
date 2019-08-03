@@ -35,7 +35,9 @@ import io.spine.server.stand.Stand;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class StandTestEnv {
 
@@ -95,6 +97,7 @@ public class StandTestEnv {
 
     public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
 
+        private final List<SubscriptionUpdate> acceptedUpdates = new ArrayList<>();
         private @Nullable Any newEntityState = null;
         private @Nullable Event newEvent = null;
 
@@ -106,6 +109,7 @@ public class StandTestEnv {
          */
         @Override
         public void accept(SubscriptionUpdate update) {
+            acceptedUpdates.add(update);
             switch (update.getUpdateCase()) {
                 case ENTITY_UPDATES:
                     EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
@@ -129,6 +133,10 @@ public class StandTestEnv {
 
         public @Nullable Event newEvent() {
             return newEvent;
+        }
+
+        public int countAcceptedUpdates() {
+            return acceptedUpdates.size();
         }
     }
 }
