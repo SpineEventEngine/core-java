@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Experimental;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,6 +68,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <C>
  *         storage-specific implementation of the {@link ColumnType}
  */
+@Experimental
 public final class ColumnTypeRegistry<C extends ColumnType> {
 
     private final ImmutableMap<Class, C> columnTypeMap;

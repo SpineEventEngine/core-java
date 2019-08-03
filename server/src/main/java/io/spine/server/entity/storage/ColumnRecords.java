@@ -20,6 +20,8 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.Experimental;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 
 import java.util.function.Function;
@@ -32,6 +34,8 @@ import static java.lang.String.format;
  * A utility for dealing with the {@linkplain EntityRecordWithColumns} and
  * the {@linkplain EntityColumn entity columns}.
  */
+@Experimental
+@Internal
 public final class ColumnRecords {
 
     /** Prevents instantiation of the utility class. */
