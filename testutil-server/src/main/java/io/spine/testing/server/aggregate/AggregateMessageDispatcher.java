@@ -55,8 +55,8 @@ public class AggregateMessageDispatcher {
     dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
         checkNotNull(aggregate);
         checkNotNull(command);
-        return AggregateTestSupport.dispatchCommand(
-                new TestAggregateRepository<>(), aggregate, command);
+        return AggregateTestSupport
+                .dispatchCommand(new TestAggregateRepository<>(), aggregate, command);
     }
 
     /**
@@ -71,8 +71,8 @@ public class AggregateMessageDispatcher {
         checkNotNull(aggregate);
         checkNotNull(command);
         CommandEnvelope ce = CommandEnvelope.of(command);
-        return AggregateTestSupport.dispatchCommand(
-                new TestAggregateRepository<>(), aggregate, ce);
+        return AggregateTestSupport
+                .dispatchCommand(new TestAggregateRepository<>(), aggregate, ce);
     }
 
     /**
@@ -86,8 +86,8 @@ public class AggregateMessageDispatcher {
     dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
         checkNotNull(aggregate);
         checkNotNull(event);
-        return AggregateTestSupport.dispatchEvent(
-                new TestAggregateRepository<>(), aggregate, event);
+        return AggregateTestSupport
+                .dispatchEvent(new TestAggregateRepository<>(), aggregate, event);
     }
 
     /**
