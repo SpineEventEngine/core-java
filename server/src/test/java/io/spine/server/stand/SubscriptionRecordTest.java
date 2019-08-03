@@ -20,6 +20,7 @@
 
 package io.spine.server.stand;
 
+import io.spine.base.EventMessage;
 import io.spine.client.CompositeFilter;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.Filter;
@@ -29,7 +30,9 @@ import io.spine.client.SubscriptionId;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
+import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.stand.given.SubscriptionRecordTestEnv;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
@@ -130,7 +133,10 @@ class SubscriptionRecordTest {
                                                       Filters.eq("name", targetName));
             Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
             EventEnvelope envelope = stateChangedEnvelope(targetId, EMPTY_PRJ, matching);
-            assertThat(record.detectUpdate(envelope)).isPresent();
+            Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
+            assertThat(maybeUpdate).isPresent();
+            EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
+            assertEquals(matching, AnyPacker.unpack(entityUpdate.getState()));
 
             Project nonMatching = SubscriptionRecordTestEnv.projectWithName("some-other-name");
             EventEnvelope envelope2 = stateChangedEnvelope(targetId, EMPTY_PRJ, nonMatching);
@@ -163,7 +169,13 @@ class SubscriptionRecordTest {
                     .setTeamId(matchingTeamId)
                     .build();
             EventEnvelope envelope = projectCreatedEnvelope(targetId, matching);
-            assertThat(record.detectUpdate(envelope)).isPresent();
+            Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
+            assertThat(maybeUpdate).isPresent();
+
+            Event event = firstEventUpdate(maybeUpdate);
+            EventMessage message = EventEnvelope.of(event)
+                                                .message();
+            assertEquals(matching, message);
 
             EvTeamId otherTeamId = EvTeamId
                     .newBuilder()
@@ -194,14 +206,8 @@ class SubscriptionRecordTest {
         Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
         assertThat(maybeUpdate).isPresent();
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat(..)`.
-                SubscriptionUpdate update = maybeUpdate.get();
-        List<EntityStateUpdate> updateList = update.getEntityUpdates()
-                                                   .getUpdateList();
-        assertEquals(1, updateList.size());
-
-        EntityStateUpdate stateUpdate = updateList.get(0);
-        assertTrue(stateUpdate.getNotMatchingAnymore());
+        EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
+        assertTrue(entityUpdate.getNotMatchingAnymore());
     }
 
     @Test
@@ -237,4 +243,26 @@ class SubscriptionRecordTest {
         return newRecordFor(subscription);
     }
 
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // OK for tests.
+    private static EntityStateUpdate firstEntityUpdate(Optional<SubscriptionUpdate> maybeUpdate) {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat(..)`.
+                SubscriptionUpdate update = maybeUpdate.get();
+        List<EntityStateUpdate> updateList = update.getEntityUpdates()
+                                                   .getUpdateList();
+        assertEquals(1, updateList.size());
+
+        return updateList.get(0);
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // OK for tests.
+    private static Event firstEventUpdate(Optional<SubscriptionUpdate> maybeUpdate) {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat(..)`.
+                SubscriptionUpdate update = maybeUpdate.get();
+        List<Event> updateList = update.getEventUpdates()
+                                       .getEventList();
+        assertEquals(1, updateList.size());
+
+        return updateList.get(0);
+    }
 }
