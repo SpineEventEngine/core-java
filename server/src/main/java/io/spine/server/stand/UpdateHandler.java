@@ -81,7 +81,7 @@ abstract class UpdateHandler {
                    "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
                    TypeUrl.of(event.message()), subscription.getId()
                                                             .getValue());
-        findUpdates(event).ifPresent(u -> notifyAction.accept(u));
+        detectUpdate(event).ifPresent(u -> notifyAction.accept(u));
     }
 
     /**
@@ -100,14 +100,15 @@ abstract class UpdateHandler {
     }
 
     /**
-     * Finds the updates in the passed event according to the {@code Subscription} criteria.
+     * Tries to detect the passed event as a {@code SubscriptionUpdate} according
+     * to the {@code Subscription} criteria.
      *
      * @param event
      *         the event to analyze against this subscription
      * @return {@code SubscriptionUpdate} packed as {@code Optional} if the event matches the
      *         subscription criteria, {@code Optional.empty()} otherwise
      */
-    abstract Optional<SubscriptionUpdate> findUpdates(EventEnvelope event);
+    abstract Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event);
 
     /**
      * Extracts the ID value of the updated {@code Entity} or received {@code Event}.

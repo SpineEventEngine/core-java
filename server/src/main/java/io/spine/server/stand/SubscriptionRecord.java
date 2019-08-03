@@ -78,12 +78,12 @@ final class SubscriptionRecord {
     }
 
     /**
-     * A test-only method that exposes {@link UpdateHandler#findUpdates(EventEnvelope)
-     * UpdateHandler.findUpdates(EventEnvelope)} to tests.
+     * A test-only method that exposes {@link UpdateHandler#detectUpdate(EventEnvelope)
+     * UpdateHandler.detectUpdate(EventEnvelope)} to tests.
      */
     @VisibleForTesting
-    Optional<SubscriptionUpdate> findUpdates(EventEnvelope event) {
-        return handler.findUpdates(event);
+    Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
+        return handler.detectUpdate(event);
     }
 
     TypeUrl getType() {

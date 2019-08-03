@@ -60,7 +60,7 @@ class EntityUpdateHandler extends UpdateHandler {
      * {@link EntityStateUpdate#getState() Entity state}.
      */
     @Override
-    Optional<SubscriptionUpdate> findUpdates(EventEnvelope event) {
+    Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
         SubscriptionUpdate result = null;
 
         if (isTypeMatching(event)) {

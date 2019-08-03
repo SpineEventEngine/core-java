@@ -45,7 +45,7 @@ class EventUpdateHandler extends UpdateHandler {
     }
 
     @Override
-    Optional<SubscriptionUpdate> findUpdates(EventEnvelope event) {
+    Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
         boolean matches = isTypeMatching(event) && (includeAll() || matchByFilters(event));
         if (!matches) {
             return Optional.empty();
