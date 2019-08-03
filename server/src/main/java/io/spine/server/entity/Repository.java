@@ -160,12 +160,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /** Returns the class of IDs used by this repository. */
     @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
-    public Class<I> idClass() {
+    public final Class<I> idClass() {
         return (Class<I>) entityModelClass().idClass();
     }
 
     /** Returns the class of entities managed by this repository. */
-    public Class<E> entityClass() {
+    public final Class<E> entityClass() {
         return entityModelClass().value();
     }
 
@@ -173,7 +173,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Obtains the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository.
      */
-    public TypeUrl entityStateType() {
+    public final TypeUrl entityStateType() {
         return entityModelClass().stateType();
     }
 
