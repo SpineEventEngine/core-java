@@ -116,7 +116,7 @@ message EntityUpdates {
     repeated EntityStateUpdate update = 1 [(validate) = true];
 }
 
-// The update happened to entity of interest.
+// The update happened to the entity of interest.
 message EntityStateUpdate {
 
     // The entity ID packed as Any.
