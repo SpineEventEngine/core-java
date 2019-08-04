@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.EventMessage;
 import io.spine.base.Time;
@@ -62,8 +63,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Streams.stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -315,6 +318,22 @@ public abstract class AggregateStorageTest
             storage.writeLifecycleFlags(id, deletedRecordFlags);
             writeAndReadEventTest(id, storage);
         }
+    }
+
+    @Test
+    @DisplayName("return an iterator over unique aggregate IDs through `index`")
+    void provideUniqueIdsThroughIndex() {
+        AggregateEventRecord record1 = StorageRecords.create(currentTime());
+        storage.writeRecord(id, record1);
+
+        Timestamp otherTime = subtract(currentTime(), Durations.fromSeconds(1));
+        AggregateEventRecord record2 = StorageRecords.create(otherTime);
+        storage.writeRecord(id, record2);
+
+        Iterator<ProjectId> index = storage.index();
+
+        List<ProjectId> result = stream(index).collect(toImmutableList());
+        assertThat(result).containsExactly(id);
     }
 
     @Nested

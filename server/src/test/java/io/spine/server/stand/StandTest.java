@@ -34,13 +34,11 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
-import io.spine.client.ResponseFormat;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
-import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.core.Command;
@@ -82,14 +80,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -127,15 +123,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 // It's OK for this test.
 @SuppressWarnings({
@@ -590,7 +577,7 @@ class StandTest extends TenantAwareTest {
         Any packedState = AnyPacker.pack(customer);
         for (MemoizeNotifySubscriptionAction action : callbacks) {
             assertEquals(packedState, action.newEntityState());
-            verify(action, times(1)).accept(any(SubscriptionUpdate.class));
+            assertEquals(1, action.countAcceptedUpdates());
         }
     }
 
@@ -614,12 +601,12 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        verify(action, never()).accept(any(SubscriptionUpdate.class));
+        assertEquals(0, action.countAcceptedUpdates());
     }
 
     private MemoizeNotifySubscriptionAction
     subscribeWithCallback(Stand stand, Target subscriptionTarget) {
-        MemoizeNotifySubscriptionAction action = spy(new MemoizeNotifySubscriptionAction());
+        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
         Topic topic = requestFactory.topic()
                                     .forTarget(subscriptionTarget);
         subscribeAndActivate(stand, topic, action);
@@ -948,13 +935,9 @@ class StandTest extends TenantAwareTest {
     private void doCheckReadingProjectsById(int numberOfProjects) {
         // Define the types and values used as a test data.
         Map<ProjectId, Project> sampleProjects = new HashMap<>();
-        TypeUrl projectType = TypeUrl.of(Project.class);
         fillSampleProjects(sampleProjects, numberOfProjects);
 
-        StandTestProjectionRepository projectionRepository =
-                mock(StandTestProjectionRepository.class);
-        when(projectionRepository.entityStateType()).thenReturn(projectType);
-        when(projectionRepository.outgoingEvents()).thenReturn(ImmutableSet.of());
+        StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
         setupExpectedFindAllBehaviour(sampleProjects, projectionRepository);
 
         Stand stand = prepareStandWithProjectionRepo(projectionRepository);
@@ -990,39 +973,7 @@ class StandTest extends TenantAwareTest {
         Set<ProjectId> projectIds = sampleProjects.keySet();
         ImmutableCollection<EntityRecord> allRecords = toProjectionRecords(projectIds);
 
-        for (ProjectId projectId : projectIds) {
-            when(projectionRepository.find(eq(projectId)))
-                    .thenReturn(Optional.of(new StandTestProjection(projectId)));
-        }
-
-        when(projectionRepository.loadAllRecords(ResponseFormat.getDefaultInstance()))
-                .thenReturn(allRecords.iterator());
-
-        when(projectionRepository.findRecords(argThat(entityFilterMatcher(projectIds)),
-                                              any(ResponseFormat.class)))
-                .thenReturn(allRecords.iterator());
-    }
-
-    private static ArgumentMatcher<TargetFilters>
-    entityFilterMatcher(Collection<ProjectId> projectIds) {
-        // This argument matcher does NOT mimic the exact repository behavior.
-        // Instead, it only matches the EntityFilters instance in case it has IdFilter with
-        // ALL the expected IDs.
-        return argument -> {
-            boolean everyElementPresent = true;
-            for (Any entityId : argument.getIdFilter()
-                                        .getIdList()) {
-                Message rawId = unpack(entityId);
-                if (rawId instanceof ProjectId) {
-                    ProjectId convertedProjectId = (ProjectId) rawId;
-                    everyElementPresent = everyElementPresent
-                            && projectIds.contains(convertedProjectId);
-                } else {
-                    everyElementPresent = false;
-                }
-            }
-            return everyElementPresent;
-        };
+        projectionRepository.setRecords(allRecords.iterator());
     }
 
     private static ImmutableCollection<EntityRecord>
