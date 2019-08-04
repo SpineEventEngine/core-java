@@ -192,7 +192,7 @@ class SubscriptionRecordTest {
 
     @Test
     @DisplayName("detect that the entity state stopped matching the subscription criteria")
-    void tellNotMatchingAnymore() {
+    void tellNoLongerMatching() {
         ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
         String targetName = "previously-matching-project";
 
@@ -207,7 +207,7 @@ class SubscriptionRecordTest {
         assertThat(maybeUpdate).isPresent();
 
         EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
-        assertTrue(entityUpdate.getNotMatchingAnymore());
+        assertTrue(entityUpdate.getNoLongerMatching());
     }
 
     @Test

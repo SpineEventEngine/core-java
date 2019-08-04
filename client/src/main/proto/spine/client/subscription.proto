@@ -133,7 +133,7 @@ message EntityStateUpdate {
 
         // The state of the entity has changed, so that previously it matched the subscription
         // `Target` filters, and now it does not.
-        bool not_matching_anymore = 3;
+        bool no_longer_matching = 3;
     }
 }
 

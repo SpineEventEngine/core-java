@@ -53,7 +53,7 @@ class EntityUpdateHandler extends UpdateHandler {
      *
      * <p>In this case a special {@code SubscriptionUpdate} is emitted. Its
      * {@linkplain SubscriptionUpdate#getEntityUpdates() EntityUpdates} will have
-     * {@link EntityStateUpdate#getNotMatchingAnymore() EntityStateUpdate.getNotMatchingAnymore()}
+     * {@link EntityStateUpdate#getNoLongerMatching() EntityStateUpdate.getNoLongerMatching()}
      * set to {@code true}.
      *
      * <p>In all other cases the {@code EntityUpdates} holds an updated
@@ -71,7 +71,7 @@ class EntityUpdateHandler extends UpdateHandler {
                     if (isStateMatching(newStateFrom(event))) {
                         result = newStateUpdate(event);
                     } else if (isStateMatching(oldStateFrom(event))) {
-                        result = notMatchingAnymore(event);
+                        result = noLongerMatching(event);
                     }
                 }
             }
@@ -145,13 +145,13 @@ class EntityUpdateHandler extends UpdateHandler {
         return toSubscriptionUpdate(stateUpdate);
     }
 
-    private SubscriptionUpdate notMatchingAnymore(EventEnvelope event) {
+    private SubscriptionUpdate noLongerMatching(EventEnvelope event) {
         EntityStateChanged theEvent = asEntityEvent(event);
         Any packedId = packId(theEvent);
         EntityStateUpdate stateUpdate = EntityStateUpdate
                 .newBuilder()
                 .setId(packedId)
-                .setNotMatchingAnymore(true)
+                .setNoLongerMatching(true)
                 .vBuild();
         return toSubscriptionUpdate(stateUpdate);
     }
