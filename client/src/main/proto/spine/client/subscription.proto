@@ -125,13 +125,13 @@ message EntityStateUpdate {
     // The update may be one of two things.
     oneof kind {
 
-        // The state of entity has updated and packed here as `Any`.
+        // The state of entity has been updated and packed here as `Any`.
         //
         // If the field mask is set in `Topic`, this value is masked.
         //
         google.protobuf.Any state = 2;
 
-        // The state of the entity has changed, so that previously it matched the subscription
+        // The state of the entity has been changed, so that previously it matched the subscription
         // `Target` filters, and now it does not.
         bool no_longer_matching = 3;
     }
