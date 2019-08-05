@@ -38,7 +38,7 @@ import java.util.Optional;
 /**
  * The update handler of {@code Subscription}s for {@code Event}s.
  */
-class EventUpdateHandler extends UpdateHandler {
+final class EventUpdateHandler extends UpdateHandler {
 
     EventUpdateHandler(Subscription subscription) {
         super(subscription);

@@ -39,7 +39,7 @@ import java.util.Optional;
 /**
  * The update handler of {@code Subscription}s for {@code Entity} state updates.
  */
-class EntityUpdateHandler extends UpdateHandler {
+final class EntityUpdateHandler extends UpdateHandler {
 
     EntityUpdateHandler(Subscription subscription) {
         super(subscription);
