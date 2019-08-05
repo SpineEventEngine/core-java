@@ -20,11 +20,10 @@
 
 package io.spine.server.delivery.given;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
-import io.spine.base.SerializableMessage;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.delivery.InboxMessage;
@@ -72,35 +71,35 @@ public class DeliveryTestEnv {
     }
 
     /**
-     * An observer of the messages delivered to shards, which remembers all the delivered messages.
+     * An observer of the messages delivered to shards, which remembers all the delivered messages
+     * per {@code CalculatorAggregate} identifier.
      *
      * <p>Unpacks {@linkplain InboxMessage#getPayloadCase() the payload} of each
      * {@code InboxMessage} observed.
      */
     public static class SignalMemoizer implements ShardObserver {
 
-        private final ImmutableSet.Builder<SerializableMessage>
-                observedMessages = ImmutableSet.builder();
+        private final Multimap<String, CalculatorSignal> signals = ArrayListMultimap.create();
 
         @Override
-        public void onMessage(InboxMessage update) {
+        public synchronized void onMessage(InboxMessage update) {
+            Any packed;
             if (update.hasCommand()) {
-                Any packed = update.getCommand()
-                                   .getMessage();
-                CommandMessage cmdMessage =
-                        (CommandMessage) AnyPacker.unpack(packed);
-                observedMessages.add(cmdMessage);
+                packed = update.getCommand()
+                               .getMessage();
             } else {
-                Any packed = update.getEvent()
-                                   .getMessage();
-                EventMessage eventMessage =
-                        (EventMessage) AnyPacker.unpack(packed);
-                observedMessages.add(eventMessage);
+                packed = update.getEvent()
+                               .getMessage();
+
             }
+            CalculatorSignal msg =
+                    (CalculatorSignal) AnyPacker.unpack(packed);
+            signals.put(msg.getCalculatorId(), msg);
+
         }
 
-        public ImmutableSet<SerializableMessage> messages() {
-            return observedMessages.build();
+        public ImmutableSet<CalculatorSignal> messagesBy(String id) {
+            return ImmutableSet.copyOf(signals.get(id));
         }
     }
 
