@@ -81,18 +81,20 @@ class AbstractEventSubscriberTest {
     @Test
     @DisplayName("receive domestic entity state updates")
     void receiveEntityStateUpdates() {
-        Group state = Group
+        Group.Builder builder = Group
                 .newBuilder()
                 .setId(GroupId.generate())
                 .setName("Admins")
                 .addParticipant(UserId.getDefaultInstance())
-                .addParticipant(UserId.getDefaultInstance())
-                .build();
+                .addParticipant(UserId.getDefaultInstance());
+        Group newState = builder.build();
+        Group oldState = builder.setName("Old " + builder.getName()).build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setEntity(messageIdWithType(Group.class))
                 .setWhen(Time.currentTime())
-                .setNewState(pack(state))
+                .setOldState(pack(oldState))
+                .setNewState(pack(newState))
                 .addSignalId(emptyEventId())
                 .build();
         SystemBoundedContexts.systemOf(groupsContext)
@@ -101,7 +103,7 @@ class AbstractEventSubscriberTest {
         Optional<Group> receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
         Truth8.assertThat(receivedState)
-              .hasValue(state);
+              .hasValue(newState);
         Truth8.assertThat(subscriber.external())
               .isEmpty();
     }
@@ -109,19 +111,21 @@ class AbstractEventSubscriberTest {
     @Test
     @DisplayName("receive external entity state updates")
     void receiveExternalEntityStateUpdates() {
-        Organization state = Organization
+        Organization.Builder builder = Organization
                 .newBuilder()
                 .setId(OrganizationId.generate())
                 .setName("Developers")
                 .setHead(UserId.getDefaultInstance())
                 .addMember(UserId.getDefaultInstance())
-                .addMember(UserId.getDefaultInstance())
-                .build();
+                .addMember(UserId.getDefaultInstance());
+        Organization newState = builder.build();
+        Organization oldState = builder.setName("Old " + builder.getName()).build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setEntity(messageIdWithType(Organization.class))
                 .setWhen(Time.currentTime())
-                .setNewState(pack(state))
+                .setOldState(pack(oldState))
+                .setNewState(pack(newState))
                 .addSignalId(emptyEventId())
                 .build();
         SystemBoundedContexts.systemOf(organizationsContext)
@@ -129,7 +133,7 @@ class AbstractEventSubscriberTest {
                              .post(GivenEvent.withMessage(event));
         Optional<Organization> receivedState = subscriber.external();
         Truth8.assertThat(receivedState)
-              .hasValue(state);
+              .hasValue(newState);
         Truth8.assertThat(subscriber.domestic())
               .isEmpty();
     }

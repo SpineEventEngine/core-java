@@ -50,13 +50,14 @@ public final class SubscriptionRecordTestEnv {
     private SubscriptionRecordTestEnv() {
     }
 
-    public static EventEnvelope stateChangedEnvelope(ProjectId id, Project newState) {
-        return stateChangedEnvelope(id, newState, TYPE);
+    public static EventEnvelope
+    stateChangedEnvelope(ProjectId id, Project oldState, Project newState) {
+        return stateChangedEnvelope(id, oldState, newState, TYPE);
     }
 
     public static EventEnvelope
-    stateChangedEnvelope(ProjectId id, Project newState, TypeUrl type) {
-        EntityStateChanged eventMessage = entityStateChanged(id, newState, type);
+    stateChangedEnvelope(ProjectId id, Project oldState, Project newState, TypeUrl type) {
+        EntityStateChanged eventMessage = entityStateChanged(id, oldState, newState, type);
         Any packedMessage = TypeConverter.toAny(eventMessage);
         Event event = Event
                 .newBuilder()
@@ -67,18 +68,20 @@ public final class SubscriptionRecordTestEnv {
     }
 
     private static EntityStateChanged
-    entityStateChanged(ProjectId id, Project newState, TypeUrl type) {
+    entityStateChanged(ProjectId id, Project oldState, Project newState, TypeUrl type) {
         Any packedId = Identifier.pack(id);
         MessageId entityId = MessageId
                 .newBuilder()
                 .setTypeUrl(type.value())
                 .setId(packedId)
                 .build();
-        Any packedMatchingState = TypeConverter.toAny(newState);
+        Any packedOldState = TypeConverter.toAny(oldState);
+        Any packedNewState = TypeConverter.toAny(newState);
         EntityStateChanged result = EntityStateChanged
                 .newBuilder()
                 .setEntity(entityId)
-                .setNewState(packedMatchingState)
+                .setOldState(packedOldState)
+                .setNewState(packedNewState)
                 .build();
         return result;
     }
@@ -131,5 +134,19 @@ public final class SubscriptionRecordTestEnv {
     private static Target target(ProjectId targetId) {
         Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
         return target;
+    }
+
+    public static Project projectWithName(String name) {
+        return Project
+                .newBuilder()
+                .setName(name)
+                .build();
+    }
+
+    public static ProjectId projectId(String id) {
+        return ProjectId
+                .newBuilder()
+                .setId(id)
+                .build();
     }
 }

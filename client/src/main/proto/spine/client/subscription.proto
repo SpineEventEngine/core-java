@@ -116,17 +116,25 @@ message EntityUpdates {
     repeated EntityStateUpdate update = 1 [(validate) = true];
 }
 
-// The pair of the entity ID and the entity state both packed as Any.
+// The update happened to the entity of interest.
 message EntityStateUpdate {
 
     // The entity ID packed as Any.
     google.protobuf.Any id = 1 [(required) = true];
 
-    // The entity state packed as Any.
-    //
-    // May be affected by a field mask specified in the subscription Topic.
-    //
-    google.protobuf.Any state = 2 [(required) = true];
+    // The update may be one of two things.
+    oneof kind {
+
+        // The state of entity has been updated and packed here as `Any`.
+        //
+        // If the field mask is set in `Topic`, this value is masked.
+        //
+        google.protobuf.Any state = 2;
+
+        // The state of the entity has been changed, so that previously it matched the subscription
+        // `Target` filters, and now it does not.
+        bool no_longer_matching = 3;
+    }
 }
 
 // The new events of the observed type that occurred in the system.

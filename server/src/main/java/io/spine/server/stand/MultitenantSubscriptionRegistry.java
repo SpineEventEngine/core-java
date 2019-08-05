@@ -26,6 +26,7 @@ import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
 import io.spine.client.Topic;
 import io.spine.core.TenantId;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -58,9 +59,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     @Override
-    public synchronized void activate(Subscription subscription,
-                                      Stand.NotifySubscriptionAction notifyAction) {
-        registrySlice().activate(subscription, notifyAction);
+    public synchronized void activate(Subscription subscription, SubscriptionCallback callback) {
+        registrySlice().activate(subscription, callback);
     }
 
     @Override
@@ -79,7 +79,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     @Override
-    public boolean containsId(SubscriptionId subscriptionId) {
+    public synchronized boolean containsId(SubscriptionId subscriptionId) {
         return registrySlice().containsId(subscriptionId);
     }
 
@@ -117,11 +117,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
         @Override
         public synchronized void activate(Subscription subscription,
-                                          Stand.NotifySubscriptionAction notifyAction) {
+                                          SubscriptionCallback callback) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
             SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-            subscriptionRecord.activate(notifyAction);
+            subscriptionRecord.activate(callback);
         }
 
         @Override

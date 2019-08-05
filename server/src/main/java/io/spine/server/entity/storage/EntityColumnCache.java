@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 
@@ -48,6 +49,7 @@ import static java.util.Collections.synchronizedMap;
  * @see Columns
  */
 @Internal
+@Experimental
 public final class EntityColumnCache {
 
     private final Class<? extends Entity<?, ?>> entityClass;

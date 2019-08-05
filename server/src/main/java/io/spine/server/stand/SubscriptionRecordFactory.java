@@ -55,9 +55,8 @@ final class SubscriptionRecordFactory {
      */
     private static SubscriptionRecord createEventRecord(Subscription subscription) {
         TypeUrl type = getSubscriptionType(subscription);
-        SubscriptionMatcher matcher = new EventSubscriptionMatcher(subscription);
-        SubscriptionCallback callback = new EventSubscriptionCallback(subscription);
-        return new SubscriptionRecord(subscription, type, matcher, callback);
+        EventUpdateHandler handler = new EventUpdateHandler(subscription);
+        return new SubscriptionRecord(subscription, type, handler);
     }
 
     /**
@@ -68,9 +67,8 @@ final class SubscriptionRecordFactory {
      */
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
         TypeUrl type = TypeUrl.of(EntityStateChanged.class);
-        SubscriptionMatcher matcher = new EntitySubscriptionMatcher(subscription);
-        SubscriptionCallback callback = new EntitySubscriptionCallback(subscription);
-        return new SubscriptionRecord(subscription, type, matcher, callback);
+        EntityUpdateHandler handler = new EntityUpdateHandler(subscription);
+        return new SubscriptionRecord(subscription, type, handler);
     }
 
     private static boolean isEventSubscription(Subscription subscription) {

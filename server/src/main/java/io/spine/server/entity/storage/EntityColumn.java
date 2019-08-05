@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -166,6 +167,7 @@ import static java.lang.String.format;
  * @see ColumnType
  */
 @Immutable
+@Experimental
 public class EntityColumn implements Serializable {
 
     private static final long serialVersionUID = 0L;

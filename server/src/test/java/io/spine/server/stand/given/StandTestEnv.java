@@ -32,6 +32,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -95,7 +96,10 @@ public class StandTestEnv {
         }
     }
 
-    public static class MemoizeNotifySubscriptionAction implements Stand.NotifySubscriptionAction {
+    /**
+     * A subscription callback, which remembers the updates fed to it.
+     */
+    public static class MemoizeSubscriptionCallback implements SubscriptionCallback {
 
         private final List<SubscriptionUpdate> acceptedUpdates = new ArrayList<>();
         private @Nullable Any newEntityState = null;

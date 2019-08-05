@@ -19,11 +19,15 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import io.spine.client.Subscription;
-import io.spine.server.stand.Stand.NotifySubscriptionAction;
+import io.spine.client.SubscriptionUpdate;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 /**
  * A {@link SubscriptionRegistry} entry that manages a single subscription.
@@ -32,29 +36,24 @@ final class SubscriptionRecord {
 
     private final Subscription subscription;
     private final TypeUrl type;
-    private final SubscriptionMatcher matcher;
-    private final SubscriptionCallback callback;
+    private final UpdateHandler handler;
 
-    SubscriptionRecord(Subscription subscription,
-                       TypeUrl type,
-                       SubscriptionMatcher matcher,
-                       SubscriptionCallback callback) {
+    SubscriptionRecord(Subscription subscription, TypeUrl type, UpdateHandler handler) {
         this.subscription = subscription;
         this.type = type;
-        this.matcher = matcher;
-        this.callback = callback;
+        this.handler = handler;
     }
 
     /**
-     * Attaches an action which will notify the read-side about a subscription update.
+     * Attaches a callback which notifies the read-side about a subscription update.
      *
-     * <p>Only activated subscription records are eligible to receiving any event/entity updates.
+     * <p>Only active subscription records are eligible to receiving any event/entity updates.
      *
-     * @param notifyAction
+     * @param callback
      *         the action to attach to the record
      */
-    void activate(NotifySubscriptionAction notifyAction) {
-        callback.setNotifyAction(notifyAction);
+    void activate(SubscriptionCallback callback) {
+        handler.setCallback(callback);
     }
 
     /**
@@ -65,29 +64,26 @@ final class SubscriptionRecord {
      *
      * @throws IllegalStateException
      *         if the subscription is not activated
-     * @see #activate(NotifySubscriptionAction)
+     * @see #activate(SubscriptionCallback)
      */
     void update(EventEnvelope event) {
-        callback.run(event);
+        handler.handle(event);
     }
 
     /**
      * Checks whether this record has an active callback attached.
      */
     boolean isActive() {
-        return callback.isActive();
+        return handler.isActive();
     }
 
     /**
-     * Checks whether this record matches the given parameters.
-     *
-     * @param event
-     *         the event to match
-     * @return {@code true} if this record matches all the given parameters,
-     *         {@code false} otherwise.
+     * A test-only method that exposes {@link UpdateHandler#detectUpdate(EventEnvelope)
+     * UpdateHandler.detectUpdate(EventEnvelope)} to tests.
      */
-    boolean matches(EventEnvelope event) {
-        return matcher.test(event);
+    @VisibleForTesting
+    Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
+        return handler.detectUpdate(event);
     }
 
     TypeUrl getType() {

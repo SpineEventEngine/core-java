@@ -73,12 +73,14 @@ class StateUpdateRoutingTest {
                 .route(LogState.class,
                        (log, context) -> ImmutableSet.of(log.getCountersOrThrow(counterKey)));
         int counter = 42;
-        LogState log = LogState
+        LogState.Builder builder = LogState
                 .newBuilder()
-                .putCounters(counterKey, counter)
-                .build();
+                .putCounters(counterKey, counter);
+        LogState log = builder.build();
+        LogState oldState = builder.putCounters(counterKey, 147).build();
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
+                .setOldState(AnyPacker.pack(oldState))
                 .setNewState(AnyPacker.pack(log))
                 .setWhen(currentTime())
                 .build();

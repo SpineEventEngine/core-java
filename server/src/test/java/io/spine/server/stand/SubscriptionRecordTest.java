@@ -20,14 +20,20 @@
 
 package io.spine.server.stand;
 
+import io.spine.base.EventMessage;
 import io.spine.client.CompositeFilter;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Filter;
 import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
+import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
+import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.stand.given.SubscriptionRecordTestEnv;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -37,8 +43,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.Targets.composeTarget;
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
@@ -47,7 +56,6 @@ import static io.spine.server.stand.given.SubscriptionRecordTestEnv.stateChanged
 import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -55,44 +63,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SubscriptionRecordTest {
 
     private static final String TARGET_ID = "target-ID";
+    private static final Project EMPTY_PRJ = Project.getDefaultInstance();
 
     @Test
-    @DisplayName("fail to match improper type")
+    @DisplayName("detect an update according to type")
     void notMatchImproperType() {
         SubscriptionRecord record = newRecordFor(subscription());
         ProjectId id = ProjectId.getDefaultInstance();
-        Project state = Project.getDefaultInstance();
 
-        EventEnvelope envelope = stateChangedEnvelope(id, state);
-        assertTrue(record.matches(envelope));
+        EventEnvelope matches = stateChangedEnvelope(id, EMPTY_PRJ, EMPTY_PRJ);
+        assertThat(record.detectUpdate(matches)).isPresent();
 
-        EventEnvelope envelope2 = stateChangedEnvelope(id, state, OTHER_TYPE);
-        assertFalse(record.matches(envelope2));
+        EventEnvelope notMatches = stateChangedEnvelope(id, EMPTY_PRJ, EMPTY_PRJ, OTHER_TYPE);
+        assertThat(record.detectUpdate(notMatches)).isEmpty();
     }
 
     @Nested
-    @DisplayName("fail to match improper ID")
+    @DisplayName("detect an update by comparing IDs")
     class MatchById {
 
         @Test
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
-            ProjectId targetId = ProjectId
-                    .newBuilder()
-                    .setId(TARGET_ID)
-                    .build();
+            ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
             Project state = Project.getDefaultInstance();
             SubscriptionRecord record = newRecordFor(subscription(targetId));
 
-            EventEnvelope envelope = stateChangedEnvelope(targetId, state);
-            assertTrue(record.matches(envelope));
+            EventEnvelope envelope = stateChangedEnvelope(targetId, state, state);
+            assertThat(record.detectUpdate(envelope)).isPresent();
 
-            ProjectId otherId = ProjectId
-                    .newBuilder()
-                    .setId("some-other-ID")
-                    .build();
-            EventEnvelope envelope2 = stateChangedEnvelope(otherId, state);
-            assertFalse(record.matches(envelope2));
+            ProjectId otherId = SubscriptionRecordTestEnv.projectId("some-other-ID");
+            EventEnvelope envelope2 = stateChangedEnvelope(otherId, state, state);
+            assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
 
         @Test
@@ -107,51 +109,38 @@ class SubscriptionRecordTest {
             SubscriptionRecord record = newRecordFor(subscription);
 
             EventEnvelope envelope = projectCreatedEnvelope(targetId);
-            assertTrue(record.matches(envelope));
+            assertThat(record.detectUpdate(envelope)).isPresent();
 
             EventId otherId = EventId
                     .newBuilder()
                     .setValue("other-event-ID")
                     .build();
             EventEnvelope nonMatching = projectCreatedEnvelope(otherId);
-            assertFalse(record.matches(nonMatching));
+            assertThat(record.detectUpdate(nonMatching)).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("fail to match improper state")
+    @DisplayName("detect an update by analyzing state")
     class MatchByState {
 
         @Test
         @DisplayName("in case of entity subscription")
         void entitySubscription() {
-            ProjectId targetId = ProjectId
-                    .newBuilder()
-                    .setId(TARGET_ID)
-                    .build();
             String targetName = "super-project";
+            ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+            SubscriptionRecord record = projectRecord(targetId,
+                                                      Filters.eq("name", targetName));
+            Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
+            EventEnvelope envelope = stateChangedEnvelope(targetId, EMPTY_PRJ, matching);
+            Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
+            assertThat(maybeUpdate).isPresent();
+            EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
+            assertEquals(matching, AnyPacker.unpack(entityUpdate.getState()));
 
-            Filter filter = Filters.eq("name", targetName);
-            CompositeFilter compositeFilter = Filters.all(filter);
-            Set<CompositeFilter> filters = singleton(compositeFilter);
-            Target target = composeTarget(Project.class, singleton(targetId), filters);
-
-            Subscription subscription = subscription(target);
-            SubscriptionRecord record = newRecordFor(subscription);
-
-            Project matching = Project
-                    .newBuilder()
-                    .setName(targetName)
-                    .build();
-            EventEnvelope envelope = stateChangedEnvelope(targetId, matching);
-            assertTrue(record.matches(envelope));
-
-            Project nonMatching = Project
-                    .newBuilder()
-                    .setName("some-other-name")
-                    .build();
-            EventEnvelope envelope2 = stateChangedEnvelope(targetId, nonMatching);
-            assertFalse(record.matches(envelope2));
+            Project nonMatching = SubscriptionRecordTestEnv.projectWithName("some-other-name");
+            EventEnvelope envelope2 = stateChangedEnvelope(targetId, EMPTY_PRJ, nonMatching);
+            assertThat(record.detectUpdate(envelope2)).isEmpty();
         }
 
         @Test
@@ -180,7 +169,13 @@ class SubscriptionRecordTest {
                     .setTeamId(matchingTeamId)
                     .build();
             EventEnvelope envelope = projectCreatedEnvelope(targetId, matching);
-            assertTrue(record.matches(envelope));
+            Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
+            assertThat(maybeUpdate).isPresent();
+
+            Event event = firstEventUpdate(maybeUpdate);
+            EventMessage message = EventEnvelope.of(event)
+                                                .message();
+            assertEquals(matching, message);
 
             EvTeamId otherTeamId = EvTeamId
                     .newBuilder()
@@ -191,8 +186,28 @@ class SubscriptionRecordTest {
                     .setTeamId(otherTeamId)
                     .build();
             EventEnvelope nonMatching = projectCreatedEnvelope(targetId, other);
-            assertFalse(record.matches(nonMatching));
+            assertThat(record.detectUpdate(nonMatching)).isEmpty();
         }
+    }
+
+    @Test
+    @DisplayName("detect that the entity state stopped matching the subscription criteria")
+    void tellNoLongerMatching() {
+        ProjectId targetId = SubscriptionRecordTestEnv.projectId(TARGET_ID);
+        String targetName = "previously-matching-project";
+
+        SubscriptionRecord record = projectRecord(targetId,
+                                                  Filters.eq("name", targetName));
+
+        Project matching = SubscriptionRecordTestEnv.projectWithName(targetName);
+        Project nonMatching = SubscriptionRecordTestEnv.projectWithName("not-matching-anymore");
+
+        EventEnvelope envelope = stateChangedEnvelope(targetId, matching, nonMatching);
+        Optional<SubscriptionUpdate> maybeUpdate = record.detectUpdate(envelope);
+        assertThat(maybeUpdate).isPresent();
+
+        EntityStateUpdate entityUpdate = firstEntityUpdate(maybeUpdate);
+        assertTrue(entityUpdate.getNoLongerMatching());
     }
 
     @Test
@@ -210,5 +225,44 @@ class SubscriptionRecordTest {
         SubscriptionRecord same = newRecordFor(oneSubscription);
         assertNotEquals(one, similar);
         assertEquals(one, same);
+    }
+
+    /**
+     * Creates a {@code SubscriptionRecord} with the target referring to the passed {@code TargetId}
+     * and with the passed {@code filter} applied.
+     *
+     * @implNote This method accesses the package-private API, hence it isn't moved to the
+     *         corresponding test environment.
+     */
+    private static SubscriptionRecord projectRecord(ProjectId targetId, Filter filter) {
+        CompositeFilter compositeFilter = Filters.all(filter);
+        Set<CompositeFilter> filters = singleton(compositeFilter);
+        Target target = composeTarget(Project.class, singleton(targetId), filters);
+
+        Subscription subscription = subscription(target);
+        return newRecordFor(subscription);
+    }
+
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // OK for tests.
+    private static EntityStateUpdate firstEntityUpdate(Optional<SubscriptionUpdate> maybeUpdate) {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat(..)`.
+                SubscriptionUpdate update = maybeUpdate.get();
+        List<EntityStateUpdate> updateList = update.getEntityUpdates()
+                                                   .getUpdateList();
+        assertEquals(1, updateList.size());
+
+        return updateList.get(0);
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // OK for tests.
+    private static Event firstEventUpdate(Optional<SubscriptionUpdate> maybeUpdate) {
+        @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat(..)`.
+                SubscriptionUpdate update = maybeUpdate.get();
+        List<Event> updateList = update.getEventUpdates()
+                                       .getEventList();
+        assertEquals(1, updateList.size());
+
+        return updateList.get(0);
     }
 }

@@ -58,9 +58,10 @@ import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
+import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.MemoizingReadSide;
 import io.spine.system.server.NoOpSystemReadSide;
@@ -366,9 +367,9 @@ class StandTest extends TenantAwareTest {
             Topic allCustomers = requestFactory.topic()
                                                .allOf(Customer.class);
 
-            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, allCustomers, action);
-            assertNull(action.newEntityState());
+            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            subscribeAndActivate(stand, allCustomers, callback);
+            assertNull(callback.newEntityState());
 
             // Post a new entity state.
             Customer customer = fillSampleCustomers(1)
@@ -384,9 +385,9 @@ class StandTest extends TenantAwareTest {
 
             stand.post(entity, repository.lifecycleOf(customerId));
 
-            // Check notify action is called with the correct value.
+            // Check the callback is called with the correct value.
             Any packedState = AnyPacker.pack(customer);
-            assertEquals(packedState, action.newEntityState());
+            assertEquals(packedState, callback.newEntityState());
         }
 
         @Test
@@ -398,9 +399,9 @@ class StandTest extends TenantAwareTest {
             Topic allProjects = requestFactory.topic()
                                               .allOf(Project.class);
 
-            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, allProjects, action);
-            assertNull(action.newEntityState());
+            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            subscribeAndActivate(stand, allProjects, callback);
+            assertNull(callback.newEntityState());
 
             // Post a new entity state.
             Project project = fillSampleProjects(1)
@@ -415,9 +416,9 @@ class StandTest extends TenantAwareTest {
                     .build();
             stand.post(entity, repository.lifecycleOf(projectId));
 
-            // Check notify action is called with the correct value.
+            // Check the callback is called with the correct value.
             Any packedState = AnyPacker.pack(project);
-            assertEquals(packedState, action.newEntityState());
+            assertEquals(packedState, callback.newEntityState());
         }
 
         @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.
@@ -429,8 +430,8 @@ class StandTest extends TenantAwareTest {
             Stand stand = createStand(repository);
             Topic topic = requestFactory.topic()
                                         .allOf(CustomerCreated.class);
-            MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
-            subscribeAndActivate(stand, topic, action);
+            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            subscribeAndActivate(stand, topic, callback);
 
             // Send a command creating a new Customer and triggering a CustomerCreated event.
             Customer customer = fillSampleCustomers(1)
@@ -447,8 +448,8 @@ class StandTest extends TenantAwareTest {
             CommandEnvelope cmd = CommandEnvelope.of(command);
             repository.dispatch(cmd);
 
-            // Check the notify action is called with the correct event.
-            Event event = action.newEvent();
+            // Check the callback is called with the correct event.
+            Event event = callback.newEvent();
             assertNotNull(event);
 
             EventContext context = event.context();
@@ -481,7 +482,7 @@ class StandTest extends TenantAwareTest {
                                             .byId(ids(sampleCustomers))
                                             .build();
         Collection<Customer> callbackStates = newHashSet();
-        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction() {
+        MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback() {
             @Override
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
@@ -489,7 +490,7 @@ class StandTest extends TenantAwareTest {
                 callbackStates.add(customerInCallback);
             }
         };
-        subscribeAndActivate(stand, someCustomers, action);
+        subscribeAndActivate(stand, someCustomers, callback);
 
         for (Customer customer : sampleCustomers) {
             CustomerId customerId = customer.getId();
@@ -513,9 +514,9 @@ class StandTest extends TenantAwareTest {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(Customer.class);
 
-        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+        MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
         Subscription subscription =
-                subscribeAndActivate(stand, allCustomers, action);
+                subscribeAndActivate(stand, allCustomers, callback);
 
         stand.cancel(subscription, noOpObserver());
 
@@ -531,7 +532,7 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        assertNull(action.newEntityState());
+        assertNull(callback.newEntityState());
     }
 
     @Test
@@ -554,12 +555,12 @@ class StandTest extends TenantAwareTest {
         Stand stand = createStand(repository);
         Target allCustomers = Targets.allOf(Customer.class);
 
-        Set<MemoizeNotifySubscriptionAction> callbacks = newHashSet();
+        Set<MemoizeSubscriptionCallback> callbacks = newHashSet();
         int totalCallbacks = 100;
 
         for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            MemoizeNotifySubscriptionAction action = subscribeWithCallback(stand, allCustomers);
-            callbacks.add(action);
+            MemoizeSubscriptionCallback callback = subscribeWithCallback(stand, allCustomers);
+            callbacks.add(callback);
         }
 
         Customer customer = fillSampleCustomers(1)
@@ -575,9 +576,9 @@ class StandTest extends TenantAwareTest {
         stand.post(entity, repository.lifecycleOf(customerId));
 
         Any packedState = AnyPacker.pack(customer);
-        for (MemoizeNotifySubscriptionAction action : callbacks) {
-            assertEquals(packedState, action.newEntityState());
-            assertEquals(1, action.countAcceptedUpdates());
+        for (MemoizeSubscriptionCallback callback : callbacks) {
+            assertEquals(packedState, callback.newEntityState());
+            assertEquals(1, callback.countAcceptedUpdates());
         }
     }
 
@@ -588,7 +589,7 @@ class StandTest extends TenantAwareTest {
         StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
         Stand stand = createStand(repository, projectionRepository);
         Target allProjects = Targets.allOf(Project.class);
-        MemoizeNotifySubscriptionAction action = subscribeWithCallback(stand, allProjects);
+        MemoizeSubscriptionCallback callback = subscribeWithCallback(stand, allProjects);
         Customer customer = fillSampleCustomers(1)
                 .iterator()
                 .next();
@@ -601,18 +602,17 @@ class StandTest extends TenantAwareTest {
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        assertEquals(0, action.countAcceptedUpdates());
+        assertEquals(0, callback.countAcceptedUpdates());
     }
 
-    private MemoizeNotifySubscriptionAction
-    subscribeWithCallback(Stand stand, Target subscriptionTarget) {
-        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+    private MemoizeSubscriptionCallback  subscribeWithCallback(Stand stand, Target subscriptionTarget) {
+        MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
         Topic topic = requestFactory.topic()
                                     .forTarget(subscriptionTarget);
-        subscribeAndActivate(stand, topic, action);
+        subscribeAndActivate(stand, topic, callback);
 
-        assertNull(action.newEntityState());
-        return action;
+        assertNull(callback.newEntityState());
+        return callback;
     }
 
     private static CustomerId customerIdFor(int numericId) {
@@ -916,11 +916,11 @@ class StandTest extends TenantAwareTest {
 
     @CanIgnoreReturnValue
     protected static Subscription
-    subscribeAndActivate(Stand stand, Topic topic, Stand.NotifySubscriptionAction notifyAction) {
+    subscribeAndActivate(Stand stand, Topic topic, SubscriptionCallback callback) {
         MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         Subscription subscription = observer.firstResponse();
-        stand.activate(subscription, notifyAction, noOpObserver());
+        stand.activate(subscription, callback, noOpObserver());
 
         assertNotNull(subscription);
         return subscription;
@@ -1065,7 +1065,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
     }
 
-    private static Stand.NotifySubscriptionAction emptyUpdateCallback() {
+    private static SubscriptionCallback emptyUpdateCallback() {
         return newEntityState -> {
             //do nothing
         };

@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.annotation.Experimental;
 import io.spine.annotation.SPI;
 
 /**
@@ -66,6 +67,7 @@ import io.spine.annotation.SPI;
  * @param <C> the type of the column identifier in the {@code R}
  */
 @SPI
+@Experimental
 public interface ColumnType<J, S, R, C> {
 
     /**

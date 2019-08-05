@@ -20,6 +20,7 @@
 
 package io.spine.system.server.given.mirror;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
@@ -62,10 +63,12 @@ public final class ProjectionTestEnv {
     }
 
     public static EntityStateChanged entityStateChanged() {
+        Any state = pack(Empty.getDefaultInstance());
         EntityStateChanged event = EntityStateChanged
                 .newBuilder()
                 .setEntity(messageId(RAW_ID))
-                .setNewState(pack(Empty.getDefaultInstance()))
+                .setOldState(state)
+                .setNewState(state)
                 .setWhen(currentTime())
                 .addSignalId(cause())
                 .setNewVersion(VERSION)

@@ -31,6 +31,7 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
 import io.spine.server.stand.Stand;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
@@ -96,13 +97,13 @@ public class SubscriptionService
                             "Target subscription `%s` could not be found for activation.",
                             toShortString(subscription))
             );
-            Stand.NotifySubscriptionAction notifyAction = update -> {
+            SubscriptionCallback callback = update -> {
                 checkNotNull(update);
                 observer.onNext(update);
             };
             Stand targetStand = context.stand();
 
-            targetStand.activate(subscription, notifyAction, forwardErrorsOnly(observer));
+            targetStand.activate(subscription, callback, forwardErrorsOnly(observer));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error activating the subscription.");

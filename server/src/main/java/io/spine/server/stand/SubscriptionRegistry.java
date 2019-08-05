@@ -22,6 +22,7 @@ package io.spine.server.stand;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Topic;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 
 import java.util.Set;
@@ -42,10 +43,10 @@ interface SubscriptionRegistry {
      *
      * @param subscription
      *         the subscription to activate
-     * @param notifyAction
+     * @param callback
      *         the action which notifies the subscription listeners on the read-side
      */
-    void activate(Subscription subscription, Stand.NotifySubscriptionAction notifyAction);
+    void activate(Subscription subscription, SubscriptionCallback callback);
 
     /**
      * Creates a subscription for the passed {@link Topic} and adds it to the registry.

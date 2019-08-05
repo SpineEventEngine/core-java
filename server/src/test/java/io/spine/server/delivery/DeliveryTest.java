@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.util.Durations;
-import io.spine.base.SerializableMessage;
 import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
@@ -46,7 +45,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +63,7 @@ import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -295,17 +294,18 @@ class DeliveryTest {
             Map<String, List<CalculatorSignal>> signalsPerTarget =
                     signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
-            ImmutableSet<SerializableMessage> receivedMessages = memoizer.messages();
-
             for (String calcId : signalsPerTarget.keySet()) {
 
-                List<CalculatorSignal> targetSignals = signalsPerTarget.get(calcId);
-                assertTrue(receivedMessages.containsAll(targetSignals));
+                ImmutableSet<CalculatorSignal> receivedMessages = memoizer.messagesBy(calcId);
+                Set<CalculatorSignal> targetSignals =
+                        ImmutableSet.copyOf(signalsPerTarget.get(calcId));
+                assertEquals(targetSignals, receivedMessages);
 
                 Integer sumForTarget = targetSignals.stream()
                                                     .map(CalculatorSignal::getValue)
                                                     .reduce(0, Integer::sum);
                 Calc expectedState = Calc.newBuilder()
+                                         .setId(calcId)
                                          .setSum(sumForTarget)
                                          .build();
                 context.assertEntity(CalcAggregate.class, calcId)
@@ -319,7 +319,7 @@ class DeliveryTest {
 
         private static List<NumberReacted> eventsToReact(int streamSize,
                                                          Iterator<String> targetsIterator) {
-            IntStream ints = new SecureRandom().ints(streamSize, 3, 500);
+            IntStream ints = IntStream.range(0, streamSize);
             return ints.mapToObj((value) ->
                                          NumberReacted.newBuilder()
                                                       .setCalculatorId(targetsIterator.next())
@@ -330,7 +330,7 @@ class DeliveryTest {
 
         private static List<NumberImported> eventsToImport(int streamSize,
                                                            Iterator<String> targetsIterator) {
-            IntStream ints = new SecureRandom().ints(streamSize, 18, 100);
+            IntStream ints = IntStream.range(streamSize, streamSize * 2);
             return ints.mapToObj((value) ->
                                          NumberImported.newBuilder()
                                                        .setCalculatorId(targetsIterator.next())
@@ -340,7 +340,7 @@ class DeliveryTest {
         }
 
         private static List<AddNumber> commands(int streamSize, Iterator<String> targetsIterator) {
-            IntStream ints = new SecureRandom().ints(streamSize, 42, 200);
+            IntStream ints = IntStream.range(streamSize * 2, streamSize * 3);
             return ints.mapToObj((value) ->
                                          AddNumber.newBuilder()
                                                   .setCalculatorId(targetsIterator.next())

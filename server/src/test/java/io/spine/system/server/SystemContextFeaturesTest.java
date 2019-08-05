@@ -141,6 +141,7 @@ class SystemContextFeaturesTest {
                 .setEntity(MessageId.newBuilder()
                                     .setId(Identifier.pack(42))
                                     .setTypeUrl(TypeUrl.of(EmptyEntityState.class).value()))
+                .setOldState(pack(StringValue.of("0")))
                 .setNewState(pack(StringValue.of("42")))
                 .addSignalId(MessageId.newBuilder()
                                       .setId(Identifier.pack(CommandId.generate()))
