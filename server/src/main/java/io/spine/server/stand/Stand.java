@@ -139,16 +139,14 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     /**
      * Test-only method that posts the state of an entity to this stand.
      *
-     * @implNote
-     * The only purpose of this method is to deliver the new entity state to the subscribers
-     * through the artificially created {@link EntityStateChanged} event. It
-     * doesn't do any proper lifecycle management ignoring "archived"/"deleted" actions, applied
-     * messages IDs, etc.
-     *
      * @param entity
      *         the entity whose state to post
      * @param lifecycle
      *         the lifecycle of the entity
+     * @implNote The only purpose of this method is to deliver the new entity state to the
+     *         subscribers through the artificially created {@link EntityStateChanged} event.
+     *         It doesn't do any proper lifecycle management ignoring "archived"/"deleted" actions,
+     *         IDs of applied messages, etc.
      */
     @VisibleForTesting
     void post(Entity entity, EntityLifecycle lifecycle) {
@@ -262,27 +260,28 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * subscribe() method call}.
      *
      * <p>After the activation, the clients will start receiving the updates via
-     * {@code NotifySubscriptionAction} upon entity state changes or new events arrival.
+     * {@code SubscriptionCallback} upon entity state changes or new events arrival.
      *
      * @param subscription
      *         the subscription to activate
-     * @param notifyAction
+     * @param callback
      *         the action which notifies the subscribers about an update
+     * @param responseObserver
+     *         an observer to notify of a successful acknowledgement of the subscription activation.
      * @see #subscribe(Topic, StreamObserver)
      */
-    public void activate(Subscription subscription,
-                         NotifySubscriptionAction notifyAction,
+    public void activate(Subscription subscription, SubscriptionCallback callback,
                          StreamObserver<Response> responseObserver)
             throws InvalidRequestException {
         checkNotNull(subscription);
-        checkNotNull(notifyAction);
+        checkNotNull(callback);
 
         subscriptionValidator.validate(subscription);
 
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
-                subscriptionRegistry.activate(subscription, notifyAction);
+                subscriptionRegistry.activate(subscription, callback);
                 ack(responseObserver);
             }
         };
@@ -294,13 +293,16 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
      * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
-     * {@link #activate(Subscription, NotifySubscriptionAction, StreamObserver) activate()} call.
+     * {@link #activate(Subscription, SubscriptionCallback, StreamObserver) activate()} call.
      *
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
      *
      * @param subscription
      *         the subscription to cancel
+     * @param responseObserver
+     *         an observer to notify of a successful acknowledgement of the subscription
+     *         cancellation.
      */
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver)
             throws InvalidRequestException {
@@ -319,7 +321,7 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     /**
      * Reads all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
-     * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
+     * <p>In order to expose the type, use {@link Stand#registerTypeSupplier(Repository)}.
      *
      * <p>The result includes all values from {@link #exposedAggregateTypes()} as well.
      *
@@ -414,10 +416,11 @@ public class Stand extends AbstractEventSubscriber implements AutoCloseable {
     /**
      * Delivers the given subscription update to the read-side.
      *
-     * @see #activate(Subscription, NotifySubscriptionAction, StreamObserver)
+     * @see #activate(Subscription, SubscriptionCallback, StreamObserver)
      * @see #cancel(Subscription, StreamObserver)
      */
-    public interface NotifySubscriptionAction extends Consumer<SubscriptionUpdate> {
+    public interface SubscriptionCallback extends Consumer<SubscriptionUpdate> {
+
     }
 
     /**

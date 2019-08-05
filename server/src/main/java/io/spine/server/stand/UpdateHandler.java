@@ -32,7 +32,7 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.protobuf.TypeConverter;
-import io.spine.server.stand.Stand.NotifySubscriptionAction;
+import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -47,8 +47,11 @@ import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Tells which {@linkplain SubscriptionUpdate subscription updates} an {@code Event}s occurred
- * in the system should trigger according to the criteria of the handled {@code Subscription}.
+ * Handles the domain and system events which correspond to the specified {@code Subscription}.
+ *
+ * <p>Compares the event data to the filtering criteria of the {@code Subscription} and
+ * notifies the {@linkplain #setCallback(SubscriptionCallback) callback} with
+ * the detected {@linkplain SubscriptionUpdate subscription updates}.
  */
 abstract class UpdateHandler {
 
@@ -57,7 +60,7 @@ abstract class UpdateHandler {
     /**
      * An action which accepts the update and notifies the read-side accordingly.
      */
-    private @MonotonicNonNull NotifySubscriptionAction notifyAction = null;
+    private @MonotonicNonNull SubscriptionCallback callback = null;
 
     /**
      * Creates an update handler acting according to the criteria of the passed
@@ -81,7 +84,7 @@ abstract class UpdateHandler {
                    "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
                    TypeUrl.of(event.message()), subscription.getId()
                                                             .getValue());
-        detectUpdate(event).ifPresent(u -> notifyAction.accept(u));
+        detectUpdate(event).ifPresent(u -> callback.accept(u));
     }
 
     /**
@@ -147,24 +150,24 @@ abstract class UpdateHandler {
     }
 
     /**
-     * Checks if the subscription has "include_all" clause.
+     * Checks if the subscription has {@code include_all} clause.
      */
     boolean includeAll() {
         return target().getIncludeAll();
     }
 
     /**
-     * "Activates" this callback with a given action.
+     * Activates this handler with a given callback.
      */
-    void setNotifyAction(NotifySubscriptionAction action) {
-        this.notifyAction = action;
+    void setCallback(SubscriptionCallback callback) {
+        this.callback = callback;
     }
 
     /**
-     * Checks if this callback has a notify action set.
+     * Checks if this handler has a callback set.
      */
     boolean isActive() {
-        return notifyAction != null;
+        return callback != null;
     }
 
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.

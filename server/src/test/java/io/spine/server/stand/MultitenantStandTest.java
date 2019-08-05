@@ -28,7 +28,8 @@ import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
-import io.spine.server.stand.given.StandTestEnv.MemoizeNotifySubscriptionAction;
+import io.spine.server.stand.given.StandTestEnv;
+import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.testing.core.given.GivenTenantId;
@@ -69,13 +70,13 @@ class MultitenantStandTest extends StandTest {
 
         // --- Default Tenant
         ActorRequestFactory requestFactory = getRequestFactory();
-        MemoizeNotifySubscriptionAction defaultTenantCallback =
+        StandTestEnv.MemoizeSubscriptionCallback defaultTenantCallback =
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
         TenantId anotherTenant = GivenTenantId.generate();
         ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
-        MemoizeNotifySubscriptionAction anotherCallback =
+        MemoizeSubscriptionCallback anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
@@ -98,13 +99,13 @@ class MultitenantStandTest extends StandTest {
         assertNull(anotherCallback.newEntityState());
     }
 
-    MemoizeNotifySubscriptionAction
+    MemoizeSubscriptionCallback
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
                      Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
-        MemoizeNotifySubscriptionAction action = new MemoizeNotifySubscriptionAction();
+        MemoizeSubscriptionCallback action = new MemoizeSubscriptionCallback();
         subscribeAndActivate(stand, allCustomers, action);
 
         assertNull(action.newEntityState());
