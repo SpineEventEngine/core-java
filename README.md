@@ -11,21 +11,26 @@ Requires Java 8 or higher.
 
 Gradle is used as a build and dependency management system. 
 
-## Pre-release
-The project is under active ongoing development. At this stage, we do not recommend using the framework for production purposes.
-You are welcome to experiment and [provide your feedback][email-developers].
+## Releases
+The project is under active ongoing development. You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.0.0-pre7][latest-release].
-
-Please track our release announcement to be informed about the production version (1.0.0) release.  
+The latest stable version is [1.0.0][latest-release].  
 
 ## Quickstart and Examples
 
-There is a [template][server-quickstart] for a server application built in Spine.
+There is a [template][server-quickstart] for a server application built in Spine. 
+
+To add Spine into an existing project consider using [Spine Bootstrap Gradle plugin](https://github.com/SpineEventEngine/bootstrap/).
 
 The introductory application examples are available from the [Spine Examples][spine-examples] GitHub organization.
 
-For more advanced example including a Spine server, a console client, and a web application, see [ToDo List app][todo-list].   
+For more advanced example including a Spine server, a console client, and a web application, see [ToDo List app][todo-list].
+
+## Building from Sources
+
+At the moment Spine modules require JDK 8 at build-time. 
+
+The support of recent JDK versions is planned for future releases.
 
 ## Links
 * [Getting Started with Spine in Java](https://spine.io/docs/quickstart/java.html)
@@ -46,7 +51,7 @@ or provide custom storage implementations.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:spine-developers@teamdev.com
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/1.0.0-pre7
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/1.0.0
 [spine-site]: https://spine.io/
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
 [java-code-style]: https://github.com/SpineEventEngine/core-java/wiki/Java-Code-Style 
