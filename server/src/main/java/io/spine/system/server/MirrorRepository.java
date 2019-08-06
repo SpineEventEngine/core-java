@@ -26,6 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
@@ -70,7 +71,9 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  *
  * <p>In other cases, an entity won't have a {@link Mirror}.
  */
-final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+@Internal
+public final class MirrorRepository
+        extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
     private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
@@ -92,19 +95,19 @@ final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjec
                       (message, context) -> targetsFrom(message.getEntity()));
     }
 
+    public static boolean shouldMirror(TypeUrl type) {
+        Kind kind = entityKind(type);
+        EntityVisibility visibility = entityVisibility(type);
+        boolean aggregate = kind == AGGREGATE && visibility.isNotNone();
+        return aggregate;
+    }
+
     private static Set<MirrorId> targetsFrom(MessageId entityId) {
         TypeUrl type = TypeUrl.parse(entityId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
                ? ImmutableSet.of(idFrom(entityId))
                : ImmutableSet.of();
-    }
-
-    private static boolean shouldMirror(TypeUrl type) {
-        Kind kind = entityKind(type);
-        EntityVisibility visibility = entityVisibility(type);
-        boolean aggregate = kind == AGGREGATE && visibility.isNotNone();
-        return aggregate;
     }
 
     private static EntityOption.Kind entityKind(TypeUrl type) {

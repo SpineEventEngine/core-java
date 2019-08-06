@@ -50,6 +50,8 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
+import io.spine.system.server.Mirror;
+import io.spine.system.server.MirrorRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
@@ -274,6 +276,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateStorage<I> createStorage() {
         StorageFactory sf = defaultStorageFactory();
         AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
+        Optional<MirrorRepository> mirrorRepository = context().systemClient()
+                                                               .systemRepositoryFor(Mirror.class)
+                                                               .map(MirrorRepository.class::cast);
+        mirrorRepository.ifPresent(repo -> result.configureMirror(repo, aggregateClass()));
         return result;
     }
 

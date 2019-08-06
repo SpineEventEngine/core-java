@@ -20,7 +20,11 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.server.entity.Repository;
+
+import java.util.Optional;
 
 /**
  * The entry point of a system context API exposed to its domain counterpart.
@@ -37,6 +41,8 @@ public interface SystemClient {
      * Obtains the system context read side.
      */
     SystemReadSide readSide();
+
+    Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass);
 
     /**
      * Closes the underlying system context.

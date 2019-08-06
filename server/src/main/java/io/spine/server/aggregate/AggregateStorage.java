@@ -24,10 +24,20 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
+import io.spine.client.CompositeFilter;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
+import io.spine.system.server.MirrorId;
+import io.spine.system.server.MirrorProjection;
+import io.spine.system.server.MirrorRepository;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -35,13 +45,18 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.checkValid;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.eq;
+import static io.spine.system.server.MirrorProjection.TYPE_COLUMN_NAME;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * An event-sourced storage of aggregate part events and snapshots.
  *
- * @param <I> the type of IDs of aggregates managed by this storage
+ * @param <I>
+ *         the type of IDs of aggregates managed by this storage
  */
 @SPI
 public abstract class AggregateStorage<I>
@@ -51,8 +66,21 @@ public abstract class AggregateStorage<I>
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
             "The specified snapshot index is incorrect";
 
+    /**
+     * ...
+     *
+     * <p>Can be configured to optimize certain kinds of aggregate reads.
+     */
+    private @Nullable Mirror<I> aggregateMirror;
+
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
+    }
+
+    void configureMirror(MirrorRepository mirrorRepository,
+                         AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
+        Mirror.configure(mirrorRepository, aggregateClass)
+              .ifPresent(m -> aggregateMirror = m);
     }
 
     /**
@@ -64,6 +92,16 @@ public abstract class AggregateStorage<I>
     protected void checkNotClosed() throws IllegalStateException {
         super.checkNotClosed();
     }
+
+    @Override
+    public Iterator<I> index() {
+        if (aggregateMirror != null) {
+            return aggregateMirror.index();
+        }
+        return distinctAggregateIds();
+    }
+
+    protected abstract Iterator<I> distinctAggregateIds();
 
     /**
      * Forms and returns an {@link AggregateHistory} based on the
@@ -247,4 +285,42 @@ public abstract class AggregateStorage<I>
      * entity.
      */
     protected abstract void truncate(int snapshotIndex, Timestamp date);
+
+    private static class Mirror<I> {
+
+        private final MirrorRepository mirrorRepository;
+        private final TypeUrl aggregateType;
+
+        private Mirror(MirrorRepository repository, TypeUrl type) {
+            this.mirrorRepository = repository;
+            this.aggregateType = type;
+        }
+
+        private static <I> Optional<Mirror<I>>
+        configure(MirrorRepository repository,
+                  AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
+
+            TypeUrl typeUrl = aggregateClass.stateType();
+            return MirrorRepository.shouldMirror(typeUrl)
+                   ? Optional.of(new Mirror<>(repository, typeUrl))
+                   : Optional.empty();
+        }
+
+        @SuppressWarnings("unchecked") // Ensured logically.
+        private Iterator<I> index() {
+            CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, aggregateType.value()));
+            TargetFilters filters = TargetFilters
+                    .newBuilder()
+                    .addFilter(allOfType)
+                    .vBuild();
+            Iterator<MirrorProjection> found =
+                    mirrorRepository.find(filters, ResponseFormat.getDefaultInstance());
+            Iterator<I> result = stream(found)
+                    .map(MirrorProjection::id)
+                    .map(MirrorId::getValue)
+                    .map(id -> (I) AnyPacker.unpack(id))
+                    .iterator();
+            return result;
+        }
+    }
 }
