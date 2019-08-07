@@ -33,6 +33,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.system.server.MirrorId;
 import io.spine.system.server.MirrorProjection;
 import io.spine.system.server.MirrorRepository;
@@ -42,6 +43,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -79,7 +81,7 @@ public abstract class AggregateStorage<I>
 
     void configureMirror(MirrorRepository mirrorRepository,
                          AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
-        Mirror.configure(mirrorRepository, aggregateClass)
+        Mirror.configure(mirrorRepository, aggregateClass, isMultitenant())
               .ifPresent(m -> aggregateMirror = m);
     }
 
@@ -290,36 +292,48 @@ public abstract class AggregateStorage<I>
 
         private final MirrorRepository mirrorRepository;
         private final TypeUrl aggregateType;
+        private final boolean multitenant;
 
-        private Mirror(MirrorRepository repository, TypeUrl type) {
+        private Mirror(MirrorRepository repository, TypeUrl type, boolean multitenant) {
             this.mirrorRepository = repository;
             this.aggregateType = type;
+            this.multitenant = multitenant;
         }
 
         private static <I> Optional<Mirror<I>>
         configure(MirrorRepository repository,
-                  AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
+                  AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass,
+                  boolean multitenant) {
 
             TypeUrl typeUrl = aggregateClass.stateType();
             return MirrorRepository.shouldMirror(typeUrl)
-                   ? Optional.of(new Mirror<>(repository, typeUrl))
+                   ? Optional.of(new Mirror<>(repository, typeUrl, multitenant))
                    : Optional.empty();
         }
 
         @SuppressWarnings("unchecked") // Ensured logically.
         private Iterator<I> index() {
-            CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, aggregateType.value()));
-            TargetFilters filters = TargetFilters
-                    .newBuilder()
-                    .addFilter(allOfType)
-                    .vBuild();
-            Iterator<MirrorProjection> found =
-                    mirrorRepository.find(filters, ResponseFormat.getDefaultInstance());
-            Iterator<I> result = stream(found)
-                    .map(MirrorProjection::id)
-                    .map(MirrorId::getValue)
-                    .map(id -> (I) AnyPacker.unpack(id))
-                    .iterator();
+            Iterator<I> result = evaluateForCurrentTenant(() -> {
+                CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, aggregateType.value()));
+                TargetFilters filters = TargetFilters
+                        .newBuilder()
+                        .addFilter(allOfType)
+                        .vBuild();
+                Iterator<MirrorProjection> found =
+                        mirrorRepository.find(filters, ResponseFormat.getDefaultInstance());
+                Iterator<I> iterator = stream(found)
+                        .map(MirrorProjection::id)
+                        .map(MirrorId::getValue)
+                        .map(id -> (I) AnyPacker.unpack(id))
+                        .iterator();
+                return iterator;
+            });
+            return result;
+        }
+
+        private <T> T evaluateForCurrentTenant(Supplier<T> operation) {
+            TenantAwareRunner runner = TenantAwareRunner.withCurrentTenant(multitenant);
+            T result = runner.evaluate(operation);
             return result;
         }
     }

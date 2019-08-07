@@ -52,6 +52,10 @@ public final class TenantAwareRunner {
         return new TenantAwareRunner(tenant);
     }
 
+    public static TenantAwareRunner withCurrentTenant(boolean multitenant) {
+        return with(TenantAware.getCurrentTenant(multitenant));
+    }
+
     /**
      * Runs the given {@code operation} for the given tenant and returns the result of
      * the operation.
