@@ -31,13 +31,15 @@ import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newConcurrentMap;
+import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 
 /**
@@ -46,7 +48,7 @@ import static io.spine.server.stand.SubscriptionRecordFactory.newRecordFor;
 final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     /** The map from {@code TenantId} to its slice of data. */
-    private final Map<TenantId, SubscriptionRegistry> tenantSlices = newConcurrentMap();
+    private final Map<TenantId, SubscriptionRegistry> tenantSlices = new ConcurrentHashMap<>();
 
     private final boolean multitenant;
 
@@ -59,32 +61,32 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     @Override
-    public synchronized void activate(Subscription subscription, SubscriptionCallback callback) {
+    public void activate(Subscription subscription, SubscriptionCallback callback) {
         registrySlice().activate(subscription, callback);
     }
 
     @Override
-    public synchronized Subscription add(Topic topic) {
+    public Subscription add(Topic topic) {
         return registrySlice().add(topic);
     }
 
     @Override
-    public synchronized void remove(Subscription subscription) {
+    public void remove(Subscription subscription) {
         registrySlice().remove(subscription);
     }
 
     @Override
-    public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
+    public Set<SubscriptionRecord> byType(TypeUrl type) {
         return registrySlice().byType(type);
     }
 
     @Override
-    public synchronized boolean containsId(SubscriptionId subscriptionId) {
+    public boolean containsId(SubscriptionId subscriptionId) {
         return registrySlice().containsId(subscriptionId);
     }
 
     @Override
-    public synchronized boolean hasType(TypeUrl type) {
+    public boolean hasType(TypeUrl type) {
         return registrySlice().hasType(type);
     }
 
@@ -112,20 +114,24 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     private static class TenantRegistry implements SubscriptionRegistry {
 
-        private final SetMultimap<TypeUrl, SubscriptionRecord> typeToRecord = HashMultimap.create();
-        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
+        private final SetMultimap<TypeUrl, SubscriptionRecord> typeToRecord =
+                synchronizedSetMultimap(HashMultimap.create());
+        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs =
+                new ConcurrentHashMap<>();
+        private final Lock lock = new ReentrantLock();
 
         @Override
-        public synchronized void activate(Subscription subscription,
-                                          SubscriptionCallback callback) {
-            checkState(subscriptionToAttrs.containsKey(subscription),
-                       "Cannot find the subscription in the registry.");
-            SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-            subscriptionRecord.activate(callback);
+        public void activate(Subscription subscription, SubscriptionCallback callback) {
+            lockAndRun(() -> {
+                checkState(subscriptionToAttrs.containsKey(subscription),
+                           "Cannot find the subscription in the registry.");
+                SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
+                subscriptionRecord.activate(callback);
+            });
         }
 
         @Override
-        public synchronized Subscription add(Topic topic) {
+        public Subscription add(Topic topic) {
             SubscriptionId subscriptionId = Subscriptions.generateId();
             Subscription subscription = Subscription
                     .newBuilder()
@@ -140,27 +146,25 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         }
 
         @Override
-        public synchronized void remove(Subscription subscription) {
-            if (!subscriptionToAttrs.containsKey(subscription)) {
-                return;
-            }
-            SubscriptionRecord record = subscriptionToAttrs.get(subscription);
-
-            if (typeToRecord.containsKey(record.getType())) {
-                typeToRecord.get(record.getType())
-                            .remove(record);
-            }
-            subscriptionToAttrs.remove(subscription);
+        public void remove(Subscription subscription) {
+            lockAndRun(() -> {
+                if (!subscriptionToAttrs.containsKey(subscription)) {
+                    return;
+                }
+                SubscriptionRecord record = subscriptionToAttrs.get(subscription);
+                typeToRecord.get(record.getType()).remove(record);
+                subscriptionToAttrs.remove(subscription);
+            });
         }
 
         @Override
-        public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
+        public Set<SubscriptionRecord> byType(TypeUrl type) {
             Set<SubscriptionRecord> result = typeToRecord.get(type);
             return result;
         }
 
         @Override
-        public synchronized boolean hasType(TypeUrl type) {
+        public boolean hasType(TypeUrl type) {
             boolean result = typeToRecord.containsKey(type);
             return result;
         }
@@ -168,12 +172,20 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         @Override
         public boolean containsId(SubscriptionId subscriptionId) {
             for (Subscription existingItem : subscriptionToAttrs.keySet()) {
-                if (existingItem.getId()
-                                .equals(subscriptionId)) {
+                if (existingItem.getId().equals(subscriptionId)) {
                     return true;
                 }
             }
             return false;
+        }
+
+        private void lockAndRun(Runnable operation) {
+            lock.lock();
+            try {
+                operation.run();
+            } finally {
+                lock.unlock();
+            }
         }
     }
 }
