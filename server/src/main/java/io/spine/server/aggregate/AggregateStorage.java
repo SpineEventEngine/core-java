@@ -69,10 +69,10 @@ public abstract class AggregateStorage<I>
             "The specified snapshot index is incorrect";
 
     /**
-     * Executes certain kinds of aggregate reads using aggregate
-     * {@linkplain MirrorProjection mirrors}.
+     * Executes certain kinds of aggregate reads using the
+     * {@linkplain MirrorProjection mirror projections} of aggregates.
      *
-     * <p>Can be used to optimize performance-heavy storage operations.
+     * <p>Used to optimize performance-heavy storage operations.
      *
      * <p>Is {@code null} either if not yet configured or if the corresponding aggregate type
      * is not mirrored.
@@ -315,7 +315,7 @@ public abstract class AggregateStorage<I>
     protected abstract void truncate(int snapshotIndex, Timestamp date);
 
     /**
-     * Executes certain kinds of aggregate reads through {@link MirrorRepository}.
+     * Executes certain kinds of aggregate reads through the {@link MirrorRepository}.
      *
      * <p>Used to optimize performance-heavy operations on the storage.
      *
