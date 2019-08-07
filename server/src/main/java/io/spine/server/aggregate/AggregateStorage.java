@@ -86,7 +86,7 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * Configures an aggregate {@code Mirror} to optimize the certain kinds of aggregate reads.
+     * Configures an aggregate {@code Mirror} to optimize certain kinds of aggregate reads.
      *
      * @param mirrorRepository
      *         the repository storing mirror {@linkplain MirrorProjection projections}
