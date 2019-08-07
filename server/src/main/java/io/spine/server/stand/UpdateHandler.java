@@ -31,6 +31,7 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
+import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.stand.Stand.SubscriptionCallback;
 import io.spine.server.type.EventEnvelope;
@@ -53,7 +54,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * notifies the {@linkplain #setCallback(SubscriptionCallback) callback} with
  * the detected {@linkplain SubscriptionUpdate subscription updates}.
  */
-abstract class UpdateHandler {
+abstract class UpdateHandler implements Logging {
 
     private final Subscription subscription;
 
@@ -84,7 +85,15 @@ abstract class UpdateHandler {
                    "Dispatched an event of type `%s` to the non-active subscription with ID `%s`.",
                    TypeUrl.of(event.message()), subscription.getId()
                                                             .getValue());
-        detectUpdate(event).ifPresent(u -> callback.accept(u));
+        detectUpdate(event).ifPresent(this::deliverUpdate);
+    }
+
+    private void deliverUpdate(SubscriptionUpdate update) {
+        try {
+            callback.accept(update);
+        } catch (Throwable t) {
+            _error().withCause(t).log();
+        }
     }
 
     /**
