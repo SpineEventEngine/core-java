@@ -97,9 +97,6 @@ public final class MirrorRepository
 
     /**
      * Tells if the entity type should be mirrored.
-     *
-     * <p>Currently, all {@code Aggregate} types with a
-     * non-{@linkplain EntityOption.Visibility#NONE private} visibility are mirrored.
      */
     public static boolean shouldMirror(TypeUrl type) {
         Kind kind = entityKind(type);
