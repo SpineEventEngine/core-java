@@ -20,6 +20,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
@@ -36,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -100,11 +102,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     @Override
                     public SubscriptionRegistry apply(@Nullable TenantId tenantId) {
                         checkNotNull(tenantId);
-                        SubscriptionRegistry registryForTenant = tenantSlices.get(tenantId);
-                        if (registryForTenant == null) {
-                            registryForTenant = new TenantRegistry();
-                            tenantSlices.put(tenantId, registryForTenant);
-                        }
+                        SubscriptionRegistry registryForTenant =
+                                tenantSlices.computeIfAbsent(tenantId, id -> new TenantRegistry());
                         return registryForTenant;
                     }
                 };
@@ -140,8 +139,10 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
                     .build();
             SubscriptionRecord record = newRecordFor(subscription);
             TypeUrl type = record.getType();
-            typeToRecord.put(type, record);
-            subscriptionToAttrs.put(subscription, record);
+            lockAndRun(() -> {
+                typeToRecord.put(type, record);
+                subscriptionToAttrs.put(subscription, record);
+            });
             return subscription;
         }
 
@@ -159,8 +160,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
         @Override
         public Set<SubscriptionRecord> byType(TypeUrl type) {
-            Set<SubscriptionRecord> result = typeToRecord.get(type);
-            return result;
+            return lockAndGet(() -> ImmutableSet.copyOf(typeToRecord.get(type)));
         }
 
         @Override
@@ -183,6 +183,15 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             lock.lock();
             try {
                 operation.run();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private <T> T lockAndGet(Supplier<T> operation) {
+            lock.lock();
+            try {
+                return operation.get();
             } finally {
                 lock.unlock();
             }
