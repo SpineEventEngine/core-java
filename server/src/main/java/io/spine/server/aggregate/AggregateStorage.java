@@ -69,9 +69,13 @@ public abstract class AggregateStorage<I>
             "The specified snapshot index is incorrect";
 
     /**
-     * ...
+     * Executes certain kinds of aggregate reads through aggregate
+     * {@linkplain MirrorProjection mirror}.
      *
-     * <p>Can be configured to optimize certain kinds of aggregate reads.
+     * <p>Is {@code null} either if not yet configured or if the corresponding aggregate type
+     * doesn't have a mirror.
+     *
+     * @see MirrorRepository
      */
     private @Nullable Mirror<I> aggregateMirror;
 
@@ -79,6 +83,14 @@ public abstract class AggregateStorage<I>
         super(multitenant);
     }
 
+    /**
+     * Configures an aggregate {@code Mirror} to optimize the certain kinds of aggregate reads.
+     *
+     * @param mirrorRepository
+     *         the repository storing mirror {@linkplain MirrorProjection projections}
+     * @param aggregateClass
+     *         the stored {@code Aggregate} type
+     */
     void configureMirror(MirrorRepository mirrorRepository,
                          AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
         Mirror.configure(mirrorRepository, aggregateClass, isMultitenant())
@@ -95,6 +107,15 @@ public abstract class AggregateStorage<I>
         super.checkNotClosed();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Attempts to read aggregate IDs from the {@link MirrorRepository}, as they are already
+     * stored there in a convenient form.
+     *
+     * <p>If an aggregate {@link Mirror} is not configured, falls back to the default method of
+     * getting distinct aggregate IDs from the event records.
+     */
     @Override
     public Iterator<I> index() {
         if (aggregateMirror != null) {
@@ -103,6 +124,9 @@ public abstract class AggregateStorage<I>
         return distinctAggregateIds();
     }
 
+    /**
+     * Obtains distinct aggregate IDs from the stored event records.
+     */
     protected abstract Iterator<I> distinctAggregateIds();
 
     /**
@@ -288,6 +312,14 @@ public abstract class AggregateStorage<I>
      */
     protected abstract void truncate(int snapshotIndex, Timestamp date);
 
+    /**
+     * Executes certain kinds of aggregate reads through {@link MirrorRepository}.
+     *
+     * <p>Used to optimize performance-heavy operations on the storage.
+     *
+     * @param <I>
+     *         the type of IDs of aggregates managed by this storage
+     */
     private static class Mirror<I> {
 
         private final MirrorRepository mirrorRepository;
@@ -300,6 +332,10 @@ public abstract class AggregateStorage<I>
             this.multitenant = multitenant;
         }
 
+        /**
+         * Returns a new instance of {@code Mirror} or {@code Optional.empty()} if the specified
+         * aggregate type does not have a mirror.
+         */
         private static <I> Optional<Mirror<I>>
         configure(MirrorRepository repository,
                   AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass,
@@ -311,6 +347,11 @@ public abstract class AggregateStorage<I>
                    : Optional.empty();
         }
 
+        /**
+         * Performs a storage {@code index} operation.
+         *
+         * @return distinct aggregate IDs
+         */
         @SuppressWarnings("unchecked") // Ensured logically.
         private Iterator<I> index() {
             Iterator<I> result = evaluateForCurrentTenant(() -> {

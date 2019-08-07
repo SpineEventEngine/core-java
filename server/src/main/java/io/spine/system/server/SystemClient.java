@@ -42,6 +42,9 @@ public interface SystemClient {
      */
     SystemReadSide readSide();
 
+    /**
+     * Finds a system repository by the state class of entities.
+     */
     Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass);
 
     /**
