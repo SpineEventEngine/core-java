@@ -69,11 +69,13 @@ public abstract class AggregateStorage<I>
             "The specified snapshot index is incorrect";
 
     /**
-     * Executes certain kinds of aggregate reads through aggregate
-     * {@linkplain MirrorProjection mirror}.
+     * Executes certain kinds of aggregate reads using aggregate
+     * {@linkplain MirrorProjection mirrors}.
+     *
+     * <p>Can be used to optimize performance-heavy storage operations.
      *
      * <p>Is {@code null} either if not yet configured or if the corresponding aggregate type
-     * doesn't have a mirror.
+     * is not mirrored.
      *
      * @see MirrorRepository
      */
