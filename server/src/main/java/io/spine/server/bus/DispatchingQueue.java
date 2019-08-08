@@ -22,6 +22,7 @@ package io.spine.server.bus;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
+import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -35,7 +36,7 @@ import static io.spine.server.bus.Buses.acknowledge;
  * @param <E>
  *         the type of envelopes to dispatch
  */
-class DispatchingQueue<E extends MessageEnvelope> {
+class DispatchingQueue<E extends MessageEnvelope> implements Logging {
 
     private final DispatchAction<E> dispatchAction;
     private final ConcurrentLinkedQueue<E> queue = new ConcurrentLinkedQueue<>();
@@ -84,10 +85,20 @@ class DispatchingQueue<E extends MessageEnvelope> {
         }
     }
 
+    @SuppressWarnings("ProhibitedExceptionThrown") // Rethrow a caught exception.
     private void dispatch(E envelope) {
         startDispatching();
-        dispatchAction.dispatch(envelope);
-        stopDispatching();
+        try {
+            dispatchAction.dispatch(envelope);
+        } catch (Throwable t) {
+            _error().withCause(t)
+                    .log("Error when dispatching %s[ID: %s].",
+                         envelope.messageClass(),
+                         envelope.id());
+            throw t;
+        } finally {
+            stopDispatching();
+        }
     }
 
     private void startDispatching() {

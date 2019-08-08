@@ -38,6 +38,7 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
@@ -325,6 +326,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("directly from the caller")
         void fromCaller() {
             BbFinalizeProject command = finalizeProject(newProjectId());
@@ -333,6 +335,7 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("generated as a response to some other signal")
         void generatedWithinModel() {
             BbProjectDone event = projectDone(newProjectId());
