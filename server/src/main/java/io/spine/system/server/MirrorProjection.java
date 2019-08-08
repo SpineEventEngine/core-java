@@ -23,6 +23,7 @@ package io.spine.system.server;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.CompositeFilter;
 import io.spine.client.IdFilter;
 import io.spine.client.Target;
@@ -63,9 +64,10 @@ import static java.util.stream.Collectors.toList;
  *         subscriber method is an event used by the framework to bind the method to the event type.
  *         The content of the event, in those cases, is irrelevant.
  */
-final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder> {
+@Internal
+public final class MirrorProjection extends Projection<MirrorId, Mirror, Mirror.Builder> {
 
-    private static final String TYPE_COLUMN_NAME = "aggregate_type";
+    public static final String TYPE_COLUMN_NAME = "aggregate_type";
 
     MirrorProjection(MirrorId id) {
         super(id);

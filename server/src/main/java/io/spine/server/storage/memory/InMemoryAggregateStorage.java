@@ -62,7 +62,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    public Iterator<I> index() {
+    protected Iterator<I> distinctAggregateIds() {
         return getStorage().index();
     }
 

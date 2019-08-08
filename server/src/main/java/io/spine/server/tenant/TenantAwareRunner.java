@@ -53,6 +53,18 @@ public final class TenantAwareRunner {
     }
 
     /**
+     * Creates a new {@code TenantAwareRunner}, which runs all the given operations for the current
+     * {@code tenant}.
+     *
+     * @param multitenant
+     *         if the current environment is multitenant
+     * @return new instance of {@code TenantAwareRunner}
+     */
+    public static TenantAwareRunner withCurrentTenant(boolean multitenant) {
+        return with(TenantAware.getCurrentTenant(multitenant));
+    }
+
+    /**
      * Runs the given {@code operation} for the given tenant and returns the result of
      * the operation.
      *

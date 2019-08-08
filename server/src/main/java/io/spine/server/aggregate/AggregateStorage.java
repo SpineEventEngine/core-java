@@ -24,24 +24,41 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
+import io.spine.client.CompositeFilter;
+import io.spine.client.ResponseFormat;
+import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
+import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.system.server.MirrorId;
+import io.spine.system.server.MirrorProjection;
+import io.spine.system.server.MirrorRepository;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.checkValid;
+import static io.spine.client.Filters.all;
+import static io.spine.client.Filters.eq;
+import static io.spine.system.server.MirrorProjection.TYPE_COLUMN_NAME;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * An event-sourced storage of aggregate part events and snapshots.
  *
- * @param <I> the type of IDs of aggregates managed by this storage
+ * @param <I>
+ *         the type of IDs of aggregates managed by this storage
  */
 @SPI
 public abstract class AggregateStorage<I>
@@ -51,8 +68,35 @@ public abstract class AggregateStorage<I>
     private static final String TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE =
             "The specified snapshot index is incorrect";
 
+    /**
+     * Executes certain kinds of aggregate reads using the
+     * {@linkplain MirrorProjection mirror projections} of aggregates.
+     *
+     * <p>Used to optimize performance-heavy storage operations.
+     *
+     * <p>Is {@code null} either if not yet configured or if the corresponding aggregate type
+     * is not mirrored.
+     *
+     * @see MirrorRepository
+     */
+    private @Nullable Mirror<I> aggregateMirror;
+
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
+    }
+
+    /**
+     * Configures an aggregate {@code Mirror} to optimize certain kinds of aggregate reads.
+     *
+     * @param mirrorRepository
+     *         the repository storing mirror {@linkplain MirrorProjection projections}
+     * @param aggregateClass
+     *         the stored {@code Aggregate} type
+     */
+    void configureMirror(MirrorRepository mirrorRepository,
+                         AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
+        Mirror.configure(mirrorRepository, aggregateClass, isMultitenant())
+              .ifPresent(m -> aggregateMirror = m);
     }
 
     /**
@@ -63,6 +107,24 @@ public abstract class AggregateStorage<I>
     @Override
     protected void checkNotClosed() throws IllegalStateException {
         super.checkNotClosed();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Attempts to read aggregate IDs from the {@link MirrorRepository}, as they are already
+     * stored there in a convenient form.
+     *
+     * <p>If an aggregate {@link MirrorRepository} is not configured to use for reads with this
+     * repository, falls back to the default method of getting distinct aggregate IDs
+     * from the event records.
+     */
+    @Override
+    public Iterator<I> index() {
+        if (aggregateMirror != null) {
+            return aggregateMirror.index();
+        }
+        return distinctAggregateIds();
     }
 
     /**
@@ -247,4 +309,76 @@ public abstract class AggregateStorage<I>
      * entity.
      */
     protected abstract void truncate(int snapshotIndex, Timestamp date);
+
+    /**
+     * Obtains distinct aggregate IDs from the stored event records.
+     */
+    protected abstract Iterator<I> distinctAggregateIds();
+
+    /**
+     * Executes certain kinds of aggregate reads through the {@link MirrorRepository}.
+     *
+     * <p>Used to optimize performance-heavy operations on the storage.
+     *
+     * @param <I>
+     *         the type of IDs of aggregates managed by this storage
+     */
+    private static class Mirror<I> {
+
+        private final MirrorRepository mirrorRepository;
+        private final TypeUrl aggregateType;
+        private final boolean multitenant;
+
+        private Mirror(MirrorRepository repository, TypeUrl type, boolean multitenant) {
+            this.mirrorRepository = repository;
+            this.aggregateType = type;
+            this.multitenant = multitenant;
+        }
+
+        /**
+         * Returns a new instance of {@code Mirror} or {@code Optional.empty()} if the specified
+         * aggregate type does not have a mirror.
+         */
+        private static <I> Optional<Mirror<I>>
+        configure(MirrorRepository repository,
+                  AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass,
+                  boolean multitenant) {
+
+            TypeUrl typeUrl = aggregateClass.stateType();
+            return MirrorRepository.shouldMirror(typeUrl)
+                   ? Optional.of(new Mirror<>(repository, typeUrl, multitenant))
+                   : Optional.empty();
+        }
+
+        /**
+         * Performs a storage {@code index} operation.
+         *
+         * @return distinct aggregate IDs
+         */
+        @SuppressWarnings("unchecked") // Ensured logically.
+        private Iterator<I> index() {
+            Iterator<I> result = evaluateForCurrentTenant(() -> {
+                CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, aggregateType.value()));
+                TargetFilters filters = TargetFilters
+                        .newBuilder()
+                        .addFilter(allOfType)
+                        .vBuild();
+                Iterator<MirrorProjection> found =
+                        mirrorRepository.find(filters, ResponseFormat.getDefaultInstance());
+                Iterator<I> iterator = stream(found)
+                        .map(MirrorProjection::id)
+                        .map(MirrorId::getValue)
+                        .map(id -> (I) AnyPacker.unpack(id))
+                        .iterator();
+                return iterator;
+            });
+            return result;
+        }
+
+        private <T> T evaluateForCurrentTenant(Supplier<T> operation) {
+            TenantAwareRunner runner = TenantAwareRunner.withCurrentTenant(multitenant);
+            T result = runner.evaluate(operation);
+            return result;
+        }
+    }
 }

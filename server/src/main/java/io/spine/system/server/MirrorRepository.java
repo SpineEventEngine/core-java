@@ -26,6 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
@@ -64,13 +65,15 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * <p>An entity has a mirror if all of the following conditions are met:
  * <ul>
  *     <li>the entity repository is registered in a domain bounded context;
- *     <li>the entity state is marked as an {@link EntityOption.Kind#AGGREGATE AGGREGATE};
+ *     <li>the entity state is marked as an {@link Kind#AGGREGATE AGGREGATE};
  *     <li>the aggregate is visible for querying or subscribing.
  * </ul>
  *
  * <p>In other cases, an entity won't have a {@link Mirror}.
  */
-final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
+@Internal
+public final class MirrorRepository
+        extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
     private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
@@ -92,19 +95,22 @@ final class MirrorRepository extends ProjectionRepository<MirrorId, MirrorProjec
                       (message, context) -> targetsFrom(message.getEntity()));
     }
 
+    /**
+     * Tells if the entity type should be mirrored.
+     */
+    public static boolean shouldMirror(TypeUrl type) {
+        Kind kind = entityKind(type);
+        EntityVisibility visibility = entityVisibility(type);
+        boolean aggregate = kind == AGGREGATE && visibility.isNotNone();
+        return aggregate;
+    }
+
     private static Set<MirrorId> targetsFrom(MessageId entityId) {
         TypeUrl type = TypeUrl.parse(entityId.getTypeUrl());
         boolean shouldMirror = shouldMirror(type);
         return shouldMirror
                ? ImmutableSet.of(idFrom(entityId))
                : ImmutableSet.of();
-    }
-
-    private static boolean shouldMirror(TypeUrl type) {
-        Kind kind = entityKind(type);
-        EntityVisibility visibility = entityVisibility(type);
-        boolean aggregate = kind == AGGREGATE && visibility.isNotNone();
-        return aggregate;
     }
 
     private static EntityOption.Kind entityKind(TypeUrl type) {

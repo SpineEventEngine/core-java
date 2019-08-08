@@ -21,7 +21,11 @@
 package io.spine.system.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.Repository;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -54,6 +58,11 @@ final class DefaultSystemClient implements SystemClient {
     @Override
     public SystemReadSide readSide() {
         return readSide;
+    }
+
+    @Override
+    public Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass) {
+        return context.findRepository(stateClass);
     }
 
     @Override
