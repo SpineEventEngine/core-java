@@ -115,8 +115,9 @@ public abstract class AggregateStorage<I>
      * <p>Attempts to read aggregate IDs from the {@link MirrorRepository}, as they are already
      * stored there in a convenient form.
      *
-     * <p>If an aggregate {@link Mirror} is not configured, falls back to the default method of
-     * getting distinct aggregate IDs from the event records.
+     * <p>If an aggregate {@link MirrorRepository} is not configured to use for reads with this
+     * repository, falls back to the default method of getting distinct aggregate IDs
+     * from the event records.
      */
     @Override
     public Iterator<I> index() {
@@ -125,11 +126,6 @@ public abstract class AggregateStorage<I>
         }
         return distinctAggregateIds();
     }
-
-    /**
-     * Obtains distinct aggregate IDs from the stored event records.
-     */
-    protected abstract Iterator<I> distinctAggregateIds();
 
     /**
      * Forms and returns an {@link AggregateHistory} based on the
@@ -313,6 +309,11 @@ public abstract class AggregateStorage<I>
      * entity.
      */
     protected abstract void truncate(int snapshotIndex, Timestamp date);
+
+    /**
+     * Obtains distinct aggregate IDs from the stored event records.
+     */
+    protected abstract Iterator<I> distinctAggregateIds();
 
     /**
      * Executes certain kinds of aggregate reads through the {@link MirrorRepository}.
