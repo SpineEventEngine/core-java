@@ -65,7 +65,7 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * <p>An entity has a mirror if all of the following conditions are met:
  * <ul>
  *     <li>the entity repository is registered in a domain bounded context;
- *     <li>the entity state is marked as an {@link EntityOption.Kind#AGGREGATE AGGREGATE};
+ *     <li>the entity state is marked as an {@link Kind#AGGREGATE AGGREGATE};
  *     <li>the aggregate is visible for querying or subscribing.
  * </ul>
  *
