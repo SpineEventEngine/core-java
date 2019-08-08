@@ -11,6 +11,8 @@ option java_multiple_files = true;
 
 message Calc {
 
+    option (entity).kind = AGGREGATE;
+
     string id = 1;
 
     int32 sum = 2;
