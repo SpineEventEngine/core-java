@@ -148,6 +148,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .register(EventImportDispatcher.of(this));
         }
         initInbox();
+        registerWithinMirror();
     }
 
     /**
@@ -169,6 +170,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private Inbox<I> inbox() {
         return checkNotNull(inbox);
+    }
+
+    private void registerWithinMirror() {
+        if (shouldBeMirrored()) {
+            mirrorRepository().ifPresent(repo -> repo.addMirror(this));
+        }
     }
 
     /**
@@ -276,10 +283,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateStorage<I> createStorage() {
         StorageFactory sf = defaultStorageFactory();
         AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
-        Optional<MirrorRepository> mirrorRepository = context().systemClient()
-                                                               .systemRepositoryFor(Mirror.class)
-                                                               .map(MirrorRepository.class::cast);
-        mirrorRepository.ifPresent(repo -> result.configureMirror(repo, aggregateClass()));
+        mirrorRepository().ifPresent(repo -> result.configureMirror(repo, entityStateType()));
         return result;
     }
 
@@ -472,6 +476,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
+    }
+
+    private boolean shouldBeMirrored() {
+        boolean shouldHaveMirror = aggregateClass().visibility()
+                                                   .isNotNone();
+        return shouldHaveMirror;
+    }
+
+    /**
+     * Returns a {@link MirrorRepository} of a corresponding {@link BoundedContext}.
+     *
+     * <p>Returns {@code Optional.empty()} if aggregate mirroring is
+     * {@linkplain io.spine.system.server.SystemFeatures disabled} in the system context.
+     */
+    private Optional<MirrorRepository> mirrorRepository() {
+        Optional<MirrorRepository> result = context().systemClient()
+                                                     .systemRepositoryFor(Mirror.class)
+                                                     .map(MirrorRepository.class::cast);
+        return result;
     }
 
     /**

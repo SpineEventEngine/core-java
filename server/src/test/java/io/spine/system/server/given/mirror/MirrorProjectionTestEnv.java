@@ -31,18 +31,18 @@ import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityRestored;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.event.EntityUnarchived;
-import io.spine.test.system.server.Video;
+import io.spine.test.system.server.MRVideo;
 import io.spine.type.TypeUrl;
 
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.TypeConverter.toAny;
 
-public final class ProjectionTestEnv {
+public final class MirrorProjectionTestEnv {
 
     public static final String RAW_ID = "42";
 
-    private static final TypeUrl AGGREGATE_TYPE_URL = TypeUrl.of(Video.class);
+    public static final TypeUrl AGGREGATE_TYPE_URL = TypeUrl.of(MRVideo.class);
 
     public static final MirrorId ID = MirrorId
             .newBuilder()
@@ -59,7 +59,7 @@ public final class ProjectionTestEnv {
     /**
      * Prevents the utility class instantiation.
      */
-    private ProjectionTestEnv() {
+    private MirrorProjectionTestEnv() {
     }
 
     public static EntityStateChanged entityStateChanged() {

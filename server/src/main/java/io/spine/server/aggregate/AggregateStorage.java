@@ -30,7 +30,6 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
 import io.spine.server.tenant.TenantAwareRunner;
@@ -90,13 +89,13 @@ public abstract class AggregateStorage<I>
      *
      * @param mirrorRepository
      *         the repository storing mirror {@linkplain MirrorProjection projections}
-     * @param aggregateClass
-     *         the stored {@code Aggregate} type
+     * @param stateType
+     *         the state type of a stored {@code Aggregate}
      */
-    void configureMirror(MirrorRepository mirrorRepository,
-                         AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass) {
-        Mirror.configure(mirrorRepository, aggregateClass, isMultitenant())
-              .ifPresent(m -> aggregateMirror = m);
+    @SuppressWarnings("unchecked") // Ensured logically.
+    void configureMirror(MirrorRepository mirrorRepository, TypeUrl stateType) {
+        Mirror.configure(mirrorRepository, stateType, isMultitenant())
+              .ifPresent(m -> aggregateMirror = (Mirror<I>) m);
     }
 
     /**
@@ -326,12 +325,12 @@ public abstract class AggregateStorage<I>
     private static class Mirror<I> {
 
         private final MirrorRepository mirrorRepository;
-        private final TypeUrl aggregateType;
+        private final TypeUrl stateType;
         private final boolean multitenant;
 
-        private Mirror(MirrorRepository repository, TypeUrl type, boolean multitenant) {
+        private Mirror(MirrorRepository repository, TypeUrl stateType, boolean multitenant) {
             this.mirrorRepository = repository;
-            this.aggregateType = type;
+            this.stateType = stateType;
             this.multitenant = multitenant;
         }
 
@@ -339,14 +338,10 @@ public abstract class AggregateStorage<I>
          * Returns a new instance of {@code Mirror} or {@code Optional.empty()} if the specified
          * aggregate type does not have a mirror.
          */
-        private static <I> Optional<Mirror<I>>
-        configure(MirrorRepository repository,
-                  AggregateClass<? extends Aggregate<I, ?, ?>> aggregateClass,
-                  boolean multitenant) {
-
-            TypeUrl typeUrl = aggregateClass.stateType();
-            return MirrorRepository.shouldMirror(typeUrl)
-                   ? Optional.of(new Mirror<>(repository, typeUrl, multitenant))
+        private static Optional<Mirror<?>>
+        configure(MirrorRepository repository, TypeUrl stateType, boolean multitenant) {
+            return repository.isMirrored(stateType)
+                   ? Optional.of(new Mirror<>(repository, stateType, multitenant))
                    : Optional.empty();
         }
 
@@ -358,7 +353,7 @@ public abstract class AggregateStorage<I>
         @SuppressWarnings("unchecked") // Ensured logically.
         private Iterator<I> index() {
             Iterator<I> result = evaluateForCurrentTenant(() -> {
-                CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, aggregateType.value()));
+                CompositeFilter allOfType = all(eq(TYPE_COLUMN_NAME, stateType.value()));
                 TargetFilters filters = TargetFilters
                         .newBuilder()
                         .addFilter(allOfType)

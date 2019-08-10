@@ -20,36 +20,30 @@
 
 package io.spine.system.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
-import io.spine.code.proto.EntityStateOption;
 import io.spine.core.MessageId;
-import io.spine.option.EntityOption;
 import io.spine.option.EntityOption.Kind;
-import io.spine.server.entity.EntityVisibility;
+import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.EntityLifecycleEvent;
 import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.FieldMaskUtil.fromFieldNumbers;
-import static io.spine.option.EntityOption.Kind.AGGREGATE;
-import static io.spine.option.EntityOption.Kind.KIND_UNKNOWN;
 import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.VERSION_FIELD_NUMBER;
@@ -71,10 +65,11 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 public final class MirrorRepository
         extends ProjectionRepository<MirrorId, MirrorProjection, Mirror> {
 
-    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
     private static final FieldMask AGGREGATE_STATE_WITH_VERSION = fromFieldNumbers(
             Mirror.class, ID_FIELD_NUMBER, STATE_FIELD_NUMBER, VERSION_FIELD_NUMBER
     );
+
+    private final Set<TypeUrl> mirroredTypes = newHashSet();
 
     @Override
     protected void setupEventRouting(EventRouting<MirrorId> routing) {
@@ -83,44 +78,25 @@ public final class MirrorRepository
                       (message, context) -> targetsFrom(message));
     }
 
-    /**
-     * Tells if the entity type should be mirrored.
-     */
-    public static boolean shouldMirror(TypeUrl type) {
-        Kind kind = entityKind(type);
-        EntityVisibility visibility = entityVisibility(type);
-        boolean aggregate = kind == AGGREGATE && visibility.isNotNone();
-        return aggregate;
-    }
-
-    private static Set<MirrorId> targetsFrom(EntityLifecycleEvent event) {
+    private Set<MirrorId> targetsFrom(EntityLifecycleEvent event) {
         TypeUrl type = event.entityType();
-        boolean shouldMirror = shouldMirror(type);
         MessageId entityId = event.getEntity();
-        return shouldMirror
+        return isMirrored(type)
                ? ImmutableSet.of(idFrom(entityId))
                : ImmutableSet.of();
     }
 
-    private static EntityOption.Kind entityKind(TypeUrl type) {
-        Descriptor descriptor = type.toTypeName()
-                                    .messageDescriptor();
-        Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
-        Kind kind = option.map(EntityOption::getKind)
-                          .orElse(KIND_UNKNOWN);
-        if (kind == KIND_UNKNOWN) {
-            logger.atWarning()
-                  .log("Received a state update of entity `%s`. The entity kind is unknown. " +
-                               "Please use `(entity)` option to define entity states.", type);
-        }
-        return kind;
+    public void addMirror(Repository<?, ?> repository) {
+        addMirroredType(repository.entityStateType());
     }
 
-    private static EntityVisibility entityVisibility(TypeUrl entityStateType) {
-        Class<Message> stateClass = entityStateType.toTypeName()
-                                                   .toMessageClass();
-        EntityVisibility visibility = EntityVisibility.of(stateClass);
-        return visibility;
+    public boolean isMirrored(TypeUrl type) {
+        return mirroredTypes.contains(type);
+    }
+
+    @VisibleForTesting
+    void addMirroredType(TypeUrl type) {
+        mirroredTypes.add(type);
     }
 
     private static MirrorId idFrom(MessageId messageId) {
