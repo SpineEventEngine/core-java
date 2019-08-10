@@ -39,11 +39,7 @@ import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
-import io.spine.system.server.event.EntityArchived;
-import io.spine.system.server.event.EntityDeleted;
-import io.spine.system.server.event.EntityRestored;
-import io.spine.system.server.event.EntityStateChanged;
-import io.spine.system.server.event.EntityUnarchived;
+import io.spine.system.server.event.EntityLifecycleEvent;
 import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
@@ -83,15 +79,7 @@ public final class MirrorRepository
     @Override
     protected void setupEventRouting(EventRouting<MirrorId> routing) {
         super.setupEventRouting(routing);
-        routing.route(EntityStateChanged.class,
-                      (message, context) -> targetsFrom(message.getEntity()))
-               .route(EntityArchived.class,
-                      (message, context) -> targetsFrom(message.getEntity()))
-               .route(EntityDeleted.class,
-                      (message, context) -> targetsFrom(message.getEntity()))
-               .route(EntityUnarchived.class,
-                      (message, context) -> targetsFrom(message.getEntity()))
-               .route(EntityRestored.class,
+        routing.route(EntityLifecycleEvent.class,
                       (message, context) -> targetsFrom(message.getEntity()));
     }
 
