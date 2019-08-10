@@ -478,10 +478,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    private boolean shouldBeMirrored() {
-        boolean shouldHaveMirror = aggregateClass().visibility()
+    protected boolean shouldBeMirrored() {
+        boolean shouldBeMirrored = aggregateClass().visibility()
                                                    .isNotNone();
-        return shouldHaveMirror;
+        return shouldBeMirrored;
     }
 
     /**
