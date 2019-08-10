@@ -80,7 +80,7 @@ public final class MirrorRepository
     protected void setupEventRouting(EventRouting<MirrorId> routing) {
         super.setupEventRouting(routing);
         routing.route(EntityLifecycleEvent.class,
-                      (message, context) -> targetsFrom(message.getEntity()));
+                      (message, context) -> targetsFrom(message));
     }
 
     /**
@@ -93,9 +93,10 @@ public final class MirrorRepository
         return aggregate;
     }
 
-    private static Set<MirrorId> targetsFrom(MessageId entityId) {
-        TypeUrl type = TypeUrl.parse(entityId.getTypeUrl());
+    private static Set<MirrorId> targetsFrom(EntityLifecycleEvent event) {
+        TypeUrl type = event.entityType();
         boolean shouldMirror = shouldMirror(type);
+        MessageId entityId = event.getEntity();
         return shouldMirror
                ? ImmutableSet.of(idFrom(entityId))
                : ImmutableSet.of();

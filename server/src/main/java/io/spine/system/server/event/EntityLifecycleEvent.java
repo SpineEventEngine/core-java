@@ -21,14 +21,23 @@
 package io.spine.system.server.event;
 
 import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.core.MessageId;
+import io.spine.type.TypeUrl;
 
 @Immutable
+@GeneratedMixin
 @Internal
 public interface EntityLifecycleEvent extends EventMessage {
 
     @SuppressWarnings("override") // Implemented in the Protobuf-generated code.
     MessageId getEntity();
+
+    default TypeUrl entityType() {
+        String typeUrl = getEntity().getTypeUrl();
+        TypeUrl result = TypeUrl.parse(typeUrl);
+        return result;
+    }
 }
