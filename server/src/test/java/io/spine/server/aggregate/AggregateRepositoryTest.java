@@ -724,7 +724,7 @@ public class AggregateRepositoryTest {
     class NotRegisterAsMirroredType {
 
         @Test
-        @DisplayName("if aggregate visibility is `NONE`")
+        @DisplayName("if the aggregate visibility is `NONE`")
         void ifVisibilityIsNone() {
             // `Engine` aggregate has default visibility, which is `NONE`.
             BoundedContext context = BoundedContextBuilder.assumingTests()
