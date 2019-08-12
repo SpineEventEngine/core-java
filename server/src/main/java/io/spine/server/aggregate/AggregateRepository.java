@@ -472,13 +472,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.snapshotTrigger = snapshotTrigger;
     }
 
+    /**
+     * Sets up entity state {@linkplain MirrorRepository mirroring} for the aggregates of this
+     * repository.
+     */
     private void initMirror() {
         if (shouldBeMirrored()) {
             mirrorRepository().ifPresent(repo -> repo.registerMirroredType(this));
         }
     }
 
-    protected boolean shouldBeMirrored() {
+    /**
+     * Returns {@code true} if the aggregates of this repository should be mirrored.
+     *
+     * <p>When the entity is mirrored, its latest state is stored in a dedicated system
+     * {@linkplain io.spine.system.server.MirrorProjection projection}, allowing for efficient
+     * querying from outside.
+     *
+     * <p>All aggregates visible for querying or subscribing should be mirrored.
+     */
+    private boolean shouldBeMirrored() {
         boolean shouldBeMirrored = aggregateClass().visibility()
                                                    .isNotNone();
         return shouldBeMirrored;

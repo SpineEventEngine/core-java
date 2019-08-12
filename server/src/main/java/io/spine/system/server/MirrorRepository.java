@@ -86,10 +86,16 @@ public final class MirrorRepository
                : ImmutableSet.of();
     }
 
+    /**
+     * Registers a {@code repository} state type as mirrored by this {@code MirrorRepository}.
+     */
     public void registerMirroredType(Repository<?, ?> repository) {
         addMirroredType(repository.entityStateType());
     }
 
+    /**
+     * Returns {@code true} if the given type is mirrored by this {@code MirrorRepository}.
+     */
     public boolean isMirrored(TypeUrl type) {
         return mirroredTypes.contains(type);
     }
