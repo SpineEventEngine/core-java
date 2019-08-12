@@ -46,6 +46,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.client.Filters.all;
@@ -91,11 +92,13 @@ public abstract class AggregateStorage<I>
      *         the repository storing mirror {@linkplain MirrorProjection projections}
      * @param stateType
      *         the state type of a stored {@code Aggregate}
+     * @throws IllegalStateException
+     *         if the state type of a stored {@code Aggregate} is not mirrored by the
+     *         {@code MirrorRepository}
      */
-    @SuppressWarnings("unchecked") // Ensured logically.
     void configureMirror(MirrorRepository mirrorRepository, TypeUrl stateType) {
-        Mirror.configure(mirrorRepository, stateType, isMultitenant())
-              .ifPresent(m -> aggregateMirror = (Mirror<I>) m);
+        checkState(mirrorRepository.isMirroring(stateType));
+        aggregateMirror = new Mirror<>(mirrorRepository, stateType, isMultitenant());
     }
 
     /**
@@ -332,17 +335,6 @@ public abstract class AggregateStorage<I>
             this.mirrorRepository = repository;
             this.stateType = stateType;
             this.multitenant = multitenant;
-        }
-
-        /**
-         * Returns a new instance of {@code Mirror} or {@code Optional.empty()} if the specified
-         * aggregate type does not have a mirror.
-         */
-        private static Optional<Mirror<?>>
-        configure(MirrorRepository repository, TypeUrl stateType, boolean multitenant) {
-            return repository.isMirroring(stateType)
-                   ? Optional.of(new Mirror<>(repository, stateType, multitenant))
-                   : Optional.empty();
         }
 
         /**

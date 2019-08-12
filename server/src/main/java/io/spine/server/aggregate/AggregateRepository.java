@@ -277,7 +277,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateStorage<I> createStorage() {
         StorageFactory sf = defaultStorageFactory();
         AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
-        mirrorRepository().ifPresent(repo -> result.configureMirror(repo, entityStateType()));
         return result;
     }
 
@@ -478,7 +477,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private void initMirror() {
         if (shouldBeMirrored()) {
-            mirrorRepository().ifPresent(repo -> repo.registerMirroredType(this));
+            mirrorRepository().ifPresent(repo -> {
+                repo.registerMirroredType(this);
+                aggregateStorage().configureMirror(repo, entityStateType());
+            });
         }
     }
 
