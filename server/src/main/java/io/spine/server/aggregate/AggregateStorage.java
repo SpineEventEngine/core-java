@@ -98,7 +98,8 @@ public abstract class AggregateStorage<I>
      */
     void configureMirror(MirrorRepository mirrorRepository, TypeUrl stateType) {
         checkState(mirrorRepository.isMirroring(stateType),
-                   "An aggregate type %s is not mirrored by a `MirrorRepository`.", stateType);
+                   "An aggregate of type `%s` is not mirrored by a `MirrorRepository`.",
+                   stateType);
         aggregateMirror = new Mirror<>(mirrorRepository, stateType, isMultitenant());
     }
 
