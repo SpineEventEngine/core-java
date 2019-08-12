@@ -27,6 +27,9 @@ import io.spine.base.EventMessage;
 import io.spine.core.MessageId;
 import io.spine.type.TypeUrl;
 
+/**
+ * A common base for events related to the {@link io.spine.server.entity.Entity Entity} lifecycle.
+ */
 @Immutable
 @GeneratedMixin
 @Internal
