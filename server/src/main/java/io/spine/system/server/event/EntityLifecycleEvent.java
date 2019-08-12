@@ -35,7 +35,6 @@ import io.spine.type.TypeUrl;
 @Internal
 public interface EntityLifecycleEvent extends EventMessage {
 
-    @SuppressWarnings("override") // Implemented in the Protobuf-generated code.
     MessageId getEntity();
 
     default TypeUrl entityType() {
