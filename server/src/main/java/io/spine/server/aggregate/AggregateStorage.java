@@ -340,7 +340,7 @@ public abstract class AggregateStorage<I>
          */
         private static Optional<Mirror<?>>
         configure(MirrorRepository repository, TypeUrl stateType, boolean multitenant) {
-            return repository.isMirrored(stateType)
+            return repository.isMirroring(stateType)
                    ? Optional.of(new Mirror<>(repository, stateType, multitenant))
                    : Optional.empty();
         }

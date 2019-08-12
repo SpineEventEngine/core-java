@@ -75,7 +75,7 @@ public final class MirrorRepository
     private Set<MirrorId> targetsFrom(EntityLifecycleEvent event) {
         TypeUrl type = event.entityType();
         MessageId entityId = event.getEntity();
-        return isMirrored(type)
+        return isMirroring(type)
                ? ImmutableSet.of(idFrom(entityId))
                : ImmutableSet.of();
     }
@@ -90,7 +90,7 @@ public final class MirrorRepository
     /**
      * Returns {@code true} if the given type is mirrored by this {@code MirrorRepository}.
      */
-    public boolean isMirrored(TypeUrl type) {
+    public boolean isMirroring(TypeUrl type) {
         return mirroredTypes.contains(type);
     }
 

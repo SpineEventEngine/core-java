@@ -715,8 +715,8 @@ public class AggregateRepositoryTest {
     @DisplayName("register self among mirrored types in `MirrorRepository`")
     void registerAsMirroredType() {
         MirrorRepository mirrorRepository = mirrorRepository(boundedContext());
-        TypeUrl storedType = TypeUrl.of(Project.class);
-        assertThat(mirrorRepository.isMirrored(storedType)).isTrue();
+        TypeUrl type = TypeUrl.of(Project.class);
+        assertThat(mirrorRepository.isMirroring(type)).isTrue();
     }
 
     @Nested
@@ -731,8 +731,8 @@ public class AggregateRepositoryTest {
                                                           .add(EngineAggregate.class)
                                                           .build();
             MirrorRepository mirrorRepository = mirrorRepository(context);
-            TypeUrl storedType = TypeUrl.of(Project.class);
-            assertThat(mirrorRepository.isMirrored(storedType)).isFalse();
+            TypeUrl type = TypeUrl.of(Project.class);
+            assertThat(mirrorRepository.isMirroring(type)).isFalse();
         }
 
         @Test
@@ -743,8 +743,8 @@ public class AggregateRepositoryTest {
                    .disableAggregateQuerying();
             BoundedContext context = builder.add(ProjectAggregate.class)
                                             .build();
-
             BoundedContext systemContext = systemOf(context);
+
             Optional<Repository> repository = systemContext.findRepository(Mirror.class);
             assertThat(repository).isEmpty();
         }
@@ -754,6 +754,7 @@ public class AggregateRepositoryTest {
         BoundedContext systemContext = systemOf(context);
         Optional<Repository> repository = systemContext.findRepository(Mirror.class);
         assertThat(repository).isPresent();
-        return (MirrorRepository) repository.get();
+        MirrorRepository result = (MirrorRepository) repository.get();
+        return result;
     }
 }
