@@ -352,7 +352,7 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     /**
      * Attempts to find a repository by the state class of entities.
      *
-     * <p>Returns {@code Optional.empty()} either if a repository for the given entity class is not
+     * <p>Returns {@link Optional#empty()} either if a repository for the given entity class is not
      * registered in this context or if the requested entity is {@linkplain Visibility#NONE not
      * visible}.
      *
