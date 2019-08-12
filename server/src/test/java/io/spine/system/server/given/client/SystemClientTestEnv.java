@@ -50,8 +50,8 @@ public class SystemClientTestEnv {
         @SuppressWarnings("unchecked")
         AggregateRepository<ListId, ShoppingListAggregate> repository =
                 (AggregateRepository<ListId, ShoppingListAggregate>)
-                        context.findRepository(ShoppingList.class)
-                               .orElseGet(() -> fail("Aggregate repository should be registered."));
+                        context.repositoryFor(ShoppingList.class)
+                               .orElseGet(() -> fail("Aggregate repository should be visible."));
         ShoppingListAggregate aggregate =
                 repository.find(aggregateId)
                           .orElseGet(() -> fail("Aggregate should be present."));
@@ -60,8 +60,8 @@ public class SystemClientTestEnv {
 
     public static MealOrderProjection findProjection(OrderId projectionId, BoundedContext context) {
         MealOrderRepository repository = (MealOrderRepository)
-                context.findRepository(MealOrder.class)
-                       .orElseGet(() -> fail("Projection repository should be registered."));
+                context.repositoryFor(MealOrder.class)
+                       .orElseGet(() -> fail("Projection repository should be visible."));
         MealOrderProjection projection =
                 repository.find(projectionId)
                           .orElseGet(() -> fail("Projection should be present."));
