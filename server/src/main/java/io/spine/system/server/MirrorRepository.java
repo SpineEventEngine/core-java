@@ -31,7 +31,6 @@ import io.spine.client.ResponseFormat;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
 import io.spine.core.MessageId;
-import io.spine.option.EntityOption.Kind;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
@@ -52,14 +51,9 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
 /**
  * The repository for {@link Mirror} projections.
  *
- * <p>An entity has a mirror if all of the following conditions are met:
- * <ul>
- *     <li>the entity repository is registered in a domain bounded context;
- *     <li>the entity state is marked as an {@link Kind#AGGREGATE AGGREGATE};
- *     <li>the aggregate is visible for querying or subscribing.
- * </ul>
- *
- * <p>In other cases, an entity won't have a {@link Mirror}.
+ * <p>The mirrored entity types are gathered at runtime and are usually
+ * {@linkplain #registerMirroredType(Repository) registered} by the corresponding entity
+ * repositories.
  */
 @Internal
 public final class MirrorRepository
