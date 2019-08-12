@@ -750,7 +750,7 @@ public class AggregateRepositoryTest {
 
     private static MirrorRepository mirrorRepository(BoundedContext context) {
         BoundedContext systemContext = systemOf(context);
-        Optional<Repository> repository = systemContext.repositoryFor(Mirror.class);
+        Optional<Repository> repository = systemContext.findRepository(Mirror.class);
         assertThat(repository).isPresent();
         MirrorRepository result = (MirrorRepository) repository.get();
         return result;

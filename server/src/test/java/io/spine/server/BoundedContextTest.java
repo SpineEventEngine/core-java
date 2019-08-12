@@ -366,7 +366,7 @@ class BoundedContextTest {
     void throwOnNoRepoRegistered() {
         // Attempt to get a repository without registering.
         assertThrows(IllegalStateException.class,
-                     () -> context.repositoryFor(Project.class));
+                     () -> context.findRepository(Project.class));
     }
 
     @Test
@@ -376,7 +376,7 @@ class BoundedContextTest {
 
         context.register(new SecretProjectRepository());
 
-        Truth8.assertThat(context.repositoryFor(SecretProject.class))
+        Truth8.assertThat(context.findRepository(SecretProject.class))
               .isEmpty();
     }
 

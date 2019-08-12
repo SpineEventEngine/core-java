@@ -75,7 +75,7 @@ class ScheduledCommandTest {
         context = contextBuilder.build();
         context.register(DefaultRepository.of(CompanyAggregate.class));
         BoundedContext system = systemOf(this.context);
-        Optional<Repository> found = system.repositoryFor(ScheduledCommandRecord.class);
+        Optional<Repository> found = system.findRepository(ScheduledCommandRecord.class);
         assertTrue(found.isPresent());
         @SuppressWarnings("unchecked") // @Internal API. OK for tests.
         RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository =

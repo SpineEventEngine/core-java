@@ -50,7 +50,7 @@ public class SystemClientTestEnv {
         @SuppressWarnings("unchecked")
         AggregateRepository<ListId, ShoppingListAggregate> repository =
                 (AggregateRepository<ListId, ShoppingListAggregate>)
-                        context.repositoryFor(ShoppingList.class)
+                        context.findRepository(ShoppingList.class)
                                .orElseGet(() -> fail("Aggregate repository should be visible."));
         ShoppingListAggregate aggregate =
                 repository.find(aggregateId)
@@ -60,7 +60,7 @@ public class SystemClientTestEnv {
 
     public static MealOrderProjection findProjection(OrderId projectionId, BoundedContext context) {
         MealOrderRepository repository = (MealOrderRepository)
-                context.repositoryFor(MealOrder.class)
+                context.findRepository(MealOrder.class)
                        .orElseGet(() -> fail("Projection repository should be visible."));
         MealOrderProjection projection =
                 repository.find(projectionId)
