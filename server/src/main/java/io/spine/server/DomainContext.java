@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>All the user interactions with the system (such as
  * {@linkplain BoundedContext#register(Repository) repository registration},
  * {@linkplain BoundedContext#commandBus() command posting},
- * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
+ * {@linkplain BoundedContext#repositoryFor(Class) query processing}, etc.) happen through
  * an instance of this class.
  *
  * <p>Each {@code DomainContext} has an associated

@@ -62,7 +62,10 @@ final class DefaultSystemClient implements SystemClient {
 
     @Override
     public Optional<Repository> systemRepositoryFor(Class<? extends Message> stateClass) {
-        return context.findRepository(stateClass);
+        if (!context.hasEntitiesWithState(stateClass)) {
+            return Optional.empty();
+        }
+        return context.repositoryFor(stateClass);
     }
 
     @Override

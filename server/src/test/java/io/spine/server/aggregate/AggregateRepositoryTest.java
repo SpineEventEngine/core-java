@@ -744,15 +744,13 @@ public class AggregateRepositoryTest {
             BoundedContext context = builder.add(ProjectAggregate.class)
                                             .build();
             BoundedContext systemContext = systemOf(context);
-
-            Optional<Repository> repository = systemContext.findRepository(Mirror.class);
-            assertThat(repository).isEmpty();
+            assertThat(systemContext.hasEntitiesWithState(Mirror.class)).isFalse();
         }
     }
 
     private static MirrorRepository mirrorRepository(BoundedContext context) {
         BoundedContext systemContext = systemOf(context);
-        Optional<Repository> repository = systemContext.findRepository(Mirror.class);
+        Optional<Repository> repository = systemContext.repositoryFor(Mirror.class);
         assertThat(repository).isPresent();
         MirrorRepository result = (MirrorRepository) repository.get();
         return result;

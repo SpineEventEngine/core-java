@@ -90,7 +90,7 @@ class MirrorRepositoryTest {
         domainContext.register(newPhotosRepository());
 
         repository = (MirrorRepository) systemContext
-                .findRepository(Mirror.class)
+                .repositoryFor(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
         queries = new TestActorRequestFactory(MirrorRepositoryTest.class).query();
 

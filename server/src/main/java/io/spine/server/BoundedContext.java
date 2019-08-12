@@ -350,30 +350,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
     }
 
     /**
-     * Attempts to find a repository by the state class of entities.
-     *
-     * <p>Returns {@link Optional#empty()} if:
-     * <ol>
-     *     <li>A repository for the given entity class is not registered in this context.
-     *     <li>The requested entity is {@linkplain Visibility#NONE not visible}.
-     * </ol>
-     *
-     * @param entityStateClass
-     *         the class of the state of the entity managed by the resulting repository
-     * @return the requested repository or {@link Optional#empty()} if it's not found or not
-     *         visible
-     * @see VisibilityGuard
-     */
-    @Internal
-    public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
-        if (!guard.hasRepository(entityStateClass)) {
-            return Optional.empty();
-        }
-        Optional<Repository> repository = guard.repositoryFor(entityStateClass);
-        return repository;
-    }
-
-    /**
      * Obtains a repository by the state class of entities.
      *
      * <p>This method assumes that a repository for the given entity state class <b>is</b>
@@ -409,7 +385,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #repositoryFor(Class)
      */
-    @VisibleForTesting
     public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
         EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
         boolean result = guard.hasRepository(cls.stateClass());
@@ -423,7 +398,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #repositoryFor(Class)
      */
-    @VisibleForTesting
     public boolean hasEntitiesWithState(Class<? extends Message> stateClass) {
         boolean result = guard.hasRepository(stateClass);
         return result;

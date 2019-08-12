@@ -62,7 +62,7 @@ final class DefaultSystemReadSide implements SystemReadSide {
     @Override
     public Iterator<EntityStateWithVersion> readDomainAggregate(Query query) {
         MirrorRepository repository = (MirrorRepository)
-                context.findRepository(Mirror.class)
+                context.repositoryFor(Mirror.class)
                        .orElseThrow(
                                () -> newIllegalStateException(
                                        "Mirror projection repository is not registered in `%s`.",
