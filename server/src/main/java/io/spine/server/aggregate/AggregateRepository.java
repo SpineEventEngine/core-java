@@ -148,7 +148,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .register(EventImportDispatcher.of(this));
         }
         initInbox();
-        registerWithinMirror();
+        initMirror();
     }
 
     /**
@@ -170,12 +170,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private Inbox<I> inbox() {
         return checkNotNull(inbox);
-    }
-
-    private void registerWithinMirror() {
-        if (shouldBeMirrored()) {
-            mirrorRepository().ifPresent(repo -> repo.addMirror(this));
-        }
     }
 
     /**
@@ -476,6 +470,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
+    }
+
+    private void initMirror() {
+        if (shouldBeMirrored()) {
+            mirrorRepository().ifPresent(repo -> repo.registerMirroredType(this));
+        }
     }
 
     protected boolean shouldBeMirrored() {

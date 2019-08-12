@@ -86,7 +86,7 @@ public final class MirrorRepository
                : ImmutableSet.of();
     }
 
-    public void addMirror(Repository<?, ?> repository) {
+    public void registerMirroredType(Repository<?, ?> repository) {
         addMirroredType(repository.entityStateType());
     }
 
