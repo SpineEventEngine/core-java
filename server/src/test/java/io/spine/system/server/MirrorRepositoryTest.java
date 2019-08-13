@@ -34,12 +34,12 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.test.system.server.IncompleteAudio;
-import io.spine.test.system.server.LocalizedVideo;
-import io.spine.test.system.server.Photo;
-import io.spine.test.system.server.PhotoId;
-import io.spine.test.system.server.Video;
-import io.spine.test.system.server.VideoId;
+import io.spine.test.system.server.MRIncompleteAudio;
+import io.spine.test.system.server.MRLocalizedVideo;
+import io.spine.test.system.server.MRPhoto;
+import io.spine.test.system.server.MRPhotoId;
+import io.spine.test.system.server.MRVideo;
+import io.spine.test.system.server.MRVideoId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.type.TypeUrl;
@@ -61,12 +61,13 @@ import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.archived;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.cause;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.deleted;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.entityStateChanged;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.event;
-import static io.spine.system.server.given.mirror.RepositoryTestEnv.givenPhotos;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.archived;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.cause;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.deleted;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.entityStateChanged;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.event;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.givenPhotos;
+import static io.spine.system.server.given.mirror.MirrorRepositoryTestEnv.newPhotosRepository;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -79,12 +80,15 @@ class MirrorRepositoryTest {
     private MirrorRepository repository;
     private QueryFactory queries;
 
-    private Map<MessageId, Photo> givenPhotos;
+    private Map<MessageId, MRPhoto> givenPhotos;
 
     @BeforeEach
     void setUp() {
-        BoundedContext domainContext = BoundedContextBuilder.assumingTests(false).build();
+        BoundedContext domainContext = BoundedContextBuilder.assumingTests(false)
+                                                            .build();
         BoundedContext systemContext = systemOf(domainContext);
+        domainContext.register(newPhotosRepository());
+
         repository = (MirrorRepository) systemContext
                 .findRepository(Mirror.class)
                 .orElseGet(() -> fail("MirrorRepository must be registered."));
@@ -105,7 +109,7 @@ class MirrorRepositoryTest {
             @Test
             @DisplayName("find all instances")
             void includeAll() {
-                Query query = queries.all(Photo.class);
+                Query query = queries.all(MRPhoto.class);
                 List<? extends Message> readMessages = execute(query);
                 assertThat(readMessages, containsInAnyOrder(givenPhotos.values()
                                                                        .toArray()));
@@ -114,17 +118,17 @@ class MirrorRepositoryTest {
             @Test
             @DisplayName("find an instance by ID")
             void byId() {
-                Photo target = onePhoto();
+                MRPhoto target = onePhoto();
                 readAndCheck(target);
             }
 
             @Test
             @DisplayName("find an archived aggregate by ID")
             void archivedInstance() {
-                Photo target = onePhoto();
+                MRPhoto target = onePhoto();
                 archive(target);
-                PhotoId targetId = target.getId();
-                Query query = queries.select(Photo.class)
+                MRPhotoId targetId = target.getId();
+                Query query = queries.select(MRPhoto.class)
                                      .byId(targetId)
                                      .where(eq(archived.name(), true))
                                      .build();
@@ -134,10 +138,10 @@ class MirrorRepositoryTest {
             @Test
             @DisplayName("find a deleted aggregate by ID")
             void deletedInstance() {
-                Photo target = onePhoto();
+                MRPhoto target = onePhoto();
                 delete(target);
-                PhotoId targetId = target.getId();
-                Query query = queries.select(Photo.class)
+                MRPhotoId targetId = target.getId();
+                Query query = queries.select(MRPhoto.class)
                                      .byId(targetId)
                                      .where(eq(deleted.name(), true))
                                      .build();
@@ -147,12 +151,12 @@ class MirrorRepositoryTest {
             @Test
             @DisplayName("find all archived instances")
             void allArchived() {
-                Photo firstPhoto = onePhoto();
-                Photo secondPhoto = anotherPhoto();
+                MRPhoto firstPhoto = onePhoto();
+                MRPhoto secondPhoto = anotherPhoto();
                 archive(firstPhoto);
                 archive(secondPhoto);
 
-                Query query = queries.select(Photo.class)
+                Query query = queries.select(MRPhoto.class)
                                      .where(eq(archived.name(), true),
                                             eq(deleted.name(), false))
                                      .build();
@@ -162,39 +166,39 @@ class MirrorRepositoryTest {
             @Test
             @DisplayName("find all deleted instances")
             void allDeleted() {
-                Photo firstPhoto = onePhoto();
-                Photo secondPhoto = anotherPhoto();
+                MRPhoto firstPhoto = onePhoto();
+                MRPhoto secondPhoto = anotherPhoto();
                 delete(firstPhoto);
                 delete(secondPhoto);
 
-                Query query = queries.select(Photo.class)
+                Query query = queries.select(MRPhoto.class)
                                      .where(eq(deleted.name(), true),
                                             eq(archived.name(), false))
                                      .build();
                 checkRead(query, firstPhoto, secondPhoto);
             }
 
-            private void readAndCheck(Photo target) {
-                PhotoId targetId = target.getId();
-                Query query = queries.byIds(Photo.class, ImmutableSet.of(targetId));
+            private void readAndCheck(MRPhoto target) {
+                MRPhotoId targetId = target.getId();
+                Query query = queries.byIds(MRPhoto.class, ImmutableSet.of(targetId));
                 checkRead(query, target);
             }
 
-            private void checkRead(Query query, Photo... expected) {
+            private void checkRead(Query query, MRPhoto... expected) {
                 List<? extends Message> readMessages = execute(query);
                 assertThat(readMessages, containsInAnyOrder(expected));
             }
 
-            private Photo onePhoto() {
-                Photo target = givenPhotos.values()
+            private MRPhoto onePhoto() {
+                MRPhoto target = givenPhotos.values()
                                           .stream()
                                           .findFirst()
                                           .orElseGet(() -> fail("No test data."));
                 return target;
             }
 
-            private Photo anotherPhoto() {
-                Photo target = givenPhotos.values()
+            private MRPhoto anotherPhoto() {
+                MRPhoto target = givenPhotos.values()
                                           .stream()
                                           .skip(1)
                                           .findFirst()
@@ -204,11 +208,11 @@ class MirrorRepositoryTest {
                 return target;
             }
 
-            private void archive(Photo photo) {
+            private void archive(MRPhoto photo) {
                 dispatchEvent(archived(photo));
             }
 
-            private void delete(Photo photo) {
+            private void delete(MRPhoto photo) {
                 dispatchEvent(deleted(photo));
             }
         }
@@ -225,7 +229,7 @@ class MirrorRepositoryTest {
         @Test
         @DisplayName("for an aggregate type which is not present")
         void notPresent() {
-            Query query = queries.all(Video.class);
+            Query query = queries.all(MRVideo.class);
 
             Collection<?> result = execute(query);
             assertTrue(result.isEmpty());
@@ -239,9 +243,9 @@ class MirrorRepositoryTest {
         @Test
         @DisplayName("to nowhere if the event is not on an aggregate update")
         void projection() {
-            VideoId videoId = VideoId.generate();
-            TypeUrl projectionType = TypeUrl.of(LocalizedVideo.class);
-            dispatchStateChanged(projectionType, videoId, LocalizedVideo.getDefaultInstance());
+            MRVideoId videoId = MRVideoId.generate();
+            TypeUrl projectionType = TypeUrl.of(MRLocalizedVideo.class);
+            dispatchStateChanged(projectionType, videoId, MRLocalizedVideo.getDefaultInstance());
 
             checkNotFound(projectionType);
         }
@@ -251,8 +255,8 @@ class MirrorRepositoryTest {
         @MuteLogging
         void incompleteAggregate() {
             String id = newUuid();
-            TypeUrl type = TypeUrl.of(IncompleteAudio.class);
-            dispatchStateChanged(type, Identifier.pack(id), IncompleteAudio.getDefaultInstance());
+            TypeUrl type = TypeUrl.of(MRIncompleteAudio.class);
+            dispatchStateChanged(type, Identifier.pack(id), MRIncompleteAudio.getDefaultInstance());
 
             checkNotFound(type);
         }

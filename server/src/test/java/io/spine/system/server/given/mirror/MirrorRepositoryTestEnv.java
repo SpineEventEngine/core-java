@@ -30,11 +30,19 @@ import io.spine.core.MessageId;
 import io.spine.core.Versions;
 import io.spine.net.Url;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.DefaultRepository;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.entity.Repository;
+import io.spine.system.server.MRUploadPhoto;
 import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityStateChanged;
-import io.spine.test.system.server.Photo;
-import io.spine.test.system.server.PhotoId;
+import io.spine.test.system.server.MRPhoto;
+import io.spine.test.system.server.MRPhotoId;
+import io.spine.test.system.server.MRPhotoUploaded;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 
@@ -44,22 +52,22 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.server.TestEventFactory.newInstance;
 
-public class RepositoryTestEnv {
+public final class MirrorRepositoryTestEnv {
 
-    public static final TestEventFactory events = newInstance(RepositoryTestEnv.class);
+    public static final TestEventFactory events = newInstance(MirrorRepositoryTestEnv.class);
 
     /**
      * Prevents the utility class instantiation.
      */
-    private RepositoryTestEnv() {
+    private MirrorRepositoryTestEnv() {
     }
 
-    public static Map<MessageId, Photo> givenPhotos() {
-        Photo spineLogo = newPhoto("spine.io/logo", "Spine Logo");
-        Photo projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
-        Photo jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
-        Map<MessageId, Photo> map = ImmutableMap
-                .<MessageId, Photo>builder()
+    public static Map<MessageId, MRPhoto> givenPhotos() {
+        MRPhoto spineLogo = newPhoto("spine.io/logo", "Spine Logo");
+        MRPhoto projectsLogo = newPhoto("projects.tm/logo", "Projects Logo");
+        MRPhoto jxBrowserLogo = newPhoto("teamdev.com/jxbrowser/logo", "JxBrowser Logo");
+        Map<MessageId, MRPhoto> map = ImmutableMap
+                .<MessageId, MRPhoto>builder()
                 .put(historyIdOf(spineLogo), spineLogo)
                 .put(historyIdOf(projectsLogo), projectsLogo)
                 .put(historyIdOf(jxBrowserLogo), jxBrowserLogo)
@@ -67,7 +75,7 @@ public class RepositoryTestEnv {
         return map;
     }
 
-    private static Photo newPhoto(String url, String altText) {
+    private static MRPhoto newPhoto(String url, String altText) {
         Url fullSizeUrl = Url
                 .newBuilder()
                 .setSpec(url)
@@ -76,9 +84,9 @@ public class RepositoryTestEnv {
                 .newBuilder()
                 .setSpec(url + "-thumbnail")
                 .buildPartial();
-        Photo photo = Photo
+        MRPhoto photo = MRPhoto
                 .newBuilder()
-                .setId(PhotoId.generate())
+                .setId(MRPhotoId.generate())
                 .setFullSizeUrl(fullSizeUrl)
                 .setThumbnailUrl(thumbnail)
                 .setAltText(altText)
@@ -86,9 +94,9 @@ public class RepositoryTestEnv {
         return photo;
     }
 
-    private static MessageId historyIdOf(Photo photo) {
+    private static MessageId historyIdOf(MRPhoto photo) {
         Any id = pack(photo.getId());
-        TypeUrl typeUrl = TypeUrl.of(Photo.class);
+        TypeUrl typeUrl = TypeUrl.of(MRPhoto.class);
         MessageId historyId = MessageId
                 .newBuilder()
                 .setId(id)
@@ -123,7 +131,7 @@ public class RepositoryTestEnv {
         return messageId;
     }
 
-    public static Event archived(Photo aggregate) {
+    public static Event archived(MRPhoto aggregate) {
         MessageId entityId = historyIdOf(aggregate);
         EntityArchived archived = EntityArchived
                 .newBuilder()
@@ -134,7 +142,7 @@ public class RepositoryTestEnv {
         return event(archived);
     }
 
-    public static Event deleted(Photo aggregate) {
+    public static Event deleted(MRPhoto aggregate) {
         MessageId historyId = historyIdOf(aggregate);
         EntityDeleted deleted = EntityDeleted
                 .newBuilder()
@@ -147,5 +155,33 @@ public class RepositoryTestEnv {
 
     public static Event event(EventMessage eventMessage) {
         return events.createEvent(eventMessage);
+    }
+
+    public static AggregateRepository<MRPhotoId, PhotoAggregate> newPhotosRepository() {
+        Repository<MRPhotoId, PhotoAggregate> repository = DefaultRepository.of(PhotoAggregate.class);
+        return (AggregateRepository<MRPhotoId, PhotoAggregate>) repository;
+    }
+
+    private static class PhotoAggregate extends Aggregate<MRPhotoId, MRPhoto, MRPhoto.Builder> {
+
+        @Assign
+        MRPhotoUploaded handle(MRUploadPhoto cmd) {
+            MRPhotoUploaded event = MRPhotoUploaded
+                    .newBuilder()
+                    .setId(cmd.getId())
+                    .setFullSizeUrl(cmd.getFullSizeUrl())
+                    .setThumbnailUrl(cmd.getThumbnailUrl())
+                    .setAltText(cmd.getAltText())
+                    .vBuild();
+            return event;
+        }
+
+        @Apply
+        private void on(MRPhotoUploaded event) {
+            builder().setId(event.getId())
+                     .setFullSizeUrl(event.getFullSizeUrl())
+                     .setThumbnailUrl(event.getThumbnailUrl())
+                     .setAltText(event.getAltText());
+        }
     }
 }

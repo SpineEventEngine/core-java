@@ -11,20 +11,20 @@ option java_multiple_files = true;
 
 import "spine/net/url.proto";
 
-message PhotoId {
+message MRPhotoId {
 
     string uuid = 1;
 }
 
-message VideoId {
+message MRVideoId {
 
     string uuid = 1;
 }
 
-message Photo {
+message MRPhoto {
     option (entity) = {kind: AGGREGATE visibility: QUERY};
 
-    PhotoId id = 1;
+    MRPhotoId id = 1;
 
     spine.net.Url full_size_url = 2 [(validate) = true];
 
@@ -33,12 +33,12 @@ message Photo {
     string alt_text = 4;
 }
 
-message Video {
+message MRVideo {
     option (entity) = {kind: AGGREGATE visibility: QUERY};
 
-    VideoId id = 1;
+    MRVideoId id = 1;
 
-    PhotoId title_shot = 2 [(validate) = true];
+    MRPhotoId title_shot = 2 [(validate) = true];
 
     spine.net.Url file_url = 3 [(validate) = true];
 
@@ -47,12 +47,12 @@ message Video {
     map<string, spine.net.Url> subtitles_url = 5 [(validate) = true, (required) = false];
 }
 
-message LocalizedVideo {
+message MRLocalizedVideo {
     option (entity).kind = PROJECTION;
 
-    VideoId id = 1;
+    MRVideoId id = 1;
 
-    PhotoId title_shot = 2 [(validate) = true];
+    MRPhotoId title_shot = 2 [(validate) = true];
 
     spine.net.Url file_url = 3 [(validate) = true];
 
@@ -64,7 +64,7 @@ message LocalizedVideo {
 // This aggregate design is not complete and the aggregate is not production-ready, so
 // the `(entity)` option is absent.
 //
-message IncompleteAudio {
+message MRIncompleteAudio {
 
     string id = 1;
 

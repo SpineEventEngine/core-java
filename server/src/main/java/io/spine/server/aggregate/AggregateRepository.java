@@ -148,6 +148,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .register(EventImportDispatcher.of(this));
         }
         initInbox();
+        initMirror();
     }
 
     /**
@@ -276,10 +277,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateStorage<I> createStorage() {
         StorageFactory sf = defaultStorageFactory();
         AggregateStorage<I> result = sf.createAggregateStorage(context().spec(), entityClass());
-        Optional<MirrorRepository> mirrorRepository = context().systemClient()
-                                                               .systemRepositoryFor(Mirror.class)
-                                                               .map(MirrorRepository.class::cast);
-        mirrorRepository.ifPresent(repo -> result.configureMirror(repo, aggregateClass()));
         return result;
     }
 
@@ -472,6 +469,47 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
+    }
+
+    /**
+     * Sets up entity state {@linkplain MirrorRepository mirroring} for the aggregates of this
+     * repository.
+     */
+    private void initMirror() {
+        if (shouldBeMirrored()) {
+            mirrorRepository().ifPresent(repo -> {
+                repo.registerMirroredType(this);
+                aggregateStorage().configureMirror(repo, entityStateType());
+            });
+        }
+    }
+
+    /**
+     * Returns {@code true} if the aggregates of this repository should be mirrored.
+     *
+     * <p>When the entity is mirrored, its latest state is stored in a dedicated system
+     * {@linkplain io.spine.system.server.MirrorProjection projection}, allowing for efficient
+     * querying from outside.
+     *
+     * <p>All aggregates visible for querying or subscribing should be mirrored.
+     */
+    private boolean shouldBeMirrored() {
+        boolean shouldBeMirrored = aggregateClass().visibility()
+                                                   .isNotNone();
+        return shouldBeMirrored;
+    }
+
+    /**
+     * Returns a {@link MirrorRepository} of a corresponding {@link BoundedContext}.
+     *
+     * <p>Returns {@code Optional.empty()} if aggregate mirroring is
+     * {@linkplain io.spine.system.server.SystemFeatures disabled} in the system context.
+     */
+    private Optional<MirrorRepository> mirrorRepository() {
+        Optional<MirrorRepository> result = context().systemClient()
+                                                     .systemRepositoryFor(Mirror.class)
+                                                     .map(MirrorRepository.class::cast);
+        return result;
     }
 
     /**

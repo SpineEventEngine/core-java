@@ -28,6 +28,8 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.repo.FailingAggregateRepository;
@@ -40,6 +42,7 @@ import io.spine.server.aggregate.given.repo.RejectingRepository;
 import io.spine.server.aggregate.given.repo.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.repo.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -47,6 +50,9 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.HandlerFailedUnexpectedly;
+import io.spine.system.server.Mirror;
+import io.spine.system.server.MirrorRepository;
+import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
@@ -63,6 +69,7 @@ import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -88,6 +95,7 @@ import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.re
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
@@ -701,5 +709,50 @@ public class AggregateRepositoryTest {
     void notAllowAnemicAggregates() {
         assertThrows(IllegalStateException.class,
                      () -> boundedContext().register(new AnemicAggregateRepository()));
+    }
+
+    @Test
+    @DisplayName("register self among mirrored types in `MirrorRepository`")
+    void registerAsMirroredType() {
+        MirrorRepository mirrorRepository = mirrorRepository(boundedContext());
+        TypeUrl type = TypeUrl.of(Project.class);
+        assertThat(mirrorRepository.isMirroring(type)).isTrue();
+    }
+
+    @Nested
+    @DisplayName("not register self among mirrored types")
+    class NotRegisterAsMirroredType {
+
+        @Test
+        @DisplayName("if the aggregate visibility is `NONE`")
+        void ifVisibilityIsNone() {
+            // `Engine` aggregate has default visibility, which is `NONE`.
+            BoundedContext context = BoundedContextBuilder.assumingTests()
+                                                          .add(EngineAggregate.class)
+                                                          .build();
+            MirrorRepository mirrorRepository = mirrorRepository(context);
+            TypeUrl type = TypeUrl.of(Project.class);
+            assertThat(mirrorRepository.isMirroring(type)).isFalse();
+        }
+
+        @Test
+        @DisplayName("if aggregate querying is disabled")
+        void ifAggregateQueryingDisabled() {
+            BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
+            builder.systemFeatures()
+                   .disableAggregateQuerying();
+            BoundedContext context = builder.add(ProjectAggregate.class)
+                                            .build();
+            BoundedContext systemContext = systemOf(context);
+            assertThat(systemContext.hasEntitiesWithState(Mirror.class)).isFalse();
+        }
+    }
+
+    private static MirrorRepository mirrorRepository(BoundedContext context) {
+        BoundedContext systemContext = systemOf(context);
+        Optional<Repository> repository = systemContext.findRepository(Mirror.class);
+        assertThat(repository).isPresent();
+        MirrorRepository result = (MirrorRepository) repository.get();
+        return result;
     }
 }

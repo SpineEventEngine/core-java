@@ -29,12 +29,13 @@ import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.system.server.given.mirror.ProjectionTestEnv.ID;
-import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityArchived;
-import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityDeleted;
-import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityExtracted;
-import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityRestored;
-import static io.spine.system.server.given.mirror.ProjectionTestEnv.entityStateChanged;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.AGGREGATE_TYPE_URL;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.ID;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityArchived;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityDeleted;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityExtracted;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityRestored;
+import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityStateChanged;
 
 @DisplayName("Mirror projection should")
 class MirrorProjectionTest {
@@ -125,8 +126,10 @@ class MirrorProjectionTest {
     }
 
     private static SingleTenantBlackBoxContext context() {
+        MirrorRepository mirrorRepository = new MirrorRepository();
+        mirrorRepository.addMirroredType(AGGREGATE_TYPE_URL);
         return BlackBoxBoundedContext
                 .singleTenant()
-                .with(new MirrorRepository());
+                .with(mirrorRepository);
     }
 }

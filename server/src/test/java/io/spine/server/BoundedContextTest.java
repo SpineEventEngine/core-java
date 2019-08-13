@@ -362,8 +362,8 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("throw ISE when no repository is found for specified entity state class")
-    void throwOnNoRepoFound() {
+    @DisplayName("throw ISE when obtaining a repository for non-registered entity state class")
+    void throwOnNoRepoRegistered() {
         // Attempt to get a repository without registering.
         assertThrows(IllegalStateException.class,
                      () -> context.findRepository(Project.class));

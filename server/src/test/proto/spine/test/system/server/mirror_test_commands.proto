@@ -18,22 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+syntax = "proto3";
 
-def final SPINE_VERSION = '1.0.2-SNAPSHOT'
+package spine.test.system.server;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+import "spine/options.proto";
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.1'
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "MirrorTestCommandsProto";
+option java_multiple_files = true;
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.1'
+import "spine/net/url.proto";
+import "spine/test/system/server/mirror_test.proto";
+
+message MRUploadPhoto {
+
+    MRPhotoId id = 1;
+
+    spine.net.Url full_size_url = 2 [(validate) = true];
+
+    spine.net.Url thumbnail_url = 3 [(validate) = true, (required) = false];
+
+    string alt_text = 4;
 }

@@ -385,7 +385,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #findRepository(Class)
      */
-    @VisibleForTesting
     public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
         EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
         boolean result = guard.hasRepository(cls.stateClass());
@@ -399,7 +398,6 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
      *
      * @see #findRepository(Class)
      */
-    @VisibleForTesting
     public boolean hasEntitiesWithState(Class<? extends Message> stateClass) {
         boolean result = guard.hasRepository(stateClass);
         return result;

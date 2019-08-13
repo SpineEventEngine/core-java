@@ -18,22 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.system.server.event;
+
+import com.google.errorprone.annotations.Immutable;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
+import io.spine.core.MessageId;
+import io.spine.type.TypeUrl;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * A common base for events describing the {@link io.spine.server.entity.Entity Entity} lifecycle.
  */
+@Immutable
+@GeneratedMixin
+@Internal
+public interface EntityLifecycleEvent extends EventMessage {
 
-def final SPINE_VERSION = '1.0.2-SNAPSHOT'
+    MessageId getEntity();
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.1'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.1'
+    default TypeUrl entityType() {
+        String typeUrl = getEntity().getTypeUrl();
+        TypeUrl result = TypeUrl.parse(typeUrl);
+        return result;
+    }
 }
