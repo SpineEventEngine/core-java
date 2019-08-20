@@ -71,12 +71,12 @@ import static io.spine.validate.Validate.isNotDefault;
  * <p>To create a new aggregate class:
  * <ol>
  *     <li>Select a type for identifiers of the aggregate.
- *      If you select to use a typed identifier (which is recommended),
- *      define a protobuf message for the ID type.
+ *         If you select to use a typed identifier (which is recommended),
+ *         define a protobuf message for the ID type.
  *     <li>Define the structure of the aggregate state as a Protobuf message.
  *     <li>Generate Java code for ID and state types.
  *     <li>Create new Java class derived from {@code Aggregate} passing ID and
- *     state types as generic parameters.
+ *         state types as generic parameters.
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
