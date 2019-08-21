@@ -21,8 +21,8 @@
 package io.spine.server.entity.given.entity;
 
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.entity.given.Given;
 import io.spine.server.test.shared.EmptyAggregate;
-import io.spine.testing.server.entity.given.Given;
 
 import static io.spine.base.Identifier.newUuid;
 

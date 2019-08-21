@@ -58,7 +58,7 @@ import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
+import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

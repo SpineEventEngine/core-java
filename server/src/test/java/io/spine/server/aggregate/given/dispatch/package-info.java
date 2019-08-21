@@ -19,12 +19,12 @@
  */
 
 /**
- * This package provides test utilities and base classes for the unit tests of
- * {@linkplain io.spine.server.procman.ProcessManager process managers}.
+ * Contains test utilities for creating Aggregates and dispatching signals.
  */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testing.server.procman;
+package io.spine.server.aggregate.given.dispatch;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

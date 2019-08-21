@@ -19,12 +19,12 @@
  */
 
 /**
- * This package provides test utilities and base classes for the unit tests of
- * {@linkplain io.spine.server.projection.Projection projections}.
+ * Contains test utilities for creating Process Managers and dispatching signals.
  */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testing.server.projection;
+package io.spine.server.procman.given.dispatch;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

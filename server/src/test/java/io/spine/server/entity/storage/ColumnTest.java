@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.given.Given;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.given.column.BrokenTestEntity;
 import io.spine.server.entity.storage.given.column.EntityWithCustomColumnNameForStoring;
@@ -30,7 +31,6 @@ import io.spine.server.entity.storage.given.column.EntityWithDefaultColumnNameFo
 import io.spine.server.entity.storage.given.column.EntityWithNotAnnotatedMethod;
 import io.spine.server.entity.storage.given.column.TestAggregate;
 import io.spine.server.entity.storage.given.column.TestEntity;
-import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

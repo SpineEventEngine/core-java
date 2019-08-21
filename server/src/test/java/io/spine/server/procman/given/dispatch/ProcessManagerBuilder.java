@@ -18,61 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.projection;
+package io.spine.server.procman.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionTransaction;
-import io.spine.testing.server.entity.EntityBuilder;
+import io.spine.server.entity.EntityBuilder;
+import io.spine.server.procman.ProcessManager;
 
 /**
- * Utility class for building test {@code Projection}s.
+ * Utility class for building test instances of {@code ProcessManager}.
  *
- * @param <P> the type of the projection to build
- * @param <I> the type of projection IDs
- * @param <S> the type of the projection state
+ * @param <P> the type of process managers
+ * @param <I> the type of process manager identifier
+ * @param <S> the type of the process manager state
  */
 @VisibleForTesting
-public class ProjectionBuilder<P extends Projection<I, S, B>,
-                               I,
-                               S extends Message,
-                               B extends ValidatingBuilder<S>>
+public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
+                                   I,
+                                   S extends Message,
+                                   B extends ValidatingBuilder<S>>
         extends EntityBuilder<P, I, S> {
 
-    /** Creates new instance. */
-    public ProjectionBuilder() {
-        super();
-        // Have the constructor for easier location of usages.
+    public static <P extends ProcessManager<I, S, B>,
+                   I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S>>
+    ProcessManagerBuilder<P, I, S, B> newInstance() {
+        return new ProcessManagerBuilder<>();
     }
 
     @CanIgnoreReturnValue
     @Override
-    public ProjectionBuilder<P, I, S, B> setResultClass(Class<P> entityClass) {
+    public ProcessManagerBuilder<P, I, S, B> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);
         return this;
     }
 
     @Override
     protected void setState(P result, S state, Version version) {
-        TestProjectionTransaction transaction =
-                new TestProjectionTransaction(result, state, version);
+        TestPmTransaction transaction = new TestPmTransaction<>(result, state, version);
         transaction.commit();
-    }
-
-    /**
-     * A test-only implementation of an {@link ProjectionTransaction} that sets the given
-     * {@code state} and {@code version} as a starting point for the transaction.
-     */
-    private final class TestProjectionTransaction extends ProjectionTransaction<I, S, B> {
-
-        private TestProjectionTransaction(Projection<I, S, B> projection,
-                                          S state,
-                                          Version version) {
-            super(projection, state, version);
-        }
     }
 }

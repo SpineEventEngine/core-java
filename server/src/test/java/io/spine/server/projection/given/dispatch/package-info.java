@@ -19,13 +19,12 @@
  */
 
 /**
- * This package provides test utilities and base classes for the unit tests of
- * {@linkplain io.spine.server.aggregate.Aggregate aggregates} and
- * {@linkplain io.spine.server.aggregate.AggregatePart aggregate parts}.
+ * Contains test utilities for creating Projections and dispatching signals.
  */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testing.server.aggregate;
+package io.spine.server.projection.given.dispatch;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

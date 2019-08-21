@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import io.spine.core.Version;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.entity.EntityBuilder;
 
 import static io.spine.base.Identifier.newUuid;
 

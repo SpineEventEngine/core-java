@@ -21,7 +21,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
@@ -50,6 +49,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Iterators.any;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -71,12 +71,12 @@ import static io.spine.validate.Validate.isNotDefault;
  * <p>To create a new aggregate class:
  * <ol>
  *     <li>Select a type for identifiers of the aggregate.
- *      If you select to use a typed identifier (which is recommended),
- *      define a protobuf message for the ID type.
+ *         If you select to use a typed identifier (which is recommended),
+ *         define a protobuf message for the ID type.
  *     <li>Define the structure of the aggregate state as a Protobuf message.
  *     <li>Generate Java code for ID and state types.
  *     <li>Create new Java class derived from {@code Aggregate} passing ID and
- *     state types as generic parameters.
+ *         state types as generic parameters.
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
@@ -435,8 +435,7 @@ public abstract class Aggregate<I,
      */
     protected final boolean historyContains(Predicate<Event> predicate) {
         Iterator<Event> iterator = historyBackward();
-        boolean found = Streams.stream(iterator)
-                               .anyMatch(predicate);
+        boolean found = any(iterator, predicate::test);
         return found;
     }
 
