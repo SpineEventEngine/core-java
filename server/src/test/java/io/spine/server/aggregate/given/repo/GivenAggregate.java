@@ -21,17 +21,17 @@
 package io.spine.server.aggregate.given.repo;
 
 import io.spine.base.CommandMessage;
+import io.spine.server.entity.given.Given;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.entity.given.Given;
 
+import static io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.testdata.Sample.builderForType;
-import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /** Utility factory for test aggregates. */
 public class GivenAggregate {

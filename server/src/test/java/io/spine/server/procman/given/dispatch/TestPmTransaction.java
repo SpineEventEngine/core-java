@@ -18,14 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.procman.given.dispatch;
+
+import com.google.protobuf.Message;
+import io.spine.core.Version;
+import io.spine.protobuf.ValidatingBuilder;
+import io.spine.server.procman.PmTransaction;
+import io.spine.server.procman.ProcessManager;
+
 /**
- * This package provides test utilities and base classes for the unit tests of
- * {@linkplain io.spine.server.projection.Projection projections}.
+ * A test-only implementation of a {@link PmTransaction} that can set the given
+ * {@code state} and {@code version} as a starting point for the transaction.
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.projection;
+final class TestPmTransaction<I, S extends Message, B extends ValidatingBuilder<S>>
+        extends PmTransaction<I, S, B> {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    TestPmTransaction(ProcessManager<I, S, B> processManager) {
+        super(processManager);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    TestPmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+        super(processManager, state, version);
+    }
+}

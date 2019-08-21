@@ -18,14 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides test utilities and base classes for the unit tests of
- * {@linkplain io.spine.server.aggregate.Aggregate aggregates} and
- * {@linkplain io.spine.server.aggregate.AggregatePart aggregate parts}.
- */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testing.server.aggregate;
+package io.spine.server.aggregate.given.dispatch;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

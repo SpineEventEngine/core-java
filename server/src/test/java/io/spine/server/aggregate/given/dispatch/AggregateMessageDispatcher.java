@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.testing.server.aggregate;
+package io.spine.server.aggregate.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -103,25 +103,6 @@ public class AggregateMessageDispatcher {
         checkNotNull(event);
         EventEnvelope env = EventEnvelope.of(event);
         return AggregateTestSupport.dispatchEvent(new TestAggregateRepository<>(), aggregate, env);
-    }
-
-    /**
-     * Imports the {@linkplain EventEnvelope event envelope} to the given {@code Aggregate}.
-     */
-    public static void importEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
-        checkNotNull(aggregate);
-        checkNotNull(event);
-        AggregateTestSupport.importEvent(new TestAggregateRepository<>(), aggregate, event);
-    }
-
-    /**
-     * Imports the event to the given {@code Aggregate}.
-     */
-    public static void importEvent(Aggregate<?, ?, ?> aggregate, Event event) {
-        checkNotNull(aggregate);
-        checkNotNull(event);
-        EventEnvelope env = EventEnvelope.of(event);
-        AggregateTestSupport.importEvent(new TestAggregateRepository<>(), aggregate, env);
     }
 
     /**

@@ -18,19 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity.given;
+package io.spine.server.entity.given;
 
 import com.google.protobuf.Message;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
+import io.spine.server.aggregate.given.dispatch.AggregateBuilder;
+import io.spine.server.aggregate.given.dispatch.AggregatePartBuilder;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.given.dispatch.ProcessManagerBuilder;
 import io.spine.server.projection.Projection;
-import io.spine.testing.server.aggregate.AggregateBuilder;
-import io.spine.testing.server.aggregate.AggregatePartBuilder;
-import io.spine.testing.server.procman.ProcessManagerBuilder;
-import io.spine.testing.server.projection.ProjectionBuilder;
+import io.spine.server.projection.given.dispatch.ProjectionBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

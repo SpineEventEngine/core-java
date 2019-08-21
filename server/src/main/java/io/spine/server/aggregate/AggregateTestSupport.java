@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class AggregateTestSupport {
 
     private static final String ALLOWED_CALLER_CLASS =
-            "io.spine.testing.server.aggregate.AggregateMessageDispatcher";
+            "io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher";
 
     /** Prevents instantiation of this utility class. */
     private AggregateTestSupport() {

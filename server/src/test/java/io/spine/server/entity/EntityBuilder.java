@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity;
+package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -28,7 +28,6 @@ import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.ReflectiveBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

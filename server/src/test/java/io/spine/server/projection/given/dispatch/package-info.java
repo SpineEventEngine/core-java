@@ -18,16 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity.testenv.ebuilder;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.projection.given.dispatch;
 
-import com.google.protobuf.StringValue;
-import io.spine.core.Version;
-import io.spine.testing.server.entity.EntityBuilder;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-public class TestEntityBuilder extends EntityBuilder<TestEntity, Long, StringValue> {
-
-    @Override
-    protected void setState(TestEntity result, StringValue state, Version version) {
-        // NoOp.
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

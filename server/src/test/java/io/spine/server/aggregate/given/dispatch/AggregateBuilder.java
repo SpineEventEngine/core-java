@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.aggregate;
+package io.spine.server.aggregate.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -27,7 +27,7 @@ import io.spine.core.Version;
 import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateTransaction;
-import io.spine.testing.server.entity.EntityBuilder;
+import io.spine.server.entity.EntityBuilder;
 
 /**
  * Utility class for building aggregates for tests.

@@ -17,15 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.testing.server.procman;
+package io.spine.server.procman.given.dispatch;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -161,19 +159,4 @@ public final class PmDispatcher {
         }
     }
 
-    /**
-     * A test-only implementation of a {@link PmTransaction} that can set the given
-     * {@code state} and {@code version} as a starting point for the transaction.
-     */
-    static final class TestPmTransaction<I, S extends Message, B extends ValidatingBuilder<S>>
-            extends PmTransaction<I, S, B> {
-
-        TestPmTransaction(ProcessManager<I, S, B> processManager) {
-            super(processManager);
-        }
-
-        TestPmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
-            super(processManager, state, version);
-        }
-    }
 }
