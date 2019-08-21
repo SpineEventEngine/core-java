@@ -20,9 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.annotation.Internal;
-import io.spine.security.InvocationGuard;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -36,12 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @apiNote This internal class is designed to be called only from Testutil Server library.
  *          Calling it other code would result in run-time error.
  */
-@Internal
-@VisibleForTesting
 public final class AggregateTestSupport {
-
-    private static final String ALLOWED_CALLER_CLASS =
-            "io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher";
 
     /** Prevents instantiation of this utility class. */
     private AggregateTestSupport() {
@@ -57,7 +49,6 @@ public final class AggregateTestSupport {
     public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchCommand(AggregateRepository<I, A> repository, A aggregate, CommandEnvelope command) {
         checkArguments(repository, aggregate, command);
-        InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
         return dispatchAndCollect(
                 new AggregateCommandEndpoint<>(repository, command),
                 aggregate
@@ -74,26 +65,10 @@ public final class AggregateTestSupport {
     public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
         checkArguments(repository, aggregate, event);
-        InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
         return dispatchAndCollect(
                 new AggregateEventReactionEndpoint<>(repository, event),
                 aggregate
         );
-    }
-
-    /**
-     * Imports an event to an instance of {@code Aggregate} into the applier method annotated
-     * as {@code allowImport = true}.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    public static <I, A extends Aggregate<I, ?, ?>>
-    void importEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
-        checkArguments(repository, aggregate, event);
-        InvocationGuard.allowOnly(ALLOWED_CALLER_CLASS);
-        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(repository, event);
-        endpoint.handleAndApplyEvents(aggregate);
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
