@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Contains test utilities for creating Aggregates and dispatching signals.
+ */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.aggregate.given.dispatch;

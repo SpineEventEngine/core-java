@@ -19,7 +19,7 @@
  */
 
 /**
- * Contains test utilities for creating instances of Process Managers and dispatching signals.
+ * Contains test utilities for creating Process Managers and dispatching signals.
  */
 
 @CheckReturnValue
