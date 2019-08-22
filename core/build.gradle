@@ -27,3 +27,4 @@ dependencies {
 }
 
 apply from: deps.scripts.testArtifacts
+apply from: deps.scripts.publishProto
