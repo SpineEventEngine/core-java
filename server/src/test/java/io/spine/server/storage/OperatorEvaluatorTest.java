@@ -254,36 +254,31 @@ class OperatorEvaluatorTest {
         @Test
         @DisplayName("`GREATER_THAN`")
         void gt() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> eval(FaultyComparisonType.INSTANCE,
-                                    GREATER_THAN,
-                                    FaultyComparisonType.INSTANCE));
+            checkFailsToCompareBy(GREATER_THAN);;
         }
 
         @Test
         @DisplayName("`GREATER_OR_EQUAL`")
         void ge() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> eval(FaultyComparisonType.INSTANCE,
-                                    GREATER_OR_EQUAL,
-                                    FaultyComparisonType.INSTANCE));
+            checkFailsToCompareBy(GREATER_OR_EQUAL);;
         }
 
         @Test
         @DisplayName("`LESS_THAN`")
         void lt() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> eval(FaultyComparisonType.INSTANCE,
-                                    LESS_THAN,
-                                    FaultyComparisonType.INSTANCE));
+            checkFailsToCompareBy(LESS_THAN);
         }
 
         @Test
         @DisplayName("`LESS_OR_EQUAL`")
         void le() {
-            assertThrows(IllegalArgumentException.class,
+            checkFailsToCompareBy(LESS_OR_EQUAL);
+        }
+
+        private void checkFailsToCompareBy(Operator operator) {
+            assertThrows(UnsupportedOperationException.class,
                          () -> eval(FaultyComparisonType.INSTANCE,
-                                    LESS_OR_EQUAL,
+                                    operator,
                                     FaultyComparisonType.INSTANCE));
         }
     }
