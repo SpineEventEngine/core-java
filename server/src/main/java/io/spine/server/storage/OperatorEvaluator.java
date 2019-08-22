@@ -36,6 +36,18 @@ import static java.lang.String.format;
 /**
  * A boolean non-typed comparison operation on two given instances.
  *
+ * <p><a name="supported_types"><strong>Supported types</strong></a>
+ *
+ * <p>The equality checks support all types. The check is performed via the {@link Object#equals}
+ * method. A {@code null} reference is equal to another {@code null} reference.
+ *
+ * <p>Order-based comparison supports only {@code Comparable} types and
+ * {@link com.google.protobuf.Timestamp}. When trying to compare unsupported types,
+ * an {@code UnsupportedOperationException} is thrown.
+ *
+ * <p>It is required that the runtime Java class of the two compared values is the same. Otherwise,
+ * an {@code IllegalArgumentException} is thrown.
+ *
  * @see io.spine.client.CompositeFilter.CompositeOperator for the comparison strategies
  */
 @Internal
