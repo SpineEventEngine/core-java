@@ -20,9 +20,13 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.string.Stringifiers;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -32,11 +36,25 @@ import static java.lang.Math.abs;
  *
  * <p>Uses a hash code of the entity identifier and the remainder of its division by the total
  * number of shards to determine the index of a shard, at which the modification is allowed.
+ *
+ * <p>To reach the consistency of the calculated values across different nodes,
+ * the identifier is transformed into a {@code String}, and this value is then hashed
+ * using {@linkplain Hashing#murmur3_32() MurmurHash3, x86 variant}.
+ *
+ * <p>While Guava's {@code Hashing} is marked {@code @Beta}, it is still the best option
+ * for hashing functions — not to involve any heavy-weight third-party hashing
+ * solutions.
  */
 @Immutable
 public final class UniformAcrossAllShards implements DeliveryStrategy, Serializable {
 
     private static final long serialVersionUID = 0L;
+
+    /**
+     * The hash function to use for the shard index calculation.
+     */
+    @SuppressWarnings("UnstableApiUsage")   // See the class-level docs.
+    private static final HashFunction HASHER = Hashing.murmur3_32(0);
 
     private final int numberOfShards;
 
@@ -68,11 +86,18 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
         if (1 == numberOfShards) {
             return newIndex(0);
         }
-        int hashValue = entityId.hashCode();
+        int hashValue = hash(entityId);
         int totalShards = shardCount();
         int indexValue = abs(hashValue % totalShards);
         ShardIndex result = newIndex(indexValue);
         return result;
+    }
+
+    private static int hash(Object entityId) {
+        String asString = Stringifiers.toString(entityId);
+        int value = HASHER.hashString(asString, Charset.defaultCharset())
+                          .asInt();
+        return value;
     }
 
     @Override
