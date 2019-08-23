@@ -123,7 +123,6 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
      *
      * @return a strategy that puts all entities in a single shard
      */
-    @SuppressWarnings("WeakerAccess")   // a part of the public API.
     public static DeliveryStrategy singleShard() {
         return SingleShard.INSTANCE.strategy;
     }
