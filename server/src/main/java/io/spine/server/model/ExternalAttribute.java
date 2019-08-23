@@ -20,7 +20,6 @@
 package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.Internal;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Command;
 import io.spine.server.event.React;
@@ -38,8 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Command#external()
  */
 @Immutable
-@Internal
-public enum ExternalAttribute implements MethodAttribute<Boolean> {
+enum ExternalAttribute implements MethodAttribute<Boolean> {
 
     /** An attribute value for the methods, designed to handle external objects only. */
     EXTERNAL(true),
