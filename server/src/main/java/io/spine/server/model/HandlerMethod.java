@@ -78,7 +78,7 @@ public interface HandlerMethod<T,
     Method rawMethod();
 
     /**
-     * Retrieves the message classes produced by this handler method.*
+     * Retrieves the message classes produced by this handler method.
      */
     Set<P> producedMessages();
 
