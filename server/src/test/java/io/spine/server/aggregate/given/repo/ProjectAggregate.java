@@ -89,8 +89,10 @@ public class ProjectAggregate
     }
 
     /**
-     * Emits {@link io.spine.test.aggregate.event.AggProjectArchived} if the event is from the parent project.
-     * Otherwise returns empty iterable.
+     * Emits {@link io.spine.test.aggregate.event.AggProjectArchived} if the event is from
+     * the parent project.
+     *
+     * <p>Otherwise returns empty iterable.
      */
     @React
     Optional<AggProjectArchived> on(AggProjectArchived event) {

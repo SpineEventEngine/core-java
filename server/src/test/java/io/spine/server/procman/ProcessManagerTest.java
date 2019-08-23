@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -72,6 +71,7 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -88,6 +88,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.core.BoundedContextNames.assumingTests;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
@@ -105,14 +106,7 @@ import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testdata.Sample.messageOfType;
-import static io.spine.testing.client.blackbox.Count.none;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
-import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
 import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommands;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -351,7 +345,9 @@ class ProcessManagerTest {
             @DisplayName("by transform incoming command")
             void transformCommand() {
                 boundedContext.receivesCommand(startProject())
-                              .assertThat(emittedCommand(PmAddTask.class, once()));
+                              .assertCommands()
+                              .withType(PmAddTask.class)
+                              .hasSize(1);
             }
 
             /**
@@ -362,15 +358,18 @@ class ProcessManagerTest {
             @DisplayName("on incoming event")
             void commandOnEvent() {
                 boundedContext.receivesEvent(ownerChanged())
-                              .assertThat(emittedCommand(PmReviewBacklog.class));
+                              .assertCommands()
+                              .withType(PmReviewBacklog.class)
+                              .hasSize(1);
             }
 
             @Test
             @DisplayName("on incoming external event")
             void commandOnExternalEvent() {
-                boundedContext.receivesExternalEvent(BoundedContextNames.assumingTests(),
-                                                     quizStarted())
-                              .assertThat(emittedCommand(PmCreateProject.class));
+                boundedContext.receivesExternalEvent(assumingTests(), quizStarted())
+                              .assertCommands()
+                              .withType(PmCreateProject.class)
+                              .hasSize(1);
             }
         }
 
@@ -399,14 +398,17 @@ class ProcessManagerTest {
             @DisplayName("when command is generated")
             void commandGenerated() {
                 boundedContext.receivesEvent(iterationPlanned(true))
-                              .assertThat(emittedCommand(PmStartIteration.class, once()));
+                              .assertCommands()
+                              .withType(PmStartIteration.class)
+                              .hasSize(1);
             }
 
             @Test
             @DisplayName("when command is NOT generated")
             void noCommand() {
                 boundedContext.receivesEvent(iterationPlanned(false))
-                              .assertThat(emittedCommand(PmStartIteration.class, none()));
+                              .assertCommands()
+                              .isEmpty();
             }
         }
     }
@@ -468,16 +470,16 @@ class ProcessManagerTest {
             PmStartQuiz startQuiz = startQuiz(quizId, questions);
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBoxBoundedContext
-                    .singleTenant()
+            SingleTenantBlackBoxContext context = BlackBoxBoundedContext
+                    .singleTenant();
+            EventSubject assertEvents = context
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .assertThat(acked(twice()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvent(twice()))
-                    .assertThat(emittedEvents(PmQuizStarted.class))
-                    .assertThat(emittedEvents(PmQuestionAnswered.class))
-                    .assertThat(emittedEvent(Nothing.class, none()))
-                    .close();
+                    .assertEvents();
+            assertEvents.hasSize(2);
+            assertEvents.withType(PmQuizStarted.class).hasSize(1);
+            assertEvents.withType(PmQuestionAnswered.class).hasSize(1);
+            context.close();
         }
     }
 

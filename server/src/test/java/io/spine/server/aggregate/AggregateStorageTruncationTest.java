@@ -38,8 +38,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.given.fibonacci.FibonacciAggregate.lastNumberOne;
 import static io.spine.server.aggregate.given.fibonacci.FibonacciAggregate.lastNumberTwo;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
 /**
  * Verifies the integrity of the aggregate history after the storage truncation happens.
@@ -72,8 +70,9 @@ public abstract class AggregateStorageTruncationTest {
                 .setNumberTwo(1)
                 .vBuild();
         context.receivesCommand(setStartingNumbers)
-               .assertThat(emittedEvent(StartingNumbersSet.class, once()));
-
+               .assertEvents()
+               .withType(StartingNumbersSet.class)
+               .hasSize(1);
         // Send a lot of `MoveSequence` events, so several snapshots are created.
         MoveSequence moveSequence = MoveSequence
                 .newBuilder()
