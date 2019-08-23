@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
@@ -33,7 +32,6 @@ import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,17 +57,19 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * <b>Configuration</b>
  *
- * <p>By default, a shard is assigned according to the identifier of the target entity. The messages
+ * <p>By default, a shard is assigned according to the identifier of the target entity. The
+ * messages
  * heading to a single entity will always reside in a single shard. However, the framework users
- * may {@linkplain Builder#setStrategy(DeliveryStrategy) customize} this behavior.
+ * may {@linkplain DeliveryBuilder#setStrategy(DeliveryStrategy) customize} this behavior.
  *
- * <p>{@linkplain Builder#setIdempotenceWindow(Duration) Provides} the time-based de-duplication
+ * <p>{@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) Provides} the time-based
+ * de-duplication
  * capabilities to eliminate the messages, which may have been already delivered to their targets.
  * The duplicates will be detected among the messages, which are not older, than
  * {@code now - [idempotence window]}.
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
- * registered. Framework users may {@linkplain Builder#setInboxStorage(InboxStorage)
+ * registered. Framework users may {@linkplain DeliveryBuilder#setInboxStorage(InboxStorage)
  * configure} the storage, taking into account that it is typically multi-tenant. By default,
  * the {@code InboxStorage} for the delivery is provided by the environment-specific
  * {@linkplain ServerEnvironment#storageFactory() storage factory} and is multi-tenant.
@@ -89,7 +89,8 @@ import static java.util.stream.Collectors.groupingBy;
  * <b>Local environment</b>
  *
  * <p>By default, the delivery is configured to {@linkplain Delivery#local() run locally}. It
- * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the messages
+ * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the
+ * messages
  * from the observed shard once a message is passed to its
  * {@link LocalDispatchingObserver#onMessage(InboxMessage) onMessage(InboxMessage)} method. This
  * process is synchronous.
@@ -147,11 +148,11 @@ public final class Delivery {
      */
     private final InboxStorage inboxStorage;
 
-    private Delivery(Builder builder) {
-        this.strategy = builder.strategy;
-        this.workRegistry = builder.workRegistry;
-        this.idempotenceWindow = builder.idempotenceWindow;
-        this.inboxStorage = builder.inboxStorage;
+    Delivery(DeliveryBuilder builder) {
+        this.strategy = builder.getStrategy();
+        this.workRegistry = builder.getWorkRegistry();
+        this.idempotenceWindow = builder.getIdempotenceWindow();
+        this.inboxStorage = builder.getInboxStorage();
         this.inboxDeliveries = Maps.newConcurrentMap();
         this.shardObservers = synchronizedList(new ArrayList<>());
     }
@@ -159,8 +160,8 @@ public final class Delivery {
     /**
      * Creates an instance of new {@code Builder} of {@code Delivery}.
      */
-    public static Builder newBuilder() {
-        return new Builder();
+    public static DeliveryBuilder newBuilder() {
+        return new DeliveryBuilder();
     }
 
     /**
@@ -410,86 +411,5 @@ public final class Delivery {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));
-    }
-
-    /**
-     * A builder for {@code Delivery} instances.
-     */
-    public static class Builder {
-
-        private @Nullable InboxStorage inboxStorage;
-        private @Nullable DeliveryStrategy strategy;
-        private @Nullable ShardedWorkRegistry workRegistry;
-        private @Nullable Duration idempotenceWindow;
-
-        /**
-         * Prevents a direct instantiation of this class.
-         */
-        private Builder() {
-        }
-
-        public Optional<InboxStorage> inboxStorage() {
-            return Optional.ofNullable(inboxStorage);
-        }
-
-        public Optional<DeliveryStrategy> strategy() {
-            return Optional.ofNullable(strategy);
-        }
-
-        public Optional<ShardedWorkRegistry> workRegistry() {
-            return Optional.ofNullable(workRegistry);
-        }
-
-        public Optional<Duration> idempotenceWindow() {
-            return Optional.ofNullable(idempotenceWindow);
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setWorkRegistry(ShardedWorkRegistry workRegistry) {
-            this.workRegistry = checkNotNull(workRegistry);
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setStrategy(DeliveryStrategy strategy) {
-            this.strategy = checkNotNull(strategy);
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setIdempotenceWindow(Duration idempotenceWindow) {
-            this.idempotenceWindow = checkNotNull(idempotenceWindow);
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setInboxStorage(InboxStorage inboxStorage) {
-            checkNotNull(inboxStorage);
-            this.inboxStorage = inboxStorage;
-            return this;
-        }
-
-        public Delivery build() {
-            if (strategy == null) {
-                strategy = UniformAcrossAllShards.singleShard();
-            }
-
-            if (idempotenceWindow == null) {
-                idempotenceWindow = Duration.getDefaultInstance();
-            }
-
-            if (this.inboxStorage == null) {
-                this.inboxStorage = ServerEnvironment.instance()
-                                                     .storageFactory()
-                                                     .createInboxStorage(true);
-            }
-
-            if (workRegistry == null) {
-                workRegistry = new InMemoryShardedWorkRegistry();
-            }
-
-            Delivery delivery = new Delivery(this);
-            return delivery;
-        }
     }
 }
