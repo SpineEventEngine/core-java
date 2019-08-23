@@ -31,11 +31,22 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
  * A boolean non-typed comparison operation on two given instances.
+ *
+ * <p><a name="supported_types"><strong>Supported types</strong></a>
+ *
+ * <p>The equality checks support all types. The check is performed via the {@link Object#equals}
+ * method. A {@code null} reference is equal to another {@code null} reference.
+ *
+ * <p>Order-based comparison supports only {@code Comparable} types and
+ * {@link com.google.protobuf.Timestamp}. When trying to compare unsupported types,
+ * an {@code UnsupportedOperationException} is thrown.
+ *
+ * <p>It is required that the runtime Java class of the two compared values is the same. Otherwise,
+ * an {@code IllegalArgumentException} is thrown.
  *
  * @see io.spine.client.CompositeFilter.CompositeOperator for the comparison strategies
  */
@@ -74,9 +85,10 @@ public enum OperatorEvaluator {
                 int comparisonResult = cmpLeft.compareTo(cmpRight);
                 return comparisonResult > 0;
             }
-            throw newIllegalArgumentException("Operation \'%s\' is not supported for type %s.",
-                                              this,
-                                              left.getClass().getCanonicalName());
+            throw new UnsupportedOperationException(format(
+                    "Comparison operations are not supported for type %s.",
+                    left.getClass().getCanonicalName())
+            );
         }
     },
     LESS_THAN {
@@ -127,7 +139,7 @@ public enum OperatorEvaluator {
      *         the type of the compared values
      * @return {@code true} if the operands match the operator, {@code false} otherwise
      * @throws UnsupportedOperationException
-     *         if the operation is <a href="supported_types">not supported</a> for the given
+     *         if the operation is <a href="#supported_types">not supported</a> for the given
      *         data types
      */
     public static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)

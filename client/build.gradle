@@ -31,5 +31,4 @@ dependencies {
 }
 
 apply from: deps.scripts.testArtifacts
-
-apply from: "$rootDir/gradle/assemble-proto.gradle"
+apply from: deps.scripts.publishProto
