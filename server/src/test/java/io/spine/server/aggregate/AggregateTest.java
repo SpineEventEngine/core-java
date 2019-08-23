@@ -70,9 +70,11 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.event.AggTaskAssigned;
+import io.spine.test.aggregate.event.AggTaskCreated;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
@@ -106,13 +108,8 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassig
 import static io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -812,6 +809,20 @@ public class AggregateTest {
     @DisplayName("create a single event when emitting a pair without second value")
     class CreateSingleEventForPair {
 
+        private BlackBoxBoundedContext<?> context;
+
+        @BeforeEach
+        void prepareContext() {
+            context = BlackBoxBoundedContext
+                    .singleTenant()
+                    .with(new TaskAggregateRepository());
+        }
+
+        @AfterEach
+        void closeContext() {
+            context.close();
+        }
+
         /**
          * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second
          * optional value returned from a command handler stores a single event.
@@ -823,13 +834,10 @@ public class AggregateTest {
         @Test
         @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(new TaskAggregateRepository())
-                    .receivesCommand(createTask())
-                    .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvent(once()))
-                    .close();
+            context.receivesCommand(createTask())
+                   .assertEvents()
+                   .withType(AggTaskCreated.class)
+                   .isNotEmpty();
         }
 
         /**
@@ -844,15 +852,13 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on an event")
         void fromEventReact() {
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(new TaskAggregateRepository())
-                    .receivesCommand(assignTask())
-                    .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvent(twice()))
-                    .assertThat(emittedEvents(AggTaskAssigned.class))
-                    .assertThat(emittedEvents(AggUserNotified.class))
-                    .close();
+            EventSubject assertEvents = context.receivesCommand(assignTask())
+                                               .assertEvents();
+            assertEvents.hasSize(2);
+            assertEvents.withType(AggTaskAssigned.class)
+                        .hasSize(1);
+            assertEvents.withType(AggUserNotified.class)
+                        .hasSize(1);
         }
 
         /**
@@ -867,14 +873,13 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(new TaskAggregateRepository())
-                    .receivesCommand(reassignTask())
-                    .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emittedEvents(AggCannotReassignUnassignedTask.class,
-                                              AggUserNotified.class))
-                    .close();
+            EventSubject assertEvents = context.receivesCommand(reassignTask())
+                                          .assertEvents();
+            assertEvents.hasSize(2);
+            assertEvents.withType(AggCannotReassignUnassignedTask.class)
+                        .hasSize(1);
+            assertEvents.withType(AggUserNotified.class)
+                        .hasSize(1);
         }
     }
 }
