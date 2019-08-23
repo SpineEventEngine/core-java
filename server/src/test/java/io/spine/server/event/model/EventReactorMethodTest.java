@@ -36,7 +36,7 @@ import io.spine.server.event.model.given.reactor.RcWrongNoAnnotation;
 import io.spine.server.event.model.given.reactor.RcWrongNoParam;
 import io.spine.server.event.model.given.reactor.RcWrongSecondParam;
 import io.spine.server.event.model.given.reactor.TestEventReactor;
-import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.server.model.SignatureMismatchException;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.event.RefProjectAssigned;

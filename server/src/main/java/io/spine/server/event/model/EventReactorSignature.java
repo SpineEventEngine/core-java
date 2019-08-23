@@ -23,7 +23,7 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.server.event.React;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;

@@ -23,7 +23,7 @@ package io.spine.server.command.model;
 import io.spine.server.command.CommandReceiver;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.IllegalOutcomeException;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 

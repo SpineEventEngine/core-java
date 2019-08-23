@@ -20,7 +20,7 @@
 
 package io.spine.server.event.model;
 
-import io.spine.server.model.declare.MethodSignatureTest;
+import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;

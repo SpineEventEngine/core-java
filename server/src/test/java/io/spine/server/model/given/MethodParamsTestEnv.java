@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare.given;
+package io.spine.server.model.given;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
@@ -27,7 +27,7 @@ import com.google.protobuf.Int32Value;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.model.ModCreateProject;
 
@@ -35,7 +35,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
+import static io.spine.server.model.MethodParams.consistsOfTwo;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**

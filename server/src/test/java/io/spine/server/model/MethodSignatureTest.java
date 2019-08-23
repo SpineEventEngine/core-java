@@ -18,9 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
+package io.spine.server.model;
 
-import io.spine.server.model.HandlerMethod;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

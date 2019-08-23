@@ -30,10 +30,10 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
-import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
+import static io.spine.server.model.MethodParams.consistsOfTypes;
 
 /**
  * Allowed combinations of parameters for the methods, that accept {@code Event}s.

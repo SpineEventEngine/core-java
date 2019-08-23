@@ -18,15 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.model;
+
+import com.google.common.base.Joiner;
+
 /**
- * Test environment classes for tests of the {@link io.spine.server.model.declare} package.
+ * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
+ * its {@link HandlerMethod#rawMethod() wrapped method} does not match
+ * {@linkplain MethodSignature method signature}, set for the handler.
  */
+public class SignatureMismatchException extends RuntimeException {
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
+    private static final long serialVersionUID = 1L;
 
-package io.spine.server.model.declare.given;
+    SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
+        super(formatMsg(mismatches));
+    }
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    private static String formatMsg(Iterable<SignatureMismatch> mismatches) {
+        return "Error declaring a method. Mismatches: " + Joiner.on(", ")
+                                                                .join(mismatches);
+    }
+}
