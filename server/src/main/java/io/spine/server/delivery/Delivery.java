@@ -148,11 +148,17 @@ public final class Delivery {
      */
     private final InboxStorage inboxStorage;
 
+    /**
+     * The monitor of delivery stages.
+     */
+    private final DeliveryMonitor monitor;
+
     Delivery(DeliveryBuilder builder) {
         this.strategy = builder.getStrategy();
         this.workRegistry = builder.getWorkRegistry();
         this.idempotenceWindow = builder.getIdempotenceWindow();
         this.inboxStorage = builder.getInboxStorage();
+        this.monitor = builder.getMonitor();
         this.inboxDeliveries = Maps.newConcurrentMap();
         this.shardObservers = synchronizedList(new ArrayList<>());
     }
@@ -231,10 +237,10 @@ public final class Delivery {
         }
         ShardProcessingSession session = picked.get();
         try {
-            int deliveredMsgCount;
+            DeliveryStage stage;
             do {
-                deliveredMsgCount = doDeliver(session);
-            } while (deliveredMsgCount > 0);
+                stage = doDeliver(session);
+            } while (monitor.shouldContinueAfter(stage));
         } finally {
             session.complete();
         }
@@ -243,9 +249,12 @@ public final class Delivery {
     /**
      * Runs the delivery for the shard, which session is passed.
      *
-     * @return the number of messages delivered
+     * <p>Produces a {@code DeliveryStage} instance once all the messages read from the
+     * {@code Inbox} of the given shard are delivered.
+     *
+     * @return the passed delivery stage.
      */
-    private int doDeliver(ShardProcessingSession session) {
+    private DeliveryStage doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
@@ -267,7 +276,8 @@ public final class Delivery {
             }
             maybePage = currentPage.next();
         }
-        return totalMessagesDelivered;
+        DeliveryStage result = new DeliveryStage(index, totalMessagesDelivered);
+        return result;
     }
 
     /**

@@ -39,6 +39,7 @@ public final class DeliveryBuilder {
     private @MonotonicNonNull DeliveryStrategy strategy;
     private @MonotonicNonNull ShardedWorkRegistry workRegistry;
     private @MonotonicNonNull Duration idempotenceWindow;
+    private @MonotonicNonNull DeliveryMonitor deliveryMonitor;
 
     /**
      * Prevents a direct instantiation of this class.
@@ -106,6 +107,18 @@ public final class DeliveryBuilder {
         return checkNotNull(idempotenceWindow);
     }
 
+    /**
+     * Returns the value of the configured {@code DeliveryMonitor} or {@code Optional.empty()}
+     * if no such value was configured.
+     */
+    public Optional<DeliveryMonitor> deliveryMonitor() {
+        return Optional.ofNullable(deliveryMonitor);
+    }
+
+    DeliveryMonitor getMonitor() {
+        return checkNotNull(deliveryMonitor);
+    }
+
     @CanIgnoreReturnValue
     public DeliveryBuilder setWorkRegistry(ShardedWorkRegistry workRegistry) {
         this.workRegistry = checkNotNull(workRegistry);
@@ -126,8 +139,13 @@ public final class DeliveryBuilder {
 
     @CanIgnoreReturnValue
     public DeliveryBuilder setInboxStorage(InboxStorage inboxStorage) {
-        checkNotNull(inboxStorage);
-        this.inboxStorage = inboxStorage;
+        this.inboxStorage = checkNotNull(inboxStorage);
+        return this;
+    }
+
+    @CanIgnoreReturnValue
+    public DeliveryBuilder setMonitor(DeliveryMonitor monitor) {
+        this.deliveryMonitor = checkNotNull(monitor);
         return this;
     }
 
@@ -148,6 +166,10 @@ public final class DeliveryBuilder {
 
         if (workRegistry == null) {
             workRegistry = new InMemoryShardedWorkRegistry();
+        }
+
+        if (deliveryMonitor == null) {
+            deliveryMonitor = DeliveryMonitor.stopWhenEmpty();
         }
 
         Delivery delivery = new Delivery(this);
