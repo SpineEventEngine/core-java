@@ -127,7 +127,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
      * dispatched messages to look for duplicate amongst.
      *
      * <p>In case a duplication is found, the respective endpoint is
-     * {@linkplain MessageEndpoint#onError(SignalEnvelope, RuntimeException) notified}.
+     * {@linkplain MessageEndpoint#onDuplicate(Object, SignalEnvelope) notified}.
      */
     abstract class Dispatcher {
 
