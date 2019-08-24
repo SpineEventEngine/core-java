@@ -53,9 +53,9 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected DispatchOutcome invokeDispatcher(P processManager, EventEnvelope event) {
+    protected DispatchOutcome invokeDispatcher(P processManager) {
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
-        return tx.dispatchEvent(event);
+        return tx.dispatchEvent(envelope());
     }
 
     /**

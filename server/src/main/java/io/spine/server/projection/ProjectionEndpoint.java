@@ -77,7 +77,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         TransactionListener listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
-        DispatchOutcome outcome = invokeDispatcher(projection, envelope());
+        DispatchOutcome outcome = invokeDispatcher(projection);
         tx.commitIfActive();
         if (outcome.hasSuccess()) {
             afterDispatched(projection.id());
@@ -90,8 +90,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @CanIgnoreReturnValue
     @Override
-    protected DispatchOutcome invokeDispatcher(P projection, EventEnvelope event) {
-        return projection.play(event.outerObject());
+    protected DispatchOutcome invokeDispatcher(P projection) {
+        return projection.play(envelope().outerObject());
     }
 
     @Override

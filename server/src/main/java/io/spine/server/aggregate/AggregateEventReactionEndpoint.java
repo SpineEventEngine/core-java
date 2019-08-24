@@ -37,8 +37,8 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected DispatchOutcome invokeDispatcher(A aggregate, EventEnvelope event) {
-        return aggregate.reactOn(event);
+    protected DispatchOutcome invokeDispatcher(A aggregate) {
+        return aggregate.reactOn(envelope());
     }
 
     @Override
