@@ -31,6 +31,8 @@ import java.util.function.Function;
  *
  * @param <I>
  *         the type of identifier of the endpoint targets
+ * @param <M>
+ *         the type of the message envelope served by the endpoint
  */
 @Internal
 @FunctionalInterface

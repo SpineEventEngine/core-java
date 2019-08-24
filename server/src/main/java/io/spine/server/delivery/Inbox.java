@@ -26,6 +26,7 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -256,7 +257,7 @@ public final class Inbox<I> {
     }
 
     /**
-     * Takes the messages, which were previously sent to their targets via this inbox and
+     * Takes the messages, which were previously sent to their targets via this inbox, and
      * delivers them, performing their de-duplication.
      *
      * <p>Source messages for the de-duplication are supplied separately.
@@ -273,18 +274,21 @@ public final class Inbox<I> {
         public void deliver(List<InboxMessage> incoming,
                             List<InboxMessage> deduplicationSource) {
 
-            InboxPart.Dispatcher commandDispatcher =
-                    commandPart.dispatcherWith(deduplicationSource);
-            InboxPart.Dispatcher eventDispatcher =
-                    eventPart.dispatcherWith(deduplicationSource);
+            InboxPart.Dispatcher cmdDispatcher = commandPart.dispatcherWith(deduplicationSource);
+            InboxPart.Dispatcher eventDispatcher = eventPart.dispatcherWith(deduplicationSource);
 
+            List<InboxMessage> batchedEvents = new ArrayList<>();
             for (InboxMessage incomingMessage : incoming) {
-
                 if (incomingMessage.hasCommand()) {
-                    commandDispatcher.deliver(incomingMessage);
+                    eventDispatcher.deliverAll(batchedEvents);
+                    batchedEvents.clear();
+                    cmdDispatcher.deliver(incomingMessage);
                 } else {
-                    eventDispatcher.deliver(incomingMessage);
+                    batchedEvents.add(incomingMessage);
                 }
+            }
+            if(!batchedEvents.isEmpty()) {
+                eventDispatcher.deliverAll(batchedEvents);
             }
         }
     }
