@@ -63,7 +63,7 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(P pm, EventEnvelope event) {
+    protected void onEmptyResult(P pm) {
         // Do nothing.
     }
 }

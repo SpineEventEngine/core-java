@@ -52,7 +52,7 @@ final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>
      * updated upon reacting on an event.
      */
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope event) {
+    protected void onEmptyResult(A aggregate) {
         // Do nothing.
     }
 }

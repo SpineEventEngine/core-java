@@ -92,7 +92,7 @@ abstract class AggregateEndpoint<I,
         } else if (success.hasRejection()) {
             post(success.getRejection());
         } else {
-            onEmptyResult(aggregate, envelope());
+            onEmptyResult(aggregate);
         }
         afterDispatched(aggregate.id());
     }

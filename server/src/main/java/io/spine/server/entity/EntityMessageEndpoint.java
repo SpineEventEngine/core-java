@@ -73,7 +73,7 @@ public abstract class EntityMessageEndpoint<I,
         if (isModified) {
             onModified(entity);
         } else {
-            onEmptyResult(entity, envelope());
+            onEmptyResult(entity);
         }
     }
 
@@ -91,7 +91,7 @@ public abstract class EntityMessageEndpoint<I,
      * Allows derived classes to handle empty list of uncommitted events returned by
      * the entity in response to the message.
      */
-    protected abstract void onEmptyResult(E entity, M envelope);
+    protected abstract void onEmptyResult(E entity);
 
     /**
      * Obtains the envelope of the message processed by this endpoint.

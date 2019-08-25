@@ -70,7 +70,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
      * updated during the command handling.
      */
     @Override
-    protected void onEmptyResult(P processManager, CommandEnvelope cmd) {
+    protected void onEmptyResult(P processManager) {
         // Do nothing.
     }
 }

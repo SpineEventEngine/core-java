@@ -116,7 +116,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
      * updated upon execution of a {@linkplain io.spine.core.Subscribe subscriber} method.
      */
     @Override
-    protected void onEmptyResult(P entity, EventEnvelope event) {
+    protected void onEmptyResult(P entity) {
         // Do nothing.
     }
 }
