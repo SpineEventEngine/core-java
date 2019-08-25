@@ -20,14 +20,20 @@
 
 package io.spine.server.delivery;
 
+import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
+import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,12 +59,14 @@ public final class Inbox<I> {
     private final InboxOfCommands<I> commandPart;
     private final InboxOfEvents<I> eventPart;
     private final Delivery delivery;
+    private final @Nullable BatchDispatcher<I> batchDispatcher;
 
     private Inbox(Builder<I> builder, Delivery delivery) {
         this.entityStateType = builder.entityStateType;
         this.commandPart = new InboxOfCommands<>(builder);
         this.eventPart = new InboxOfEvents<>(builder);
         this.delivery = delivery;
+        this.batchDispatcher = builder.batchDispatcher;
     }
 
     /**
@@ -134,6 +142,7 @@ public final class Inbox<I> {
         private final InboxWriter writer;
         private final Endpoints<I, EventEnvelope> eventEndpoints = new Endpoints<>();
         private final Endpoints<I, CommandEnvelope> commandEndpoints = new Endpoints<>();
+        private @Nullable BatchDispatcher<I> batchDispatcher;
 
         /**
          * Creates an instance of {@code Builder} for the given {@code Inbox} consumer entity type.
@@ -169,6 +178,11 @@ public final class Inbox<I> {
             checkNotNull(label);
             checkNotNull(lazyEndpoint);
             commandEndpoints.add(label, lazyEndpoint);
+            return this;
+        }
+
+        public Builder<I> withBatchDispatcher(BatchDispatcher<I> dispatcher) {
+            this.batchDispatcher = checkNotNull(dispatcher);
             return this;
         }
 
@@ -256,6 +270,13 @@ public final class Inbox<I> {
         }
     }
 
+    public interface BatchDispatcher<I> {
+
+        void onStart(I id);
+
+        void onEnd(I id);
+    }
+
     /**
      * Takes the messages, which were previously sent to their targets via this inbox, and
      * delivers them, performing their de-duplication.
@@ -273,22 +294,107 @@ public final class Inbox<I> {
         @Override
         public void deliver(List<InboxMessage> incoming,
                             List<InboxMessage> deduplicationSource) {
-
             InboxPart.Dispatcher cmdDispatcher = commandPart.dispatcherWith(deduplicationSource);
             InboxPart.Dispatcher eventDispatcher = eventPart.dispatcherWith(deduplicationSource);
 
-            List<InboxMessage> batchedEvents = new ArrayList<>();
-            for (InboxMessage incomingMessage : incoming) {
-                if (incomingMessage.hasCommand()) {
-                    eventDispatcher.deliverAll(batchedEvents);
-                    batchedEvents.clear();
-                    cmdDispatcher.deliver(incomingMessage);
-                } else {
-                    batchedEvents.add(incomingMessage);
+            if(batchDispatcher == null) {
+                for (InboxMessage incomingMessage : incoming) {
+                    doDeliver(cmdDispatcher, eventDispatcher, incomingMessage);
                 }
+            } else {
+                deliverInBatch(incoming, batchDispatcher, cmdDispatcher, eventDispatcher);
             }
-            if(!batchedEvents.isEmpty()) {
-                eventDispatcher.deliverAll(batchedEvents);
+        }
+
+        private void deliverInBatch(List<InboxMessage> incoming,
+                                    BatchDispatcher<I> batchDispatcher,
+                                    InboxPart.Dispatcher cmdDispatcher,
+                                    InboxPart.Dispatcher eventDispatcher) {
+            List<Batch<I>> batches = Batch.byInboxId(incoming, message -> {
+                if (message.hasCommand()) {
+                    return commandPart.asEnvelope(message);
+                } else {
+                    return eventPart.asEnvelope(message);
+                }
+            });
+
+            for (Batch<I> batch : batches) {
+                batch.deliverVia(batchDispatcher, cmdDispatcher, eventDispatcher);
+            }
+        }
+    }
+
+    private static void doDeliver(InboxPart.Dispatcher cmdDispatcher,
+                                  InboxPart.Dispatcher eventDispatcher,
+                                  InboxMessage incomingMessage) {
+        if (incomingMessage.hasCommand()) {
+            cmdDispatcher.deliver(incomingMessage);
+        } else {
+            eventDispatcher.deliver(incomingMessage);
+        }
+    }
+
+    private static class Batch<I> {
+
+        private final InboxId inboxId;
+        private final TenantId tenantId;
+        private final List<InboxMessage> messages = new ArrayList<>();
+
+        private Batch(InboxId inboxId, TenantId tenantId) {
+            this.inboxId = inboxId;
+            this.tenantId = tenantId;
+        }
+
+        /**
+         * Groups the messages into batches by their {@code InboxId}s and {@code TenantId}.
+         *
+         * <p>The resulting order of messages through all batches is preserved.
+         */
+        private static <I> List<Batch<I>> byInboxId(List<InboxMessage> messages,
+                                             Function<InboxMessage, SignalEnvelope> fn) {
+            List<Batch<I>> batches = new ArrayList<>();
+            Batch<I> currentBatch = null;
+            for (InboxMessage message : messages) {
+
+                InboxId msgInboxId = message.getInboxId();
+                SignalEnvelope envelope = fn.apply(message);
+                TenantId tenantId = envelope.tenantId();
+                if (currentBatch == null) {
+                    currentBatch = new Batch<>(msgInboxId, tenantId);
+                } else {
+                    if (!(currentBatch.inboxId.equals(msgInboxId)
+                            && currentBatch.tenantId.equals(tenantId))) {
+                        batches.add(currentBatch);
+                        currentBatch = new Batch<>(msgInboxId, tenantId);
+                    }
+                }
+                currentBatch.addMessage(message);
+            }
+            if(currentBatch != null) {
+                batches.add(currentBatch);
+            }
+            return batches;
+        }
+
+        private void addMessage(InboxMessage message) {
+            messages.add(message);
+        }
+
+        private void deliverVia(BatchDispatcher<I> dispatcher,
+                                InboxPart.Dispatcher cmdDispatcher,
+                                InboxPart.Dispatcher eventDispatcher) {
+            if(messages.size() > 1) {
+                Any packedId = inboxId.getEntityId()
+                                      .getId();
+                @SuppressWarnings("unchecked")      // Only IDs of type `I` are stored.
+                I id = (I) Identifier.unpack(packedId);
+                dispatcher.onStart(id);
+                for (InboxMessage message : messages) {
+                    doDeliver(cmdDispatcher, eventDispatcher, message);
+                }
+                dispatcher.onEnd(id);
+            } else {
+                doDeliver(cmdDispatcher, eventDispatcher, messages.get(0));
             }
         }
     }

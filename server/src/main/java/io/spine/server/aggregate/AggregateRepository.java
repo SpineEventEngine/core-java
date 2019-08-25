@@ -38,6 +38,7 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.RejectionEnvelope;
@@ -104,6 +105,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private @MonotonicNonNull Inbox<I> inbox;
 
+    private @MonotonicNonNull RepositoryCache<I, A> cache;
+
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
@@ -147,8 +150,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             context.importBus()
                    .register(EventImportDispatcher.of(this));
         }
+        initCache(context.isMultitenant());
         initInbox();
         initMirror();
+    }
+
+    private void initCache(boolean multitenant) {
+        cache = new RepositoryCache<>(multitenant, this::doLoadOrCreate, this::doStore);
     }
 
     /**
@@ -159,6 +167,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
+                .withBatchDispatcher(new Inbox.BatchDispatcher<I>() {
+                    @Override
+                    public void onStart(I id) {
+                        cache.startCaching(id);
+                    }
+
+                    @Override
+                    public void onEnd(I id) {
+                        cache.stopCaching(id);
+                    }
+                })
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> new AggregateEventReactionEndpoint<>(this, e))
                 .addEventEndpoint(InboxLabel.IMPORT_EVENT,
@@ -264,6 +283,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected final void store(A aggregate) {
+        cache.store(aggregate);
+    }
+
+    private void doStore(A aggregate) {
         Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
@@ -533,6 +556,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return loaded or created aggregate instance
      */
     final A loadOrCreate(I id) {
+        return cache.load(id);
+    }
+
+    private A doLoadOrCreate(I id) {
         A result = load(id).orElseGet(() -> createNew(id));
         return result;
     }

@@ -21,19 +21,15 @@
 package io.spine.server.delivery;
 
 import io.spine.base.Time;
-import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -123,57 +119,6 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         return result;
     }
 
-    private static class Batch {
-
-        private final InboxId inboxId;
-        private final TenantId tenantId;
-        private final InboxLabel label;
-        private final List<SignalEnvelope> messages = new ArrayList<>();
-
-        private Batch(InboxId inboxId, TenantId tenantId, InboxLabel label) {
-            this.inboxId = inboxId;
-            this.tenantId = tenantId;
-            this.label = label;
-        }
-
-        /**
-         * Groups the messages into batches by their {@code InboxId}s and {@code TenantId}.
-         *
-         * <p>The resulting order of messages through all batches is preserved.
-         */
-        private static List<Batch> byInboxId(List<InboxMessage> messages,
-                                             Function<InboxMessage, SignalEnvelope> fn) {
-            List<Batch> batches = new ArrayList<>();
-            Batch currentBatch = null;
-            for (InboxMessage message : messages) {
-
-                InboxId msgInboxId = message.getInboxId();
-                SignalEnvelope envelope = fn.apply(message);
-                TenantId tenantId = envelope.tenantId();
-                InboxLabel label = message.getLabel();
-                if (currentBatch == null) {
-                    currentBatch = new Batch(msgInboxId, tenantId, label);
-                } else {
-                    if (!(currentBatch.inboxId.equals(msgInboxId)
-                            && currentBatch.label == label
-                            && currentBatch.tenantId.equals(tenantId))) {
-                        batches.add(currentBatch);
-                        currentBatch = new Batch(msgInboxId, tenantId, label);
-                    }
-                }
-                currentBatch.addMessage(envelope);
-            }
-            return batches;
-        }
-
-        private void addMessage(SignalEnvelope envelope) {
-            messages.add(envelope);
-        }
-
-        private void deliverVia(Endpoints endpoints) {
-        }
-    }
-
     /**
      * An abstract base for routines which dispatch {@code InboxMessage}s to their endpoints.
      *
@@ -206,16 +151,6 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
         }
 
         protected abstract Predicate<? super InboxMessage> filterByType();
-
-        void deliverAll(List<InboxMessage> messages) {
-            for (InboxMessage message : messages) {
-                deliver(message);
-            }
-//            List<Batch> batches = Batch.byInboxId(messages, InboxPart.this::asEnvelope);
-//            for (Batch batch : batches) {
-//                batch.deliverVia(endpoints);
-//            }
-        }
 
         void deliver(InboxMessage message) {
             M envelope = asEnvelope(message);
