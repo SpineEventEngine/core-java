@@ -63,6 +63,11 @@ public class DeliveryTestEnv {
         /** How many calls there were to {@link #doLoadOrCreate(String)} method, grouped by ID. */
         private static final Map<String, Integer> loadOrCreateCalls = Maps.newConcurrentMap();
 
+        public CalculatorRepository() {
+            storeCalls.clear();
+            loadOrCreateCalls.clear();
+        }
+
         @Override
         protected void setupImportRouting(EventRouting<String> routing) {
             routeByFirstField(routing);
