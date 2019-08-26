@@ -218,7 +218,7 @@ class DeliveryTest {
     }
 
     @Test
-    @DisplayName("single shards to a single target in a multi-threaded env in batches")
+    @DisplayName("a single shard to a single target in a multi-threaded env in batches")
     void deliverInBatch() {
         FixedShardStrategy strategy = new FixedShardStrategy(1);
         Delivery delivery = Delivery.newBuilder()
