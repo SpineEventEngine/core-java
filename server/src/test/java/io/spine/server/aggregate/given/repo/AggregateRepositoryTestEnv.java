@@ -46,7 +46,7 @@ public class AggregateRepositoryTestEnv {
         return boundedContext;
     }
 
-    public static AggregateRepository<ProjectId, ProjectAggregate> repository() {
+    public static ProjectAggregateRepository repository() {
         return repository;
     }
 

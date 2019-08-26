@@ -107,10 +107,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
@@ -283,13 +281,12 @@ public class AggregateRepositoryTest {
         @Test
         @DisplayName("when it's set to default value")
         void whenItsDefault() {
-            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
-            AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
-            doReturn(storageSpy).when(repositorySpy)
-                                .aggregateStorage();
+            ProjectAggregateRepository repository = repository();
+            AggregateStorage<ProjectId> storageSpy = spy(repository.aggregateStorage());
+            repository.injectStorage(storageSpy);
 
             ProjectId id = Sample.messageOfType(ProjectId.class);
-            repositorySpy.loadOrCreate(id);
+            loadOrCreate(repository, id);
 
             ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
                     ArgumentCaptor.forClass(AggregateReadRequest.class);
@@ -297,22 +294,21 @@ public class AggregateRepositoryTest {
 
             AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
             assertEquals(id, passedRequest.recordId());
-            assertEquals(repositorySpy.snapshotTrigger() + 1, passedRequest.batchSize());
+            assertEquals(repository.snapshotTrigger() + 1, passedRequest.batchSize());
         }
 
         @SuppressWarnings({"unchecked", "CheckReturnValue" /* calling mock */})
         @Test
         @DisplayName("when it's set to non-default value")
         void whenItsNonDefault() {
-            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
-            AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
-            doReturn(storageSpy).when(repositorySpy)
-                                .aggregateStorage();
+            ProjectAggregateRepository repository = repository();
+            AggregateStorage<ProjectId> storageSpy = spy(repository.aggregateStorage());
+            repository.injectStorage(storageSpy);
 
             int nonDefaultSnapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER * 2;
-            repositorySpy.setSnapshotTrigger(nonDefaultSnapshotTrigger);
+            repository.setSnapshotTrigger(nonDefaultSnapshotTrigger);
             ProjectId id = Sample.messageOfType(ProjectId.class);
-            repositorySpy.loadOrCreate(id);
+            loadOrCreate(repository, id);
 
             ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
                     ArgumentCaptor.forClass(AggregateReadRequest.class);
@@ -327,14 +323,13 @@ public class AggregateRepositoryTest {
     @Test
     @DisplayName("pass snapshot trigger + 1 to `AggregateReadRequest`")
     void useSnapshotTriggerForRead() {
-        AggregateRepository<ProjectId, ProjectAggregate> repositorySpy = spy(repository());
-        AggregateStorage<ProjectId> storageSpy = spy(repositorySpy.aggregateStorage());
-        when(repositorySpy.aggregateStorage())
-                .thenReturn(storageSpy);
-        int snapshotTrigger = repositorySpy.snapshotTrigger();
+        ProjectAggregateRepository repository = repository();
+        AggregateStorage<ProjectId> storageSpy = spy(repository.aggregateStorage());
+        repository.injectStorage(storageSpy);
+        int snapshotTrigger = repository.snapshotTrigger();
 
         ProjectId id = Sample.messageOfType(ProjectId.class);
-        repositorySpy.loadOrCreate(id);
+        loadOrCreate(repository, id);
 
         @SuppressWarnings("unchecked") // Reflective mock creation.
                 ArgumentCaptor<AggregateReadRequest<ProjectId>> requestCaptor =
@@ -344,6 +339,11 @@ public class AggregateRepositoryTest {
         AggregateReadRequest<ProjectId> passedRequest = requestCaptor.getValue();
         assertEquals(id, passedRequest.recordId());
         assertEquals(snapshotTrigger + 1, passedRequest.batchSize());
+    }
+
+    private static void loadOrCreate(AggregateRepository<ProjectId, ProjectAggregate> repository,
+                                     ProjectId id) {
+        repository.loadOrCreate(id);
     }
 
     @Nested
