@@ -88,8 +88,8 @@ final class MethodResults {
      *         the type of the produced message classes
      * @return the set of message classes produced by the method
      */
-    @SuppressWarnings("unchecked") /* The cast to <P> is convenience for calling sites, and is safe
-        as all handler methods in the model produce either commands OR events.
+    @SuppressWarnings("unchecked") /* The cast to `<P>` is a convenience for calling sites, and
+        is safe as all handler methods in the model produce either commands OR events.
         The method is thus parameterized with a produced message class, and the runtime checks
         are only used for convenience. */
     static <P extends MessageClass<?>> ImmutableSet<P> collectMessageClasses(Method method) {
