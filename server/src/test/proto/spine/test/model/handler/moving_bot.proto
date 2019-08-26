@@ -17,17 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- * This package defines of the declaration requirements of {@link io.spine.server.entity.Entity
- * Entity} API methods, that are typically created by the framework end-user.
- */
-@Internal
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.model.declare;
+package spine.test.model;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import io.spine.annotation.Internal;
+import "spine/options.proto";
 
-import javax.annotation.ParametersAreNonnullByDefault;
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.model.handler.given";
+option java_multiple_files = true;
+option java_outer_classname = "MovingBotProto";
+
+// The position of the MovingBot.
+message Position {
+    uint32 id = 1;
+    uint32 x = 2;
+    uint32 y = 3;
+}

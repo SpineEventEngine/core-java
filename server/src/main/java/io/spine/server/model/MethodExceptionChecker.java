@@ -21,7 +21,6 @@
 package io.spine.server.model;
 
 import com.google.common.base.Joiner;
-import io.spine.annotation.Internal;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -40,7 +39,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>If such check fails, the {@link IllegalStateException} will be thrown. If the check passes,
  * no action is performed.
  */
-@Internal
 public final class MethodExceptionChecker {
 
     private final Method method;

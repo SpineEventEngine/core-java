@@ -18,33 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.handler.given.event;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.server.event.React;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
-
-import java.lang.reflect.Method;
-import java.util.Optional;
 
 /**
- * The signature of {@link EventReactorMethod}.
+ * A common interface for moving events.
  */
-class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
-
-    EventReactorSignature() {
-        super(React.class);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
-    }
-
-    @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventReactorMethod(method, parameterSpec);
-    }
+@Immutable
+public interface MovingEvent extends EventMessage {
 }

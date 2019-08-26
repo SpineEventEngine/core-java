@@ -25,14 +25,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.MethodSignature;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.AccessModifier;
+import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
+import static io.spine.server.model.MethodParams.consistsOfSingle;
 
 /**
  * The signature of the {@link Applier} method.

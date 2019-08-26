@@ -25,7 +25,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.base.FieldPath;
-import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;

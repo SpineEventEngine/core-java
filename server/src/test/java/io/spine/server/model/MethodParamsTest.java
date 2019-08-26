@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
+package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
@@ -26,7 +26,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
-import io.spine.server.model.declare.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
+import io.spine.server.model.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
 import io.spine.test.model.ModCreateProject;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
@@ -34,14 +34,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
-import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
-import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
-import static io.spine.server.model.declare.MethodParams.findMatching;
-import static io.spine.server.model.declare.MethodParams.isFirstParamCommand;
-import static io.spine.server.model.declare.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
-import static io.spine.server.model.declare.given.MethodParamsTestEnv.singleParamCommand;
-import static io.spine.server.model.declare.given.MethodParamsTestEnv.twoParamCommandAndCtx;
+import static io.spine.server.model.MethodParams.consistsOfSingle;
+import static io.spine.server.model.MethodParams.consistsOfTwo;
+import static io.spine.server.model.MethodParams.consistsOfTypes;
+import static io.spine.server.model.MethodParams.findMatching;
+import static io.spine.server.model.MethodParams.isFirstParamCommand;
+import static io.spine.server.model.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
+import static io.spine.server.model.given.MethodParamsTestEnv.singleParamCommand;
+import static io.spine.server.model.given.MethodParamsTestEnv.twoParamCommandAndCtx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -108,7 +108,7 @@ class MethodParamsTest extends UtilityClassTest<MethodParams> {
         Optional<ScheduleCommandParamSpec> matching =
                 findMatching(singleParamCommand(),
                              ImmutableList.copyOf(ScheduleCommandParamSpec.values()));
-        assertTrue(!matching.isPresent());
+        assertFalse(matching.isPresent());
     }
 
     @Test

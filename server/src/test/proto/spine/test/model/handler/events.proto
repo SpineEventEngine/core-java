@@ -17,27 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.model.declare;
+package spine.test.model;
 
-import com.google.common.base.Joiner;
-import io.spine.server.model.HandlerMethod;
+import "spine/options.proto";
 
-/**
- * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
- * its {@link HandlerMethod#rawMethod() wrapped method} does not match
- * {@linkplain MethodSignature method signature}, set for the handler.
- */
-public class SignatureMismatchException extends RuntimeException {
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.model.handler.given.event";
+option java_multiple_files = true;
+option java_outer_classname = "EventsProto";
 
-    private static final long serialVersionUID = 1L;
+option (every_is).java_type = "MovingEvent";
 
-    SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
-        super(formatMsg(mismatches));
-    }
+message MovedNorth {
+    uint32 bot_id = 1;
+}
 
-    private static String formatMsg(Iterable<SignatureMismatch> mismatches) {
-        return "Error declaring a method. Mismatches: " + Joiner.on(", ")
-                                                                .join(mismatches);
-    }
+message MovedEast {
+    uint32 bot_id = 1;
+}
+
+message MovedSouth {
+    uint32 bot_id = 1;
+}
+
+message MovedWest {
+    uint32 bot_id = 1;
 }

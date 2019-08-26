@@ -18,33 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
-
-import com.google.common.collect.ImmutableSet;
-import io.spine.base.EventMessage;
-import io.spine.server.event.React;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
-
-import java.lang.reflect.Method;
-import java.util.Optional;
-
 /**
- * The signature of {@link EventReactorMethod}.
+ * Events related to the tests of handler method definitions.
+ *
+ * <p>See {@code proto/spine/test/model/handler} for the domain definition of these tests.
  */
-class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
-    EventReactorSignature() {
-        super(React.class);
-    }
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.handler.given.event;
 
-    @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventReactorMethod(method, parameterSpec);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

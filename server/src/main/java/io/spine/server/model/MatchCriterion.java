@@ -18,12 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
+package io.spine.server.model;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.server.model.MethodExceptionChecker;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -31,9 +30,9 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
-import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
-import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
-import static io.spine.server.model.declare.SignatureMismatch.create;
+import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
+import static io.spine.server.model.SignatureMismatch.Severity.WARN;
+import static io.spine.server.model.SignatureMismatch.create;
 import static java.lang.String.format;
 
 /**
@@ -114,8 +113,7 @@ public enum MatchCriterion {
                 checker.checkThrowsNoExceptionsBut(allowed);
                 return Optional.empty();
             } catch (IllegalStateException e) {
-                SignatureMismatch mismatch = create(this,
-                                                    e.getMessage());
+                SignatureMismatch mismatch = create(this, e.getMessage());
                 return Optional.of(mismatch);
             }
         }

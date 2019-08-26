@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
+package io.spine.server.model;
 
 import io.spine.base.CommandMessage;
 import io.spine.server.type.MessageEnvelope;
@@ -36,9 +36,7 @@ import static java.util.Arrays.asList;
  */
 public final class MethodParams {
 
-    /**
-     * Prevents this utility class from instantiation.
-     */
+    /** Prevents instantiation of this utility class. */
     private MethodParams() {
     }
 

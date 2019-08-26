@@ -34,6 +34,7 @@ import io.spine.test.model.ModProjectStarted;
 import io.spine.test.model.ModStartProject;
 import io.spine.test.model.Rejections.ModCannotAssignOwnerToProject;
 import io.spine.test.model.Rejections.ModProjectAlreadyExists;
+import io.spine.testing.UtilityClassTest;
 import io.spine.type.MessageClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,12 +45,17 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.model.MethodResults.collectMessageClasses;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("ProducedTypeSet should")
-class ProducedTypeSetTest {
+class MethodResultsTest extends UtilityClassTest<MethodResults> {
+
+    MethodResultsTest() {
+        super(MethodResults.class);
+    }
 
     @Nested
     @DisplayName("be collected from a single produced message type")
@@ -153,12 +159,11 @@ class ProducedTypeSetTest {
                                           Collection<Class<? extends Message>> expectedTypes) {
         try {
             Method method = MessageProducer.class.getMethod(methodName);
-            ProducedTypeSet<?> producedTypes = ProducedTypeSet.collect(method);
             Set<? extends MessageClass<?>> expectedClasses = expectedTypes
                     .stream()
-                    .map(ProducedTypeSetTest::toCommandOrEventClass)
+                    .map(MethodResultsTest::toCommandOrEventClass)
                     .collect(toSet());
-            ImmutableSet<?> classes = producedTypes.typeSet();
+            ImmutableSet<?> classes = collectMessageClasses(method);
             assertThat(classes).containsExactlyElementsIn(expectedClasses);
         } catch (NoSuchMethodException e) {
             fail(e);

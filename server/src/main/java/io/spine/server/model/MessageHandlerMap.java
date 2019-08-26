@@ -27,7 +27,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.type.EmptyClass;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;

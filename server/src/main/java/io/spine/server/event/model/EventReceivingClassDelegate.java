@@ -27,8 +27,8 @@ import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ModelClass;
-import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 

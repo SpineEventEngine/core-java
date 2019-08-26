@@ -24,7 +24,7 @@ import io.spine.base.EventMessage;
 import io.spine.server.dispatch.Success;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;

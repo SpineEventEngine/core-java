@@ -29,9 +29,10 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
-import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -42,10 +43,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.base.Errors.causeOf;
 import static io.spine.base.Errors.fromThrowable;
+import static io.spine.server.model.MethodResults.collectMessageClasses;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -102,7 +106,13 @@ public abstract class AbstractHandlerMethod<T,
      */
     private final ParameterSpec<E> parameterSpec;
 
-    private final ProducedTypeSet<P> producedTypes;
+    /**
+     * Contains classes of messages returned by the handler.
+     *
+     * <p>Does <em>not</em> contain interfaces.
+     */
+    @SuppressWarnings("Immutable") // Memoizing supplier is effectively immutable.
+    private final Supplier<ImmutableSet<P>> producedTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -117,8 +127,7 @@ public abstract class AbstractHandlerMethod<T,
         this.messageClass = firstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
-        this.producedTypes = ProducedTypeSet.collect(method);
-
+        this.producedTypes = memoize(() -> collectMessageClasses(method));
         method.setAccessible(true);
     }
 
@@ -194,15 +203,15 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<P> producedMessages() {
-        return producedTypes.typeSet();
+    public final Set<P> producedMessages() {
+        return producedTypes.get();
     }
 
     /**
      * Returns {@code true} if the method is declared {@code public},
      * {@code false} otherwise.
      */
-    protected boolean isPublic() {
+    protected final boolean isPublic() {
         boolean result = Modifier.isPublic(modifiers());
         return result;
     }
@@ -211,13 +220,13 @@ public abstract class AbstractHandlerMethod<T,
      * Returns {@code true} if the method is declared {@code private},
      * {@code false} otherwise.
      */
-    protected boolean isPrivate() {
+    protected final boolean isPrivate() {
         boolean result = Modifier.isPrivate(modifiers());
         return result;
     }
 
     @Override
-    public Set<MethodAttribute<?>> attributes() {
+    public final Set<MethodAttribute<?>> attributes() {
         return attributes;
     }
 
@@ -230,7 +239,7 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * Feeds the given {@code envelope} to the given {@code target} and returns the outcome.
      *
-     * @implNote the outcome of this method is not validated, as its fields in fact consist
+     * @implNote The outcome of this method is not validated, as its fields in fact consist
      *         of the parts, such as wrapped {@code Command}s and {@code Event}s that are validated
      *         upon their creation. Such an approach allows to improve the overall performance of
      *         the signal propagation.
@@ -315,7 +324,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public HandlerId id() {
-        return Handlers.createId(messageClass());
+        return createId(messageClass());
     }
 
     @Override
@@ -345,5 +354,50 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public String toString() {
         return getFullName();
+    }
+
+    /**
+     * Creates a new {@link HandlerId} with the given class as the handled message type.
+     *
+     * @param messageClass
+     *         the handled message class
+     * @return new handler ID
+     */
+    protected static HandlerId createId(MessageClass<?> messageClass) {
+        HandlerTypeInfo typeInfo = HandlerTypeInfo
+                .newBuilder()
+                .setMessageType(typeUrl(messageClass))
+                .build();
+        return HandlerId
+                .newBuilder()
+                .setType(typeInfo)
+                .build();
+    }
+
+    /**
+     * Creates a new {@link HandlerId} with handled message type and origin message type.
+     *
+     * @param messageClass
+     *         the handled message class
+     * @param originClass
+     *         the origin message class
+     * @return new handler ID
+     */
+    protected static HandlerId createId(MessageClass<?> messageClass, MessageClass<?> originClass) {
+        HandlerTypeInfo typeInfo = HandlerTypeInfo
+                .newBuilder()
+                .setMessageType(typeUrl(messageClass))
+                .setOriginType(typeUrl(originClass))
+                .build();
+        return HandlerId
+                .newBuilder()
+                .setType(typeInfo)
+                .build();
+    }
+
+    private static String typeUrl(MessageClass<?> messageClass) {
+        TypeName typeName = messageClass.typeName();
+        TypeUrl typeUrl = typeName.toUrl();
+        return typeUrl.value();
     }
 }

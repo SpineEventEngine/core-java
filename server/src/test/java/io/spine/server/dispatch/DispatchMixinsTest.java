@@ -37,6 +37,7 @@ class DispatchMixinsTest {
     @Test
     @DisplayName("`BatchDispatchOutcomeMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void batchDispatchOutcomeMixin() {
+        checkReachable(BatchDispatchOutcome.getDefaultInstance());
     }
 
     @Test

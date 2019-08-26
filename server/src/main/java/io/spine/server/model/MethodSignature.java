@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.declare;
+package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.logging.Logging;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.type.MessageEnvelope;
 
 import java.lang.annotation.Annotation;
@@ -33,8 +32,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.declare.MethodParams.findMatching;
+import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
+import static io.spine.server.model.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -186,7 +185,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * @return a wrapper object created from the method
      * @throws SignatureMismatchException
      *         in case there are
-     *         {@link io.spine.server.model.declare.SignatureMismatch.Severity#ERROR ERROR}-level
+     *         {@link SignatureMismatch.Severity#ERROR ERROR}-level
      *         mismatches
      */
     public Optional<H> create(Method method) {

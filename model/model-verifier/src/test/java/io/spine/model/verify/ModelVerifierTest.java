@@ -34,7 +34,7 @@ import io.spine.model.verify.given.UploadCommandHandler;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
-import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.server.model.SignatureMismatchException;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.MuteLogging;
