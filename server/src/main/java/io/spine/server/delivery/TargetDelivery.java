@@ -25,14 +25,11 @@ import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.type.SignalEnvelope;
-import io.spine.string.Stringifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-
-import static java.lang.String.format;
 
 /**
  * Takes the messages, which were previously sent to their targets via this inbox, and
@@ -166,8 +163,6 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
                 for (InboxMessage message : messages) {
                     doDeliver(cmdDispatcher, eventDispatcher, message);
                 }
-                System.out.println(format("Delivered %s messages to the target %s",
-                                          messages.size(), Stringifiers.toString(inboxId.value())));
                 dispatcher.onEnd(id);
             } else {
                 doDeliver(cmdDispatcher, eventDispatcher, messages.get(0));
