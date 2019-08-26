@@ -45,8 +45,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * <p>The set contains <em>class</em> information collected from method signatures.
  * If a method result refers to an interface (directly or as a generic parameter), this
- * interface is not added to the set. Thus, for example, if a method,
- * for example, returns {@code List<EventMessage>}, the set would be empty.
+ * interface is not added to the set. Thus, if a method returns {@code List<EventMessage>},
+ * the set would be empty.
  */
 @Immutable
 final class MethodResults {
