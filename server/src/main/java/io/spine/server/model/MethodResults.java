@@ -43,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * Obtains a set of command or event types produced by a {@link HandlerMethod}.
  *
- * <p>The set contains <em>class</em>information collected from method signatures.
+ * <p>The set contains <em>class</em> information collected from method signatures.
  * If a method result refers to an interface (directly or as a generic parameter), this
  * interface is not added to the set. Thus, for example, if a method,
  * for example, returns {@code List<EventMessage>}, the set would be empty.
