@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -287,7 +288,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         cache.store(aggregate);
     }
 
-    private void doStore(A aggregate) {
+    @VisibleForTesting
+    protected void doStore(A aggregate) {
         Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
@@ -560,7 +562,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return cache.load(id);
     }
 
-    private A doLoadOrCreate(I id) {
+    @VisibleForTesting
+    protected A doLoadOrCreate(I id) {
         A result = load(id).orElseGet(() -> createNew(id));
         return result;
     }

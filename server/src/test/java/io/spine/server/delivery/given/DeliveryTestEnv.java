@@ -22,6 +22,7 @@ package io.spine.server.delivery.given;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.protobuf.AnyPacker;
@@ -33,6 +34,7 @@ import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
 import java.security.SecureRandom;
+import java.util.Map;
 
 /**
  * Test environment for {@link Delivery} tests.
@@ -55,6 +57,12 @@ public class DeliveryTestEnv {
 
     public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
 
+        /** How many calls there were to {@link #doStore(CalcAggregate)} method, grouped by ID. */
+        private static final Map<String, Integer> storeCalls = Maps.newConcurrentMap();
+
+        /** How many calls there were to {@link #doLoadOrCreate(String)} method, grouped by ID. */
+        private static final Map<String, Integer> loadOrCreateCalls = Maps.newConcurrentMap();
+
         @Override
         protected void setupImportRouting(EventRouting<String> routing) {
             routeByFirstField(routing);
@@ -67,6 +75,34 @@ public class DeliveryTestEnv {
 
         private static void routeByFirstField(EventRouting<String> routing) {
             routing.replaceDefault(EventRoute.byFirstMessageField(String.class));
+        }
+
+        @Override
+        protected void doStore(CalcAggregate aggregate) {
+            String id = aggregate.id();
+            incrementByKey(id, storeCalls);
+            super.doStore(aggregate);
+        }
+
+        @Override
+        protected CalcAggregate doLoadOrCreate(String id) {
+            incrementByKey(id, loadOrCreateCalls);
+            return super.doLoadOrCreate(id);
+        }
+
+        private static void incrementByKey(String id, Map<String, Integer> counters) {
+            if (!counters.containsKey(id)) {
+                counters.put(id, 0);
+            }
+            counters.put(id, counters.get(id) + 1);
+        }
+
+        public int storeCallsCount(String id) {
+            return storeCalls.getOrDefault(id, 0);
+        }
+
+        public int loadOrCreateCallsCount(String id) {
+            return loadOrCreateCalls.getOrDefault(id, 0);
         }
     }
 

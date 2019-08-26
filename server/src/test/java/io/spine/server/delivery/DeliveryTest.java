@@ -40,6 +40,7 @@ import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -175,8 +176,7 @@ class DeliveryTest {
         new ThreadSimulator(5, false).runWith(targets);
 
         ImmutableSet<ShardIndex> shards = memoizer.shards();
-        assertThat(shards.size())
-                .isEqualTo(1);
+        assertThat(shards.size()).isEqualTo(1);
         assertThat(shards.iterator()
                          .next())
                 .isEqualTo(strategy.nonEmptyShard());
@@ -225,32 +225,35 @@ class DeliveryTest {
                                     .setStrategy(strategy)
                                     .setIdempotenceWindow(Durations.ZERO)
                                     .build();
+        deliverAfterPause(delivery);
 
+        ServerEnvironment.instance()
+                         .configureDelivery(delivery);
+        ImmutableSet<String> targets = singleTarget();
+        ThreadSimulator simulator = new ThreadSimulator(7, false);
+        simulator.runWith(targets);
+
+        String theTarget = targets.iterator()
+                                  .next();
+        int signalsDispatched = simulator.signalsPerTarget()
+                                         .get(theTarget)
+                                         .size();
+        assertThat(simulator.callsToRepositoryLoadOrCreate(theTarget)).isLessThan(
+                signalsDispatched);
+        assertThat(simulator.callsToRepositoryStore(theTarget)).isLessThan(signalsDispatched);
+    }
+
+    private static void deliverAfterPause(Delivery delivery) {
         CountDownLatch latch = new CountDownLatch(20);
         // Sleep for some time to accumulate messages in shards before starting to process them.
         delivery.subscribe(update -> {
-            if(latch.getCount() > 0) {
+            if (latch.getCount() > 0) {
                 sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
                 latch.countDown();
             } else {
                 delivery.deliverMessagesFrom(update.getShardIndex());
             }
         });
-
-        ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
-        delivery.subscribe(memoizer);
-        ServerEnvironment.instance()
-                         .configureDelivery(delivery);
-
-        ImmutableSet<String> targets = singleTarget();
-        new ThreadSimulator(5, false).runWith(targets);
-
-        ImmutableSet<ShardIndex> shards = memoizer.shards();
-        assertThat(shards.size())
-                .isEqualTo(1);
-        assertThat(shards.iterator()
-                         .next())
-                .isEqualTo(strategy.nonEmptyShard());
     }
 
     private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContents() {
@@ -293,6 +296,10 @@ class DeliveryTest {
 
         private final int threadCount;
         private final boolean shouldInboxBeEmpty;
+        private final CalculatorRepository repository;
+
+        // Which signals are expected to be delivered to which targets.
+        private @Nullable Map<String, List<CalculatorSignal>> signalsPerTarget;
 
         private ThreadSimulator(int threadCount) {
             this(threadCount, true);
@@ -301,6 +308,7 @@ class DeliveryTest {
         private ThreadSimulator(int threadCount, boolean shouldInboxBeEmpty) {
             this.threadCount = threadCount;
             this.shouldInboxBeEmpty = shouldInboxBeEmpty;
+            this.repository = new CalculatorRepository();
         }
 
         /**
@@ -313,7 +321,7 @@ class DeliveryTest {
         private void runWith(Set<String> targets) {
             BlackBoxBoundedContext<?> context =
                     BlackBoxBoundedContext.singleTenant()
-                                          .with(new CalculatorRepository());
+                                          .with(repository);
 
             SignalMemoizer memoizer = subscribeToDelivered();
 
@@ -330,8 +338,7 @@ class DeliveryTest {
                                                       importEvents.stream(),
                                                       reactEvents.stream());
 
-            Map<String, List<CalculatorSignal>> signalsPerTarget =
-                    signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
+            signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
             for (String calcId : signalsPerTarget.keySet()) {
 
@@ -354,6 +361,21 @@ class DeliveryTest {
 
             }
             ensureInboxesEmpty();
+        }
+
+        private int callsToRepositoryStore(String id) {
+            return repository.storeCallsCount(id);
+        }
+
+        private int callsToRepositoryLoadOrCreate(String id) {
+            return repository.loadOrCreateCallsCount(id);
+        }
+
+        public ImmutableMap<String, List<CalculatorSignal>> signalsPerTarget() {
+            if (signalsPerTarget == null) {
+                return ImmutableMap.of();
+            }
+            return ImmutableMap.copyOf(signalsPerTarget);
         }
 
         private static List<NumberReacted> eventsToReact(int streamSize,
