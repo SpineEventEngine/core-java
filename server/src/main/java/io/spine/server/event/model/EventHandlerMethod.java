@@ -34,7 +34,6 @@ import io.spine.type.MessageClass;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.server.model.Handlers.createId;
 
 /**
  * An abstract base for methods handling events.

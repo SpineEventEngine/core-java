@@ -31,6 +31,8 @@ import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -314,7 +316,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public HandlerId id() {
-        return Handlers.createId(messageClass());
+        return createId(messageClass());
     }
 
     @Override
@@ -344,5 +346,47 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public String toString() {
         return getFullName();
+    }
+
+    /**
+     * Creates a new {@link HandlerId} with the given class as the handled message type.
+     *
+     * @param messageClass the handled message class
+     * @return new handler ID
+     */
+    protected static HandlerId createId(MessageClass<?> messageClass) {
+        HandlerTypeInfo typeInfo = HandlerTypeInfo
+                .newBuilder()
+                .setMessageType(typeUrl(messageClass))
+                .build();
+        return HandlerId
+                .newBuilder()
+                .setType(typeInfo)
+                .build();
+    }
+
+    /**
+     * Creates a new {@link HandlerId} with handled message type and origin message type.
+     *
+     * @param messageClass the handled message class
+     * @param originClass  the origin message class
+     * @return new handler ID
+     */
+    protected static HandlerId createId(MessageClass<?> messageClass, MessageClass<?> originClass) {
+        HandlerTypeInfo typeInfo = HandlerTypeInfo
+                .newBuilder()
+                .setMessageType(typeUrl(messageClass))
+                .setOriginType(typeUrl(originClass))
+                .build();
+        return HandlerId
+                .newBuilder()
+                .setType(typeInfo)
+                .build();
+    }
+
+    private static String typeUrl(MessageClass<?> messageClass) {
+        TypeName typeName = messageClass.typeName();
+        TypeUrl typeUrl = typeName.toUrl();
+        return typeUrl.value();
     }
 }
