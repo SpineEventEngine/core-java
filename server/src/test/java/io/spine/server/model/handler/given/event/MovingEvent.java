@@ -20,10 +20,12 @@
 
 package io.spine.server.model.handler.given.event;
 
-import com.google.protobuf.Message;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.EventMessage;
 
 /**
  * A common interface for moving events.
  */
-public interface MovingEvent extends Message {
+@Immutable
+public interface MovingEvent extends EventMessage {
 }

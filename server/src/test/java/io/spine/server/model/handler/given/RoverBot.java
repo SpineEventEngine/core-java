@@ -44,14 +44,12 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
 
     @Assign
     List<MovingEvent> handle(Start command) {
-//    MovingEvent handle(Start command) {
         ImmutableList.Builder<MovingEvent> events = ImmutableList.builder();
         int numberOfMoves = command.getNumberOfMoves();
         for (int i = 0; i < numberOfMoves; i++) {
             events.add(nextMove());
         }
         return events.build();
-//        return nextMove();
     }
 
     /** Generates a random move event. */

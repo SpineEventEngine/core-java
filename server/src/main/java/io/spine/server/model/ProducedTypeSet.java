@@ -25,10 +25,8 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
 import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.base.RejectionMessage;
 import io.spine.reflect.Types;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
@@ -36,7 +34,6 @@ import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,6 +43,11 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * A collection of command or event types produced by a {@link HandlerMethod}.
  *
+ * <p>The set contains <em>class</em>information collected from method signatures.
+ * If a method result refers to an interface (directly or as a generic parameter), this
+ * interface is not added to the set. Thus, for example, if a method,
+ * for example, returns {@code List<EventMessage>}, the set would be empty.
+ *
  * @param <P>
  *         the type of the produced message classes
  */
@@ -54,9 +56,22 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
 
     private final ImmutableSet<P> producedTypes;
 
-    private ProducedTypeSet(ImmutableSet<P> producedTypes) {
-        this.producedTypes = producedTypes;
-    }
+    /**
+     * Checks if the class is a concrete {@linkplain CommandMessage command} or
+     * {@linkplain EventMessage event}.
+     */
+    private static final Predicate<Class<?>> IS_COMMAND_OR_EVENT = cls -> {
+        if (cls.isInterface()) {
+            return false;
+        }
+        if (Nothing.class.equals(cls)) {
+            return false;
+        }
+        boolean isCommandOrEvent =
+                CommandMessage.class.isAssignableFrom(cls)
+                        || EventMessage.class.isAssignableFrom(cls);
+        return isCommandOrEvent;
+    };
 
     /**
      * Collects the produced command/event types from the handler method.
@@ -80,6 +95,10 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
         return new ProducedTypeSet<>(producedMessages);
     }
 
+    private ProducedTypeSet(ImmutableSet<P> producedTypes) {
+        this.producedTypes = producedTypes;
+    }
+
     /**
      * Retrieves the produced types collection.
      */
@@ -92,54 +111,6 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
      *
      * <p>If the type is parameterized, its arguments are traversed recursively enabling correct
      * parsing of return types like {@code Pair<ProjectCreated, Optional<ProjectStarted>>}.
-     */
-    private static <P extends MessageClass<?>> ImmutableSet<P> collectProducedMessages(Type type) {
-        Iterable<Type> allTypes = Traverser.forTree(Types::resolveArguments)
-                                           .breadthFirst(type);
-        ImmutableSet<P> result =
-                Streams.stream(allTypes)
-                       .map(TypeToken::of)
-                       .map(TypeToken::getRawType)
-                       .filter(new IsCommandOrEvent())
-                       .map(new ToMessageClass<P>())
-                       .collect(toImmutableSet());
-        return result;
-    }
-
-    /**
-     * Checks if the class is a concrete {@linkplain CommandMessage command} or
-     * {@linkplain EventMessage event}.
-     */
-    private static class IsCommandOrEvent implements Predicate<Class<?>> {
-
-        /**
-         * Ignored command/event types include both too broad types like {@link EventMessage} and
-         * special-case types of commands and events which should not be exposed like
-         * {@link Nothing}.
-         */
-        private static final ImmutableSet<Class<? extends Message>> IGNORED_TYPES =
-                ImmutableSet.of(
-                        CommandMessage.class,
-                        EventMessage.class,
-                        RejectionMessage.class,
-                        Nothing.class
-                );
-
-        @Override
-        public boolean test(Class<?> aClass) {
-            boolean isCommandOrEvent =
-                    CommandMessage.class.isAssignableFrom(aClass)
-                            || EventMessage.class.isAssignableFrom(aClass);
-            boolean isIgnoredType = IGNORED_TYPES.contains(aClass);
-            return isCommandOrEvent && !isIgnoredType;
-        }
-    }
-
-    /**
-     * Converts the command or event class to the corresponding {@link MessageClass}.
-     *
-     * @param <P>
-     *         the type of the message class produced
      *
      * @apiNote
      * The class, in fact, knows to which class to convert on compilation stage already, as all
@@ -147,20 +118,34 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
      * parameterized with a produced message class, and the runtime checks are only used for
      * convenience.
      */
-    private static class ToMessageClass<P extends MessageClass<?>>
-            implements Function<Class<?>, P> {
+    @SuppressWarnings("unchecked")
+    private static <P extends MessageClass<?>> ImmutableSet<P> collectProducedMessages(Type type) {
+        Iterable<Type> allTypes = Traverser.forTree(Types::resolveArguments)
+                                           .breadthFirst(type);
+        ImmutableSet<P> result =
+                Streams.stream(allTypes)
+                       .map(TypeToken::of)
+                       .map(TypeToken::getRawType)
+                       .filter(IS_COMMAND_OR_EVENT)
+                       .map(c -> (P) toMessageClass(c))
+                       .collect(toImmutableSet());
+        return result;
+    }
 
-        @SuppressWarnings("unchecked") // See class doc.
-        @Override
-        public P apply(Class<?> aClass) {
-            if (CommandMessage.class.isAssignableFrom(aClass)) {
-                return (P) CommandClass.from((Class<? extends CommandMessage>) aClass);
-            }
-            if (EventMessage.class.isAssignableFrom(aClass)) {
-                return (P) EventClass.from((Class<? extends EventMessage>) aClass);
-            }
-            throw newIllegalArgumentException("A given type %s is neither command nor event",
-                                              aClass.getCanonicalName());
+    /**
+     * Converts the command or event class to the corresponding {@link MessageClass}.
+     */
+    @SuppressWarnings("unchecked") // checked by `isAssignableFrom()`
+    private static MessageClass<?> toMessageClass(Class<?> cls) {
+        if (CommandMessage.class.isAssignableFrom(cls)) {
+            return CommandClass.from((Class<? extends CommandMessage>) cls);
         }
+        if (EventMessage.class.isAssignableFrom(cls)) {
+            return EventClass.from((Class<? extends EventMessage>) cls);
+        }
+        throw newIllegalArgumentException(
+                "A given type `%s` is neither a command nor an event.",
+                cls.getCanonicalName()
+        );
     }
 }
