@@ -167,7 +167,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     private void initCache(boolean multitenant) {
-        cache = new RepositoryCache<>(multitenant, this::findOrCreate, this::store);
+        cache = new RepositoryCache<>(multitenant, this::doFindOrCreate, this::doStore);
     }
 
     /**
@@ -402,9 +402,17 @@ public abstract class ProcessManagerRepository<I,
         return cache.load(id);
     }
 
+    private P doFindOrCreate(I id) {
+        return super.findOrCreate(id);
+    }
+
     @Override
     public void store(P entity) {
         cache.store(entity);
+    }
+
+    private void doStore(P entity) {
+        super.store(entity);
     }
 
     @Override
