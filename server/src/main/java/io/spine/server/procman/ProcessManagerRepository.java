@@ -35,6 +35,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.delivery.BatchDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
@@ -178,7 +179,7 @@ public abstract class ProcessManagerRepository<I,
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
-                .withBatchDispatcher(new Inbox.BatchDispatcher<I>() {
+                .withBatchDispatcher(new BatchDispatcher<I>() {
                     @Override
                     public void onStart(I id) {
                         cache.startCaching(id);

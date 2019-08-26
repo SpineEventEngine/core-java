@@ -51,13 +51,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Streams.concat;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -212,6 +215,42 @@ class DeliveryTest {
                 assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.DELIVERED);
             }
         }
+    }
+
+    @Test
+    @DisplayName("single shards to a single target in a multi-threaded env in batches")
+    void deliverInBatch() {
+        FixedShardStrategy strategy = new FixedShardStrategy(1);
+        Delivery delivery = Delivery.newBuilder()
+                                    .setStrategy(strategy)
+                                    .setIdempotenceWindow(Durations.ZERO)
+                                    .build();
+
+        CountDownLatch latch = new CountDownLatch(20);
+        // Sleep for some time to accumulate messages in shards before starting to process them.
+        delivery.subscribe(update -> {
+            if(latch.getCount() > 0) {
+                sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+                latch.countDown();
+            } else {
+                delivery.deliverMessagesFrom(update.getShardIndex());
+            }
+        });
+
+        ShardIndexMemoizer memoizer = new ShardIndexMemoizer();
+        delivery.subscribe(memoizer);
+        ServerEnvironment.instance()
+                         .configureDelivery(delivery);
+
+        ImmutableSet<String> targets = singleTarget();
+        new ThreadSimulator(5, false).runWith(targets);
+
+        ImmutableSet<ShardIndex> shards = memoizer.shards();
+        assertThat(shards.size())
+                .isEqualTo(1);
+        assertThat(shards.iterator()
+                         .next())
+                .isEqualTo(strategy.nonEmptyShard());
     }
 
     private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContents() {

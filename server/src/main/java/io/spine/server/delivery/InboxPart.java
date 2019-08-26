@@ -161,7 +161,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                              .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
 
             @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-                    I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
+            I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
             TenantAwareRunner
                     .with(envelope.tenantId())
                     .run(() -> {

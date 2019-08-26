@@ -20,6 +20,7 @@
 
 package io.spine.server.tenant;
 
+import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
 import java.util.Objects;
@@ -32,6 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I>
  *         the type of the identifier
  */
+@Internal
 public final class IdInTenant<I> {
 
     private final I id;
@@ -45,10 +47,22 @@ public final class IdInTenant<I> {
     /**
      * Creates a new instance of {@code IdInTenant} with the given identifier value and
      * selected multitenancy mode.
+     *
+     * <p>Uses the current {@code Tenant}.
      */
     public static <I> IdInTenant<I> of(I id, boolean multitenant) {
         checkNotNull(id);
         TenantId tenant = TenantAware.getCurrentTenant(multitenant);
+        return new IdInTenant<>(id, tenant);
+    }
+
+    /**
+     * Creates a new instance of {@code IdInTenant} with the given identifier value and
+     * {@code TenantId}.
+     */
+    public static <I> IdInTenant<I> of(I id, TenantId tenant) {
+        checkNotNull(id);
+        checkNotNull(tenant);
         return new IdInTenant<>(id, tenant);
     }
 
