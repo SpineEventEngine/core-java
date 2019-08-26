@@ -58,13 +58,13 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
         Integer id = id();
         switch (nextMove) {
             case 0:
-                return MovedNorth.newBuilder().setBotId(id).build();
+                return MovedNorth.newBuilder().setBotId(id).vBuild();
             case 1:
-                return MovedEast.newBuilder().setBotId(id).build();
+                return MovedEast.newBuilder().setBotId(id).vBuild();
             case 2:
-                return MovedSouth.newBuilder().setBotId(id).build();
+                return MovedSouth.newBuilder().setBotId(id).vBuild();
             case 3:
-                return MovedWest.newBuilder().setBotId(id).build();
+                return MovedWest.newBuilder().setBotId(id).vBuild();
             default:
                 throw newIllegalStateException("Unable to create a move event for %d.", nextMove);
         }
