@@ -45,6 +45,3 @@ message MovedSouth {
 message MovedWest {
     uint32 bot_id = 1;
 }
-
-
-
