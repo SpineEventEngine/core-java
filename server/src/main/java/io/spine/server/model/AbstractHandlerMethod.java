@@ -203,7 +203,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public Set<P> producedMessages() {
+    public final Set<P> producedMessages() {
         return producedTypes.get();
     }
 
@@ -211,7 +211,7 @@ public abstract class AbstractHandlerMethod<T,
      * Returns {@code true} if the method is declared {@code public},
      * {@code false} otherwise.
      */
-    protected boolean isPublic() {
+    protected final boolean isPublic() {
         boolean result = Modifier.isPublic(modifiers());
         return result;
     }
@@ -220,13 +220,13 @@ public abstract class AbstractHandlerMethod<T,
      * Returns {@code true} if the method is declared {@code private},
      * {@code false} otherwise.
      */
-    protected boolean isPrivate() {
+    protected final boolean isPrivate() {
         boolean result = Modifier.isPrivate(modifiers());
         return result;
     }
 
     @Override
-    public Set<MethodAttribute<?>> attributes() {
+    public final Set<MethodAttribute<?>> attributes() {
         return attributes;
     }
 
