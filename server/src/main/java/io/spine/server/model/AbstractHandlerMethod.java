@@ -239,7 +239,7 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * Feeds the given {@code envelope} to the given {@code target} and returns the outcome.
      *
-     * @implNote the outcome of this method is not validated, as its fields in fact consist
+     * @implNote The outcome of this method is not validated, as its fields in fact consist
      *         of the parts, such as wrapped {@code Command}s and {@code Event}s that are validated
      *         upon their creation. Such an approach allows to improve the overall performance of
      *         the signal propagation.
@@ -359,7 +359,8 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * Creates a new {@link HandlerId} with the given class as the handled message type.
      *
-     * @param messageClass the handled message class
+     * @param messageClass
+     *         the handled message class
      * @return new handler ID
      */
     protected static HandlerId createId(MessageClass<?> messageClass) {
@@ -376,8 +377,10 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * Creates a new {@link HandlerId} with handled message type and origin message type.
      *
-     * @param messageClass the handled message class
-     * @param originClass  the origin message class
+     * @param messageClass
+     *         the handled message class
+     * @param originClass
+     *         the origin message class
      * @return new handler ID
      */
     protected static HandlerId createId(MessageClass<?> messageClass, MessageClass<?> originClass) {
