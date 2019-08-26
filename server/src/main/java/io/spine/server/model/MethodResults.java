@@ -41,20 +41,15 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * A collection of command or event types produced by a {@link HandlerMethod}.
+ * Obtains a set of command or event types produced by a {@link HandlerMethod}.
  *
  * <p>The set contains <em>class</em>information collected from method signatures.
  * If a method result refers to an interface (directly or as a generic parameter), this
  * interface is not added to the set. Thus, for example, if a method,
  * for example, returns {@code List<EventMessage>}, the set would be empty.
- *
- * @param <P>
- *         the type of the produced message classes
  */
 @Immutable
-final class ProducedTypeSet<P extends MessageClass<?>> {
-
-    private final ImmutableSet<P> producedTypes;
+final class MethodResults {
 
     /**
      * Checks if the class is a concrete {@linkplain CommandMessage command} or
@@ -73,11 +68,16 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
         return isCommandOrEvent;
     };
 
+    /** Prevents instantiation of this utility class. */
+    private MethodResults() {
+    }
+
     /**
-     * Collects the produced command/event types from the handler method.
+     * Collects command or event classes declared in the return type of the handler method.
      *
      * <p>If the method returns a parameterized type like {@link Iterable}, the produced messages
-     * are gathered from its generic arguments.
+     * are gathered from its generic arguments. Generic arguments are traversed recursively enabling
+     * correct parsing of return types like {@code Pair<ProjectCreated, Optional<ProjectStarted>>}.
      *
      * <p>Too broad types are ignored, so methods returning something like
      * {@code Optional<Message>} are deemed producing no types.
@@ -86,42 +86,17 @@ final class ProducedTypeSet<P extends MessageClass<?>> {
      *         the handler method
      * @param <P>
      *         the type of the produced message classes
-     * @return a new {@code ProducedTypeSet} instance
+     * @return the set of message classes produced by the method
      */
-    static <P extends MessageClass<?>> ProducedTypeSet<P> collect(Method method) {
+    @SuppressWarnings("unchecked") /* The cast to <P> is convenience for calling sites, and is safe
+        as all handler methods in the model produce either commands OR events.
+        The method is thus parameterized with a produced message class, and the runtime checks
+        are only used for convenience. */
+    static <P extends MessageClass<?>> ImmutableSet<P> collectMessageClasses(Method method) {
         checkNotNull(method);
         Type returnType = method.getGenericReturnType();
-        ImmutableSet<P> producedMessages = collectProducedMessages(returnType);
-        return new ProducedTypeSet<>(producedMessages);
-    }
-
-    private ProducedTypeSet(ImmutableSet<P> producedTypes) {
-        this.producedTypes = producedTypes;
-    }
-
-    /**
-     * Retrieves the produced types collection.
-     */
-    ImmutableSet<P> typeSet() {
-        return producedTypes;
-    }
-
-    /**
-     * Collects all produced commands/events from the type.
-     *
-     * <p>If the type is parameterized, its arguments are traversed recursively enabling correct
-     * parsing of return types like {@code Pair<ProjectCreated, Optional<ProjectStarted>>}.
-     *
-     * @apiNote
-     * The class, in fact, knows to which class to convert on compilation stage already, as all
-     * handler methods in the model produce either commands OR events. The class is thus
-     * parameterized with a produced message class, and the runtime checks are only used for
-     * convenience.
-     */
-    @SuppressWarnings("unchecked")
-    private static <P extends MessageClass<?>> ImmutableSet<P> collectProducedMessages(Type type) {
         Iterable<Type> allTypes = Traverser.forTree(Types::resolveArguments)
-                                           .breadthFirst(type);
+                                           .breadthFirst(returnType);
         ImmutableSet<P> result =
                 Streams.stream(allTypes)
                        .map(TypeToken::of)

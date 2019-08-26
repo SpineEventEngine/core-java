@@ -36,9 +36,7 @@ import static java.util.Arrays.asList;
  */
 public final class MethodParams {
 
-    /**
-     * Prevents this utility class from instantiation.
-     */
+    /** Prevents instantiation of this utility class. */
     private MethodParams() {
     }
 

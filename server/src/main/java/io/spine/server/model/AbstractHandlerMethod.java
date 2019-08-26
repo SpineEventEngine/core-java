@@ -43,10 +43,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.base.Errors.causeOf;
 import static io.spine.base.Errors.fromThrowable;
+import static io.spine.server.model.MethodResults.collectMessageClasses;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
@@ -103,7 +106,13 @@ public abstract class AbstractHandlerMethod<T,
      */
     private final ParameterSpec<E> parameterSpec;
 
-    private final ProducedTypeSet<P> producedTypes;
+    /**
+     * Contains classes of messages returned by the handler.
+     *
+     * <p>Does <em>not</em> contain interfaces.
+     */
+    @SuppressWarnings("Immutable") // Memoizing supplier is effectively immutable.
+    private final Supplier<ImmutableSet<P>> producedTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -118,8 +127,7 @@ public abstract class AbstractHandlerMethod<T,
         this.messageClass = firstParamType(method);
         this.attributes = discoverAttributes(method);
         this.parameterSpec = parameterSpec;
-        this.producedTypes = ProducedTypeSet.collect(method);
-
+        this.producedTypes = memoize(() -> collectMessageClasses(method));
         method.setAccessible(true);
     }
 
@@ -196,7 +204,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @Override
     public Set<P> producedMessages() {
-        return producedTypes.typeSet();
+        return producedTypes.get();
     }
 
     /**
