@@ -47,7 +47,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private final MethodSignature<H, ?> signature;
     private final Multimap<HandlerTypeInfo, H> handlers;
     private final Map<HandlerId, H> seenMethods;
-    private final Map<MessageClass, H> filteringHandlers;
+    private final Map<MessageClass, FilteringHandler> filteringHandlers;
 
     private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         this.declaringClass = declaringClass;
@@ -100,7 +100,9 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private void remember(H handler) {
         checkNotRemembered(handler);
-        checkFilteringNotClashes(handler);
+        if (handler instanceof FilteringHandler) {
+            checkFilteringNotClashes((FilteringHandler) handler);
+        }
         HandlerId id = handler.id();
         handlers.put(id.getType(), handler);
     }
@@ -119,13 +121,13 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
     }
 
-    private void checkFilteringNotClashes(H handler) {
+    private void checkFilteringNotClashes(FilteringHandler handler) {
         MessageClass handledClass = handler.messageClass();
         FieldPath field = handler.filter().getField();
         if (!isNotDefault(field)) {
             return;
         }
-        H existingHandler = filteringHandlers.put(handledClass, handler);
+        FilteringHandler existingHandler = filteringHandlers.put(handledClass, handler);
         if (existingHandler != null) {
             // There is already a handler for this message class.
             // See that the field which is used as the condition for filtering is the same.
