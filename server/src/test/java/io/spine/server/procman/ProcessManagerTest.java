@@ -71,6 +71,7 @@ import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -106,7 +107,6 @@ import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testdata.Sample.messageOfType;
-import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -384,9 +384,10 @@ class ProcessManagerTest {
             @Test
             @DisplayName("when splitting incoming command")
             void splitCommand() {
-                boundedContext.receivesCommand(cancelIteration())
-                              .assertThat(emittedCommands(PmScheduleRetrospective.class,
-                                                          PmPlanIteration.class));
+                CommandSubject assertCommands = boundedContext.receivesCommand(cancelIteration())
+                                                              .assertCommands();
+                assertCommands.withType(PmScheduleRetrospective.class).hasSize(1);
+                assertCommands.withType(PmPlanIteration.class).hasSize(1);
             }
         }
 

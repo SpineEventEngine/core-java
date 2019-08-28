@@ -65,9 +65,11 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -77,11 +79,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -96,12 +101,7 @@ import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.re
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.testing.client.blackbox.Count.none;
-import static io.spine.testing.client.blackbox.Count.thrice;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenTenantId.generate;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -499,7 +499,6 @@ public class AggregateRepositoryTest {
                 // 1. got Rejections.AggCannotStartArchivedProject;
                 // 2. produced the state the event;
                 // 3. applied the event.
-                @SuppressWarnings("OptionalGetWithoutIsPresent") // checked above.
                 String value = optional.get()
                                        .state()
                                        .getValue();
@@ -514,7 +513,12 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private AggregateRepository<?, ?> repository;
+        private final TestActorRequestFactory requests =
+                new TestActorRequestFactory(AggregateRepositoryTest.class);
+        private final TestEventFactory events =
+                TestEventFactory.newInstance(AggregateRepositoryTest.class);
+        private BoundedContext context;
+        private List<Event> dispatchedEvents;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
@@ -525,7 +529,13 @@ public class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            repository = repository();
+            AggregateRepository<?, ?> repository = repository();
+            dispatchedEvents = new ArrayList<>();
+            context = BoundedContextBuilder
+                    .assumingTests()
+                    .add(repository)
+                    .addEventListener(event -> dispatchedEvents.add(event.outerObject()))
+                    .build();
         }
 
         @Test
@@ -551,12 +561,12 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(id)
                     .build();
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(repository)
-                    .receivesCommands(create, addTask, start)
-                    .assertThat(emittedEventsHadVersions(1, 2, 3))
-                    .close();
+            Iterable<Command> commands = Stream.of(create, addTask, start)
+                                               .map(requests.command()::create)
+                                               .collect(toImmutableList());
+            context.commandBus()
+                   .post(commands, noOpObserver());
+            assertEventVersions(1, 2, 3);
         }
 
         @Test
@@ -578,16 +588,14 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(repository)
-                    .receivesCommands(create, start)
-                    .receivesEvent(archived)
-                    .assertThat(emittedEventsHadVersions(
-                            1, 2, // Product creation
-                            3     // Event produced in response to `archived` event
-                    ))
-                    .close();
+            Iterable<Command> commands = Stream.of(create, start)
+                                               .map(requests.command()::create)
+                                               .collect(toImmutableList());
+            context.commandBus()
+                   .post(commands, noOpObserver());
+            context.eventBus()
+                   .post(events.createEvent(archived));
+            assertEventVersions(1, 2, 3);
         }
 
         @Test
@@ -609,14 +617,23 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext
+            SingleTenantBlackBoxContext context = BlackBoxBoundedContext
                     .singleTenant()
                     .with(new EventDiscardingAggregateRepository())
                     .receivesCommands(create, start)
-                    .receivesEvent(archived)
-                    .assertThat(emittedEvent(none()))
-                    .assertThat(acked(thrice()).withoutErrorsOrRejections())
-                    .close();
+                    .receivesEvent(archived);
+            context.assertEvents().hasSize(1);
+            context.close();
+        }
+
+        private void assertEventVersions(int... expectedVersions) {
+            assertThat(dispatchedEvents).hasSize(expectedVersions.length);
+            for (int i = 0; i < dispatchedEvents.size(); i++) {
+                Event event = dispatchedEvents.get(i);
+                int expectedVersion = expectedVersions[i];
+                assertThat(event.context().getVersion().getNumber())
+                        .isEqualTo(expectedVersion);
+            }
         }
     }
 
