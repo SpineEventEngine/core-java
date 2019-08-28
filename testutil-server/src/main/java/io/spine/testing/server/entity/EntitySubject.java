@@ -26,12 +26,12 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
@@ -40,14 +40,16 @@ import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVe
 /**
  * Assertions for entities.
  */
-public final class EntitySubject
-        extends Subject<EntitySubject, Entity<?, ?>> {
+public final class EntitySubject extends Subject {
 
     @VisibleForTesting
     static final String ENTITY_SHOULD_EXIST = "entity should exist";
 
+    private final @Nullable Entity<?, ?> actual;
+
     private EntitySubject(FailureMetadata metadata, @Nullable Entity<?, ?> actual) {
         super(metadata, actual);
+        this.actual = actual;
     }
 
     /**
@@ -97,7 +99,9 @@ public final class EntitySubject
     }
 
     private LifecycleFlags flags() {
-        return actual().lifecycleFlags();
+        Entity<?, ?> actual = actual();
+        checkNotNull(actual);
+        return actual.lifecycleFlags();
     }
 
     /**
@@ -115,7 +119,7 @@ public final class EntitySubject
     /**
      * Obtains the subject for the state of the entity.
      */
-    public ProtoSubject<?, Message> hasStateThat() {
+    public ProtoSubject hasStateThat() {
         Entity<?, ?> entity = actual();
         if (entity == null) {
             shouldExistButDoesNot();
@@ -125,6 +129,10 @@ public final class EntitySubject
             return check("state()").about(protos())
                                    .that(entity.state());
         }
+    }
+
+    public @Nullable Entity<?, ?> actual() {
+        return actual;
     }
 
     private void shouldExistButDoesNot() {
