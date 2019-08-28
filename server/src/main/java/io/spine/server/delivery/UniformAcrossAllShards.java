@@ -23,10 +23,9 @@ package io.spine.server.delivery;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.string.Stringifiers;
+import com.google.protobuf.Message;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -94,8 +93,14 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
     }
 
     private static int hash(Object entityId) {
-        String asString = Stringifiers.toString(entityId);
-        int value = HASHER.hashString(asString, Charset.defaultCharset())
+        byte[] bytes;
+        if (entityId instanceof Message) {
+            bytes = ((Message) entityId).toByteArray();
+        } else {
+            bytes = entityId.toString()
+                            .getBytes();
+        }
+        int value = HASHER.hashBytes(bytes)
                           .asInt();
         return value;
     }
