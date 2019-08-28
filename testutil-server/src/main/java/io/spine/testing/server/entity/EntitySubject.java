@@ -26,7 +26,6 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
@@ -40,14 +39,16 @@ import static io.spine.testing.server.entity.EntityVersionSubject.assertEntityVe
 /**
  * Assertions for entities.
  */
-public final class EntitySubject
-        extends Subject<EntitySubject, Entity<?, ?>> {
+public final class EntitySubject extends Subject {
 
     @VisibleForTesting
     static final String ENTITY_SHOULD_EXIST = "entity should exist";
 
+    private final @Nullable Entity<?, ?> actual;
+
     private EntitySubject(FailureMetadata metadata, @Nullable Entity<?, ?> actual) {
         super(metadata, actual);
+        this.actual = actual;
     }
 
     /**
@@ -76,7 +77,7 @@ public final class EntitySubject
      * Obtains the subject for the {@code archived} flag.
      */
     public BooleanSubject archivedFlag() {
-        if (actual() == null) {
+        if (actual == null) {
             shouldExistButDoesNot();
             return ignoreCheck().that(false);
         } else {
@@ -88,7 +89,7 @@ public final class EntitySubject
      * Obtains the subject for the {@code deleted} flag.
      */
     public BooleanSubject deletedFlag() {
-        if (actual() == null) {
+        if (actual == null) {
             shouldExistButDoesNot();
             return ignoreCheck().that(false);
         } else {
@@ -96,27 +97,28 @@ public final class EntitySubject
         }
     }
 
+    @SuppressWarnings("ConstantConditions") // Logically checked.
     private LifecycleFlags flags() {
-        return actual().lifecycleFlags();
+        return actual.lifecycleFlags();
     }
 
     /**
      * Obtains the subject for the entity version.
      */
     public EntityVersionSubject version() {
-        if (actual() == null) {
+        if (actual == null) {
             shouldExistButDoesNot();
             return assertEntityVersion(Version.getDefaultInstance());
         } else {
-            return assertEntityVersion(actual().version());
+            return assertEntityVersion(actual.version());
         }
     }
 
     /**
      * Obtains the subject for the state of the entity.
      */
-    public ProtoSubject<?, Message> hasStateThat() {
-        Entity<?, ?> entity = actual();
+    public ProtoSubject hasStateThat() {
+        Entity<?, ?> entity = actual;
         if (entity == null) {
             shouldExistButDoesNot();
             return ignoreCheck().about(protos())

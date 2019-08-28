@@ -100,7 +100,7 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     void retrieveMessage() {
         int messageCount = 3;
         Iterable<W> messages = messages(messageCount);
-        ProtoSubject<?, ?> protoSubject = assertWithSubjectThat(messages).message(2);
+        ProtoSubject protoSubject = assertWithSubjectThat(messages).message(2);
         assertThat(protoSubject).isNotNull();
         protoSubject.isNotEqualToDefaultInstance();
         protoSubject.isNotInstanceOf(Any.class);

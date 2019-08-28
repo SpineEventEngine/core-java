@@ -28,6 +28,7 @@ import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
 
@@ -36,17 +37,22 @@ import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
  * versions.
  */
 @VisibleForTesting
-public final class IterableEntityVersionSubject
-        extends IterableOfProtosSubject<IterableEntityVersionSubject, Version, Iterable<Version>> {
+public final class IterableEntityVersionSubject extends IterableOfProtosSubject<Version> {
+
+    private static final String ENTITY_VERSION_LIST_SHOULD_EXIST =
+            "entity version list should exist";
+
+    private final @Nullable Iterable<Version> actual;
 
     private IterableEntityVersionSubject(FailureMetadata failureMetadata,
-                                         @Nullable Iterable<Version> versions) {
-        super(failureMetadata, versions);
+                                         @Nullable Iterable<Version> actual) {
+        super(failureMetadata, actual);
+        this.actual = actual;
     }
 
     public static IterableEntityVersionSubject
-    assertEntityVersions(@Nullable Iterable<Version> versions) {
-        return assertAbout(entityVersions()).that(versions);
+    assertEntityVersions(@Nullable Iterable<Version> actual) {
+        return assertAbout(entityVersions()).that(actual);
     }
 
     /**
@@ -54,8 +60,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllNewerThan(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isNewerThan(version));
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        actual.forEach(v -> assertVersion(v).isNewerThan(version));
     }
 
     /**
@@ -63,8 +72,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllNewerOrEqualTo(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        actual.forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
     }
 
     /**
@@ -72,8 +84,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllOlderThan(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isOlderThan(version));
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        actual.forEach(v -> assertVersion(v).isOlderThan(version));
     }
 
     /**
@@ -81,8 +96,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllOlderOrEqualTo(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        actual.forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
     }
 
     /**
@@ -90,9 +108,14 @@ public final class IterableEntityVersionSubject
      * {@code Subject} for it.
      */
     public EntityVersionSubject containsSingleEntityVersionThat() {
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return ignoreCheck().about(entityVersion())
+                                .that(null);
+        }
         assertContainsSingleItem();
-        Version version = actual().iterator()
-                                  .next();
+        Version version = actual.iterator()
+                                .next();
         return assertVersion(version);
     }
 
@@ -102,12 +125,11 @@ public final class IterableEntityVersionSubject
     }
 
     private void assertContainsSingleItem() {
-        assertExists();
         hasSize(1);
     }
 
-    private void assertExists() {
-        isNotNull();
+    private void shouldExistButDoesNot() {
+        failWithoutActual(simpleFact(ENTITY_VERSION_LIST_SHOULD_EXIST));
     }
 
     public static

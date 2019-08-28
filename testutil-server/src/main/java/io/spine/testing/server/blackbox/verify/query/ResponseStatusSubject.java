@@ -37,11 +37,14 @@ import static io.spine.core.Status.StatusCase.REJECTION;
  * A set of checks for the {@linkplain io.spine.client.QueryResponse query response} status.
  */
 @VisibleForTesting
-public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
+public final class ResponseStatusSubject extends ProtoSubject {
+
+    private final @Nullable Status actual;
 
     private ResponseStatusSubject(FailureMetadata failureMetadata,
-                                  @Nullable Status message) {
-        super(failureMetadata, message);
+                                  @Nullable Status actual) {
+        super(failureMetadata, actual);
+        this.actual = actual;
     }
 
     public static ResponseStatusSubject assertResponseStatus(@Nullable Status status) {
@@ -70,13 +73,14 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
     }
 
     void hasStatusCase(StatusCase statusCase) {
-        assertExists();
         check("statusCase()").that(statusCase())
                              .isEqualTo(statusCase);
     }
 
+    @SuppressWarnings("ConstantConditions") // Logically checked by `assertExists()`.
     private StatusCase statusCase() {
-        return actual().getStatusCase();
+        assertExists();
+        return actual.getStatusCase();
     }
 
     private void assertExists() {

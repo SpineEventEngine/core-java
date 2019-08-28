@@ -22,7 +22,6 @@ package io.spine.testing.server.blackbox.verify.subscription;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.extensions.proto.ProtoSubject;
-import com.google.protobuf.Message;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
@@ -55,14 +54,14 @@ class ToProtoSubjectsTest {
     @DisplayName("transform received entity states into proto subjects")
     void transformEntityStates() {
         SubscriptionUpdate update = GivenSubscriptionUpdate.withTwoEntities();
-        Iterable<ProtoSubject<?, Message>> subjects = function.apply(update);
+        Iterable<ProtoSubject> subjects = function.apply(update);
 
         assertThat(subjects).hasSize(2);
 
-        ProtoSubject<?, Message> assertFirstItem = subjects.iterator()
+        ProtoSubject assertFirstItem = subjects.iterator()
                                                            .next();
         assertFirstItem.isInstanceOf(BbProject.class);
-        ProtoSubject<?, Message> assertSecondItem = subjects.iterator()
+        ProtoSubject assertSecondItem = subjects.iterator()
                                                             .next();
         assertSecondItem.isInstanceOf(BbProject.class);
     }
@@ -71,14 +70,14 @@ class ToProtoSubjectsTest {
     @DisplayName("transform received events into proto subjects")
     void transformEvents() {
         SubscriptionUpdate update = GivenSubscriptionUpdate.withTwoEvents();
-        Iterable<ProtoSubject<?, Message>> subjects = function.apply(update);
+        Iterable<ProtoSubject> subjects = function.apply(update);
 
         assertThat(subjects).hasSize(2);
 
-        ProtoSubject<?, Message> assertFirstItem = subjects.iterator()
+        ProtoSubject assertFirstItem = subjects.iterator()
                                                            .next();
         assertFirstItem.isInstanceOf(BbProjectCreated.class);
-        ProtoSubject<?, Message> assertSecondItem = subjects.iterator()
+        ProtoSubject assertSecondItem = subjects.iterator()
                                                             .next();
         assertSecondItem.isInstanceOf(BbProjectCreated.class);
     }
@@ -87,7 +86,7 @@ class ToProtoSubjectsTest {
     @DisplayName("return empty collection if update list is empty")
     void transformToEmpty() {
         SubscriptionUpdate update = GivenSubscriptionUpdate.empty();
-        Iterable<ProtoSubject<?, Message>> subjects = function.apply(update);
+        Iterable<ProtoSubject> subjects = function.apply(update);
 
         assertThat(subjects).isEmpty();
     }

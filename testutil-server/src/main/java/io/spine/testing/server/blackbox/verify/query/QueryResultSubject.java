@@ -63,8 +63,7 @@ import static java.util.stream.Collectors.toList;
  * custom {@code static} {@linkplain #assertQueryResult(QueryResponse) method}.
  */
 @VisibleForTesting
-public final class QueryResultSubject
-        extends IterableOfProtosSubject<QueryResultSubject, Message, Iterable<Message>> {
+public final class QueryResultSubject extends IterableOfProtosSubject<Message> {
 
     /**
      * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
@@ -83,9 +82,11 @@ public final class QueryResultSubject
      */
     private IterableEntityVersionSubject versionsSubject;
 
-    private QueryResultSubject(FailureMetadata failureMetadata,
-                               Iterable<Message> entityStates) {
-        super(failureMetadata, entityStates);
+    private final Iterable<Message> actual;
+
+    private QueryResultSubject(FailureMetadata failureMetadata, Iterable<Message> actual) {
+        super(failureMetadata, actual);
+        this.actual = actual;
     }
 
     private void initChildSubjects(QueryResponse queryResponse) {
@@ -133,11 +134,11 @@ public final class QueryResultSubject
      * Verifies that the {@link QueryResponse} yields a single entity and returns a
      * {@code ProtoSubject} for its {@link Message state}.
      */
-    public ProtoSubject<?, Message> containsSingleEntityStateThat() {
+    public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        Message entityState = actual().iterator()
-                                      .next();
-        ProtoSubject<?, Message> subject = check("singleEntityState()").about(protos())
+        Message entityState = actual.iterator()
+                                    .next();
+        ProtoSubject subject = check("singleEntityState()").about(protos())
                                                                        .that(entityState);
         return subject;
     }

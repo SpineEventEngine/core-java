@@ -28,17 +28,22 @@ import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 
 /**
  * A set of checks for the {@link io.spine.server.entity.Entity Entity} version.
  */
 @VisibleForTesting
-public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubject, Version> {
+public final class EntityVersionSubject extends ProtoSubject {
+
+    public static final String ENTITY_VERSION_SHOULD_EXIST = "entity version should exist";
+    private final @Nullable Version actual;
 
     private EntityVersionSubject(FailureMetadata failureMetadata,
-                                 @Nullable Version message) {
-        super(failureMetadata, message);
+                                 @Nullable Version actual) {
+        super(failureMetadata, actual);
+        this.actual = actual;
     }
 
     public static EntityVersionSubject assertEntityVersion(Version version) {
@@ -50,8 +55,11 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
      */
     public void isNewerThan(Version other) {
         checkNotNull(other);
-        assertExists();
-        check("isIncrement()").that(actual().isIncrement(other))
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        check("isIncrement()").that(actual.isIncrement(other))
                               .isTrue();
     }
 
@@ -60,8 +68,11 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
      */
     public void isNewerOrEqualTo(Version other) {
         checkNotNull(other);
-        assertExists();
-        check("isIncrementOrEqual()").that(actual().isIncrementOrEqual(other))
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        check("isIncrementOrEqual()").that(actual.isIncrementOrEqual(other))
                                      .isTrue();
     }
 
@@ -70,8 +81,11 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
      */
     public void isOlderThan(Version other) {
         checkNotNull(other);
-        assertExists();
-        check("isDecrement()").that(actual().isDecrement(other))
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        check("isDecrement()").that(actual.isDecrement(other))
                               .isTrue();
     }
 
@@ -80,13 +94,16 @@ public final class EntityVersionSubject extends ProtoSubject<EntityVersionSubjec
      */
     public void isOlderOrEqualTo(Version other) {
         checkNotNull(other);
-        assertExists();
-        check("isDecrementOrEqual()").that(actual().isDecrementOrEqual(other))
+        if (actual == null) {
+            shouldExistButDoesNot();
+            return;
+        }
+        check("isDecrementOrEqual()").that(actual.isDecrementOrEqual(other))
                                      .isTrue();
     }
 
-    private void assertExists() {
-        isNotNull();
+    private void shouldExistButDoesNot() {
+        failWithoutActual(simpleFact(ENTITY_VERSION_SHOULD_EXIST));
     }
 
     static

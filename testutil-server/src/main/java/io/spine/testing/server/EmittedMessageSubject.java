@@ -34,6 +34,7 @@ import io.spine.base.SerializableMessage;
 import io.spine.core.Signal;
 import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T, M>,
                                             T extends Signal,
                                             M extends SerializableMessage>
-        extends Subject<S, Iterable<T>> {
+        extends Subject {
 
     /**
      * Key strings for Truth facts.
@@ -81,25 +82,28 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         }
     }
 
+    private final @Nullable Iterable<T> actual;
+
     protected EmittedMessageSubject(FailureMetadata metadata, @NullableDecl Iterable<T> actual) {
         super(metadata, actual);
+        this.actual = actual;
     }
 
     /** Fails if the subject does not have the given size. */
     public final void hasSize(int expectedSize) {
-        check("size()").that(actual())
+        check("size()").that(actual)
                        .hasSize(expectedSize);
     }
 
     /** Fails if the subject is not empty. */
     public final void isEmpty() {
-        check("isEmpty()").that(actual())
+        check("isEmpty()").that(actual)
                           .isEmpty();
     }
 
     /** Fails if the subject is empty. */
     public final void isNotEmpty() {
-        check("isNotEmpty()").that(actual())
+        check("isNotEmpty()").that(actual)
                              .isNotEmpty();
     }
 
@@ -108,8 +112,13 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      *
      * <p>Fails if the index is out of the range of the generated message sequence.
      */
-    public final ProtoSubject<?, ?> message(int index) {
-        int size = Iterables.size(actual());
+    public final ProtoSubject message(int index) {
+        if (actual == null) {
+            failWithActual(fact(FactKey.ACTUAL.value, null));
+            return ignoreCheck().about(protos())
+                                .that((Message) null);
+        }
+        int size = Iterables.size(actual);
         if (index >= size) {
             failWithActual(
                     fact(FactKey.MESSAGE_COUNT.value, size),
@@ -118,7 +127,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         } else {
-            T outerObject = Iterables.get(actual(), index);
+            T outerObject = Iterables.get(actual, index);
             Message unpacked = AnyPacker.unpack(outerObject.getMessage());
             return ProtoTruth.assertThat(unpacked);
         }
@@ -133,7 +142,6 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      * Obtains the subject over outer objects that contain messages of the passed class.
      */
     public final S withType(Class<? extends M> messageClass) {
-        Iterable<T> actual = actual();
         if (actual == null) {
             failWithActual(fact(FactKey.ACTUAL.value, null));
             return ignoreCheck().about(factory())

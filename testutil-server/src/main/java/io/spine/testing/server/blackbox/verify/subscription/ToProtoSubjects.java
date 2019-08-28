@@ -40,15 +40,15 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 @Internal
 public final class ToProtoSubjects
-        implements Function<SubscriptionUpdate, Iterable<ProtoSubject<?, Message>>> {
+        implements Function<SubscriptionUpdate, Iterable<ProtoSubject>> {
 
     @Override
-    public Iterable<ProtoSubject<?, Message>> apply(SubscriptionUpdate update) {
+    public Iterable<ProtoSubject> apply(SubscriptionUpdate update) {
         checkNotNull(update);
         return collectAll(update);
     }
 
-    private static Iterable<ProtoSubject<?, Message>> collectAll(SubscriptionUpdate update) {
+    private static Iterable<ProtoSubject> collectAll(SubscriptionUpdate update) {
         switch (update.getUpdateCase()) {
             case ENTITY_UPDATES:
                 return collectEntitySubjects(update);
@@ -60,19 +60,19 @@ public final class ToProtoSubjects
         }
     }
 
-    private static Iterable<ProtoSubject<?, Message>>
+    private static Iterable<ProtoSubject>
     collectEntitySubjects(SubscriptionUpdate update) {
         return toSubjects(update.states());
     }
 
-    private static Iterable<ProtoSubject<?, Message>>
+    private static Iterable<ProtoSubject>
     collectEventSubjects(SubscriptionUpdate update) {
         return toSubjects(update.eventMessages());
     }
 
-    private static Iterable<ProtoSubject<?, Message>>
+    private static Iterable<ProtoSubject>
     toSubjects(List<? extends Message> messages) {
-        List<ProtoSubject<?, Message>> result =
+        List<ProtoSubject> result =
                 messages.stream()
                         .map(ProtoTruth::assertThat)
                         .collect(toList());

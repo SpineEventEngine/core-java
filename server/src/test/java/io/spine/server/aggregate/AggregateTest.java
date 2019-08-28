@@ -710,7 +710,7 @@ public class AggregateTest {
                     .isFalse();
         }
 
-        private ProtoSubject<?, Message> assertNextCommandId() {
+        private ProtoSubject assertNextCommandId() {
             return assertThat(history.next().rootCommandId());
         }
 
