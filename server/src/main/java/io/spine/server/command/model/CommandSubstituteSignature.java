@@ -44,9 +44,8 @@ public class CommandSubstituteSignature
     }
 
     @Override
-    public CommandSubstituteMethod doCreate(Method method,
-                                            ParameterSpec<CommandEnvelope> paramSpec) {
-        return new CommandSubstituteMethod(method, paramSpec);
+    public CommandSubstituteMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
+        return new CommandSubstituteMethod(method, params);
     }
 
     @Override

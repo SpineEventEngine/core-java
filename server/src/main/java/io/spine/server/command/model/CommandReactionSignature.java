@@ -65,8 +65,8 @@ public class CommandReactionSignature
     }
 
     @Override
-    public CommandReactionMethod doCreate(Method method, ParameterSpec<EventEnvelope> paramSpec) {
-        return new CommandReactionMethod(method, paramSpec);
+    public CommandReactionMethod create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new CommandReactionMethod(method, params);
     }
 
     /**

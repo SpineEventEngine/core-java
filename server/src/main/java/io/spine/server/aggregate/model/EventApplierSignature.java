@@ -53,8 +53,8 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     }
 
     @Override
-    public Applier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new Applier(method, parameterSpec);
+    public Applier create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new Applier(method, params);
     }
 
     @Override

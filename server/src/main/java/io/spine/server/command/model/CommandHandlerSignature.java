@@ -47,7 +47,7 @@ public final class CommandHandlerSignature
     }
 
     @Override
-    public CommandHandlerMethod doCreate(Method method, ParameterSpec<CommandEnvelope> paramSpec) {
-        return new CommandHandlerMethod(method, paramSpec);
+    public CommandHandlerMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
+        return new CommandHandlerMethod(method, params);
     }
 }

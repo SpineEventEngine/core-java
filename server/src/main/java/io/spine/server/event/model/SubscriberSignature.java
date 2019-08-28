@@ -55,10 +55,10 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    public SubscriberMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    public SubscriberMethod create(Method method, ParameterSpec<EventEnvelope> params) {
         return isEntitySubscriber(method)
-               ? new StateSubscriberMethod(method, parameterSpec)
-               : new EventSubscriberMethod(method, parameterSpec);
+               ? new StateSubscriberMethod(method, params)
+               : new EventSubscriberMethod(method, params);
     }
 
     private static boolean isEntitySubscriber(Method method) {

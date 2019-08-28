@@ -47,7 +47,7 @@ final class EventReactorSignature extends EventAcceptingSignature<EventReactorMe
     }
 
     @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventReactorMethod(method, parameterSpec);
+    public EventReactorMethod create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new EventReactorMethod(method, params);
     }
 }

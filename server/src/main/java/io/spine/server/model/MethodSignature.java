@@ -172,11 +172,13 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * <p>This method is designed to NOT perform any matching, but rather create a specific
      * instance of {@code HandlerMethod}.
      *
-     * @param method the raw method to wrap into a {@code HandlerMethod} instance being created
-     * @param parameterSpec the specification of method parameters
+     * @param method
+     *         the raw method to wrap into a {@code HandlerMethod} instance being created
+     * @param params
+     *         the specification of method parameters
      * @return new instance of {@code HandlerMethod}
      */
-    public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);
+    public abstract H create(Method method, ParameterSpec<E> params);
 
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
@@ -204,7 +206,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         }
         Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, paramSpecs());
         return matchingSpec.map(spec -> {
-            H handler = doCreate(method, spec);
+            H handler = create(method, spec);
             handler.discoverAttributes();
             return handler;
         });
