@@ -312,7 +312,7 @@ class EventReactorMethodTest {
     }
 
     private static EventReactorMethod createMethod(Method method) {
-        Optional<EventReactorMethod> found = signature.create(method);
+        Optional<EventReactorMethod> found = signature.toHandler(method);
         assertTrue(found.isPresent());
         return found.get();
     }

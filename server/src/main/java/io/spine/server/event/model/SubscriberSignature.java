@@ -39,7 +39,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(void.class);
     }
 
