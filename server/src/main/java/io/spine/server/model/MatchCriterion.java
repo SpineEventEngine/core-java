@@ -20,16 +20,18 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.string.Diags;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodExceptionChecker.forMethod;
+import static io.spine.server.model.MethodExceptionCheck.forMethod;
+import static io.spine.server.model.MethodParams.findMatching;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.SignatureMismatch.Severity.WARN;
 import static io.spine.server.model.SignatureMismatch.create;
@@ -39,7 +41,7 @@ import static java.lang.String.format;
  * The criteria of {@linkplain Method method} matching to a certain {@linkplain MethodSignature
  * set of requirements}, applied to the model message handlers.
  *
- * <p>Each criterion defines the {@linkplain #getSeverity() severity} of its violation.
+ * <p>Each criterion defines the {@linkplain #severity() severity} of its violation.
  * Depending on it, the callees may refuse working with the tested methods.
  *
  * <p>Additionally, upon testing the criteria provide a number of {@linkplain SignatureMismatch
@@ -101,16 +103,18 @@ public enum MatchCriterion {
 
     /**
      * The criterion checking that the tested method throws only
-     * {@linkplain MethodSignature#exceptions() allowed exceptions}.
+     * {@linkplain MethodSignature#allowedThrowable() allowed exceptions}.
      */
     PROHIBITED_EXCEPTION(ERROR, "%s") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             //TODO:2018-08-15:alex.tymchenko: add non-throwing behavior to `MethodExceptionChecker`.
             try {
-                MethodExceptionChecker checker = forMethod(method);
-                Collection<Class<? extends Throwable>> allowed = signature.exceptions();
-                checker.checkThrowsNoExceptionsBut(allowed);
+                @Nullable
+                Class<? extends Throwable> allowedThrowable =
+                        signature.allowedThrowable().orElse(null);
+                MethodExceptionCheck checker = forMethod(method, allowedThrowable);
+                checker.check();
                 return Optional.empty();
             } catch (IllegalStateException e) {
                 SignatureMismatch mismatch = create(this, e.getMessage());
@@ -120,18 +124,18 @@ public enum MatchCriterion {
     },
 
     /**
-     * The criterion for the method parameter list to conform the
+     * The criterion for the method parameters to conform the
      * {@linkplain MethodSignature#paramSpecs() requirements}.
      *
      * @see MethodParams#findMatching(Method, Collection)
      */
-    PARAMETER_LIST(ERROR,
-                   "`%s` method has an invalid parameter list. " +
-                           "Please refer to `%s` annotation docs for allowed parameters.") {
+    PARAMETERS(ERROR,
+               "The method `%s` has invalid parameters. " +
+               "Please refer to `%s` annotation documentation for allowed parameter types.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
-                    MethodParams.findMatching(method, signature.paramSpecs());
+                    findMatching(method, signature.paramSpecs());
             if (!matching.isPresent()) {
                 SignatureMismatch mismatch =
                         create(this,
@@ -143,8 +147,6 @@ public enum MatchCriterion {
             return Optional.empty();
         }
     };
-
-    private static final Joiner PARAMETER_TYPE_JOINER = Joiner.on(", ");
 
     private final SignatureMismatch.Severity severity;
     private final String format;
@@ -158,7 +160,7 @@ public enum MatchCriterion {
         this.format = format;
     }
 
-    SignatureMismatch.Severity getSeverity() {
+    SignatureMismatch.Severity severity() {
         return severity;
     }
 
@@ -182,7 +184,7 @@ public enum MatchCriterion {
     private static String methodAsString(Method method) {
         String declaringClassName = method.getDeclaringClass()
                                           .getCanonicalName();
-        String parameterTypes = PARAMETER_TYPE_JOINER.join(method.getParameterTypes());
+        String parameterTypes = Diags.join(method.getParameterTypes());
         String result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
     }

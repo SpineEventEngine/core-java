@@ -48,7 +48,7 @@ import static java.util.stream.Collectors.toList;
  *     <li>{@linkplain #paramSpecs() the specification of method parameters},
  *     <li>{@linkplain #modifiers() the set of allowed access modifiers},
  *     <li>{@linkplain #returnTypes() the set of valid return types},
- *     <li>{@linkplain #exceptions() the set of allowed exceptions}, that the method
+ *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
  * declares to throw (empty by default),
  * </ul>
  *
@@ -92,10 +92,16 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     protected abstract ImmutableSet<Class<?>> returnTypes();
 
     /**
-     * Obtains the set of allowed exceptions that method may declare to throw.
+     * Obtains the type of a {@code Throwable} which a method can declare.
+     *
+     * <p>A handler method may declare more than one {@code Throwable}, but they must be of
+     * the same super-type.
+     *
+     * <p>Default implementation returns empty {@code Optional}, which means that normally
+     * a handler method does not throw.
      */
-    protected ImmutableSet<Class<? extends Throwable>> exceptions() {
-        return ImmutableSet.of();
+    protected Optional<Class<? extends Throwable>> allowedThrowable() {
+        return Optional.empty();
     }
 
     /**

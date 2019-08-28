@@ -30,20 +30,21 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.MethodExceptionChecker.forMethod;
+import static io.spine.server.model.MethodExceptionCheck.forMethod;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("MethodExceptionChecker should")
-class MethodExceptionCheckerTest {
+class MethodExceptionCheckTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        new NullPointerTester().testAllPublicStaticMethods(MethodExceptionChecker.class);
+        new NullPointerTester().testAllPublicStaticMethods(MethodExceptionCheck.class);
 
         Method method = getMethod("methodNoExceptions");
-        MethodExceptionChecker checker = forMethod(method);
+        MethodExceptionCheck checker = forMethod(method, null);
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 
@@ -55,24 +56,25 @@ class MethodExceptionCheckerTest {
         @DisplayName("no exceptions are thrown by method")
         void forNoCheckedThrown() {
             Method methodNoExceptions = getMethod("methodNoExceptions");
-            MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
-            noExceptionsChecker.checkDeclaresNoExceptionsThrown();
+            MethodExceptionCheck checker = forMethod(methodNoExceptions, null);
+            assertDoesNotThrow(checker::check);
         }
 
         @Test
         @DisplayName("allowed exception types are thrown by method")
         void forAllowedThrown() {
             Method methodCustomException = getMethod("methodCustomException");
-            MethodExceptionChecker checker = forMethod(methodCustomException);
-            checker.checkThrowsNoExceptionsBut(IOException.class);
+            MethodExceptionCheck checker = forMethod(methodCustomException, IOException.class);
+            assertDoesNotThrow(checker::check);
         }
 
         @Test
         @DisplayName("allowed exception types descendants are thrown by method")
         void forAllowedDescendantsThrown() {
             Method methodDescendantException = getMethod("methodDescendantException");
-            MethodExceptionChecker checker = forMethod(methodDescendantException);
-            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
+            MethodExceptionCheck checker =
+                    forMethod(methodDescendantException, ThrowableMessage.class);
+            assertDoesNotThrow(checker::check);
         }
     }
 
@@ -84,25 +86,24 @@ class MethodExceptionCheckerTest {
         @DisplayName("checked exceptions are thrown by method")
         void forCheckedThrown() {
             Method methodCheckedException = getMethod("methodCheckedException");
-            MethodExceptionChecker checker = forMethod(methodCheckedException);
-            assertThrows(IllegalStateException.class, checker::checkDeclaresNoExceptionsThrown);
+            MethodExceptionCheck checker = forMethod(methodCheckedException, null);
+            assertThrows(IllegalStateException.class, checker::check);
         }
 
         @Test
         @DisplayName("runtime exceptions are thrown by method")
         void forRuntimeThrown() {
             Method methodRuntimeException = getMethod("methodRuntimeException");
-            MethodExceptionChecker checker = forMethod(methodRuntimeException);
-            assertThrows(IllegalStateException.class, checker::checkDeclaresNoExceptionsThrown);
+            MethodExceptionCheck checker = forMethod(methodRuntimeException, null);
+            assertThrows(IllegalStateException.class, checker::check);
         }
 
         @Test
         @DisplayName("exception types that are not allowed are thrown by method")
         void forNotAllowedThrown() {
             Method methodCustomException = getMethod("methodCustomException");
-            MethodExceptionChecker checker = forMethod(methodCustomException);
-            assertThrows(IllegalStateException.class,
-                         () -> checker.checkThrowsNoExceptionsBut(RuntimeException.class));
+            MethodExceptionCheck checker = forMethod(methodCustomException, RuntimeException.class);
+            assertThrows(IllegalStateException.class, checker::check);
         }
     }
 

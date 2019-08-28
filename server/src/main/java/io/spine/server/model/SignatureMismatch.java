@@ -55,7 +55,7 @@ public final class SignatureMismatch {
 
     private SignatureMismatch(MatchCriterion criterion, Object[] values) {
         unmetCriterion = criterion;
-        severity = criterion.getSeverity();
+        severity = criterion.severity();
         message = criterion.formatMsg(values);
     }
 

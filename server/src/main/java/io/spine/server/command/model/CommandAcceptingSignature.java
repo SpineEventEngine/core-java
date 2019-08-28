@@ -32,6 +32,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 import static io.spine.server.model.MethodParams.consistsOfSingle;
 import static io.spine.server.model.MethodParams.consistsOfTwo;
@@ -55,14 +56,14 @@ abstract class CommandAcceptingSignature
     }
 
     /**
-     * {@inheritDoc}
+     * Returns {@code ThrowableMessage.class} wrapped into {@code Optional}.
      *
      * <p>The methods accepting commands may reject the command by throwing {@linkplain
      * ThrowableMessage command rejections} which are based on {@code ThrowableMessage}.
      */
     @Override
-    protected ImmutableSet<Class<? extends Throwable>> exceptions() {
-        return ImmutableSet.of(ThrowableMessage.class);
+    protected Optional<Class<? extends Throwable>> allowedThrowable() {
+        return Optional.of(ThrowableMessage.class);
     }
 
     /**
