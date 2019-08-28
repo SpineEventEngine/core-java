@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
  * CommandSubstituteMethod}.
  */
 public class CommandSubstituteSignature
-        extends CommandAcceptingMethodSignature<CommandSubstituteMethod> {
+        extends CommandAcceptingSignature<CommandSubstituteMethod> {
 
     CommandSubstituteSignature() {
         super(Command.class);
