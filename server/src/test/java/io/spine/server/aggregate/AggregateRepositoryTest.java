@@ -65,7 +65,6 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
@@ -79,14 +78,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -513,12 +509,7 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private final TestActorRequestFactory requests =
-                new TestActorRequestFactory(AggregateRepositoryTest.class);
-        private final TestEventFactory events =
-                TestEventFactory.newInstance(AggregateRepositoryTest.class);
-        private BoundedContext context;
-        private List<Event> dispatchedEvents;
+        private BlackBoxBoundedContext<?> context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
@@ -530,12 +521,9 @@ public class AggregateRepositoryTest {
         void createAnotherRepository() {
             resetRepository();
             AggregateRepository<?, ?> repository = repository();
-            dispatchedEvents = new ArrayList<>();
-            context = BoundedContextBuilder
-                    .assumingTests()
-                    .add(repository)
-                    .addEventListener(event -> dispatchedEvents.add(event.outerObject()))
-                    .build();
+            context = BlackBoxBoundedContext
+                    .singleTenant()
+                    .with(repository);
         }
 
         @Test
@@ -561,11 +549,7 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(id)
                     .build();
-            Iterable<Command> commands = Stream.of(create, addTask, start)
-                                               .map(message -> requests.command().create(message))
-                                               .collect(toImmutableList());
-            context.commandBus()
-                   .post(commands, noOpObserver());
+            context.receivesCommands(create, addTask, start);
             assertEventVersions(1, 2, 3);
         }
 
@@ -588,13 +572,8 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            Iterable<Command> commands = Stream.of(create, start)
-                                               .map(message -> requests.command().create(message))
-                                               .collect(toImmutableList());
-            context.commandBus()
-                   .post(commands, noOpObserver());
-            context.eventBus()
-                   .post(events.createEvent(archived));
+            context.receivesCommands(create, start)
+                   .receivesEvent(archived);
             assertEventVersions(
                     1, 2, // Results of commands.
                     0, // The `archived` event.
@@ -631,9 +610,10 @@ public class AggregateRepositoryTest {
         }
 
         private void assertEventVersions(int... expectedVersions) {
-            assertThat(dispatchedEvents).hasSize(expectedVersions.length);
-            for (int i = 0; i < dispatchedEvents.size(); i++) {
-                Event event = dispatchedEvents.get(i);
+            List<Event> events = context.assertEvents().actual();
+            assertThat(events).hasSize(expectedVersions.length);
+            for (int i = 0; i < events.size(); i++) {
+                Event event = events.get(i);
                 int expectedVersion = expectedVersions[i];
                 assertThat(event.context().getVersion().getNumber())
                         .isEqualTo(expectedVersion);

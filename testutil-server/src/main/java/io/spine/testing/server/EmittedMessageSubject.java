@@ -38,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.truth.Fact.fact;
@@ -82,13 +83,13 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
 
     /** Fails if the subject is not empty. */
     public final void isEmpty() {
-        check("isEmpty()").that(actual())
+        check("isEmpty()").that(messages())
                           .isEmpty();
     }
 
     /** Fails if the subject is empty. */
     public final void isNotEmpty() {
-        check("isNotEmpty()").that(actual())
+        check("isNotEmpty()").that(messages())
                              .isNotEmpty();
     }
 
@@ -98,13 +99,13 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      * <p>Fails if the index is out of the range of the generated message sequence.
      */
     public final ProtoSubject message(int index) {
-        if (actual() == null) {
+        if (messages() == null) {
             failWithActual(fact(FactKey.ACTUAL.value, null));
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         }
-        int size = size(actual());
-        if (index >= size(actual())) {
+        int size = size(messages());
+        if (index >= size(messages())) {
             failWithActual(
                     fact(FactKey.MESSAGE_COUNT.value, size),
                     fact(FactKey.REQUESTED_INDEX.value, index)
@@ -112,7 +113,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         }
-        T outerObject = Iterables.get(actual(), index);
+        T outerObject = Iterables.get(messages(), index);
         Message unpacked = AnyPacker.unpack(outerObject.getMessage());
         return ProtoTruth.assertThat(unpacked);
 
@@ -127,7 +128,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      * Obtains the subject over outer objects that contain messages of the passed class.
      */
     public final S withType(Class<? extends M> messageClass) {
-        Iterable<T> actual = actual();
+        Iterable<T> actual = messages();
         if (actual == null) {
             failWithActual(fact(FactKey.ACTUAL.value, null));
             return ignoreCheck().about(factory())
@@ -150,8 +151,18 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         }
     }
 
-    private @Nullable Iterable<T> actual() {
+    private @Nullable Iterable<T> messages() {
         return actual;
+    }
+
+    /**
+     * Obtains the list of messages under assertion.
+     *
+     * @return an immutable copy of the {@code actual} messages
+     */
+    public List<T> actual() {
+        checkNotNull(actual);
+        return ImmutableList.copyOf(actual);
     }
 
     /**
