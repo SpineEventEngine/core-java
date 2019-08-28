@@ -20,48 +20,30 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Objects;
-import io.spine.base.FieldPath;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.type.MessageClass;
 
 /**
- * A pair of a {@link HandlerMethod} and the field to filter its events by.
+ * A handler method which accept only instances of messages that match the filtering conditions.
  *
- * @param <H>
- *         the type of handler method
+ * <p>Having two or more methods that accept the same message type but instances of different
+ * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
+ *
+ * <p>It is possible to filter by the same field of the same message type.
+ * 
+ * @see io.spine.core.ByField
+ * @see HandlerFieldFilterClashError
  */
-final class FilteringHandler<H extends HandlerMethod<?, ?, ?, ?>> {
+@Immutable
+public interface FilteringHandler<T,
+                                  C extends MessageClass,
+                                  E extends MessageEnvelope<?, ?, ?>,
+                                  P extends MessageClass<?>>
+        extends HandlerMethod<T, C, E, P> {
 
-    private final H handler;
-    private final FieldPath filteredField;
-
-    FilteringHandler(H handler, FieldPath field) {
-        this.handler = handler;
-        this.filteredField = field;
-    }
-
-    boolean fieldDiffersFrom(FieldPath path) {
-        return !filteredField.equals(path);
-    }
-
-    H handler() {
-        return handler;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        FilteringHandler<?> another = (FilteringHandler<?>) o;
-        return Objects.equal(handler, another.handler) &&
-                Objects.equal(filteredField, another.filteredField);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(handler, filteredField);
-    }
+    /**
+     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
+     */
+    MessageFilter filter();
 }

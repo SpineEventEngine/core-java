@@ -20,11 +20,13 @@
 
 package io.spine.server.event.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.FilteringHandler;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.ParameterSpec;
@@ -34,7 +36,9 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.base.FieldPaths.getValue;
 import static io.spine.protobuf.TypeConverter.toObject;
 
@@ -45,13 +49,18 @@ import static io.spine.protobuf.TypeConverter.toObject;
  *
  * @see io.spine.core.Subscribe
  */
+@Immutable
 public abstract class SubscriberMethod
         extends AbstractHandlerMethod<EventSubscriber,
                                       EventMessage,
                                       EventClass,
                                       EventEnvelope,
                                       EmptyClass>
-        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope> {
+        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope>,
+                   FilteringHandler<EventSubscriber, EventClass, EventEnvelope, EmptyClass> {
+
+    @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
+    private final Supplier<MessageFilter> filter = memoize(this::createFilter);
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
@@ -72,6 +81,16 @@ public abstract class SubscriberMethod
     @Override
     public EventClass messageClass() {
         return EventClass.from(rawMessageClass());
+    }
+
+    /**
+     * Creates the filter for messages handled by this method.
+     */
+    protected abstract MessageFilter createFilter();
+
+    @Override
+    public final MessageFilter filter() {
+        return filter.get();
     }
 
     /**

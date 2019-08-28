@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Environment;
@@ -47,21 +48,19 @@ import static io.spine.protobuf.TypeConverter.toAny;
 /**
  * A handler method which receives an entity state and produces no output.
  */
+@Immutable
 public final class StateSubscriberMethod extends SubscriberMethod implements Logging {
 
     private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("entity.type_url");
 
     private final BoundedContextName contextOfSubscriber;
     private final Class<? extends Message> stateType;
-    private final Any typeUrlAsAny;
 
     StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(checkNotFiltered(method), parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         this.stateType = firstParamType(rawMethod());
         checkExternal();
-        TypeUrl targetType = TypeUrl.of(this.stateType);
-        this.typeUrlAsAny = toAny(targetType.value());
     }
 
     private static Method checkNotFiltered(Method method) {
@@ -87,7 +86,9 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     @Override
-    public MessageFilter filter() {
+    protected MessageFilter createFilter() {
+        TypeUrl targetType = TypeUrl.of(stateType);
+        Any typeUrlAsAny = toAny(targetType.value());
         return MessageFilter
                 .newBuilder()
                 .setField(TYPE_URL_PATH)

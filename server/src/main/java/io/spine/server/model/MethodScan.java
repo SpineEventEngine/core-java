@@ -44,17 +44,17 @@ import static io.spine.validate.Validate.isNotDefault;
 final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
+    private final MethodSignature<H, ?> signature;
     private final Multimap<HandlerTypeInfo, H> handlers;
     private final Map<HandlerId, H> seenMethods;
-    private final MethodSignature<H, ?> signature;
-    private final Map<MessageClass, FilteringHandler<H>> fieldFilters;
+    private final Map<MessageClass, FilteringHandler> filteringHandlers;
 
     private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         this.declaringClass = declaringClass;
         this.signature = signature;
         this.handlers = HashMultimap.create();
         this.seenMethods = new HashMap<>();
-        this.fieldFilters = new HashMap<>();
+        this.filteringHandlers = new HashMap<>();
     }
 
     /**
@@ -100,7 +100,9 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private void remember(H handler) {
         checkNotRemembered(handler);
-        checkNotClashes(handler);
+        if (handler instanceof FilteringHandler) {
+            checkFilteringNotClashes((FilteringHandler) handler);
+        }
         HandlerId id = handler.id();
         handlers.put(id.getType(), handler);
     }
@@ -119,19 +121,33 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
     }
 
-    private void checkNotClashes(H handler) {
+    private void checkFilteringNotClashes(FilteringHandler handler) {
         MessageClass handledClass = handler.messageClass();
         FieldPath field = handler.filter().getField();
-        if (isNotDefault(field)) {
-            FilteringHandler<H> previousValue = fieldFilters.put(
-                    handledClass,
-                    new FilteringHandler<>(handler, field)
-            );
-            if (previousValue != null && previousValue.fieldDiffersFrom(field)) {
+        if (!isNotDefault(field)) {
+            return;
+        }
+        FilteringHandler existingHandler = filteringHandlers.put(handledClass, handler);
+        if (existingHandler != null) {
+            // There is already a handler for this message class.
+            // See that the field which is used as the condition for filtering is the same.
+            // It is not allowed to have filtered handlers by various fields because it
+            // makes the dispatching ambiguous: "Do we need to dispatch to this this handler
+            // and that handler too?"
+            //
+            // We allow multiple handlers for the same message type with filters by
+            // different values. It allows to split logic into smaller methods instead of having
+            // if-else chains (that branch by different values) inside a bigger handler method.
+            //
+            FieldPath prevHandlerField = existingHandler.filter().getField();
+            boolean fieldDiffers = !prevHandlerField.equals(field);
+            if (fieldDiffers) {
                 throw new HandlerFieldFilterClashError(declaringClass,
                                                        handler.rawMethod(),
-                                                       previousValue.handler().rawMethod());
+                                                       existingHandler.rawMethod());
             }
+            // It is OK to keep only the last filtering handler in the map (and not all of them)
+            // because filtered fields are required to be the same.
         }
     }
 }
