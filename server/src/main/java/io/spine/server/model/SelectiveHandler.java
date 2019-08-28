@@ -36,7 +36,7 @@ import io.spine.type.MessageClass;
  * @see HandlerFieldFilterClashError
  */
 @Immutable
-public interface FilteringHandler<T,
+public interface SelectiveHandler<T,
                                   C extends MessageClass,
                                   E extends MessageEnvelope<?, ?, ?>,
                                   P extends MessageClass<?>>
