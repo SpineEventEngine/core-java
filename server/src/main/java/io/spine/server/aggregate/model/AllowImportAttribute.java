@@ -22,7 +22,7 @@ package io.spine.server.aggregate.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.model.MethodAttribute;
+import io.spine.server.model.Attribute;
 
 import java.lang.reflect.Method;
 
@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
 @Immutable
-public enum AllowImportAttribute implements MethodAttribute<Boolean> {
+public enum AllowImportAttribute implements Attribute<Boolean> {
 
     ALLOW(true),
 
@@ -50,12 +50,12 @@ public enum AllowImportAttribute implements MethodAttribute<Boolean> {
     }
 
     @Override
-    public String getName() {
+    public String parameter() {
         return "allowImport";
     }
 
     @Override
-    public Boolean getValue() {
+    public Boolean value() {
         return value;
     }
 
@@ -64,14 +64,17 @@ public enum AllowImportAttribute implements MethodAttribute<Boolean> {
      *
      * <p>The passed method must be an {@linkplain Apply event applier}.
      *
-     * @param method the method to inspect
+     * @param method
+     *         the method to inspect
      * @return the value of {@code AllowImportAttribute} for the given {@code Method}
-     * @throws IllegalArgumentException if the passed method is not properly annotated
+     * @throws IllegalArgumentException
+     *         if the passed method is not properly annotated
      */
     public static AllowImportAttribute of(Method method) {
         checkNotNull(method);
         Apply annotation = method.getAnnotation(Apply.class);
-        checkArgument(annotation != null, "The method `%s` is not annotated with `@Apply`", method);
+        checkArgument(annotation != null, "The method `%s` is not annotated with `@Apply`.",
+                      method);
         AllowImportAttribute result = annotation.allowImport() ? ALLOW : DO_NOT_ALLOW;
         return result;
     }

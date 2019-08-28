@@ -25,7 +25,7 @@ import com.google.common.collect.Sets;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodAttribute;
+import io.spine.server.model.Attribute;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.VoidMethod;
 import io.spine.server.type.EmptyClass;
@@ -63,7 +63,7 @@ public final class Applier
      * Adds {@link AllowImportAttribute} to the set of method attributes.
      */
     @Override
-    protected Set<Function<Method, MethodAttribute<?>>> attributeSuppliers() {
+    protected Set<Function<Method, Attribute<?>>> attributeSuppliers() {
         return Sets.union(super.attributeSuppliers(), ImmutableSet.of(AllowImportAttribute::of));
     }
 

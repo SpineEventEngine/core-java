@@ -137,8 +137,7 @@ public final class MethodParams {
     }
 
     /**
-     * Finds out if the first method parameter is a {@linkplain io.spine.core.Command Command}
-     * message.
+     * Finds out if the first method parameter is a {@linkplain CommandMessage}.
      *
      * @param method
      *         the method to inspect
