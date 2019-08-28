@@ -27,11 +27,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodExceptionCheck.forMethod;
+import static io.spine.server.model.MethodExceptionCheck.check;
 import static io.spine.server.model.MethodParams.findMatching;
+import static io.spine.server.model.ModelError.MessageFormatter.toStringEnumeration;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
 import static io.spine.server.model.SignatureMismatch.Severity.WARN;
 import static io.spine.server.model.SignatureMismatch.create;
@@ -106,20 +108,51 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#allowedThrowable() allowed exceptions}.
      */
     PROHIBITED_EXCEPTION(ERROR, "%s") {
+
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            //TODO:2018-08-15:alex.tymchenko: add non-throwing behavior to `MethodExceptionChecker`.
-            try {
-                @Nullable
-                Class<? extends Throwable> allowedThrowable =
-                        signature.allowedThrowable().orElse(null);
-                MethodExceptionCheck checker = forMethod(method, allowedThrowable);
-                checker.check();
+            @Nullable
+            Class<? extends Throwable> allowedThrowable =
+                    signature.allowedThrowable().orElse(null);
+            MethodExceptionCheck checker = check(method, allowedThrowable);
+            List<Class<? extends Throwable>> prohibited = checker.findProhibited();
+            if (prohibited.isEmpty()) {
                 return Optional.empty();
-            } catch (IllegalStateException e) {
-                SignatureMismatch mismatch = create(this, e.getMessage());
-                return Optional.of(mismatch);
             }
+            String errorMessage = toMessage(method, prohibited, allowedThrowable);
+            SignatureMismatch mismatch = create(this, errorMessage);
+            return Optional.of(mismatch);
+        }
+
+        private String toMessage(Method method,
+                                 List<Class<? extends Throwable>> exceptionsThrown,
+                                 @Nullable Class<? extends Throwable> allowedThrowable) {
+            if (allowedThrowable == null) {
+                return format(
+                        "The method `%s.%s` throws %s. But throwing is not allowed" +
+                                " for this kind of methods.",
+                        method.getDeclaringClass().getCanonicalName(),
+                        method.getName(),
+                        enumerate(exceptionsThrown)
+                );
+            }
+            return format(
+                    "The method `%s.%s` throws %s. But only `%s` is allowed for" +
+                            " this kind of methods.",
+                    method.getDeclaringClass().getCanonicalName(),
+                    method.getName(),
+                    enumerate(exceptionsThrown),
+                    allowedThrowable.getName()
+            );
+        }
+
+        /**
+         * Prints {@link Iterable} to {@link String}, separating elements with comma.
+         */
+        private String enumerate(List<Class<? extends Throwable>> throwables) {
+            return throwables.stream()
+                             .map(Diags::backtick)
+                             .collect(toStringEnumeration());
         }
     },
 
