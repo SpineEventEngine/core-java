@@ -49,14 +49,6 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private final Map<HandlerId, H> seenMethods;
     private final Map<MessageClass, SelectiveHandler> selectiveHandlers;
 
-    private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
-        this.declaringClass = declaringClass;
-        this.signature = signature;
-        this.handlers = HashMultimap.create();
-        this.seenMethods = new HashMap<>();
-        this.selectiveHandlers = new HashMap<>();
-    }
-
     /**
      * Finds handler methods in the scanned class by the given signature.
      *
@@ -75,6 +67,14 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         return result;
     }
 
+    private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+        this.declaringClass = declaringClass;
+        this.signature = signature;
+        this.handlers = HashMultimap.create();
+        this.seenMethods = new HashMap<>();
+        this.selectiveHandlers = new HashMap<>();
+    }
+
     /**
      * Performs the operation.
      *
@@ -82,7 +82,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *
      * @return a map of {@link HandlerTypeInfo}s to the method handlers
      */
-    ImmutableMultimap<HandlerTypeInfo, H> perform() {
+    private ImmutableMultimap<HandlerTypeInfo, H> perform() {
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             scanMethod(method);
