@@ -26,10 +26,10 @@ import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.FilteringHandler;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
 import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.SelectiveHandler;
 import io.spine.server.model.VoidMethod;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -57,7 +57,7 @@ public abstract class SubscriberMethod
                                       EventEnvelope,
                                       EmptyClass>
         implements VoidMethod<EventSubscriber, EventClass, EventEnvelope>,
-                   FilteringHandler<EventSubscriber, EventClass, EventEnvelope, EmptyClass> {
+                   SelectiveHandler<EventSubscriber, EventClass, EventEnvelope, EmptyClass> {
 
     @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
     private final Supplier<MessageFilter> filter = memoize(this::createFilter);

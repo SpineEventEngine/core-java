@@ -20,6 +20,8 @@
 
 package io.spine.server.model;
 
+import io.spine.string.Diags;
+
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -53,7 +55,7 @@ public class ModelError extends Error {
         }
 
         static String backtick(Object object) {
-            return format("`%s`", object);
+            return Diags.backtick(object);
         }
 
         static Collector<CharSequence, ?, String> toStringEnumeration() {

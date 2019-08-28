@@ -47,15 +47,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private final MethodSignature<H, ?> signature;
     private final Multimap<HandlerTypeInfo, H> handlers;
     private final Map<HandlerId, H> seenMethods;
-    private final Map<MessageClass, FilteringHandler> filteringHandlers;
-
-    private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
-        this.declaringClass = declaringClass;
-        this.signature = signature;
-        this.handlers = HashMultimap.create();
-        this.seenMethods = new HashMap<>();
-        this.filteringHandlers = new HashMap<>();
-    }
+    private final Map<MessageClass, SelectiveHandler> selectiveHandlers;
 
     /**
      * Finds handler methods in the scanned class by the given signature.
@@ -75,6 +67,14 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         return result;
     }
 
+    private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+        this.declaringClass = declaringClass;
+        this.signature = signature;
+        this.handlers = HashMultimap.create();
+        this.seenMethods = new HashMap<>();
+        this.selectiveHandlers = new HashMap<>();
+    }
+
     /**
      * Performs the operation.
      *
@@ -82,7 +82,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *
      * @return a map of {@link HandlerTypeInfo}s to the method handlers
      */
-    ImmutableMultimap<HandlerTypeInfo, H> perform() {
+    private ImmutableMultimap<HandlerTypeInfo, H> perform() {
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             scanMethod(method);
@@ -91,7 +91,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void scanMethod(Method method) {
-        Optional<H> handlerMethod = signature.create(method);
+        Optional<H> handlerMethod = signature.toHandler(method);
         if (handlerMethod.isPresent()) {
             H handler = handlerMethod.get();
             remember(handler);
@@ -100,8 +100,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private void remember(H handler) {
         checkNotRemembered(handler);
-        if (handler instanceof FilteringHandler) {
-            checkFilteringNotClashes((FilteringHandler) handler);
+        if (handler instanceof SelectiveHandler) {
+            checkFilteringNotClashes((SelectiveHandler) handler);
         }
         HandlerId id = handler.id();
         handlers.put(id.getType(), handler);
@@ -121,13 +121,13 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
     }
 
-    private void checkFilteringNotClashes(FilteringHandler handler) {
+    private void checkFilteringNotClashes(SelectiveHandler handler) {
         MessageClass handledClass = handler.messageClass();
         FieldPath field = handler.filter().getField();
         if (!isNotDefault(field)) {
             return;
         }
-        FilteringHandler existingHandler = filteringHandlers.put(handledClass, handler);
+        SelectiveHandler existingHandler = selectiveHandlers.put(handledClass, handler);
         if (existingHandler != null) {
             // There is already a handler for this message class.
             // See that the field which is used as the condition for filtering is the same.
