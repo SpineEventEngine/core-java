@@ -131,6 +131,9 @@ public final class EntitySubject extends Subject {
         }
     }
 
+    /**
+     * Obtains the entity under verification.
+     */
     public @Nullable Entity<?, ?> actual() {
         return actual;
     }
