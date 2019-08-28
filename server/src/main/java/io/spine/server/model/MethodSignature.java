@@ -46,9 +46,9 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *     <li>{@linkplain #MethodSignature(Class) the method annotation},
  *     <li>{@linkplain #paramSpecs() the specification of method parameters},
- *     <li>{@linkplain #allowedModifiers() the set of allowed access modifiers},
- *     <li>{@linkplain #validReturnTypes() the set of valid return types},
- *     <li>{@linkplain #allowedExceptions() the set of allowed exceptions}, that the method
+ *     <li>{@linkplain #modifiers() the set of allowed access modifiers},
+ *     <li>{@linkplain #returnTypes() the set of valid return types},
+ *     <li>{@linkplain #exceptions() the set of allowed exceptions}, that the method
  * declares to throw (empty by default),
  * </ul>
  *
@@ -78,23 +78,23 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Obtains the set of allowed access modifiers for the method.
      *
-     * <p>By default, obtains a set of single value {@link AccessModifier#PACKAGE_PRIVATE}. Most of
-     * the implementations should be fine with this behaviour. Override this method to change
+     * <p>Default implementation returns a set with a single value
+     * {@link AccessModifier#PACKAGE_PRIVATE}. Override this method to change
      * the allowed access modifiers.
      */
-    protected ImmutableSet<AccessModifier> allowedModifiers() {
+    protected ImmutableSet<AccessModifier> modifiers() {
         return ImmutableSet.of(PACKAGE_PRIVATE);
     }
 
     /**
      * Obtains the set of valid return types.
      */
-    protected abstract ImmutableSet<Class<?>> validReturnTypes();
+    protected abstract ImmutableSet<Class<?>> returnTypes();
 
     /**
      * Obtains the set of allowed exceptions that method may declare to throw.
      */
-    protected ImmutableSet<Class<? extends Throwable>> allowedExceptions() {
+    protected ImmutableSet<Class<? extends Throwable>> exceptions() {
         return ImmutableSet.of();
     }
 
@@ -120,14 +120,16 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             return false;
         }
         Collection<SignatureMismatch> mismatches = match(method);
-        boolean hasErrors = mismatches.stream()
-                                      .anyMatch(SignatureMismatch::isError);
-        List<SignatureMismatch> warnings =  mismatches.stream()
-                                                      .filter(SignatureMismatch::isWarning)
-                                                      .collect(toList());
+        boolean hasErrors =
+                mismatches.stream()
+                          .anyMatch(SignatureMismatch::isError);
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
         }
+        List<SignatureMismatch> warnings =
+                mismatches.stream()
+                          .filter(SignatureMismatch::isWarning)
+                          .collect(toList());
         if (!warnings.isEmpty()) {
             warnings.stream()
                     .map(SignatureMismatch::toString)
@@ -176,19 +178,18 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     }
 
     /**
-     * Creates a {@linkplain HandlerMethod handler method} from a raw method.
-     *
-     * <p>Before creation performs {@linkplain #matches(Method) matching } against the signature.
+     * Creates a {@linkplain HandlerMethod handler method} from a raw method, if the passed
+     * method {@linkplain #matches(Method) matches} the signature.
      *
      * @param method
-     *         the method to create wrapper from
-     * @return a wrapper object created from the method
+     *         the method to convert to a {@code HandlerMethod}
+     * @return the instance of {@code HandlerMethod} or empty {@code Optional} if the passed raw
+     *         method does not match the signature
      * @throws SignatureMismatchException
-     *         in case there are
-     *         {@link SignatureMismatch.Severity#ERROR ERROR}-level
-     *         mismatches
+     *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
+     *         encountered
      */
-    public Optional<H> create(Method method) {
+    public Optional<H> toHandler(Method method) throws SignatureMismatchException {
         boolean matches = matches(method);
         if (!matches) {
             return Optional.empty();

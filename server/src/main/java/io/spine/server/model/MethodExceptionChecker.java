@@ -39,7 +39,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>If such check fails, the {@link IllegalStateException} will be thrown. If the check passes,
  * no action is performed.
  */
-public final class MethodExceptionChecker {
+final class MethodExceptionChecker {
 
     private final Method method;
 
@@ -91,13 +91,13 @@ public final class MethodExceptionChecker {
      * @throws IllegalStateException if the method throws any exception types apart from the
      *                               types specified in {@code whiteList} and their descendants
      */
-    public void checkThrowsNoExceptionsBut(Collection<Class<? extends Throwable>> whiteList) {
+    void checkThrowsNoExceptionsBut(Collection<Class<? extends Throwable>> whiteList) {
         checkNotNull(whiteList);
 
         Collection<Class<? extends Throwable>> exceptions =
                 obtainProhibitedExceptionsThrown(whiteList);
         if (!exceptions.isEmpty()) {
-            throwCheckFailedException(exceptions, whiteList);
+            throw checkFailedException(exceptions, whiteList);
         }
     }
 
@@ -128,18 +128,24 @@ public final class MethodExceptionChecker {
     }
 
     /**
-     * Throws {@link RuntimeException} with diagnostics information about the prohibited exception
-     * types thrown from the {@link Method}.
+     * Throws {@link IllegalStateException} with diagnostics information about the prohibited
+     * exception types thrown from the {@link Method}.
      *
      * <p>The message of the exception thrown will provide the user with the info about prohibited
      * exception types thrown by the contained {@link Method}, as well as which exception types are
      * allowed for this {@link Method}.
      *
-     * @param exceptionsThrown  the list of prohibited exceptions thrown
-     * @param allowedExceptions the list of allowed exceptions for the contained {@link Method}
+     * @param exceptionsThrown
+     *         the list of prohibited exceptions thrown
+     * @param allowedExceptions
+     *         the list of allowed exceptions for the contained {@link Method}
+     * @throws IllegalStateException
+     *         always
      */
-    private void throwCheckFailedException(Iterable<Class<? extends Throwable>> exceptionsThrown,
-                                           Iterable<Class<? extends Throwable>> allowedExceptions) {
+    private IllegalStateException
+    checkFailedException(Iterable<Class<? extends Throwable>> exceptionsThrown,
+                         Iterable<Class<? extends Throwable>> allowedExceptions)
+        throws IllegalStateException {
         throw newIllegalStateException(
                 "Method %s.%s throws prohibited exception types: %s. " +
                         "The allowed exception types for this method are: %s",

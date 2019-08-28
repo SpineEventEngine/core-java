@@ -91,7 +91,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void scanMethod(Method method) {
-        Optional<H> handlerMethod = signature.create(method);
+        Optional<H> handlerMethod = signature.toHandler(method);
         if (handlerMethod.isPresent()) {
             H handler = handlerMethod.get();
             remember(handler);

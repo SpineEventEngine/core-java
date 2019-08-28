@@ -39,7 +39,7 @@ public final class CommandHandlerSignature
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(EventMessage.class, Iterable.class);
     }
 

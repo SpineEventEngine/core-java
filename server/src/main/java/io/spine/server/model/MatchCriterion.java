@@ -50,7 +50,7 @@ public enum MatchCriterion {
 
     /**
      * The criterion, which checks that the method return type is among the
-     * {@linkplain MethodSignature#validReturnTypes() expected}.
+     * {@linkplain MethodSignature#returnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints " +
@@ -59,7 +59,7 @@ public enum MatchCriterion {
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Class<?> returnType = method.getReturnType();
             boolean conforms = signature
-                    .validReturnTypes()
+                    .returnTypes()
                     .stream()
                     .anyMatch(type -> type.isAssignableFrom(returnType));
             if (!conforms) {
@@ -76,13 +76,13 @@ public enum MatchCriterion {
 
     /**
      * The criterion, which ensures that the method access modifier is among the
-     * {@linkplain MethodSignature#allowedModifiers() expected}.
+     * {@linkplain MethodSignature#modifiers() expected}.
      */
     ACCESS_MODIFIER(WARN,
                     "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            ImmutableSet<AccessModifier> allowedModifiers = signature.allowedModifiers();
+            ImmutableSet<AccessModifier> allowedModifiers = signature.modifiers();
             boolean hasMatch = allowedModifiers
                     .stream()
                     .anyMatch(m -> m.test(method));
@@ -101,7 +101,7 @@ public enum MatchCriterion {
 
     /**
      * The criterion checking that the tested method throws only
-     * {@linkplain MethodSignature#allowedExceptions() allowed exceptions}.
+     * {@linkplain MethodSignature#exceptions() allowed exceptions}.
      */
     PROHIBITED_EXCEPTION(ERROR, "%s") {
         @Override
@@ -109,7 +109,7 @@ public enum MatchCriterion {
             //TODO:2018-08-15:alex.tymchenko: add non-throwing behavior to `MethodExceptionChecker`.
             try {
                 MethodExceptionChecker checker = forMethod(method);
-                Collection<Class<? extends Throwable>> allowed = signature.allowedExceptions();
+                Collection<Class<? extends Throwable>> allowed = signature.exceptions();
                 checker.checkThrowsNoExceptionsBut(allowed);
                 return Optional.empty();
             } catch (IllegalStateException e) {

@@ -37,14 +37,14 @@ import static io.spine.server.model.MethodParams.consistsOfSingle;
 /**
  * The signature of the {@link Applier} method.
  */
-class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
+final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
 
     EventApplierSignature() {
         super(Apply.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(void.class);
     }
 
@@ -54,7 +54,7 @@ class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> allowedModifiers() {
+    protected ImmutableSet<AccessModifier> modifiers() {
         return ImmutableSet.of(AccessModifier.PRIVATE);
     }
 

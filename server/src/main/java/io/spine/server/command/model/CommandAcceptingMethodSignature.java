@@ -61,7 +61,7 @@ abstract class CommandAcceptingMethodSignature
      * ThrowableMessage command rejections} which are based on {@code ThrowableMessage}.
      */
     @Override
-    protected ImmutableSet<Class<? extends Throwable>> allowedExceptions() {
+    protected ImmutableSet<Class<? extends Throwable>> exceptions() {
         return ImmutableSet.of(ThrowableMessage.class);
     }
 

@@ -47,7 +47,7 @@ public class CommandSubstituteSignature
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(CommandMessage.class, Iterable.class);
     }
 
