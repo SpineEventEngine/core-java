@@ -89,7 +89,7 @@ public abstract class SubscriberMethod
     protected abstract MessageFilter createFilter();
 
     @Override
-    public MessageFilter filter() {
+    public final MessageFilter filter() {
         return filter.get();
     }
 
