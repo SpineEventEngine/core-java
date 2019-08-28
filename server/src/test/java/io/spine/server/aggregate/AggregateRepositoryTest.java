@@ -562,7 +562,7 @@ public class AggregateRepositoryTest {
                     .setProjectId(id)
                     .build();
             Iterable<Command> commands = Stream.of(create, addTask, start)
-                                               .map(requests.command()::create)
+                                               .map(message -> requests.command().create(message))
                                                .collect(toImmutableList());
             context.commandBus()
                    .post(commands, noOpObserver());
@@ -589,13 +589,17 @@ public class AggregateRepositoryTest {
                     .addChildProjectId(id)
                     .build();
             Iterable<Command> commands = Stream.of(create, start)
-                                               .map(requests.command()::create)
+                                               .map(message -> requests.command().create(message))
                                                .collect(toImmutableList());
             context.commandBus()
                    .post(commands, noOpObserver());
             context.eventBus()
                    .post(events.createEvent(archived));
-            assertEventVersions(1, 2, 3);
+            assertEventVersions(
+                    1, 2, // Results of commands.
+                    0, // The `archived` event.
+                    3  // The result of the `archived` event.
+            );
         }
 
         @Test
@@ -622,7 +626,7 @@ public class AggregateRepositoryTest {
                     .with(new EventDiscardingAggregateRepository())
                     .receivesCommands(create, start)
                     .receivesEvent(archived);
-            context.assertEvents().hasSize(1);
+            context.assertEvents().isEmpty();
             context.close();
         }
 

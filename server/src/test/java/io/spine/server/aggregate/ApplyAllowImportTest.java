@@ -72,7 +72,7 @@ class ApplyAllowImportTest {
         context.receivesCommands(move(id, NORTH), move(id, EAST))
                .assertEvents()
                .withType(Moved.class)
-               .hasSize(3);
+               .hasSize(2);
     }
 
     @Test
