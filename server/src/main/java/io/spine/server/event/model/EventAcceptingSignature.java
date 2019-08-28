@@ -36,12 +36,15 @@ import java.lang.annotation.Annotation;
 abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?>>
         extends MethodSignature<H, EventEnvelope> {
 
+    static final ImmutableSet<EventAcceptingMethodParams> PARAM_SPEC =
+            ImmutableSet.copyOf(EventAcceptingMethodParams.values());
+
     EventAcceptingSignature(Class<? extends Annotation> annotation) {
         super(annotation);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(EventAcceptingMethodParams.values());
+        return PARAM_SPEC;
     }
 }

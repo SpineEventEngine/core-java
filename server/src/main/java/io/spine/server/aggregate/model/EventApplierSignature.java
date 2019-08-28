@@ -39,13 +39,17 @@ import static io.spine.server.model.MethodParams.consistsOfSingle;
  */
 final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
 
+    private static final ImmutableSet<Class<?>> RETURN_TYPES = ImmutableSet.of(void.class);
+    private static final ImmutableSet<AccessModifier> MODIFIERS =
+            ImmutableSet.of(AccessModifier.PRIVATE);
+
     EventApplierSignature() {
         super(Apply.class);
     }
 
     @Override
     protected ImmutableSet<Class<?>> returnTypes() {
-        return ImmutableSet.of(void.class);
+        return RETURN_TYPES;
     }
 
     @Override
@@ -55,7 +59,7 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
 
     @Override
     protected ImmutableSet<AccessModifier> modifiers() {
-        return ImmutableSet.of(AccessModifier.PRIVATE);
+        return MODIFIERS;
     }
 
     @Override

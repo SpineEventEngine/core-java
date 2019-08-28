@@ -20,24 +20,48 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.server.type.MessageEnvelope;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.asList;
 
 /**
  * The utility class for working with {@link Method} parameters.
+ *
+ * //TODO:2019-08-28:alexander.yevsyukov: Update the doc.
  */
 public final class MethodParams {
 
-    /** Prevents instantiation of this utility class. */
-    private MethodParams() {
+    private final Method method;
+    private final ImmutableList<Parameter> params;
+
+    /** Obtains parameters from the passed method. */
+    private MethodParams(Method method) {
+        this.method = checkNotNull(method);
+        this.params = ImmutableList.copyOf(method.getParameters());
+    }
+
+    /** Obtains the number of parameters passed to the method. */
+    public int size() {
+        return params.size();
+    }
+
+    public boolean is(Class<?> type) {
+        int size = size();
+        checkState(
+                size == 1, "The method `%s` accepts more than one parameter (%d).", method, size
+        );
+        Class<?> firstParam = params.get(0).getType();
+        return type.isAssignableFrom(firstParam);
     }
 
     /**

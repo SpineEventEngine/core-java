@@ -60,6 +60,8 @@ import static java.util.stream.Collectors.toList;
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
+    private static final ImmutableSet<AccessModifier> MODIFIERS = ImmutableSet.of(PACKAGE_PRIVATE);
+
     private final Class<? extends Annotation> annotation;
 
     /**
@@ -83,7 +85,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * the allowed access modifiers.
      */
     protected ImmutableSet<AccessModifier> modifiers() {
-        return ImmutableSet.of(PACKAGE_PRIVATE);
+        return MODIFIERS;
     }
 
     /**

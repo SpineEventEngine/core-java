@@ -46,13 +46,16 @@ abstract class CommandAcceptingSignature
         <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
+    private static final ImmutableSet<CommandAcceptingMethodParams> PARAM_SPECS =
+            ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+
     CommandAcceptingSignature(Class<? extends Annotation> annotation) {
         super(annotation);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+        return PARAM_SPECS;
     }
 
     /**

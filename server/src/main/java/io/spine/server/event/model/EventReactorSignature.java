@@ -32,7 +32,10 @@ import java.util.Optional;
 /**
  * The signature of {@link EventReactorMethod}.
  */
-class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
+final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
+
+    private static final ImmutableSet<Class<?>> RETURN_TYPES =
+            ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
 
     EventReactorSignature() {
         super(React.class);
@@ -40,7 +43,7 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
 
     @Override
     protected ImmutableSet<Class<?>> returnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
+        return RETURN_TYPES;
     }
 
     @Override

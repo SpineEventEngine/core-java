@@ -34,6 +34,12 @@ import java.lang.reflect.Method;
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 
+    private static final ImmutableSet<ParameterSpec<EventEnvelope>> PARAM_SPEC = ImmutableSet
+            .<ParameterSpec<EventEnvelope>>builder()
+            .addAll(EventAcceptingSignature.PARAM_SPEC)
+            .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
+            .build();
+
     public SubscriberSignature() {
         super(Subscribe.class);
     }
@@ -45,12 +51,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        ImmutableSet<? extends ParameterSpec<EventEnvelope>> result = ImmutableSet
-                .<ParameterSpec<EventEnvelope>>builder()
-                .addAll(super.paramSpecs())
-                .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
-                .build();
-        return result;
+        return PARAM_SPEC;
     }
 
     @Override
