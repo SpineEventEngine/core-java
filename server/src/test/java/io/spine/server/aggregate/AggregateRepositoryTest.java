@@ -576,7 +576,6 @@ public class AggregateRepositoryTest {
                    .receivesEvent(archived);
             assertEventVersions(
                     1, 2, // Results of commands.
-                    0, // The `archived` event.
                     3  // The result of the `archived` event.
             );
         }
