@@ -37,9 +37,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.truth.Fact.fact;
+import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
 
 /**
@@ -69,8 +71,13 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
 
     /** Fails if the subject does not have the given size. */
     public final void hasSize(int expectedSize) {
-        check("size()").that(actual())
-                       .hasSize(expectedSize);
+        checkArgument(expectedSize >= 0, "expectedSize(%s) must be >= 0", expectedSize);
+        if (actual == null) {
+            failWithoutActual(simpleFact("message list should not be equal to null"));
+        } else {
+            int actualSize = size(actual);
+            check("size()").that(actualSize).isEqualTo(expectedSize);
+        }
     }
 
     /** Fails if the subject is not empty. */
@@ -137,8 +144,9 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
                                return match;
                            })
                            .collect(toImmutableList());
-            return check("withType()").about(factory())
-                          .that(filtered);
+            return check("withType(%s)", messageClass.getSimpleName())
+                    .about(factory())
+                    .that(filtered);
         }
     }
 
