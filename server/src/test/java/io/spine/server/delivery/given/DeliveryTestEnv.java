@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.NodeId;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.ShardIndex;
@@ -35,6 +36,8 @@ import io.spine.server.route.EventRouting;
 
 import java.security.SecureRandom;
 import java.util.Map;
+
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * Test environment for {@link Delivery} tests.
@@ -53,6 +56,21 @@ public class DeliveryTestEnv {
 
     public static ImmutableSet<String> singleTarget() {
         return ImmutableSet.of("the-calculator");
+    }
+
+    public static NodeId generateNodeId() {
+        return NodeId
+                .newBuilder()
+                .setValue(newUuid())
+                .vBuild();
+    }
+
+    public static ShardIndex newShardIndex(int index, int ofTotal) {
+        return ShardIndex
+                .newBuilder()
+                .setIndex(index)
+                .setOfTotal(ofTotal)
+                .vBuild();
     }
 
     public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
