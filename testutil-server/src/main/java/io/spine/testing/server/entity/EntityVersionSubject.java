@@ -99,6 +99,9 @@ public final class EntityVersionSubject extends ProtoSubject {
         }
     }
 
+    /**
+     * Obtains the entity version under verification.
+     */
     public @Nullable Version actual() {
         return actual;
     }
