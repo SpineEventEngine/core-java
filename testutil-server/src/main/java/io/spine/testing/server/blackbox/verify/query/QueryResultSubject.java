@@ -64,7 +64,7 @@ import static java.util.stream.Collectors.toList;
  */
 @VisibleForTesting
 public final class QueryResultSubject
-        extends IterableOfProtosSubject<QueryResultSubject, Message, Iterable<Message>> {
+        extends IterableOfProtosSubject<Message> {
 
     /**
      * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
@@ -83,9 +83,12 @@ public final class QueryResultSubject
      */
     private IterableEntityVersionSubject versionsSubject;
 
+    private final Iterable<Message> actual;
+
     private QueryResultSubject(FailureMetadata failureMetadata,
                                Iterable<Message> entityStates) {
         super(failureMetadata, entityStates);
+        this.actual = entityStates;
     }
 
     private void initChildSubjects(QueryResponse queryResponse) {
@@ -133,12 +136,10 @@ public final class QueryResultSubject
      * Verifies that the {@link QueryResponse} yields a single entity and returns a
      * {@code ProtoSubject} for its {@link Message state}.
      */
-    public ProtoSubject<?, Message> containsSingleEntityStateThat() {
+    public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        Message entityState = actual().iterator()
-                                      .next();
-        ProtoSubject<?, Message> subject = check("singleEntityState()").about(protos())
-                                                                       .that(entityState);
+        Message entityState = actual.iterator().next();
+        ProtoSubject subject = check("singleEntityState()").about(protos()).that(entityState);
         return subject;
     }
 

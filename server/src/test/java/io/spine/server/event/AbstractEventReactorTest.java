@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
-import io.spine.testing.client.blackbox.Count;
+import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,9 +37,6 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderPaidFo
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderReady;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServedInTime;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServedLate;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
 @DisplayName("Abstract event reactor should")
 class AbstractEventReactorTest {
@@ -103,7 +100,9 @@ class AbstractEventReactorTest {
         void react() {
             OrderServed servedLate = someOrderServedLate();
             restaurantContext.receivesEvent(servedLate)
-                             .assertThat(emittedEvent(OrderServedLate.class, once()));
+                             .assertEvents()
+                             .withType(OrderServedLate.class)
+                             .hasSize(1);
         }
 
         @Test
@@ -111,16 +110,20 @@ class AbstractEventReactorTest {
         void reactWithNone() {
             OrderServed orderServed = someOrderServedInTime();
             restaurantContext.receivesEvent(orderServed)
-                             .assertThat(emittedEvent(OrderServedLate.class, Count.none()));
+                             .assertEvents()
+                             .withType(OrderServedLate.class)
+                             .isEmpty();
         }
 
         @Test
         @DisplayName("react with several events")
         void reactWithSeveral() {
             OrderReadyToBeServed orderIsReady = someOrderReady();
-            restaurantContext.receivesEvent(orderIsReady)
-                             .assertThat(emittedEvent(CustomerNotified.class, once()))
-                             .assertThat(emittedEvent(DeliveryServiceNotified.class, once()));
+            EventSubject assertEvents = restaurantContext
+                    .receivesEvent(orderIsReady)
+                    .assertEvents();
+            assertEvents.withType(CustomerNotified.class).hasSize(1);
+            assertEvents.withType(DeliveryServiceNotified.class).hasSize(1);
         }
     }
 
@@ -145,7 +148,9 @@ class AbstractEventReactorTest {
         void reactToOne() {
             OrderPaidFor orderPaidFor = someOrderPaidFor();
             charityContext.receivesExternalEvent(deliveryContext.name(), orderPaidFor)
-                          .assertThat(emittedEvent(DonationMade.class, once()));
+                          .assertEvents()
+                          .withType(DonationMade.class)
+                          .hasSize(1);
         }
 
         @DisplayName("react to several")
@@ -156,7 +161,9 @@ class AbstractEventReactorTest {
 
             charityContext.receivesExternalEvent(deliveryContext.name(), paidToDelivery)
                           .receivesExternalEvent(restaurantContext.name(), paidInRestaurant)
-                          .assertThat(emittedEvent(DonationMade.class, twice()));
+                          .assertEvents()
+                          .withType(DonationMade.class)
+                          .hasSize(2);
         }
     }
 }

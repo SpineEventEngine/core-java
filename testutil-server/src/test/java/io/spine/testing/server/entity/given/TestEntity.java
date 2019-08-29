@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.entity.testenv.ebuilder;
+package io.spine.testing.server.entity.given;
 
 import com.google.protobuf.StringValue;
 import io.spine.server.entity.AbstractEntity;
 
-public class TestEntity extends AbstractEntity<Long, StringValue> {
-    private TestEntity(Long id) {
+public final class TestEntity extends AbstractEntity<Long, StringValue> {
+    public TestEntity(Long id) {
         super(id);
     }
 }

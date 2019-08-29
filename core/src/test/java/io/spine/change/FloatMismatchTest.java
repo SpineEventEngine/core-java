@@ -119,7 +119,7 @@ class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
         }
 
         @Test
-        @DisplayName("actual")
+        @DisplayName("actual float")
         void actualWithWrongType() {
             ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));

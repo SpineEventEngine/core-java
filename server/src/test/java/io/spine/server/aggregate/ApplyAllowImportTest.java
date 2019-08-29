@@ -36,9 +36,6 @@ import static io.spine.server.aggregate.given.importado.Direction.SOUTH;
 import static io.spine.server.aggregate.given.importado.Direction.WEST;
 import static io.spine.server.aggregate.given.importado.MoveMessages.move;
 import static io.spine.server.aggregate.given.importado.MoveMessages.moved;
-import static io.spine.testing.client.blackbox.Count.thrice;
-import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
 /**
  * This class contains test for importing events into aggregate via {@link Apply}
@@ -73,7 +70,9 @@ class ApplyAllowImportTest {
                 .build();
 
         context.receivesCommands(move(id, NORTH), move(id, EAST))
-               .assertThat(emittedEvent(Moved.class, twice()));
+               .assertEvents()
+               .withType(Moved.class)
+               .hasSize(2);
     }
 
     @Test
@@ -85,6 +84,8 @@ class ApplyAllowImportTest {
                 .build();
 
         context.importsEvents(moved(id, SOUTH), moved(id, WEST), moved(id, WEST))
-               .assertThat(emittedEvent(Moved.class, thrice()));
+               .assertEvents()
+               .withType(Moved.class)
+               .hasSize(3);
     }
 }

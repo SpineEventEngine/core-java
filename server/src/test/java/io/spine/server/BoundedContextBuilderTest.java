@@ -366,7 +366,7 @@ class BoundedContextBuilderTest {
         void forEvents() {
             BusFilter<EventEnvelope> filter = event -> Optional.empty();
 
-            builder.addEventFiler(filter);
+            builder.addEventFilter(filter);
 
             assertTrue(builder.build()
                               .eventBus()

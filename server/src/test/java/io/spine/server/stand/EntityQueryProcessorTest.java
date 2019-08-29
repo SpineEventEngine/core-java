@@ -120,7 +120,7 @@ class EntityQueryProcessorTest {
         Comparator<EntityStateWithVersion> uuidOrder = comparing(
                 (EntityStateWithVersion record) -> state(record).getId().getUuid()
         );
-        assertRecords.isOrdered(uuidOrder.reversed());
+        assertRecords.isInOrder(uuidOrder.reversed());
     }
 
     @Test
