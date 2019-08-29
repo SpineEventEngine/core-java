@@ -30,10 +30,9 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
-
-import static io.spine.server.model.MethodParams.consistsOfTypes;
 
 /**
  * Allowed combinations of parameters for the methods, that accept {@code Event}s.
@@ -41,32 +40,33 @@ import static io.spine.server.model.MethodParams.consistsOfTypes;
 @Immutable
 enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(ImmutableList.of(EventMessage.class), false) {
+    MESSAGE(EventMessage.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
-            return new Object[] {event.message()};
+            return new Object[]{event.message()};
         }
     },
 
-    MESSAGE_EVENT_CTX(ImmutableList.of(EventMessage.class, EventContext.class), false) {
+    MESSAGE_EVENT_CTX(EventMessage.class, EventContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[] {event.message(), event.context()};
         }
     },
 
-    MESSAGE_COMMAND_CTX(ImmutableList.of(RejectionMessage.class, CommandContext.class), false) {
+    MESSAGE_COMMAND_CTX(RejectionMessage.class, CommandContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            CommandContext context = rejection.getOrigin()
-                                              .getContext();
+            CommandContext context =
+                    rejection.getOrigin()
+                             .getContext();
             return new Object[] {message, context};
         }
     },
 
-    MESSAGE_COMMAND_MSG(ImmutableList.of(RejectionMessage.class, CommandMessage.class), true) {
+    MESSAGE_COMMAND_MSG(RejectionMessage.class, CommandMessage.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -76,10 +76,8 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     },
 
-    MESSAGE_COMMAND_MSG_COMMAND_CTX(ImmutableList.of(RejectionMessage.class,
-                                                     CommandMessage.class,
-                                                     CommandContext.class),
-                                    true) {
+    MESSAGE_COMMAND_MSG_COMMAND_CTX(
+            RejectionMessage.class, CommandMessage.class, CommandContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -87,25 +85,22 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             Command origin = rejection.getOrigin();
             CommandMessage commandMessage = origin.enclosedMessage();
             CommandContext context = origin.context();
-
             return new Object[] {message, commandMessage, context};
         }
     };
 
     private final ImmutableList<Class<?>> expectedParameters;
-    private final boolean awareOfCommandType;
 
-    EventAcceptingMethodParams(ImmutableList<Class<?>> parameters, boolean type) {
-        expectedParameters = parameters;
-        awareOfCommandType = type;
+    EventAcceptingMethodParams(Class<?>... parameters) {
+        this.expectedParameters = ImmutableList.copyOf(parameters);
     }
 
     @Override
-    public boolean matches(Class<?>[] methodParams) {
-        return consistsOfTypes(methodParams, expectedParameters);
+    public boolean matches(MethodParams params) {
+        return params.match(expectedParameters);
     }
 
-    public boolean isAwareOfCommandType() {
-        return awareOfCommandType;
+    public boolean acceptsCommand() {
+        return expectedParameters.contains(CommandMessage.class);
     }
 }

@@ -152,7 +152,9 @@ class ApplierTest {
                              () -> applier.toSuccessfulOutcome(result,
                                                                applierObject,
                                                                envelope));
-        assertThat(exception).hasMessageThat().endsWith(result);
+        assertThat(exception)
+                .hasMessageThat()
+                .contains(result);
     }
 
     @Nested
