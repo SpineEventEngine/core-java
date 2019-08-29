@@ -49,7 +49,7 @@ public interface VoidMethod<T,
     default Success toSuccessfulOutcome(@Nullable Object result, T target, E handledSignal) {
         if (result != null) {
             String errorMessage = format(
-                    "Method `%s` should NOT produce any result. Produced: %s",
+                    "Method `%s` should NOT produce any result. Produced: `%s`.",
                     this,
                     result
             );
