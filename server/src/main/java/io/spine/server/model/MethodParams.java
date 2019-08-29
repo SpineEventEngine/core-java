@@ -90,7 +90,7 @@ public final class MethodParams {
     /**
      * Verifies if these parameters match the passed types.
      */
-    public boolean match(Class<?>... types) {
+    public boolean are(Class<?>... types) {
         return match(ImmutableList.copyOf(types));
     }
 

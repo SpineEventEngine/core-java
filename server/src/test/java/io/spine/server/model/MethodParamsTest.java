@@ -71,13 +71,13 @@ class MethodParamsTest {
     @DisplayName("detect that a method has lots of parameters of expected types")
     void detectLotsOfParams() {
         assertTrue(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId())
-                               .match(String.class, Any.class, Empty.class,
-                                      Int32Value.class, UserId.class)
+                               .are(String.class, Any.class, Empty.class,
+                                    Int32Value.class, UserId.class)
         );
         assertFalse(MethodParams.of(singleParamCommand())
-                                .match(String.class, Any.class, Empty.class));
+                                .are(String.class, Any.class, Empty.class));
         assertFalse(MethodParams.of(twoParamCommandAndCtx())
-                                .match(String.class, Any.class, Empty.class));
+                                .are(String.class, Any.class, Empty.class));
     }
 
     @Test
