@@ -24,7 +24,7 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
-import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.HandlerMap;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 
@@ -38,11 +38,11 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
         implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
-    private final MessageHandlerMap<CommandClass, EventClass, CommandHandlerMethod> commands;
+    private final HandlerMap<CommandClass, EventClass, CommandHandlerMethod> commands;
 
     protected CommandHandlingEntityClass(Class<E> cls) {
         super(cls);
-        this.commands = MessageHandlerMap.create(cls, new CommandHandlerSignature());
+        this.commands = HandlerMap.create(cls, new CommandHandlerSignature());
     }
 
     @Override

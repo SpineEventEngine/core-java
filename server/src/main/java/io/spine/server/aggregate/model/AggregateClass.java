@@ -26,7 +26,7 @@ import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
-import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.HandlerMap;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
@@ -47,14 +47,14 @@ public class AggregateClass<A extends Aggregate>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EmptyClass, Applier> stateEvents;
+    private final HandlerMap<EventClass, EmptyClass, Applier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
     /** Creates new instance. */
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
-        this.stateEvents = MessageHandlerMap.create(cls, new EventApplierSignature());
+        this.stateEvents = HandlerMap.create(cls, new EventApplierSignature());
         this.importableEvents = stateEvents.messageClasses(Applier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }

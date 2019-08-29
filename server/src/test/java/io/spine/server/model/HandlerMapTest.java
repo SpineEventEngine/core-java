@@ -28,13 +28,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("MessageHandlerMap should")
-class MessageHandlerMapTest {
+class HandlerMapTest {
 
     @Test
     @DisplayName("not allow duplicating message classes in handlers")
     void rejectDuplicateHandlers() {
         assertThrows(DuplicateHandlerMethodError.class,
-                     () -> MessageHandlerMap.create(HandlerWithDuplicatingMethods.class,
-                                                    new CommandHandlerSignature()));
+                     () -> HandlerMap.create(HandlerWithDuplicatingMethods.class,
+                                             new CommandHandlerSignature()));
     }
 }

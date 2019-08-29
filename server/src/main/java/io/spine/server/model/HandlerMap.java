@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.type.EmptyClass;
 import io.spine.type.MessageClass;
@@ -52,9 +51,9 @@ import static io.spine.server.model.MethodScan.findMethodsBy;
  *         the type of handler methods
  */
 @Immutable(containerOf = {"M", "H"})
-public final class MessageHandlerMap<M extends MessageClass<?>,
-                                     R extends MessageClass<?>,
-                                     H extends HandlerMethod<?, M, ?, R>>
+public final class HandlerMap<M extends MessageClass<?>,
+                              R extends MessageClass<?>,
+                              H extends HandlerMethod<?, M, ?, R>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -62,8 +61,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     private final ImmutableMultimap<HandlerTypeInfo, H> map;
     private final ImmutableSet<M> messageClasses;
 
-    private MessageHandlerMap(ImmutableMultimap<HandlerTypeInfo, H> map,
-                              ImmutableSet<M> messageClasses) {
+    private HandlerMap(ImmutableMultimap<HandlerTypeInfo, H> map,
+                       ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
     }
@@ -81,12 +80,12 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     public static <M extends MessageClass<?>,
             P extends MessageClass<?>,
             H extends HandlerMethod<?, M, ?, P>>
-    MessageHandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+    HandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
         ImmutableMultimap<HandlerTypeInfo, H> map = findMethodsBy(declaringClass, signature);
         ImmutableSet<M> messageClasses = messageClasses(map.values());
-        return new MessageHandlerMap<>(map, messageClasses);
+        return new HandlerMap<>(map, messageClasses);
     }
 
     /**
@@ -235,10 +234,11 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     }
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
-    ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
-        ImmutableSet<M> result = Streams.stream(handlerMethods)
-                                        .map(HandlerMethod::messageClass)
-                                        .collect(toImmutableSet());
+    ImmutableSet<M> messageClasses(Collection<H> handlerMethods) {
+        ImmutableSet<M> result =
+                handlerMethods.stream()
+                              .map(HandlerMethod::messageClass)
+                              .collect(toImmutableSet());
         return result;
     }
 

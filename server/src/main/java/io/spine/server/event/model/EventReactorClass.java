@@ -22,8 +22,8 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.model.HandlerMap;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
@@ -43,13 +43,13 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventClass, EventReactorMethod> reactors;
+    private final HandlerMap<EventClass, EventClass, EventReactorMethod> reactors;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
     private EventReactorClass(Class<? extends S> cls) {
         super(cls);
-        this.reactors = MessageHandlerMap.create(cls, new EventReactorSignature());
+        this.reactors = HandlerMap.create(cls, new EventReactorSignature());
         this.domesticEvents = reactors.messageClasses(HandlerMethod::isDomestic);
         this.externalEvents = reactors.messageClasses(HandlerMethod::isExternal);
     }

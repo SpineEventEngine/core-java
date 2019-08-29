@@ -37,7 +37,7 @@ import static io.spine.server.model.MethodParams.findMatching;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An abstract base of signatures of a {@linkplain HandlerMethod handler method}s.
+ * Specification of a {@linkplain HandlerMethod handler method} signature.
  *
  * <p>Sets the requirements to meet for the {@linkplain Method java.lang.reflect.Method}
  * in order to be qualified as a {@code Message} handler method.
