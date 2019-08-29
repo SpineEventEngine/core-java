@@ -172,7 +172,6 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
 
         MESSAGE_COUNT("the count of the generated messages is"),
         REQUESTED_INDEX("but the requested index was"),
-        @SuppressWarnings("DuplicateStringLiteralInspection")
         ACTUAL("actual");
 
         private final String value;

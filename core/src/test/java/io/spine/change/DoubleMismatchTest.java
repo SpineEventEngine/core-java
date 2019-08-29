@@ -120,7 +120,7 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
         }
 
         @Test
-        @DisplayName("actual")
+        @DisplayName("actual double")
         void actualWithWrongType() {
             ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
