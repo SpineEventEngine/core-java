@@ -116,7 +116,6 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         T outerObject = Iterables.get(messages(), index);
         Message unpacked = AnyPacker.unpack(outerObject.getMessage());
         return ProtoTruth.assertThat(unpacked);
-
     }
 
     /**
@@ -187,4 +186,3 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         }
     }
 }
-

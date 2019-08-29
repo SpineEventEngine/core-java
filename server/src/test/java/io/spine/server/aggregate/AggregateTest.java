@@ -171,7 +171,8 @@ public class AggregateTest {
         ModelTests.dropAllModels();
         aggregate = newAggregate(ID);
         amishAggregate = newAmishAggregate(ID);
-        boundedContext = BoundedContextBuilder.assumingTests(true).build();
+        boundedContext = BoundedContextBuilder.assumingTests(true)
+                                              .build();
         repository = new TestAggregateRepository();
         boundedContext.register(repository);
     }
@@ -643,10 +644,11 @@ public class AggregateTest {
 
             Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
             AggregateTransaction.start(faultyAggregate);
-            BatchDispatchOutcome batchDispatchOutcome = ((Aggregate) faultyAggregate).play(AggregateHistory
-                                                                                 .newBuilder()
-                                                                                 .addEvent(event)
-                                                                                 .build());
+            BatchDispatchOutcome batchDispatchOutcome =
+                    ((Aggregate) faultyAggregate).play(AggregateHistory
+                                                               .newBuilder()
+                                                               .addEvent(event)
+                                                               .build());
             assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
             MessageId expectedTarget = MessageId
                     .newBuilder()
@@ -874,7 +876,7 @@ public class AggregateTest {
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
             EventSubject assertEvents = context.receivesCommand(reassignTask())
-                                          .assertEvents();
+                                               .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggCannotReassignUnassignedTask.class)
                         .hasSize(1);
