@@ -40,21 +40,21 @@ import io.spine.server.type.EventEnvelope;
 @Immutable
 enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(false, EventMessage.class) {
+    MESSAGE(EventMessage.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message()};
         }
     },
 
-    MESSAGE_EVENT_CTX(false, EventMessage.class, EventContext.class) {
+    MESSAGE_EVENT_CTX(EventMessage.class, EventContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[] {event.message(), event.context()};
         }
     },
 
-    MESSAGE_COMMAND_CTX(false, RejectionMessage.class, CommandContext.class) {
+    MESSAGE_COMMAND_CTX(RejectionMessage.class, CommandContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -65,7 +65,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
     },
 
-    MESSAGE_COMMAND_MSG(true, RejectionMessage.class, CommandMessage.class) {
+    MESSAGE_COMMAND_MSG(RejectionMessage.class, CommandMessage.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -76,7 +76,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     },
 
     MESSAGE_COMMAND_MSG_COMMAND_CTX(
-            true, RejectionMessage.class, CommandMessage.class, CommandContext.class) {
+            RejectionMessage.class, CommandMessage.class, CommandContext.class) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
@@ -90,11 +90,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     };
 
     private final ImmutableList<Class<?>> expectedParameters;
-    private final boolean awareOfCommandType;
 
-    EventAcceptingMethodParams(boolean awareOfCommandType, Class<?>... parameters) {
+    EventAcceptingMethodParams(Class<?>... parameters) {
         this.expectedParameters = ImmutableList.copyOf(parameters);
-        this.awareOfCommandType = awareOfCommandType;
     }
 
     @Override
@@ -102,7 +100,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         return params.match(expectedParameters);
     }
 
-    public boolean isAwareOfCommandType() {
-        return awareOfCommandType;
+    public boolean acceptsCommand() {
+        return expectedParameters.contains(CommandMessage.class);
     }
 }
