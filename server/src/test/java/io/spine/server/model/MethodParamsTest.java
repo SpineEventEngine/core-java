@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
@@ -38,12 +39,20 @@ import static io.spine.server.model.MethodParams.firstIsCommand;
 import static io.spine.server.model.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
 import static io.spine.server.model.given.MethodParamsTestEnv.singleParamCommand;
 import static io.spine.server.model.given.MethodParamsTestEnv.twoParamCommandAndCtx;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`MethodParams` utility should ")
 class MethodParamsTest {
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+            .testAllPublicStaticMethods(MethodParams.class);
+    }
 
     @Test
     @DisplayName("detect that a method has exactly one parameter of an expected type")
