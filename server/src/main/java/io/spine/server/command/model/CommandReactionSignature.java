@@ -45,10 +45,10 @@ import static io.spine.server.model.MethodParams.consistsOfTwo;
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
 
-    private static final ImmutableSet<CommandReactionParams> PARAM_SPECS =
-            ImmutableSet.copyOf(CommandReactionParams.values());
-    private static final ImmutableSet<Class<?>> RETURN_TYPES =
-            ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
+    private static final ImmutableSet<CommandReactionParams>
+            PARAM_SPECS = ImmutableSet.copyOf(CommandReactionParams.values());
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
 
     CommandReactionSignature() {
         super(Command.class);

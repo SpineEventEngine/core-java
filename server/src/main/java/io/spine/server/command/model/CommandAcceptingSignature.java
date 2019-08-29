@@ -46,8 +46,11 @@ abstract class CommandAcceptingSignature
         <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
-    private static final ImmutableSet<CommandAcceptingMethodParams> PARAM_SPECS =
-            ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+    private static final ImmutableSet<CommandAcceptingMethodParams>
+            PARAM_SPECS = ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.
+    private static final Optional<Class<? extends Throwable>>
+            ALLOWED_THROWABLE = Optional.of(ThrowableMessage.class);
 
     CommandAcceptingSignature(Class<? extends Annotation> annotation) {
         super(annotation);
@@ -66,7 +69,7 @@ abstract class CommandAcceptingSignature
      */
     @Override
     protected Optional<Class<? extends Throwable>> allowedThrowable() {
-        return Optional.of(ThrowableMessage.class);
+        return ALLOWED_THROWABLE;
     }
 
     /**

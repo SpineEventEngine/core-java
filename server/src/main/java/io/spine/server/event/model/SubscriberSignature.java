@@ -34,11 +34,14 @@ import java.lang.reflect.Method;
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 
-    private static final ImmutableSet<ParameterSpec<EventEnvelope>> PARAM_SPEC = ImmutableSet
+    private static final ImmutableSet<ParameterSpec<EventEnvelope>>
+            PARAM_SPEC = ImmutableSet
             .<ParameterSpec<EventEnvelope>>builder()
             .addAll(EventAcceptingSignature.PARAM_SPEC)
             .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
             .build();
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPE = ImmutableSet.of(void.class);
 
     public SubscriberSignature() {
         super(Subscribe.class);
@@ -46,7 +49,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
 
     @Override
     protected ImmutableSet<Class<?>> returnTypes() {
-        return ImmutableSet.of(void.class);
+        return RETURN_TYPE;
     }
 
     @Override

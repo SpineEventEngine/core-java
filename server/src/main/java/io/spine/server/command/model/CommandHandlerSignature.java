@@ -34,8 +34,8 @@ import java.lang.reflect.Method;
 public final class CommandHandlerSignature
         extends CommandAcceptingSignature<CommandHandlerMethod> {
 
-    private static final ImmutableSet<Class<?>> RETURN_TYPES =
-            ImmutableSet.of(EventMessage.class, Iterable.class);
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class);
 
     public CommandHandlerSignature() {
         super(Assign.class);

@@ -34,8 +34,8 @@ import java.util.Optional;
  */
 final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
-    private static final ImmutableSet<Class<?>> RETURN_TYPES =
-            ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
 
     EventReactorSignature() {
         super(React.class);
