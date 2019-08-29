@@ -22,7 +22,7 @@ package io.spine.server.model;
 import com.google.errorprone.annotations.Immutable;
 
 /**
- * Contains a value of an annotation parameter.
+ * Contains a value of an annotation attribute.
  *
  * <p>Typical way to add more semantics to a method is via a parameterized annotation,
  * such as {@link io.spine.core.Subscribe Subscribe}.
@@ -35,7 +35,13 @@ import com.google.errorprone.annotations.Immutable;
 @Immutable(containerOf = "V")
 public interface Attribute<V> {
 
-    /** The name of the parameter. */
+    /**
+     * The name of the parameter.
+     *
+     * @apiNote This is mostly a diagnostics method. We do not use it directly.
+     *  This method cannot be called {@code name()} because it would clash with the built-in method
+     *  {@code name()} of enums that implement this interface.
+     */
     String parameter();
 
     /** The value of the attribute. */
