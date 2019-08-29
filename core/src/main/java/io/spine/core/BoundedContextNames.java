@@ -37,6 +37,8 @@ public final class BoundedContextNames {
     /** The name of a Bounded Context to be used if the name was explicitly set. */
     private static final BoundedContextName ASSUMING_TESTS = newName("AssumingTests");
 
+    private static final BoundedContextName OUTSIDE = newName("Outside");
+
     /**
      * Prevents the utility class instantiation.
      */
@@ -108,5 +110,16 @@ public final class BoundedContextNames {
     @VisibleForTesting
     public static BoundedContextName assumingTests() {
         return ASSUMING_TESTS;
+    }
+
+    /**
+     * Obtains the name which is used to signify absence of a Bounded Context.
+     *
+     * <p>When integrating with a third-party, use this name where a Bounded Context would go.
+     */
+    @Internal
+    @VisibleForTesting
+    public static BoundedContextName outside() {
+        return OUTSIDE;
     }
 }
