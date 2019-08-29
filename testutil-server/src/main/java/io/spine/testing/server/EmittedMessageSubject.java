@@ -162,7 +162,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      *
      * @return an immutable copy of the {@code actual} messages
      */
-    public List<T> actual() {
+    public ImmutableList<T> actual() {
         checkNotNull(actual);
         return ImmutableList.copyOf(actual);
     }
