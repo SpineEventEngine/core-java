@@ -40,11 +40,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  *
  * @param <T>
  *         the type of the target object
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
-public abstract class EventHandlerMethod<T, P extends MessageClass<?>>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P> {
+public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

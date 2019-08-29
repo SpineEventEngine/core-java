@@ -46,15 +46,15 @@ import static io.spine.server.model.MethodScan.findMethodsBy;
  *
  * @param <M>
  *         the type of messages
- * @param <P>
+ * @param <R>
  *         the type of message classes produced by handler methods
  * @param <H>
  *         the type of handler methods
  */
 @Immutable(containerOf = {"M", "H"})
 public final class MessageHandlerMap<M extends MessageClass<?>,
-                                     P extends MessageClass<?>,
-                                     H extends HandlerMethod<?, M, ?, P>>
+                                     R extends MessageClass<?>,
+                                     H extends HandlerMethod<?, M, ?, R>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -118,8 +118,8 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     /**
      * Obtains the classes of messages produced by the handler methods in this map.
      */
-    public ImmutableSet<P> producedTypes() {
-        ImmutableSet<P> result = map
+    public ImmutableSet<R> producedTypes() {
+        ImmutableSet<R> result = map
                 .values()
                 .stream()
                 .map(HandlerMethod::producedMessages)

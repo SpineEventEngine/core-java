@@ -43,14 +43,14 @@ import static com.google.common.base.Preconditions.checkArgument;
  *         the type of the incoming message class
  * @param <E>
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
 @Immutable
 public interface HandlerMethod<T,
                                C extends MessageClass,
                                E extends MessageEnvelope<?, ?, ?>,
-                               P extends MessageClass<?>> {
+                               R extends MessageClass<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -80,7 +80,7 @@ public interface HandlerMethod<T,
     /**
      * Retrieves the message classes produced by this handler method.
      */
-    Set<P> producedMessages();
+    Set<R> producedMessages();
 
     /**
      * Converts the raw method result to a {@linkplain Success successful propagation outcome}.

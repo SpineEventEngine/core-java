@@ -67,7 +67,7 @@ import static java.lang.String.format;
  *         the type of the message class
  * @param <E>
  *         the type of message envelopes, in which the messages to handle are wrapped
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
 @Immutable
@@ -75,8 +75,8 @@ public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
                                             C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
-                                            P extends MessageClass<?>>
-        implements HandlerMethod<T, C, E, P> {
+                                            R extends MessageClass<?>>
+        implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -112,7 +112,7 @@ public abstract class AbstractHandlerMethod<T,
      * <p>Does <em>not</em> contain interfaces.
      */
     @SuppressWarnings("Immutable") // Memoizing supplier is effectively immutable.
-    private final Supplier<ImmutableSet<P>> producedTypes;
+    private final Supplier<ImmutableSet<R>> producedTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -203,7 +203,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public final Set<P> producedMessages() {
+    public final Set<R> producedMessages() {
         return producedTypes.get();
     }
 
