@@ -74,6 +74,13 @@ class ResponseStatusSubjectTest extends SubjectTest<ResponseStatusSubject, Statu
                                                     .isOk());
     }
 
+    @Test
+    @DisplayName("fail status check if the value is `null`")
+    void failCheckIfNull() {
+        expectSomeFailure(whenTesting -> whenTesting.that(null)
+                                                    .isOk());
+    }
+
     @Override
     protected Subject.Factory<ResponseStatusSubject, Status> subjectFactory() {
         return responseStatus();
