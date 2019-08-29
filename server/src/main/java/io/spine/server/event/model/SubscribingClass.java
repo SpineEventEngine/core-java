@@ -20,12 +20,12 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.logging.Logging;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -43,7 +43,7 @@ public interface SubscribingClass extends Logging {
      *         the event to obtain a method for
      */
     default Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
-        Collection<SubscriberMethod> subscribers =
+        ImmutableSet<SubscriberMethod> subscribers =
                 subscribersOf(event.messageClass(), event.originClass());
         Comparator<SubscriberMethod> methodOrder = comparing(
                 (SubscriberMethod subscriber) -> subscriber.filter().getField().getFieldNameCount()
@@ -77,5 +77,5 @@ public interface SubscribingClass extends Logging {
      *          {@link io.spine.server.type.EmptyClass EmptyClass} for all origins
      * @return methods handling the requested class of the events
      */
-    Collection<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass);
+    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass);
 }

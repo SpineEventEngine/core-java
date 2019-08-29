@@ -51,7 +51,7 @@ import static io.spine.protobuf.TypeConverter.toAny;
 @Immutable
 public final class StateSubscriberMethod extends SubscriberMethod implements Logging {
 
-    private static final FieldPath TYPE_URL_PATH = FieldPaths.parse("entity.type_url");
+    private static final FieldPath ENTITY_TYPE_URL = FieldPaths.parse("entity.type_url");
 
     private final BoundedContextName contextOfSubscriber;
     private final Class<? extends Message> stateType;
@@ -91,7 +91,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
         Any typeUrlAsAny = toAny(targetType.value());
         return MessageFilter
                 .newBuilder()
-                .setField(TYPE_URL_PATH)
+                .setField(ENTITY_TYPE_URL)
                 .setValue(typeUrlAsAny)
                 .build();
     }

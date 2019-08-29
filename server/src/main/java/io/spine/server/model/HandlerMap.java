@@ -20,9 +20,8 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
@@ -58,14 +57,8 @@ public final class HandlerMap<M extends MessageClass<?>,
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableMultimap<HandlerTypeInfo, H> map;
+    private final ImmutableSetMultimap<HandlerTypeInfo, H> map;
     private final ImmutableSet<M> messageClasses;
-
-    private HandlerMap(ImmutableMultimap<HandlerTypeInfo, H> map,
-                       ImmutableSet<M> messageClasses) {
-        this.map = map;
-        this.messageClasses = messageClasses;
-    }
 
     /**
      * Creates a map of methods found in the passed class.
@@ -78,14 +71,20 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         signature
      */
     public static <M extends MessageClass<?>,
-            P extends MessageClass<?>,
-            H extends HandlerMethod<?, M, ?, P>>
+                   P extends MessageClass<?>,
+                   H extends HandlerMethod<?, M, ?, P>>
     HandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
-        ImmutableMultimap<HandlerTypeInfo, H> map = findMethodsBy(declaringClass, signature);
+        ImmutableSetMultimap<HandlerTypeInfo, H> map = findMethodsBy(declaringClass, signature);
         ImmutableSet<M> messageClasses = messageClasses(map.values());
         return new HandlerMap<>(map, messageClasses);
+    }
+
+    private HandlerMap(ImmutableSetMultimap<HandlerTypeInfo, H> map,
+                       ImmutableSet<M> messageClasses) {
+        this.map = map;
+        this.messageClasses = messageClasses;
     }
 
     /**
@@ -136,8 +135,8 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    private ImmutableCollection<H> handlersOf(HandlerTypeInfo handlerKey) {
-        ImmutableCollection<H> handlers = map.get(handlerKey);
+    private ImmutableSet<H> handlersOf(HandlerTypeInfo handlerKey) {
+        ImmutableSet<H> handlers = map.get(handlerKey);
         checkState(!handlers.isEmpty(),
                    "Unable to find handler with the key: %s.", handlerKey);
         return handlers;
@@ -157,7 +156,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    public ImmutableCollection<H> handlersOf(M messageClass, MessageClass originClass) {
+    public ImmutableSet<H> handlersOf(M messageClass, MessageClass originClass) {
         HandlerTypeInfo keyWithOrigin = HandlerTypeInfo
                 .newBuilder()
                 .setMessageType(typeUrl(messageClass).value())
@@ -187,7 +186,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         if there is no such method or several such methods found in the map
      */
     public H handlerOf(M messageClass, MessageClass originClass) {
-        ImmutableCollection<H> methods = handlersOf(messageClass, originClass);
+        ImmutableSet<H> methods = handlersOf(messageClass, originClass);
         return checkSingle(methods, messageClass);
     }
 
@@ -200,15 +199,15 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    public ImmutableCollection<H> handlersOf(M messageClass) {
+    public ImmutableSet<H> handlersOf(M messageClass) {
         return handlersOf(messageClass, EmptyClass.instance());
     }
 
     /**
      * Obtains a single handler method for messages of the given class.
      *
-     * <p>If there is no such method or several such methods, an {@link IllegalStateException} is
-     * thrown.
+     * <p>If there is no such method or several such methods, an {@link IllegalStateException}
+     * is thrown.
      *
      * @param messageClass
      *         the message class of the handled message
@@ -217,7 +216,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         if there is no such method or several such methods found in the map
      */
     public H handlerOf(M messageClass) {
-        ImmutableCollection<H> methods = handlersOf(messageClass);
+        ImmutableSet<H> methods = handlersOf(messageClass);
         return checkSingle(methods, messageClass);
     }
 

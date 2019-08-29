@@ -21,7 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.base.FieldPath;
 import io.spine.type.MessageClass;
@@ -60,10 +60,10 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *         the handler {@linkplain MethodSignature signature}
      * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
      */
-    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
+    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<HandlerTypeInfo, H>
     findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
-        ImmutableMultimap<HandlerTypeInfo, H> result = operation.perform();
+        ImmutableSetMultimap<HandlerTypeInfo, H> result = operation.perform();
         return result;
     }
 
@@ -82,12 +82,12 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *
      * @return a map of {@link HandlerTypeInfo}s to the method handlers
      */
-    private ImmutableMultimap<HandlerTypeInfo, H> perform() {
+    private ImmutableSetMultimap<HandlerTypeInfo, H> perform() {
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             scanMethod(method);
         }
-        return ImmutableMultimap.copyOf(handlers);
+        return ImmutableSetMultimap.copyOf(handlers);
     }
 
     private void scanMethod(Method method) {

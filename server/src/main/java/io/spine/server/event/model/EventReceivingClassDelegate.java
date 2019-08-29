@@ -20,7 +20,6 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.model.StateClass;
@@ -32,7 +31,6 @@ import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -63,7 +61,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
 
     /**
      * Creates new instance for the passed raw class with methods obtained
-     * though the passed factory.
+     * through the passed factory.
      */
     public EventReceivingClassDelegate(Class<T> delegatingClass, MethodSignature<M, ?> signature) {
         super(delegatingClass);
@@ -118,7 +116,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public Collection<M> handlersOf(EventClass eventClass, MessageClass originClass) {
+    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass originClass) {
         return handlers.handlersOf(eventClass, originClass);
     }
 
@@ -139,7 +137,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         if (!handlers.containsClass(updateEvent)) {
             return ImmutableSet.of();
         }
-        ImmutableCollection<M> stateHandlers = handlers.handlersOf(updateEvent);
+        ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
         ImmutableSet<StateClass> result =
                 stateHandlers.stream()
                         .filter(h -> h instanceof StateSubscriberMethod)

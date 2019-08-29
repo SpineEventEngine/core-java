@@ -20,13 +20,13 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -71,8 +71,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public
-    Collection<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
+    public ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass, MessageClass originClass) {
         return delegate.handlersOf(eventClass, originClass);
     }
 }
