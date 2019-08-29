@@ -126,6 +126,15 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     }
 
     @Test
+    @DisplayName("fail to get a message if the list is `null`")
+    void failForNull() {
+        AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                       .message(42));
+        assertThat(error).factKeys()
+                         .contains(ACTUAL.value());
+    }
+
+    @Test
     @DisplayName("obtain derived subject with messages of type")
     void subSubjectByType() {
         int messageCount = 3;
