@@ -27,6 +27,7 @@ import com.google.protobuf.Int32Value;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.model.ModCreateProject;
@@ -89,6 +90,11 @@ public class MethodParamsTestEnv {
             @Override
             public boolean matches(Class<?>[] methodParams) {
                 return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
+            }
+
+            @Override
+            public boolean matches(MethodParams params) {
+                return params.are(CommandMessage.class, CommandContext.class);
             }
 
             @Override

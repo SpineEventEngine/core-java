@@ -28,7 +28,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.UserId;
 import io.spine.server.model.given.MethodParamsTestEnv.ScheduleCommandParamSpec;
 import io.spine.test.model.ModCreateProject;
-import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,11 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`MethodParams` utility should ")
-class MethodParamsTest extends UtilityClassTest<MethodParams> {
-
-    private MethodParamsTest() {
-        super(MethodParams.class);
-    }
+class MethodParamsTest {
 
     @Test
     @DisplayName("detect that a method has exactly one parameter of an expected type")

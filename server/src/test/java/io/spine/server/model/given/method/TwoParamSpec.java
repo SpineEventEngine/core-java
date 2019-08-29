@@ -23,6 +23,7 @@ package io.spine.server.model.given.method;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.EventContext;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
@@ -36,6 +37,11 @@ public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
     @Override
     public boolean matches(Class<?>[] methodParams) {
         return consistsOfTwo(methodParams, Message.class, EventContext.class);
+    }
+
+    @Override
+    public boolean matches(MethodParams params) {
+        return params.are(Message.class, EventContext.class);
     }
 
     @Override

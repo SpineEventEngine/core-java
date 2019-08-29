@@ -50,6 +50,11 @@ public interface ParameterSpec<E extends MessageEnvelope<?, ?, ?>> {
     boolean matches(Class<?>[] methodParams);
 
     /**
+     * Tells if this specification of parameters matches the passed parameters.
+     */
+    boolean matches(MethodParams params);
+
+    /**
      * Extracts the values to be used during the invocation of the method with this parameter
      * specification.
      *

@@ -26,6 +26,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -85,6 +86,11 @@ abstract class CommandAcceptingSignature
             }
 
             @Override
+            public boolean matches(MethodParams params) {
+                return params.is(CommandMessage.class);
+            }
+
+            @Override
             public Object[] extractArguments(CommandEnvelope envelope) {
                 return new Object[]{envelope.message()};
             }
@@ -94,6 +100,11 @@ abstract class CommandAcceptingSignature
             @Override
             public boolean matches(Class<?>[] methodParams) {
                 return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
+            }
+
+            @Override
+            public boolean matches(MethodParams params) {
+                return params.are(CommandMessage.class, CommandContext.class);
             }
 
             @Override

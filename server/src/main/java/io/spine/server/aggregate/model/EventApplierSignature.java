@@ -26,6 +26,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AccessModifier;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
@@ -81,6 +82,11 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
             @Override
             public boolean matches(Class<?>[] methodParams) {
                 return consistsOfSingle(methodParams, EventMessage.class);
+            }
+
+            @Override
+            public boolean matches(MethodParams params) {
+                return params.is(EventMessage.class);
             }
 
             @Override

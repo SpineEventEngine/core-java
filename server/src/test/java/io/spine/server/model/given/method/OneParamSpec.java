@@ -22,6 +22,7 @@ package io.spine.server.model.given.method;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
@@ -35,6 +36,11 @@ public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
     @Override
     public boolean matches(Class<?>[] methodParams) {
         return consistsOfSingle(methodParams, EventMessage.class);
+    }
+
+    @Override
+    public boolean matches(MethodParams params) {
+        return params.is(EventMessage.class);
     }
 
     @Override

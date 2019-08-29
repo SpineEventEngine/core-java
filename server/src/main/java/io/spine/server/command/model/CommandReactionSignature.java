@@ -101,6 +101,11 @@ public class CommandReactionSignature
             }
 
             @Override
+            public boolean matches(MethodParams params) {
+                return params.is(EventMessage.class);
+            }
+
+            @Override
             public Object[] extractArguments(EventEnvelope event) {
                 return new Object[]{event.message()};
             }
@@ -113,6 +118,11 @@ public class CommandReactionSignature
             }
 
             @Override
+            public boolean matches(MethodParams params) {
+                return params.are(EventMessage.class, EventContext.class);
+            }
+
+            @Override
             public Object[] extractArguments(EventEnvelope event) {
                 return new Object[]{event.message(), event.context()};
             }
@@ -122,6 +132,11 @@ public class CommandReactionSignature
             @Override
             public boolean matches(Class<?>[] methodParams) {
                 return consistsOfTwo(methodParams, RejectionMessage.class, CommandContext.class);
+            }
+
+            @Override
+            public boolean matches(MethodParams params) {
+                return params.are(RejectionMessage.class, CommandContext.class);
             }
 
             @Override
