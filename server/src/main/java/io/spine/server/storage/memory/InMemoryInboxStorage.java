@@ -32,9 +32,13 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.server.storage.AbstractStorage;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.protobuf.util.Timestamps.compare;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * In-memory implementation of messages stored in {@link Inbox Inbox}.
@@ -56,16 +60,20 @@ public final class InMemoryInboxStorage
     }
 
     @Override
-    public Page<InboxMessage> readAll(ShardIndex index) {
+    public Page<InboxMessage> readAll(ShardIndex index, int pageSize) {
         TenantInboxRecords storage = multitenantStorage.currentSlice();
-        ImmutableList<InboxMessage> filtered =
+
+        AtomicInteger counter = new AtomicInteger();
+        Map<Integer, ImmutableList<InboxMessage>> pages =
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
                        .sorted((m1, m2) -> compare(m2.getWhenReceived(), m1.getWhenReceived()))
-                       .collect(ImmutableList.toImmutableList());
+                       .collect(groupingBy(m -> counter.getAndIncrement() / pageSize,
+                                           toImmutableList()));
 
-        return new InMemoryPage(filtered);
+        PageByNumber supplier = number -> Optional.ofNullable(pages.get(number));
+        return new InMemoryPage(0, supplier);
     }
 
     @Override
@@ -108,32 +116,44 @@ public final class InMemoryInboxStorage
     }
 
     /**
-     * An in-memory implementation of a page of read operation results.
-     *
-     * <p>Always contains the whole result set, so {@link #next() next()} always returns
-     * {@code Optional.empty()}.
+     * An in-memory implementation of a page of messages read from the {@code InboxStorage}.
      */
     private static final class InMemoryPage implements Page<InboxMessage> {
 
-        private final ImmutableList<InboxMessage> contents;
+        private final int pageNumber;
+        private final PageByNumber pageSupplier;
 
-        private InMemoryPage(ImmutableList<InboxMessage> contents) {
-            this.contents = contents;
+        private InMemoryPage(int number, PageByNumber supplier) {
+            this.pageNumber = number;
+            this.pageSupplier = supplier;
         }
 
         @Override
         public ImmutableList<InboxMessage> contents() {
-            return contents;
+            return pageSupplier.getBy(pageNumber)
+                               .orElse(ImmutableList.of());
         }
 
         @Override
         public int size() {
-            return contents.size();
+            return contents().size();
         }
 
         @Override
         public Optional<Page<InboxMessage>> next() {
-            return Optional.empty();
+            int nextNumber = pageNumber + 1;
+            Optional<Page<InboxMessage>> result =
+                    pageSupplier.getBy(nextNumber)
+                                .map(l -> new InMemoryPage(nextNumber, pageSupplier));
+            return result;
         }
+    }
+
+    /**
+     * Supplies the contents of the {@linkplain InMemoryPage page} by its number.
+     */
+    private interface PageByNumber {
+
+        Optional<ImmutableList<InboxMessage>> getBy(int number);
     }
 }

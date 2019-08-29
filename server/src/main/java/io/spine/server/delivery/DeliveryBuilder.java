@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -35,11 +36,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class DeliveryBuilder {
 
+    /**
+     * The default number of messages to be delivered in scope of a single {@link DeliveryStage}.
+     */
+    private static final int DEFAULT_PAGE_SIZE = 500;
+
     private @MonotonicNonNull InboxStorage inboxStorage;
     private @MonotonicNonNull DeliveryStrategy strategy;
     private @MonotonicNonNull ShardedWorkRegistry workRegistry;
     private @MonotonicNonNull Duration idempotenceWindow;
     private @MonotonicNonNull DeliveryMonitor deliveryMonitor;
+    private @MonotonicNonNull Integer pageSize;
 
     /**
      * Prevents a direct instantiation of this class.
@@ -119,33 +126,80 @@ public final class DeliveryBuilder {
         return checkNotNull(deliveryMonitor);
     }
 
+    /**
+     * Returns the value of the configured page size or {@code Optional.empty()}
+     * if no such value was configured.
+     */
+    public Optional<Integer> pageSize() {
+        return Optional.ofNullable(pageSize);
+    }
+
+    Integer getPageSize() {
+        return checkNotNull(pageSize);
+    }
+
     @CanIgnoreReturnValue
     public DeliveryBuilder setWorkRegistry(ShardedWorkRegistry workRegistry) {
         this.workRegistry = checkNotNull(workRegistry);
         return this;
     }
 
+    /**
+     * Sets strategy of assigning a shard index for a message that is delivered to a particular
+     * target.
+     *
+     * <p>If none set, {@link UniformAcrossAllShards#singleShard()} is be used.
+     */
     @CanIgnoreReturnValue
     public DeliveryBuilder setStrategy(DeliveryStrategy strategy) {
         this.strategy = checkNotNull(strategy);
         return this;
     }
 
+    /**
+     * Sets for how long the previously delivered messages should be kept in the {@code Inbox}
+     * to ensure the incoming messages aren't duplicates.
+     *
+     * <p>If none set, zero duration is used.
+     */
     @CanIgnoreReturnValue
     public DeliveryBuilder setIdempotenceWindow(Duration idempotenceWindow) {
         this.idempotenceWindow = checkNotNull(idempotenceWindow);
         return this;
     }
 
+    /**
+     * Sets the custom {@code InboxStorage}.
+     *
+     * <p>If none set, the storage is initialized by the {@code StorageFactory} specific for
+     * this {@code ServerEnvironment}.
+     */
     @CanIgnoreReturnValue
     public DeliveryBuilder setInboxStorage(InboxStorage inboxStorage) {
         this.inboxStorage = checkNotNull(inboxStorage);
         return this;
     }
 
+    /**
+     * Sets the custom {@code DeliveryMonitor}.
+     *
+     * <p>If none set, {@link DeliveryMonitor#stopWhenEmpty()}  is used.
+     */
     @CanIgnoreReturnValue
     public DeliveryBuilder setMonitor(DeliveryMonitor monitor) {
         this.deliveryMonitor = checkNotNull(monitor);
+        return this;
+    }
+
+    /**
+     * Sets the  maximum amount of messages to deliver within a {@link DeliveryStage}.
+     *
+     * <p>If none set, {@linkplain #DEFAULT_PAGE_SIZE} is used.
+     */
+    @CanIgnoreReturnValue
+    public DeliveryBuilder setPageSize(int pageSize) {
+        checkArgument(pageSize > 0);
+        this.pageSize = pageSize;
         return this;
     }
 
@@ -170,6 +224,10 @@ public final class DeliveryBuilder {
 
         if (deliveryMonitor == null) {
             deliveryMonitor = DeliveryMonitor.stopWhenEmpty();
+        }
+
+        if (pageSize == null) {
+            pageSize = DEFAULT_PAGE_SIZE;
         }
 
         Delivery delivery = new Delivery(this);

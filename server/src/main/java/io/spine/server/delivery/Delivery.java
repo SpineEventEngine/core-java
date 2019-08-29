@@ -86,6 +86,16 @@ import static java.util.stream.Collectors.groupingBy;
  * it registers itself in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard
  * that only allows to pick a shard to a single node at a time.
  *
+ * <p>The delivery process for each shard index is split into {@link DeliveryStage}s. In scope of
+ * each stage, a certain number of messages is read from the respective shard of the {@code Inbox}.
+ * The messages are grouped per-target and delivered in batches if possible. The maximum
+ * number of the messages within a {@code DeliveryStage} can be
+ * {@linkplain DeliveryBuilder#setPageSize(int) configured}.
+ *
+ * <p>After each {@code DeliveryStage} it is possible to stop the delivery by
+ * {@link DeliveryBuilder#setMonitor(DeliveryMonitor) supplying} the custom delivery monitor.
+ * Please refer to the {@link DeliveryMonitor documentation} for the details.
+ *
  * <b>Local environment</b>
  *
  * <p>By default, the delivery is configured to {@linkplain Delivery#local() run locally}. It
@@ -153,12 +163,18 @@ public final class Delivery {
      */
     private final DeliveryMonitor monitor;
 
+    /**
+     * The maximum amount of messages to deliver within a {@link DeliveryStage}.
+     */
+    private final int pageSize;
+
     Delivery(DeliveryBuilder builder) {
         this.strategy = builder.getStrategy();
         this.workRegistry = builder.getWorkRegistry();
         this.idempotenceWindow = builder.getIdempotenceWindow();
         this.inboxStorage = builder.getInboxStorage();
         this.monitor = builder.getMonitor();
+        this.pageSize = builder.getPageSize();
         this.inboxDeliveries = Maps.newConcurrentMap();
         this.shardObservers = synchronizedList(new ArrayList<>());
     }
@@ -259,7 +275,7 @@ public final class Delivery {
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
 
-        Page<InboxMessage> startingPage = inboxStorage.readAll(index);
+        Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;

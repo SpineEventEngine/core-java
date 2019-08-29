@@ -40,7 +40,7 @@ class DeliveryBuilderTest {
     }
 
     @Nested
-    @DisplayName("not accept null")
+    @DisplayName("not accept `null`")
     class NotAcceptNull {
 
         @Test
@@ -77,6 +77,15 @@ class DeliveryBuilderTest {
             assertThrows(NullPointerException.class,
                          () -> builder().setMonitor(nullRef()));
         }
+    }
+
+    @Test
+    @DisplayName("accept only positive page size")
+    void acceptOnlyPositivePageSize() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setPageSize(0));
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setPageSize(-3));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")    // testing `Builder` getters.
@@ -128,6 +137,15 @@ class DeliveryBuilderTest {
                                            .deliveryMonitor()
                                            .get());
         }
+
+        @Test
+        @DisplayName("page size")
+        void pageSize() {
+            int pageSize = 42;
+            assertEquals(pageSize, builder().setPageSize(pageSize)
+                                            .pageSize()
+                                            .get());
+        }
     }
 
     @Nested
@@ -162,6 +180,12 @@ class DeliveryBuilderTest {
         @DisplayName("delivery monitor")
         void deliveryMonitor() {
             assertThrows(NullPointerException.class, () -> builder().getMonitor());
+        }
+
+        @Test
+        @DisplayName("page size")
+        void pageSize() {
+            assertThrows(NullPointerException.class, () -> builder().getPageSize());
         }
     }
 }
