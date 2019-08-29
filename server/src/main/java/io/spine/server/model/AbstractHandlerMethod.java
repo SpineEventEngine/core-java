@@ -330,7 +330,7 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public int hashCode() {
         int prime = 31;
-        return (prime + method.hashCode());
+        return (prime * method.hashCode());
     }
 
     @Override
