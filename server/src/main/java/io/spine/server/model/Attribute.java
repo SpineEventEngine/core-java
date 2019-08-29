@@ -20,32 +20,30 @@
 package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.Internal;
 
 /**
- * Meta-data set to a {@link HandlerMethod#attributes()} HandlerMethod} attributes.
+ * Contains a value of an annotation attribute.
  *
  * <p>Typical way to add more semantics to a method is via a parameterized annotation,
  * such as {@link io.spine.core.Subscribe Subscribe}.
+ *
+ * @param <V>
+ *         the type of the value of the attribute. As it would typically be an annotation field
+ *         value, its type cannot be restricted to anything except for {@link Object}.
+ * @see HandlerMethod#attributes()
  */
-@Internal
 @Immutable(containerOf = "V")
-public interface MethodAttribute<V> {
+public interface Attribute<V> {
 
     /**
-     * An attribute name.
+     * The name of the parameter.
      *
-     * @return a name of the attribute as {@code String}
+     * @apiNote This is mostly a diagnostics method. We do not use it directly.
+     *  This method cannot be called {@code name()} because it would clash with the built-in method
+     *  {@code name()} of enums that implement this interface.
      */
-    String getName();
+    String parameter();
 
-    /**
-     * A value of the attribute.
-     *
-     * <p>As it'd typically be an annotation field value, its type cannot be restricted
-     * to anything except for {@link Object}.
-     *
-     * @return the value of the attribute
-     */
-    V getValue();
+    /** The value of the attribute. */
+    V value();
 }

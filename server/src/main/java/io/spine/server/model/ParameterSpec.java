@@ -40,14 +40,9 @@ import io.spine.server.type.MessageEnvelope;
 public interface ParameterSpec<E extends MessageEnvelope<?, ?, ?>> {
 
     /**
-     * Tells if the given {@code methodParams} are matched against this instance of
-     * {@code ParameterSpec}.
-     *
-     * @param methodParams
-     *         the method parameters to match
-     * @return {@code true} if the parameters match, {@code false} otherwise
+     * Tells if this specification of parameters matches the passed parameters.
      */
-    boolean matches(Class<?>[] methodParams);
+    boolean matches(MethodParams params);
 
     /**
      * Extracts the values to be used during the invocation of the method with this parameter

@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Command#external()
  */
 @Immutable
-enum ExternalAttribute implements MethodAttribute<Boolean> {
+enum ExternalAttribute implements Attribute<Boolean> {
 
     /** An attribute value for the methods, designed to handle external objects only. */
     EXTERNAL(true),
@@ -52,12 +52,12 @@ enum ExternalAttribute implements MethodAttribute<Boolean> {
     }
 
     @Override
-    public String getName() {
+    public String parameter() {
         return "external";
     }
 
     @Override
-    public Boolean getValue() {
+    public Boolean value() {
         return value;
     }
 

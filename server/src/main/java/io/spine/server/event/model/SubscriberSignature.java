@@ -34,30 +34,34 @@ import java.lang.reflect.Method;
  */
 public class SubscriberSignature extends EventAcceptingSignature<SubscriberMethod> {
 
+    private static final ImmutableSet<ParameterSpec<EventEnvelope>>
+            PARAM_SPEC = ImmutableSet
+            .<ParameterSpec<EventEnvelope>>builder()
+            .addAll(EventAcceptingSignature.PARAM_SPEC)
+            .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
+            .build();
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPE = ImmutableSet.of(void.class);
+
     public SubscriberSignature() {
         super(Subscribe.class);
     }
 
     @Override
     protected ImmutableSet<Class<?>> returnTypes() {
-        return ImmutableSet.of(void.class);
+        return RETURN_TYPE;
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        ImmutableSet<? extends ParameterSpec<EventEnvelope>> result = ImmutableSet
-                .<ParameterSpec<EventEnvelope>>builder()
-                .addAll(super.paramSpecs())
-                .addAll(ImmutableList.copyOf(StateSubscriberSpec.values()))
-                .build();
-        return result;
+        return PARAM_SPEC;
     }
 
     @Override
-    public SubscriberMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    public SubscriberMethod create(Method method, ParameterSpec<EventEnvelope> params) {
         return isEntitySubscriber(method)
-               ? new StateSubscriberMethod(method, parameterSpec)
-               : new EventSubscriberMethod(method, parameterSpec);
+               ? new StateSubscriberMethod(method, params)
+               : new EventSubscriberMethod(method, params);
     }
 
     private static boolean isEntitySubscriber(Method method) {

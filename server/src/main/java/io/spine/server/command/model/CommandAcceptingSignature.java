@@ -26,6 +26,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -33,9 +34,6 @@ import io.spine.server.type.CommandEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
-
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-import static io.spine.server.model.MethodParams.consistsOfTwo;
 
 /**
  * The signature of a method, that accepts {@code Command} envelopes as parameter values.
@@ -46,13 +44,19 @@ abstract class CommandAcceptingSignature
         <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
+    private static final ImmutableSet<CommandAcceptingMethodParams>
+            PARAM_SPECS = ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.
+    private static final Optional<Class<? extends Throwable>>
+            ALLOWED_THROWABLE = Optional.of(ThrowableMessage.class);
+
     CommandAcceptingSignature(Class<? extends Annotation> annotation) {
         super(annotation);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+        return PARAM_SPECS;
     }
 
     /**
@@ -63,7 +67,7 @@ abstract class CommandAcceptingSignature
      */
     @Override
     protected Optional<Class<? extends Throwable>> allowedThrowable() {
-        return Optional.of(ThrowableMessage.class);
+        return ALLOWED_THROWABLE;
     }
 
     /**
@@ -74,8 +78,8 @@ abstract class CommandAcceptingSignature
 
         MESSAGE {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, CommandMessage.class);
+            public boolean matches(MethodParams params) {
+                return params.is(CommandMessage.class);
             }
 
             @Override
@@ -86,8 +90,8 @@ abstract class CommandAcceptingSignature
 
         MESSAGE_AND_CONTEXT {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
+            public boolean matches(MethodParams params) {
+                return params.are(CommandMessage.class, CommandContext.class);
             }
 
             @Override

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
 import com.google.common.reflect.TypeToken;
-import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.reflect.Types;
@@ -48,7 +47,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * interface is not added to the set. Thus, if a method returns {@code List<EventMessage>},
  * the set would be empty.
  */
-@Immutable
 final class MethodResults {
 
     /**

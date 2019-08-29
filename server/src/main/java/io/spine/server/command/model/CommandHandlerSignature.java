@@ -34,18 +34,20 @@ import java.lang.reflect.Method;
 public final class CommandHandlerSignature
         extends CommandAcceptingSignature<CommandHandlerMethod> {
 
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class);
+
     public CommandHandlerSignature() {
         super(Assign.class);
     }
 
     @Override
     protected ImmutableSet<Class<?>> returnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class);
+        return RETURN_TYPES;
     }
 
     @Override
-    public CommandHandlerMethod doCreate(Method method,
-                                         ParameterSpec<CommandEnvelope> parameterSpec) {
-        return new CommandHandlerMethod(method, parameterSpec);
+    public CommandHandlerMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
+        return new CommandHandlerMethod(method, params);
     }
 }

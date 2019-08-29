@@ -27,6 +27,7 @@ import com.google.protobuf.Int32Value;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.model.ModCreateProject;
@@ -35,7 +36,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodParams.consistsOfTwo;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -87,8 +87,8 @@ public class MethodParamsTestEnv {
 
         MESSAGE_AND_CONTEXT {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
+            public boolean matches(MethodParams params) {
+                return params.are(CommandMessage.class, CommandContext.class);
             }
 
             @Override

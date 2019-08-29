@@ -70,7 +70,7 @@ public interface HandlerMethod<T,
     /**
      * Obtains the set of method attributes configured for this method.
      */
-    Set<MethodAttribute<?>> attributes();
+    Set<Attribute<?>> attributes();
 
     /**
      * Obtains the handling method.

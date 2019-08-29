@@ -96,7 +96,7 @@ public abstract class AbstractHandlerMethod<T,
      * {@linkplain #attributeSuppliers() customize} the set of supported method attributes.
      */
     @SuppressWarnings("Immutable")
-    private ImmutableSet<MethodAttribute<?>> attributes;
+    private ImmutableSet<Attribute<?>> attributes;
 
     /**
      * The specification of parameters for this method.
@@ -142,16 +142,16 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     @PostConstruct
     public final void discoverAttributes() {
-        ImmutableSet.Builder<MethodAttribute<?>> builder = ImmutableSet.builder();
-        for (Function<Method, MethodAttribute<?>> fn : attributeSuppliers()) {
-            MethodAttribute<?> attr = fn.apply(method);
+        ImmutableSet.Builder<Attribute<?>> builder = ImmutableSet.builder();
+        for (Function<Method, Attribute<?>> fn : attributeSuppliers()) {
+            Attribute<?> attr = fn.apply(method);
             builder.add(attr);
         }
         attributes = builder.build();
     }
 
     /**
-     * Obtains a set of functions for getting {@linkplain MethodAttribute method attributes}
+     * Obtains a set of functions for getting {@linkplain Attribute method attributes}
      * by a {@linkplain Method raw method} value.
      *
      * <p>Default implementation returns a one-element set for obtaining {@link ExternalAttribute}.
@@ -161,7 +161,7 @@ public abstract class AbstractHandlerMethod<T,
      * set provided by this method and the one needed by the overriding class.
      */
     @OverridingMethodsMustInvokeSuper
-    protected Set<Function<Method, MethodAttribute<?>>> attributeSuppliers() {
+    protected Set<Function<Method, Attribute<?>>> attributeSuppliers() {
         return ImmutableSet.of(ExternalAttribute::of);
     }
 
@@ -226,11 +226,11 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public final Set<MethodAttribute<?>> attributes() {
+    public final Set<Attribute<?>> attributes() {
         return attributes;
     }
 
-    private static ImmutableSet<MethodAttribute<?>> discoverAttributes(Method method) {
+    private static ImmutableSet<Attribute<?>> discoverAttributes(Method method) {
         checkNotNull(method);
         ExternalAttribute externalAttribute = ExternalAttribute.of(method);
         return ImmutableSet.of(externalAttribute);
