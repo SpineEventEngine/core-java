@@ -36,6 +36,10 @@ import static com.google.common.collect.Sets.intersection;
  */
 final class ClassMap {
 
+    /**
+     * The map from the name of the class to the instance of the corresponding model class.
+     * @see #nameOf(Class)
+     */
     private final Map<String, ModelClass<?>> classes = Maps.newConcurrentMap();
 
     /**

@@ -22,50 +22,46 @@ package io.spine.server.model.given;
 
 import io.spine.base.RejectionMessage;
 import io.spine.base.ThrowableMessage;
-import io.spine.test.model.Rejections.ModProjectAlreadyExists;
+import io.spine.test.model.Rejections;
 
 import java.io.IOException;
 
 import static io.spine.base.Identifier.newUuid;
 
-public class MethodExceptionCheckerTestEnv {
+/**
+ * Provides methods used by {@link io.spine.server.model.MethodExceptionCheckTest}.
+ */
+@SuppressWarnings("unused") // Reflective access.
+public final class StubMethodContainer {
 
-    /** Prevents instantiation of this utility class. */
-    private MethodExceptionCheckerTestEnv() {
+    private static void noExceptions() {
     }
 
-    @SuppressWarnings("unused") // Reflective access.
-    public static class StubMethodContainer {
-
-        private static void methodNoExceptions() {
-        }
-
-        private static void methodCheckedException() throws Exception {
-            throw new IOException("Test checked exception");
-        }
-
-        private static void methodRuntimeException() throws RuntimeException {
-            throw new RuntimeException("Test runtime exception");
-        }
-
-        private static void methodCustomException() throws IOException {
-            throw new IOException("Test custom exception");
-        }
-
-        private static void methodDescendantException() throws DescendantThrowableMessage {
-            ModProjectAlreadyExists rejection = ModProjectAlreadyExists
-                    .newBuilder()
-                    .setId(newUuid())
-                    .build();
-            throw new DescendantThrowableMessage(rejection);
-        }
+    private static void checkedException() throws Exception {
+        throw new IOException("Test checked exception");
     }
 
-    private static class DescendantThrowableMessage extends ThrowableMessage {
+    private static void runtimeException() throws RuntimeException {
+        throw new RuntimeException("Test runtime exception");
+    }
+
+    private static void customException() throws IOException {
+        throw new IOException("Test custom exception");
+    }
+
+    private static void derivedException() throws DerivedThrowable {
+        Rejections.ModProjectAlreadyExists rejection = Rejections.ModProjectAlreadyExists
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        throw new DerivedThrowable(rejection);
+    }
+
+    private static final class DerivedThrowable extends ThrowableMessage {
 
         private static final long serialVersionUID = 0L;
 
-        DescendantThrowableMessage(RejectionMessage message) {
+        private DerivedThrowable(RejectionMessage message) {
             super(message);
         }
     }

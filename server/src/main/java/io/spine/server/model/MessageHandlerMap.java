@@ -39,6 +39,7 @@ import java.util.function.Predicate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.model.MethodScan.findMethodsBy;
 
 /**
  * Provides mapping from a class of messages to methods which handle such messages.
@@ -83,9 +84,7 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
     MessageHandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
-
-        ClassScanner scanner = ClassScanner.of(declaringClass);
-        ImmutableMultimap<HandlerTypeInfo, H> map = scanner.findMethodsBy(signature);
+        ImmutableMultimap<HandlerTypeInfo, H> map = findMethodsBy(declaringClass, signature);
         ImmutableSet<M> messageClasses = messageClasses(map.values());
         return new MessageHandlerMap<>(map, messageClasses);
     }

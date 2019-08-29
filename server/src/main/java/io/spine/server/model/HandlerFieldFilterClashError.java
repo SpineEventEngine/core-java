@@ -25,8 +25,8 @@ import java.lang.reflect.Method;
 import static java.lang.String.format;
 
 /**
- * An error indicating that two message handlers have clashing {@link io.spine.core.ByField ByField}
- * signatures.
+ * An error indicating that two message handlers have clashing
+ * {@linkplain io.spine.core.ByField ByField filtering} signatures.
  *
  * <p>Two handlers clash if they handle the same type of message but filter messages by different
  * fields. For example:

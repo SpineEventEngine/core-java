@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import io.spine.base.FieldPath;
 import io.spine.base.FieldPaths;
@@ -38,6 +39,7 @@ import static io.spine.string.Stringifiers.fromString;
 /**
  * A wrapper for an event subscriber method.
  */
+@Immutable
 public final class EventSubscriberMethod extends SubscriberMethod {
 
     /** Creates a new instance. */
@@ -46,7 +48,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     }
 
     @Override
-    public MessageFilter filter() {
+    public MessageFilter createFilter() {
         Subscribe annotation = rawMethod().getAnnotation(Subscribe.class);
         ByField byFieldFilter = annotation.filter();
         String rawFieldPath = byFieldFilter.path();

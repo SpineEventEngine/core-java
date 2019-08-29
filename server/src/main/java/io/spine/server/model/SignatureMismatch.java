@@ -54,9 +54,9 @@ public final class SignatureMismatch {
     private final String message;
 
     private SignatureMismatch(MatchCriterion criterion, Object[] values) {
-        unmetCriterion = criterion;
-        severity = criterion.getSeverity();
-        message = criterion.formatMsg(values);
+        this.unmetCriterion = criterion;
+        this.severity = criterion.severity();
+        this.message = criterion.formatMsg(values);
     }
 
     /** Returns whether this mismatch is of {@code ERROR} severity. */
@@ -89,7 +89,6 @@ public final class SignatureMismatch {
     static SignatureMismatch create(MatchCriterion criterion, Object... values) {
         checkNotNull(criterion);
         checkNotNull(values);
-
         SignatureMismatch result = new SignatureMismatch(criterion, values);
         return result;
     }

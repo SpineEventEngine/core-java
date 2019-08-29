@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
  * CommandSubstituteMethod}.
  */
 public class CommandSubstituteSignature
-        extends CommandAcceptingMethodSignature<CommandSubstituteMethod> {
+        extends CommandAcceptingSignature<CommandSubstituteMethod> {
 
     CommandSubstituteSignature() {
         super(Command.class);
@@ -47,7 +47,7 @@ public class CommandSubstituteSignature
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(CommandMessage.class, Iterable.class);
     }
 

@@ -20,46 +20,30 @@
 
 package io.spine.server.model;
 
-import io.spine.string.Diags;
-
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
-import static java.lang.String.format;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.type.MessageClass;
 
 /**
- * A programming error of message processing definition.
+ * A handler method which accept only instances of messages that match the filtering conditions.
+ *
+ * <p>Having two or more methods that accept the same message type but instances of different
+ * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
+ *
+ * <p>It is possible to filter by the same field of the same message type.
+ * 
+ * @see io.spine.core.ByField
+ * @see HandlerFieldFilterClashError
  */
-public class ModelError extends Error {
-
-    private static final long serialVersionUID = 0L;
-
-    protected ModelError(String message) {
-        super(message);
-    }
-
-    public ModelError(String messageFormat, Object... args) {
-        super(format(messageFormat, args));
-    }
-
-    public ModelError(Throwable cause) {
-        super(cause);
-    }
+@Immutable
+public interface SelectiveHandler<T,
+                                  C extends MessageClass,
+                                  E extends MessageEnvelope<?, ?, ?>,
+                                  P extends MessageClass<?>>
+        extends HandlerMethod<T, C, E, P> {
 
     /**
-     * An error message formatting helper.
+     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
      */
-    static class MessageFormatter {
-
-        private MessageFormatter() {
-        }
-
-        static String backtick(Object object) {
-            return Diags.backtick(object);
-        }
-
-        static Collector<CharSequence, ?, String> toStringEnumeration() {
-            return Collectors.joining(", ");
-        }
-    }
+    MessageFilter filter();
 }

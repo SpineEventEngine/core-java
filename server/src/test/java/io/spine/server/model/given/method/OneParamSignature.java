@@ -46,12 +46,12 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> allowedModifiers() {
+    protected ImmutableSet<AccessModifier> modifiers() {
         return allModifiers();
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(void.class);
     }
 

@@ -59,7 +59,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     }
 
     private Optional<? extends HandlerMethod> wrap(Method method) {
-        Optional<? extends HandlerMethod> result = signature().create(method);
+        Optional<? extends HandlerMethod> result = signature().toHandler(method);
         return result;
     }
 }

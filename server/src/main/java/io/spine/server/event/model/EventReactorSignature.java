@@ -39,7 +39,7 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
     }
 
