@@ -33,11 +33,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-import static io.spine.server.model.MethodParams.consistsOfTwo;
-import static io.spine.server.model.MethodParams.consistsOfTypes;
 import static io.spine.server.model.MethodParams.findMatching;
-import static io.spine.server.model.MethodParams.isFirstParamCommand;
+import static io.spine.server.model.MethodParams.firstIsCommand;
 import static io.spine.server.model.given.MethodParamsTestEnv.fiveParamMethodStringAnyEmptyInt32UserId;
 import static io.spine.server.model.given.MethodParamsTestEnv.singleParamCommand;
 import static io.spine.server.model.given.MethodParamsTestEnv.twoParamCommandAndCtx;
@@ -51,40 +48,36 @@ class MethodParamsTest {
     @Test
     @DisplayName("detect that a method has exactly one parameter of an expected type")
     void detectSingleParam() {
-        assertTrue(consistsOfSingle(singleParamCommand().getParameterTypes(),
-                                    ModCreateProject.class));
-        assertFalse(consistsOfSingle(twoParamCommandAndCtx().getParameterTypes(),
-                                     ModCreateProject.class));
-        assertFalse(consistsOfSingle(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                     ModCreateProject.class));
-
+        assertTrue(MethodParams.of(singleParamCommand())
+                               .is(ModCreateProject.class));
+        assertFalse(MethodParams.of(twoParamCommandAndCtx())
+                                .is(ModCreateProject.class));
+        assertFalse(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId())
+                                .is(ModCreateProject.class));
     }
 
     @Test
     @DisplayName("detect that a method has exactly two parameters of expected types")
     void detectTwoParams() {
-        assertTrue(consistsOfTwo(twoParamCommandAndCtx().getParameterTypes(),
-                                 ModCreateProject.class, CommandContext.class));
-        assertFalse(consistsOfTwo(singleParamCommand().getParameterTypes(),
-                                  ModCreateProject.class, CommandContext.class));
-        assertFalse(consistsOfTwo(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                  ModCreateProject.class, CommandContext.class));
-
+        assertTrue(MethodParams.of(twoParamCommandAndCtx())
+                               .are(ModCreateProject.class, CommandContext.class));
+        assertFalse(MethodParams.of(singleParamCommand())
+                                .are(ModCreateProject.class, CommandContext.class));
+        assertFalse(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId())
+                                .are(ModCreateProject.class, CommandContext.class));
     }
 
     @Test
     @DisplayName("detect that a method has lots of parameters of expected types")
     void detectLotsOfParams() {
-        assertTrue(consistsOfTypes(fiveParamMethodStringAnyEmptyInt32UserId().getParameterTypes(),
-                                   ImmutableList.of(String.class, Any.class,
-                                                    Empty.class, Int32Value.class, UserId.class)));
-        assertFalse(consistsOfTypes(singleParamCommand().getParameterTypes(),
-                                    ImmutableList.of(String.class, Any.class,
-                                       Empty.class, Int32Value.class, UserId.class)));
-        assertFalse(consistsOfTypes(twoParamCommandAndCtx().getParameterTypes(),
-                                    ImmutableList.of(String.class, Any.class,
-                                       Empty.class, Int32Value.class, UserId.class)));
-
+        assertTrue(MethodParams.of(fiveParamMethodStringAnyEmptyInt32UserId())
+                               .match(String.class, Any.class, Empty.class,
+                                      Int32Value.class, UserId.class)
+        );
+        assertFalse(MethodParams.of(singleParamCommand())
+                                .match(String.class, Any.class, Empty.class));
+        assertFalse(MethodParams.of(twoParamCommandAndCtx())
+                                .match(String.class, Any.class, Empty.class));
     }
 
     @Test
@@ -109,8 +102,8 @@ class MethodParamsTest {
     @Test
     @DisplayName("detect if the first method parameter is a Command message")
     void detectFirstCommandParameter() {
-        assertTrue(isFirstParamCommand(singleParamCommand()));
-        assertTrue(isFirstParamCommand(twoParamCommandAndCtx()));
-        assertFalse(isFirstParamCommand(fiveParamMethodStringAnyEmptyInt32UserId()));
+        assertTrue(firstIsCommand(singleParamCommand()));
+        assertTrue(firstIsCommand(twoParamCommandAndCtx()));
+        assertFalse(firstIsCommand(fiveParamMethodStringAnyEmptyInt32UserId()));
     }
 }

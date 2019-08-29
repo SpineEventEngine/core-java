@@ -33,8 +33,6 @@ import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-
 /**
  * The signature of the {@link Applier} method.
  */
@@ -79,11 +77,6 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     enum EventApplierParams implements ParameterSpec<EventEnvelope> {
 
         MESSAGE {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, EventMessage.class);
-            }
-
             @Override
             public boolean matches(MethodParams params) {
                 return params.is(EventMessage.class);

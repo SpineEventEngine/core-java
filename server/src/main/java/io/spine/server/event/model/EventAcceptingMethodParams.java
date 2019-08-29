@@ -34,8 +34,6 @@ import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
-import static io.spine.server.model.MethodParams.consistsOfTypes;
-
 /**
  * Allowed combinations of parameters for the methods, that accept {@code Event}s.
  */
@@ -97,11 +95,6 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     EventAcceptingMethodParams(boolean awareOfCommandType, Class<?>... parameters) {
         this.expectedParameters = ImmutableList.copyOf(parameters);
         this.awareOfCommandType = awareOfCommandType;
-    }
-
-    @Override
-    public boolean matches(Class<?>[] methodParams) {
-        return consistsOfTypes(methodParams, expectedParameters);
     }
 
     @Override

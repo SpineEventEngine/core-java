@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Arrays.asList;
 
 /**
  * Provides information about parameters of a method.
@@ -41,8 +40,12 @@ public final class MethodParams {
     private final ImmutableList<Parameter> params;
 
     /** Obtains parameters from the passed method. */
-    private MethodParams(Method method) {
+    static MethodParams of(Method method) {
         checkNotNull(method);
+        return new MethodParams(method);
+    }
+
+    private MethodParams(Method method) {
         this.params = ImmutableList.copyOf(method.getParameters());
     }
 
@@ -87,6 +90,13 @@ public final class MethodParams {
     /**
      * Verifies if these parameters match the passed types.
      */
+    public boolean match(Class<?>... types) {
+        return match(ImmutableList.copyOf(types));
+    }
+
+    /**
+     * Verifies if these parameters match the passed types.
+     */
     public boolean match(List<Class<?>> types) {
         if (size() != types.size()) {
             return false;
@@ -94,78 +104,6 @@ public final class MethodParams {
         for (int i = 0; i < size(); i++) {
             Class<?> actual = type(i);
             Class<?> expected = types.get(i);
-            if (!expected.isAssignableFrom(actual)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Checks whether the given method parameters have exactly one parameter of an expected type.
-     *
-     * <p>This is a convenience shortcut for {@link #consistsOfTypes(Class[], List)
-     * consistsOfTypes(Class[], List)}.
-     *
-     * @param methodParams
-     *         the method parameters to check
-     * @param type
-     *         the type of expected single parameter
-     * @return {@code true} if the method has exactly one parameter of the expected type,
-     *         {@code false} otherwise
-     */
-    public static boolean consistsOfSingle(Class<?>[] methodParams, Class<?> type) {
-        checkNotNull(methodParams);
-        checkNotNull(type);
-
-        if (1 != methodParams.length) {
-            return false;
-        }
-        Class<?> firstParam = methodParams[0];
-        return type.isAssignableFrom(firstParam);
-    }
-
-    /**
-     * Checks whether the given method parameters are two parameters of expected types.
-     *
-     * <p>This is a convenience shortcut for {@link #consistsOfTypes(Class[], List)
-     * consistsOfTypes(Class[], List)}.
-     *
-     * @param methodParams
-     *         the method parameters to check
-     * @param firstType
-     *         the expected type of the first parameter
-     * @param secondType
-     *         the expected type of the second parameter
-     * @return {@code true} if the method parameters are of expected types, {@code false} otherwise
-     */
-    public static boolean consistsOfTwo(Class<?>[] methodParams,
-                                        Class<?> firstType,
-                                        Class<?> secondType) {
-        checkNotNull(methodParams);
-        checkNotNull(firstType);
-        checkNotNull(secondType);
-
-        return consistsOfTypes(methodParams, asList(firstType, secondType));
-    }
-
-    /**
-     * Checks whether the given method parameters are of expected types.
-     *
-     * @param methodParams
-     *         the method params to check
-     * @param expectedTypes
-     *         the expected types
-     * @return {@code true} if the method parameters are of expected types, {@code false} otherwise
-     */
-    public static boolean consistsOfTypes(Class<?>[] methodParams,
-                                          List<Class<?>> expectedTypes) {
-        if (methodParams.length != expectedTypes.size()) {
-            return false;
-        }
-        for (int i = 0; i < methodParams.length; i++) {
-            Class<?> actual = methodParams[i];
-            Class<?> expected = expectedTypes.get(i);
             if (!expected.isAssignableFrom(actual)) {
                 return false;
             }
@@ -190,10 +128,11 @@ public final class MethodParams {
      */
     static <E extends MessageEnvelope<?, ?, ?>, S extends ParameterSpec<E>>
     Optional<S> findMatching(Method method, Collection<S> paramSpecs) {
-        MethodParams params = new MethodParams(method);
-        Optional<S> result = paramSpecs.stream()
-                                       .filter(spec -> spec.matches(params))
-                                       .findFirst();
+        MethodParams params = of(method);
+        Optional<S> result =
+                paramSpecs.stream()
+                          .filter(spec -> spec.matches(params))
+                          .findFirst();
         return result;
     }
 
@@ -205,15 +144,13 @@ public final class MethodParams {
      * @return {@code true} if the first parameter is a {@code Command} message,
      *         {@code false} otherwise
      */
-    public static boolean isFirstParamCommand(Method method) {
+    public static boolean firstIsCommand(Method method) {
         checkNotNull(method);
-
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes.length > 0) {
-            Class<?> firstParameter = parameterTypes[0];
-            boolean result = CommandMessage.class.isAssignableFrom(firstParameter);
-            return result;
+        MethodParams params = of(method);
+        if (params.size() == 0) {
+            return false;
         }
-        return false;
+        boolean result = CommandMessage.class.isAssignableFrom(params.type(0));
+        return result;
     }
 }

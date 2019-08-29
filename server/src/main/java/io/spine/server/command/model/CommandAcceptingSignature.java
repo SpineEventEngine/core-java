@@ -35,9 +35,6 @@ import io.spine.server.type.CommandEnvelope;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-import static io.spine.server.model.MethodParams.consistsOfTwo;
-
 /**
  * The signature of a method, that accepts {@code Command} envelopes as parameter values.
  *
@@ -81,11 +78,6 @@ abstract class CommandAcceptingSignature
 
         MESSAGE {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, CommandMessage.class);
-            }
-
-            @Override
             public boolean matches(MethodParams params) {
                 return params.is(CommandMessage.class);
             }
@@ -97,11 +89,6 @@ abstract class CommandAcceptingSignature
         },
 
         MESSAGE_AND_CONTEXT {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
-            }
-
             @Override
             public boolean matches(MethodParams params) {
                 return params.are(CommandMessage.class, CommandContext.class);

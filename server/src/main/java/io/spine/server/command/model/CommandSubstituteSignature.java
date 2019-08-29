@@ -58,16 +58,15 @@ public class CommandSubstituteSignature
      *
      * @implNote This method distinguishes {@linkplain Command Commander} methods one from
      * another, as they use the same annotation, but have different parameter list. It skips
-     * the methods which first parameter {@linkplain MethodParams#isFirstParamCommand(Method)
+     * the methods which first parameter {@linkplain MethodParams#firstIsCommand(Method)
      * is NOT} a {@code Command} message.
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
     protected boolean skipMethod(Method method) {
         boolean parentResult = !super.skipMethod(method);
-
         if (parentResult) {
-            return !MethodParams.isFirstParamCommand(method);
+            return !MethodParams.firstIsCommand(method);
         }
         return true;
     }

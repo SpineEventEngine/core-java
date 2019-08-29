@@ -36,9 +36,6 @@ import io.spine.server.type.EventEnvelope;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-import static io.spine.server.model.MethodParams.consistsOfTwo;
-
 /**
  * A signature of {@link CommandReactionMethod}.
  */
@@ -74,15 +71,14 @@ public class CommandReactionSignature
      * <p>
      * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
      * as they use the same annotation, but have different parameter list. It skips the methods
-     * which first parameter {@linkplain MethodParams#isFirstParamCommand(Method) is }
+     * which first parameter {@linkplain MethodParams#firstIsCommand(Method) is }
      * a {@code Command} message.
      */
     @Override
     protected boolean skipMethod(Method method) {
         boolean parentResult = !super.skipMethod(method);
-
-        if(parentResult) {
-            return MethodParams.isFirstParamCommand(method);
+        if (parentResult) {
+            return MethodParams.firstIsCommand(method);
         }
         return true;
     }
@@ -96,11 +92,6 @@ public class CommandReactionSignature
 
         MESSAGE {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, EventMessage.class);
-            }
-
-            @Override
             public boolean matches(MethodParams params) {
                 return params.is(EventMessage.class);
             }
@@ -112,11 +103,6 @@ public class CommandReactionSignature
         },
 
         EVENT_AND_EVENT_CONTEXT {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, EventMessage.class, EventContext.class);
-            }
-
             @Override
             public boolean matches(MethodParams params) {
                 return params.are(EventMessage.class, EventContext.class);
@@ -130,21 +116,17 @@ public class CommandReactionSignature
 
         REJECTION_AND_COMMAND_CONTEXT {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, RejectionMessage.class, CommandContext.class);
-            }
-
-            @Override
             public boolean matches(MethodParams params) {
                 return params.are(RejectionMessage.class, CommandContext.class);
             }
 
             @Override
             public Object[] extractArguments(EventEnvelope event) {
-                CommandContext originContext = event.context()
-                                                    .getRejection()
-                                                    .getCommand()
-                                                    .getContext();
+                CommandContext originContext =
+                        event.context()
+                             .getRejection()
+                             .getCommand()
+                             .getContext();
                 return new Object[]{event.message(), originContext};
             }
         }

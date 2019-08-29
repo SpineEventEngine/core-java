@@ -27,17 +27,10 @@ import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
-import static io.spine.server.model.MethodParams.consistsOfTwo;
-
 @Immutable
 public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
     INSTANCE;
-
-    @Override
-    public boolean matches(Class<?>[] methodParams) {
-        return consistsOfTwo(methodParams, Message.class, EventContext.class);
-    }
 
     @Override
     public boolean matches(MethodParams params) {

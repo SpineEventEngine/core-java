@@ -34,7 +34,6 @@ import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.model.MethodParams.consistsOfTypes;
 
 /**
  * A {@link ParameterSpec} of an entity state subscriber method.
@@ -60,22 +59,6 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     StateSubscriberSpec(ImmutableList<Class<?>> parameters) {
         this.parameters = parameters;
-    }
-
-    @Override
-    public boolean matches(Class<?>[] methodParams) {
-        boolean typesMatch = consistsOfTypes(methodParams, parameters);
-        if (!typesMatch) {
-            return false;
-        }
-        @SuppressWarnings("unchecked") // Checked above.
-        Class<? extends Message> firstParameter = (Class<? extends Message>) methodParams[0];
-        EntityVisibility visibility = EntityVisibility.of(firstParameter);
-        if (visibility.canSubscribe()) {
-            return true;
-        } else {
-            throw new InsufficientVisibilityError(TypeName.of(firstParameter), visibility);
-        }
     }
 
     @Override

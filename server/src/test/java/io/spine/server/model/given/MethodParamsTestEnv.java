@@ -36,7 +36,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static io.spine.server.model.MethodParams.consistsOfTwo;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -87,11 +86,6 @@ public class MethodParamsTestEnv {
     public enum ScheduleCommandParamSpec implements ParameterSpec<CommandEnvelope> {
 
         MESSAGE_AND_CONTEXT {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, CommandMessage.class, CommandContext.class);
-            }
-
             @Override
             public boolean matches(MethodParams params) {
                 return params.are(CommandMessage.class, CommandContext.class);
