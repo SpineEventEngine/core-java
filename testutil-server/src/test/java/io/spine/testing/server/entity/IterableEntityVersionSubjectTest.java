@@ -29,6 +29,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.ExpectFailure.assertThat;
+import static io.spine.core.Versions.zero;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.server.entity.IterableEntityVersionSubject.assertEntityVersions;
 import static io.spine.testing.server.entity.IterableEntityVersionSubject.entityVersions;
@@ -89,6 +91,66 @@ class IterableEntityVersionSubjectTest
 
             expectSomeFailure(whenTesting -> whenTesting.that(currentAndOlder())
                                                         .containsAllOlderOrEqualTo(olderVersion()));
+        }
+    }
+
+    @Nested
+    @DisplayName("if actual is null")
+    class IfNull {
+
+        @Test
+        @DisplayName("not allow to containsAllNewerThan(...)")
+        void containsAllNewerThan() {
+            AssertionError error = expectFailure(
+                    whenTesting -> whenTesting.that(null)
+                                              .containsAllNewerThan(zero())
+            );
+            assertDetectedNull(error);
+        }
+
+        @Test
+        @DisplayName("not allow to containsAllNewerOrEqualTo(...)")
+        void containsAllNewerOrEqualTo() {
+            AssertionError error = expectFailure(
+                    whenTesting -> whenTesting.that(null)
+                                              .containsAllNewerOrEqualTo(zero())
+            );
+            assertDetectedNull(error);
+        }
+
+        @Test
+        @DisplayName("not allow to containsAllOlderThan(...)")
+        void containsAllOlderThan() {
+            AssertionError error = expectFailure(
+                    whenTesting -> whenTesting.that(null)
+                                              .containsAllOlderThan(zero())
+            );
+            assertDetectedNull(error);
+        }
+
+        @Test
+        @DisplayName("not allow to containsAllOlderOrEqualTo(...)")
+        void containsAllOlderOrEqualTo() {
+            AssertionError error = expectFailure(
+                    whenTesting -> whenTesting.that(null)
+                                              .containsAllOlderOrEqualTo(zero())
+            );
+            assertDetectedNull(error);
+        }
+
+        @Test
+        @DisplayName("not allow to containsSingleEntityVersionThat()")
+        void containsSingleEntityVersionThat() {
+            AssertionError error = expectFailure(
+                    whenTesting -> whenTesting.that(null)
+                                              .containsSingleEntityVersionThat()
+            );
+            assertDetectedNull(error);
+        }
+
+        private void assertDetectedNull(AssertionError error) {
+            assertThat(error).factValue("expected not to be")
+                             .isEqualTo("null");
         }
     }
 
