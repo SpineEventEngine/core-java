@@ -59,14 +59,13 @@ import static java.util.stream.Collectors.groupingBy;
  * <b>Configuration</b>
  *
  * <p>By default, a shard is assigned according to the identifier of the target entity. The
- * messages
- * heading to a single entity will always reside in a single shard. However, the framework users
- * may {@linkplain DeliveryBuilder#setStrategy(DeliveryStrategy) customize} this behavior.
+ * messages heading to a single entity will always reside in a single shard. However,
+ * the framework users may {@linkplain DeliveryBuilder#setStrategy(DeliveryStrategy) customize}
+ * this behavior.
  *
  * <p>{@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) Provides} the time-based
- * de-duplication
- * capabilities to eliminate the messages, which may have been already delivered to their targets.
- * The duplicates will be detected among the messages, which are not older, than
+ * de-duplication capabilities to eliminate the messages, which may have been already delivered
+ * to their targets. The duplicates will be detected among the messages, which are not older, than
  * {@code now - [idempotence window]}.
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
@@ -83,9 +82,9 @@ import static java.util.stream.Collectors.groupingBy;
  * environment a message queue may be used to notify the node cluster of a shard that has some
  * messages pending for the delivery.
  *
- * <p>Once an application node picks the shard to deliver the messages from it,
- * it registers itself in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard
- * that only allows to pick a shard to a single node at a time.
+ * <p>Once an application node picks the shard to deliver the messages from it, it registers itself
+ * in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard that only allows
+ * to pick a shard to a single node at a time.
  *
  * <p>The delivery process for each shard index is split into {@link DeliveryStage}s. In scope of
  * each stage, a certain number of messages is read from the respective shard of the {@code Inbox}.
@@ -94,15 +93,14 @@ import static java.util.stream.Collectors.groupingBy;
  * {@linkplain DeliveryBuilder#setPageSize(int) configured}.
  *
  * <p>After each {@code DeliveryStage} it is possible to stop the delivery by
- * {@link DeliveryBuilder#setMonitor(DeliveryMonitor) supplying} the custom delivery monitor.
+ * {@link DeliveryBuilder#setMonitor(DeliveryMonitor) supplying} a custom delivery monitor.
  * Please refer to the {@link DeliveryMonitor documentation} for the details.
  *
  * <b>Local environment</b>
  *
  * <p>By default, the delivery is configured to {@linkplain Delivery#local() run locally}. It
  * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the
- * messages
- * from the observed shard once a message is passed to its
+ * messages from the observed shard once a message is passed to its
  * {@link LocalDispatchingObserver#onMessage(InboxMessage) onMessage(InboxMessage)} method. This
  * process is synchronous.
  *
@@ -111,6 +109,7 @@ import static java.util.stream.Collectors.groupingBy;
  * {@code synchronized} in-memory data structures and prevents several threads from picking up the
  * same shard.
  */
+@SuppressWarnings("OverlyCoupledClass")     // It's fine for a centerpiece.
 public final class Delivery {
 
     /**
@@ -272,7 +271,7 @@ public final class Delivery {
      * The configured {@link #monitor DeliveryMonitor} may stop the execution according to
      * the monitored {@code DeliveryStage}.
      *
-     * @return the passed delivery stage.
+     * @return the passed delivery stage
      */
     private RunResult doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
@@ -305,7 +304,7 @@ public final class Delivery {
     }
 
     private boolean monitorTellsToContinue(@Nullable DeliveryStage stage) {
-        if(stage == null) {
+        if (stage == null) {
             return true;
         }
         return monitor.shouldContinueAfter(stage);
