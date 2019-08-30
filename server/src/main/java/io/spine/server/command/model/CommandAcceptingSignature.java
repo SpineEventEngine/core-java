@@ -1,0 +1,103 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.server.command.model;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
+import io.spine.base.CommandMessage;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.CommandContext;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodParams;
+import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
+import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+
+import java.lang.annotation.Annotation;
+import java.util.Optional;
+
+/**
+ * The signature of a method, that accepts {@code Command} envelopes as parameter values.
+ *
+ * @param <H> the type of {@link HandlerMethod} which signature this is
+ */
+abstract class CommandAcceptingSignature
+        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
+        extends MethodSignature<H, CommandEnvelope> {
+
+    private static final ImmutableSet<CommandAcceptingMethodParams>
+            PARAM_SPECS = ImmutableSet.copyOf(CommandAcceptingMethodParams.values());
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.
+    private static final Optional<Class<? extends Throwable>>
+            ALLOWED_THROWABLE = Optional.of(ThrowableMessage.class);
+
+    CommandAcceptingSignature(Class<? extends Annotation> annotation) {
+        super(annotation);
+    }
+
+    @Override
+    public ImmutableSet<? extends ParameterSpec<CommandEnvelope>> paramSpecs() {
+        return PARAM_SPECS;
+    }
+
+    /**
+     * Returns {@code ThrowableMessage.class} wrapped into {@code Optional}.
+     *
+     * <p>The methods accepting commands may reject the command by throwing {@linkplain
+     * ThrowableMessage command rejections} which are based on {@code ThrowableMessage}.
+     */
+    @Override
+    protected Optional<Class<? extends Throwable>> allowedThrowable() {
+        return ALLOWED_THROWABLE;
+    }
+
+    /**
+     * Allowed combinations of parameters in the methods, that accept {@code Command}s.
+     */
+    @Immutable
+    public enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
+
+        MESSAGE {
+            @Override
+            public boolean matches(MethodParams params) {
+                return params.is(CommandMessage.class);
+            }
+
+            @Override
+            public Object[] extractArguments(CommandEnvelope envelope) {
+                return new Object[]{envelope.message()};
+            }
+        },
+
+        MESSAGE_AND_CONTEXT {
+            @Override
+            public boolean matches(MethodParams params) {
+                return params.are(CommandMessage.class, CommandContext.class);
+            }
+
+            @Override
+            public Object[] extractArguments(CommandEnvelope cmd) {
+                return new Object[]{cmd.message(), cmd.context()};
+            }
+        }
+    }
+}

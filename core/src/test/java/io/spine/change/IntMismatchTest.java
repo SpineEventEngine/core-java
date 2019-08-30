@@ -136,7 +136,7 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
         }
 
         @Test
-        @DisplayName("actual")
+        @DisplayName("actual int")
         void actualWithWrongType() {
             ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));

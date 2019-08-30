@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
@@ -32,8 +31,8 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.IllegalOutcomeException;
-import io.spine.server.model.declare.MatchCriterion;
-import io.spine.server.model.declare.SignatureMismatch;
+import io.spine.server.model.MatchCriterion;
+import io.spine.server.model.SignatureMismatch;
 import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -77,7 +76,7 @@ class ApplierTest {
         Method method = new ValidApplier().getMethod();
 
 
-        Optional<Applier> actual = signature.create(method);
+        Optional<Applier> actual = signature.toHandler(method);
         assertTrue(actual.isPresent());
 
         Applier expected = new Applier(method, EventApplierParams.MESSAGE);
@@ -88,7 +87,7 @@ class ApplierTest {
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.create(applierObject.getMethod());
+        Optional<Applier> method = signature.toHandler(applierObject.getMethod());
         assertTrue(method.isPresent());
         Applier applier = method.get();
         RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
@@ -118,7 +117,7 @@ class ApplierTest {
     @DisplayName("convert `null` result to Success")
     void convertToSuccess() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.create(applierObject.getMethod());
+        Optional<Applier> method = signature.toHandler(applierObject.getMethod());
         assertTrue(method.isPresent());
         Applier applier = method.get();
 
@@ -129,7 +128,7 @@ class ApplierTest {
                 .build();
         EventEnvelope envelope = EventEnvelope.of(event);
         Success success = applier.toSuccessfulOutcome(result, applierObject, envelope);
-        ProtoSubject<?, Message> assertSuccess = ProtoTruth.assertThat(success);
+        ProtoSubject assertSuccess = ProtoTruth.assertThat(success);
         assertSuccess.isNotNull();
         assertSuccess.isEqualToDefaultInstance();
     }
@@ -138,7 +137,7 @@ class ApplierTest {
     @DisplayName("throw on non-`null` return value")
     void failIfReturnsValue() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.create(applierObject.getMethod());
+        Optional<Applier> method = signature.toHandler(applierObject.getMethod());
         assertTrue(method.isPresent());
         Applier applier = method.get();
 
@@ -153,7 +152,9 @@ class ApplierTest {
                              () -> applier.toSuccessfulOutcome(result,
                                                                applierObject,
                                                                envelope));
-        assertThat(exception).hasMessageThat().endsWith(result);
+        assertThat(exception)
+                .hasMessageThat()
+                .contains(result);
     }
 
     @Nested

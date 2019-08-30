@@ -29,7 +29,6 @@ message HandlerId {
 }
 
 // A message handler type information.
-//
 message HandlerTypeInfo {
 
     // The type URL of the handled message.
@@ -40,7 +39,6 @@ message HandlerTypeInfo {
 }
 
 // A filter to apply to a handled message.
-//
 message MessageFilter {
 
     // The path to the field.

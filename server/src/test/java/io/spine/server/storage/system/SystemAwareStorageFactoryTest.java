@@ -21,7 +21,6 @@
 package io.spine.server.storage.system;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.DefaultSubject;
 import com.google.common.truth.Subject;
 import io.spine.base.Environment;
 import io.spine.server.BoundedContext;
@@ -156,7 +155,7 @@ class SystemAwareStorageFactoryTest {
         assertFalse(systemSpec.storesEvents());
         EventStore store = systemAware.createEventStore(systemSpec);
         assertFalse(factory.requestedEventStore());
-        Subject<DefaultSubject, Object> assertStore = assertThat(store);
+        Subject assertStore = assertThat(store);
         assertStore.isNotNull();
         assertStore.isInstanceOf(EmptyEventStore.class);
     }

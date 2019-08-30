@@ -23,7 +23,7 @@ package io.spine.server.command.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandEnvelope;
 
 import java.lang.reflect.Method;
@@ -32,20 +32,22 @@ import java.lang.reflect.Method;
  * The signature of {@code Command} handler method.
  */
 public final class CommandHandlerSignature
-        extends CommandAcceptingMethodSignature<CommandHandlerMethod> {
+        extends CommandAcceptingSignature<CommandHandlerMethod> {
+
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class);
 
     public CommandHandlerSignature() {
         super(Assign.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
-        return ImmutableSet.of(EventMessage.class, Iterable.class);
+    protected ImmutableSet<Class<?>> returnTypes() {
+        return RETURN_TYPES;
     }
 
     @Override
-    public CommandHandlerMethod doCreate(Method method,
-                                         ParameterSpec<CommandEnvelope> parameterSpec) {
-        return new CommandHandlerMethod(method, parameterSpec);
+    public CommandHandlerMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
+        return new CommandHandlerMethod(method, params);
     }
 }

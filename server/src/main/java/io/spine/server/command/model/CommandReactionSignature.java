@@ -28,16 +28,13 @@ import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;
-import io.spine.server.model.declare.MethodParams;
-import io.spine.server.model.declare.MethodSignature;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.MethodParams;
+import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
-
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
-import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * A signature of {@link CommandReactionMethod}.
@@ -45,24 +42,28 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 public class CommandReactionSignature
         extends MethodSignature<CommandReactionMethod, EventEnvelope> {
 
+    private static final ImmutableSet<CommandReactionParams>
+            PARAM_SPECS = ImmutableSet.copyOf(CommandReactionParams.values());
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
+
     CommandReactionSignature() {
         super(Command.class);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(CommandReactionParams.values());
+        return PARAM_SPECS;
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
-        return ImmutableSet.of(CommandMessage.class, Iterable.class, Optional.class);
+    protected ImmutableSet<Class<?>> returnTypes() {
+        return RETURN_TYPES;
     }
 
     @Override
-    public CommandReactionMethod doCreate(Method method,
-                                          ParameterSpec<EventEnvelope> parameterSpec) {
-        return new CommandReactionMethod(method, parameterSpec);
+    public CommandReactionMethod create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new CommandReactionMethod(method, params);
     }
 
     /**
@@ -70,15 +71,14 @@ public class CommandReactionSignature
      * <p>
      * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
      * as they use the same annotation, but have different parameter list. It skips the methods
-     * which first parameter {@linkplain MethodParams#isFirstParamCommand(Method) is }
+     * which first parameter {@linkplain MethodParams#firstIsCommand(Method) is }
      * a {@code Command} message.
      */
     @Override
     protected boolean skipMethod(Method method) {
         boolean parentResult = !super.skipMethod(method);
-
-        if(parentResult) {
-            return MethodParams.isFirstParamCommand(method);
+        if (parentResult) {
+            return MethodParams.firstIsCommand(method);
         }
         return true;
     }
@@ -92,8 +92,8 @@ public class CommandReactionSignature
 
         MESSAGE {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, EventMessage.class);
+            public boolean matches(MethodParams params) {
+                return params.is(EventMessage.class);
             }
 
             @Override
@@ -104,8 +104,8 @@ public class CommandReactionSignature
 
         EVENT_AND_EVENT_CONTEXT {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, EventMessage.class, EventContext.class);
+            public boolean matches(MethodParams params) {
+                return params.are(EventMessage.class, EventContext.class);
             }
 
             @Override
@@ -116,16 +116,17 @@ public class CommandReactionSignature
 
         REJECTION_AND_COMMAND_CONTEXT {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, RejectionMessage.class, CommandContext.class);
+            public boolean matches(MethodParams params) {
+                return params.are(RejectionMessage.class, CommandContext.class);
             }
 
             @Override
             public Object[] extractArguments(EventEnvelope event) {
-                CommandContext originContext = event.context()
-                                                    .getRejection()
-                                                    .getCommand()
-                                                    .getContext();
+                CommandContext originContext =
+                        event.context()
+                             .getRejection()
+                             .getCommand()
+                             .getContext();
                 return new Object[]{event.message(), originContext};
             }
         }

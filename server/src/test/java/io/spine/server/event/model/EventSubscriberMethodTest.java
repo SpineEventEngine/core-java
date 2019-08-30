@@ -36,7 +36,7 @@ import io.spine.server.event.model.given.subscriber.InvalidTwoParamsSecondInvali
 import io.spine.server.event.model.given.subscriber.TestEventSubscriber;
 import io.spine.server.event.model.given.subscriber.ValidButPrivate;
 import io.spine.server.event.model.given.subscriber.ValidOneParam;
-import io.spine.server.model.declare.SignatureMismatchException;
+import io.spine.server.model.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -81,7 +81,7 @@ class EventSubscriberMethodTest {
     void invokeSubscriberMethod() {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        Optional<SubscriberMethod> createdMethod = signature.create(subscriberObject.getMethod());
+        Optional<SubscriberMethod> createdMethod = signature.toHandler(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
         SubscriberMethod subscriber = createdMethod.get();
         RefProjectCreated msg = Given.EventMessage.projectCreated();
@@ -202,7 +202,7 @@ class EventSubscriberMethodTest {
 
         private void check(TestEventSubscriber subscriber, boolean external) {
             Method method = subscriber.getMethod();
-            Optional<SubscriberMethod> created = signature.create(method);
+            Optional<SubscriberMethod> created = signature.toHandler(method);
             assertTrue(created.isPresent());
             SubscriberMethod modelMethod = created.get();
             EventContext context = EventContext

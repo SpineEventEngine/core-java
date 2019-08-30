@@ -22,7 +22,6 @@ package io.spine.server.projection;
 
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
@@ -101,7 +100,7 @@ class StateRoutingTest {
                         .build()
         );
 
-        ProtoSubject<?, Message> assertWorks =
+        ProtoSubject assertWorks =
                 context.assertEntity(WorksProjection.class, artist)
                        .hasStateThat();
         Works expectedWork =

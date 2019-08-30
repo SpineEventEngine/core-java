@@ -70,7 +70,7 @@ public interface HandlerMethod<T,
     /**
      * Obtains the set of method attributes configured for this method.
      */
-    Set<MethodAttribute<?>> attributes();
+    Set<Attribute<?>> attributes();
 
     /**
      * Obtains the handling method.
@@ -78,7 +78,7 @@ public interface HandlerMethod<T,
     Method rawMethod();
 
     /**
-     * Retrieves the message classes produced by this handler method.*
+     * Retrieves the message classes produced by this handler method.
      */
     Set<P> producedMessages();
 
@@ -123,13 +123,6 @@ public interface HandlerMethod<T,
      */
     default boolean isDomestic() {
         return !isExternal();
-    }
-
-    /**
-     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
-     */
-    default MessageFilter filter() {
-        return MessageFilter.getDefaultInstance();
     }
 
     /**

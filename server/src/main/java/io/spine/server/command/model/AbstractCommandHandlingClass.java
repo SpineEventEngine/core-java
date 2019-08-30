@@ -50,7 +50,7 @@ public abstract class AbstractCommandHandlingClass<C,
     private final MessageHandlerMap<CommandClass, P, H> commands;
 
     AbstractCommandHandlingClass(Class<? extends C> cls,
-                                 CommandAcceptingMethodSignature<H> signature) {
+                                 CommandAcceptingSignature<H> signature) {
         super(cls);
         this.commands = MessageHandlerMap.create(cls, signature);
     }

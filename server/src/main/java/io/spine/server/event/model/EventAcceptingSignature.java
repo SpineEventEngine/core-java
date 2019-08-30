@@ -22,8 +22,8 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.declare.MethodSignature;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.annotation.Annotation;
@@ -36,12 +36,19 @@ import java.lang.annotation.Annotation;
 abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?>>
         extends MethodSignature<H, EventEnvelope> {
 
+    /**
+     * This field is also is used by {@link SubscriberSignature} to avoid repeated scanning in
+     * the overriden {@link #paramSpecs()}.
+     */
+    static final ImmutableSet<EventAcceptingMethodParams>
+            PARAM_SPEC = ImmutableSet.copyOf(EventAcceptingMethodParams.values());
+
     EventAcceptingSignature(Class<? extends Annotation> annotation) {
         super(annotation);
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(EventAcceptingMethodParams.values());
+        return PARAM_SPEC;
     }
 }

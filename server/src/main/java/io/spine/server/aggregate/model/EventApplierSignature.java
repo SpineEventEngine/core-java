@@ -25,42 +25,48 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.MethodSignature;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.AccessModifier;
+import io.spine.server.model.MethodParams;
+import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
-
 /**
  * The signature of the {@link Applier} method.
  */
-class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
+final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
+
+    private static final ImmutableSet<Class<?>>
+            RETURN_TYPES = ImmutableSet.of(void.class);
+    private static final ImmutableSet<AccessModifier>
+            MODIFIERS = ImmutableSet.of(AccessModifier.PRIVATE);
+    private static final ImmutableSet<EventApplierParams>
+            PARAM_SPEC = ImmutableSet.copyOf(EventApplierParams.values());
 
     EventApplierSignature() {
         super(Apply.class);
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
-        return ImmutableSet.of(void.class);
+    protected ImmutableSet<Class<?>> returnTypes() {
+        return RETURN_TYPES;
     }
 
     @Override
-    public Applier doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new Applier(method, parameterSpec);
+    public Applier create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new Applier(method, params);
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> allowedModifiers() {
-        return ImmutableSet.of(AccessModifier.PRIVATE);
+    protected ImmutableSet<AccessModifier> modifiers() {
+        return MODIFIERS;
     }
 
     @Override
     public ImmutableSet<? extends ParameterSpec<EventEnvelope>> paramSpecs() {
-        return ImmutableSet.copyOf(EventApplierParams.values());
+        return PARAM_SPEC;
     }
 
     /**
@@ -72,8 +78,8 @@ class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
 
         MESSAGE {
             @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, EventMessage.class);
+            public boolean matches(MethodParams params) {
+                return params.is(EventMessage.class);
             }
 
             @Override

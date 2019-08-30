@@ -28,6 +28,7 @@ import io.spine.core.Status;
 import io.spine.core.Status.StatusCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
@@ -37,11 +38,13 @@ import static io.spine.core.Status.StatusCase.REJECTION;
  * A set of checks for the {@linkplain io.spine.client.QueryResponse query response} status.
  */
 @VisibleForTesting
-public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubject, Status> {
+public final class ResponseStatusSubject extends ProtoSubject {
 
-    private ResponseStatusSubject(FailureMetadata failureMetadata,
-                                  @Nullable Status message) {
+    private final @Nullable Status actual;
+
+    private ResponseStatusSubject(FailureMetadata failureMetadata, @Nullable Status message) {
         super(failureMetadata, message);
+        this.actual = message;
     }
 
     public static ResponseStatusSubject assertResponseStatus(@Nullable Status status) {
@@ -70,13 +73,20 @@ public final class ResponseStatusSubject extends ProtoSubject<ResponseStatusSubj
     }
 
     void hasStatusCase(StatusCase statusCase) {
-        assertExists();
-        check("statusCase()").that(statusCase())
-                             .isEqualTo(statusCase);
+        if (actual() == null) {
+            assertExists();
+        } else {
+            check("statusCase()").that(statusCase())
+                                 .isEqualTo(statusCase);
+        }
+    }
+
+    private @Nullable Status actual() {
+        return actual;
     }
 
     private StatusCase statusCase() {
-        return actual().getStatusCase();
+        return checkNotNull(actual).getStatusCase();
     }
 
     private void assertExists() {

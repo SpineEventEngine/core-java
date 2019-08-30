@@ -21,18 +21,18 @@
 package io.spine.server.model.given.method;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.MethodSignature;
-import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.AccessModifier;
+import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.declare.AccessModifier.PRIVATE;
-import static io.spine.server.model.declare.AccessModifier.PROTECTED;
-import static io.spine.server.model.declare.AccessModifier.PUBLIC;
+import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
+import static io.spine.server.model.AccessModifier.PRIVATE;
+import static io.spine.server.model.AccessModifier.PROTECTED;
+import static io.spine.server.model.AccessModifier.PUBLIC;
 
 public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
 
@@ -46,18 +46,18 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> allowedModifiers() {
+    protected ImmutableSet<AccessModifier> modifiers() {
         return allModifiers();
     }
 
     @Override
-    protected ImmutableSet<Class<?>> validReturnTypes() {
+    protected ImmutableSet<Class<?>> returnTypes() {
         return ImmutableSet.of(void.class);
     }
 
     @Override
-    public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new OneParamMethod(method, parameterSpec);
+    public OneParamMethod create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new OneParamMethod(method, params);
     }
 
     private static ImmutableSet<AccessModifier> allModifiers() {

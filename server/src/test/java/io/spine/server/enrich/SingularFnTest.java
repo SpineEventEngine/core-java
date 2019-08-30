@@ -22,7 +22,6 @@ package io.spine.server.enrich;
 
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
-import com.google.protobuf.Message;
 import io.spine.core.Enrichment;
 import io.spine.core.EventContext;
 import io.spine.server.enrich.given.event.SfnTestEvent;
@@ -59,7 +58,7 @@ class SingularFnTest {
                 ));
 
         Enrichment enrichment = fn.apply((SfnTestEvent) event.message(), event.context());
-        ProtoSubject<?, Message> assertThat = ProtoTruth.assertThat(enrichment);
+        ProtoSubject assertThat = ProtoTruth.assertThat(enrichment);
         assertThat.isNotNull();
         assertThat.hasAllRequiredFields();
     }

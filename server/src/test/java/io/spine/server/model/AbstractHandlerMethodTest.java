@@ -199,14 +199,14 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("checked exception")
         void checkedException() {
-            Optional<OneParamMethod> method = signature.create(getMethodWithCheckedException());
+            Optional<OneParamMethod> method = signature.toHandler(getMethodWithCheckedException());
             assertFalse(method.isPresent());
         }
 
         @Test
         @DisplayName("runtime exception")
         void runtimeException() {
-            Optional<OneParamMethod> method = signature.create(getMethodWithRuntimeException());
+            Optional<OneParamMethod> method = signature.toHandler(getMethodWithRuntimeException());
             assertFalse(method.isPresent());
         }
     }
