@@ -149,7 +149,7 @@ public class ProjectionTestEnv {
             halt();
         }
 
-        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "1"))
+        @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "+1"))
         void onStringOne(Int32Imported event) {
             halt();
         }
