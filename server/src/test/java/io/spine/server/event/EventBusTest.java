@@ -20,10 +20,10 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Int32Value;
+import io.grpc.stub.StreamObserver;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventId;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -45,11 +45,11 @@ import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
 import io.spine.testdata.Sample;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContextBuilder.assumingTests;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
@@ -445,31 +444,25 @@ public class EventBusTest {
      * initialization multiple times from several threads.
      */
     @SuppressWarnings({"MethodWithMultipleLoops", "BusyWait"}) // OK for such test case.
-    @Disabled // This test is used only to diagnose EventBus malfunctions in concurrent environment.
-    // It's too long to execute this test per each build, so we leave it as is for now.
-    // Please see build log to find out if there were some errors during the test execution.
+    @SlowTest
     @Test
     @DisplayName("store filters regarding possible concurrent modifications")
-    void storeFiltersInConcurrentEnv() throws InterruptedException {
+    void storeFiltersInConcurrentEnv() throws Exception {
         int threadCount = 50;
-
-        // "Random" more or less valid Event.
-        Event event = Event
-                .newBuilder()
-                .setId(EventId.newBuilder()
-                              .setValue("123-1"))
-                .setMessage(pack(Int32Value.newBuilder()
-                                           .setValue(42)
-                                           .build()))
-                .build();
+        Event event = eventFactory.createEvent(DonationMade
+                                                       .newBuilder()
+                                                       .setUsdsDonated(3.14)
+                                                       .vBuild());
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
         for (int i = 0; i < 300; i++) {
-            EventBus eventBus = EventBus
-                    .newBuilder()
+            BoundedContext context = BoundedContextBuilder
+                    .assumingTests()
                     .build();
+            EventBus eventBus = context.eventBus();
+            StreamObserver<Ack> observer = StreamObservers.noOpObserver();
             for (int j = 0; j < threadCount; j++) {
-                executor.execute(() -> eventBus.post(event));
+                executor.execute(() -> eventBus.post(event, observer));
             }
             // Let the system destroy all the native threads, clean up, etc.
             Thread.sleep(100);
