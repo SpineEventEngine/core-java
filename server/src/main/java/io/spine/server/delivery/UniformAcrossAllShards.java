@@ -36,10 +36,8 @@ import static java.lang.Math.abs;
  *
  * <p>Uses a hash code of the entity identifier and the remainder of its division by the total
  * number of shards to determine the index of a shard, at which the modification is allowed.
- *
- * <p>To reach the consistency of the calculated values across different nodes,
- * the identifier is transformed into a {@code String}, and this value is then hashed
- * using {@linkplain Hashing#murmur3_32() MurmurHash3, x86 variant}.
+ * To reach the consistency of the hash code values across JVMs,
+ * the {@linkplain Hashing#murmur3_32() MurmurHash3, x86 variant} is used.
  *
  * <p>While Guava's {@code Hashing} is marked {@code @Beta}, it is still the best option
  * for hashing functions — not to involve any heavy-weight third-party hashing
