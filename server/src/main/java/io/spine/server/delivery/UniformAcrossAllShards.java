@@ -26,6 +26,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -98,7 +99,7 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
             bytes = ((Message) entityId).toByteArray();
         } else {
             bytes = entityId.toString()
-                            .getBytes();
+                            .getBytes(Charset.defaultCharset());
         }
         int value = HASHER.hashBytes(bytes)
                           .asInt();
