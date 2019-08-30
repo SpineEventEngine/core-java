@@ -186,7 +186,8 @@ public class EventBus
     public EventStore eventStore() {
         checkNotNull(
                 eventStore,
-                "`EventStore` is not initialized. Please call `EventBus.init(BoundedContext)`."
+                "`EventStore` is not initialized. " +
+                        "Please call `EventBus.registerWith(BoundedContext)`."
         );
         return eventStore;
     }

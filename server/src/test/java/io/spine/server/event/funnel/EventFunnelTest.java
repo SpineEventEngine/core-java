@@ -20,17 +20,120 @@
 
 package io.spine.server.event.funnel;
 
+import io.spine.core.Ack;
+import io.spine.core.Status;
+import io.spine.core.UserId;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.event.funnel.given.DocumentAggregate;
+import io.spine.server.event.funnel.given.DocumentRepository;
+import io.spine.server.event.funnel.given.EditHistoryRepository;
+import io.spine.time.Now;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT;
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.core.Status.StatusCase.OK;
+import static io.spine.testing.server.entity.EntitySubject.assertEntity;
 
 @DisplayName("EventFunnel should")
 class EventFunnelTest {
 
+    private BoundedContext context;
+    private DocumentRepository documentRepository;
+    private EditHistoryRepository editHistoryRepository;
 
+    @BeforeEach
+    void prepareContext() {
+        documentRepository = new DocumentRepository();
+        editHistoryRepository = new EditHistoryRepository();
+        context = BoundedContextBuilder
+                .assumingTests()
+                .add(documentRepository)
+                .add(editHistoryRepository)
+                .build();
+    }
+
+    @AfterEach
+    void closeContext() throws Exception {
+        context.close();
+    }
 
     @Nested
     @DisplayName("import events into aggregates")
     class ToAggregate {
 
+        @Test
+        @DisplayName("if the applier allows import")
+        void markedForImport() {
+            MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
+            UserId johnDoe = UserId
+                    .newBuilder()
+                    .setValue(newUuid())
+                    .build();
+            PaperDocumentScanned importEvent = PaperDocumentScanned
+                    .newBuilder()
+                    .setId(DocumentId.generate())
+                    .setText("Quarter report")
+                    .setOwner(johnDoe)
+                    .setWhenCreated(Now.get().asLocalDateTime())
+                    .build();
+            context.postEvent()
+                   .producedBy(johnDoe)
+                   .toAggregate()
+                   .with(observer)
+                   .post(importEvent);
+            Status status = observer.firstResponse()
+                                    .getStatus();
+            assertWithMessage(status.toString())
+                    .that(status.getStatusCase())
+                    .isEqualTo(OK);
+            Optional<DocumentAggregate> foundDoc = documentRepository.find(importEvent.getId());
+            assertThat(foundDoc).isPresent();
+            assertEntity(foundDoc.get()).hasStateThat()
+                                        .comparingExpectedFieldsOnly()
+                                        .isEqualTo(Document.newBuilder()
+                                                           .setText(importEvent.getText())
+                                                           .buildPartial());
+        }
+
+        @Test
+        @DisplayName("but NOT if the applier does not allow import")
+        void notMarked() {
+            MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
+            UserId johnDoe = UserId
+                    .newBuilder()
+                    .setValue(newUuid())
+                    .build();
+            TextEdited importEvent = TextEdited
+                    .newBuilder()
+                    .setId(DocumentId.generate())
+                    .build();
+            context.postEvent()
+                   .producedBy(johnDoe)
+                   .toAggregate()
+                   .with(observer)
+                   .post(importEvent);
+            Ack ack = observer.firstResponse();
+            assertThat(ack.getStatus()
+                          .getStatusCase())
+                    .isEqualTo(ERROR);
+            assertThat(ack.getStatus()
+                          .getError()
+                          .getCode())
+                    .isEqualTo(UNSUPPORTED_EVENT.getNumber());
+        }
     }
 }

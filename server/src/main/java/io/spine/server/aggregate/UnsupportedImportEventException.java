@@ -27,6 +27,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
 
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.server.event.EventException.eventTypeAttribute;
 import static java.lang.String.format;
 
@@ -71,7 +72,7 @@ public final class UnsupportedImportEventException
         Error result = Error
                 .newBuilder()
                 .setType(UnsupportedImportEventException.class.getName())
-                .setCode(-1)
+                .setCode(UNSUPPORTED_EVENT_VALUE)
                 .setMessage(errorMessage)
                 .putAllAttributes(eventTypeAttribute(eventMessage))
                 .build();
