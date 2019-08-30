@@ -96,7 +96,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
     }
 
     /**
-     * @author Alex Tymchenko
+     * The batch of messages headed to the same target.
      */
     private static class Batch<I> {
 
