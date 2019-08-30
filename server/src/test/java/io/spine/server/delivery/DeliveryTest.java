@@ -243,15 +243,13 @@ class DeliveryTest {
         int signalsDispatched = simulator.signalsPerTarget()
                                          .get(theTarget)
                                          .size();
-        assertThat(simulator.callsToRepositoryLoadOrCreate(theTarget)).isLessThan(
-                signalsDispatched);
-        assertThat(simulator.callsToRepositoryStore(theTarget)).isLessThan(signalsDispatched);
+        assertThat(simulator.callsToRepoLoadOrCreate(theTarget)).isLessThan(signalsDispatched);
+        assertThat(simulator.callsToRepoStore(theTarget)).isLessThan(signalsDispatched);
 
         assertStages(monitor, pageSize);
     }
 
-    private static void assertStages(MemoizingDeliveryMonitor monitor,
-                                     int pageSize) {
+    private static void assertStages(MemoizingDeliveryMonitor monitor, int pageSize) {
         ImmutableList<DeliveryStage> totalStages = monitor.getStages();
         List<Integer> actualSizePerPage = totalStages.stream()
                                                      .map(DeliveryStage::messagesDelivered)
@@ -381,11 +379,11 @@ class DeliveryTest {
             ensureInboxesEmpty();
         }
 
-        private int callsToRepositoryStore(String id) {
+        private int callsToRepoStore(String id) {
             return repository.storeCallsCount(id);
         }
 
-        private int callsToRepositoryLoadOrCreate(String id) {
+        private int callsToRepoLoadOrCreate(String id) {
             return repository.loadOrCreateCallsCount(id);
         }
 
