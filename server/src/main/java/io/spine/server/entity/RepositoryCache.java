@@ -124,7 +124,6 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      *         the type of entity
      */
     public interface Load<I, E extends Entity<I, ?>> extends Function<I, E> {
-
     }
 
     /**
@@ -136,6 +135,5 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      *         the type of entity
      */
     public interface Store<I, E extends Entity<I, ?>> extends Consumer<E> {
-
     }
 }
