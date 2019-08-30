@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Environment;
 import io.spine.base.EventMessage;
@@ -32,7 +31,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.logging.Logging;
-import io.spine.server.model.MessageFilter;
+import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.Model;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
@@ -43,7 +42,6 @@ import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTests;
-import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A handler method which receives an entity state and produces no output.
@@ -86,14 +84,9 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     @Override
-    protected MessageFilter createFilter() {
+    protected ArgumentFilter createFilter() {
         TypeUrl targetType = TypeUrl.of(stateType);
-        Any typeUrlAsAny = toAny(targetType.value());
-        return MessageFilter
-                .newBuilder()
-                .setField(ENTITY_TYPE_URL)
-                .setValue(typeUrlAsAny)
-                .build();
+        return ArgumentFilter.acceptingOnly(ENTITY_TYPE_URL, targetType.value());
     }
 
     /**

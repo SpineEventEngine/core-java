@@ -21,19 +21,17 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Any;
 import io.spine.base.FieldPath;
 import io.spine.base.FieldPaths;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
-import io.spine.server.model.MessageFilter;
+import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
 
 import static io.spine.base.FieldPaths.typeOfFieldAt;
-import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.string.Stringifiers.fromString;
 
 /**
@@ -48,23 +46,17 @@ public final class EventSubscriberMethod extends SubscriberMethod {
     }
 
     @Override
-    public MessageFilter createFilter() {
+    public ArgumentFilter createFilter() {
         Subscribe annotation = rawMethod().getAnnotation(Subscribe.class);
         ByField byFieldFilter = annotation.filter();
         String rawFieldPath = byFieldFilter.path();
         if (rawFieldPath.isEmpty()) {
-            return MessageFilter.getDefaultInstance();
+            return ArgumentFilter.acceptingAll();
         }
         FieldPath fieldPath = FieldPaths.parse(rawFieldPath);
         Class<?> fieldType = typeOfFieldAt(rawMessageClass(), fieldPath);
         Object expectedValue = fromString(byFieldFilter.value(), fieldType);
-        Any packedValue = toAny(expectedValue);
-        MessageFilter messageFilter = MessageFilter
-                .newBuilder()
-                .setField(fieldPath)
-                .setValue(packedValue)
-                .build();
-        return messageFilter;
+        return ArgumentFilter.acceptingOnly(fieldPath, expectedValue);
     }
 
     @Override

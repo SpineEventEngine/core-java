@@ -128,7 +128,7 @@ class CommandHandlerMethodTest {
             ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
 
             Optional<CommandHandlerMethod> createdMethod =
-                    new CommandHandlerSignature().toHandler(handlerObject.method());
+                    new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(createdMethod.isPresent());
             CommandHandlerMethod handler = createdMethod.get();
             RefCreateProject cmd = createProject();
@@ -150,7 +150,7 @@ class CommandHandlerMethodTest {
             ValidHandlerOneParamReturnsList handlerObject =
                     spy(new ValidHandlerOneParamReturnsList());
             Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().toHandler(handlerObject.method());
+                    new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -175,7 +175,7 @@ class CommandHandlerMethodTest {
         void noEvents() {
             HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
             Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().toHandler(handlerObject.method());
+                    new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -191,7 +191,7 @@ class CommandHandlerMethodTest {
         void nothingEvent() {
             HandlerReturnsNothing handlerObject = new HandlerReturnsNothing();
             Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().toHandler(handlerObject.method());
+                    new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();

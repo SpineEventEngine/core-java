@@ -27,7 +27,6 @@ import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.type.EmptyClass;
 import io.spine.type.MessageClass;
-import io.spine.type.TypeUrl;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -57,7 +56,7 @@ public final class HandlerMap<M extends MessageClass<?>,
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableSetMultimap<HandlerTypeInfo, H> map;
+    private final ImmutableSetMultimap<DispatchKey, H> map;
     private final ImmutableSet<M> messageClasses;
 
     /**
@@ -76,12 +75,12 @@ public final class HandlerMap<M extends MessageClass<?>,
     HandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
-        ImmutableSetMultimap<HandlerTypeInfo, H> map = findMethodsBy(declaringClass, signature);
+        ImmutableSetMultimap<DispatchKey, H> map = findMethodsBy(declaringClass, signature);
         ImmutableSet<M> messageClasses = messageClasses(map.values());
         return new HandlerMap<>(map, messageClasses);
     }
 
-    private HandlerMap(ImmutableSetMultimap<HandlerTypeInfo, H> map,
+    private HandlerMap(ImmutableSetMultimap<DispatchKey, H> map,
                        ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
@@ -109,7 +108,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> messageClasses(Predicate<? super H> predicate) {
-        Multimap<HandlerTypeInfo, H> filtered = Multimaps.filterValues(map, predicate::test);
+        Multimap<DispatchKey, H> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
 
@@ -129,16 +128,16 @@ public final class HandlerMap<M extends MessageClass<?>,
     /**
      * Obtains the method for handling by the passed key.
      *
-     * @param handlerKey
+     * @param key
      *         the key of the handler to get
      * @return a handler method
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    private ImmutableSet<H> handlersOf(HandlerTypeInfo handlerKey) {
-        ImmutableSet<H> handlers = map.get(handlerKey);
+    private ImmutableSet<H> handlersOf(DispatchKey key) {
+        ImmutableSet<H> handlers = map.get(key);
         checkState(!handlers.isEmpty(),
-                   "Unable to find handler with the key: %s.", handlerKey);
+                   "Unable to find handler with the key: %s.", key);
         return handlers;
     }
 
@@ -156,17 +155,16 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @throws IllegalStateException
      *         if there is no method found in the map
      */
-    public ImmutableSet<H> handlersOf(M messageClass, MessageClass originClass) {
-        HandlerTypeInfo keyWithOrigin = HandlerTypeInfo
-                .newBuilder()
-                .setMessageType(typeUrl(messageClass).value())
-                .setOriginType(typeUrl(originClass).value())
-                .build();
-        HandlerTypeInfo presentKey = map.containsKey(keyWithOrigin)
-                                     ? keyWithOrigin
-                                     : keyWithOrigin.toBuilder()
-                                                    .clearOriginType()
-                                                    .build();
+    public ImmutableSet<H> handlersOf(M messageClass, MessageClass<?> originClass) {
+        DispatchKey key =
+                originClass.equals(EmptyClass.instance())
+                ? new DispatchKey(messageClass.value(), null, null)
+                : new DispatchKey(messageClass.value(), null, originClass.value());
+        // If we have a handler with origin type, use the key. Otherwise, find handlers only
+        // by the first parameter.
+        DispatchKey presentKey = map.containsKey(key)
+                                     ? key
+                                     : new DispatchKey(messageClass.value(), null, null);
         return handlersOf(presentKey);
     }
 
@@ -232,16 +230,12 @@ public final class HandlerMap<M extends MessageClass<?>,
         return result;
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
+    private static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableSet<M> messageClasses(Collection<H> handlerMethods) {
         ImmutableSet<M> result =
                 handlerMethods.stream()
                               .map(HandlerMethod::messageClass)
                               .collect(toImmutableSet());
         return result;
-    }
-
-    private static TypeUrl typeUrl(MessageClass<?> cls) {
-        return TypeUrl.of(cls.value());
     }
 }

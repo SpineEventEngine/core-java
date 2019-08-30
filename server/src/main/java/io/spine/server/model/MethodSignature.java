@@ -200,7 +200,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
      *         encountered
      */
-    public Optional<H> toHandler(Method method) throws SignatureMismatchException {
+    public Optional<H> classify(Method method) throws SignatureMismatchException {
         boolean matches = matches(method);
         if (!matches) {
             return Optional.empty();

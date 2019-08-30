@@ -322,9 +322,13 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    @Override
     public HandlerId id() {
         return createId(messageClass());
+    }
+
+    @Override
+    public MethodParams params() {
+        return MethodParams.ofType(messageClass().value());
     }
 
     @Override

@@ -77,7 +77,7 @@ class ApplierTest {
         Method method = new ValidApplier().getMethod();
 
 
-        Optional<Applier> actual = signature.toHandler(method);
+        Optional<Applier> actual = signature.classify(method);
         assertTrue(actual.isPresent());
 
         Applier expected = new Applier(method, EventApplierParams.MESSAGE);
@@ -88,7 +88,7 @@ class ApplierTest {
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.toHandler(applierObject.getMethod());
+        Optional<Applier> method = signature.classify(applierObject.getMethod());
         assertTrue(method.isPresent());
         Applier applier = method.get();
         RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
@@ -118,7 +118,7 @@ class ApplierTest {
     @DisplayName("convert `null` result to Success")
     void convertToSuccess() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.toHandler(applierObject.getMethod());
+        Optional<Applier> method = signature.classify(applierObject.getMethod());
         assertTrue(method.isPresent());
         Applier applier = method.get();
 
@@ -138,7 +138,7 @@ class ApplierTest {
     @DisplayName("throw on non-`null` return value")
     void failIfReturnsValue() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.toHandler(applierObject.getMethod());
+        Optional<Applier> method = signature.classify(applierObject.getMethod());
         assertTrue(method.isPresent());
         Applier applier = method.get();
 

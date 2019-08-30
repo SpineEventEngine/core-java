@@ -45,8 +45,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
     private final MethodSignature<H, ?> signature;
-    private final Multimap<HandlerTypeInfo, H> handlers;
-    private final Map<HandlerId, H> seenMethods;
+    private final Multimap<DispatchKey, H> handlers;
+    private final Map<MethodParams, H> seenMethods;
     private final Map<MessageClass, SelectiveHandler> selectiveHandlers;
 
     /**
@@ -60,10 +60,10 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *         the handler {@linkplain MethodSignature signature}
      * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
      */
-    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<HandlerTypeInfo, H>
+    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
     findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
-        ImmutableSetMultimap<HandlerTypeInfo, H> result = operation.perform();
+        ImmutableSetMultimap<DispatchKey, H> result = operation.perform();
         return result;
     }
 
@@ -79,10 +79,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      * Performs the operation.
      *
      * <p>Multiple calls to this method may cause {@link DuplicateHandlerMethodError}s.
-     *
-     * @return a map of {@link HandlerTypeInfo}s to the method handlers
      */
-    private ImmutableSetMultimap<HandlerTypeInfo, H> perform() {
+    private ImmutableSetMultimap<DispatchKey, H> perform() {
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             scanMethod(method);
@@ -91,7 +89,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void scanMethod(Method method) {
-        Optional<H> handlerMethod = signature.toHandler(method);
+        Optional<H> handlerMethod = signature.classify(method);
         if (handlerMethod.isPresent()) {
             H handler = handlerMethod.get();
             remember(handler);
@@ -103,27 +101,27 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         if (handler instanceof SelectiveHandler) {
             checkFilteringNotClashes((SelectiveHandler) handler);
         }
-        HandlerId id = handler.id();
-        handlers.put(id.getType(), handler);
+        handlers.put(handler.key(), handler);
     }
 
     private void checkNotRemembered(H handler) {
-        HandlerId id = handler.id();
-        if (seenMethods.containsKey(id)) {
-            Method alreadyPresent = seenMethods.get(id)
+        MethodParams params = handler.params();
+        if (seenMethods.containsKey(params)) {
+            Method alreadyPresent = seenMethods.get(params)
                                                .rawMethod();
             String methodName = alreadyPresent.getName();
             String duplicateMethodName = handler.rawMethod().getName();
-            throw new DuplicateHandlerMethodError(declaringClass, id,
-                                                  methodName, duplicateMethodName);
+            throw new DuplicateHandlerMethodError(
+                    declaringClass, params, methodName, duplicateMethodName
+            );
         } else {
-            seenMethods.put(id, handler);
+            seenMethods.put(params.withoutContextAndFilter(), handler);
         }
     }
 
     private void checkFilteringNotClashes(SelectiveHandler handler) {
         MessageClass handledClass = handler.messageClass();
-        FieldPath field = handler.filter().getField();
+        FieldPath field = handler.filter().field();
         if (!isNotDefault(field)) {
             return;
         }
@@ -139,7 +137,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
             // different values. It allows to split logic into smaller methods instead of having
             // if-else chains (that branch by different values) inside a bigger handler method.
             //
-            FieldPath prevHandlerField = existingHandler.filter().getField();
+            FieldPath prevHandlerField = existingHandler.filter().field();
             boolean fieldDiffers = !prevHandlerField.equals(field);
             if (fieldDiffers) {
                 throw new HandlerFieldFilterClashError(declaringClass,

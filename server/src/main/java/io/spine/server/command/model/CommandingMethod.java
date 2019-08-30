@@ -38,7 +38,7 @@ import io.spine.type.MessageClass;
  */
 @Immutable
 public interface CommandingMethod<T,
-                                  M extends MessageClass,
+                                  M extends MessageClass<?>,
                                   E extends MessageEnvelope<?, ?, ?>>
         extends CommandProducingMethod<T, M, E> {
 }

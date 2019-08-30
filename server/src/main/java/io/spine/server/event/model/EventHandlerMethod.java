@@ -24,7 +24,9 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.DispatchKey;
 import io.spine.server.model.HandlerId;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
@@ -72,6 +74,29 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
         } else {
             return createId(eventClass);
         }
+    }
+
+    @Override
+    public DispatchKey key() {
+        EventClass eventClass = messageClass();
+        if (parameterSpec().acceptsCommand()) {
+            Class<?>[] parameters = rawMethod().getParameterTypes();
+            Class<? extends CommandMessage> commandMessageClass =
+                    castClass(parameters[1], CommandMessage.class);
+            CommandClass commandClass = CommandClass.from(commandMessageClass);
+            return new DispatchKey(eventClass.value(), null, commandClass.value());
+        } else {
+            return super.key();
+        }
+    }
+
+    @Override
+    public MethodParams params() {
+        if (parameterSpec().acceptsCommand()) {
+            MethodParams result = MethodParams.of(rawMethod());
+            return result;
+        }
+        return super.params();
     }
 
     private static <T extends Message> Class<T> castClass(Class<?> raw, Class<T> targetBound) {

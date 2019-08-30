@@ -21,13 +21,15 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.ArgumentFilter;
+import io.spine.server.model.DispatchKey;
 import io.spine.server.model.HandlerId;
 import io.spine.server.model.MessageFilter;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.SelectiveHandler;
 import io.spine.server.model.VoidMethod;
@@ -39,8 +41,6 @@ import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.base.FieldPaths.getValue;
-import static io.spine.protobuf.TypeConverter.toObject;
 
 /**
  * A method annotated with the {@link io.spine.core.Subscribe @Subscribe} annotation.
@@ -60,7 +60,7 @@ public abstract class SubscriberMethod
                    SelectiveHandler<EventSubscriber, EventClass, EventEnvelope, EmptyClass> {
 
     @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
-    private final Supplier<MessageFilter> filter = memoize(this::createFilter);
+    private final Supplier<ArgumentFilter> filter = memoize(this::createFilter);
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
@@ -69,13 +69,30 @@ public abstract class SubscriberMethod
     @Override
     public HandlerId id() {
         HandlerId typeBasedToken = super.id();
-        MessageFilter filter = filter();
+        MessageFilter filter = MessageFilter.getDefaultInstance(); //filter();
         FieldPath fieldPath = filter.getField();
-        return fieldPath.getFieldNameList().isEmpty()
+        return fieldPath.getFieldNameList()
+                        .isEmpty()
                ? typeBasedToken
                : typeBasedToken.toBuilder()
                                .setFilter(filter)
                                .build();
+    }
+
+    @Override
+    public DispatchKey key() {
+        DispatchKey typeBasedKey = super.key();
+        ArgumentFilter filter = filter();
+        FieldPath fieldPath = filter.field();
+        return fieldPath.getFieldNameList()
+                        .isEmpty()
+               ? typeBasedKey
+               : new DispatchKey(typeBasedKey.messageClass(), filter, typeBasedKey.originClass());
+    }
+
+    @Override
+    public MethodParams params() {
+        return MethodParams.of(this);
     }
 
     @Override
@@ -86,10 +103,10 @@ public abstract class SubscriberMethod
     /**
      * Creates the filter for messages handled by this method.
      */
-    protected abstract MessageFilter createFilter();
+    protected abstract ArgumentFilter createFilter();
 
     @Override
-    public final MessageFilter filter() {
+    public final ArgumentFilter filter() {
         return filter.get();
     }
 
@@ -103,22 +120,8 @@ public abstract class SubscriberMethod
      * @return {@code true} if this method can handle the given event, {@code false} otherwise
      */
     final boolean canHandle(EventEnvelope event) {
-        MessageFilter filter = filter();
-        FieldPath fieldPath = filter.getField();
-        if (fieldPath.getFieldNameList().isEmpty()) {
-            return true;
-        } else {
-            EventMessage msg = event.message();
-            return match(msg, filter);
-        }
-    }
-
-    private static boolean match(EventMessage event, MessageFilter filter) {
-        FieldPath path = filter.getField();
-        Object valueOfField = getValue(path, event);
-        Any value = filter.getValue();
-        Object expectedValue = toObject(value, valueOfField.getClass());
-        boolean filterMatches = valueOfField.equals(expectedValue);
-        return filterMatches;
+        ArgumentFilter filter = filter();
+        boolean result = filter.test(event.message());
+        return result;
     }
 }

@@ -41,7 +41,7 @@ import static java.lang.String.format;
  */
 @Immutable
 public interface VoidMethod<T,
-                            C extends MessageClass,
+                            C extends MessageClass<?>,
                             E extends MessageEnvelope<?, ?, ?>>
         extends HandlerMethod<T, C, E, EmptyClass> {
 
