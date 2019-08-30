@@ -68,7 +68,7 @@ public final class InMemoryInboxStorage
                 storage.readAll()
                        .stream()
                        .filter((r) -> index.equals(r.getShardIndex()))
-                       .sorted((m1, m2) -> compare(m2.getWhenReceived(), m1.getWhenReceived()))
+                       .sorted((m1, m2) -> compare(m1.getWhenReceived(), m2.getWhenReceived()))
                        .collect(groupingBy(m -> counter.getAndIncrement() / pageSize,
                                            toImmutableList()));
 

@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 
 /**
- * The memory-based storage for {@link io.spine.server.inbox.InboxMessage InboxMessage}s
+ * The memory-based storage for {@link io.spine.server.delivery.InboxMessage InboxMessage}s
  * that represents all storage operations available for inbox data of a single tenant.
  */
 final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMessage> {
@@ -86,7 +86,7 @@ final class TenantInboxRecords implements TenantStorage<InboxMessageId, InboxMes
      * Comparator for the {@code InboxMessage}s that are stored in in-memory storage.
      *
      * <p>Defines the order of messages, placing the messages
-     * {@linkplain io.spine.server.inbox.InboxMessage#getWhenReceived() received earlier} on top.
+     * {@linkplain io.spine.server.delivery.InboxMessage#getWhenReceived() received earlier} on top.
      */
     static class InboxStorageRecordComparator implements Comparator<InboxMessage>, Serializable {
 

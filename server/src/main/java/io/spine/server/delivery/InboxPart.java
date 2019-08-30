@@ -24,7 +24,6 @@ import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
-import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -112,11 +111,8 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     }
 
     private InboxSignalId signalIdFrom(M envelope, I targetId) {
-        String rawValue = extractUuidFrom(envelope) + " @" + Stringifiers.toString(targetId);
-        InboxSignalId result = InboxSignalId.newBuilder()
-                                            .setValue(rawValue)
-                                            .build();
-        return result;
+        String uuid = extractUuidFrom(envelope);
+        return InboxIds.newSignalId(targetId, uuid);
     }
 
     /**
