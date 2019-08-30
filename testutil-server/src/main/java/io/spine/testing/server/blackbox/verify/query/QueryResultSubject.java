@@ -63,7 +63,8 @@ import static java.util.stream.Collectors.toList;
  * custom {@code static} {@linkplain #assertQueryResult(QueryResponse) method}.
  */
 @VisibleForTesting
-public final class QueryResultSubject extends IterableOfProtosSubject<Message> {
+public final class QueryResultSubject
+        extends IterableOfProtosSubject<Message> {
 
     /**
      * A helper {@code Subject} which allows to check the {@link QueryResponse} status.
@@ -84,9 +85,10 @@ public final class QueryResultSubject extends IterableOfProtosSubject<Message> {
 
     private final Iterable<Message> actual;
 
-    private QueryResultSubject(FailureMetadata failureMetadata, Iterable<Message> actual) {
-        super(failureMetadata, actual);
-        this.actual = actual;
+    private QueryResultSubject(FailureMetadata failureMetadata,
+                               Iterable<Message> entityStates) {
+        super(failureMetadata, entityStates);
+        this.actual = entityStates;
     }
 
     private void initChildSubjects(QueryResponse queryResponse) {
@@ -136,10 +138,8 @@ public final class QueryResultSubject extends IterableOfProtosSubject<Message> {
      */
     public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        Message entityState = actual.iterator()
-                                    .next();
-        ProtoSubject subject = check("singleEntityState()").about(protos())
-                                                                       .that(entityState);
+        Message entityState = actual.iterator().next();
+        ProtoSubject subject = check("singleEntityState()").about(protos()).that(entityState);
         return subject;
     }
 

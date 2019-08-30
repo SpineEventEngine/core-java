@@ -74,11 +74,9 @@ class ToProtoSubjectsTest {
 
         assertThat(subjects).hasSize(2);
 
-        ProtoSubject assertFirstItem = subjects.iterator()
-                                                           .next();
+        ProtoSubject assertFirstItem = subjects.iterator().next();
         assertFirstItem.isInstanceOf(BbProjectCreated.class);
-        ProtoSubject assertSecondItem = subjects.iterator()
-                                                            .next();
+        ProtoSubject assertSecondItem = subjects.iterator().next();
         assertSecondItem.isInstanceOf(BbProjectCreated.class);
     }
 

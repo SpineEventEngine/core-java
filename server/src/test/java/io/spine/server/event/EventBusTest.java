@@ -87,7 +87,7 @@ public class EventBusTest {
     private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         BoundedContextBuilder builder = assumingTests(true)
-                .addEventFiler(new TaskCreatedFilter())
+                .addEventFilter(new TaskCreatedFilter())
                 .add(ProjectAggregate.class);
         if (enricher != null) {
             builder.enrichEventsUsing(enricher);

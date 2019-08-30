@@ -39,6 +39,7 @@ import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.VerifyingCounter;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.command.BbFinalizeProject;
@@ -73,13 +74,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.thrice;
-import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
@@ -94,8 +89,6 @@ import static io.spine.testing.server.blackbox.given.Given.registerCommandDispat
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
-import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactly;
-import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -213,10 +206,12 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("ignore sent events in emitted")
     void ignoreSentEvents() {
         BbProjectId id = newProjectId();
-        context.receivesCommand(createProject(id))
-               .receivesEvent(taskAdded(id))
-               .assertThat(emittedEvent(once()))
-               .assertThat(emittedEvent(BbProjectCreated.class, once()));
+        EventSubject assertEvents = context
+                .receivesCommand(createProject(id))
+                .receivesEvent(taskAdded(id))
+                .assertEvents();
+        assertEvents.hasSize(1);
+        assertEvents.withType(BbProjectCreated.class).isNotEmpty();
     }
 
     @Nested
@@ -224,51 +219,32 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     class VerifyStateOf {
 
         @Test
-        @DisplayName("a single aggregate")
+        @DisplayName("an aggregate")
         void aggregate() {
             BbCreateProject createProject = createProject();
             BbProject expectedProject = createdProjectState(createProject);
             context.receivesCommand(createProject)
-                   .assertThat(exactlyOne(expectedProject));
+                   .assertEntityWithState(expectedProject.getClass(), createProject.getProjectId())
+                   .hasStateThat()
+                   .isEqualTo(expectedProject);
         }
 
         @Test
-        @DisplayName("several aggregates")
-        void aggregates() {
-            BbCreateProject cmd1 = createProject();
-            BbCreateProject cmd2 = createProject();
-            BbProject expectedProject1 = createdProjectState(cmd1);
-            BbProject expectedProject2 = createdProjectState(cmd2);
-            context.receivesCommands(cmd1, cmd2)
-                   .assertThat(exactly(BbProject.class,
-                                       ImmutableSet.of(expectedProject1, expectedProject2)));
-        }
-
-        @Test
-        @DisplayName("a single projection")
+        @DisplayName("a projection")
         void projection() {
             BbCreateProject createProject = createProject();
             BbProjectView expectedProject = createProjectView(createProject);
             context.receivesCommand(createProject)
-                   .assertThat(exactlyOne(expectedProject));
-        }
-
-        @Test
-        @DisplayName("several projections")
-        void projections() {
-            BbCreateProject cmd1 = createProject();
-            BbCreateProject cmd2 = createProject();
-            BbProjectView expectedProject1 = createProjectView(cmd1);
-            BbProjectView expectedProject2 = createProjectView(cmd2);
-            context.receivesCommands(cmd1, cmd2)
-                   .assertThat(exactly(BbProjectView.class,
-                                       ImmutableSet.of(expectedProject1, expectedProject2)));
+                   .assertEntityWithState(expectedProject.getClass(), createProject.getProjectId())
+                   .hasStateThat()
+                   .isEqualTo(expectedProject);
         }
 
         private BbProjectView createProjectView(BbCreateProject createProject) {
-            return BbProjectView.newBuilder()
-                                        .setId(createProject.getProjectId())
-                                        .build();
+            return BbProjectView
+                    .newBuilder()
+                    .setId(createProject.getProjectId())
+                    .build();
         }
     }
 
@@ -276,27 +252,31 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("receive and handle a single command")
     void receivesACommand() {
         context.receivesCommand(createProject())
-               .assertThat(acked(once()).withoutErrorsOrRejections())
-               .assertThat(emittedEvent(BbProjectCreated.class, once()));
+               .assertEvents()
+               .withType(BbProjectCreated.class)
+               .hasSize(1);
     }
 
     @Test
     @DisplayName("verifiers emitting one event")
     void eventOnCommand() {
         context.receivesCommand(createProject())
-               .assertEmitted(BbProjectCreated.class);
+               .assertEvents()
+               .withType(BbProjectCreated.class)
+               .hasSize(1);
     }
 
     @Test
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
         BbProjectId projectId = newProjectId();
-        context.receivesCommand(createProject(projectId))
-               .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
-               .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(emittedEvent(count(4)))
-               .assertThat(emittedEvent(BbProjectCreated.class, once()))
-               .assertThat(emittedEvent(BbTaskAdded.class, thrice()));
+        EventSubject assertEvents = context
+                .receivesCommand(createProject(projectId))
+                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
+                .assertEvents();
+        assertEvents.hasSize(4);
+        assertEvents.withType(BbProjectCreated.class).hasSize(1);
+        assertEvents.withType(BbTaskAdded.class).hasSize(3);
     }
 
     @Test
@@ -308,7 +288,9 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
 
         // Attempt to start the project again.
         context.receivesCommand(startProject(projectId))
-               .assertRejectedWith(Rejections.BbProjectAlreadyStarted.class);
+               .assertEvents()
+               .withType(Rejections.BbProjectAlreadyStarted.class)
+               .hasSize(1);
     }
 
     @Nested
@@ -348,68 +330,73 @@ abstract class BlackBoxBoundedContextTest<T extends BlackBoxBoundedContext<T>> {
     @DisplayName("receive and react on single event")
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
-        context.with(new BbReportRepository())
-               .receivesCommand(createReport(projectId))
-               .receivesEvent(taskAdded(projectId))
-               .assertThat(acked(twice()).withoutErrorsOrRejections())
-               .assertThat(emittedEvent(twice()))
-               .assertThat(emittedEvent(BbReportCreated.class, once()))
-               .assertThat(emittedEvent(BbTaskAddedToReport.class, once()));
+        EventSubject assertEvents = context
+                .with(new BbReportRepository())
+                .receivesCommand(createReport(projectId))
+                .receivesEvent(taskAdded(projectId))
+                .assertEvents();
+        assertEvents.hasSize(2);
+        assertEvents.withType(BbReportCreated.class).hasSize(1);
+        assertEvents.withType(BbTaskAddedToReport.class).hasSize(1);
     }
 
     @Test
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
-        context.with(new BbReportRepository())
-               .receivesCommand(createReport(projectId))
-               .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
-               .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(emittedEvent(count(4)))
-               .assertThat(emittedEvent(BbReportCreated.class, once()))
-               .assertThat(emittedEvent(BbTaskAddedToReport.class, thrice()));
+        EventSubject assertEvents = context
+                .with(new BbReportRepository())
+                .receivesCommand(createReport(projectId))
+                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
+                .assertEvents();
+        assertEvents.hasSize(4);
+        assertEvents.withType(BbReportCreated.class).hasSize(1);
+        assertEvents.withType(BbTaskAddedToReport.class).hasSize(3);
     }
 
     @Nested
+    @DisplayName("send")
     class SendExternalEvents {
 
         @Test
-        @DisplayName("sends an external event")
+        @DisplayName(" an external event")
         void single() {
             BbProjectId projectId = newProjectId();
             UserId user = newUuid();
 
-            context.receivesCommand(createProject(projectId))
-                   .receivesCommand(addProjectAssignee(projectId, user))
-                   .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
-                   .assertThat(acked(count(3)).withoutErrorsOrRejections())
-                   .assertThat(emittedEvent(count(3)))
-                   .assertThat(emittedEvent(BbProjectCreated.class, once()))
-                   .assertThat(emittedEvent(BbAssigneeAdded.class, once()))
-                   .assertThat(emittedEvent(BbAssigneeRemoved.class, once()));
+            EventSubject assertEvents = context
+                    .receivesCommand(createProject(projectId))
+                    .receivesCommand(addProjectAssignee(projectId, user))
+                    .receivesExternalEvent(newName("Users"), userDeleted(user, projectId))
+                    .assertEvents();
+            assertEvents.hasSize(3);
+            assertEvents.withType(BbProjectCreated.class).isNotEmpty();
+            assertEvents.withType(BbAssigneeAdded.class).isNotEmpty();
+            assertEvents.withType(BbAssigneeRemoved.class).isNotEmpty();
         }
 
         @Test
-        @DisplayName("sends multiple external events")
+        @DisplayName("multiple external events")
         void multiple() {
             BbProjectId projectId = newProjectId();
             UserId user1 = newUuid();
             UserId user2 = newUuid();
             UserId user3 = newUuid();
 
-            context.receivesCommand(createProject(projectId))
-                   .receivesCommands(addProjectAssignee(projectId, user1),
-                                     addProjectAssignee(projectId, user2),
-                                     addProjectAssignee(projectId, user3))
-                   .receivesExternalEvents(newName("Users"),
-                                           userDeleted(user1, projectId),
-                                           userDeleted(user2, projectId),
-                                           userDeleted(user3, projectId))
-                   .assertThat(acked(count(7)).withoutErrorsOrRejections())
-                   .assertThat(emittedEvent(count(7)))
-                   .assertThat(emittedEvent(BbProjectCreated.class, once()))
-                   .assertThat(emittedEvent(BbAssigneeAdded.class, thrice()))
-                   .assertThat(emittedEvent(BbAssigneeRemoved.class, thrice()));
+            EventSubject assertEvents = context
+                    .receivesCommand(createProject(projectId))
+                    .receivesCommands(addProjectAssignee(projectId, user1),
+                                      addProjectAssignee(projectId, user2),
+                                      addProjectAssignee(projectId, user3))
+                    .receivesExternalEvents(newName("Users"),
+                                            userDeleted(user1, projectId),
+                                            userDeleted(user2, projectId),
+                                            userDeleted(user3, projectId))
+                    .assertEvents();
+            assertEvents.hasSize(7);
+            assertEvents.withType(BbProjectCreated.class).hasSize(1);
+            assertEvents.withType(BbAssigneeAdded.class).hasSize(3);
+            assertEvents.withType(BbAssigneeRemoved.class).hasSize(3);
         }
     }
 

@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
@@ -33,7 +34,6 @@ import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.model.MethodParams.consistsOfTypes;
 
 /**
  * A {@link ParameterSpec} of an entity state subscriber method.
@@ -62,13 +62,12 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     }
 
     @Override
-    public boolean matches(Class<?>[] methodParams) {
-        boolean typesMatch = consistsOfTypes(methodParams, parameters);
-        if (!typesMatch) {
+    public boolean matches(MethodParams params) {
+        if (!params.match(parameters)) {
             return false;
         }
         @SuppressWarnings("unchecked") // Checked above.
-        Class<? extends Message> firstParameter = (Class<? extends Message>) methodParams[0];
+        Class<? extends Message> firstParameter = (Class<? extends Message>) params.type(0);
         EntityVisibility visibility = EntityVisibility.of(firstParameter);
         if (visibility.canSubscribe()) {
             return true;

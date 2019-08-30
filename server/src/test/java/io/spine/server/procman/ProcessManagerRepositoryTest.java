@@ -105,10 +105,8 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStar
 import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
 import static io.spine.testing.TestValues.randomString;
-import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -598,7 +596,8 @@ class ProcessManagerRepositoryTest
                 .singleTenant()
                 .with(new EventDiscardingProcManRepository())
                 .receivesCommand(command)
-                .assertThat(emittedEvent(count(0)));
+                .assertEvents()
+                .isEmpty();
     }
 
     @Nested

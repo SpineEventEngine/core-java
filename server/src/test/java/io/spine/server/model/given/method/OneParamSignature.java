@@ -56,8 +56,8 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new OneParamMethod(method, parameterSpec);
+    public OneParamMethod create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new OneParamMethod(method, params);
     }
 
     private static ImmutableSet<AccessModifier> allModifiers() {

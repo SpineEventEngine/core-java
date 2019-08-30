@@ -28,7 +28,7 @@ import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.truth.Fact.simpleFact;
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
 
@@ -39,20 +39,17 @@ import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
 @VisibleForTesting
 public final class IterableEntityVersionSubject extends IterableOfProtosSubject<Version> {
 
-    private static final String ENTITY_VERSION_LIST_SHOULD_EXIST =
-            "entity version list should exist";
-
     private final @Nullable Iterable<Version> actual;
 
     private IterableEntityVersionSubject(FailureMetadata failureMetadata,
-                                         @Nullable Iterable<Version> actual) {
-        super(failureMetadata, actual);
-        this.actual = actual;
+                                         @Nullable Iterable<Version> versions) {
+        super(failureMetadata, versions);
+        this.actual = versions;
     }
 
     public static IterableEntityVersionSubject
-    assertEntityVersions(@Nullable Iterable<Version> actual) {
-        return assertAbout(entityVersions()).that(actual);
+    assertEntityVersions(@Nullable Iterable<Version> versions) {
+        return assertAbout(entityVersions()).that(versions);
     }
 
     /**
@@ -61,10 +58,10 @@ public final class IterableEntityVersionSubject extends IterableOfProtosSubject<
     public void containsAllNewerThan(Version version) {
         checkNotNull(version);
         if (actual == null) {
-            shouldExistButDoesNot();
-            return;
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isNewerThan(version));
         }
-        actual.forEach(v -> assertVersion(v).isNewerThan(version));
     }
 
     /**
@@ -73,10 +70,10 @@ public final class IterableEntityVersionSubject extends IterableOfProtosSubject<
     public void containsAllNewerOrEqualTo(Version version) {
         checkNotNull(version);
         if (actual == null) {
-            shouldExistButDoesNot();
-            return;
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
         }
-        actual.forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
     }
 
     /**
@@ -85,10 +82,10 @@ public final class IterableEntityVersionSubject extends IterableOfProtosSubject<
     public void containsAllOlderThan(Version version) {
         checkNotNull(version);
         if (actual == null) {
-            shouldExistButDoesNot();
-            return;
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isOlderThan(version));
         }
-        actual.forEach(v -> assertVersion(v).isOlderThan(version));
     }
 
     /**
@@ -97,10 +94,10 @@ public final class IterableEntityVersionSubject extends IterableOfProtosSubject<
     public void containsAllOlderOrEqualTo(Version version) {
         checkNotNull(version);
         if (actual == null) {
-            shouldExistButDoesNot();
-            return;
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
         }
-        actual.forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
     }
 
     /**
@@ -109,27 +106,22 @@ public final class IterableEntityVersionSubject extends IterableOfProtosSubject<
      */
     public EntityVersionSubject containsSingleEntityVersionThat() {
         if (actual == null) {
-            shouldExistButDoesNot();
+            isNotNull();
             return ignoreCheck().about(entityVersion())
-                                .that(null);
+                                .that(Version.getDefaultInstance());
+        } else if (size(actual) != 1) {
+            hasSize(1);
+            return ignoreCheck().about(entityVersion())
+                                .that(Version.getDefaultInstance());
+        } else {
+            Version version = actual.iterator().next();
+            return assertVersion(version);
         }
-        assertContainsSingleItem();
-        Version version = actual.iterator()
-                                .next();
-        return assertVersion(version);
     }
 
     private EntityVersionSubject assertVersion(Version version) {
         return check("singleEntityVersion()").about(entityVersion())
                                              .that(version);
-    }
-
-    private void assertContainsSingleItem() {
-        hasSize(1);
-    }
-
-    private void shouldExistButDoesNot() {
-        failWithoutActual(simpleFact(ENTITY_VERSION_LIST_SHOULD_EXIST));
     }
 
     public static

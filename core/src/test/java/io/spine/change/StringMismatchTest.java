@@ -111,7 +111,7 @@ class StringMismatchTest extends UtilityClassTest<StringMismatch> {
         }
 
         @Test
-        @DisplayName("actual")
+        @DisplayName("actual String")
         void actualWithWrongType() {
             ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));

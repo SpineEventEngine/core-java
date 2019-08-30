@@ -31,6 +31,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
@@ -77,7 +78,7 @@ public final class EntitySubject extends Subject {
      * Obtains the subject for the {@code archived} flag.
      */
     public BooleanSubject archivedFlag() {
-        if (actual == null) {
+        if (actual() == null) {
             shouldExistButDoesNot();
             return ignoreCheck().that(false);
         } else {
@@ -89,7 +90,7 @@ public final class EntitySubject extends Subject {
      * Obtains the subject for the {@code deleted} flag.
      */
     public BooleanSubject deletedFlag() {
-        if (actual == null) {
+        if (actual() == null) {
             shouldExistButDoesNot();
             return ignoreCheck().that(false);
         } else {
@@ -97,8 +98,9 @@ public final class EntitySubject extends Subject {
         }
     }
 
-    @SuppressWarnings("ConstantConditions") // Logically checked.
     private LifecycleFlags flags() {
+        Entity<?, ?> actual = actual();
+        checkNotNull(actual);
         return actual.lifecycleFlags();
     }
 
@@ -106,11 +108,11 @@ public final class EntitySubject extends Subject {
      * Obtains the subject for the entity version.
      */
     public EntityVersionSubject version() {
-        if (actual == null) {
+        if (actual() == null) {
             shouldExistButDoesNot();
             return assertEntityVersion(Version.getDefaultInstance());
         } else {
-            return assertEntityVersion(actual.version());
+            return assertEntityVersion(actual().version());
         }
     }
 
@@ -118,7 +120,7 @@ public final class EntitySubject extends Subject {
      * Obtains the subject for the state of the entity.
      */
     public ProtoSubject hasStateThat() {
-        Entity<?, ?> entity = actual;
+        Entity<?, ?> entity = actual();
         if (entity == null) {
             shouldExistButDoesNot();
             return ignoreCheck().about(protos())
@@ -127,6 +129,13 @@ public final class EntitySubject extends Subject {
             return check("state()").about(protos())
                                    .that(entity.state());
         }
+    }
+
+    /**
+     * Obtains the entity under verification.
+     */
+    public @Nullable Entity<?, ?> actual() {
+        return actual;
     }
 
     private void shouldExistButDoesNot() {

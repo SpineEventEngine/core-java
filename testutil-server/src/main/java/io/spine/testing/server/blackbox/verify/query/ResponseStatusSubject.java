@@ -28,6 +28,7 @@ import io.spine.core.Status;
 import io.spine.core.Status.StatusCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
@@ -41,10 +42,9 @@ public final class ResponseStatusSubject extends ProtoSubject {
 
     private final @Nullable Status actual;
 
-    private ResponseStatusSubject(FailureMetadata failureMetadata,
-                                  @Nullable Status actual) {
-        super(failureMetadata, actual);
-        this.actual = actual;
+    private ResponseStatusSubject(FailureMetadata failureMetadata, @Nullable Status message) {
+        super(failureMetadata, message);
+        this.actual = message;
     }
 
     public static ResponseStatusSubject assertResponseStatus(@Nullable Status status) {
@@ -73,14 +73,20 @@ public final class ResponseStatusSubject extends ProtoSubject {
     }
 
     void hasStatusCase(StatusCase statusCase) {
-        check("statusCase()").that(statusCase())
-                             .isEqualTo(statusCase);
+        if (actual() == null) {
+            assertExists();
+        } else {
+            check("statusCase()").that(statusCase())
+                                 .isEqualTo(statusCase);
+        }
     }
 
-    @SuppressWarnings("ConstantConditions") // Logically checked by `assertExists()`.
+    private @Nullable Status actual() {
+        return actual;
+    }
+
     private StatusCase statusCase() {
-        assertExists();
-        return actual.getStatusCase();
+        return checkNotNull(actual).getStatusCase();
     }
 
     private void assertExists() {

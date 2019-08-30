@@ -89,7 +89,7 @@ class BooleanMismatchTest extends UtilityClassTest<BooleanMismatch> {
         }
 
         @Test
-        @DisplayName("actual")
+        @DisplayName("actual boolean")
         void actualWithWrongType() {
             ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));

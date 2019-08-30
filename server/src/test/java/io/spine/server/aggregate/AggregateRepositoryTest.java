@@ -68,6 +68,7 @@ import io.spine.testdata.Sample;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
@@ -96,12 +97,7 @@ import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.re
 import static io.spine.server.aggregate.given.repo.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
-import static io.spine.testing.client.blackbox.Count.none;
-import static io.spine.testing.client.blackbox.Count.thrice;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenTenantId.generate;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -499,7 +495,6 @@ public class AggregateRepositoryTest {
                 // 1. got Rejections.AggCannotStartArchivedProject;
                 // 2. produced the state the event;
                 // 3. applied the event.
-                @SuppressWarnings("OptionalGetWithoutIsPresent") // checked above.
                 String value = optional.get()
                                        .state()
                                        .getValue();
@@ -514,7 +509,7 @@ public class AggregateRepositoryTest {
     @DisplayName("post produced events to EventBus")
     class PostEventsToBus {
 
-        private AggregateRepository<?, ?> repository;
+        private BlackBoxBoundedContext<?> context;
 
         /**
          * Create a fresh instance of the repository since this nested class uses
@@ -525,7 +520,10 @@ public class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            repository = repository();
+            AggregateRepository<?, ?> repository = repository();
+            context = BlackBoxBoundedContext
+                    .singleTenant()
+                    .with(repository);
         }
 
         @Test
@@ -551,12 +549,8 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(id)
                     .build();
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(repository)
-                    .receivesCommands(create, addTask, start)
-                    .assertThat(emittedEventsHadVersions(1, 2, 3))
-                    .close();
+            context.receivesCommands(create, addTask, start);
+            assertEventVersions(1, 2, 3);
         }
 
         @Test
@@ -578,16 +572,12 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext
-                    .singleTenant()
-                    .with(repository)
-                    .receivesCommands(create, start)
-                    .receivesEvent(archived)
-                    .assertThat(emittedEventsHadVersions(
-                            1, 2, // Product creation
-                            3     // Event produced in response to `archived` event
-                    ))
-                    .close();
+            context.receivesCommands(create, start)
+                   .receivesEvent(archived);
+            assertEventVersions(
+                    1, 2, // Results of commands.
+                    3  // The result of the `archived` event.
+            );
         }
 
         @Test
@@ -609,14 +599,24 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext
+            SingleTenantBlackBoxContext context = BlackBoxBoundedContext
                     .singleTenant()
                     .with(new EventDiscardingAggregateRepository())
                     .receivesCommands(create, start)
-                    .receivesEvent(archived)
-                    .assertThat(emittedEvent(none()))
-                    .assertThat(acked(thrice()).withoutErrorsOrRejections())
-                    .close();
+                    .receivesEvent(archived);
+            context.assertEvents().isEmpty();
+            context.close();
+        }
+
+        private void assertEventVersions(int... expectedVersions) {
+            List<Event> events = context.assertEvents().actual();
+            assertThat(events).hasSize(expectedVersions.length);
+            for (int i = 0; i < events.size(); i++) {
+                Event event = events.get(i);
+                int expectedVersion = expectedVersions[i];
+                assertThat(event.context().getVersion().getNumber())
+                        .isEqualTo(expectedVersion);
+            }
         }
     }
 

@@ -27,7 +27,6 @@ import com.google.protobuf.Any;
 import io.spine.base.SerializableMessage;
 import io.spine.core.Signal;
 import io.spine.testing.SubjectTest;
-import io.spine.testing.server.EmittedMessageSubject.FactKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +34,9 @@ import java.util.function.Supplier;
 
 import static com.google.common.truth.ExpectFailure.assertThat;
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.server.EmittedMessageSubject.FactKey.ACTUAL;
+import static io.spine.testing.server.EmittedMessageSubject.FactKey.MESSAGE_COUNT;
+import static io.spine.testing.server.EmittedMessageSubject.FactKey.REQUESTED_INDEX;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
 
@@ -117,10 +119,19 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
         AssertionError error = expectFailure(whenTesting -> whenTesting.that(messages)
                                                                        .message(index));
         TruthFailureSubject assertError = assertThat(error);
-        assertError.factValue(FactKey.MESSAGE_COUNT.value())
+        assertError.factValue(MESSAGE_COUNT.value())
                    .isEqualTo(String.valueOf(messageCount));
-        assertError.factValue(FactKey.REQUESTED_INDEX.value())
+        assertError.factValue(REQUESTED_INDEX.value())
                    .isEqualTo(String.valueOf(index));
+    }
+
+    @Test
+    @DisplayName("fail to get a message if the list is `null`")
+    void failForNull() {
+        AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                       .message(42));
+        assertThat(error).factKeys()
+                         .contains(ACTUAL.value());
     }
 
     @Test
@@ -155,7 +166,7 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
         AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
                                                                        .withType(type));
         TruthFailureSubject assertError = assertThat(error);
-        assertError.factValue(FactKey.ACTUAL.value())
+        assertError.factValue(ACTUAL.value())
                    .isEqualTo("null");
     }
 
