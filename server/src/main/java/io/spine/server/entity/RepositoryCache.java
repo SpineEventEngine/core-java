@@ -36,6 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * The cache of {@code Entity} states for a certain {@code Repository} and
  * {@linkplain #startCaching(Object) selected} identifiers.
  *
+ * <p>The users of this class should keep the number of the simultaneously cached entities
+ * reasonable due to a potentially huge significant memory footprint.
+ *
  * @param <I>
  *         the type of {@code Entity} identifiers
  * @param <E>
