@@ -127,7 +127,7 @@ import static java.lang.String.format;
  *
  * <p>An entity column can be of any type. Most common types are already supported if an existing
  * implementation of the {@link io.spine.server.storage.Storage Spine Storage} is used.
- * However, their behavior can be overriden using {@link ColumnTypeRegistry}.
+ * However, their behavior can be overridden using {@link ColumnTypeRegistry}.
  *
  * <p>To handle column types not supported by default implement the {@link ColumnType}
  * interface, register it in a {@link ColumnTypeRegistry} and pass the instance of the registry
