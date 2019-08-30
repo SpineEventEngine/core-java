@@ -40,10 +40,10 @@ import io.spine.server.NodeId;
 @SPI
 public class DeliveryMonitor {
 
-    private static final DeliveryMonitor STOP_WHEN_EMPTY = new DeliveryMonitor();
+    private static final DeliveryMonitor ALWAYS_CONTINUE = new DeliveryMonitor();
 
     /**
-     * Determines if the delivery execution should be continued after the given stage is completed.
+     * Determines if the delivery execution should be stopped after the given stage is completed.
      *
      * <p>If {@code false} is returned, the ongoing delivery run for the served shard will be
      * stopped at this application node. The node will release the previously
@@ -62,15 +62,14 @@ public class DeliveryMonitor {
      * @implNote The default implementation stops the execution once there were zero
      *         messages {@linkplain DeliveryStage#messagesDelivered() delivered in the given stage}.
      */
-    public boolean shouldContinueAfter(DeliveryStage stage) {
-        return stage.messagesDelivered() > 0;
+    public boolean shouldStopAfter(DeliveryStage stage) {
+        return false;
     }
 
     /**
-     * Returns an instance of {@code DeliveryMonitor} which stops the delivery, once no messages
-     * appeared to be delivered at the given stage.
+     * Returns an instance of {@code DeliveryMonitor} which always tells to continue.
      */
-    static DeliveryMonitor stopWhenEmpty() {
-        return STOP_WHEN_EMPTY;
+    static DeliveryMonitor alwaysContinue() {
+        return ALWAYS_CONTINUE;
     }
 }

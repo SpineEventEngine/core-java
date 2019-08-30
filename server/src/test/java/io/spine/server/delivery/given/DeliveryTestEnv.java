@@ -21,6 +21,7 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -169,14 +170,14 @@ public class DeliveryTestEnv {
      */
     public static class RawMessageMemoizer implements ShardObserver {
 
-        private final ImmutableSet.Builder<InboxMessage> rawMessages = ImmutableSet.builder();
+        private final ImmutableList.Builder<InboxMessage> rawMessages = ImmutableList.builder();
 
         @Override
         public void onMessage(InboxMessage update) {
             rawMessages.add(update);
         }
 
-        public ImmutableSet<InboxMessage> messages() {
+        public ImmutableList<InboxMessage> messages() {
             return rawMessages.build();
         }
     }

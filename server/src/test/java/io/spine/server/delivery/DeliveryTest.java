@@ -34,6 +34,7 @@ import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.SignalMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
+import io.spine.server.delivery.given.MemoizingDeliveryMonitor;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
@@ -203,7 +204,7 @@ class DeliveryTest {
         new ThreadSimulator(3, false).runWith(targets);
 
         // Check that each message was in `TO_DELIVER` status upon writing to the storage.
-        ImmutableSet<InboxMessage> rawMessages = memoizer.messages();
+        ImmutableList<InboxMessage> rawMessages = memoizer.messages();
         for (InboxMessage message : rawMessages) {
             assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
         }
@@ -221,9 +222,13 @@ class DeliveryTest {
     @DisplayName("a single shard to a single target in a multi-threaded env in batches")
     void deliverInBatch() {
         FixedShardStrategy strategy = new FixedShardStrategy(1);
+        MemoizingDeliveryMonitor monitor = new MemoizingDeliveryMonitor();
+        int pageSize = 20;
         Delivery delivery = Delivery.newBuilder()
                                     .setStrategy(strategy)
                                     .setIdempotenceWindow(Durations.ZERO)
+                                    .setMonitor(monitor)
+                                    .setPageSize(pageSize)
                                     .build();
         deliverAfterPause(delivery);
 
@@ -241,6 +246,19 @@ class DeliveryTest {
         assertThat(simulator.callsToRepositoryLoadOrCreate(theTarget)).isLessThan(
                 signalsDispatched);
         assertThat(simulator.callsToRepositoryStore(theTarget)).isLessThan(signalsDispatched);
+
+        assertStages(monitor, pageSize);
+    }
+
+    private static void assertStages(MemoizingDeliveryMonitor monitor,
+                                     int pageSize) {
+        ImmutableList<DeliveryStage> totalStages = monitor.getStages();
+        List<Integer> actualSizePerPage = totalStages.stream()
+                                                     .map(DeliveryStage::messagesDelivered)
+                                                     .collect(toList());
+        for (Integer actualSize : actualSizePerPage) {
+            assertThat(actualSize).isAtMost(pageSize);
+        }
     }
 
     private static void deliverAfterPause(Delivery delivery) {

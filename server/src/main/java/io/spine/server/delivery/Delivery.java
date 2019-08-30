@@ -32,6 +32,7 @@ import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -246,17 +247,20 @@ public final class Delivery {
     public void deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        Optional<ShardProcessingSession> picked =
-                workRegistry.pickUp(index, currentNode);
+        Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
         if (!picked.isPresent()) {
             return;
         }
         ShardProcessingSession session = picked.get();
+
         try {
-            DeliveryStage stage;
+
+            int deliveredMsgCount;
             do {
-                stage = doDeliver(session);
-            } while (monitor.shouldContinueAfter(stage));
+                deliveredMsgCount = doDeliver(session);
+            } while (deliveredMsgCount > 0);
+        } catch (DeliveryStoppedByMonitorException ignored) {
+            // do nothing.
         } finally {
             session.complete();
         }
@@ -265,12 +269,15 @@ public final class Delivery {
     /**
      * Runs the delivery for the shard, which session is passed.
      *
-     * <p>Produces a {@code DeliveryStage} instance once all the messages read from the
-     * {@code Inbox} of the given shard are delivered.
+     * <p>The messages are read page-by-page according to the {@link #pageSize page size} setting.
+     *
+     * <p>After delivering each page of messages, a {@code DeliveryStage} is produced.
+     * The configured {@link #monitor DeliveryMonitor} may stop the execution according to
+     * the monitored {@code DeliveryStage}.
      *
      * @return the passed delivery stage.
      */
-    private DeliveryStage doDeliver(ShardProcessingSession session) {
+    private int doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
@@ -279,7 +286,8 @@ public final class Delivery {
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;
-        while (maybePage.isPresent()) {
+        DeliveryStage stage = null;
+        while (maybePage.isPresent() && monitorTellsToContinue(stage)) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
@@ -289,11 +297,21 @@ public final class Delivery {
 
                 ImmutableList<InboxMessage> toRemove = classifier.removals();
                 inboxStorage.removeAll(toRemove);
+                stage = new DeliveryStage(index, totalMessagesDelivered);
             }
             maybePage = currentPage.next();
         }
-        DeliveryStage result = new DeliveryStage(index, totalMessagesDelivered);
-        return result;
+        return totalMessagesDelivered;
+    }
+
+    private boolean monitorTellsToContinue(@Nullable DeliveryStage stage) {
+        if(stage == null) {
+            return true;
+        }
+        if(monitor.shouldStopAfter(stage)) {
+            throw new DeliveryStoppedByMonitorException();
+        }
+        return true;
     }
 
     /**

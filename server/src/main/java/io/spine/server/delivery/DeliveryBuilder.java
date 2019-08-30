@@ -183,7 +183,7 @@ public final class DeliveryBuilder {
     /**
      * Sets the custom {@code DeliveryMonitor}.
      *
-     * <p>If none set, {@link DeliveryMonitor#stopWhenEmpty()}  is used.
+     * <p>If none set, {@link DeliveryMonitor#alwaysContinue()}  is used.
      */
     @CanIgnoreReturnValue
     public DeliveryBuilder setMonitor(DeliveryMonitor monitor) {
@@ -223,7 +223,7 @@ public final class DeliveryBuilder {
         }
 
         if (deliveryMonitor == null) {
-            deliveryMonitor = DeliveryMonitor.stopWhenEmpty();
+            deliveryMonitor = DeliveryMonitor.alwaysContinue();
         }
 
         if (pageSize == null) {

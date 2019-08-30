@@ -132,7 +132,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("delivery monitor")
         void deliveryMonitor() {
-            DeliveryMonitor monitor = DeliveryMonitor.stopWhenEmpty();
+            DeliveryMonitor monitor = DeliveryMonitor.alwaysContinue();
             assertEquals(monitor, builder().setMonitor(monitor)
                                            .deliveryMonitor()
                                            .get());

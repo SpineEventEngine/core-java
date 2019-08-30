@@ -129,9 +129,10 @@ public abstract class InboxStorageTest {
     }
 
     /*
-     * Test environment and utility methods
+     * Test environment and utilities.
      *
-     * <p>Accesses some of the package-private utilities.
+     * @implNote Some of the package-private utilities are accessed in this section. This is why
+     * it is not extracted into a separate {@code TestEnv}.
      ******************************************************************************/
 
     private static void assertSameContent(Collection<InboxMessage> expected,
