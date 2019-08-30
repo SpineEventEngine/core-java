@@ -52,7 +52,7 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
      * The hash function to use for the shard index calculation.
      */
     @SuppressWarnings("UnstableApiUsage")   // See the class-level docs.
-    private static final HashFunction HASHER = Hashing.murmur3_32(0);
+    private static final HashFunction HASHER = Hashing.murmur3_32();
 
     private final int numberOfShards;
 
