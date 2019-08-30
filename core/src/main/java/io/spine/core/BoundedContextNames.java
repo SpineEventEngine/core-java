@@ -118,7 +118,6 @@ public final class BoundedContextNames {
      * <p>When integrating with a third-party, use this name where a Bounded Context would go.
      */
     @Internal
-    @VisibleForTesting
     public static BoundedContextName outside() {
         return OUTSIDE;
     }

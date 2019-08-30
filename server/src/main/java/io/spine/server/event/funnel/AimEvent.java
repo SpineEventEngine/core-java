@@ -20,19 +20,31 @@
 
 package io.spine.server.event.funnel;
 
-import io.spine.core.EventId;
+import io.grpc.stub.StreamObserver;
+import io.spine.core.Ack;
+import io.spine.core.UserId;
+import io.spine.server.BoundedContext;
 
-public class AimEvent {
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 
-    public EventFunnel to(Object aggregateId) {
-        throw new UnsupportedOperationException("Method to is not implemented!");
+public final class AimEvent {
+
+    private static final StreamObserver<Ack> defaultObserver = noOpObserver();
+
+    private final BoundedContext context;
+    private final UserId actor;
+
+    AimEvent(BoundedContext context, UserId actor) {
+        this.context = checkNotNull(context);
+        this.actor = checkNotNull(actor);
+    }
+
+    public EventFunnel toAggregate() {
+        return new ImportFunnel(context.importBus(), defaultObserver, actor);
     }
 
     public EventFunnel broadcast() {
-        throw new UnsupportedOperationException("Method broadcast is not implemented!");
-    }
-
-    public EventFunnel broadcastWithOrigin(EventId originEventId) {
-        throw new UnsupportedOperationException("Method broadcastWithOrigin is not implemented!");
+        return new IntegrationFunnel(context.integrationBus(), defaultObserver, actor);
     }
 }

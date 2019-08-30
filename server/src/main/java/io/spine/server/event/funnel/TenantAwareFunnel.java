@@ -20,31 +20,38 @@
 
 package io.spine.server.event.funnel;
 
-import io.spine.annotation.Internal;
-import io.spine.core.UserId;
-import io.spine.server.BoundedContext;
+import io.grpc.stub.StreamObserver;
+import io.spine.base.EventMessage;
+import io.spine.core.Ack;
+import io.spine.core.TenantId;
+import io.spine.server.tenant.TenantAwareRunner;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class PostEvent {
+final class TenantAwareFunnel implements EventFunnel {
 
-    private final BoundedContext context;
+    private final EventFunnel delegate;
+    private final TenantId tenantId;
 
-    @Internal
-    public PostEvent(BoundedContext context) {
-        this.context = checkNotNull(context);
+    TenantAwareFunnel(EventFunnel delegate, TenantId tenantId) {
+        this.delegate = checkNotNull(delegate);
+        this.tenantId = checkNotNull(tenantId);
     }
 
-    public AimEvent producedBy(UserId actor) {
-        checkNotNull(actor);
-        return new AimEvent(context, actor);
+    @Override
+    public EventFunnel with(StreamObserver<Ack> resultObserver) {
+        return new TenantAwareFunnel(delegate.with(resultObserver), tenantId);
     }
 
-    public AimEvent producedIn(String thirdParty) {
-        UserId actor = UserId
-                .newBuilder()
-                .setValue(thirdParty)
-                .vBuild();
-        return producedBy(actor);
+    @Override
+    public EventFunnel forTenant(TenantId tenantId) {
+        checkNotNull(tenantId);
+        return new TenantAwareFunnel(delegate, tenantId);
+    }
+
+    @Override
+    public void post(EventMessage... events) {
+        TenantAwareRunner.with(tenantId)
+                         .run(() -> delegate.post(events));
     }
 }

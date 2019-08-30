@@ -20,31 +20,42 @@
 
 package io.spine.server.event.funnel;
 
-import io.spine.annotation.Internal;
+import io.grpc.stub.StreamObserver;
+import io.spine.base.EventMessage;
+import io.spine.core.Ack;
+import io.spine.core.ActorContext;
+import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.ImportBus;
+
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Time.currentTime;
+import static java.util.stream.Collectors.toList;
 
-public final class PostEvent {
+final class ImportFunnel extends AbstractFunnel {
 
-    private final BoundedContext context;
+    private final ImportBus bus;
 
-    @Internal
-    public PostEvent(BoundedContext context) {
-        this.context = checkNotNull(context);
+    ImportFunnel(ImportBus bus, StreamObserver<Ack> resultObserver, UserId actor) {
+        super(actor, resultObserver);
+        this.bus = checkNotNull(bus);
     }
 
-    public AimEvent producedBy(UserId actor) {
-        checkNotNull(actor);
-        return new AimEvent(context, actor);
+    @Override
+    AbstractFunnel copyWithObserver(StreamObserver<Ack> resultObserver) {
+        return new ImportFunnel(bus, resultObserver(), actor());
     }
 
-    public AimEvent producedIn(String thirdParty) {
-        UserId actor = UserId
-                .newBuilder()
-                .setValue(thirdParty)
-                .vBuild();
-        return producedBy(actor);
+    @Override
+    public void post(EventMessage... eventMessages) {
+        checkNotNull(eventMessages);
+        ActorContext context = buildImportContext(currentTime());
+        Iterable<Event> events = Stream
+                .of(eventMessages)
+                .map((EventMessage message) -> buildEvent(message, context, false))
+                .collect(toList());
+        bus.post(events, resultObserver());
     }
 }
