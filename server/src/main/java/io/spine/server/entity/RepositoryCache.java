@@ -49,9 +49,9 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
 
     private final boolean multitenant;
     private final Load<I, E> loadFn;
-    private final Store<I, E> storeFn;
+    private final Store<E> storeFn;
 
-    public RepositoryCache(boolean multitenant, Load<I, E> loadFn, Store<I, E> storeFn) {
+    public RepositoryCache(boolean multitenant, Load<I, E> loadFn, Store<E> storeFn) {
         this.multitenant = multitenant;
         this.loadFn = loadFn;
         this.storeFn = storeFn;
@@ -129,11 +129,9 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
     /**
      * A function which stores the {@code Entity} state to its real repository.
      *
-     * @param <I>
-     *         the type of {@code Entity} identifiers
      * @param <E>
      *         the type of entity
      */
-    public interface Store<I, E extends Entity<I, ?>> extends Consumer<E> {
+    public interface Store<E extends Entity> extends Consumer<E> {
     }
 }
