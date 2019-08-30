@@ -60,7 +60,8 @@ public class DeliveryMonitor {
      *         the stage of delivery which has ended
      * @return {@code true} to continue the delivery, {@code false} to stop
      * @implNote The default implementation stops the execution once there were zero
-     *         messages {@linkplain DeliveryStage#messagesDelivered() delivered in the given stage}.
+     *         messages {@linkplain DeliveryStage#getMessagesDelivered() delivered in
+     *         the given stage}.
      */
     public boolean shouldContinueAfter(DeliveryStage stage) {
         return true;

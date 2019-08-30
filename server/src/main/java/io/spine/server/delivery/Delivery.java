@@ -293,14 +293,22 @@ public final class Delivery {
 
                 ImmutableList<InboxMessage> toRemove = classifier.removals();
                 inboxStorage.removeAll(toRemove);
-                DeliveryStage stage = new DeliveryStage(index, deliveredInBatch);
+                DeliveryStage stage = newStage(index, deliveredInBatch);
                 continueAllowed = monitorTellsToContinue(stage);
             }
-            if(continueAllowed) {
+            if (continueAllowed) {
                 maybePage = currentPage.next();
             }
         }
         return new RunResult(totalMessagesDelivered, !continueAllowed);
+    }
+
+    private static DeliveryStage newStage(ShardIndex index, int deliveredInBatch) {
+        return DeliveryStage
+                .newBuilder()
+                .setIndex(index)
+                .setMessagesDelivered(deliveredInBatch)
+                .vBuild();
     }
 
     private boolean monitorTellsToContinue(@Nullable DeliveryStage stage) {

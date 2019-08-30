@@ -252,7 +252,7 @@ class DeliveryTest {
     private static void assertStages(MemoizingDeliveryMonitor monitor, int pageSize) {
         ImmutableList<DeliveryStage> totalStages = monitor.getStages();
         List<Integer> actualSizePerPage = totalStages.stream()
-                                                     .map(DeliveryStage::messagesDelivered)
+                                                     .map(DeliveryStage::getMessagesDelivered)
                                                      .collect(toList());
         for (Integer actualSize : actualSizePerPage) {
             assertThat(actualSize).isAtMost(pageSize);
