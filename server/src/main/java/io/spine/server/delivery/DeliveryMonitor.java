@@ -43,7 +43,7 @@ public class DeliveryMonitor {
     private static final DeliveryMonitor ALWAYS_CONTINUE = new DeliveryMonitor();
 
     /**
-     * Determines if the delivery execution should be stopped after the given stage is completed.
+     * Determines if the delivery execution should be continued after the given stage is completed.
      *
      * <p>If {@code false} is returned, the ongoing delivery run for the served shard will be
      * stopped at this application node. The node will release the previously
@@ -62,8 +62,8 @@ public class DeliveryMonitor {
      * @implNote The default implementation stops the execution once there were zero
      *         messages {@linkplain DeliveryStage#messagesDelivered() delivered in the given stage}.
      */
-    public boolean shouldStopAfter(DeliveryStage stage) {
-        return false;
+    public boolean shouldContinueAfter(DeliveryStage stage) {
+        return true;
     }
 
     /**

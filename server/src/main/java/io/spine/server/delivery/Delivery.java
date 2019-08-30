@@ -254,13 +254,10 @@ public final class Delivery {
         ShardProcessingSession session = picked.get();
 
         try {
-
-            int deliveredMsgCount;
+            RunResult runResult;
             do {
-                deliveredMsgCount = doDeliver(session);
-            } while (deliveredMsgCount > 0);
-        } catch (DeliveryStoppedByMonitorException ignored) {
-            // do nothing.
+                runResult = doDeliver(session);
+            } while (runResult.shouldRunAgain());
         } finally {
             session.complete();
         }
@@ -277,7 +274,7 @@ public final class Delivery {
      *
      * @return the passed delivery stage.
      */
-    private int doDeliver(ShardProcessingSession session) {
+    private RunResult doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
@@ -286,8 +283,8 @@ public final class Delivery {
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;
-        DeliveryStage stage = null;
-        while (maybePage.isPresent() && monitorTellsToContinue(stage)) {
+        boolean continueAllowed = true;
+        while (continueAllowed && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
@@ -297,21 +294,21 @@ public final class Delivery {
 
                 ImmutableList<InboxMessage> toRemove = classifier.removals();
                 inboxStorage.removeAll(toRemove);
-                stage = new DeliveryStage(index, deliveredInBatch);
+                DeliveryStage stage = new DeliveryStage(index, deliveredInBatch);
+                continueAllowed = monitorTellsToContinue(stage);
             }
-            maybePage = currentPage.next();
+            if(continueAllowed) {
+                maybePage = currentPage.next();
+            }
         }
-        return totalMessagesDelivered;
+        return new RunResult(totalMessagesDelivered, !continueAllowed);
     }
 
     private boolean monitorTellsToContinue(@Nullable DeliveryStage stage) {
         if(stage == null) {
             return true;
         }
-        if(monitor.shouldStopAfter(stage)) {
-            throw new DeliveryStoppedByMonitorException();
-        }
-        return true;
+        return monitor.shouldContinueAfter(stage);
     }
 
     /**

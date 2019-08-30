@@ -35,9 +35,9 @@ public final class MemoizingDeliveryMonitor extends DeliveryMonitor {
     private final List<DeliveryStage> stages = new ArrayList<>();
 
     @Override
-    public boolean shouldStopAfter(DeliveryStage stage) {
+    public boolean shouldContinueAfter(DeliveryStage stage) {
         stages.add(stage);
-        return super.shouldStopAfter(stage);
+        return super.shouldContinueAfter(stage);
     }
 
     public ImmutableList<DeliveryStage> getStages() {

@@ -21,10 +21,26 @@
 package io.spine.server.delivery;
 
 /**
- * A flow-control exception which indicates that the {@link DeliveryMonitor} has stopped the
- * delivery.
+ * How ended the delivery of all messages read from the {@code Inbox} according to a certain
+ * {@code ShardIndex}.
  */
-class DeliveryStoppedByMonitorException extends RuntimeException {
+class RunResult {
 
-    private static final long serialVersionUID = -1L;
+    private final int deliveredMsgCount;
+    private final boolean stoppedByMonitor;
+
+    RunResult(int count, boolean stoppedByMonitor) {
+        deliveredMsgCount = count;
+        this.stoppedByMonitor = stoppedByMonitor;
+    }
+
+    /**
+     * Tells if another run is required.
+     *
+     * <p>The run is not required either if there were no messages delivered or if
+     * the {@code DeliveryMonitor} stopped the execution.
+     */
+    boolean shouldRunAgain() {
+        return !stoppedByMonitor && deliveredMsgCount > 0;
+    }
 }
