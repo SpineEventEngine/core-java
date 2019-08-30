@@ -297,7 +297,7 @@ public final class Delivery {
 
                 ImmutableList<InboxMessage> toRemove = classifier.removals();
                 inboxStorage.removeAll(toRemove);
-                stage = new DeliveryStage(index, totalMessagesDelivered);
+                stage = new DeliveryStage(index, deliveredInBatch);
             }
             maybePage = currentPage.next();
         }
