@@ -51,7 +51,7 @@ public final class Inbox<I> {
     private final InboxOfCommands<I> commandPart;
     private final InboxOfEvents<I> eventPart;
     private final Delivery delivery;
-    private final @Nullable BatchDispatcher<I> batchDispatcher;
+    private final @Nullable BatchDeliveryListener<I> batchDispatcher;
 
     private Inbox(Builder<I> builder, Delivery delivery) {
         this.entityStateType = builder.entityStateType;
@@ -134,7 +134,7 @@ public final class Inbox<I> {
         private final InboxWriter writer;
         private final Endpoints<I, EventEnvelope> eventEndpoints = new Endpoints<>();
         private final Endpoints<I, CommandEnvelope> commandEndpoints = new Endpoints<>();
-        private @Nullable BatchDispatcher<I> batchDispatcher;
+        private @Nullable BatchDeliveryListener<I> batchDispatcher;
 
         /**
          * Creates an instance of {@code Builder} for the given {@code Inbox} consumer entity type.
@@ -173,7 +173,10 @@ public final class Inbox<I> {
             return this;
         }
 
-        public Builder<I> withBatchDispatcher(BatchDispatcher<I> dispatcher) {
+        /**
+         * Allows to specify the listener of the starting and ending batch dispatching operations.
+         */
+        public Builder<I> withBatchListener(BatchDeliveryListener<I> dispatcher) {
             this.batchDispatcher = checkNotNull(dispatcher);
             return this;
         }

@@ -41,11 +41,11 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
     private final InboxOfCommands<I> inboxOfCmds;
     private final InboxOfEvents<I> inboxOfEvents;
-    private final @Nullable BatchDispatcher<I> batchDispatcher;
+    private final @Nullable BatchDeliveryListener<I> batchDispatcher;
 
     TargetDelivery(InboxOfCommands<I> inboxOfCmds,
                    InboxOfEvents<I> inboxOfEvents,
-                   @Nullable BatchDispatcher<I> batchDispatcher) {
+                   @Nullable BatchDeliveryListener<I> batchDispatcher) {
         this.inboxOfCmds = inboxOfCmds;
         this.inboxOfEvents = inboxOfEvents;
         this.batchDispatcher = batchDispatcher;
@@ -77,7 +77,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
     }
 
     private void deliverInBatch(List<InboxMessage> incoming,
-                                BatchDispatcher<I> batchDispatcher,
+                                BatchDeliveryListener<I> batchDispatcher,
                                 InboxPart.Dispatcher cmdDispatcher,
                                 InboxPart.Dispatcher eventDispatcher) {
         List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
@@ -150,7 +150,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
             messages.add(message);
         }
 
-        private void deliverVia(BatchDispatcher<I> dispatcher,
+        private void deliverVia(BatchDeliveryListener<I> dispatcher,
                                 InboxPart.Dispatcher cmdDispatcher,
                                 InboxPart.Dispatcher eventDispatcher) {
             if (messages.size() > 1) {

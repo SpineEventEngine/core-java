@@ -34,7 +34,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.delivery.BatchDispatcher;
+import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
@@ -169,7 +169,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
-                .withBatchDispatcher(new BatchDispatcher<I>() {
+                .withBatchListener(new BatchDeliveryListener<I>() {
                     @Override
                     public void onStart(I id) {
                         cache.startCaching(id);
