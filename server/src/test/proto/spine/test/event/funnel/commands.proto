@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package spine.test.server.event.funnel;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.event.funnel";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+import "spine/test/event/funnel/docs.proto";
+
+message CreateDocument {
+
+    DocumentId id = 1;
+}
+
+message EditText {
+
+    DocumentId id = 1;
+
+    uint32 position = 2;
+
+    uint32 chars_to_delete = 3;
+
+    string new_text = 4;
+}

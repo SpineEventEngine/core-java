@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package spine.test.server.event.funnel;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.event.funnel";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
+
+import "spine/test/event/funnel/docs.proto";
+
+import "spine/core/user_id.proto";
+import "spine/time/time.proto";
+
+message DocumentCreated {
+
+    DocumentId id = 1;
+
+    core.UserId owner = 2;
+
+    time.LocalDateTime when_created = 3;
+}
+
+message TextEdited {
+
+    DocumentId id = 1;
+
+    Edit edit = 2;
+}
+
+message PaperDocumentScanned {
+
+    DocumentId id = 1;
+
+    string text = 2;
+
+    core.UserId owner = 3;
+
+    time.LocalDateTime when_created = 4;
+}
+
+message OpenOfficeDocumentUploaded {
+
+    DocumentId id = 1;
+
+    string text = 2;
+}
+
+message DocumentImported {
+
+    DocumentId id = 1;
+
+    string text = 2;
+
+    core.UserId owner = 3;
+
+    time.LocalDateTime when_uploaded = 4;
+}
+
+message UserDeleted {
+
+    core.UserId user = 1;
+}
