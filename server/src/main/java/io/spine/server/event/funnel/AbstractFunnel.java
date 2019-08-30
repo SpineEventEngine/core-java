@@ -20,9 +20,12 @@
 
 package io.spine.server.event.funnel;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EventMessage;
+import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
@@ -31,50 +34,65 @@ import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.tenant.TenantAwareFunction0;
-import io.spine.server.tenant.TenantFunction;
+import io.spine.server.bus.Bus;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
+import static java.util.stream.Collectors.toList;
 
-abstract class AbstractFunnel implements EventFunnel {
+abstract class AbstractFunnel<M extends Message> implements EventFunnel {
 
+    private final Bus<M, ?, ?, ?> bus;
     private final UserId actor;
+    private final Any producerId;
     private final StreamObserver<Ack> resultObserver;
+    private final boolean fromExternalSource;
+    private final @Nullable TenantId tenantId;
 
-    AbstractFunnel(UserId actor, StreamObserver<Ack> resultObserver) {
+    AbstractFunnel(@Nullable TenantId tenantId,
+                   Bus<M, ?, ?, ?> bus,
+                   StreamObserver<Ack> resultObserver,
+                   UserId actor,
+                   boolean fromExternalSource) {
+        this.tenantId = tenantId;
+        this.bus = checkNotNull(bus);
         this.actor = checkNotNull(actor);
         this.resultObserver = checkNotNull(resultObserver);
+        this.producerId = AnyPacker.pack(actor);
+        this.fromExternalSource = fromExternalSource;
     }
 
-    @Override
-    public final EventFunnel forTenant(TenantId tenantId) {
-        checkNotNull(tenantId);
-        return new TenantAwareFunnel(this, tenantId);
-    }
+    abstract M transformEvent(Event event);
+
+    abstract AbstractFunnel<M> copyWithObserver(StreamObserver<Ack> resultObserver);
 
     @Override
-    public EventFunnel with(StreamObserver<Ack> resultObserver) {
+    public final EventFunnel with(StreamObserver<Ack> resultObserver) {
         checkNotNull(resultObserver);
         return resultObserver.equals(this.resultObserver)
                ? this
                : copyWithObserver(resultObserver);
     }
 
-    abstract AbstractFunnel copyWithObserver(StreamObserver<Ack> resultObserver);
+    @Override
+    public final void post(EventMessage... events) {
+        checkNotNull(events);
+        Timestamp time = Time.currentTime();
+        ActorContext importContext = buildImportContext(time);
+        Iterable<M> messages = Stream
+                .of(events)
+                .map((EventMessage message) -> buildEvent(message, importContext))
+                .map(this::transformEvent)
+                .collect(toList());
+        bus.post(messages, resultObserver());
+    }
 
-    Event buildEvent(EventMessage message, ActorContext importContext, boolean external) {
-        EventId id = EventId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
-        EventContext context = EventContext
-                .newBuilder()
-                .setTimestamp(importContext.getTimestamp())
-                .setProducerId(AnyPacker.pack(actor))
-                .setImportContext(importContext)
-                .setExternal(external)
-                .build();
+    private Event buildEvent(EventMessage message, ActorContext importContext) {
+        EventId id = buildEventId();
+        EventContext context = buildContext(importContext);
         Event event = Event
                 .newBuilder()
                 .setId(id)
@@ -84,25 +102,32 @@ abstract class AbstractFunnel implements EventFunnel {
         return event;
     }
 
-    final ActorContext buildImportContext(Timestamp time) {
-        ActorContext context = new TenantAwareFunction0<ActorContext>() {
-            @Override
-            public ActorContext apply() {
-                ActorContext context = new TenantFunction<ActorContext>(isTenantSet()) {
-                    @Override
-                    public ActorContext apply(TenantId tenantId) {
-                        return ActorContext
-                                .newBuilder()
-                                .setActor(actor)
-                                .setTimestamp(time)
-                                .setTenantId(tenantId)
-                                .vBuild();
-                    }
-                }.execute();
-                return context;
-            }
-        }.apply();
-        return context;
+    private static EventId buildEventId() {
+        return EventId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
+    }
+
+    private EventContext buildContext(ActorContext importContext) {
+        return EventContext
+                .newBuilder()
+                .setTimestamp(importContext.getTimestamp())
+                .setProducerId(producerId)
+                .setImportContext(importContext)
+                .setExternal(fromExternalSource)
+                .build();
+    }
+
+    private ActorContext buildImportContext(Timestamp time) {
+        ActorContext.Builder context = ActorContext
+                .newBuilder()
+                .setActor(actor)
+                .setTimestamp(time);
+        if (tenantId != null) {
+            context.setTenantId(tenantId);
+        }
+        return context.vBuild();
     }
 
     final StreamObserver<Ack> resultObserver() {
@@ -111,5 +136,9 @@ abstract class AbstractFunnel implements EventFunnel {
 
     final UserId actor() {
         return actor;
+    }
+
+    final TenantId tenantId() {
+        return tenantId;
     }
 }

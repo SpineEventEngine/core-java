@@ -22,14 +22,18 @@ package io.spine.server.event.funnel;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.ImportBus;
+import io.spine.server.integration.IntegrationBus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
 public final class AimEvent {
 
+    private static final TenantId defaultTenant = null;
     private static final StreamObserver<Ack> defaultObserver = noOpObserver();
 
     private final BoundedContext context;
@@ -41,10 +45,12 @@ public final class AimEvent {
     }
 
     public EventFunnel toAggregate() {
-        return new ImportFunnel(context.importBus(), defaultObserver, actor);
+        ImportBus bus = context.importBus();
+        return new ImportFunnel(defaultTenant, bus, defaultObserver, actor);
     }
 
     public EventFunnel broadcast() {
-        return new IntegrationFunnel(context.integrationBus(), defaultObserver, actor);
+        IntegrationBus bus = context.integrationBus();
+        return new IntegrationFunnel(defaultTenant, bus, defaultObserver, actor);
     }
 }

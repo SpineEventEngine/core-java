@@ -21,41 +21,40 @@
 package io.spine.server.event.funnel;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.base.EventMessage;
 import io.spine.core.Ack;
-import io.spine.core.ActorContext;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.ImportBus;
-
-import java.util.stream.Stream;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Time.currentTime;
-import static java.util.stream.Collectors.toList;
 
-final class ImportFunnel extends AbstractFunnel {
+final class ImportFunnel extends AbstractFunnel<Event> {
 
     private final ImportBus bus;
 
-    ImportFunnel(ImportBus bus, StreamObserver<Ack> resultObserver, UserId actor) {
-        super(actor, resultObserver);
+    ImportFunnel(@Nullable TenantId tenantId,
+                 ImportBus bus,
+                 StreamObserver<Ack> resultObserver,
+                 UserId actor) {
+        super(tenantId, bus, resultObserver, actor, false);
         this.bus = checkNotNull(bus);
     }
 
     @Override
-    AbstractFunnel copyWithObserver(StreamObserver<Ack> resultObserver) {
-        return new ImportFunnel(bus, resultObserver(), actor());
+    ImportFunnel copyWithObserver(StreamObserver<Ack> resultObserver) {
+        return new ImportFunnel(tenantId(), bus, resultObserver, actor());
     }
 
     @Override
-    public void post(EventMessage... eventMessages) {
-        checkNotNull(eventMessages);
-        ActorContext context = buildImportContext(currentTime());
-        Iterable<Event> events = Stream
-                .of(eventMessages)
-                .map((EventMessage message) -> buildEvent(message, context, false))
-                .collect(toList());
-        bus.post(events, resultObserver());
+    Event transformEvent(Event event) {
+        return event;
+    }
+
+    @Override
+    public EventFunnel forTenant(TenantId tenantId) {
+        checkNotNull(tenantId);
+        return new ImportFunnel(tenantId, bus, resultObserver(), actor());
     }
 }

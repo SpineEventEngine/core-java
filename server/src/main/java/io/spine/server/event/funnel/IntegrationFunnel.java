@@ -20,49 +20,44 @@
 
 package io.spine.server.event.funnel;
 
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.EventMessage;
-import io.spine.base.Time;
 import io.spine.core.Ack;
-import io.spine.core.ActorContext;
+import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
 import io.spine.server.integration.IntegrationBus;
-
-import java.util.stream.Stream;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.outside;
-import static java.util.stream.Collectors.toList;
 
-final class IntegrationFunnel extends AbstractFunnel {
+final class IntegrationFunnel extends AbstractFunnel<ExternalMessage> {
 
     private final IntegrationBus bus;
 
-    IntegrationFunnel(IntegrationBus bus,
+    IntegrationFunnel(@Nullable TenantId tenantId,
+                      IntegrationBus bus,
                       StreamObserver<Ack> resultObserver,
                       UserId actor) {
-        super(actor, resultObserver);
+        super(tenantId, bus, resultObserver, actor, true);
         this.bus = checkNotNull(bus);
     }
 
     @Override
-    AbstractFunnel copyWithObserver(StreamObserver<Ack> resultObserver) {
-        return new IntegrationFunnel(bus, resultObserver(), actor());
+    IntegrationFunnel copyWithObserver(StreamObserver<Ack> resultObserver) {
+        return new IntegrationFunnel(tenantId(), bus, resultObserver, actor());
     }
 
     @Override
-    public void post(EventMessage... events) {
-        checkNotNull(events);
-        Timestamp time = Time.currentTime();
-        ActorContext importContext = buildImportContext(time);
-        Iterable<ExternalMessage> messages = Stream
-                .of(events)
-                .map((EventMessage message) -> buildEvent(message, importContext, true))
-                .map(event -> ExternalMessages.of(event, outside()))
-                .collect(toList());
-        bus.post(messages, resultObserver());
+    ExternalMessage transformEvent(Event event) {
+        return ExternalMessages.of(event, outside());
+    }
+
+    @Override
+    public EventFunnel forTenant(TenantId tenantId) {
+        checkNotNull(tenantId);
+        return new IntegrationFunnel(tenantId, bus, resultObserver(), actor());
     }
 }
