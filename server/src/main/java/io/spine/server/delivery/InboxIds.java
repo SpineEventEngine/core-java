@@ -83,9 +83,11 @@ final class InboxIds {
     /**
      * Creates a new {@code InboxSignalId}.
      *
-     * @param targetId the ID of the target to which the signal is dispatched
-     * @param uuid the UUID of the signal
-     * @return the new instance of @code InboxSignalId}
+     * @param targetId
+     *         the ID of the target to which the signal is dispatched
+     * @param uuid
+     *         the UUID of the signal
+     * @return the new instance of {@code InboxSignalId}
      */
     static InboxSignalId newSignalId(Object targetId, String uuid) {
         checkNotNull(targetId);
