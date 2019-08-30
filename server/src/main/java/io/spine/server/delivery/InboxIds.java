@@ -93,7 +93,7 @@ final class InboxIds {
         checkNotNull(targetId);
         checkNotNull(uuid);
 
-        String rawValue = uuid + " @" + Stringifiers.toString(targetId);
+        String rawValue = uuid + '@' + Stringifiers.toString(targetId);
         InboxSignalId result = InboxSignalId.newBuilder()
                                             .setValue(rawValue)
                                             .build();
