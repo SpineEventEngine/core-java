@@ -106,6 +106,11 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
     }
 
     @Apply
+    private void event(DocumentImported event) {
+        // Do nothing. As the event is produced, it must be applied.
+    }
+
+    @Apply
     private void event(DocumentCreated e) {
         builder()
                 .setOwner(e.getOwner())

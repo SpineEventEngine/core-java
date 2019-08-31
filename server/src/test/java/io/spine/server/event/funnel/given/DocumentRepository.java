@@ -22,6 +22,7 @@ package io.spine.server.event.funnel.given;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.event.funnel.DocumentId;
+import io.spine.server.event.funnel.OpenOfficeDocumentUploaded;
 import io.spine.server.event.funnel.PaperDocumentScanned;
 import io.spine.server.route.EventRouting;
 
@@ -33,5 +34,12 @@ public class DocumentRepository extends AggregateRepository<DocumentId, Document
     protected void setupImportRouting(EventRouting<DocumentId> routing) {
         super.setupImportRouting(routing);
         routing.route(PaperDocumentScanned.class, (message, context) -> withId(message.getId()));
+    }
+
+    @Override
+    protected void setupEventRouting(EventRouting<DocumentId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(OpenOfficeDocumentUploaded.class,
+                      (message, context) -> withId(message.getId()));
     }
 }
