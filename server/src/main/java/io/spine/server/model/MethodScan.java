@@ -23,7 +23,6 @@ package io.spine.server.model;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
-import io.spine.base.FieldPath;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
@@ -135,10 +134,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
             // different values. It allows to split logic into smaller methods instead of having
             // if-else chains (that branch by different values) inside a bigger handler method.
             //
-            FieldPath prevHandlerField = existingHandler.filter().field();
-            FieldPath field = filter.field();
-            boolean fieldDiffers = !prevHandlerField.equals(field);
-            if (fieldDiffers) {
+            if (!filter.sameField(existingHandler.filter())) {
                 throw new HandlerFieldFilterClashError(
                         declaringClass, handler.rawMethod(), existingHandler.rawMethod()
                 );

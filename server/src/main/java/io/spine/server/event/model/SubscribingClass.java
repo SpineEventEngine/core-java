@@ -46,9 +46,7 @@ public interface SubscribingClass extends Logging {
         ImmutableSet<SubscriberMethod> subscribers =
                 subscribersOf(event.messageClass(), event.originClass());
         Comparator<SubscriberMethod> methodOrder = comparing(
-                (SubscriberMethod subscriber) -> subscriber.filter()
-                                                           .field()
-                                                           .getFieldNameCount()
+                (SubscriberMethod subscriber) -> subscriber.filter().pathLength()
         ).reversed();
         Optional<SubscriberMethod> foundSubscriber = subscribers
                 .stream()

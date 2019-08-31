@@ -57,8 +57,17 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         return new ArgumentFilter(FieldPath.getDefaultInstance(), Empty.getDefaultInstance());
     }
 
-    public FieldPath field() {
-        return field;
+    /**
+     * Verifies if the passed filter works on the same field as this one.
+     */
+    boolean sameField(ArgumentFilter another) {
+        boolean result = field.equals(another.field);
+        return result;
+    }
+
+    /** Obtains the depth of the filtered field. */
+    public int pathLength() {
+        return field.getFieldNameCount();
     }
 
     private ArgumentFilter(FieldPath field, Object expectedValue) {
