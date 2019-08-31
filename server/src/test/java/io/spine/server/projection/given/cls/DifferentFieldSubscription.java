@@ -18,32 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.projection.given.cls;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
+import io.spine.core.ByField;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.given.SavedString;
+import io.spine.test.projection.event.PairImported;
+
+import static io.spine.testing.Tests.halt;
 
 /**
- * A handler method which accept only instances of messages that match the filtering conditions.
- *
- * <p>Having two or more methods that accept the same message type but instances of different
- * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
- *
- * <p>It is possible to filter by the same field of the same message type.
- * 
- * @see io.spine.core.ByField
- * @see HandlerFieldFilterClashError
+ * This is invalid projection class because it uses different fields for
+ * filtering event subscribers.
  */
-@Immutable
-public interface SelectiveHandler<T,
-                                  C extends MessageClass<?>,
-                                  E extends MessageEnvelope<?, ?, ?>,
-                                  R extends MessageClass<?>>
-        extends HandlerMethod<T, C, E, R> {
+public final class DifferentFieldSubscription
+        extends Projection<String, SavedString, SavedString.Builder> {
 
-    /**
-     * Obtains the filter to apply to the messages received by this method.
-     */
-    ArgumentFilter filter();
+    private DifferentFieldSubscription(String id) {
+        super(id);
+    }
+
+    @Subscribe(filter = @ByField(path = "integer", value = "42"))
+    void onInt(PairImported event) {
+        halt();
+    }
+
+    @Subscribe(filter = @ByField(path = "str", value = "42"))
+    void onString(PairImported event) {
+        halt();
+    }
 }

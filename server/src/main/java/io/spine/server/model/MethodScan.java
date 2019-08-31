@@ -21,17 +21,14 @@
 package io.spine.server.model;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
-import io.spine.base.FieldPath;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * A class method scan operation.
@@ -45,8 +42,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
     private final MethodSignature<H, ?> signature;
-    private final Multimap<HandlerTypeInfo, H> handlers;
-    private final Map<HandlerId, H> seenMethods;
+    private final Multimap<DispatchKey, H> handlers;
+    private final Map<DispatchKey, H> seenMethods;
     private final Map<MessageClass, SelectiveHandler> selectiveHandlers;
 
     /**
@@ -58,12 +55,12 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *         the scanned class
      * @param signature
      *         the handler {@linkplain MethodSignature signature}
-     * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
+     * @return the map with handler methods of the given type
      */
-    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMultimap<HandlerTypeInfo, H>
+    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
     findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
-        ImmutableMultimap<HandlerTypeInfo, H> result = operation.perform();
+        ImmutableSetMultimap<DispatchKey, H> result = operation.perform();
         return result;
     }
 
@@ -79,19 +76,17 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      * Performs the operation.
      *
      * <p>Multiple calls to this method may cause {@link DuplicateHandlerMethodError}s.
-     *
-     * @return a map of {@link HandlerTypeInfo}s to the method handlers
      */
-    private ImmutableMultimap<HandlerTypeInfo, H> perform() {
+    private ImmutableSetMultimap<DispatchKey, H> perform() {
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             scanMethod(method);
         }
-        return ImmutableMultimap.copyOf(handlers);
+        return ImmutableSetMultimap.copyOf(handlers);
     }
 
     private void scanMethod(Method method) {
-        Optional<H> handlerMethod = signature.toHandler(method);
+        Optional<H> handlerMethod = signature.classify(method);
         if (handlerMethod.isPresent()) {
             H handler = handlerMethod.get();
             remember(handler);
@@ -103,30 +98,31 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         if (handler instanceof SelectiveHandler) {
             checkFilteringNotClashes((SelectiveHandler) handler);
         }
-        HandlerId id = handler.id();
-        handlers.put(id.getType(), handler);
+        handlers.put(handler.key().withoutFilter(), handler);
     }
 
     private void checkNotRemembered(H handler) {
-        HandlerId id = handler.id();
-        if (seenMethods.containsKey(id)) {
-            Method alreadyPresent = seenMethods.get(id)
+        DispatchKey key = handler.key();
+        if (seenMethods.containsKey(key)) {
+            Method alreadyPresent = seenMethods.get(key)
                                                .rawMethod();
             String methodName = alreadyPresent.getName();
             String duplicateMethodName = handler.rawMethod().getName();
-            throw new DuplicateHandlerMethodError(declaringClass, id,
-                                                  methodName, duplicateMethodName);
+            throw new DuplicateHandlerMethodError(
+                    declaringClass, key, methodName, duplicateMethodName
+            );
         } else {
-            seenMethods.put(id, handler);
+            seenMethods.put(key, handler);
         }
     }
 
+    @SuppressWarnings("PMD.CollapsibleIfStatements")    // For clarity.
     private void checkFilteringNotClashes(SelectiveHandler handler) {
-        MessageClass handledClass = handler.messageClass();
-        FieldPath field = handler.filter().getField();
-        if (!isNotDefault(field)) {
+        ArgumentFilter filter = handler.filter();
+        if (filter.acceptsAll()) {
             return;
         }
+        MessageClass handledClass = handler.messageClass();
         SelectiveHandler existingHandler = selectiveHandlers.put(handledClass, handler);
         if (existingHandler != null) {
             // There is already a handler for this message class.
@@ -139,12 +135,10 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
             // different values. It allows to split logic into smaller methods instead of having
             // if-else chains (that branch by different values) inside a bigger handler method.
             //
-            FieldPath prevHandlerField = existingHandler.filter().getField();
-            boolean fieldDiffers = !prevHandlerField.equals(field);
-            if (fieldDiffers) {
-                throw new HandlerFieldFilterClashError(declaringClass,
-                                                       handler.rawMethod(),
-                                                       existingHandler.rawMethod());
+            if (!filter.sameField(existingHandler.filter())) {
+                throw new HandlerFieldFilterClashError(
+                        declaringClass, handler.rawMethod(), existingHandler.rawMethod()
+                );
             }
             // It is OK to keep only the last filtering handler in the map (and not all of them)
             // because filtered fields are required to be the same.

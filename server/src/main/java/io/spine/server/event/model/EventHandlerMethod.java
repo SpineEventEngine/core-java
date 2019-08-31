@@ -24,7 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerId;
+import io.spine.server.model.DispatchKey;
+import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
@@ -40,11 +41,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  *
  * @param <T>
  *         the type of the target object
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
-public abstract class EventHandlerMethod<T, P extends MessageClass<?>>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, P> {
+public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
+        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -61,17 +62,26 @@ public abstract class EventHandlerMethod<T, P extends MessageClass<?>>
     }
 
     @Override
-    public HandlerId id() {
+    public DispatchKey key() {
         EventClass eventClass = messageClass();
         if (parameterSpec().acceptsCommand()) {
             Class<?>[] parameters = rawMethod().getParameterTypes();
             Class<? extends CommandMessage> commandMessageClass =
                     castClass(parameters[1], CommandMessage.class);
             CommandClass commandClass = CommandClass.from(commandMessageClass);
-            return createId(eventClass, commandClass);
+            return new DispatchKey(eventClass.value(), null, commandClass.value());
         } else {
-            return createId(eventClass);
+            return super.key();
         }
+    }
+
+    @Override
+    public MethodParams params() {
+        if (parameterSpec().acceptsCommand()) {
+            MethodParams result = MethodParams.of(rawMethod());
+            return result;
+        }
+        return super.params();
     }
 
     private static <T extends Message> Class<T> castClass(Class<?> raw, Class<T> targetBound) {

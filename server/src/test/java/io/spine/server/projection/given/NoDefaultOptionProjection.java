@@ -18,33 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.method;
+package io.spine.server.projection.given;
 
-import io.spine.base.EventMessage;
-import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.model.VoidMethod;
-import io.spine.server.type.EmptyClass;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.ByField;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.test.projection.event.StringImported;
 
-import java.lang.reflect.Method;
+public final class NoDefaultOptionProjection
+        extends Projection<String, SavedString, SavedString.Builder> {
 
-public class OneParamMethod
-        extends AbstractHandlerMethod<Object,
-                                      EventMessage,
-                                      EventClass,
-                                      EventEnvelope,
-                                      EmptyClass>
-        implements VoidMethod<Object, EventClass, EventEnvelope> {
+    private static final String VALUE_FIELD_PATH = "value";
 
-    public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(method, parameterSpec);
+    public static final String ACCEPTED_VALUE = "AAA";
+
+    private NoDefaultOptionProjection(String id) {
+        super(id);
     }
 
-    @Override
-    public EventClass messageClass() {
-        return EventClass.from(rawMessageClass());
+    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = ACCEPTED_VALUE))
+    void on(StringImported event) {
+        builder().setValue(event.getValue());
     }
-
 }

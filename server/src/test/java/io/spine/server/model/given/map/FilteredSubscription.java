@@ -18,32 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model.given.map;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
+import io.spine.core.ByField;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.given.SavedString;
+import io.spine.test.projection.event.Int32Imported;
+
+import static io.spine.testing.Tests.halt;
 
 /**
- * A handler method which accept only instances of messages that match the filtering conditions.
- *
- * <p>Having two or more methods that accept the same message type but instances of different
- * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
- *
- * <p>It is possible to filter by the same field of the same message type.
- * 
- * @see io.spine.core.ByField
- * @see HandlerFieldFilterClashError
+ * Valid projection class which filters events by values.
  */
-@Immutable
-public interface SelectiveHandler<T,
-                                  C extends MessageClass<?>,
-                                  E extends MessageEnvelope<?, ?, ?>,
-                                  R extends MessageClass<?>>
-        extends HandlerMethod<T, C, E, R> {
+public final class FilteredSubscription
+        extends Projection<String, SavedString, SavedString.Builder> {
 
-    /**
-     * Obtains the filter to apply to the messages received by this method.
-     */
-    ArgumentFilter filter();
+    private static final String VALUE_FIELD_PATH = "value";
+
+    private FilteredSubscription(String id) {
+        super(id);
+    }
+
+    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "100"))
+    void only100(Int32Imported event) {
+        halt();
+    }
+
+    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "500"))
+    void only500(Int32Imported event) {
+        halt();
+    }
 }

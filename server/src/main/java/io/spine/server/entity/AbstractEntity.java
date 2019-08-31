@@ -129,6 +129,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Assigns the ID to the entity.
      */
+    @SuppressWarnings("InstanceVariableUsedBeforeInitialized") // checked in `if`
     final void setId(I id) {
         checkNotNull(id);
         if (this.id != null) {

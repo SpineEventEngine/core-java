@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
 import io.spine.server.type.MessageEnvelope;
@@ -43,14 +44,14 @@ import static com.google.common.base.Preconditions.checkArgument;
  *         the type of the incoming message class
  * @param <E>
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
 @Immutable
 public interface HandlerMethod<T,
-                               C extends MessageClass,
+                               C extends MessageClass<?>,
                                E extends MessageEnvelope<?, ?, ?>,
-                               P extends MessageClass<?>> {
+                               R extends MessageClass<?>> {
 
     /**
      * Obtains the type of the incoming message class.
@@ -61,11 +62,9 @@ public interface HandlerMethod<T,
     void discoverAttributes();
 
     /**
-     * Creates a new instance of {@linkplain HandlerId handler id} for this method.
-     *
-     * @return the id of the handler method
+     * Obtains parameters of the method.
      */
-    HandlerId id();
+    MethodParams params();
 
     /**
      * Obtains the set of method attributes configured for this method.
@@ -80,7 +79,7 @@ public interface HandlerMethod<T,
     /**
      * Retrieves the message classes produced by this handler method.
      */
-    Set<P> producedMessages();
+    Set<R> producedMessages();
 
     /**
      * Converts the raw method result to a {@linkplain Success successful propagation outcome}.
@@ -140,5 +139,10 @@ public interface HandlerMethod<T,
                       "Mismatch of `external` value for the handler method %s. " +
                               "Expected `external` = %s, but got the other way around.", this,
                       expectedValue);
+    }
+
+    default DispatchKey key() {
+        Class<? extends Message> rawCls = messageClass().value();
+        return new DispatchKey(rawCls, null, null);
     }
 }

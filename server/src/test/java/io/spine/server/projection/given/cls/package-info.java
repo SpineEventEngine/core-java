@@ -18,32 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
-
-import com.google.errorprone.annotations.Immutable;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
-
 /**
- * A handler method which accept only instances of messages that match the filtering conditions.
- *
- * <p>Having two or more methods that accept the same message type but instances of different
- * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
- *
- * <p>It is possible to filter by the same field of the same message type.
- * 
- * @see io.spine.core.ByField
- * @see HandlerFieldFilterClashError
+ * Test environment classes for {@link io.spine.server.projection.model.ProjectionClassTest}.
  */
-@Immutable
-public interface SelectiveHandler<T,
-                                  C extends MessageClass<?>,
-                                  E extends MessageEnvelope<?, ?, ?>,
-                                  R extends MessageClass<?>>
-        extends HandlerMethod<T, C, E, R> {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.projection.given.cls;
 
-    /**
-     * Obtains the filter to apply to the messages received by this method.
-     */
-    ArgumentFilter filter();
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

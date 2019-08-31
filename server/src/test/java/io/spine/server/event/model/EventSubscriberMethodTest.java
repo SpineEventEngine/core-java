@@ -81,7 +81,7 @@ class EventSubscriberMethodTest {
     void invokeSubscriberMethod() {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        Optional<SubscriberMethod> createdMethod = signature.toHandler(subscriberObject.getMethod());
+        Optional<SubscriberMethod> createdMethod = signature.classify(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
         SubscriberMethod subscriber = createdMethod.get();
         RefProjectCreated msg = Given.EventMessage.projectCreated();
@@ -202,7 +202,7 @@ class EventSubscriberMethodTest {
 
         private void check(TestEventSubscriber subscriber, boolean external) {
             Method method = subscriber.getMethod();
-            Optional<SubscriberMethod> created = signature.toHandler(method);
+            Optional<SubscriberMethod> created = signature.classify(method);
             assertTrue(created.isPresent());
             SubscriberMethod modelMethod = created.get();
             EventContext context = EventContext

@@ -46,7 +46,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @Immutable
 public interface CommandProducingMethod<T,
-                                        C extends MessageClass,
+                                        C extends MessageClass<?>,
                                         E extends MessageEnvelope<?, ?, ?>>
         extends HandlerMethod<T, C, E, CommandClass> {
 

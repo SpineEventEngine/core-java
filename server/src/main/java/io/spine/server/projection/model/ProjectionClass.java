@@ -20,6 +20,7 @@
 
 package io.spine.server.projection.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.entity.model.StateSubscribingClass;
@@ -33,7 +34,6 @@ import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -87,7 +87,7 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public final Collection<SubscriberMethod>
+    public final ImmutableSet<SubscriberMethod>
     subscribersOf(EventClass eventClass, MessageClass originClass) {
         return delegate.handlersOf(eventClass, originClass);
     }
