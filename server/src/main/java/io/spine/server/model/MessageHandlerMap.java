@@ -23,10 +23,12 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.logging.Logging;
 import io.spine.server.type.EmptyClass;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -40,6 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.model.MethodScan.findMethodsBy;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Provides mapping from a class of messages to methods which handle such messages.
@@ -55,7 +58,7 @@ import static io.spine.server.model.MethodScan.findMethodsBy;
 public final class MessageHandlerMap<M extends MessageClass<?>,
                                      P extends MessageClass<?>,
                                      H extends HandlerMethod<?, M, ?, P>>
-        implements Serializable {
+        implements Serializable, Logging {
 
     private static final long serialVersionUID = 0L;
 
@@ -224,14 +227,26 @@ public final class MessageHandlerMap<M extends MessageClass<?>,
 
     private H checkSingle(Collection<H> handlers, M targetType) {
         int count = handlers.size();
-        checkState(count == 1,
-                   "Unexpected number of handlers for messages of class %s: %s.%n%s",
-                   targetType, count, handlers);
-        H result = handlers
-                .stream()
-                .findFirst()
-                .get();
-        return result;
+        if (count != 1) {
+            logWrongMethodCount(count, targetType);
+            throw newIllegalStateException(
+                    "Unexpected number of handlers for messages of class %s: %s.%n%s",
+                    targetType, count, handlers
+            );
+        }
+        H handler = Iterables.getOnlyElement(handlers);
+        return handler;
+    }
+
+    private void logWrongMethodCount(int count, M targetType) {
+        if (count == 0) {
+            _error().log("No handler method found for the type `%s`.", targetType);
+        } else {
+            _error().log(
+                    "There are %d handler methods found for the type `%s`. Expected only one.",
+                    count, targetType
+            );
+        }
     }
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
