@@ -126,6 +126,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      * @param <E>
      *         the type of entity
      */
+    @FunctionalInterface
     public interface Load<I, E extends Entity<I, ?>> extends Function<I, E> {
     }
 
@@ -135,6 +136,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> {
      * @param <E>
      *         the type of entity
      */
+    @FunctionalInterface
     public interface Store<E extends Entity> extends Consumer<E> {
     }
 }
