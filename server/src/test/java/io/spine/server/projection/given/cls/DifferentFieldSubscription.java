@@ -23,7 +23,6 @@ package io.spine.server.projection.given.cls;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.PairImported;
 
@@ -48,9 +47,5 @@ public final class DifferentFieldSubscription
     @Subscribe(filter = @ByField(path = "str", value = "42"))
     void onString(PairImported event) {
         halt();
-    }
-
-    public static final class Repository
-            extends ProjectionRepository<String, DifferentFieldSubscription, SavedString> {
     }
 }

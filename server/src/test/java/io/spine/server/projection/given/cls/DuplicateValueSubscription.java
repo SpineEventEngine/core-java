@@ -23,7 +23,6 @@ package io.spine.server.projection.given.cls;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.Int32Imported;
 
@@ -50,9 +49,5 @@ public final class DuplicateValueSubscription
     @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "+1"))
     void onStringOne(Int32Imported event) {
         halt();
-    }
-
-    public static final class Repository
-            extends ProjectionRepository<String, DuplicateValueSubscription, SavedString> {
     }
 }
