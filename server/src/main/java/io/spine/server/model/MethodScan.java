@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.spine.validate.Validate.isNotDefault;
-
 /**
  * A class method scan operation.
  *
@@ -58,7 +56,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *         the scanned class
      * @param signature
      *         the handler {@linkplain MethodSignature signature}
-     * @return map of {@link HandlerTypeInfo}s to the handler methods of the given type
+     * @return the map with handler methods of the given type
      */
     static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
     findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
@@ -120,11 +118,11 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void checkFilteringNotClashes(SelectiveHandler handler) {
-        MessageClass handledClass = handler.messageClass();
-        FieldPath field = handler.filter().field();
-        if (!isNotDefault(field)) {
+        ArgumentFilter filter = handler.filter();
+        if (filter.acceptsAll()) {
             return;
         }
+        MessageClass handledClass = handler.messageClass();
         SelectiveHandler existingHandler = selectiveHandlers.put(handledClass, handler);
         if (existingHandler != null) {
             // There is already a handler for this message class.
@@ -138,11 +136,12 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
             // if-else chains (that branch by different values) inside a bigger handler method.
             //
             FieldPath prevHandlerField = existingHandler.filter().field();
+            FieldPath field = filter.field();
             boolean fieldDiffers = !prevHandlerField.equals(field);
             if (fieldDiffers) {
-                throw new HandlerFieldFilterClashError(declaringClass,
-                                                       handler.rawMethod(),
-                                                       existingHandler.rawMethod());
+                throw new HandlerFieldFilterClashError(
+                        declaringClass, handler.rawMethod(), existingHandler.rawMethod()
+                );
             }
             // It is OK to keep only the last filtering handler in the map (and not all of them)
             // because filtered fields are required to be the same.
