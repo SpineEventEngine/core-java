@@ -101,7 +101,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         if (handler instanceof SelectiveHandler) {
             checkFilteringNotClashes((SelectiveHandler) handler);
         }
-        handlers.put(handler.key(), handler);
+        handlers.put(handler.key().withoutFilter(), handler);
     }
 
     private void checkNotRemembered(H handler) {

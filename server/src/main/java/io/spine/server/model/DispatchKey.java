@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -29,6 +30,7 @@ import java.util.Objects;
 /**
  * Provides information for dispatching a message to a handler method.
  */
+@Immutable
 public final class DispatchKey {
 
     private final Class<? extends Message> messageClass;
@@ -43,16 +45,24 @@ public final class DispatchKey {
         this.originClass = originClass;
     }
 
-    public Class<? extends Message> messageClass() {
-        return messageClass;
+    /**
+     * Obtains a filter-less version of this.
+     *
+     * <p>If this key has a filter, a new instance is created, which copies this key data
+     * without the filter. Otherwise, this instance is returned.
+     */
+    DispatchKey withoutFilter() {
+        if (filter == null) {
+            return this;
+        }
+        return new DispatchKey(messageClass, null, originClass);
     }
 
-    public ArgumentFilter filter() {
-        return filter;
-    }
-
-    public Class<? extends Message> originClass() {
-        return originClass;
+    /**
+     * Creates a new key copying its data and taking the passed filter.
+     */
+    public DispatchKey withFilter(ArgumentFilter filter) {
+        return new DispatchKey(messageClass, filter, originClass);
     }
 
     @Override
