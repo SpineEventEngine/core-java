@@ -52,9 +52,11 @@ public interface InboxStorage
      *
      * @param index
      *         the shard index to return the results for
+     * @param pageSize
+     *         the maximum number of the elements per page
      * @return the first page of the results
      */
-    Page<InboxMessage> readAll(ShardIndex index);
+    Page<InboxMessage> readAll(ShardIndex index, int pageSize);
 
     /**
      * Writes a message to the storage.

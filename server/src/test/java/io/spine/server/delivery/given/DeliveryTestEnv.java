@@ -21,10 +21,13 @@
 package io.spine.server.delivery.given;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.NodeId;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.ShardIndex;
@@ -33,6 +36,9 @@ import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
 import java.security.SecureRandom;
+import java.util.Map;
+
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * Test environment for {@link Delivery} tests.
@@ -53,7 +59,33 @@ public class DeliveryTestEnv {
         return ImmutableSet.of("the-calculator");
     }
 
+    public static NodeId generateNodeId() {
+        return NodeId
+                .newBuilder()
+                .setValue(newUuid())
+                .vBuild();
+    }
+
+    public static ShardIndex newShardIndex(int index, int ofTotal) {
+        return ShardIndex
+                .newBuilder()
+                .setIndex(index)
+                .setOfTotal(ofTotal)
+                .vBuild();
+    }
+
     public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
+
+        /** How many calls there were to {@link #doStore(CalcAggregate)} method, grouped by ID. */
+        private static final Map<String, Integer> storeCalls = Maps.newConcurrentMap();
+
+        /** How many calls there were to {@link #doLoadOrCreate(String)} method, grouped by ID. */
+        private static final Map<String, Integer> loadOrCreateCalls = Maps.newConcurrentMap();
+
+        public CalculatorRepository() {
+            storeCalls.clear();
+            loadOrCreateCalls.clear();
+        }
 
         @Override
         protected void setupImportRouting(EventRouting<String> routing) {
@@ -67,6 +99,34 @@ public class DeliveryTestEnv {
 
         private static void routeByFirstField(EventRouting<String> routing) {
             routing.replaceDefault(EventRoute.byFirstMessageField(String.class));
+        }
+
+        @Override
+        protected void doStore(CalcAggregate aggregate) {
+            String id = aggregate.id();
+            incrementByKey(id, storeCalls);
+            super.doStore(aggregate);
+        }
+
+        @Override
+        protected CalcAggregate doLoadOrCreate(String id) {
+            incrementByKey(id, loadOrCreateCalls);
+            return super.doLoadOrCreate(id);
+        }
+
+        private static void incrementByKey(String id, Map<String, Integer> counters) {
+            if (!counters.containsKey(id)) {
+                counters.put(id, 0);
+            }
+            counters.put(id, counters.get(id) + 1);
+        }
+
+        public int storeCallsCount(String id) {
+            return storeCalls.getOrDefault(id, 0);
+        }
+
+        public int loadOrCreateCallsCount(String id) {
+            return loadOrCreateCalls.getOrDefault(id, 0);
         }
     }
 
@@ -110,14 +170,14 @@ public class DeliveryTestEnv {
      */
     public static class RawMessageMemoizer implements ShardObserver {
 
-        private final ImmutableSet.Builder<InboxMessage> rawMessages = ImmutableSet.builder();
+        private final ImmutableList.Builder<InboxMessage> rawMessages = ImmutableList.builder();
 
         @Override
         public void onMessage(InboxMessage update) {
             rawMessages.add(update);
         }
 
-        public ImmutableSet<InboxMessage> messages() {
+        public ImmutableList<InboxMessage> messages() {
             return rawMessages.build();
         }
     }

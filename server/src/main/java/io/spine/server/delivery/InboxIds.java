@@ -23,8 +23,10 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
+import io.spine.string.Stringifiers;
 import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.pack;
 
 /**
@@ -48,6 +50,9 @@ final class InboxIds {
      * @return the {@link InboxId}
      */
     static <T> InboxId wrap(T id, TypeUrl entityType) {
+        checkNotNull(id);
+        checkNotNull(entityType);
+
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(id))
@@ -68,9 +73,30 @@ final class InboxIds {
      * @return the extracted entity ID
      */
     static Object unwrap(InboxId inboxId) {
+        checkNotNull(inboxId);
         Any idValue = inboxId.getEntityId()
                              .getId();
         Object unpackedId = Identifier.unpack(idValue);
         return unpackedId;
+    }
+
+    /**
+     * Creates a new {@code InboxSignalId}.
+     *
+     * @param targetId
+     *         the ID of the target to which the signal is dispatched
+     * @param uuid
+     *         the UUID of the signal
+     * @return the new instance of {@code InboxSignalId}
+     */
+    static InboxSignalId newSignalId(Object targetId, String uuid) {
+        checkNotNull(targetId);
+        checkNotNull(uuid);
+
+        String rawValue = uuid + '@' + Stringifiers.toString(targetId);
+        InboxSignalId result = InboxSignalId.newBuilder()
+                                            .setValue(rawValue)
+                                            .build();
+        return result;
     }
 }

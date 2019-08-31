@@ -52,8 +52,8 @@ final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      *         applied}.
      */
     @Override
-    protected DispatchOutcome invokeDispatcher(A aggregate, EventEnvelope eventEnvelope) {
-        Event event = eventEnvelope.outerObject();
+    protected DispatchOutcome invokeDispatcher(A aggregate) {
+        Event event = envelope().outerObject();
         Success.Builder success = Success.newBuilder();
         success.getProducedEventsBuilder()
                .addEvent(event);
@@ -72,8 +72,8 @@ final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope event) {
+    protected void onEmptyResult(A aggregate) {
         _error().log("The aggregate `%s` was not modified during the import of the event `%s`.",
-                     aggregate, event);
+                     aggregate, envelope());
     }
 }

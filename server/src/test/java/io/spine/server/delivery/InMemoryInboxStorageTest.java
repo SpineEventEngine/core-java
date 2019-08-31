@@ -18,22 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * Tests of {@link io.spine.server.storage.memory.InMemoryInboxStorage InMemoryInboxStorage}.
  */
+class InMemoryInboxStorageTest extends InboxStorageTest {
 
-def final SPINE_VERSION = '1.0.5-SNAPSHOT'
-
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.2'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.2'
+    @Override
+    protected InboxStorage storage() {
+        return InMemoryStorageFactory.newInstance()
+                                     .createInboxStorage(false);
+    }
 }

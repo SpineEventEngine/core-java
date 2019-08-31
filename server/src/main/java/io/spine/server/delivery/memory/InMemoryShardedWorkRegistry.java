@@ -20,8 +20,12 @@
 
 package io.spine.server.delivery.memory;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
@@ -31,6 +35,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static com.google.protobuf.util.Timestamps.between;
+import static io.spine.base.Time.currentTime;
 
 /**
  * An in-memory implementation of {@link ShardedWorkRegistry ShardedWorkRegistry}.
@@ -56,9 +63,31 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
                         .newBuilder()
                         .setIndex(index)
                         .setPickedBy(nodeId)
+                        .setWhenLastPicked(currentTime())
                         .vBuild();
         workByNode.put(index, record);
         return Optional.of(asSession(record));
+    }
+
+    @Override
+    public synchronized Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
+        ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
+
+        for (ShardSessionRecord record : workByNode.values()) {
+            Timestamp whenPicked = record.getWhenLastPicked();
+            Duration elapsed = between(whenPicked, currentTime());
+
+            int comparison = Durations.compare(elapsed, inactivityPeriod);
+            if (comparison >= 0) {
+                clearNode(record);
+                resultBuilder.add(record.getIndex());
+            }
+        }
+        return resultBuilder.build();
+    }
+
+    private void clearNode(ShardSessionRecord record) {
+        updatePickedBy(record, null);
     }
 
     /**
@@ -100,7 +129,7 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         protected void complete() {
             ShardSessionRecord record = workByNode.get(shardIndex());
             // Clear the node ID value and release the session.
-            updatePickedBy(record, null);
+            clearNode(record);
         }
     }
 }

@@ -18,22 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * How ended the delivery of all messages read from the {@code Inbox} according to a certain
+ * {@code ShardIndex}.
  */
+class RunResult {
 
-def final SPINE_VERSION = '1.0.5-SNAPSHOT'
+    private final int deliveredMsgCount;
+    private final boolean stoppedByMonitor;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+    RunResult(int count, boolean stoppedByMonitor) {
+        deliveredMsgCount = count;
+        this.stoppedByMonitor = stoppedByMonitor;
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.2'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.2'
+    /**
+     * Tells if another run is required.
+     *
+     * <p>The run is not required either if there were no messages delivered or if
+     * the {@code DeliveryMonitor} stopped the execution.
+     */
+    boolean shouldRunAgain() {
+        return !stoppedByMonitor && deliveredMsgCount > 0;
+    }
 }

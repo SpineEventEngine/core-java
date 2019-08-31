@@ -23,7 +23,6 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
@@ -59,17 +58,18 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * <b>Configuration</b>
  *
- * <p>By default, a shard is assigned according to the identifier of the target entity. The messages
- * heading to a single entity will always reside in a single shard. However, the framework users
- * may {@linkplain Builder#setStrategy(DeliveryStrategy) customize} this behavior.
+ * <p>By default, a shard is assigned according to the identifier of the target entity. The
+ * messages heading to a single entity will always reside in a single shard. However,
+ * the framework users may {@linkplain DeliveryBuilder#setStrategy(DeliveryStrategy) customize}
+ * this behavior.
  *
- * <p>{@linkplain Builder#setIdempotenceWindow(Duration) Provides} the time-based de-duplication
- * capabilities to eliminate the messages, which may have been already delivered to their targets.
- * The duplicates will be detected among the messages, which are not older, than
+ * <p>{@linkplain DeliveryBuilder#setIdempotenceWindow(Duration) Provides} the time-based
+ * de-duplication capabilities to eliminate the messages, which may have been already delivered
+ * to their targets. The duplicates will be detected among the messages, which are not older, than
  * {@code now - [idempotence window]}.
  *
  * <p>{@code Delivery} is responsible for providing the {@link InboxStorage} for every inbox
- * registered. Framework users may {@linkplain Builder#setInboxStorage(InboxStorage)
+ * registered. Framework users may {@linkplain DeliveryBuilder#setInboxStorage(InboxStorage)
  * configure} the storage, taking into account that it is typically multi-tenant. By default,
  * the {@code InboxStorage} for the delivery is provided by the environment-specific
  * {@linkplain ServerEnvironment#storageFactory() storage factory} and is multi-tenant.
@@ -82,15 +82,25 @@ import static java.util.stream.Collectors.groupingBy;
  * environment a message queue may be used to notify the node cluster of a shard that has some
  * messages pending for the delivery.
  *
- * <p>Once an application node picks the shard to deliver the messages from it,
- * it registers itself in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard
- * that only allows to pick a shard to a single node at a time.
+ * <p>Once an application node picks the shard to deliver the messages from it, it registers itself
+ * in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard that only allows
+ * to pick a shard to a single node at a time.
+ *
+ * <p>The delivery process for each shard index is split into {@link DeliveryStage}s. In scope of
+ * each stage, a certain number of messages is read from the respective shard of the {@code Inbox}.
+ * The messages are grouped per-target and delivered in batches if possible. The maximum
+ * number of the messages within a {@code DeliveryStage} can be
+ * {@linkplain DeliveryBuilder#setPageSize(int) configured}.
+ *
+ * <p>After each {@code DeliveryStage} it is possible to stop the delivery by
+ * {@link DeliveryBuilder#setMonitor(DeliveryMonitor) supplying} a custom delivery monitor.
+ * Please refer to the {@link DeliveryMonitor documentation} for the details.
  *
  * <b>Local environment</b>
  *
  * <p>By default, the delivery is configured to {@linkplain Delivery#local() run locally}. It
- * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the messages
- * from the observed shard once a message is passed to its
+ * uses {@linkplain LocalDispatchingObserver see-and-dispatch observer}, which delivers the
+ * messages from the observed shard once a message is passed to its
  * {@link LocalDispatchingObserver#onMessage(InboxMessage) onMessage(InboxMessage)} method. This
  * process is synchronous.
  *
@@ -99,6 +109,7 @@ import static java.util.stream.Collectors.groupingBy;
  * {@code synchronized} in-memory data structures and prevents several threads from picking up the
  * same shard.
  */
+@SuppressWarnings("OverlyCoupledClass")     // It's fine for a centerpiece.
 public final class Delivery {
 
     /**
@@ -147,11 +158,23 @@ public final class Delivery {
      */
     private final InboxStorage inboxStorage;
 
-    private Delivery(Builder builder) {
-        this.strategy = builder.strategy;
-        this.workRegistry = builder.workRegistry;
-        this.idempotenceWindow = builder.idempotenceWindow;
-        this.inboxStorage = builder.inboxStorage;
+    /**
+     * The monitor of delivery stages.
+     */
+    private final DeliveryMonitor monitor;
+
+    /**
+     * The maximum amount of messages to deliver within a {@link DeliveryStage}.
+     */
+    private final int pageSize;
+
+    Delivery(DeliveryBuilder builder) {
+        this.strategy = builder.getStrategy();
+        this.workRegistry = builder.getWorkRegistry();
+        this.idempotenceWindow = builder.getIdempotenceWindow();
+        this.inboxStorage = builder.getInboxStorage();
+        this.monitor = builder.getMonitor();
+        this.pageSize = builder.getPageSize();
         this.inboxDeliveries = Maps.newConcurrentMap();
         this.shardObservers = synchronizedList(new ArrayList<>());
     }
@@ -159,8 +182,8 @@ public final class Delivery {
     /**
      * Creates an instance of new {@code Builder} of {@code Delivery}.
      */
-    public static Builder newBuilder() {
-        return new Builder();
+    public static DeliveryBuilder newBuilder() {
+        return new DeliveryBuilder();
     }
 
     /**
@@ -223,17 +246,17 @@ public final class Delivery {
     public void deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        Optional<ShardProcessingSession> picked =
-                workRegistry.pickUp(index, currentNode);
+        Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
         if (!picked.isPresent()) {
             return;
         }
         ShardProcessingSession session = picked.get();
+
         try {
-            int deliveredMsgCount;
+            RunResult runResult;
             do {
-                deliveredMsgCount = doDeliver(session);
-            } while (deliveredMsgCount > 0);
+                runResult = doDeliver(session);
+            } while (runResult.shouldRunAgain());
         } finally {
             session.complete();
         }
@@ -242,18 +265,25 @@ public final class Delivery {
     /**
      * Runs the delivery for the shard, which session is passed.
      *
-     * @return the number of messages delivered
+     * <p>The messages are read page-by-page according to the {@link #pageSize page size} setting.
+     *
+     * <p>After delivering each page of messages, a {@code DeliveryStage} is produced.
+     * The configured {@link #monitor DeliveryMonitor} may stop the execution according to
+     * the monitored {@code DeliveryStage}.
+     *
+     * @return the passed delivery stage
      */
-    private int doDeliver(ShardProcessingSession session) {
+    private RunResult doDeliver(ShardProcessingSession session) {
         ShardIndex index = session.shardIndex();
         Timestamp now = Time.currentTime();
         Timestamp idempotenceWndStart = Timestamps.subtract(now, idempotenceWindow);
 
-        Page<InboxMessage> startingPage = inboxStorage.readAll(index);
+        Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
 
         int totalMessagesDelivered = 0;
-        while (maybePage.isPresent()) {
+        boolean continueAllowed = true;
+        while (continueAllowed && maybePage.isPresent()) {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
@@ -263,10 +293,29 @@ public final class Delivery {
 
                 ImmutableList<InboxMessage> toRemove = classifier.removals();
                 inboxStorage.removeAll(toRemove);
+                DeliveryStage stage = newStage(index, deliveredInBatch);
+                continueAllowed = monitorTellsToContinue(stage);
             }
-            maybePage = currentPage.next();
+            if (continueAllowed) {
+                maybePage = currentPage.next();
+            }
         }
-        return totalMessagesDelivered;
+        return new RunResult(totalMessagesDelivered, !continueAllowed);
+    }
+
+    private static DeliveryStage newStage(ShardIndex index, int deliveredInBatch) {
+        return DeliveryStage
+                .newBuilder()
+                .setIndex(index)
+                .setMessagesDelivered(deliveredInBatch)
+                .vBuild();
+    }
+
+    private boolean monitorTellsToContinue(@Nullable DeliveryStage stage) {
+        if (stage == null) {
+            return true;
+        }
+        return monitor.shouldContinueAfter(stage);
     }
 
     /**
@@ -410,86 +459,5 @@ public final class Delivery {
         return messages.stream()
                        .collect(groupingBy(m -> m.getInboxId()
                                                  .getTypeUrl()));
-    }
-
-    /**
-     * A builder for {@code Delivery} instances.
-     */
-    public static class Builder {
-
-        private @Nullable InboxStorage inboxStorage;
-        private @Nullable DeliveryStrategy strategy;
-        private @Nullable ShardedWorkRegistry workRegistry;
-        private @Nullable Duration idempotenceWindow;
-
-        /**
-         * Prevents a direct instantiation of this class.
-         */
-        private Builder() {
-        }
-
-        public Optional<InboxStorage> inboxStorage() {
-            return Optional.ofNullable(inboxStorage);
-        }
-
-        public Optional<DeliveryStrategy> strategy() {
-            return Optional.ofNullable(strategy);
-        }
-
-        public Optional<ShardedWorkRegistry> workRegistry() {
-            return Optional.ofNullable(workRegistry);
-        }
-
-        public Optional<Duration> idempotenceWindow() {
-            return Optional.ofNullable(idempotenceWindow);
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setWorkRegistry(ShardedWorkRegistry workRegistry) {
-            this.workRegistry = checkNotNull(workRegistry);
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setStrategy(DeliveryStrategy strategy) {
-            this.strategy = checkNotNull(strategy);
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setIdempotenceWindow(Duration idempotenceWindow) {
-            this.idempotenceWindow = checkNotNull(idempotenceWindow);
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setInboxStorage(InboxStorage inboxStorage) {
-            checkNotNull(inboxStorage);
-            this.inboxStorage = inboxStorage;
-            return this;
-        }
-
-        public Delivery build() {
-            if (strategy == null) {
-                strategy = UniformAcrossAllShards.singleShard();
-            }
-
-            if (idempotenceWindow == null) {
-                idempotenceWindow = Duration.getDefaultInstance();
-            }
-
-            if (this.inboxStorage == null) {
-                this.inboxStorage = ServerEnvironment.instance()
-                                                     .storageFactory()
-                                                     .createInboxStorage(true);
-            }
-
-            if (workRegistry == null) {
-                workRegistry = new InMemoryShardedWorkRegistry();
-            }
-
-            Delivery delivery = new Delivery(this);
-            return delivery;
-        }
     }
 }

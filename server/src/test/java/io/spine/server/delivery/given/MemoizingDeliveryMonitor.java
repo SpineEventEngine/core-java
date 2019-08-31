@@ -18,22 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery.given;
+
+import com.google.common.collect.ImmutableList;
+import io.spine.server.delivery.DeliveryMonitor;
+import io.spine.server.delivery.DeliveryStage;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * The implementation of {@link DeliveryMonitor} which remembers the passed stages.
  */
+public final class MemoizingDeliveryMonitor extends DeliveryMonitor {
 
-def final SPINE_VERSION = '1.0.5-SNAPSHOT'
+    private final List<DeliveryStage> stages = new ArrayList<>();
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+    @Override
+    public boolean shouldContinueAfter(DeliveryStage stage) {
+        stages.add(stage);
+        return super.shouldContinueAfter(stage);
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.2'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.2'
+    public ImmutableList<DeliveryStage> getStages() {
+        return ImmutableList.copyOf(stages);
+    }
 }

@@ -18,22 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
 /**
- *  The versions of the libraries used.
+ * Listens to start and end of the {@code Inbox} batch delivery.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * <p>When the consequent messages in the {@code Inbox} are targeting the same entity,
+ * the delivery may be optimized by using either the same transaction or caching the storage
+ * operations while the batch is delivered.
+ *
+ * <p>The implementing classes may define their own behavior and react upon such use cases.
  */
+public interface BatchDeliveryListener<I> {
 
-def final SPINE_VERSION = '1.0.5-SNAPSHOT'
+    /**
+     * Invoked before the batch delivery to the target with the given ID is started.
+     *
+     * @param id
+     *         the ID of the delivery target
+     */
+    void onStart(I id);
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.2'
-
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.2'
+    /**
+     * Invoked after the batch delivery to the target with the given ID is ended.
+     *
+     * @param id
+     *         the ID of the delivery target
+     */
+    void onEnd(I id);
 }

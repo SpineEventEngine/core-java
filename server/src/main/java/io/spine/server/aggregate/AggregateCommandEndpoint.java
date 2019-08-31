@@ -45,9 +45,9 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected DispatchOutcome invokeDispatcher(A aggregate, CommandEnvelope envelope) {
+    protected DispatchOutcome invokeDispatcher(A aggregate) {
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
-        DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope);
+        DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope());
         return dispatch.perform();
     }
 
@@ -64,7 +64,8 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException always
      */
     @Override
-    protected void onEmptyResult(A aggregate, CommandEnvelope cmd) throws IllegalStateException {
+    protected void onEmptyResult(A aggregate) throws IllegalStateException {
+        CommandEnvelope cmd = envelope();
         String entityId = aggregate.idAsString();
         String entityClass = aggregate.getClass()
                                       .getName();

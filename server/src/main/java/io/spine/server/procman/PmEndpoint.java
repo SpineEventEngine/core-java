@@ -104,7 +104,7 @@ abstract class PmEndpoint<I,
 
     protected DispatchOutcome runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        DispatchOutcome outcome = invokeDispatcher(processManager, envelope());
+        DispatchOutcome outcome = invokeDispatcher(processManager);
         tx.commitIfActive();
         return outcome;
     }
