@@ -29,7 +29,6 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.event.UnsupportedEventException;
 import io.spine.server.event.funnel.given.DocumentAggregate;
 import io.spine.server.event.funnel.given.DocumentRepository;
 import io.spine.server.event.funnel.given.EditHistoryProjection;
@@ -234,8 +233,8 @@ class EventFunnelTest {
             assertWithMessage(status.toString())
                     .that(status.getStatusCase())
                     .isEqualTo(ERROR);
-            assertThat(status.getError().getType())
-                    .isEqualTo(UnsupportedEventException.class.getName());
+            assertThat(status.getError().getCode())
+                    .isEqualTo(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber());
             Optional<DocumentAggregate> foundDoc = documentRepository.find(importEvent.getId());
             assertThat(foundDoc).isEmpty();
         }
