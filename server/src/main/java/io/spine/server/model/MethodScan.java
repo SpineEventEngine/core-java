@@ -116,6 +116,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
     }
 
+    @SuppressWarnings("PMD:CollapsibleIfStatements")    // For clarity.
     private void checkFilteringNotClashes(SelectiveHandler handler) {
         ArgumentFilter filter = handler.filter();
         if (filter.acceptsAll()) {
