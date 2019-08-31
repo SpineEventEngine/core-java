@@ -21,20 +21,61 @@
 package io.spine.server.model;
 
 import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DuplicatingCommandHandlers;
+import io.spine.server.model.given.map.TwoFieldsInSubscription;
+import io.spine.string.StringifierRegistry;
+import io.spine.string.Stringifiers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.model.HandlerMap.create;
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("MessageHandlerMap should")
+@DisplayName("`HandlerMap` should")
 class HandlerMapTest {
 
-    @Test
-    @DisplayName("not allow duplicating message classes in handlers")
-    void rejectDuplicateHandlers() {
-        assertThrows(DuplicateHandlerMethodError.class,
-                     () -> HandlerMap.create(DuplicatingCommandHandlers.class,
-                                             new CommandHandlerSignature()));
+    /**
+     * Registers the stringifier for {@code Integer}, which is used for parsing filter field values.
+     */
+    @BeforeAll
+    static void prepare() {
+        StringifierRegistry.instance()
+                           .register(Stringifiers.forInteger(), Integer.TYPE);
+    }
+
+    @Nested
+    @DisplayName("not allow")
+    class DuplicateHandler {
+
+        @Test
+        @DisplayName("duplicating message classes in handlers")
+        void rejectDuplicateHandlers() {
+            assertDuplication(
+                    () -> create(DuplicatingCommandHandlers.class, new CommandHandlerSignature())
+            );
+        }
+
+        @Test
+        @DisplayName("the same value of the filtered event field")
+        void rejectFilterFieldDuplication() {
+            assertDuplication(() -> asProjectionClass(DupEventFilterValue.class));
+        }
+
+        @Test
+        @DisplayName("the same event filtering by different fields")
+        void failToSubscribeByDifferentFields() {
+            assertThrows(
+                    HandlerFieldFilterClashError.class,
+                    () -> asProjectionClass(TwoFieldsInSubscription.class)
+            );
+        }
+
+        void assertDuplication(Runnable runnable) {
+            assertThrows(DuplicateHandlerMethodError.class, runnable::run);
+        }
     }
 }
