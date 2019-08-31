@@ -58,7 +58,7 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
     }
 
     /**
-     * Verifies if the passed filter works on the same field as this one.
+     * Tells if the passed filter works on the same field as this one.
      */
     boolean sameField(ArgumentFilter another) {
         boolean result = field.equals(another.field);
@@ -76,7 +76,7 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         this.acceptsAll = field.getFieldNameCount() == 0;
     }
 
-    /** Verifies that this filter accepts all the events. */
+    /** Tells if this filter accepts all the events. */
     public boolean acceptsAll() {
         return acceptsAll;
     }
