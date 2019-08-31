@@ -70,16 +70,21 @@ public final class DispatchKey {
         }
         final DispatchKey other = (DispatchKey) obj;
         return Objects.equals(this.messageClass, other.messageClass)
+                && Objects.equals(this.filter, other.filter)
                 && Objects.equals(this.originClass, other.originClass);
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Both classes have `filter` field.
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("messageClass", messageClass)
-                          .add("filter", filter)
-                          .add("originClass", originClass)
-                          .toString();
+        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
+        helper.add("messageClass", messageClass.getName());
+        if (filter != null && !filter.acceptsAll()) {
+            helper.add("filter", filter);
+        }
+        if (originClass != null) {
+            helper.add("originClass", originClass);
+        }
+        return helper.toString();
     }
 }

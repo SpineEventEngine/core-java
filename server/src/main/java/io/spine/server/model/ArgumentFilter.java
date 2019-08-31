@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
 import io.spine.base.EventMessage;
@@ -29,6 +30,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.base.FieldPaths.getValue;
 
 /**
@@ -65,6 +67,11 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         this.acceptsAll = field.getFieldNameCount() == 0;
     }
 
+    /** Verifies that this filter accepts all the events. */
+    public boolean acceptsAll() {
+        return acceptsAll;
+    }
+
     /**
      * Accepts the passed event message if this filter {@linkplain #acceptingAll() accepts all}
      * events, or if the field of the message matches the configured value.
@@ -77,6 +84,14 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         Object eventField = getValue(field, event);
         boolean result = expectedValue.equals(eventField);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("field", shortDebugString(field))
+                          .add("expectedValue", expectedValue)
+                          .toString();
     }
 
     @Override
