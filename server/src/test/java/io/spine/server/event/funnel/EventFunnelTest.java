@@ -23,8 +23,10 @@ package io.spine.server.event.funnel;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Ack;
 import io.spine.core.Status;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.UnsupportedEventException;
@@ -32,6 +34,7 @@ import io.spine.server.event.funnel.given.DocumentAggregate;
 import io.spine.server.event.funnel.given.DocumentRepository;
 import io.spine.server.event.funnel.given.EditHistoryProjection;
 import io.spine.server.event.funnel.given.EditHistoryRepository;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.Now;
 import org.junit.jupiter.api.AfterEach;
@@ -135,6 +138,47 @@ class EventFunnelTest {
                           .getError()
                           .getCode())
                     .isEqualTo(UNSUPPORTED_EVENT.getNumber());
+        }
+
+        @Test
+        @DisplayName("in a multitenant environment")
+        void multitenant() {
+            DocumentRepository documentRepository = new DocumentRepository();
+            BoundedContext context = BoundedContextBuilder
+                    .assumingTests(true)
+                    .add(documentRepository)
+                    .build();
+            UserId johnDoe = userId();
+            TenantId acmeCorp = TenantId
+                    .newBuilder()
+                    .setDomain(InternetDomain.newBuilder().setValue("acme.com"))
+                    .build();
+            TenantId cyberdyne = TenantId
+                    .newBuilder()
+                    .setDomain(InternetDomain.newBuilder().setValue("cyberdyne.com"))
+                    .build();
+            PaperDocumentScanned importEvent = PaperDocumentScanned
+                    .newBuilder()
+                    .setId(DocumentId.generate())
+                    .setText("Monthly report")
+                    .setOwner(johnDoe)
+                    .setWhenCreated(Now.get().asLocalDateTime())
+                    .build();
+            context.postEvent()
+                   .producedBy(johnDoe)
+                   .toAggregate()
+                   .forTenant(acmeCorp)
+                   .post(importEvent);
+
+            Optional<DocumentAggregate> acmeMonthlyReport = TenantAwareRunner
+                    .with(acmeCorp)
+                    .evaluate(() -> documentRepository.find(importEvent.getId()));
+            assertThat(acmeMonthlyReport).isPresent();
+
+            Optional<DocumentAggregate> cyberdyneMonthlyReport = TenantAwareRunner
+                    .with(cyberdyne)
+                    .evaluate(() -> documentRepository.find(importEvent.getId()));
+            assertThat(cyberdyneMonthlyReport).isEmpty();
         }
     }
 
@@ -253,6 +297,45 @@ class EventFunnelTest {
             assertThat(status.getStatusCase()).isEqualTo(ERROR);
             assertThat(status.getError().getCode())
                     .isEqualTo(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber());
+        }
+
+        @Test
+        @DisplayName("in a multitenant environment")
+        void multitenant() {
+            DocumentRepository documentRepository = new DocumentRepository();
+            BoundedContext context = BoundedContextBuilder
+                    .assumingTests(true)
+                    .add(documentRepository)
+                    .build();
+            UserId johnDoe = userId();
+            TenantId acmeCorp = TenantId
+                    .newBuilder()
+                    .setDomain(InternetDomain.newBuilder().setValue("acme.com"))
+                    .build();
+            TenantId cyberdyne = TenantId
+                    .newBuilder()
+                    .setDomain(InternetDomain.newBuilder().setValue("cyberdyne.com"))
+                    .build();
+            OpenOfficeDocumentUploaded importEvent = OpenOfficeDocumentUploaded
+                    .newBuilder()
+                    .setId(DocumentId.generate())
+                    .setText("Daily report")
+                    .build();
+            context.postEvent()
+                   .producedBy(johnDoe)
+                   .broadcast()
+                   .forTenant(acmeCorp)
+                   .post(importEvent);
+
+            Optional<DocumentAggregate> acmeDailyReport = TenantAwareRunner
+                    .with(acmeCorp)
+                    .evaluate(() -> documentRepository.find(importEvent.getId()));
+            assertThat(acmeDailyReport).isPresent();
+
+            Optional<DocumentAggregate> cyberdyneDailyReport = TenantAwareRunner
+                    .with(cyberdyne)
+                    .evaluate(() -> documentRepository.find(importEvent.getId()));
+            assertThat(cyberdyneDailyReport).isEmpty();
         }
     }
 
