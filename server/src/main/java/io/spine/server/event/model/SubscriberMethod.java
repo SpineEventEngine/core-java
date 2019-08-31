@@ -83,11 +83,9 @@ public abstract class SubscriberMethod
     public DispatchKey key() {
         DispatchKey typeBasedKey = super.key();
         ArgumentFilter filter = filter();
-        FieldPath fieldPath = filter.field();
-        return fieldPath.getFieldNameList()
-                        .isEmpty()
+        return filter.acceptsAll()
                ? typeBasedKey
-               : new DispatchKey(typeBasedKey.messageClass(), filter, typeBasedKey.originClass());
+               : typeBasedKey.withFilter(filter);
     }
 
     @Override
