@@ -20,18 +20,22 @@
 
 package io.spine.server.event.funnel;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.core.Ack;
 import io.spine.core.Status;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.event.UnsupportedEventException;
 import io.spine.server.event.funnel.given.DocumentAggregate;
 import io.spine.server.event.funnel.given.DocumentRepository;
+import io.spine.server.event.funnel.given.EditHistoryProjection;
 import io.spine.server.event.funnel.given.EditHistoryRepository;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.Now;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,6 +50,9 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
 import static io.spine.testing.server.entity.EntitySubject.assertEntity;
 
 @DisplayName("EventFunnel should")
@@ -78,11 +85,8 @@ class EventFunnelTest {
         @Test
         @DisplayName("if the applier allows import")
         void markedForImport() {
-            MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-            UserId johnDoe = UserId
-                    .newBuilder()
-                    .setValue(newUuid())
-                    .build();
+            MemoizingObserver<Ack> observer = memoizingObserver();
+            UserId johnDoe = userId();
             PaperDocumentScanned importEvent = PaperDocumentScanned
                     .newBuilder()
                     .setId(DocumentId.generate())
@@ -112,11 +116,8 @@ class EventFunnelTest {
         @Test
         @DisplayName("but NOT if the applier does not allow import")
         void notMarked() {
-            MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-            UserId johnDoe = UserId
-                    .newBuilder()
-                    .setValue(newUuid())
-                    .build();
+            MemoizingObserver<Ack> observer = memoizingObserver();
+            UserId johnDoe = userId();
             TextEdited importEvent = TextEdited
                     .newBuilder()
                     .setId(DocumentId.generate())
@@ -144,11 +145,8 @@ class EventFunnelTest {
         @Test
         @DisplayName("and deliver to external reactors")
         void externalReactor() {
-            MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-            UserId johnDoe = UserId
-                    .newBuilder()
-                    .setValue(newUuid())
-                    .build();
+            MemoizingObserver<Ack> observer = memoizingObserver();
+            UserId johnDoe = userId();
             OpenOfficeDocumentUploaded importEvent = OpenOfficeDocumentUploaded
                     .newBuilder()
                     .setId(DocumentId.generate())
@@ -171,5 +169,97 @@ class EventFunnelTest {
                                .getText())
                     .isEqualTo(importEvent.getText());
         }
+
+        @Test
+        @DisplayName("and ignore domestic reactors")
+        void domesticReactor() {
+            MemoizingObserver<Ack> observer = memoizingObserver();
+            UserId johnDoe = userId();
+            DocumentImported importEvent = DocumentImported
+                    .newBuilder()
+                    .setId(DocumentId.generate())
+                    .setText("Annual report")
+                    .build();
+            context.postEvent()
+                   .producedBy(johnDoe)
+                   .broadcast()
+                   .with(observer)
+                   .post(importEvent);
+            Status status = observer.firstResponse()
+                                    .getStatus();
+            assertWithMessage(status.toString())
+                    .that(status.getStatusCase())
+                    .isEqualTo(ERROR);
+            assertThat(status.getError().getType())
+                    .isEqualTo(UnsupportedEventException.class.getName());
+            Optional<DocumentAggregate> foundDoc = documentRepository.find(importEvent.getId());
+            assertThat(foundDoc).isEmpty();
+        }
+
+        @Test
+        @DisplayName("and deliver to external subscribers")
+        void externalSubscriber() {
+            UserId johnDoe = userId();
+            TestActorRequestFactory requests =
+                    new TestActorRequestFactory(johnDoe);
+            DocumentId documentId = DocumentId.generate();
+            CreateDocument crete = CreateDocument
+                    .newBuilder()
+                    .setId(documentId)
+                    .vBuild();
+            EditText edit = EditText
+                    .newBuilder()
+                    .setId(documentId)
+                    .setPosition(0)
+                    .setNewText("Fresh new document")
+                    .vBuild();
+            context.commandBus()
+                   .post(ImmutableList.of(requests.createCommand(crete),
+                                          requests.createCommand(edit)),
+                         noOpObserver());
+            EditHistoryProjection historyAfterEdit = editHistoryRepository
+                    .find(documentId)
+                    .orElseGet(Assertions::fail);
+            assertThat(historyAfterEdit.state().getEditList()).isNotEmpty();
+            context.postEvent()
+                   .producedIn("3d party directory service")
+                   .broadcast()
+                   .post(UserDeleted
+                                 .newBuilder()
+                                 .setUser(johnDoe)
+                                 .vBuild());
+            EditHistoryProjection historyAfterDeleted = editHistoryRepository
+                    .find(documentId)
+                    .orElseGet(Assertions::fail);
+            assertThat(historyAfterDeleted.state().getEditList()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("and ignore domestic subscribers")
+        void domesticSubscriber() {
+            DocumentId documentId = DocumentId.generate();
+            TextEdited event = TextEdited
+                    .newBuilder()
+                    .setId(documentId)
+                    .vBuild();
+            MemoizingObserver<Ack> observer = memoizingObserver();
+            context.postEvent()
+                   .producedIn("Abusing client")
+                   .broadcast()
+                   .with(observer)
+                   .post(event);
+            Status status = observer.firstResponse()
+                                    .getStatus();
+            assertThat(status.getStatusCase()).isEqualTo(ERROR);
+            assertThat(status.getError().getCode())
+                    .isEqualTo(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber());
+        }
+    }
+
+    private static UserId userId() {
+        return UserId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
     }
 }
