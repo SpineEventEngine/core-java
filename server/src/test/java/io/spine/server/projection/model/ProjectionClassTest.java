@@ -124,7 +124,7 @@ class ProjectionClassTest {
     void failOnDuplicateFilters() {
         assertThrows(
                 DuplicateHandlerMethodError.class,
-                () -> new DuplicateValueSubscription.Repository().entityClass()
+                () -> asProjectionClass(DuplicateValueSubscription.class)
         );
     }
 
@@ -133,7 +133,7 @@ class ProjectionClassTest {
     void failToSubscribeByDifferentFields() {
         assertThrows(
                 HandlerFieldFilterClashError.class,
-                () -> new DifferentFieldSubscription.Repository().entityClass()
+                () -> asProjectionClass(DifferentFieldSubscription.class)
         );
     }
 
