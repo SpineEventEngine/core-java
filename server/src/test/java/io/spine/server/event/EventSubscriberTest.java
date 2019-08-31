@@ -71,14 +71,16 @@ class EventSubscriberTest {
 
         assertTrue(subscriber.isMethodCalled());
         List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
-        assertThat(systemEvents).hasSize(1);
+        assertThat(systemEvents)
+                .hasSize(1);
         HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
         assertThat(systemEvent.getHandledSignal())
                 .isEqualTo(eventEnvelope.messageId());
         assertThat(systemEvent.getError()).isNotEqualToDefaultInstance();
         Any expectedId = Identifier.pack(subscriber.getClass()
                                                    .getName());
-        assertThat(systemEvent.getEntity().getId()).isEqualTo(expectedId);
+        assertThat(systemEvent.getEntity().getId())
+                .isEqualTo(expectedId);
     }
 
     @Test

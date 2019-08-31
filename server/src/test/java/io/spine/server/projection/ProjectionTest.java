@@ -32,19 +32,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.entity.given.Given;
-import io.spine.server.entity.storage.EntityColumn;
-import io.spine.server.entity.storage.EntityColumnCache;
-import io.spine.server.model.DuplicateHandlerMethodError;
-import io.spine.server.model.HandlerFieldFilterClashError;
 import io.spine.server.projection.given.EntitySubscriberProjection;
-import io.spine.server.projection.given.ProjectionTestEnv.DuplicateFilterProjection;
-import io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection;
-import io.spine.server.projection.given.ProjectionTestEnv.MalformedProjection;
-import io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection;
-import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import io.spine.server.projection.given.NoDefaultOptionProjection;
 import io.spine.server.projection.given.SavedString;
-import io.spine.server.storage.StorageField;
-import io.spine.server.type.EventClass;
+import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.string.StringifierRegistry;
@@ -68,26 +59,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_A;
-import static io.spine.server.projection.given.ProjectionTestEnv.FilteringProjection.SET_B;
-import static io.spine.server.projection.given.ProjectionTestEnv.NoDefaultOptionProjection.ACCEPTED_VALUE;
+import static io.spine.server.projection.given.NoDefaultOptionProjection.ACCEPTED_VALUE;
 import static io.spine.server.projection.given.dispatch.ProjectionEventDispatcher.dispatch;
-import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.server.storage.VersionField.version;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.TestValues.random;
 import static io.spine.testing.TestValues.randomString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -103,7 +85,7 @@ class ProjectionTest {
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(ProjectionTest.class);
 
-    private TestProjection projection;
+    private SavingProjection projection;
 
     @BeforeAll
     static void prepare() {
@@ -114,7 +96,7 @@ class ProjectionTest {
     @BeforeEach
     void setUp() {
         String id = newUuid();
-        projection = Given.projectionOfClass(TestProjection.class)
+        projection = Given.projectionOfClass(SavingProjection.class)
                           .withId(id)
                           .withVersion(1)
                           .withState(SavedString.newBuilder()
@@ -207,7 +189,7 @@ class ProjectionTest {
     @DisplayName("throw ISE if no handler is present for event")
     void throwIfNoHandlerPresent() {
         ProjectionRepository<String, ?, ?> repository =
-                (ProjectionRepository<String, ?, ?>) DefaultRepository.of(TestProjection.class);
+                (ProjectionRepository<String, ?, ?>) DefaultRepository.of(SavingProjection.class);
         BoundedContext context = BoundedContextBuilder
                 .assumingTests()
                 .build();
@@ -223,22 +205,14 @@ class ProjectionTest {
         List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
         assertThat(systemEvents).hasSize(1);
         HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
-        assertThat(systemEvent.getHandledSignal().asEventId()).isEqualTo(event.id());
-        assertThat(systemEvent.getEntity().getId())
+        assertThat(systemEvent.getHandledSignal()
+                              .asEventId())
+                .isEqualTo(event.id());
+        assertThat(systemEvent.getEntity()
+                              .getId())
                 .isEqualTo(Identifier.pack(projection.id()));
         assertThat(systemEvent.getError().getType())
                 .isEqualTo(IllegalStateException.class.getCanonicalName());
-    }
-
-    @Test
-    @DisplayName("return handled event classes")
-    void exposeEventClasses() {
-        Set<EventClass> classes =
-                asProjectionClass(TestProjection.class).domesticEvents();
-
-        assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
-        assertTrue(classes.contains(EventClass.from(StringImported.class)));
-        assertTrue(classes.contains(EventClass.from(Int32Imported.class)));
     }
 
     @Test
@@ -265,47 +239,6 @@ class ProjectionTest {
     }
 
     @Test
-    @DisplayName("subscribe to events with specific field values")
-    void subscribeToEventsWithSpecificFields() {
-        ProjectId id = newId();
-        StringImported setB = StringImported
-                .newBuilder()
-                .setValue(SET_B)
-                .build();
-        StringImported setA = StringImported
-                .newBuilder()
-                .setValue(SET_A)
-                .build();
-        StringImported setText = StringImported
-                .newBuilder()
-                .setValue("Test project name")
-                .build();
-        FilteringProjection projection =
-                Given.projectionOfClass(FilteringProjection.class)
-                     .withId(id.getId())
-                     .withVersion(42)
-                     .withState(SavedString.getDefaultInstance())
-                     .build();
-        dispatch(projection, eventFactory.createEvent(setB));
-        assertThat(projection.state().getValue()).isEqualTo("B");
-
-        dispatch(projection, eventFactory.createEvent(setA));
-        assertThat(projection.state().getValue()).isEqualTo("A");
-
-        dispatch(projection, eventFactory.createEvent(setText));
-        assertThat(projection.state().getValue()).isEqualTo(setText.getValue());
-    }
-
-    @Test
-    @DisplayName("fail to subscribe to the same event filtering by different fields")
-    void failToSubscribeByDifferentFields() {
-        assertThrows(
-                HandlerFieldFilterClashError.class,
-                () -> new MalformedProjection.Repository().entityClass()
-        );
-    }
-
-    @Test
     @DisplayName("not dispatch event if it does not match filters")
     void notDeliverIfNotFits() {
         NoDefaultOptionProjection projection =
@@ -329,37 +262,6 @@ class ProjectionTest {
                 .build();
         dispatch(projection, eventFactory.createEvent(dispatched));
         assertThat(projection.state().getValue()).isEqualTo(ACCEPTED_VALUE);
-    }
-
-    @Test
-    @DisplayName("fail on duplicate filter values")
-    void failOnDuplicateFilters() {
-        assertThrows(
-                DuplicateHandlerMethodError.class,
-                () -> new DuplicateFilterProjection.Repository().entityClass()
-        );
-    }
-
-    @Test
-    @DisplayName("have `version` column")
-    void haveVersionColumn() {
-        assertHasColumn(TestProjection.class, version, Version.class);
-    }
-
-    @Test
-    @DisplayName("have `archived` and `deleted` columns")
-    void haveLifecycleColumn() {
-        assertHasColumn(TestProjection.class, archived, boolean.class);
-        assertHasColumn(TestProjection.class, deleted, boolean.class);
-    }
-
-    private static void assertHasColumn(Class<? extends Projection<?, ?, ?>> projectionType,
-                                        StorageField columnName,
-                                        Class<?> columnType) {
-        EntityColumnCache cache = EntityColumnCache.initializeFor(projectionType);
-        EntityColumn column = cache.findColumn(columnName.toString());
-        assertThat(column).isNotNull();
-        assertThat(column.type()).isEqualTo(columnType);
     }
 
     private static ProjectId newId() {
