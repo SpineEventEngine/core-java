@@ -136,4 +136,40 @@ class EventFunnelTest {
                     .isEqualTo(UNSUPPORTED_EVENT.getNumber());
         }
     }
+
+    @Nested
+    @DisplayName("broadcast events via IntegrationBus")
+    class Broadcast {
+
+        @Test
+        @DisplayName("and deliver to external reactors")
+        void externalReactor() {
+            MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
+            UserId johnDoe = UserId
+                    .newBuilder()
+                    .setValue(newUuid())
+                    .build();
+            OpenOfficeDocumentUploaded importEvent = OpenOfficeDocumentUploaded
+                    .newBuilder()
+                    .setId(DocumentId.generate())
+                    .setText("The scary truth about gluten")
+                    .build();
+            context.postEvent()
+                   .producedBy(johnDoe)
+                   .broadcast()
+                   .with(observer)
+                   .post(importEvent);
+            Status status = observer.firstResponse()
+                                    .getStatus();
+            assertWithMessage(status.toString())
+                    .that(status.getStatusCase())
+                    .isEqualTo(OK);
+            Optional<DocumentAggregate> foundDoc = documentRepository.find(importEvent.getId());
+            assertThat(foundDoc).isPresent();
+            assertThat(foundDoc.get()
+                               .state()
+                               .getText())
+                    .isEqualTo(importEvent.getText());
+        }
+    }
 }
