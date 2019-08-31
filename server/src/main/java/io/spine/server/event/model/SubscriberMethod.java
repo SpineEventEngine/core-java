@@ -22,13 +22,10 @@ package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
-import io.spine.base.FieldPath;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.DispatchKey;
-import io.spine.server.model.HandlerId;
-import io.spine.server.model.MessageFilter;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.SelectiveHandler;
@@ -64,19 +61,6 @@ public abstract class SubscriberMethod
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
-    }
-
-    @Override
-    public HandlerId id() {
-        HandlerId typeBasedToken = super.id();
-        MessageFilter filter = MessageFilter.getDefaultInstance(); //filter();
-        FieldPath fieldPath = filter.getField();
-        return fieldPath.getFieldNameList()
-                        .isEmpty()
-               ? typeBasedToken
-               : typeBasedToken.toBuilder()
-                               .setFilter(filter)
-                               .build();
     }
 
     @Override
