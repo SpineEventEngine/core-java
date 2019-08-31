@@ -160,10 +160,13 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
                 @SuppressWarnings("unchecked")      // Only IDs of type `I` are stored.
                         I id = (I) Identifier.unpack(packedId);
                 dispatcher.onStart(id);
-                for (InboxMessage message : messages) {
-                    doDeliver(cmdDispatcher, eventDispatcher, message);
+                try {
+                    for (InboxMessage message : messages) {
+                        doDeliver(cmdDispatcher, eventDispatcher, message);
+                    }
+                } finally {
+                    dispatcher.onEnd(id);
                 }
-                dispatcher.onEnd(id);
             } else {
                 doDeliver(cmdDispatcher, eventDispatcher, messages.get(0));
             }
