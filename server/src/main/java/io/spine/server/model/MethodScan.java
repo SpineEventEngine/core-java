@@ -46,7 +46,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private final Class<?> declaringClass;
     private final MethodSignature<H, ?> signature;
     private final Multimap<DispatchKey, H> handlers;
-    private final Map<MethodParams, H> seenMethods;
+    private final Map<DispatchKey, H> seenMethods;
     private final Map<MessageClass, SelectiveHandler> selectiveHandlers;
 
     /**
@@ -105,17 +105,17 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void checkNotRemembered(H handler) {
-        MethodParams params = handler.params();
-        if (seenMethods.containsKey(params)) {
-            Method alreadyPresent = seenMethods.get(params)
+        DispatchKey key = handler.key();
+        if (seenMethods.containsKey(key)) {
+            Method alreadyPresent = seenMethods.get(key)
                                                .rawMethod();
             String methodName = alreadyPresent.getName();
             String duplicateMethodName = handler.rawMethod().getName();
             throw new DuplicateHandlerMethodError(
-                    declaringClass, params, methodName, duplicateMethodName
+                    declaringClass, key, methodName, duplicateMethodName
             );
         } else {
-            seenMethods.put(params.withoutContextAndFilter(), handler);
+            seenMethods.put(key, handler);
         }
     }
 
