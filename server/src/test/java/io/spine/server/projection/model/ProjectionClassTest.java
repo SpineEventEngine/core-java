@@ -30,10 +30,13 @@ import io.spine.server.projection.given.cls.DifferentFieldSubscription;
 import io.spine.server.projection.given.cls.DuplicateValueSubscription;
 import io.spine.server.projection.given.cls.FilteringProjection;
 import io.spine.server.type.EventClass;
+import io.spine.string.StringifierRegistry;
+import io.spine.string.Stringifiers;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.Int32Imported;
 import io.spine.test.projection.event.StringImported;
 import io.spine.testing.server.TestEventFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -55,6 +58,15 @@ class ProjectionClassTest {
 
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(ProjectionClassTest.class);
+
+    /**
+     * Registers the stringifier for {@code Integer}, which is used for parsing filter field values.
+     */
+    @BeforeAll
+    static void prepare() {
+        StringifierRegistry.instance()
+                           .register(Stringifiers.forInteger(), Integer.TYPE);
+    }
 
     @Test
     @DisplayName("return handled event classes")

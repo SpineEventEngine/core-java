@@ -38,8 +38,6 @@ import io.spine.server.projection.given.SavedString;
 import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.string.StringifierRegistry;
-import io.spine.string.Stringifiers;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.event.EntityStateChanged;
@@ -53,7 +51,6 @@ import io.spine.test.projection.event.StringImported;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,12 +83,6 @@ class ProjectionTest {
             TestEventFactory.newInstance(ProjectionTest.class);
 
     private SavingProjection projection;
-
-    @BeforeAll
-    static void prepare() {
-        StringifierRegistry.instance()
-                           .register(Stringifiers.forInteger(), Integer.TYPE);
-    }
 
     @BeforeEach
     void setUp() {
