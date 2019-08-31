@@ -31,7 +31,12 @@ import io.spine.server.integration.IntegrationBus;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
-public final class AimEvent {
+/**
+ * Part of the fluent API for manually posting event into a Bounded Context.
+ *
+ * <p>This step configures the destination bus of the posted events.
+ */
+public final class AimEvents {
 
     private static final TenantId defaultTenant = null;
     private static final StreamObserver<Ack> defaultObserver = noOpObserver();
@@ -39,16 +44,30 @@ public final class AimEvent {
     private final BoundedContext context;
     private final UserId actor;
 
-    AimEvent(BoundedContext context, UserId actor) {
+    AimEvents(BoundedContext context, UserId actor) {
         this.context = checkNotNull(context);
         this.actor = checkNotNull(actor);
     }
 
+    /**
+     * Specifies that the events should be posted to an Aggregate via the {@link ImportBus}.
+     *
+     * <p>If the Aggregate imports the events successfully, they are posted into the Event Bus of
+     * the target context, just like any other event applied to an Aggregate.
+     *
+     * @return the next step in the fluent API for posting events
+     */
     public EventFunnel toAggregate() {
         ImportBus bus = context.importBus();
         return new ImportFunnel(defaultTenant, bus, defaultObserver, actor);
     }
 
+    /**
+     * Specifies that the events should be posted in the {@link IntegrationBus} and broadcast to
+     * external dispatchers.
+     *
+     * @return the next step in the fluent API for posting events
+     */
     public EventFunnel broadcast() {
         IntegrationBus bus = context.integrationBus();
         return new IntegrationFunnel(defaultTenant, bus, defaultObserver, actor);

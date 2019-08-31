@@ -39,10 +39,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * The implementation base for {@link EventFunnel}s.
+ *
+ * <p>Posts the given events into a {@link Bus}.
+ *
+ * @param <M>
+ *         type of accepted by the target bus
+ */
 abstract class AbstractFunnel<M extends Message> implements EventFunnel {
 
     private final Bus<M, ?, ?, ?> bus;
@@ -65,8 +74,20 @@ abstract class AbstractFunnel<M extends Message> implements EventFunnel {
         this.fromExternalSource = fromExternalSource;
     }
 
+    /**
+     * Transforms the given event into the type accepted by the target bus.
+     *
+     * @param event
+     *         the event to post
+     * @return the wrapped event
+     */
     abstract M transformEvent(Event event);
 
+    /**
+     * Obtains a copy of this funnel but with the given {@code Ack} observer.
+     *
+     * @return new instance of the funnel
+     */
     abstract AbstractFunnel<M> copyWithObserver(StreamObserver<Ack> resultObserver);
 
     @Override
@@ -80,6 +101,7 @@ abstract class AbstractFunnel<M extends Message> implements EventFunnel {
     @Override
     public final void post(EventMessage... events) {
         checkNotNull(events);
+        checkArgument(events.length > 0);
         Timestamp time = Time.currentTime();
         ActorContext importContext = buildImportContext(time);
         Iterable<M> messages = Stream

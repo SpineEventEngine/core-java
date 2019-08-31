@@ -25,11 +25,37 @@ import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.TenantId;
 
+/**
+ * A funnel which posts events from an external source into a Bounded Context.
+ *
+ * <p>This if a part of the fluent API for manually posting events.
+ *
+ * @see io.spine.server.BoundedContext#postEvents()
+ */
 public interface EventFunnel {
 
+    /**
+     * Specifies an observer for the event acknowledgement.
+     *
+     * <p>Multiple invocations of this method override the observer.
+     *
+     * @return a new {@code EventFunnel} with the given observer
+     */
     EventFunnel with(StreamObserver<Ack> resultObserver);
 
+    /**
+     * Specifies the tenant for which the events are posted.
+     *
+     * <p>Multiple invocations of this method override the tenant value.
+     *
+     * @return a new {@code EventFunnel} with the given observer
+     */
     EventFunnel forTenant(TenantId tenantId);
 
+    /**
+     * Posts the given events into the target Bounded Context.
+     *
+     * @param events one or more events to post
+     */
     void post(EventMessage... events);
 }

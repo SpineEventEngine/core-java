@@ -30,6 +30,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * An {@link EventFunnel} which posts events into the {@link ImportBus} for Aggregates to apply.
+ */
 final class ImportFunnel extends AbstractFunnel<Event> {
 
     private final ImportBus bus;

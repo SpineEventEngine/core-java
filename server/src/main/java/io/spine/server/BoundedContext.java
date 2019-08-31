@@ -39,7 +39,7 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.funnel.PostEvent;
+import io.spine.server.event.funnel.PostEvents;
 import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.integration.ExternalDispatcherFactory;
 import io.spine.server.integration.ExternalMessageDispatcher;
@@ -457,8 +457,18 @@ public abstract class BoundedContext implements AutoCloseable, Logging {
         return spec.isMultitenant();
     }
 
-    public PostEvent postEvent() {
-        return new PostEvent(this);
+    /**
+     * Obtains an instance of a fluent builder for manually posting events into this Context.
+     *
+     * <p>An event may be posted by hand:
+     * <ol>
+     *     <li>to an Aggregate, which {@linkplain io.spine.server.aggregate.Apply#allowImport
+     *         allows import} for this type of events;
+     *     <li>to external event reactors/subscribers.
+     * </ol>
+     */
+    public PostEvents postEvents() {
+        return new PostEvents(this);
     }
 
     /**

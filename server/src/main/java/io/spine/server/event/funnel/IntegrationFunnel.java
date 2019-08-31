@@ -33,6 +33,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.outside;
 
+/**
+ * An {@link EventFunnel} which posts the events into the {@link IntegrationBus}.
+ */
 final class IntegrationFunnel extends AbstractFunnel<ExternalMessage> {
 
     private final IntegrationBus bus;

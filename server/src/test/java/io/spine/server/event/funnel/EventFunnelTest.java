@@ -97,7 +97,7 @@ class EventFunnelTest {
                     .setOwner(johnDoe)
                     .setWhenCreated(Now.get().asLocalDateTime())
                     .build();
-            context.postEvent()
+            context.postEvents()
                    .producedBy(johnDoe)
                    .toAggregate()
                    .with(observer)
@@ -125,7 +125,7 @@ class EventFunnelTest {
                     .newBuilder()
                     .setId(DocumentId.generate())
                     .build();
-            context.postEvent()
+            context.postEvents()
                    .producedBy(johnDoe)
                    .toAggregate()
                    .with(observer)
@@ -164,7 +164,7 @@ class EventFunnelTest {
                     .setOwner(johnDoe)
                     .setWhenCreated(Now.get().asLocalDateTime())
                     .build();
-            context.postEvent()
+            context.postEvents()
                    .producedBy(johnDoe)
                    .toAggregate()
                    .forTenant(acmeCorp)
@@ -196,7 +196,7 @@ class EventFunnelTest {
                     .setId(DocumentId.generate())
                     .setText("The scary truth about gluten")
                     .build();
-            context.postEvent()
+            context.postEvents()
                    .producedBy(johnDoe)
                    .broadcast()
                    .with(observer)
@@ -224,7 +224,7 @@ class EventFunnelTest {
                     .setId(DocumentId.generate())
                     .setText("Annual report")
                     .build();
-            context.postEvent()
+            context.postEvents()
                    .producedBy(johnDoe)
                    .broadcast()
                    .with(observer)
@@ -265,7 +265,7 @@ class EventFunnelTest {
                     .find(documentId)
                     .orElseGet(Assertions::fail);
             assertThat(historyAfterEdit.state().getEditList()).isNotEmpty();
-            context.postEvent()
+            context.postEvents()
                    .producedIn("3d party directory service")
                    .broadcast()
                    .post(UserDeleted
@@ -287,7 +287,7 @@ class EventFunnelTest {
                     .setId(documentId)
                     .vBuild();
             MemoizingObserver<Ack> observer = memoizingObserver();
-            context.postEvent()
+            context.postEvents()
                    .producedIn("Abusing client")
                    .broadcast()
                    .with(observer)
@@ -321,7 +321,7 @@ class EventFunnelTest {
                     .setId(DocumentId.generate())
                     .setText("Daily report")
                     .build();
-            context.postEvent()
+            context.postEvents()
                    .producedBy(johnDoe)
                    .broadcast()
                    .forTenant(acmeCorp)
