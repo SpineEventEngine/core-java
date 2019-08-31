@@ -193,7 +193,7 @@ class SubscriptionServiceTest {
             subscriptionService.subscribe(topic, observer);
 
             Subscription response = observer.firstResponse();
-            ProtoSubject<?, Message> assertResponse = ProtoTruth.assertThat(response);
+            ProtoSubject assertResponse = ProtoTruth.assertThat(response);
             assertResponse
                     .isNotNull();
             assertResponse

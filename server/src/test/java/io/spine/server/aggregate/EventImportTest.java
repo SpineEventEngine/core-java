@@ -29,7 +29,6 @@ import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.UnsupportedEngineEvent;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
@@ -43,7 +42,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithErrors;
 
 /**
  * Test support of event import in {@link AggregateRepository}.
@@ -145,13 +143,19 @@ class EventImportTest {
             assertImports(event);
         }
 
+        /**
+         * Checks that the given event is successfully imported.
+         *
+         * <p>An imported event can be verified by the {@code BlackBoxBoundedContext} since it is
+         * posted into the event bus after being applied to an Aggregate. Also, the event posted
+         * into the event bus differs from the one posted into the import bus in the {@code version}
+         * field.
+         */
         private void assertImports(EventEnvelope event) {
-            EventSubject assertEvents =
-                    context().importsEvent(event.outerObject())
-                             .assertEvents()
-                             .withType(EngineStopped.class);
-
-            assertEvents.hasSize(1);
+            context().importsEvent(event.outerObject())
+                     .assertEvents()
+                     .withType(event.messageClass().value())
+                     .hasSize(1);
         }
     }
 
@@ -194,7 +198,6 @@ class EventImportTest {
             EntitySubject assertEntity =
                     context().importsEvent(event.outerObject())
                              .assertEntity(EngineAggregate.class, engineId);
-
             assertEntity.exists();
         }
     }
@@ -212,6 +215,7 @@ class EventImportTest {
         EventEnvelope unsupported = createEvent(eventMessage, id);
 
         context().importsEvent(unsupported.outerObject())
-                 .assertThat(ackedWithErrors());
+                 .assertEvents()
+                 .isEmpty();
     }
 }

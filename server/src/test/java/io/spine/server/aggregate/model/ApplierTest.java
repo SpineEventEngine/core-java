@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
@@ -129,7 +128,7 @@ class ApplierTest {
                 .build();
         EventEnvelope envelope = EventEnvelope.of(event);
         Success success = applier.toSuccessfulOutcome(result, applierObject, envelope);
-        ProtoSubject<?, Message> assertSuccess = ProtoTruth.assertThat(success);
+        ProtoSubject assertSuccess = ProtoTruth.assertThat(success);
         assertSuccess.isNotNull();
         assertSuccess.isEqualToDefaultInstance();
     }

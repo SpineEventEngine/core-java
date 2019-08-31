@@ -87,7 +87,6 @@ import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
-import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -599,31 +598,19 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
     }
 
     /**
-     * Verifies emitted events by the passed verifier.
-     *
-     * @param verifier
-     *         a verifier that checks the events emitted in this Bounded Context
-     * @return current instance
-     */
-    @CanIgnoreReturnValue
-    public T assertThat(VerifyEvents verifier) {
-        EmittedEvents events = emittedEvents();
-        verifier.verify(events);
-        return thisRef();
-    }
-
-    /**
      * Asserts that an event of the passed class was emitted once.
      *
      * @param eventClass
      *         the class of events to verify
      * @return current instance
+     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public T assertEmitted(Class<? extends EventMessage> eventClass) {
-        VerifyEvents verifier = VerifyEvents.emittedEvent(eventClass, once());
-        EmittedEvents events = emittedEvents();
-        verifier.verify(events);
+        assertEvents()
+                .withType(eventClass)
+                .hasSize(1);
         return thisRef();
     }
 
@@ -633,10 +620,25 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * @param rejectionClass
      *         the class of the rejection to verify
      * @return current instance
+     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public T assertRejectedWith(Class<? extends RejectionMessage> rejectionClass) {
-        VerifyEvents verifier = VerifyEvents.emittedEvent(rejectionClass, once());
+        return assertEmitted(rejectionClass);
+    }
+
+    /**
+     * Verifies emitted events by the passed verifier.
+     *
+     * @param verifier
+     *         a verifier that checks the events emitted in this Bounded Context
+     * @return current instance
+     * @deprecated use {@link #assertEvents()} instead; to be removed in future versions
+     */
+    @Deprecated
+    @CanIgnoreReturnValue
+    public T assertThat(VerifyEvents verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return thisRef();
@@ -649,7 +651,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * @param verifier
      *         a verifier that checks the acknowledgements in this Bounded Context
      * @return current instance
+     * @deprecated verify command outcome instead of acknowledgements; to be removed in future
+     *         versions
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public T assertThat(VerifyAcknowledgements verifier) {
         Acknowledgements acks = commandAcknowledgements(observer);
@@ -663,7 +668,9 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * @param verifier
      *         a verifier that checks the commands emitted in this Bounded Context
      * @return current instance
+     * @deprecated use {@link #assertCommands()} instead; to be removed in future versions
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public T assertThat(VerifyCommands verifier) {
         EmittedCommands commands = emittedCommands();
@@ -677,7 +684,10 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      * @param verifier
      *         a verifier of entity states
      * @return current instance
+     * @deprecated use {@link #assertEntity}, {@link #assertEntityWithState},
+     *         or {@link #assertQueryResult} instead; to be removed in future versions
      */
+    @Deprecated
     @CanIgnoreReturnValue
     public T assertThat(VerifyState verifier) {
         QueryFactory queryFactory = requestFactory().query();
@@ -919,7 +929,7 @@ public abstract class BlackBoxBoundedContext<T extends BlackBoxBoundedContext>
      */
     @CanIgnoreReturnValue
     public VerifyingCounter
-    assertSubscriptionUpdates(Topic topic, Consumer<ProtoSubject<?, Message>> assertEachReceived) {
+    assertSubscriptionUpdates(Topic topic, Consumer<ProtoSubject> assertEachReceived) {
         SubscriptionService subscriptionService =
                 SubscriptionService.newBuilder()
                                    .add(context)

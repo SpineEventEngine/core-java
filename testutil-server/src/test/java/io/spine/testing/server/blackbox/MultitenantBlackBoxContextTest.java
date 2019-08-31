@@ -28,14 +28,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.core.given.GivenTenantId.generate;
-import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
-import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
-import static io.spine.testing.server.blackbox.verify.state.VerifyState.exactlyOne;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Multi-tenant `BlackBoxContext` should")
@@ -76,28 +71,32 @@ class MultitenantBlackBoxContextTest
                 // Create a project for Carl.
                 .withTenant(carl)
                 .receivesCommand(createCarlProject);
-
         // Verify project was created for John.
         context.withTenant(john)
-               .assertThat(emittedEvent(BbProjectCreated.class, count(1)));
+               .assertEvents()
+               .withType(BbProjectCreated.class)
+               .hasSize(1);
         context.assertEntityWithState(BbProject.class, createJohnProject.getProjectId())
                .hasStateThat()
                .isEqualTo(createdProjectState(createJohnProject));
         // Verify project was created for Carl.
-        context.withTenant(carl)
-               .assertThat(emittedEvent(BbProjectCreated.class, count(1)))
-               .assertEntityWithState(BbProject.class, createCarlProject.getProjectId())
-               .hasStateThat()
-               .isEqualTo(createdProjectState(createCarlProject));
+        MultitenantBlackBoxContext contextForCarl = context.withTenant(carl);
+        contextForCarl
+                .assertEvents()
+                .withType(BbProjectCreated.class)
+                .hasSize(1);
+        contextForCarl
+                .assertEntityWithState(BbProject.class, createCarlProject.getProjectId())
+                .hasStateThat()
+                .isEqualTo(createdProjectState(createCarlProject));
         // Verify nothing happened for a new user.
-        context.withTenant(newUser)
-               .assertThat(emittedCommand(count(0)))
-               .assertThat(emittedEvent(count(0)))
-
-               // Verify command acknowledgements.
-               // One command was posted for John and one for Carl,
-               // so totally 2 commands were acknowledged (aren't grouped by a tenant ID).
-               .assertThat(acked(count(2)));
+        MultitenantBlackBoxContext newUserContext = context.withTenant(newUser);
+        newUserContext
+                .assertCommands()
+                .isEmpty();
+        newUserContext
+                .assertEvents()
+                .isEmpty();
     }
 
     @Test
@@ -105,8 +104,9 @@ class MultitenantBlackBoxContextTest
     void requireTenantId() {
         assertThrows(
                 IllegalStateException.class,
-                () -> BlackBoxBoundedContext.multiTenant()
-                                            .assertThat(exactlyOne(StringValue.of("verify state")))
+                () -> BlackBoxBoundedContext
+                        .multiTenant()
+                        .assertEntityWithState(StringValue.class, "verify state")
         );
     }
 }

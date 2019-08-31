@@ -27,11 +27,13 @@ import io.spine.core.TenantId;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -41,7 +43,7 @@ import static com.google.common.base.Preconditions.checkState;
 public final class MultitenantBlackBoxContext
         extends BlackBoxBoundedContext<MultitenantBlackBoxContext> {
 
-    private TenantId tenantId;
+    private @MonotonicNonNull TenantId tenantId;
 
     /**
      * Creates a new multi-tenant instance.
@@ -58,28 +60,28 @@ public final class MultitenantBlackBoxContext
      * @return current instance
      */
     public MultitenantBlackBoxContext withTenant(TenantId tenant) {
-        this.tenantId = tenant;
+        this.tenantId = checkNotNull(tenant);
         return this;
     }
 
     @Override
     protected TestActorRequestFactory requestFactory() {
-        return requestFactory(tenantId());
+        return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId());
     }
 
     @Override
     protected List<Command> select(CommandCollector collector) {
-        return collector.ofTenant(tenantId);
+        return collector.ofTenant(tenantId());
     }
 
     @Override
     protected List<Event> select(EventCollector collector) {
-        return collector.ofTenant(tenantId);
+        return collector.ofTenant(tenantId());
     }
 
     @Override
     protected <D> @Nullable D readOperation(Supplier<D> supplier) {
-        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId);
+        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId());
         D result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
         return result;
     }
@@ -88,17 +90,5 @@ public final class MultitenantBlackBoxContext
         checkState(tenantId != null,
                    "Set a tenant ID before calling receive and assert methods");
         return tenantId;
-    }
-
-    /**
-     * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
-     * with a provided tenant ID.
-     *
-     * @param tenantId
-     *         an identifier of a tenant that is executing requests in this Bounded Context
-     * @return a new request factory instance
-     */
-    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return new TestActorRequestFactory(MultitenantBlackBoxContext.class, tenantId);
     }
 }

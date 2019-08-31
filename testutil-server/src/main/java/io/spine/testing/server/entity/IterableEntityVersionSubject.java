@@ -28,6 +28,7 @@ import io.spine.core.Version;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.truth.Truth.assertAbout;
 import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
 
@@ -36,12 +37,14 @@ import static io.spine.testing.server.entity.EntityVersionSubject.entityVersion;
  * versions.
  */
 @VisibleForTesting
-public final class IterableEntityVersionSubject
-        extends IterableOfProtosSubject<IterableEntityVersionSubject, Version, Iterable<Version>> {
+public final class IterableEntityVersionSubject extends IterableOfProtosSubject<Version> {
+
+    private final @Nullable Iterable<Version> actual;
 
     private IterableEntityVersionSubject(FailureMetadata failureMetadata,
                                          @Nullable Iterable<Version> versions) {
         super(failureMetadata, versions);
+        this.actual = versions;
     }
 
     public static IterableEntityVersionSubject
@@ -54,8 +57,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllNewerThan(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isNewerThan(version));
+        if (actual == null) {
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isNewerThan(version));
+        }
     }
 
     /**
@@ -63,8 +69,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllNewerOrEqualTo(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
+        if (actual == null) {
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isNewerOrEqualTo(version));
+        }
     }
 
     /**
@@ -72,8 +81,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllOlderThan(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isOlderThan(version));
+        if (actual == null) {
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isOlderThan(version));
+        }
     }
 
     /**
@@ -81,8 +93,11 @@ public final class IterableEntityVersionSubject
      */
     public void containsAllOlderOrEqualTo(Version version) {
         checkNotNull(version);
-        assertExists();
-        actual().forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
+        if (actual == null) {
+            isNotNull();
+        } else {
+            actual.forEach(v -> assertVersion(v).isOlderOrEqualTo(version));
+        }
     }
 
     /**
@@ -90,24 +105,23 @@ public final class IterableEntityVersionSubject
      * {@code Subject} for it.
      */
     public EntityVersionSubject containsSingleEntityVersionThat() {
-        assertContainsSingleItem();
-        Version version = actual().iterator()
-                                  .next();
-        return assertVersion(version);
+        if (actual == null) {
+            isNotNull();
+            return ignoreCheck().about(entityVersion())
+                                .that(Version.getDefaultInstance());
+        } else if (size(actual) != 1) {
+            hasSize(1);
+            return ignoreCheck().about(entityVersion())
+                                .that(Version.getDefaultInstance());
+        } else {
+            Version version = actual.iterator().next();
+            return assertVersion(version);
+        }
     }
 
     private EntityVersionSubject assertVersion(Version version) {
         return check("singleEntityVersion()").about(entityVersion())
                                              .that(version);
-    }
-
-    private void assertContainsSingleItem() {
-        assertExists();
-        hasSize(1);
-    }
-
-    private void assertExists() {
-        isNotNull();
     }
 
     public static

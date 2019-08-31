@@ -319,7 +319,7 @@ public final class BoundedContextBuilder implements Logging {
      *
      * @param filter the filter to add
      */
-    public BoundedContextBuilder addEventFiler(BusFilter<EventEnvelope> filter) {
+    public BoundedContextBuilder addEventFilter(BusFilter<EventEnvelope> filter) {
         checkNotNull(filter);
         eventBus.appendFilter(filter);
         return this;

@@ -118,7 +118,7 @@ class LongMismatchTest extends UtilityClassTest<LongMismatch> {
         }
 
         @Test
-        @DisplayName("actual")
+        @DisplayName("actual long")
         void actualWithWrongType() {
             ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
