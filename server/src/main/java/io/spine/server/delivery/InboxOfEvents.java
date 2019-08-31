@@ -72,6 +72,5 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
         protected Predicate<? super InboxMessage> filterByType() {
             return (Predicate<InboxMessage>) InboxMessage::hasEvent;
         }
-
     }
 }

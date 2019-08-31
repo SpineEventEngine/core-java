@@ -20,22 +20,16 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
-import io.spine.server.type.SignalEnvelope;
-
-import java.util.function.Function;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 /**
- * A lazily initialized {@link io.spine.server.delivery.MessageEndpoint MessageEndpoint},
- * which should be used as a destination for inbox messages.
- *
- * @param <I>
- *         the type of identifier of the endpoint targets
- * @param <M>
- *         the type of the message envelope served by the endpoint
+ * Tests of {@link io.spine.server.storage.memory.InMemoryInboxStorage InMemoryInboxStorage}.
  */
-@Internal
-@FunctionalInterface
-public interface LazyEndpoint<I, M extends SignalEnvelope<?, ?, ?>>
-        extends Function<M, MessageEndpoint<I, M>> {
+class InMemoryInboxStorageTest extends InboxStorageTest {
+
+    @Override
+    protected InboxStorage storage() {
+        return InMemoryStorageFactory.newInstance()
+                                     .createInboxStorage(false);
+    }
 }

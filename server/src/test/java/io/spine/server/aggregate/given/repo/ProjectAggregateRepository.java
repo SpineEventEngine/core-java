@@ -37,6 +37,7 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +60,8 @@ public class ProjectAggregateRepository
     public static final ProjectId troublesome = ProjectId.newBuilder()
                                                          .setId("INVALID_ID")
                                                          .build();
+
+    private @Nullable AggregateStorage<ProjectId> customStorage;
 
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
@@ -92,9 +95,25 @@ public class ProjectAggregateRepository
         return super.find(id);
     }
 
+    /**
+     * Returns the storage for this repository.
+     *
+     * <p>The returning result may be customized by {@linkplain #injectStorage(AggregateStorage)
+     * injecting} the custom storage.
+     */
     @Override
-    public AggregateStorage<ProjectId> aggregateStorage() {
+    public AggregateStorage<ProjectId> aggregateStorage(){
+        if(customStorage != null) {
+            return customStorage;
+        }
         return super.aggregateStorage();
+    }
+
+    /**
+     * Injects a storage to use for this repository.
+     */
+    public void injectStorage(AggregateStorage<ProjectId> storage) {
+        this.customStorage = storage;
     }
 
     void storeAggregate(ProjectAggregate aggregate) {

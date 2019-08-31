@@ -34,12 +34,14 @@ import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.SignalMemoizer;
 import io.spine.server.delivery.given.FixedShardStrategy;
+import io.spine.server.delivery.given.MemoizingDeliveryMonitor;
 import io.spine.test.delivery.AddNumber;
 import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,13 +53,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Streams.concat;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -172,8 +177,7 @@ class DeliveryTest {
         new ThreadSimulator(5, false).runWith(targets);
 
         ImmutableSet<ShardIndex> shards = memoizer.shards();
-        assertThat(shards.size())
-                .isEqualTo(1);
+        assertThat(shards.size()).isEqualTo(1);
         assertThat(shards.iterator()
                          .next())
                 .isEqualTo(strategy.nonEmptyShard());
@@ -200,7 +204,7 @@ class DeliveryTest {
         new ThreadSimulator(3, false).runWith(targets);
 
         // Check that each message was in `TO_DELIVER` status upon writing to the storage.
-        ImmutableSet<InboxMessage> rawMessages = memoizer.messages();
+        ImmutableList<InboxMessage> rawMessages = memoizer.messages();
         for (InboxMessage message : rawMessages) {
             assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
         }
@@ -212,6 +216,60 @@ class DeliveryTest {
                 assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.DELIVERED);
             }
         }
+    }
+
+    @Test
+    @DisplayName("a single shard to a single target in a multi-threaded env in batches")
+    void deliverInBatch() {
+        FixedShardStrategy strategy = new FixedShardStrategy(1);
+        MemoizingDeliveryMonitor monitor = new MemoizingDeliveryMonitor();
+        int pageSize = 20;
+        Delivery delivery = Delivery.newBuilder()
+                                    .setStrategy(strategy)
+                                    .setIdempotenceWindow(Durations.ZERO)
+                                    .setMonitor(monitor)
+                                    .setPageSize(pageSize)
+                                    .build();
+        deliverAfterPause(delivery);
+
+        ServerEnvironment.instance()
+                         .configureDelivery(delivery);
+        ImmutableSet<String> targets = singleTarget();
+        ThreadSimulator simulator = new ThreadSimulator(7, false);
+        simulator.runWith(targets);
+
+        String theTarget = targets.iterator()
+                                  .next();
+        int signalsDispatched = simulator.signalsPerTarget()
+                                         .get(theTarget)
+                                         .size();
+        assertThat(simulator.callsToRepoLoadOrCreate(theTarget)).isLessThan(signalsDispatched);
+        assertThat(simulator.callsToRepoStore(theTarget)).isLessThan(signalsDispatched);
+
+        assertStages(monitor, pageSize);
+    }
+
+    private static void assertStages(MemoizingDeliveryMonitor monitor, int pageSize) {
+        ImmutableList<DeliveryStage> totalStages = monitor.getStages();
+        List<Integer> actualSizePerPage = totalStages.stream()
+                                                     .map(DeliveryStage::getMessagesDelivered)
+                                                     .collect(toList());
+        for (Integer actualSize : actualSizePerPage) {
+            assertThat(actualSize).isAtMost(pageSize);
+        }
+    }
+
+    private static void deliverAfterPause(Delivery delivery) {
+        CountDownLatch latch = new CountDownLatch(20);
+        // Sleep for some time to accumulate messages in shards before starting to process them.
+        delivery.subscribe(update -> {
+            if (latch.getCount() > 0) {
+                sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+                latch.countDown();
+            } else {
+                delivery.deliverMessagesFrom(update.getShardIndex());
+            }
+        });
     }
 
     private static ImmutableMap<ShardIndex, Page<InboxMessage>> inboxContents() {
@@ -228,7 +286,7 @@ class DeliveryTest {
                               .setOfTotal(shardCount)
                               .vBuild();
             Page<InboxMessage> page = with(TenantId.getDefaultInstance())
-                    .evaluate(() -> storage.readAll(index));
+                    .evaluate(() -> storage.readAll(index, Integer.MAX_VALUE));
 
             builder.put(index, page);
         }
@@ -254,6 +312,10 @@ class DeliveryTest {
 
         private final int threadCount;
         private final boolean shouldInboxBeEmpty;
+        private final CalculatorRepository repository;
+
+        // Which signals are expected to be delivered to which targets.
+        private @Nullable Map<String, List<CalculatorSignal>> signalsPerTarget;
 
         private ThreadSimulator(int threadCount) {
             this(threadCount, true);
@@ -262,6 +324,7 @@ class DeliveryTest {
         private ThreadSimulator(int threadCount, boolean shouldInboxBeEmpty) {
             this.threadCount = threadCount;
             this.shouldInboxBeEmpty = shouldInboxBeEmpty;
+            this.repository = new CalculatorRepository();
         }
 
         /**
@@ -274,7 +337,7 @@ class DeliveryTest {
         private void runWith(Set<String> targets) {
             BlackBoxBoundedContext<?> context =
                     BlackBoxBoundedContext.singleTenant()
-                                          .with(new CalculatorRepository());
+                                          .with(repository);
 
             SignalMemoizer memoizer = subscribeToDelivered();
 
@@ -291,8 +354,7 @@ class DeliveryTest {
                                                       importEvents.stream(),
                                                       reactEvents.stream());
 
-            Map<String, List<CalculatorSignal>> signalsPerTarget =
-                    signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
+            signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
             for (String calcId : signalsPerTarget.keySet()) {
 
@@ -315,6 +377,21 @@ class DeliveryTest {
 
             }
             ensureInboxesEmpty();
+        }
+
+        private int callsToRepoStore(String id) {
+            return repository.storeCallsCount(id);
+        }
+
+        private int callsToRepoLoadOrCreate(String id) {
+            return repository.loadOrCreateCallsCount(id);
+        }
+
+        public ImmutableMap<String, List<CalculatorSignal>> signalsPerTarget() {
+            if (signalsPerTarget == null) {
+                return ImmutableMap.of();
+            }
+            return ImmutableMap.copyOf(signalsPerTarget);
         }
 
         private static List<NumberReacted> eventsToReact(int streamSize,

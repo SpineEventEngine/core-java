@@ -30,10 +30,12 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
@@ -75,6 +77,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     private @MonotonicNonNull Inbox<I> inbox;
 
+    private @MonotonicNonNull RepositoryCache<I, P> cache;
+
     /**
      * Initializes the repository.
      *
@@ -98,7 +102,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public void registerWith(BoundedContext context) throws IllegalStateException {
         super.registerWith(context);
         ensureDispatchesEvents();
+        initCache(context.isMultitenant());
         initInbox();
+    }
+
+    private void initCache(boolean multitenant) {
+        cache = new RepositoryCache<>(multitenant, this::doFindOrCreate, this::doStore);
     }
 
     /**
@@ -109,6 +118,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
+                .withBatchListener(new BatchDeliveryListener<I>() {
+                    @Override
+                    public void onStart(I id) {
+                        cache.startCaching(id);
+                    }
+
+                    @Override
+                    public void onEnd(I id) {
+                        cache.stopCaching(id);
+                    }
+                })
                 .addEventEndpoint(InboxLabel.UPDATE_SUBSCRIBER,
                                   e -> ProjectionEndpoint.of(this, e))
                 .build();
@@ -276,11 +296,24 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to expose the method to the package.
+     * //TODO:2019-08-25:alex.tymchenko: document.
      */
     @Override
     protected P findOrCreate(I id) {
+        return cache.load(id);
+    }
+
+    private P doFindOrCreate(I id) {
         return super.findOrCreate(id);
+    }
+
+    @Override
+    public void store(P entity) {
+        cache.store(entity);
+    }
+
+    private void doStore(P entity) {
+        super.store(entity);
     }
 
     /**

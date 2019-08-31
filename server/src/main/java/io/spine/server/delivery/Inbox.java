@@ -25,8 +25,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
-
-import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,12 +51,14 @@ public final class Inbox<I> {
     private final InboxOfCommands<I> commandPart;
     private final InboxOfEvents<I> eventPart;
     private final Delivery delivery;
+    private final @Nullable BatchDeliveryListener<I> batchDispatcher;
 
     private Inbox(Builder<I> builder, Delivery delivery) {
         this.entityStateType = builder.entityStateType;
         this.commandPart = new InboxOfCommands<>(builder);
         this.eventPart = new InboxOfEvents<>(builder);
         this.delivery = delivery;
+        this.batchDispatcher = builder.batchDispatcher;
     }
 
     /**
@@ -108,7 +109,7 @@ public final class Inbox<I> {
      * to the endpoints configured for this {@code Inbox} instance.
      */
     public ShardedMessageDelivery<InboxMessage> delivery() {
-        return new TargetDelivery();
+        return new TargetDelivery<>(commandPart, eventPart, batchDispatcher);
     }
 
     /**
@@ -133,6 +134,7 @@ public final class Inbox<I> {
         private final InboxWriter writer;
         private final Endpoints<I, EventEnvelope> eventEndpoints = new Endpoints<>();
         private final Endpoints<I, CommandEnvelope> commandEndpoints = new Endpoints<>();
+        private @Nullable BatchDeliveryListener<I> batchDispatcher;
 
         /**
          * Creates an instance of {@code Builder} for the given {@code Inbox} consumer entity type.
@@ -168,6 +170,14 @@ public final class Inbox<I> {
             checkNotNull(label);
             checkNotNull(lazyEndpoint);
             commandEndpoints.add(label, lazyEndpoint);
+            return this;
+        }
+
+        /**
+         * Allows to specify the listener of the starting and ending batch dispatching operations.
+         */
+        public Builder<I> withBatchListener(BatchDeliveryListener<I> dispatcher) {
+            this.batchDispatcher = checkNotNull(dispatcher);
             return this;
         }
 
@@ -252,40 +262,6 @@ public final class Inbox<I> {
          */
         public void toHandler(I entityId) {
             commandPart.store(command, entityId, HANDLE_COMMAND);
-        }
-    }
-
-    /**
-     * Takes the messages, which were previously sent to their targets via this inbox and
-     * delivers them, performing their de-duplication.
-     *
-     * <p>Source messages for the de-duplication are supplied separately.
-     */
-    final class TargetDelivery implements ShardedMessageDelivery<InboxMessage> {
-
-        /**
-         * Prevents the utility class instantiation.
-         */
-        private TargetDelivery() {
-        }
-
-        @Override
-        public void deliver(List<InboxMessage> incoming,
-                            List<InboxMessage> deduplicationSource) {
-
-            InboxPart.Dispatcher commandDispatcher =
-                    commandPart.dispatcherWith(deduplicationSource);
-            InboxPart.Dispatcher eventDispatcher =
-                    eventPart.dispatcherWith(deduplicationSource);
-
-            for (InboxMessage incomingMessage : incoming) {
-
-                if (incomingMessage.hasCommand()) {
-                    commandDispatcher.deliver(incomingMessage);
-                } else {
-                    eventDispatcher.deliver(incomingMessage);
-                }
-            }
         }
     }
 }

@@ -18,24 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.delivery.given;
 
-import io.spine.annotation.Internal;
-import io.spine.server.type.SignalEnvelope;
+import com.google.common.collect.ImmutableList;
+import io.spine.server.delivery.DeliveryMonitor;
+import io.spine.server.delivery.DeliveryStage;
 
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A lazily initialized {@link io.spine.server.delivery.MessageEndpoint MessageEndpoint},
- * which should be used as a destination for inbox messages.
- *
- * @param <I>
- *         the type of identifier of the endpoint targets
- * @param <M>
- *         the type of the message envelope served by the endpoint
+ * The implementation of {@link DeliveryMonitor} which remembers the passed stages.
  */
-@Internal
-@FunctionalInterface
-public interface LazyEndpoint<I, M extends SignalEnvelope<?, ?, ?>>
-        extends Function<M, MessageEndpoint<I, M>> {
+public final class MemoizingDeliveryMonitor extends DeliveryMonitor {
+
+    private final List<DeliveryStage> stages = new ArrayList<>();
+
+    @Override
+    public boolean shouldContinueAfter(DeliveryStage stage) {
+        stages.add(stage);
+        return super.shouldContinueAfter(stage);
+    }
+
+    public ImmutableList<DeliveryStage> getStages() {
+        return ImmutableList.copyOf(stages);
+    }
 }

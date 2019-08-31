@@ -58,9 +58,9 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected DispatchOutcome invokeDispatcher(P processManager, CommandEnvelope envelope) {
+    protected DispatchOutcome invokeDispatcher(P processManager) {
         EntityLifecycle lifecycle = repository().lifecycleOf(processManager.id());
-        DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope);
+        DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope());
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.perform(dispatch);
     }
@@ -70,7 +70,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
      * updated during the command handling.
      */
     @Override
-    protected void onEmptyResult(P processManager, CommandEnvelope cmd) {
+    protected void onEmptyResult(P processManager) {
         // Do nothing.
     }
 }

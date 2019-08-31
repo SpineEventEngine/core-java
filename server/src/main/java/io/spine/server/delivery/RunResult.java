@@ -20,22 +20,27 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
-import io.spine.server.type.SignalEnvelope;
-
-import java.util.function.Function;
-
 /**
- * A lazily initialized {@link io.spine.server.delivery.MessageEndpoint MessageEndpoint},
- * which should be used as a destination for inbox messages.
- *
- * @param <I>
- *         the type of identifier of the endpoint targets
- * @param <M>
- *         the type of the message envelope served by the endpoint
+ * How ended the delivery of all messages read from the {@code Inbox} according to a certain
+ * {@code ShardIndex}.
  */
-@Internal
-@FunctionalInterface
-public interface LazyEndpoint<I, M extends SignalEnvelope<?, ?, ?>>
-        extends Function<M, MessageEndpoint<I, M>> {
+class RunResult {
+
+    private final int deliveredMsgCount;
+    private final boolean stoppedByMonitor;
+
+    RunResult(int count, boolean stoppedByMonitor) {
+        deliveredMsgCount = count;
+        this.stoppedByMonitor = stoppedByMonitor;
+    }
+
+    /**
+     * Tells if another run is required.
+     *
+     * <p>The run is not required either if there were no messages delivered or if
+     * the {@code DeliveryMonitor} stopped the execution.
+     */
+    boolean shouldRunAgain() {
+        return !stoppedByMonitor && deliveredMsgCount > 0;
+    }
 }

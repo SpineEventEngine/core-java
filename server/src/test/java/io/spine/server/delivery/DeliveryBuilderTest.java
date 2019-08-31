@@ -24,52 +24,68 @@ import com.google.protobuf.Duration;
 import io.spine.protobuf.Durations2;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.memory.InMemoryInboxStorage;
-import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Delivery Builder should")
-public class DeliveryBuilderTest {
+@DisplayName("`DeliveryBuilder` should")
+class DeliveryBuilderTest {
 
-    private static Delivery.Builder builder() {
+    private static DeliveryBuilder builder() {
         return Delivery.newBuilder();
     }
 
     @Nested
-    @DisplayName("not accept null")
+    @DisplayName("not accept `null`")
     class NotAcceptNull {
 
         @Test
         @DisplayName("delivery strategy")
         void strategy() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setStrategy(Tests.nullRef()));
+                         () -> builder().setStrategy(nullRef()));
         }
 
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setInboxStorage(Tests.nullRef()));
+                         () -> builder().setInboxStorage(nullRef()));
         }
 
         @Test
         @DisplayName("work registry")
         void workRegistry() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setWorkRegistry(Tests.nullRef()));
+                         () -> builder().setWorkRegistry(nullRef()));
         }
 
         @Test
         @DisplayName("idempotence window")
         void idempotenceWindow() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setIdempotenceWindow(Tests.nullRef()));
+                         () -> builder().setIdempotenceWindow(nullRef()));
         }
+
+        @Test
+        @DisplayName("delivery monitor")
+        void deliveryMonitor() {
+            assertThrows(NullPointerException.class,
+                         () -> builder().setMonitor(nullRef()));
+        }
+    }
+
+    @Test
+    @DisplayName("accept only positive page size")
+    void acceptOnlyPositivePageSize() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setPageSize(0));
+        assertThrows(IllegalArgumentException.class,
+                     () -> builder().setPageSize(-3));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")    // testing `Builder` getters.
@@ -111,6 +127,65 @@ public class DeliveryBuilderTest {
             assertEquals(duration, builder().setIdempotenceWindow(duration)
                                             .idempotenceWindow()
                                             .get());
+        }
+
+        @Test
+        @DisplayName("delivery monitor")
+        void deliveryMonitor() {
+            DeliveryMonitor monitor = DeliveryMonitor.alwaysContinue();
+            assertEquals(monitor, builder().setMonitor(monitor)
+                                           .deliveryMonitor()
+                                           .get());
+        }
+
+        @Test
+        @DisplayName("page size")
+        void pageSize() {
+            int pageSize = 42;
+            assertEquals(pageSize, builder().setPageSize(pageSize)
+                                            .pageSize()
+                                            .get());
+        }
+    }
+
+    @Nested
+    @DisplayName("throw `NullPointerException` if attempting to get the unset value of")
+    class ThrowNpe {
+
+        @Test
+        @DisplayName("delivery strategy")
+        void strategy() {
+            assertThrows(NullPointerException.class, () -> builder().getStrategy());
+        }
+
+        @Test
+        @DisplayName("Inbox storage")
+        void inboxStorage() {
+            assertThrows(NullPointerException.class, () -> builder().getInboxStorage());
+        }
+
+        @Test
+        @DisplayName("work registry")
+        void workRegistry() {
+            assertThrows(NullPointerException.class, () -> builder().getWorkRegistry());
+        }
+
+        @Test
+        @DisplayName("idempotence window")
+        void idempotenceWindow() {
+            assertThrows(NullPointerException.class, () -> builder().getIdempotenceWindow());
+        }
+
+        @Test
+        @DisplayName("delivery monitor")
+        void deliveryMonitor() {
+            assertThrows(NullPointerException.class, () -> builder().getMonitor());
+        }
+
+        @Test
+        @DisplayName("page size")
+        void pageSize() {
+            assertThrows(NullPointerException.class, () -> builder().getPageSize());
         }
     }
 }
