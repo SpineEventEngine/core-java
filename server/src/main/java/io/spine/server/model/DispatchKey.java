@@ -67,7 +67,7 @@ public final class DispatchKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageClass, originClass);
+        return Objects.hash(messageClass, filter, originClass);
     }
 
     @Override
