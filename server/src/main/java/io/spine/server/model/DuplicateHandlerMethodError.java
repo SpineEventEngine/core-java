@@ -30,13 +30,13 @@ public final class DuplicateHandlerMethodError extends ModelError {
     private static final long serialVersionUID = 0L;
 
     DuplicateHandlerMethodError(Class<?> targetClass,
-                                MethodParams params,
+                                DispatchKey key,
                                 String firstMethodName,
                                 String secondMethodName) {
 
         super(format("The `%s` class defines more than one method with parameters `%s`." +
                              " Methods encountered: `%s`, `%s`.",
-                     targetClass.getName(), params,
+                     targetClass.getName(), key,
                      firstMethodName, secondMethodName));
     }
 }
