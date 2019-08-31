@@ -18,28 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given;
+/**
+ * Test environment for {@link io.spine.server.model.HandlerMapTest}.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given.map;
 
-import io.spine.server.command.Assign;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.command.CreateProject;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-public class MessageHandlerMapTestEnv {
-
-    /** Prevents instantiation of this utility class. */
-    private MessageHandlerMapTestEnv() {
-    }
-
-    public static class HandlerWithDuplicatingMethods {
-
-        @Assign
-        ProjectCreated on(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
