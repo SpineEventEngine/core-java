@@ -24,10 +24,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
-import io.spine.base.MessageContext;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -37,7 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
  * Provides information about parameters of a method.
@@ -70,15 +67,6 @@ public final class MethodParams {
     }
 
     /**
-     * Obtains parameters by the class of messages and their origin.
-     */
-    static MethodParams ofTypeWithOrigin(MessageClass message, MessageClass origin) {
-        checkNotNull(message);
-        checkNotNull(origin);
-        return new MethodParams(null, message.value(), origin.value());
-    }
-
-    /**
      * Creates the instance with single parameter of the passed type.
      */
     static MethodParams ofType(Class<?> type) {
@@ -93,20 +81,6 @@ public final class MethodParams {
     private MethodParams(@Nullable ArgumentFilter filter, ImmutableList<Class<?>> params) {
         this.filter = filter;
         this.params = params;
-    }
-
-    /**
-     * Copies data instance stripping filter and {@link MessageContext} parameters.
-     */
-    MethodParams withoutContextAndFilter() {
-        if (filter == null) {
-            return this;
-        }
-        ImmutableList<Class<?>> withoutContexts =
-                params.stream()
-                      .filter(c -> !(MessageContext.class.isAssignableFrom(c)))
-                      .collect(toImmutableList());
-        return new MethodParams(null, withoutContexts);
     }
 
     /** Obtains the number of parameters passed to the method. */
@@ -240,6 +214,7 @@ public final class MethodParams {
         return Objects.hash(params, filter);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // others also have the `filter` field.
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
