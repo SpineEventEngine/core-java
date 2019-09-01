@@ -137,7 +137,7 @@ public abstract class InboxStorageTest {
 
     private static void assertSameContent(Collection<InboxMessage> expected,
                                           Page<InboxMessage> page) {
-        assertThat(page.contents()).isEqualTo(expected);
+        assertThat(page.contents()).containsExactlyElementsIn(expected);
     }
 
     private ImmutableList<InboxMessage> generateMessages(ShardIndex index, int count) {
