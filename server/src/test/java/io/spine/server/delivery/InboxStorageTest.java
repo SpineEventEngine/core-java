@@ -65,12 +65,12 @@ public abstract class InboxStorageTest {
     protected abstract InboxStorage storage();
 
     @BeforeEach
-    void setUp() {
+    protected void setUp() {
         this.storage = storage();
     }
 
     @AfterEach
-    void tearDown() {
+    protected void tearDown() {
         if (this.storage != null) {
             this.storage.close();
         }
