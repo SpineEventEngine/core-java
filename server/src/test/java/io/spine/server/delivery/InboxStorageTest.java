@@ -65,12 +65,12 @@ public abstract class InboxStorageTest {
     protected abstract InboxStorage storage();
 
     @BeforeEach
-    void setUp() {
+    protected void setUp() {
         this.storage = storage();
     }
 
     @AfterEach
-    void tearDown() {
+    protected void tearDown() {
         if (this.storage != null) {
             this.storage.close();
         }
@@ -137,7 +137,7 @@ public abstract class InboxStorageTest {
 
     private static void assertSameContent(Collection<InboxMessage> expected,
                                           Page<InboxMessage> page) {
-        assertThat(page.contents()).isEqualTo(expected);
+        assertThat(page.contents()).containsExactlyElementsIn(expected);
     }
 
     private ImmutableList<InboxMessage> generateMessages(ShardIndex index, int count) {
