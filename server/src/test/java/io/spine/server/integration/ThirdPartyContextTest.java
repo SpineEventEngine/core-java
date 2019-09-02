@@ -219,21 +219,22 @@ class ThirdPartyContextTest {
                 .setDomain(InternetDomain.newBuilder()
                                          .setValue("cyberdyne.com"))
                 .build();
+        DocumentId documentId = DocumentId.generate();
         OpenOfficeDocumentUploaded importEvent = OpenOfficeDocumentUploaded
                 .newBuilder()
-                .setId(DocumentId.generate())
+                .setId(documentId)
                 .setText("Daily report")
                 .build();
         postForTenant(acmeCorp, johnDoe, importEvent);
 
         Optional<DocumentAggregate> acmeDailyReport = TenantAwareRunner
                 .with(acmeCorp)
-                .evaluate(() -> documentRepository.find(importEvent.getId()));
+                .evaluate(() -> documentRepository.find(documentId));
         assertThat(acmeDailyReport).isPresent();
 
         Optional<DocumentAggregate> cyberdyneDailyReport = TenantAwareRunner
                 .with(cyberdyne)
-                .evaluate(() -> documentRepository.find(importEvent.getId()));
+                .evaluate(() -> documentRepository.find(documentId));
         assertThat(cyberdyneDailyReport).isEmpty();
     }
 
