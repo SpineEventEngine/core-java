@@ -21,7 +21,9 @@
 package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.testing.NullPointerTester;
 import io.spine.base.EventMessage;
+import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
@@ -32,6 +34,7 @@ import io.spine.server.integration.given.DocumentAggregate;
 import io.spine.server.integration.given.DocumentRepository;
 import io.spine.server.integration.given.EditHistoryProjection;
 import io.spine.server.integration.given.EditHistoryRepository;
+import io.spine.server.model.Nothing;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +50,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("ThirdPartyContext should")
@@ -70,6 +75,49 @@ class ThirdPartyContextTest {
     @AfterEach
     void closeContext() throws Exception {
         context.close();
+    }
+
+    @Test
+    @DisplayName("not accept nulls in factory methods")
+    void nullsOnConstruction() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(ThirdPartyContext.class);
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void nulls() {
+        new NullPointerTester()
+                .setDefault(UserId.class, UserId.getDefaultInstance())
+                .setDefault(ActorContext.class, ActorContext.getDefaultInstance())
+                .testAllPublicInstanceMethods(ThirdPartyContext.singleTenant("Directory"));
+    }
+
+    @Test
+    @DisplayName("if multitenant, require a tenant ID for each event")
+    void requireTenant() {
+        ActorContext noTenantContext = ActorContext
+                .newBuilder()
+                .setActor(UserId.newBuilder().setValue("42"))
+                .setTimestamp(Time.currentTime())
+                .vBuild();
+        ThirdPartyContext calendar = ThirdPartyContext.multitenant("Calendar");
+        assertThrows(IllegalArgumentException.class,
+                     () -> calendar.emittedEvent(noTenantContext, Nothing.getDefaultInstance()));
+    }
+
+    @Test
+    @DisplayName("if single-tenant, fail if a tenant ID is supplied")
+    void noTenant() {
+        ActorContext actorWithTenant = ActorContext
+                .newBuilder()
+                .setActor(UserId.newBuilder().setValue("42"))
+                .setTimestamp(Time.currentTime())
+                .setTenantId(TenantId.newBuilder().setValue("AcmeCorp"))
+                .vBuild();
+        ThirdPartyContext calendar = ThirdPartyContext.singleTenant("Notes");
+        assertThrows(IllegalArgumentException.class,
+                     () -> calendar.emittedEvent(actorWithTenant, Nothing.getDefaultInstance()));
     }
 
     @Test

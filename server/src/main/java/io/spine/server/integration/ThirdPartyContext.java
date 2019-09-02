@@ -29,8 +29,8 @@ import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -161,17 +161,17 @@ public final class ThirdPartyContext implements AutoCloseable {
     private void checkTenant(ActorContext actorContext, EventMessage event) {
         boolean tenantSupplied = actorContext.hasTenantId();
         if (context.isMultitenant()) {
-            checkState(tenantSupplied,
-                       "Cannot post `%s` into a third-party multitenant context %s." +
-                               " No tenant ID supplied.",
-                       event.getClass().getSimpleName(),
-                       context.name().getValue());
+            checkArgument(tenantSupplied,
+                          "Cannot post `%s` into a third-party multitenant context %s." +
+                                  " No tenant ID supplied.",
+                          event.getClass().getSimpleName(),
+                          context.name().getValue());
         } else {
-            checkState(!tenantSupplied,
-                       "Cannot post `%s` into a third-party single-tenant context %s." +
-                               " Tenant ID must NOT be supplied.",
-                       event.getClass().getSimpleName(),
-                       context.name().getValue());
+            checkArgument(!tenantSupplied,
+                          "Cannot post `%s` into a third-party single-tenant context %s." +
+                                  " Tenant ID must NOT be supplied.",
+                          event.getClass().getSimpleName(),
+                          context.name().getValue());
         }
     }
 
