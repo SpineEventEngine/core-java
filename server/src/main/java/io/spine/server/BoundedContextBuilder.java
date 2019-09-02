@@ -151,7 +151,9 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Creates a new builder for a Bounded Context which does not store its events.
      *
-     * <p>Such a Bounded Context is invalid is general case.
+     * <p>Such a Bounded Context should not be used general case. This method throws
+     * a {@link SecurityException} if called outside the framework core. Please use static factory
+     * methods in {@link BoundedContext} to create an instance of builder.
      */
     @Internal
     public static BoundedContextBuilder notStoringEvents(String name, boolean multitenant) {
