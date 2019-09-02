@@ -40,6 +40,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.integration.IntegrationBus;
+import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
@@ -100,7 +101,7 @@ public final class BoundedContextBuilder implements Logging {
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
 
     /**
-     * Prevents direct instantiation.
+     * Creates a new builder with the given spec.
      *
      * @param spec
      *         the context spec for the built context
@@ -112,10 +113,12 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Prevents direct instantiation.
+     * Creates a new builder with the given spec and system features.
      *
      * @param spec
      *         the context spec for the built context
+     * @param systemFeatures
+     *         system feature flags; can be changed later via {@link #systemFeatures()}
      * @see BoundedContext#singleTenant
      * @see BoundedContext#multitenant
      */
@@ -143,6 +146,22 @@ public final class BoundedContextBuilder implements Logging {
     @VisibleForTesting
     public static BoundedContextBuilder assumingTests() {
         return assumingTests(false);
+    }
+
+    /**
+     * Creates a new builder for a Bounded Context which does not store its events.
+     *
+     * <p>Such a Bounded Context is invalid is general case.
+     */
+    @Internal
+    public static BoundedContextBuilder notStoringEvents(String name, boolean multitenant) {
+        checkNotNull(name);
+        Security.allowOnlyFrameworkServer();
+
+        ContextSpec spec = multitenant
+                           ? multitenant(name)
+                           : singleTenant(name);
+        return new BoundedContextBuilder(spec.notStoringEvents());
     }
 
     /**

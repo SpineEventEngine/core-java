@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.BoundedContextBuilder.notStoringEvents;
 
 /**
  * An external upstream system which is not implemented in Spine.
@@ -49,13 +50,16 @@ public final class ThirdPartyContext implements AutoCloseable {
 
     public static ThirdPartyContext singleTenant(String name) {
         checkNotNull(name);
-        BoundedContext context = BoundedContext.singleTenant(name).build();
-        return new ThirdPartyContext(context);
+        return newContext(name, false);
     }
 
     public static ThirdPartyContext multitenant(String name) {
         checkNotNull(name);
-        BoundedContext context = BoundedContext.multitenant(name).build();
+        return newContext(name, true);
+    }
+
+    private static ThirdPartyContext newContext(String name, boolean multitenant) {
+        BoundedContext context = notStoringEvents(name, multitenant).build();
         return new ThirdPartyContext(context);
     }
 
@@ -71,6 +75,10 @@ public final class ThirdPartyContext implements AutoCloseable {
         checkNotNull(eventMessage);
         checkTenant(actorContext, eventMessage);
 
+        EventId id = EventId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
         EventContext eventContext = EventContext
                 .newBuilder()
                 .setProducerId(producerId)
@@ -78,10 +86,6 @@ public final class ThirdPartyContext implements AutoCloseable {
                 .setImportContext(actorContext)
                 .setExternal(true)
                 .vBuild();
-        EventId id = EventId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
         Event event = Event
                 .newBuilder()
                 .setId(id)
