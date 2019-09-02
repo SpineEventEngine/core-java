@@ -20,14 +20,18 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
+import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.type.MessageEnvelope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,18 +39,48 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Provides information about parameters of a method.
  */
+@Immutable
 public final class MethodParams {
 
-    private final ImmutableList<Parameter> params;
+    private final ImmutableList<Class<?>> params;
+    private final @Nullable ArgumentFilter filter;
 
-    /** Obtains parameters from the passed method. */
-    static MethodParams of(Method method) {
+    /**
+     * Obtains parameters of the subscriber method.
+     *
+     * <p>Parameters may include an argument filter.
+     */
+    public static MethodParams of(SubscriberMethod method) {
         checkNotNull(method);
-        return new MethodParams(method);
+        ArgumentFilter filter = method.filter();
+        Class<?>[] paramTypes = method.rawMethod()
+                                      .getParameterTypes();
+        return new MethodParams(filter, paramTypes);
     }
 
-    private MethodParams(Method method) {
-        this.params = ImmutableList.copyOf(method.getParameters());
+    /**
+     * Obtains parameters from the passed method.
+     */
+    public static MethodParams of(Method method) {
+        checkNotNull(method);
+        return new MethodParams(null, method.getParameterTypes());
+    }
+
+    /**
+     * Creates the instance with single parameter of the passed type.
+     */
+    static MethodParams ofType(Class<?> type) {
+        checkNotNull(type);
+        return new MethodParams(null, type);
+    }
+
+    private MethodParams(@Nullable ArgumentFilter filter, Class<?>... types) {
+        this(filter, ImmutableList.copyOf(types));
+    }
+
+    private MethodParams(@Nullable ArgumentFilter filter, ImmutableList<Class<?>> params) {
+        this.filter = filter;
+        this.params = params;
     }
 
     /** Obtains the number of parameters passed to the method. */
@@ -55,13 +89,21 @@ public final class MethodParams {
     }
 
     /**
+     * Obtains the argument filter if it is specified for the first argument of
+     * this instance of method parameters.
+     */
+    public Optional<ArgumentFilter> filter() {
+        return Optional.ofNullable(filter);
+    }
+
+    /**
      * Obtains the type of the method parameter.
      *
      * @param index the zero-based index of the type.
      */
     public Class<?> type(int index) {
-        Parameter parameter = params.get(index);
-        return parameter.getType();
+        Class<?> type = params.get(index);
+        return type;
     }
 
     /**
@@ -152,5 +194,32 @@ public final class MethodParams {
         }
         boolean result = CommandMessage.class.isAssignableFrom(params.type(0));
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MethodParams other = (MethodParams) o;
+        return params.equals(other.params) &&
+                Objects.equals(filter, other.filter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(params, filter);
+    }
+
+    @SuppressWarnings("DuplicateStringLiteralInspection") // others also have the `filter` field.
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("params", params)
+                          .add("filter", filter)
+                          .toString();
     }
 }

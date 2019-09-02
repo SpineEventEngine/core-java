@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets.SetView;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -33,11 +34,13 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.RejectionEnvelope;
@@ -104,6 +107,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private @MonotonicNonNull Inbox<I> inbox;
 
+    private @MonotonicNonNull RepositoryCache<I, A> cache;
+
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
@@ -147,8 +152,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             context.importBus()
                    .register(EventImportDispatcher.of(this));
         }
+        initCache(context.isMultitenant());
         initInbox();
         initMirror();
+    }
+
+    private void initCache(boolean multitenant) {
+        cache = new RepositoryCache<>(multitenant, this::doLoadOrCreate, this::doStore);
     }
 
     /**
@@ -159,6 +169,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
+                .withBatchListener(new BatchDeliveryListener<I>() {
+                    @Override
+                    public void onStart(I id) {
+                        cache.startCaching(id);
+                    }
+
+                    @Override
+                    public void onEnd(I id) {
+                        cache.stopCaching(id);
+                    }
+                })
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> new AggregateEventReactionEndpoint<>(this, e))
                 .addEventEndpoint(InboxLabel.IMPORT_EVENT,
@@ -264,6 +285,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected final void store(A aggregate) {
+        cache.store(aggregate);
+    }
+
+    @VisibleForTesting
+    protected void doStore(A aggregate) {
         Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
@@ -533,6 +559,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return loaded or created aggregate instance
      */
     final A loadOrCreate(I id) {
+        return cache.load(id);
+    }
+
+    @VisibleForTesting
+    protected A doLoadOrCreate(I id) {
         A result = load(id).orElseGet(() -> createNew(id));
         return result;
     }

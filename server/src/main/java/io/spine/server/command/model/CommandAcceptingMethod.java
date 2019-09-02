@@ -40,13 +40,13 @@ import java.util.Optional;
  *
  * @param <T>
  *         the type of the target object
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
 @Immutable
 public abstract class CommandAcceptingMethod<T extends EventProducer,
-                                             P extends MessageClass<?>>
-        extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, P> {
+                                             R extends MessageClass<?>>
+        extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, R> {
 
     CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);

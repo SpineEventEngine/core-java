@@ -92,7 +92,7 @@ abstract class AggregateEndpoint<I,
         } else if (success.hasRejection()) {
             post(success.getRejection());
         } else {
-            onEmptyResult(aggregate, envelope());
+            onEmptyResult(aggregate);
         }
         afterDispatched(aggregate.id());
     }
@@ -118,7 +118,7 @@ abstract class AggregateEndpoint<I,
 
     @CanIgnoreReturnValue
     final DispatchOutcome handleAndApplyEvents(A aggregate) {
-        DispatchOutcome outcome = invokeDispatcher(aggregate, envelope());
+        DispatchOutcome outcome = invokeDispatcher(aggregate);
         Success successfulOutcome = outcome.getSuccess();
         return successfulOutcome.hasProducedEvents()
                ? applyProducedEvents(aggregate, outcome)

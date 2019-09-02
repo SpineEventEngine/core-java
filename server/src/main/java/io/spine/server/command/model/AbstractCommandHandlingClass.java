@@ -21,7 +21,7 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.HandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
@@ -47,12 +47,12 @@ public abstract class AbstractCommandHandlingClass<C,
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, P, H> commands;
+    private final HandlerMap<CommandClass, P, H> commands;
 
     AbstractCommandHandlingClass(Class<? extends C> cls,
                                  CommandAcceptingSignature<H> signature) {
         super(cls);
-        this.commands = MessageHandlerMap.create(cls, signature);
+        this.commands = HandlerMap.create(cls, signature);
     }
 
     @Override

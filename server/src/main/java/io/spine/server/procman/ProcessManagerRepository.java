@@ -35,12 +35,14 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -95,6 +97,8 @@ public abstract class ProcessManagerRepository<I,
      * repository.
      */
     private @MonotonicNonNull Inbox<I> inbox;
+
+    private @MonotonicNonNull RepositoryCache<I, P> cache;
 
     /**
      * The configurable lifecycle rules of the repository.
@@ -159,7 +163,12 @@ public abstract class ProcessManagerRepository<I,
         super.registerWith(context);
         setupCommandRouting(commandRouting());
         checkNotDeaf();
+        initCache(context.isMultitenant());
         initInbox();
+    }
+
+    private void initCache(boolean multitenant) {
+        cache = new RepositoryCache<>(multitenant, this::doFindOrCreate, this::doStore);
     }
 
     /**
@@ -170,6 +179,17 @@ public abstract class ProcessManagerRepository<I,
                                              .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
+                .withBatchListener(new BatchDeliveryListener<I>() {
+                    @Override
+                    public void onStart(I id) {
+                        cache.startCaching(id);
+                    }
+
+                    @Override
+                    public void onEnd(I id) {
+                        cache.stopCaching(id);
+                    }
+                })
                 .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
                                   e -> PmEventEndpoint.of(this, e))
                 .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
@@ -380,7 +400,20 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected P findOrCreate(I id) {
+        return cache.load(id);
+    }
+
+    private P doFindOrCreate(I id) {
         return super.findOrCreate(id);
+    }
+
+    @Override
+    public void store(P entity) {
+        cache.store(entity);
+    }
+
+    private void doStore(P entity) {
+        super.store(entity);
     }
 
     @Override

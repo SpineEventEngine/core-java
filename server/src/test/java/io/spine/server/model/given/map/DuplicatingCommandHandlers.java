@@ -18,23 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model.given.map;
 
-import io.spine.server.command.model.CommandHandlerSignature;
-import io.spine.server.model.given.MessageHandlerMapTestEnv.HandlerWithDuplicatingMethods;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.server.command.Assign;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.command.CreateProject;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+/**
+ * This class is not valid because it declares two command handlers that
+ * accept the same command type.
+ */
+public class DuplicatingCommandHandlers {
 
-@DisplayName("MessageHandlerMap should")
-class MessageHandlerMapTest {
+    @Assign
+    ProjectCreated on(CreateProject cmd) {
+        return ProjectCreated.getDefaultInstance();
+    }
 
-    @Test
-    @DisplayName("not allow duplicating message classes in handlers")
-    void rejectDuplicateHandlers() {
-        assertThrows(DuplicateHandlerMethodError.class,
-                     () -> MessageHandlerMap.create(HandlerWithDuplicatingMethods.class,
-                                                    new CommandHandlerSignature()));
+    @Assign
+    ProjectCreated handle(CreateProject cmd) {
+        return ProjectCreated.getDefaultInstance();
     }
 }

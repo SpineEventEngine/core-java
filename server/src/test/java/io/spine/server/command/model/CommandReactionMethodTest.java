@@ -96,7 +96,7 @@ class CommandReactionMethodTest {
         void setUp() {
             target = new ReOneParam();
             rawMethod = ((TestCommandReactor) target).getMethod();
-            Optional<CommandReactionMethod> result = signature.toHandler(rawMethod);
+            Optional<CommandReactionMethod> result = signature.classify(rawMethod);
             assertTrue(result.isPresent());
             this.method = result.get();
             id = ProjectId.newBuilder()
@@ -147,7 +147,7 @@ class CommandReactionMethodTest {
         void setUp() {
             target = supplier.get();
             rawMethod = target.getMethod();
-            method = signature.toHandler(rawMethod)
+            method = signature.classify(rawMethod)
                                 .get();
             id = ProjectId.newBuilder()
                           .setId(newUuid())

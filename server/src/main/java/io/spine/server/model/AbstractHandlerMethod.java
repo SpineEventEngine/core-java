@@ -31,8 +31,6 @@ import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-import io.spine.type.TypeName;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -67,7 +65,7 @@ import static java.lang.String.format;
  *         the type of the message class
  * @param <E>
  *         the type of message envelopes, in which the messages to handle are wrapped
- * @param <P>
+ * @param <R>
  *         the type of the produced message classes
  */
 @Immutable
@@ -75,8 +73,8 @@ public abstract class AbstractHandlerMethod<T,
                                             M extends Message,
                                             C extends MessageClass<M>,
                                             E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
-                                            P extends MessageClass<?>>
-        implements HandlerMethod<T, C, E, P> {
+                                            R extends MessageClass<?>>
+        implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -112,7 +110,7 @@ public abstract class AbstractHandlerMethod<T,
      * <p>Does <em>not</em> contain interfaces.
      */
     @SuppressWarnings("Immutable") // Memoizing supplier is effectively immutable.
-    private final Supplier<ImmutableSet<P>> producedTypes;
+    private final Supplier<ImmutableSet<R>> producedTypes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -203,7 +201,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public final Set<P> producedMessages() {
+    public final Set<R> producedMessages() {
         return producedTypes.get();
     }
 
@@ -323,14 +321,14 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
-    public HandlerId id() {
-        return createId(messageClass());
+    public MethodParams params() {
+        return MethodParams.ofType(messageClass().value());
     }
 
     @Override
     public int hashCode() {
         int prime = 31;
-        return (prime + method.hashCode());
+        return (prime * method.hashCode());
     }
 
     @Override
@@ -354,50 +352,5 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public String toString() {
         return getFullName();
-    }
-
-    /**
-     * Creates a new {@link HandlerId} with the given class as the handled message type.
-     *
-     * @param messageClass
-     *         the handled message class
-     * @return new handler ID
-     */
-    protected static HandlerId createId(MessageClass<?> messageClass) {
-        HandlerTypeInfo typeInfo = HandlerTypeInfo
-                .newBuilder()
-                .setMessageType(typeUrl(messageClass))
-                .build();
-        return HandlerId
-                .newBuilder()
-                .setType(typeInfo)
-                .build();
-    }
-
-    /**
-     * Creates a new {@link HandlerId} with handled message type and origin message type.
-     *
-     * @param messageClass
-     *         the handled message class
-     * @param originClass
-     *         the origin message class
-     * @return new handler ID
-     */
-    protected static HandlerId createId(MessageClass<?> messageClass, MessageClass<?> originClass) {
-        HandlerTypeInfo typeInfo = HandlerTypeInfo
-                .newBuilder()
-                .setMessageType(typeUrl(messageClass))
-                .setOriginType(typeUrl(originClass))
-                .build();
-        return HandlerId
-                .newBuilder()
-                .setType(typeInfo)
-                .build();
-    }
-
-    private static String typeUrl(MessageClass<?> messageClass) {
-        TypeName typeName = messageClass.typeName();
-        TypeUrl typeUrl = typeName.toUrl();
-        return typeUrl.value();
     }
 }

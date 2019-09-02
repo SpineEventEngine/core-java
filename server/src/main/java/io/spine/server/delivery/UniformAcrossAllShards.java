@@ -20,9 +20,13 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -32,11 +36,23 @@ import static java.lang.Math.abs;
  *
  * <p>Uses a hash code of the entity identifier and the remainder of its division by the total
  * number of shards to determine the index of a shard, at which the modification is allowed.
+ * To reach the consistency of the hash code values across JVMs,
+ * the {@linkplain Hashing#murmur3_32() MurmurHash3, x86 variant} is used.
+ *
+ * <p>While Guava's {@code Hashing} is marked {@code @Beta}, it is still the best option
+ * for hashing functions — not to involve any heavy-weight third-party hashing
+ * solutions.
  */
 @Immutable
 public final class UniformAcrossAllShards implements DeliveryStrategy, Serializable {
 
     private static final long serialVersionUID = 0L;
+
+    /**
+     * The hash function to use for the shard index calculation.
+     */
+    @SuppressWarnings("UnstableApiUsage")   // See the class-level docs.
+    private static final HashFunction HASHER = Hashing.murmur3_32();
 
     private final int numberOfShards;
 
@@ -68,11 +84,24 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
         if (1 == numberOfShards) {
             return newIndex(0);
         }
-        int hashValue = entityId.hashCode();
+        int hashValue = hash(entityId);
         int totalShards = shardCount();
         int indexValue = abs(hashValue % totalShards);
         ShardIndex result = newIndex(indexValue);
         return result;
+    }
+
+    private static int hash(Object entityId) {
+        byte[] bytes;
+        if (entityId instanceof Message) {
+            bytes = ((Message) entityId).toByteArray();
+        } else {
+            bytes = entityId.toString()
+                            .getBytes(Charset.defaultCharset());
+        }
+        int value = HASHER.hashBytes(bytes)
+                          .asInt();
+        return value;
     }
 
     @Override
@@ -98,7 +127,6 @@ public final class UniformAcrossAllShards implements DeliveryStrategy, Serializa
      *
      * @return a strategy that puts all entities in a single shard
      */
-    @SuppressWarnings("WeakerAccess")   // a part of the public API.
     public static DeliveryStrategy singleShard() {
         return SingleShard.INSTANCE.strategy;
     }

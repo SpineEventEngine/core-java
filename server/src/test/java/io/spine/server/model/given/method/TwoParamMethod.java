@@ -22,7 +22,6 @@ package io.spine.server.model.given.method;
 
 import io.spine.base.EventMessage;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerId;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.VoidMethod;
 import io.spine.server.type.EmptyClass;
@@ -48,8 +47,4 @@ public class TwoParamMethod
         return EventClass.from(rawMessageClass());
     }
 
-    @Override
-    public HandlerId id() {
-        throw new IllegalStateException("The method is not a target of the test.");
-    }
 }

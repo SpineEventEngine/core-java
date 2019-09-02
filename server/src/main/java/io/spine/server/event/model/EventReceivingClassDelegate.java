@@ -20,19 +20,17 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
+import io.spine.server.model.HandlerMap;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -55,7 +53,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
-    private final MessageHandlerMap<EventClass, P, M> handlers;
+    private final HandlerMap<EventClass, P, M> handlers;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
     private final ImmutableSet<StateClass> domesticStates;
@@ -63,11 +61,11 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
 
     /**
      * Creates new instance for the passed raw class with methods obtained
-     * though the passed factory.
+     * through the passed factory.
      */
     public EventReceivingClassDelegate(Class<T> delegatingClass, MethodSignature<M, ?> signature) {
         super(delegatingClass);
-        this.handlers = MessageHandlerMap.create(delegatingClass, signature);
+        this.handlers = HandlerMap.create(delegatingClass, signature);
         this.domesticEvents = handlers.messageClasses(HandlerMethod::isDomestic);
         this.externalEvents = handlers.messageClasses(HandlerMethod::isExternal);
         this.domesticStates = extractStates(false);
@@ -118,7 +116,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public Collection<M> handlersOf(EventClass eventClass, MessageClass originClass) {
+    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass originClass) {
         return handlers.handlersOf(eventClass, originClass);
     }
 
@@ -139,7 +137,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         if (!handlers.containsClass(updateEvent)) {
             return ImmutableSet.of();
         }
-        ImmutableCollection<M> stateHandlers = handlers.handlersOf(updateEvent);
+        ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
         ImmutableSet<StateClass> result =
                 stateHandlers.stream()
                         .filter(h -> h instanceof StateSubscriberMethod)

@@ -37,13 +37,13 @@ import io.spine.type.MessageClass;
  */
 @Immutable
 public interface SelectiveHandler<T,
-                                  C extends MessageClass,
+                                  C extends MessageClass<?>,
                                   E extends MessageEnvelope<?, ?, ?>,
-                                  P extends MessageClass<?>>
-        extends HandlerMethod<T, C, E, P> {
+                                  R extends MessageClass<?>>
+        extends HandlerMethod<T, C, E, R> {
 
     /**
-     * Obtains the {@link MessageFilter} to apply to the messages received by this method.
+     * Obtains the filter to apply to the messages received by this method.
      */
-    MessageFilter filter();
+    ArgumentFilter filter();
 }

@@ -100,6 +100,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         return params.match(expectedParameters);
     }
 
+    /**
+     * Verifies if command message is one of the expected parameters.
+     */
     public boolean acceptsCommand() {
         return expectedParameters.contains(CommandMessage.class);
     }
