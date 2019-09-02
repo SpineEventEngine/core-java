@@ -40,7 +40,7 @@ public final class EventSubscriberMethod extends SubscriberMethod {
 
     @Override
     public ArgumentFilter createFilter() {
-        ArgumentFilter result = createFilter(rawMethod());
+        ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
         return result;
     }
 

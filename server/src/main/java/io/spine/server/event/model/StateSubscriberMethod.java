@@ -60,7 +60,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     private static Method checkNotFiltered(Method method) {
-        ArgumentFilter filter = createFilter(method);
+        ArgumentFilter filter = ArgumentFilter.createFilter(method);
         checkState(filter.acceptsAll(),
                    "A state subscriber method cannot declare filters but the method `%s` does.",
                    method);

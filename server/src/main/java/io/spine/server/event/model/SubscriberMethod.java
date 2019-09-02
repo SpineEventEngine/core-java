@@ -21,12 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
-import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
-import io.spine.core.ByField;
-import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.ArgumentFilter;
@@ -43,8 +38,6 @@ import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.base.FieldPaths.typeOfFieldAt;
-import static io.spine.string.Stringifiers.fromString;
 
 /**
  * A method annotated with the {@link io.spine.core.Subscribe @Subscribe} annotation.
@@ -68,26 +61,6 @@ public abstract class SubscriberMethod
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
-    }
-
-    /**
-     * Creates a new filter by the passed method.
-     *
-     * <p>If the method is not annotated for filtering, the returned instance
-     * {@linkplain ArgumentFilter#acceptsAll() accepts all} arguments.
-     */
-    static ArgumentFilter createFilter(Method method) {
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        ByField byFieldFilter = annotation.filter();
-        String rawFieldPath = byFieldFilter.path();
-        if (rawFieldPath.isEmpty()) {
-            return ArgumentFilter.acceptingAll();
-        }
-        FieldPath fieldPath = FieldPaths.parse(rawFieldPath);
-        Class<Message> firstParam = firstParamType(method);
-        Class<?> fieldType = typeOfFieldAt(firstParam, fieldPath);
-        Object expectedValue = fromString(byFieldFilter.value(), fieldType);
-        return ArgumentFilter.acceptingOnly(fieldPath, expectedValue);
     }
 
     @Override

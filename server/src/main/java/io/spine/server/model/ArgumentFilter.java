@@ -23,15 +23,22 @@ package io.spine.server.model;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.FieldPath;
+import io.spine.base.FieldPaths;
+import io.spine.core.ByField;
+import io.spine.core.Subscribe;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.base.FieldPaths.getValue;
+import static io.spine.base.FieldPaths.typeOfFieldAt;
+import static io.spine.string.Stringifiers.fromString;
 
 /**
  * Allows to filter messages passed by a handler method by a value of the message field.
@@ -53,8 +60,28 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         return new ArgumentFilter(field, fieldValue);
     }
 
-    public static ArgumentFilter acceptingAll() {
+    private static ArgumentFilter acceptingAll() {
         return new ArgumentFilter(FieldPath.getDefaultInstance(), Empty.getDefaultInstance());
+    }
+
+    /**
+     * Creates a new filter by the passed method.
+     *
+     * <p>If the method is not annotated for filtering, the returned instance
+     * {@linkplain ArgumentFilter#acceptsAll() accepts all} arguments.
+     */
+    public static ArgumentFilter createFilter(Method method) {
+        Subscribe annotation = method.getAnnotation(Subscribe.class);
+        ByField byFieldFilter = annotation.filter();
+        String rawFieldPath = byFieldFilter.path();
+        if (rawFieldPath.isEmpty()) {
+            return acceptingAll();
+        }
+        FieldPath fieldPath = FieldPaths.parse(rawFieldPath);
+        Class<Message> firstParam = AbstractHandlerMethod.firstParamType(method);
+        Class<?> fieldType = typeOfFieldAt(firstParam, fieldPath);
+        Object expectedValue = fromString(byFieldFilter.value(), fieldType);
+        return acceptingOnly(fieldPath, expectedValue);
     }
 
     /**
