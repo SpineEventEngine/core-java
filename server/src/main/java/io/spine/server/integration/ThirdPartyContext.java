@@ -21,76 +21,56 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
-import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
-import io.spine.time.ZoneId;
-import io.spine.time.ZoneIds;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.validate.Validate.isNotDefault;
 
+/**
+ * An external upstream system which is not implemented in Spine.
+ *
+ * <p>{@code ThirdPartyContext} helps to represent an upstream system as a Bounded Context. Events
+ * in the external system are converted into domain events of the user's Bounded Contexts and
+ * dispatched via {@link IntegrationBus}.
+ */
 public final class ThirdPartyContext implements AutoCloseable {
 
     private final BoundedContext context;
-    private final TenantId tenantId;
     private final Any producerId;
 
-    public ThirdPartyContext(String name, TenantId tenantId) {
+    public static ThirdPartyContext singleTenant(String name) {
         checkNotNull(name);
-        this.tenantId = checkNotNull(tenantId);
-        this.context = buildContext(name, tenantId);
+        BoundedContext context = BoundedContext.singleTenant(name).build();
+        return new ThirdPartyContext(context);
+    }
+
+    public static ThirdPartyContext multitenant(String name) {
+        checkNotNull(name);
+        BoundedContext context = BoundedContext.multitenant(name).build();
+        return new ThirdPartyContext(context);
+    }
+
+    private ThirdPartyContext(BoundedContext context) {
+        this.context = context;
         this.producerId = pack(context.name());
-    }
-
-    public ThirdPartyContext(String name) {
-        this(name, TenantId.getDefaultInstance());
-    }
-
-    private static BoundedContext buildContext(String name, TenantId tenantId) {
-        boolean multitenant = isNotDefault(tenantId);
-        BoundedContextBuilder builder = multitenant
-                                        ? BoundedContext.multitenant(name)
-                                        : BoundedContext.singleTenant(name);
-        BoundedContext context = builder.build();
         context.integrationBus()
                .notifyOfCurrentNeeds();
-        return context;
     }
 
-    public void emittedEvent(UserId actor, EventMessage eventMessage) {
-        emittedEvent(actor, eventMessage, Time.currentTime(), ZoneIds.systemDefault());
-    }
-
-    public void emittedEvent(UserId actor,
-                             EventMessage eventMessage,
-                             Timestamp when,
-                             ZoneId inZone) {
-        checkNotNull(actor);
+    public void emittedEvent(ActorContext actorContext, EventMessage eventMessage) {
+        checkNotNull(actorContext);
         checkNotNull(eventMessage);
-        checkNotNull(when);
-        checkNotNull(inZone);
-        ActorContext actorContext = ActorContext
-                .newBuilder()
-                .setActor(actor)
-                .setTenantId(tenantId)
-                .setTimestamp(when)
-                .setZoneId(inZone)
-                .vBuild();
-        post(actorContext, eventMessage);
-    }
+        checkTenant(actorContext, eventMessage);
 
-    private void post(ActorContext actorContext, EventMessage eventMessage) {
         EventContext eventContext = EventContext
                 .newBuilder()
                 .setProducerId(producerId)
@@ -110,6 +90,28 @@ public final class ThirdPartyContext implements AutoCloseable {
                 .vBuild();
         context.eventBus()
                .post(event);
+    }
+
+    public void emittedEvent(UserId userId, EventMessage eventMessage) {
+        checkNotNull(userId);
+        checkNotNull(eventMessage);
+        ActorContext context = ActorContext
+                .newBuilder()
+                .setActor(userId)
+                .setTimestamp(currentTime())
+                .vBuild();
+        emittedEvent(context, eventMessage);
+    }
+
+    private void checkTenant(ActorContext actorContext, EventMessage event) {
+        if (context.isMultitenant()) {
+            checkState(actorContext.hasActor(),
+                       "Cannot post `%s` into a third-party multitenant context %s." +
+                               " No tenant ID supplied." +
+                               " Use `emittedEvent(ActorContext, EventMessage)` instead.",
+                       event.getClass().getSimpleName(),
+                       context.name().getValue());
+        }
     }
 
     @Override

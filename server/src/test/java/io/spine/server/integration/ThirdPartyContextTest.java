@@ -22,6 +22,7 @@ package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
+import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.net.InternetDomain;
@@ -44,6 +45,7 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -188,7 +190,7 @@ class ThirdPartyContextTest {
     }
 
     private static void postForSingleTenant(UserId actor, EventMessage event) {
-        try (ThirdPartyContext uploads = new ThirdPartyContext("Imports")) {
+        try (ThirdPartyContext uploads = ThirdPartyContext.singleTenant("Imports")) {
             uploads.emittedEvent(actor, event);
         } catch (Exception e) {
             fail(e);
@@ -196,8 +198,14 @@ class ThirdPartyContextTest {
     }
 
     private static void postForTenant(TenantId tenantId, UserId actor, EventMessage event) {
-        try (ThirdPartyContext uploads = new ThirdPartyContext("Exports", tenantId)) {
-            uploads.emittedEvent(actor, event);
+        try (ThirdPartyContext uploads = ThirdPartyContext.multitenant("Exports")) {
+            ActorContext actorContext = ActorContext
+                    .newBuilder()
+                    .setActor(actor)
+                    .setTenantId(tenantId)
+                    .setTimestamp(currentTime())
+                    .vBuild();
+            uploads.emittedEvent(actorContext, event);
         } catch (Exception e) {
             fail(e);
         }
