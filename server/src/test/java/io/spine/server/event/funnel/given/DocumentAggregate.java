@@ -41,6 +41,11 @@ import io.spine.server.tuple.Pair;
 import io.spine.time.LocalDateTime;
 import io.spine.time.Now;
 
+/**
+ * An test aggregate representing a {@code Document}.
+ *
+ * <p>Used for testing event posting via {@link io.spine.server.event.funnel.EventFunnel}.
+ */
 public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.Builder> {
 
     @Assign
@@ -69,6 +74,13 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
                 .vBuild();
     }
 
+    /**
+     * Reacts on an external {@code OpenOfficeDocumentUploaded} event with
+     * a {@code DocumentImported} event.
+     *
+     * <p>This flow is intentionally complex so that the aggregate reacts to both external and
+     * domestic events.
+     */
     @React(external = true)
     DocumentImported on(OpenOfficeDocumentUploaded event, EventContext context) {
         return DocumentImported

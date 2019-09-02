@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Environment for tests of event import API.
+ */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.event.funnel.given;
