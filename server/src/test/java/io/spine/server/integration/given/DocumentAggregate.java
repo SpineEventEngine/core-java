@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.funnel.given;
+package io.spine.server.integration.given;
 
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -27,24 +27,24 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
-import io.spine.server.event.funnel.CreateDocument;
-import io.spine.server.event.funnel.Document;
-import io.spine.server.event.funnel.DocumentCreated;
-import io.spine.server.event.funnel.DocumentId;
-import io.spine.server.event.funnel.DocumentImported;
-import io.spine.server.event.funnel.Edit;
-import io.spine.server.event.funnel.EditText;
-import io.spine.server.event.funnel.OpenOfficeDocumentUploaded;
-import io.spine.server.event.funnel.PaperDocumentScanned;
-import io.spine.server.event.funnel.TextEdited;
+import io.spine.server.integration.CreateDocument;
+import io.spine.server.integration.Document;
+import io.spine.server.integration.DocumentCreated;
+import io.spine.server.integration.DocumentId;
+import io.spine.server.integration.DocumentImported;
+import io.spine.server.integration.Edit;
+import io.spine.server.integration.EditText;
+import io.spine.server.integration.OpenOfficeDocumentUploaded;
+import io.spine.server.integration.PaperDocumentScanned;
+import io.spine.server.integration.TextEdited;
 import io.spine.server.tuple.Pair;
 import io.spine.time.LocalDateTime;
 import io.spine.time.Now;
 
 /**
- * An test aggregate representing a {@code Document}.
+ * A test aggregate representing a {@code Document}.
  *
- * <p>Used for testing event posting via {@link io.spine.server.event.funnel.EventFunnel}.
+ * <p>Used for testing event posting via {@link io.spine.server.integration.EventFunnel}.
  */
 public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.Builder> {
 

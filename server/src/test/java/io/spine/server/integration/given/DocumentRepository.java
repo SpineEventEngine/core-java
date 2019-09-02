@@ -18,14 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Environment for tests of event import API.
- */
+package io.spine.server.integration.given;
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.event.funnel.given;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.integration.DocumentId;
+import io.spine.server.integration.OpenOfficeDocumentUploaded;
+import io.spine.server.integration.PaperDocumentScanned;
+import io.spine.server.route.EventRouting;
 
-import com.google.errorprone.annotations.CheckReturnValue;
+import static io.spine.server.route.EventRoute.withId;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+public class DocumentRepository extends AggregateRepository<DocumentId, DocumentAggregate> {
+
+    @Override
+    protected void setupImportRouting(EventRouting<DocumentId> routing) {
+        super.setupImportRouting(routing);
+        routing.route(PaperDocumentScanned.class, (message, context) -> withId(message.getId()));
+    }
+
+    @Override
+    protected void setupEventRouting(EventRouting<DocumentId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(OpenOfficeDocumentUploaded.class,
+                      (message, context) -> withId(message.getId()));
+    }
+}

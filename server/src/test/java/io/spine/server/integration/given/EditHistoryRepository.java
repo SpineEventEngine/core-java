@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.funnel.given;
+package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.server.event.funnel.DocumentId;
-import io.spine.server.event.funnel.EditHistory;
-import io.spine.server.event.funnel.TextEdited;
-import io.spine.server.event.funnel.UserDeleted;
+import io.spine.server.integration.DocumentId;
+import io.spine.server.integration.EditHistory;
+import io.spine.server.integration.TextEdited;
+import io.spine.server.integration.UserDeleted;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 

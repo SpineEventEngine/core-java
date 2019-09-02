@@ -18,28 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.funnel.given;
+package io.spine.server.integration.given;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.event.funnel.DocumentId;
-import io.spine.server.event.funnel.OpenOfficeDocumentUploaded;
-import io.spine.server.event.funnel.PaperDocumentScanned;
-import io.spine.server.route.EventRouting;
+import io.spine.core.Subscribe;
+import io.spine.server.integration.DocumentId;
+import io.spine.server.integration.Edit;
+import io.spine.server.integration.EditHistory;
+import io.spine.server.integration.TextEdited;
+import io.spine.server.integration.UserDeleted;
+import io.spine.server.projection.Projection;
 
-import static io.spine.server.route.EventRoute.withId;
+import java.util.ArrayList;
+import java.util.List;
 
-public class DocumentRepository extends AggregateRepository<DocumentId, DocumentAggregate> {
+public class EditHistoryProjection
+        extends Projection<DocumentId, EditHistory, EditHistory.Builder> {
 
-    @Override
-    protected void setupImportRouting(EventRouting<DocumentId> routing) {
-        super.setupImportRouting(routing);
-        routing.route(PaperDocumentScanned.class, (message, context) -> withId(message.getId()));
+    @Subscribe
+    void on(TextEdited event) {
+        builder()
+                .addEdit(event.getEdit());
     }
 
-    @Override
-    protected void setupEventRouting(EventRouting<DocumentId> routing) {
-        super.setupEventRouting(routing);
-        routing.route(OpenOfficeDocumentUploaded.class,
-                      (message, context) -> withId(message.getId()));
+    @Subscribe(external = true)
+    void on(UserDeleted event) {
+        List<Edit> list = new ArrayList<>(builder().getEditList());
+        list.removeIf(edit -> edit.getEditor().equals(event.getUser()));
+        builder()
+                .clearEdit()
+                .addAllEdit(list);
     }
 }

@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package spine.test.server.event.funnel;
+package spine.test.server.integration;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.event.funnel";
+option java_package = "io.spine.server.integration";
 option java_outer_classname = "DocsProto";
 option java_multiple_files = true;
 
