@@ -161,7 +161,12 @@ public final class BoundedContextBuilder implements Logging {
         ContextSpec spec = multitenant
                            ? multitenant(name)
                            : singleTenant(name);
-        return new BoundedContextBuilder(spec.notStoringEvents());
+        BoundedContextBuilder builder = new BoundedContextBuilder(spec.notStoringEvents());
+        builder.systemFeatures()
+               .forgetEvents()
+               .disableAggregateQuerying()
+               .disableCommandLog();
+        return builder;
     }
 
     /**
