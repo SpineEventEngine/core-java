@@ -27,7 +27,7 @@ import org.junit.jupiter.api.DisplayName;
  * Tests the {@link InMemoryShardedWorkRegistry}.
  */
 @DisplayName("`InMemoryShardedWorkRegistry` should")
-class InMemoryShardedWorkRegistryTest extends AbstractShardedWorkRegistryTest {
+class InMemoryShardedWorkRegistryTest extends ShardedWorkRegistryTest {
 
     @Override
     protected ShardedWorkRegistry registry() {

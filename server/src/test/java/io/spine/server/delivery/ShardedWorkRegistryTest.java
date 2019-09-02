@@ -41,7 +41,7 @@ import static java.util.stream.IntStream.rangeClosed;
  * An abstract base for {@link ShardedWorkRegistry} tests.
  */
 @DisplayName("`ShardedWorkRegistry` should")
-public abstract class AbstractShardedWorkRegistryTest {
+public abstract class ShardedWorkRegistryTest {
 
     /**
      * Creates a new instance of {@code ShardedWorkRegistry}.
