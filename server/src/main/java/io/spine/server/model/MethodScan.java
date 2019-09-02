@@ -123,7 +123,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
         MessageClass handledClass = handler.messageClass();
         SelectiveHandler existingHandler = selectiveHandlers.put(handledClass, handler);
-        if (existingHandler != null) {
+        if (existingHandler != null
+                && !filter.sameField(existingHandler.filter())) {
             // There is already a handler for this message class.
             // See that the field which is used as the condition for filtering is the same.
             // It is not allowed to have filtered handlers by various fields because it
@@ -134,11 +135,9 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
             // different values. It allows to split logic into smaller methods instead of having
             // if-else chains (that branch by different values) inside a bigger handler method.
             //
-            if (!filter.sameField(existingHandler.filter())) {
-                throw new HandlerFieldFilterClashError(
-                        declaringClass, handler.rawMethod(), existingHandler.rawMethod()
-                );
-            }
+            throw new HandlerFieldFilterClashError(
+                    declaringClass, handler.rawMethod(), existingHandler.rawMethod()
+            );
             // It is OK to keep only the last filtering handler in the map (and not all of them)
             // because filtered fields are required to be the same.
         }
