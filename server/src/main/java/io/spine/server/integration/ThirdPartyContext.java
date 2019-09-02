@@ -39,9 +39,9 @@ import static io.spine.server.BoundedContextBuilder.notStoringEvents;
 /**
  * An external upstream system which is not implemented in Spine.
  *
- * <p>{@code ThirdPartyContext} helps to represent an upstream system as a Bounded Context. Events
- * in the external system are converted into domain events of the user's Bounded Contexts and
- * dispatched via {@link IntegrationBus}.
+ * <p>{@code ThirdPartyContext} helps to represent an external system as a Bounded Context. Events
+ * which occur in the external system are converted into domain events of the user's
+ * Bounded Contexts and dispatched via {@link IntegrationBus}.
  *
  * @implSpec Note that a {@code ThirdPartyContext} sends a request for external messages to
  *         other contexts. The {@code ThirdPartyContext} never consumes external messages itself,
@@ -164,18 +164,14 @@ public final class ThirdPartyContext implements AutoCloseable {
             checkState(tenantSupplied,
                        "Cannot post `%s` into a third-party multitenant context %s." +
                                " No tenant ID supplied.",
-                       event.getClass()
-                            .getSimpleName(),
-                       context.name()
-                              .getValue());
+                       event.getClass().getSimpleName(),
+                       context.name().getValue());
         } else {
             checkState(!tenantSupplied,
                        "Cannot post `%s` into a third-party single-tenant context %s." +
                                " Tenant ID must NOT be supplied.",
-                       event.getClass()
-                            .getSimpleName(),
-                       context.name()
-                              .getValue());
+                       event.getClass().getSimpleName(),
+                       context.name().getValue());
         }
     }
 
@@ -184,7 +180,8 @@ public final class ThirdPartyContext implements AutoCloseable {
      *
      * <p>Attempts of emitting an event from a closed Context result in an exception.
      *
-     * @throws Exception if the underlying {@link BoundedContext} fails to close
+     * @throws Exception
+     *         if the underlying {@link BoundedContext} fails to close
      */
     @Override
     public void close() throws Exception {
