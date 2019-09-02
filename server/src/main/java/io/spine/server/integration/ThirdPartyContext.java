@@ -42,17 +42,38 @@ import static io.spine.server.BoundedContextBuilder.notStoringEvents;
  * <p>{@code ThirdPartyContext} helps to represent an upstream system as a Bounded Context. Events
  * in the external system are converted into domain events of the user's Bounded Contexts and
  * dispatched via {@link IntegrationBus}.
+ *
+ * @implSpec Note that a {@code ThirdPartyContext} sends a request for external messages to
+ *         other contexts. The {@code ThirdPartyContext} never consumes external messages itself,
+ *         but requires the other Bounded Contexts to send their requests, so that the publishing
+ *         channels are open. Depending of the implementation of
+ *         {@link io.spine.server.transport.TransportFactory transport}, creating
+ *         a {@code ThirdPartyContext} may be an expensive operation. Thus, it is recommended that
+ *         the instances of this class are reused and {@linkplain #close() closed} when they are
+ *         no longer needed.
  */
 public final class ThirdPartyContext implements AutoCloseable {
 
     private final BoundedContext context;
     private final Any producerId;
 
+    /**
+     * Creates a new single-tenant instance of {@code ThirdPartyContext} with the given name.
+     *
+     * @param name
+     *         name of the third-party system
+     */
     public static ThirdPartyContext singleTenant(String name) {
         checkNotNull(name);
         return newContext(name, false);
     }
 
+    /**
+     * Creates a new multitenant instance of {@code ThirdPartyContext} with the given name.
+     *
+     * @param name
+     *         name of the third-party system
+     */
     public static ThirdPartyContext multitenant(String name) {
         checkNotNull(name);
         return newContext(name, true);
@@ -60,16 +81,31 @@ public final class ThirdPartyContext implements AutoCloseable {
 
     private static ThirdPartyContext newContext(String name, boolean multitenant) {
         BoundedContext context = notStoringEvents(name, multitenant).build();
+        context.integrationBus()
+               .notifyOfCurrentNeeds();
         return new ThirdPartyContext(context);
     }
 
     private ThirdPartyContext(BoundedContext context) {
         this.context = context;
         this.producerId = pack(context.name());
-        context.integrationBus()
-               .notifyOfCurrentNeeds();
     }
 
+    /**
+     * Emits an event from the third-party system.
+     *
+     * <p>If the event is required by another Context, posts the event into
+     * the {@link IntegrationBus} of the respective Context. Does nothing if the event is not
+     * required by any Context.
+     *
+     * <p>The caller is required to supply the tenant ID via the {@code ActorContext.tenant_id} if
+     * this Context is multitenant.
+     *
+     * @param actorContext
+     *         the info about the actor, a user or a software component, who emits the event
+     * @param eventMessage
+     *         the event
+     */
     public void emittedEvent(ActorContext actorContext, EventMessage eventMessage) {
         checkNotNull(actorContext);
         checkNotNull(eventMessage);
@@ -96,6 +132,21 @@ public final class ThirdPartyContext implements AutoCloseable {
                .post(event);
     }
 
+    /**
+     * Emits an event from the third-party system.
+     *
+     * <p>If the event is required by another Context, posts the event into
+     * the {@link IntegrationBus} of the respective Context. Does nothing if the event is not
+     * required by any Context.
+     *
+     * <p>This overload may only be used for single-tenant third-party contexts. If this Context is
+     * multitenant, this method throws an exception.
+     *
+     * @param userId
+     *         the ID of the actor, a user or a software component, who emits the event
+     * @param eventMessage
+     *         the event
+     */
     public void emittedEvent(UserId userId, EventMessage eventMessage) {
         checkNotNull(userId);
         checkNotNull(eventMessage);
@@ -108,16 +159,33 @@ public final class ThirdPartyContext implements AutoCloseable {
     }
 
     private void checkTenant(ActorContext actorContext, EventMessage event) {
+        boolean tenantSupplied = actorContext.hasTenantId();
         if (context.isMultitenant()) {
-            checkState(actorContext.hasActor(),
+            checkState(tenantSupplied,
                        "Cannot post `%s` into a third-party multitenant context %s." +
-                               " No tenant ID supplied." +
-                               " Use `emittedEvent(ActorContext, EventMessage)` instead.",
-                       event.getClass().getSimpleName(),
-                       context.name().getValue());
+                               " No tenant ID supplied.",
+                       event.getClass()
+                            .getSimpleName(),
+                       context.name()
+                              .getValue());
+        } else {
+            checkState(!tenantSupplied,
+                       "Cannot post `%s` into a third-party single-tenant context %s." +
+                               " Tenant ID must NOT be supplied.",
+                       event.getClass()
+                            .getSimpleName(),
+                       context.name()
+                              .getValue());
         }
     }
 
+    /**
+     * Closes this Context and clean up underlying resources.
+     *
+     * <p>Attempts of emitting an event from a closed Context result in an exception.
+     *
+     * @throws Exception if the underlying {@link BoundedContext} fails to close
+     */
     @Override
     public void close() throws Exception {
         context.close();
