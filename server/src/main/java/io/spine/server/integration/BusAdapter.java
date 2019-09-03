@@ -70,8 +70,8 @@ final class BusAdapter {
      * @return an {@code ExternalMessageEnvelope}, containing the given message
      */
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
-        Message originalMessage = unpack(message.getOriginalMessage());
-        return ExternalMessageEnvelope.of(message, originalMessage);
+        Event event = unpack(message.getOriginalMessage(), Event.class);
+        return ExternalMessageEnvelope.of(message, event.enclosedMessage());
     }
 
     /**
