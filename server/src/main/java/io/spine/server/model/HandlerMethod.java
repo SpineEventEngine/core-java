@@ -137,8 +137,8 @@ public interface HandlerMethod<T,
     default void ensureExternalMatch(boolean expectedValue) throws IllegalArgumentException {
         checkArgument(isExternal() == expectedValue,
                       "Mismatch of `external` value for the handler method %s. " +
-                              "Expected `external` = %s, but got the other way around.", this,
-                      expectedValue);
+                              "Expected `external` = %s, but got the other way around.",
+                      this, expectedValue);
     }
 
     default DispatchKey key() {

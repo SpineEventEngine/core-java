@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
@@ -50,6 +51,7 @@ import static io.spine.base.Errors.fromThrowable;
 import static io.spine.server.model.MethodResults.collectMessageClasses;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -312,11 +314,14 @@ public abstract class AbstractHandlerMethod<T,
      * @return full name of the subscriber
      */
     public String getFullName() {
-        String template = "%s.%s()";
+        String template = "%s.%s(%s)";
         String className = method.getDeclaringClass()
                                  .getName();
         String methodName = method.getName();
-        String result = format(template, className, methodName);
+        String parameterTypes = Stream.of(method.getParameterTypes())
+                                      .map(Class::getSimpleName)
+                                      .collect(joining(", "));
+        String result = format(template, className, methodName, parameterTypes);
         return result;
     }
 
