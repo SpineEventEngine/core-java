@@ -37,7 +37,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.BoundedContextBuilder.notStoringEvents;
 
 /**
- * An external upstream system which is not implemented in Spine.
+ * An external non-Spine based upstream system.
  *
  * <p>{@code ThirdPartyContext} helps to represent an external system as a Bounded Context. Events
  * which occur in the external system are converted into domain events of the user's
