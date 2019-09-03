@@ -21,8 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
@@ -92,7 +92,7 @@ public final class HandlerMap<M extends MessageClass<?>,
     /**
      * Obtains classes of messages for which handlers are stored in this map.
      */
-    public Set<M> messageClasses() {
+    public ImmutableSet<M> messageClasses() {
         return messageClasses;
     }
 

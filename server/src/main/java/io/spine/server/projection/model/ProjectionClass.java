@@ -67,8 +67,8 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public final Set<EventClass> domesticEvents() {
-        return delegate.domesticEvents();
+    public final Set<EventClass> events() {
+        return delegate.events();
     }
 
     @Override

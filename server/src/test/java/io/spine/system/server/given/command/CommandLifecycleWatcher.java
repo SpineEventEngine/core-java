@@ -35,6 +35,6 @@ public class CommandLifecycleWatcher extends AbstractEventAccumulator {
     @Override
     public Set<EventClass> eventClasses() {
         return ModelInfo.commandLifecycle()
-                        .domesticEvents();
+                        .events();
     }
 }

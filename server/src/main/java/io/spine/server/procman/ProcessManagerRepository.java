@@ -249,7 +249,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     public Set<EventClass> messageClasses() {
-        return processManagerClass().domesticEvents();
+        return processManagerClass().events();
     }
 
     /**

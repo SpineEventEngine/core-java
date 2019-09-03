@@ -58,7 +58,7 @@ class AggregateClassTest {
     @Test
     @DisplayName("provide classes of events and rejection events on which the aggregate reacts")
     void eventClasses() {
-        assertThat(aggregateClass.domesticEvents())
+        assertThat(aggregateClass.events())
                 .containsExactlyElementsIn(EventClass.setOf(
                         TankEmpty.class,
                         Rejections.EngineAlreadyStopped.class,

@@ -330,7 +330,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<EventClass> messageClasses() {
-        return projectionClass().domesticEvents();
+        return projectionClass().events();
     }
 
     @Override

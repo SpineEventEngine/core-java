@@ -72,7 +72,7 @@ class ProjectionClassTest {
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
         Set<EventClass> classes =
-                asProjectionClass(Calcumulator.class).domesticEvents();
+                asProjectionClass(Calcumulator.class).events();
 
         assertThat(classes).containsExactly(
                 EventClass.from(StringImported.class),

@@ -100,7 +100,7 @@ public abstract class AbstractEventReactor
 
     @Override
     public Set<EventClass> messageClasses() {
-        return thisClass.domesticEvents();
+        return thisClass.events();
     }
 
     @CanIgnoreReturnValue

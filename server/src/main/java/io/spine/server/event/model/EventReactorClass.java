@@ -44,13 +44,13 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     private static final long serialVersionUID = 0L;
 
     private final HandlerMap<EventClass, EventClass, EventReactorMethod> reactors;
-    private final ImmutableSet<EventClass> domesticEvents;
+    private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> externalEvents;
 
     private EventReactorClass(Class<? extends S> cls) {
         super(cls);
         this.reactors = HandlerMap.create(cls, new EventReactorSignature());
-        this.domesticEvents = reactors.messageClasses(HandlerMethod::isDomestic);
+        this.events = reactors.messageClasses();
         this.externalEvents = reactors.messageClasses(HandlerMethod::isExternal);
     }
 
@@ -74,8 +74,8 @@ public final class EventReactorClass<S extends AbstractEventReactor> extends Mod
     }
 
     @Override
-    public Set<EventClass> domesticEvents() {
-        return domesticEvents;
+    public Set<EventClass> events() {
+        return events;
     }
 
     @Override

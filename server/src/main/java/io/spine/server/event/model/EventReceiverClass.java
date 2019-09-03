@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import io.spine.annotation.Internal;
 import io.spine.server.type.EventClass;
 
 import java.util.Set;
@@ -30,25 +31,23 @@ import java.util.Set;
  * <p>A class can declare methods to receive events from the same Bounded Context (“domestic”
  * events), or events originated in another Bounded Context (“external” events).
  */
+@Internal
 public interface EventReceiverClass {
 
     /**
      * Obtains a set of event classes which this class receives.
      *
-     * <p>The returned set contains only event classes of the {@code BoundedContext}
-     * to which the class belongs.
+     * <p>The returned set contains both domestic and external event classes.
      *
-     * <p>For external events, please see {@link #externalEvents()}.
+     * <p>For only the external events, please see {@link #externalEvents()}.
      */
-    Set<EventClass> domesticEvents();
+    Set<EventClass> events();
 
     /**
      * Obtains a set of external events which this class receives.
      *
      * <p>External events are those that are delivered to the {@code BoundedContext}
      * to which this class belongs from outside.
-     *
-     * <p>For domestic events, please see {@link #domesticEvents()}.
      */
     Set<EventClass> externalEvents();
 }
