@@ -63,6 +63,7 @@ message RequestForExternalMessages {
 
 // The type of message requested by some part of the system.
 message ExternalMessageType {
+    option (is).java_type = "ExternalMessageTypeMixin";
 
     // Type URL of the message (e.g. `io.spine.examples.TaskCreated`).
     string message_type_url = 1 [(required) = true];
