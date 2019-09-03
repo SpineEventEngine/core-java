@@ -30,6 +30,7 @@ import io.spine.core.UserId;
 import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.integration.given.DocumentAggregate;
 import io.spine.server.integration.given.DocumentRepository;
 import io.spine.server.integration.given.EditHistoryProjection;
@@ -75,6 +76,9 @@ class ThirdPartyContextTest {
     @AfterEach
     void closeContext() throws Exception {
         context.close();
+        ServerEnvironment
+                .instance()
+                .reset();
     }
 
     @Test
