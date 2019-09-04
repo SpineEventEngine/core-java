@@ -24,8 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.BoundedContextName;
 import io.spine.server.transport.Publisher;
 
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
@@ -56,11 +54,10 @@ final class ConfigurationBroadcast {
      * @param needs
      *         the new needs of current context
      */
-    synchronized void onNeedsUpdated(Set<ExternalMessageType> needs) {
+    synchronized void onNeedsUpdated(ImmutableSet<ExternalMessageType> needs) {
         checkNotNull(needs);
-        ImmutableSet<ExternalMessageType> newNeeds = ImmutableSet.copyOf(needs);
-        if (!knownNeeds.equals(newNeeds)) {
-            knownNeeds = newNeeds;
+        if (!knownNeeds.equals(needs)) {
+            knownNeeds = needs;
             send();
         }
     }
