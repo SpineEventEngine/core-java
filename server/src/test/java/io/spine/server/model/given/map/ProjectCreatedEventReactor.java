@@ -27,15 +27,10 @@ import io.spine.test.event.ProjectStarred;
 /**
  * This class is not valid because it declares two event reactors which accept the same event type.
  */
-public class DuplicateEventReactors {
+public class ProjectCreatedEventReactor {
 
     @React
     ProjectStarred on(ProjectCreated cmd) {
-        return ProjectStarred.getDefaultInstance();
-    }
-
-    @React
-    ProjectStarred reactOn(ProjectCreated cmd) {
         return ProjectStarred.getDefaultInstance();
     }
 }

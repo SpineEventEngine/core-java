@@ -24,10 +24,12 @@ import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.event.model.EventReactorSignature;
 import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DuplicateCommandHandlers;
-import io.spine.server.model.given.map.DuplicateEventReactors;
+import io.spine.server.model.given.map.ProjectCreatedEventReactor;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
+import io.spine.server.type.EventClass;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
+import io.spine.test.event.ProjectStarred;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -54,25 +56,17 @@ class HandlerMapTest {
     class DuplicateHandler {
 
         @Test
-        @DisplayName("duplicating message classes in handlers")
+        @DisplayName("duplicate message classes in handlers")
         void rejectDuplicateHandlers() {
-            assertDuplication(
+            assertDuplicate(
                     () -> create(DuplicateCommandHandlers.class, new CommandHandlerSignature())
-            );
-        }
-
-        @Test
-        @DisplayName("duplicating event reactors")
-        void reactorDuplication() {
-            assertDuplication(
-                    () -> create(DuplicateEventReactors.class, new EventReactorSignature())
             );
         }
 
         @Test
         @DisplayName("the same value of the filtered event field")
         void rejectFilterFieldDuplication() {
-            assertDuplication(() -> asProjectionClass(DupEventFilterValue.class));
+            assertDuplicate(() -> asProjectionClass(DupEventFilterValue.class));
         }
 
         @Test
@@ -84,8 +78,17 @@ class HandlerMapTest {
             );
         }
 
-        void assertDuplication(Runnable runnable) {
+        void assertDuplicate(Runnable runnable) {
             assertThrows(DuplicateHandlerMethodError.class, runnable::run);
         }
+    }
+
+    @Test
+    @DisplayName("fail if no method found")
+    void failIfNotFound() {
+        HandlerMap<EventClass, ?, ?> map = create(ProjectCreatedEventReactor.class,
+                                                  new EventReactorSignature());
+        assertThrows(IllegalStateException.class,
+                     () -> map.handlerOf(EventClass.from(ProjectStarred.class)));
     }
 }

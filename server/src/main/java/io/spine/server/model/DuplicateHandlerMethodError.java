@@ -19,7 +19,10 @@
  */
 package io.spine.server.model;
 
+import java.util.Collection;
+
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Indicates that more than one handling method for the same message class are present
@@ -29,14 +32,21 @@ public final class DuplicateHandlerMethodError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    DuplicateHandlerMethodError(Class<?> targetClass,
+    DuplicateHandlerMethodError(Class<?> declaringClass,
                                 DispatchKey key,
                                 String firstMethodName,
                                 String secondMethodName) {
-
         super(format("The `%s` class defines more than one method with parameters `%s`." +
                              " Methods encountered: `%s`, `%s`.",
-                     targetClass.getName(), key,
+                     declaringClass.getName(), key,
                      firstMethodName, secondMethodName));
+    }
+
+    DuplicateHandlerMethodError(Collection<? extends HandlerMethod<?, ?, ?, ?>> handlers) {
+        super(format("Handler methods %s are clashing.%n" +
+                             "Only one of them should handle this message type.",
+                     handlers.stream()
+                             .map(Object::toString)
+                             .collect(joining(", "))));
     }
 }
