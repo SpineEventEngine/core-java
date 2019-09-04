@@ -21,8 +21,10 @@
 package io.spine.server.model;
 
 import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.event.model.EventReactorSignature;
 import io.spine.server.model.given.map.DupEventFilterValue;
-import io.spine.server.model.given.map.DuplicatingCommandHandlers;
+import io.spine.server.model.given.map.DuplicateCommandHandlers;
+import io.spine.server.model.given.map.DuplicateEventReactors;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
@@ -55,7 +57,15 @@ class HandlerMapTest {
         @DisplayName("duplicating message classes in handlers")
         void rejectDuplicateHandlers() {
             assertDuplication(
-                    () -> create(DuplicatingCommandHandlers.class, new CommandHandlerSignature())
+                    () -> create(DuplicateCommandHandlers.class, new CommandHandlerSignature())
+            );
+        }
+
+        @Test
+        @DisplayName("duplicating event reactors")
+        void reactorDuplication() {
+            assertDuplication(
+                    () -> create(DuplicateEventReactors.class, new EventReactorSignature())
             );
         }
 

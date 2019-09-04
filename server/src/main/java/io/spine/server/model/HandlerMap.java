@@ -21,8 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
@@ -226,7 +226,7 @@ public final class HandlerMap<M extends MessageClass<?>,
         if (count != 1) {
             logWrongMethodCount(count, targetType);
             throw newIllegalStateException(
-                    "Unexpected number of handlers for messages of class %s: %s.%n%s",
+                    "Unexpected number of handlers for messages of class %s: %d.%n%s",
                     targetType, count, handlers
             );
         }

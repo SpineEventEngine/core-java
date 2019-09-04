@@ -20,23 +20,22 @@
 
 package io.spine.server.model.given.map;
 
-import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.command.CreateProject;
+import io.spine.test.event.ProjectStarred;
 
 /**
- * This class is not valid because it declares two command handlers that
- * accept the same command type.
+ * This class is not valid because it declares two event reactors which accept the same event type.
  */
-public class DuplicatingCommandHandlers {
+public class DuplicateEventReactors {
 
-    @Assign
-    ProjectCreated on(CreateProject cmd) {
-        return ProjectCreated.getDefaultInstance();
+    @React
+    ProjectStarred on(ProjectCreated cmd) {
+        return ProjectStarred.getDefaultInstance();
     }
 
-    @Assign
-    ProjectCreated handle(CreateProject cmd) {
-        return ProjectCreated.getDefaultInstance();
+    @React
+    ProjectStarred reactOn(ProjectCreated cmd) {
+        return ProjectStarred.getDefaultInstance();
     }
 }
