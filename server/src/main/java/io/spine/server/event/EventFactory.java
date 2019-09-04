@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
@@ -71,6 +72,24 @@ public class EventFactory {
         checkNotNull(producerId);
         EventOrigin eventOrigin = fromAnotherMessage(origin);
         return new EventFactory(eventOrigin, producerId);
+    }
+
+    /**
+     * Creates a new event factory for producing events to be imported into a Bounced Context.
+     *
+     * @param actorContext
+     *         the description of the actor who imports the events
+     * @param producerId
+     *         the ID of the system which produced the events
+     * @return new event factory
+     */
+    public static EventFactory forImport(ActorContext actorContext, Any producerId) {
+        checkNotNull(actorContext);
+        checkNotNull(producerId);
+        checkValid(actorContext);
+
+        EventOrigin origin = EventOrigin.forImport(actorContext);
+        return new EventFactory(origin, producerId);
     }
 
     /**

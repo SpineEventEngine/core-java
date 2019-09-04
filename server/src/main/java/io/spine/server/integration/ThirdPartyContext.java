@@ -24,20 +24,16 @@ import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.event.EventFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.BoundedContextBuilder.notStoringEvents;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
-import static io.spine.validate.Validate.checkNotDefault;
-import static io.spine.validate.Validate.checkValid;
 
 /**
  * An external non-Spine based upstream system.
@@ -111,28 +107,10 @@ public final class ThirdPartyContext implements AutoCloseable {
     public void emittedEvent(ActorContext actorContext, EventMessage eventMessage) {
         checkNotNull(actorContext);
         checkNotNull(eventMessage);
-        checkValid(actorContext);
-        checkNotDefault(eventMessage);
-        checkValid(eventMessage);
         checkTenant(actorContext, eventMessage);
 
-        EventId id = EventId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
-        EventContext eventContext = EventContext
-                .newBuilder()
-                .setProducerId(producerId)
-                .setTimestamp(actorContext.getTimestamp())
-                .setImportContext(actorContext)
-                .setExternal(true)
-                .vBuild();
-        Event event = Event
-                .newBuilder()
-                .setId(id)
-                .setContext(eventContext)
-                .setMessage(pack(eventMessage))
-                .vBuild();
+        EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
+        Event event = eventFactory.createEvent(eventMessage, null);
         context.eventBus()
                .post(event);
     }
