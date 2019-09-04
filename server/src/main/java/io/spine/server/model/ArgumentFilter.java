@@ -25,20 +25,19 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static io.spine.base.FieldPaths.getValue;
-import static io.spine.base.FieldPaths.typeOfFieldAt;
 import static io.spine.string.Stringifiers.fromString;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Allows to filter messages passed by a handler method by a value of the message field.
@@ -46,10 +45,9 @@ import static io.spine.string.Stringifiers.fromString;
 @Immutable
 public final class ArgumentFilter implements Predicate<EventMessage> {
 
-    private final FieldPath field;
+    private final @Nullable Field field;
     @SuppressWarnings("Immutable") // Values are primitives.
-    private final Object expectedValue;
-    private final boolean acceptsAll;
+    private final @Nullable Object expectedValue;
 
     /**
      * Creates a new filter which accepts only the passed value of the specified field.
@@ -77,35 +75,48 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         if (rawFieldPath.isEmpty()) {
             return acceptingAll();
         }
-        FieldPath fieldPath = FieldPaths.parse(rawFieldPath);
+        Field field = Field.parse(rawFieldPath);
         Class<Message> firstParam = AbstractHandlerMethod.firstParamType(method);
-        Class<?> fieldType = typeOfFieldAt(firstParam, fieldPath);
+        Class<?> fieldType = field.findType(firstParam).orElseThrow(
+                () -> newIllegalStateException(
+                        "The message with type `%s` does not have the field `%s`.",
+                        firstParam.getName(), field)
+        );
         Object expectedValue = fromString(byFieldFilter.value(), fieldType);
-        return acceptingOnly(fieldPath, expectedValue);
+        return acceptingOnly(field.path(), expectedValue);
     }
 
     /**
      * Tells if the passed filter works on the same field as this one.
      */
     boolean sameField(ArgumentFilter another) {
+        if (field == null) {
+            return another.field == null;
+        }
         boolean result = field.equals(another.field);
         return result;
     }
 
     /** Obtains the depth of the filtered field. */
     public int pathLength() {
-        return field.getFieldNameCount();
+        if (field == null) {
+            return 0;
+        }
+        return field.path().getFieldNameCount();
     }
 
-    private ArgumentFilter(FieldPath field, Object expectedValue) {
-        this.field = field;
-        this.expectedValue = expectedValue;
-        this.acceptsAll = field.getFieldNameCount() == 0;
+    private ArgumentFilter(FieldPath path, Object expectedValue) {
+        this.field = path.getFieldNameCount() > 0
+            ? Field.withPath(path)
+            : null;
+        this.expectedValue = field != null
+            ? expectedValue
+            : null;
     }
 
     /** Tells if this filter accepts all the events. */
     public boolean acceptsAll() {
-        return acceptsAll;
+        return field == null;
     }
 
     /**
@@ -114,20 +125,24 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      */
     @Override
     public boolean test(EventMessage event) {
-        if (acceptsAll) {
+        if (acceptsAll()) {
             return true;
         }
-        Object eventField = getValue(field, event);
-        boolean result = expectedValue.equals(eventField);
+        Object eventField = field.valueIn(event);
+        boolean result = eventField.equals(expectedValue);
         return result;
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("field", shortDebugString(field))
-                          .add("expectedValue", expectedValue)
-                          .toString();
+        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
+        if (acceptsAll()) {
+            helper.add("acceptsAll", true);
+        } else {
+            helper.add("field", field)
+                  .add("expectedValue", expectedValue);
+        }
+        return helper.toString();
     }
 
     @Override

@@ -22,8 +22,7 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.FieldPath;
-import io.spine.base.FieldPaths;
+import io.spine.base.Field;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
@@ -43,7 +42,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.FieldPaths.getValue;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -197,8 +195,8 @@ abstract class UpdateHandler implements Logging {
     }
 
     private static boolean checkPasses(Message state, Filter filter) {
-        FieldPath fieldPath = filter.getFieldPath();
-        Object actual = getValue(fieldPath, state);
+        Field field = Field.withPath(filter.getFieldPath());
+        Object actual = field.valueIn(state);
         Any requiredAsAny = filter.getValue();
         Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
         try {
@@ -208,8 +206,7 @@ abstract class UpdateHandler implements Logging {
                     e,
                     "Filter value `%s` cannot be properly compared to" +
                             " the message field `%s` of the class `%s`.",
-                    required, FieldPaths.toString(fieldPath), actual.getClass()
-                                                                    .getName()
+                    required, field, actual.getClass().getName()
             );
         }
     }
