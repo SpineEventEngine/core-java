@@ -74,8 +74,8 @@ final class ConfigurationChangeObserver
      * types.
      *
      * <p>If the request originates from a previously unknown Bounded Context,
-     * {@linkplain IntegrationBus#introduceSelf() publishes} the needs of current context,
-     * since they may be unknown to the new context.
+     * {@linkplain IntegrationBus#notifyOthers() publishes} the types requested by the current
+     * Context, since they may be unknown to the new Context.
      *
      * @param value
      *         {@link RequestForExternalMessages} form another Bounded Context
@@ -89,7 +89,7 @@ final class ConfigurationChangeObserver
         clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
         if (!knownContexts.contains(origin)) {
             knownContexts.add(origin);
-            integrationBus.introduceSelf();
+            integrationBus.notifyOthers();
         }
     }
 

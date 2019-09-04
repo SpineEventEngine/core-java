@@ -20,9 +20,9 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
@@ -38,6 +38,7 @@ import java.util.function.Predicate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static io.spine.server.model.MethodScan.findMethodsBy;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -57,6 +58,7 @@ public final class HandlerMap<M extends MessageClass<?>,
                               H extends HandlerMethod<?, M, ?, R>>
         implements Serializable, Logging {
 
+    private static final Joiner METHOD_LIST_JOINER = Joiner.on(System.lineSeparator() + ',');
     private static final long serialVersionUID = 0L;
 
     private final ImmutableSetMultimap<DispatchKey, H> map;
@@ -166,8 +168,8 @@ public final class HandlerMap<M extends MessageClass<?>,
         // If we have a handler with origin type, use the key. Otherwise, find handlers only
         // by the first parameter.
         DispatchKey presentKey = map.containsKey(key)
-                                     ? key
-                                     : new DispatchKey(messageClass.value(), null, null);
+                                 ? key
+                                 : new DispatchKey(messageClass.value(), null, null);
         return handlersOf(presentKey);
     }
 
@@ -188,7 +190,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      */
     public H handlerOf(M messageClass, MessageClass originClass) {
         ImmutableSet<H> methods = handlersOf(messageClass, originClass);
-        return checkSingle(methods, messageClass);
+        return singleMethod(methods, messageClass);
     }
 
     /**
@@ -218,19 +220,16 @@ public final class HandlerMap<M extends MessageClass<?>,
      */
     public H handlerOf(M messageClass) {
         ImmutableSet<H> methods = handlersOf(messageClass);
-        return checkSingle(methods, messageClass);
+        return singleMethod(methods, messageClass);
     }
 
-    private H checkSingle(Collection<H> handlers, M targetType) {
-        int count = handlers.size();
-        if (count != 1) {
-            throw wrongMethodCount(handlers, targetType);
-        }
-        H handler = Iterables.getOnlyElement(handlers);
+    private H singleMethod(Collection<H> handlers, M targetType) {
+        checkSingle(handlers, targetType);
+        H handler = getOnlyElement(handlers);
         return handler;
     }
 
-    private IllegalStateException wrongMethodCount(Collection<H> handlers, M targetType) {
+    private void checkSingle(Collection<H> handlers, M targetType) {
         int count = handlers.size();
         if (count == 0) {
             _error().log("No handler method found for the type `%s`.", targetType);
@@ -238,7 +237,7 @@ public final class HandlerMap<M extends MessageClass<?>,
                     "Unexpected number of handlers for messages of class %s: %d.%n%s",
                     targetType, count, handlers
             );
-        } else {
+        } else if (count > 1) {
             /*
               The map should have found all the duplicates during construction.
               This is a fail-safe execution branch which ensures that no changes in the `HandlerMap`
@@ -246,8 +245,8 @@ public final class HandlerMap<M extends MessageClass<?>,
             */
             _error().log(
                     "There are %d handler methods found for the type `%s`." +
-                            "Expected only one. Model is corrupt.",
-                    count, targetType
+                            "Please remove all but one method:%n%s",
+                    count, targetType, METHOD_LIST_JOINER.join(handlers)
             );
             throw new DuplicateHandlerMethodError(handlers);
         }

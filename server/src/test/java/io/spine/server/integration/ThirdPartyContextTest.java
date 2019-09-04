@@ -107,7 +107,7 @@ class ThirdPartyContextTest {
                 .vBuild();
         ThirdPartyContext calendar = ThirdPartyContext.multitenant("Calendar");
         assertThrows(IllegalArgumentException.class,
-                     () -> calendar.emittedEvent(noTenantContext, GivenEvent.message()));
+                     () -> calendar.emittedEvent(GivenEvent.message(), noTenantContext));
     }
 
     @Test
@@ -121,7 +121,7 @@ class ThirdPartyContextTest {
                 .vBuild();
         ThirdPartyContext calendar = ThirdPartyContext.singleTenant("Notes");
         assertThrows(IllegalArgumentException.class,
-                     () -> calendar.emittedEvent(actorWithTenant, GivenEvent.message()));
+                     () -> calendar.emittedEvent(GivenEvent.message(), actorWithTenant));
     }
 
     @Test
@@ -244,7 +244,7 @@ class ThirdPartyContextTest {
 
     private static void postForSingleTenant(UserId actor, EventMessage event) {
         try (ThirdPartyContext uploads = ThirdPartyContext.singleTenant("Imports")) {
-            uploads.emittedEvent(actor, event);
+            uploads.emittedEvent(event, actor);
         } catch (Exception e) {
             fail(e);
         }
@@ -258,7 +258,7 @@ class ThirdPartyContextTest {
                     .setTenantId(tenantId)
                     .setTimestamp(currentTime())
                     .vBuild();
-            uploads.emittedEvent(actorContext, event);
+            uploads.emittedEvent(event, actorContext);
         } catch (Exception e) {
             fail(e);
         }

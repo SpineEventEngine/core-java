@@ -19,16 +19,19 @@
  */
 package io.spine.server.model;
 
+import com.google.common.base.Joiner;
+
 import java.util.Collection;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 
 /**
  * Indicates that more than one handling method for the same message class are present
  * in the declaring class.
  */
 public final class DuplicateHandlerMethodError extends ModelError {
+
+    private static final Joiner METHOD_JOINER = Joiner.on(", ");
 
     private static final long serialVersionUID = 0L;
 
@@ -45,8 +48,6 @@ public final class DuplicateHandlerMethodError extends ModelError {
     DuplicateHandlerMethodError(Collection<? extends HandlerMethod<?, ?, ?, ?>> handlers) {
         super(format("Handler methods %s are clashing.%n" +
                              "Only one of them should handle this message type.",
-                     handlers.stream()
-                             .map(Object::toString)
-                             .collect(joining(", "))));
+                     METHOD_JOINER.join(handlers)));
     }
 }

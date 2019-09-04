@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.server.event.React;
 import io.spine.server.model.ParameterSpec;
@@ -33,13 +32,12 @@ import java.util.Optional;
 /**
  * The signature of {@link EventReactorMethod}.
  */
-@Internal
-public final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
+final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
     private static final ImmutableSet<Class<?>>
             RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
 
-    public EventReactorSignature() {
+    EventReactorSignature() {
         super(React.class);
     }
 
