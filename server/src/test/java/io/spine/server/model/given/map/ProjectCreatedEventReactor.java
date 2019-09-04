@@ -18,38 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.given.map;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.annotation.Internal;
-import io.spine.base.EventMessage;
 import io.spine.server.event.React;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
-
-import java.lang.reflect.Method;
-import java.util.Optional;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectStarred;
 
 /**
- * The signature of {@link EventReactorMethod}.
+ * This class is not valid because it declares two event reactors which accept the same event type.
  */
-@Internal
-public final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
+public class ProjectCreatedEventReactor {
 
-    private static final ImmutableSet<Class<?>>
-            RETURN_TYPES = ImmutableSet.of(EventMessage.class, Iterable.class, Optional.class);
-
-    public EventReactorSignature() {
-        super(React.class);
-    }
-
-    @Override
-    protected ImmutableSet<Class<?>> returnTypes() {
-        return RETURN_TYPES;
-    }
-
-    @Override
-    public EventReactorMethod create(Method method, ParameterSpec<EventEnvelope> params) {
-        return new EventReactorMethod(method, params);
+    @React
+    ProjectStarred on(ProjectCreated cmd) {
+        return ProjectStarred.getDefaultInstance();
     }
 }

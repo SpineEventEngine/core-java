@@ -35,8 +35,8 @@ import io.spine.server.integration.given.DocumentAggregate;
 import io.spine.server.integration.given.DocumentRepository;
 import io.spine.server.integration.given.EditHistoryProjection;
 import io.spine.server.integration.given.EditHistoryRepository;
-import io.spine.server.model.Nothing;
 import io.spine.server.tenant.TenantAwareRunner;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -107,7 +107,7 @@ class ThirdPartyContextTest {
                 .vBuild();
         ThirdPartyContext calendar = ThirdPartyContext.multitenant("Calendar");
         assertThrows(IllegalArgumentException.class,
-                     () -> calendar.emittedEvent(noTenantContext, Nothing.getDefaultInstance()));
+                     () -> calendar.emittedEvent(noTenantContext, GivenEvent.message()));
     }
 
     @Test
@@ -121,7 +121,7 @@ class ThirdPartyContextTest {
                 .vBuild();
         ThirdPartyContext calendar = ThirdPartyContext.singleTenant("Notes");
         assertThrows(IllegalArgumentException.class,
-                     () -> calendar.emittedEvent(actorWithTenant, Nothing.getDefaultInstance()));
+                     () -> calendar.emittedEvent(actorWithTenant, GivenEvent.message()));
     }
 
     @Test

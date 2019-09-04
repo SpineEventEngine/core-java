@@ -24,20 +24,19 @@ import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.event.EventFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.BoundedContextBuilder.notStoringEvents;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
- * An external upstream system which is not implemented in Spine.
+ * An external non-Spine based upstream system.
  *
  * <p>{@code ThirdPartyContext} helps to represent an external system as a Bounded Context. Events
  * which occur in the external system are converted into domain events of the user's
@@ -61,10 +60,9 @@ public final class ThirdPartyContext implements AutoCloseable {
      * Creates a new single-tenant instance of {@code ThirdPartyContext} with the given name.
      *
      * @param name
-     *         name of the third-party system
+     *         name of the Bounded Context representing a part of a third-party system
      */
     public static ThirdPartyContext singleTenant(String name) {
-        checkNotNull(name);
         return newContext(name, false);
     }
 
@@ -72,17 +70,17 @@ public final class ThirdPartyContext implements AutoCloseable {
      * Creates a new multitenant instance of {@code ThirdPartyContext} with the given name.
      *
      * @param name
-     *         name of the third-party system
+     *         name of the Bounded Context representing a part of a third-party system
      */
     public static ThirdPartyContext multitenant(String name) {
-        checkNotNull(name);
         return newContext(name, true);
     }
 
     private static ThirdPartyContext newContext(String name, boolean multitenant) {
+        checkNotEmptyOrBlank(name);
         BoundedContext context = notStoringEvents(name, multitenant).build();
         context.integrationBus()
-               .notifyOfCurrentNeeds();
+               .introduceSelf();
         return new ThirdPartyContext(context);
     }
 
@@ -111,23 +109,8 @@ public final class ThirdPartyContext implements AutoCloseable {
         checkNotNull(eventMessage);
         checkTenant(actorContext, eventMessage);
 
-        EventId id = EventId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
-        EventContext eventContext = EventContext
-                .newBuilder()
-                .setProducerId(producerId)
-                .setTimestamp(actorContext.getTimestamp())
-                .setImportContext(actorContext)
-                .setExternal(true)
-                .vBuild();
-        Event event = Event
-                .newBuilder()
-                .setId(id)
-                .setContext(eventContext)
-                .setMessage(pack(eventMessage))
-                .vBuild();
+        EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
+        Event event = eventFactory.createEvent(eventMessage, null);
         context.eventBus()
                .post(event);
     }

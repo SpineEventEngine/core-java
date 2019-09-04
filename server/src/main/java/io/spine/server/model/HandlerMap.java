@@ -224,24 +224,32 @@ public final class HandlerMap<M extends MessageClass<?>,
     private H checkSingle(Collection<H> handlers, M targetType) {
         int count = handlers.size();
         if (count != 1) {
-            logWrongMethodCount(count, targetType);
-            throw newIllegalStateException(
-                    "Unexpected number of handlers for messages of class %s: %s.%n%s",
-                    targetType, count, handlers
-            );
+            throw wrongMethodCount(handlers, targetType);
         }
         H handler = Iterables.getOnlyElement(handlers);
         return handler;
     }
 
-    private void logWrongMethodCount(int count, M targetType) {
+    private IllegalStateException wrongMethodCount(Collection<H> handlers, M targetType) {
+        int count = handlers.size();
         if (count == 0) {
             _error().log("No handler method found for the type `%s`.", targetType);
+            throw newIllegalStateException(
+                    "Unexpected number of handlers for messages of class %s: %d.%n%s",
+                    targetType, count, handlers
+            );
         } else {
+            /*
+              The map should have found all the duplicates during construction.
+              This is a fail-safe execution branch which ensures that no changes in the `HandlerMap`
+              implementation corrupt the model.
+            */
             _error().log(
-                    "There are %d handler methods found for the type `%s`. Expected only one.",
+                    "There are %d handler methods found for the type `%s`." +
+                            "Expected only one. Model is corrupt.",
                     count, targetType
             );
+            throw new DuplicateHandlerMethodError(handlers);
         }
     }
 
