@@ -21,11 +21,11 @@
 package io.spine.server.model;
 
 import io.spine.server.command.model.CommandHandlerSignature;
-import io.spine.server.event.model.EventReactorSignature;
 import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DuplicateCommandHandlers;
-import io.spine.server.model.given.map.ProjectCreatedEventReactor;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
+import io.spine.server.model.given.method.OneParamSignature;
+import io.spine.server.model.given.method.StubHandler;
 import io.spine.server.type.EventClass;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
@@ -86,8 +86,8 @@ class HandlerMapTest {
     @Test
     @DisplayName("fail if no method found")
     void failIfNotFound() {
-        HandlerMap<EventClass, ?, ?> map = create(ProjectCreatedEventReactor.class,
-                                                  new EventReactorSignature());
+        HandlerMap<EventClass, ?, ?> map = create(StubHandler.class,
+                                                  new OneParamSignature());
         assertThrows(IllegalStateException.class,
                      () -> map.handlerOf(EventClass.from(ProjectStarred.class)));
     }
