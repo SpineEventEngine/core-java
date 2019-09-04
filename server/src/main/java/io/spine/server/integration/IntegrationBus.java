@@ -283,12 +283,13 @@ public class IntegrationBus
     }
 
     /**
-     * Notifies other parts of the application about the types requested by this integration bus.
+     * Notifies other Bounded Contexts of the application about the types requested by this Context.
      *
-     * <p>Sends out an instance of {@linkplain RequestForExternalMessages
-     * request for external messages} for that purpose.
+     * <p>The {@code IntegrationBus} sends a {@link RequestForExternalMessages}. The request
+     * triggers other Contexts to send their requests. As the result, all the Contexts know about
+     * the needs of all the Contexts.
      */
-    void notifyOfCurrentNeeds() {
+    void introduceSelf() {
         configurationBroadcast.send();
     }
 

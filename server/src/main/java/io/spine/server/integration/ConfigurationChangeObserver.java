@@ -75,7 +75,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
      * types.
      *
      * <p>If the request originates from a previously unknown Bounded Context,
-     * {@linkplain IntegrationBus#notifyOfCurrentNeeds() publishes} the needs of current context,
+     * {@linkplain IntegrationBus#introduceSelf() publishes} the needs of current context,
      * since they may be unknown to the new context.
      *
      * @param value {@link RequestForExternalMessages} form another Bounded Context
@@ -89,7 +89,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
         clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
         if (!knownContexts.contains(origin)) {
             knownContexts.add(origin);
-            integrationBus.notifyOfCurrentNeeds();
+            integrationBus.introduceSelf();
         }
     }
 
