@@ -21,7 +21,6 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.util.Durations;
 import io.spine.server.NodeId;
@@ -32,6 +31,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.generateNodeId;
 import static io.spine.server.delivery.given.DeliveryTestEnv.newShardIndex;
@@ -59,9 +59,9 @@ public abstract class ShardedWorkRegistryTest {
         Optional<ShardProcessingSession> session = registry.pickUp(index, node);
         ShardProcessingSession actualSession = assertSession(session, index);
 
-        Truth8.assertThat(registry.pickUp(index, node))
+        assertThat(registry.pickUp(index, node))
               .isEmpty();
-        Truth8.assertThat(registry.pickUp(index, generateNodeId()))
+        assertThat(registry.pickUp(index, generateNodeId()))
               .isEmpty();
 
         actualSession.complete();
@@ -76,7 +76,6 @@ public abstract class ShardedWorkRegistryTest {
 
         int totalShards = 35;
 
-        ImmutableSet.Builder<NodeId> nodeBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ShardIndex> indexBuilder = ImmutableSet.builder();
         rangeClosed(1, totalShards)
                 .forEach((i) -> {
@@ -85,10 +84,8 @@ public abstract class ShardedWorkRegistryTest {
 
                     Optional<ShardProcessingSession> session = registry.pickUp(newIndex, newNode);
                     assertSession(session, newIndex);
-                    nodeBuilder.add(newNode);
                     indexBuilder.add(newIndex);
                 });
-        ImmutableSet<NodeId> nodes = nodeBuilder.build();
         ImmutableSet<ShardIndex> indexes = indexBuilder.build();
 
         Iterable<ShardIndex> releasedIndexes =
@@ -108,7 +105,6 @@ public abstract class ShardedWorkRegistryTest {
             NodeId anotherNode = generateNodeId();
             Optional<ShardProcessingSession> newSession = registry.pickUp(shardIndex, anotherNode);
             assertSession(newSession, shardIndex);
-
         }
     }
 
@@ -116,7 +112,7 @@ public abstract class ShardedWorkRegistryTest {
     @CanIgnoreReturnValue
     private static ShardProcessingSession
     assertSession(Optional<ShardProcessingSession> session, ShardIndex index) {
-        Truth8.assertThat(session)
+        assertThat(session)
               .isPresent();
         ShardProcessingSession actualSession = session.get();
         assertThat(actualSession.shardIndex()).isEqualTo(index);
