@@ -34,7 +34,7 @@ import io.spine.server.route.EventRoute;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static io.spine.system.server.SystemCommandFactory.requestFactory;
+import static io.spine.system.server.SystemRequestFactory.requestFactory;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**

@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.CommandFactory;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,27 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.system.server.DefaultSystemWriteSide.SYSTEM_USER;
 
 /**
- * Creates a command factory for producing commands under the context of specified tenant.
+ * Creates an actor request factory for producing requests under the context of specified tenant.
  */
-final class SystemCommandFactory {
+final class SystemRequestFactory {
 
     private static final ActorRequestFactory SINGLE_TENANT =
             newFactoryFor(TenantId.getDefaultInstance());
 
     /** Prevents instantiation of this utility class. */
-    private SystemCommandFactory() {
-    }
-
-    /**
-     * Obtains a {@code CommandFactory} for creating system commands.
-     *
-     * @param multitenant
-     *        pass {@code true} if the System Context works in the multi-tenant mode,
-     *        {@code false} otherwise
-     */
-    static CommandFactory newInstance(boolean multitenant) {
-        ActorRequestFactory requestFactory = requestFactory(multitenant);
-        return requestFactory.command();
+    private SystemRequestFactory() {
     }
 
     static ActorRequestFactory requestFactory(boolean multitenant) {

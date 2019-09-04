@@ -18,22 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server.integration.given;
 
-def final SPINE_VERSION = '1.0.6-SNAPSHOT'
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.integration.DocumentId;
+import io.spine.server.integration.OpenOfficeDocumentUploaded;
+import io.spine.server.integration.PaperDocumentScanned;
+import io.spine.server.route.EventRouting;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+import static io.spine.server.route.EventRoute.withId;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.3'
+public class DocumentRepository extends AggregateRepository<DocumentId, DocumentAggregate> {
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.3'
+    @Override
+    protected void setupImportRouting(EventRouting<DocumentId> routing) {
+        super.setupImportRouting(routing);
+        routing.route(PaperDocumentScanned.class, (message, context) -> withId(message.getId()));
+    }
+
+    @Override
+    protected void setupEventRouting(EventRouting<DocumentId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(OpenOfficeDocumentUploaded.class,
+                      (message, context) -> withId(message.getId()));
+    }
 }

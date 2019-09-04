@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package spine.test.server.integration;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration";
+option java_outer_classname = "DocCommandsProto";
+option java_multiple_files = true;
+
+import "spine/test/integration/docs.proto";
+
+message CreateDocument {
+
+    DocumentId id = 1;
+}
+
+message EditText {
+
+    DocumentId id = 1;
+
+    uint32 position = 2;
+
+    uint32 chars_to_delete = 3;
+
+    string new_text = 4;
+}

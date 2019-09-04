@@ -20,6 +20,7 @@
 
 package io.spine.testing.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -42,6 +43,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 /**
  * The factory or producing events for tests.
  */
+@VisibleForTesting
 @CheckReturnValue
 public class TestEventFactory extends EventFactory {
 

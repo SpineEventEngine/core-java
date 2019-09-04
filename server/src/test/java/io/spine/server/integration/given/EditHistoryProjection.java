@@ -18,22 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
+package io.spine.server.integration.given;
 
-def final SPINE_VERSION = '1.0.6-SNAPSHOT'
+import io.spine.core.Subscribe;
+import io.spine.server.integration.DocumentId;
+import io.spine.server.integration.Edit;
+import io.spine.server.integration.EditHistory;
+import io.spine.server.integration.TextEdited;
+import io.spine.server.integration.UserDeleted;
+import io.spine.server.projection.Projection;
 
-ext {
-    // The version of the modules in this project.
-    versionToPublish = SPINE_VERSION
+import java.util.ArrayList;
+import java.util.List;
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '1.0.3'
+public class EditHistoryProjection
+        extends Projection<DocumentId, EditHistory, EditHistory.Builder> {
 
-    // Depend on `time` for `ZoneId`, `ZoneOffset` and other date/time types and utilities.
-    spineTimeVersion = '1.0.3'
+    @Subscribe
+    void on(TextEdited event) {
+        builder()
+                .addEdit(event.getEdit());
+    }
+
+    @Subscribe(external = true)
+    void on(UserDeleted event) {
+        List<Edit> list = new ArrayList<>(builder().getEditList());
+        list.removeIf(edit -> edit.getEditor().equals(event.getUser()));
+        builder()
+                .clearEdit()
+                .addAllEdit(list);
+    }
 }

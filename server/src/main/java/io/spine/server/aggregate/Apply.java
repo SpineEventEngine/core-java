@@ -60,4 +60,3 @@ public @interface Apply {
      */
     boolean allowImport() default false;
 }
-
