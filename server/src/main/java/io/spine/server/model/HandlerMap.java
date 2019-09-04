@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
@@ -57,6 +58,7 @@ public final class HandlerMap<M extends MessageClass<?>,
                               H extends HandlerMethod<?, M, ?, R>>
         implements Serializable, Logging {
 
+    private static final Joiner METHOD_LIST_JOINER = Joiner.on(System.lineSeparator() + ',');
     private static final long serialVersionUID = 0L;
 
     private final ImmutableSetMultimap<DispatchKey, H> map;
@@ -166,8 +168,8 @@ public final class HandlerMap<M extends MessageClass<?>,
         // If we have a handler with origin type, use the key. Otherwise, find handlers only
         // by the first parameter.
         DispatchKey presentKey = map.containsKey(key)
-                                     ? key
-                                     : new DispatchKey(messageClass.value(), null, null);
+                                 ? key
+                                 : new DispatchKey(messageClass.value(), null, null);
         return handlersOf(presentKey);
     }
 
@@ -243,8 +245,8 @@ public final class HandlerMap<M extends MessageClass<?>,
             */
             _error().log(
                     "There are %d handler methods found for the type `%s`." +
-                            "Expected only one. Model is corrupt.",
-                    count, targetType
+                            "Expected only one method, but got:%n%s",
+                    count, targetType, METHOD_LIST_JOINER.join(handlers)
             );
             throw new DuplicateHandlerMethodError(handlers);
         }
