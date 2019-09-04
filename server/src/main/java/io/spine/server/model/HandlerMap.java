@@ -245,7 +245,7 @@ public final class HandlerMap<M extends MessageClass<?>,
             */
             _error().log(
                     "There are %d handler methods found for the type `%s`." +
-                            "Expected only one method, but got:%n%s",
+                            "Please remove all but one method:%n%s",
                     count, targetType, METHOD_LIST_JOINER.join(handlers)
             );
             throw new DuplicateHandlerMethodError(handlers);
