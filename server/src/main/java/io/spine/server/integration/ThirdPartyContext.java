@@ -80,7 +80,7 @@ public final class ThirdPartyContext implements AutoCloseable {
         checkNotEmptyOrBlank(name);
         BoundedContext context = notStoringEvents(name, multitenant).build();
         context.integrationBus()
-               .introduceSelf();
+               .notifyOthers();
         return new ThirdPartyContext(context);
     }
 

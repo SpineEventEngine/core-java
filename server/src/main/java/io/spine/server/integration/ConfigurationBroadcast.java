@@ -38,7 +38,7 @@ final class ConfigurationBroadcast {
     private final BoundedContextName contextName;
     private final Publisher needsPublisher;
 
-    private ImmutableSet<ExternalMessageType> knownNeeds = ImmutableSet.of();
+    private ImmutableSet<ExternalMessageType> requestedTypes = ImmutableSet.of();
 
     ConfigurationBroadcast(BoundedContextName contextName, Publisher publisher) {
         this.contextName = checkNotNull(contextName);
@@ -48,16 +48,15 @@ final class ConfigurationBroadcast {
     /**
      * Notifies other Bounded contexts about a change in the requested messages.
      *
-     * <p>If the given {@code needs} are the same as previous ones, i.e. the needs did not change,
-     * the request is not sent.
+     * <p>If the given {@code types} are the same as previous ones, the request is not sent.
      *
-     * @param needs
-     *         the new needs of current context
+     * @param types
+     *         the types
      */
-    synchronized void onNeedsUpdated(ImmutableSet<ExternalMessageType> needs) {
-        checkNotNull(needs);
-        if (!knownNeeds.equals(needs)) {
-            knownNeeds = needs;
+    synchronized void onTypesChanged(ImmutableSet<ExternalMessageType> types) {
+        checkNotNull(types);
+        if (!requestedTypes.equals(types)) {
+            requestedTypes = types;
             send();
         }
     }
@@ -68,7 +67,7 @@ final class ConfigurationBroadcast {
     synchronized void send() {
         RequestForExternalMessages request = RequestForExternalMessages
                 .newBuilder()
-                .addAllRequestedMessageType(knownNeeds)
+                .addAllRequestedMessageType(requestedTypes)
                 .buildPartial();
         ExternalMessage externalMessage = ExternalMessages.of(request, contextName);
         needsPublisher.publish(pack(newUuid()), externalMessage);
