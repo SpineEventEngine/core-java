@@ -74,13 +74,15 @@ public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
         ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
 
         for (ShardSessionRecord record : workByNode.values()) {
-            Timestamp whenPicked = record.getWhenLastPicked();
-            Duration elapsed = between(whenPicked, currentTime());
+            if (record.hasPickedBy()) {
+                Timestamp whenPicked = record.getWhenLastPicked();
+                Duration elapsed = between(whenPicked, currentTime());
 
-            int comparison = Durations.compare(elapsed, inactivityPeriod);
-            if (comparison >= 0) {
-                clearNode(record);
-                resultBuilder.add(record.getIndex());
+                int comparison = Durations.compare(elapsed, inactivityPeriod);
+                if (comparison >= 0) {
+                    clearNode(record);
+                    resultBuilder.add(record.getIndex());
+                }
             }
         }
         return resultBuilder.build();
