@@ -27,7 +27,6 @@ import io.spine.server.transport.Subscriber;
  *
  * <p>To use only in scope of the same JVM as {@linkplain InMemoryPublisher publishers}.
  */
-
 class InMemorySubscriber extends Subscriber {
 
     InMemorySubscriber(ChannelId id) {
