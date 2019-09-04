@@ -35,6 +35,9 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.BoundedContextBuilder.notStoringEvents;
+import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
+import static io.spine.validate.Validate.checkNotDefault;
+import static io.spine.validate.Validate.checkValid;
 
 /**
  * An external non-Spine based upstream system.
@@ -61,10 +64,9 @@ public final class ThirdPartyContext implements AutoCloseable {
      * Creates a new single-tenant instance of {@code ThirdPartyContext} with the given name.
      *
      * @param name
-     *         name of the third-party system
+     *         name of the Bounded Context representing a part of a third-party system
      */
     public static ThirdPartyContext singleTenant(String name) {
-        checkNotNull(name);
         return newContext(name, false);
     }
 
@@ -72,14 +74,14 @@ public final class ThirdPartyContext implements AutoCloseable {
      * Creates a new multitenant instance of {@code ThirdPartyContext} with the given name.
      *
      * @param name
-     *         name of the third-party system
+     *         name of the Bounded Context representing a part of a third-party system
      */
     public static ThirdPartyContext multitenant(String name) {
-        checkNotNull(name);
         return newContext(name, true);
     }
 
     private static ThirdPartyContext newContext(String name, boolean multitenant) {
+        checkNotEmptyOrBlank(name);
         BoundedContext context = notStoringEvents(name, multitenant).build();
         context.integrationBus()
                .notifyOfCurrentNeeds();
@@ -109,6 +111,9 @@ public final class ThirdPartyContext implements AutoCloseable {
     public void emittedEvent(ActorContext actorContext, EventMessage eventMessage) {
         checkNotNull(actorContext);
         checkNotNull(eventMessage);
+        checkValid(actorContext);
+        checkNotDefault(eventMessage);
+        checkValid(eventMessage);
         checkTenant(actorContext, eventMessage);
 
         EventId id = EventId
