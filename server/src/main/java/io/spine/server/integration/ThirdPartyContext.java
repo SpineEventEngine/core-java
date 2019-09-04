@@ -99,12 +99,12 @@ public final class ThirdPartyContext implements AutoCloseable {
      * <p>The caller is required to supply the tenant ID via the {@code ActorContext.tenant_id} if
      * this Context is multitenant.
      *
-     * @param actorContext
-     *         the info about the actor, a user or a software component, who emits the event
      * @param eventMessage
      *         the event
+     * @param actorContext
+     *         the info about the actor, a user or a software component, who emits the event
      */
-    public void emittedEvent(ActorContext actorContext, EventMessage eventMessage) {
+    public void emittedEvent(EventMessage eventMessage, ActorContext actorContext) {
         checkNotNull(actorContext);
         checkNotNull(eventMessage);
         checkTenant(actorContext, eventMessage);
@@ -125,12 +125,12 @@ public final class ThirdPartyContext implements AutoCloseable {
      * <p>This overload may only be used for single-tenant third-party contexts. If this Context is
      * multitenant, this method throws an exception.
      *
-     * @param userId
-     *         the ID of the actor, a user or a software component, who emits the event
      * @param eventMessage
      *         the event
+     * @param userId
+     *         the ID of the actor, a user or a software component, who emits the event
      */
-    public void emittedEvent(UserId userId, EventMessage eventMessage) {
+    public void emittedEvent(EventMessage eventMessage, UserId userId) {
         checkNotNull(userId);
         checkNotNull(eventMessage);
         ActorContext context = ActorContext
@@ -138,7 +138,7 @@ public final class ThirdPartyContext implements AutoCloseable {
                 .setActor(userId)
                 .setTimestamp(currentTime())
                 .vBuild();
-        emittedEvent(context, eventMessage);
+        emittedEvent(eventMessage, context);
     }
 
     private void checkTenant(ActorContext actorContext, EventMessage event) {
