@@ -20,101 +20,63 @@
 
 package io.spine.server.delivery.memory;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Durations;
 import io.spine.server.NodeId;
+import io.spine.server.delivery.AbstractWorkRegistry;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.protobuf.util.Timestamps.between;
-import static io.spine.base.Time.currentTime;
+import static com.google.common.collect.Iterators.unmodifiableIterator;
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * An in-memory implementation of {@link ShardedWorkRegistry ShardedWorkRegistry}.
+ *
+ * @implNote This implementation synchronizes methods of {@code AbstractWorkRegistry} and
+ *         uses a concurrent collection in order to guarantee thread safety.
  */
-public class InMemoryShardedWorkRegistry implements ShardedWorkRegistry {
+public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
 
-    private final Map<ShardIndex, ShardSessionRecord> workByNode =
-            Maps.newConcurrentMap();
+    private final Map<ShardIndex, ShardSessionRecord> workByNode = newConcurrentMap();
 
     @Override
     public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
-        if (workByNode.containsKey(index)) {
-            ShardSessionRecord existingRecord = workByNode.get(index);
-            if (existingRecord.hasPickedBy()) {
-                return Optional.empty();
-            } else {
-                ShardSessionRecord updatedRecord = updatePickedBy(existingRecord, nodeId);
-                return Optional.of(asSession(updatedRecord));
-            }
-        }
-        ShardSessionRecord record =
-                ShardSessionRecord
-                        .newBuilder()
-                        .setIndex(index)
-                        .setPickedBy(nodeId)
-                        .setWhenLastPicked(currentTime())
-                        .vBuild();
-        workByNode.put(index, record);
-        return Optional.of(asSession(record));
+        return super.pickUp(index, nodeId);
     }
 
     @Override
     public synchronized Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
-        ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
-
-        for (ShardSessionRecord record : workByNode.values()) {
-            if (record.hasPickedBy()) {
-                Timestamp whenPicked = record.getWhenLastPicked();
-                Duration elapsed = between(whenPicked, currentTime());
-
-                int comparison = Durations.compare(elapsed, inactivityPeriod);
-                if (comparison >= 0) {
-                    clearNode(record);
-                    resultBuilder.add(record.getIndex());
-                }
-            }
-        }
-        return resultBuilder.build();
+        return super.releaseExpiredSessions(inactivityPeriod);
     }
 
-    private void clearNode(ShardSessionRecord record) {
-        updatePickedBy(record, null);
+    @Override
+    protected synchronized void clearNode(ShardSessionRecord session) {
+        super.clearNode(session);
     }
 
-    /**
-     * Updates the {@code picked_by} field or clears it if {@code null} is passed.
-     *
-     * @return the updated record value.
-     * @implNote As the field is only updated, the record message isn't validated. It allows
-     *         to save some CPU cycles.
-     */
-    @SuppressWarnings("ResultOfMethodCallIgnored")      // `Builder` methods called in `if-else`.
-    @CanIgnoreReturnValue
-    private ShardSessionRecord updatePickedBy(ShardSessionRecord record,
-                                              @Nullable NodeId nodeId) {
-        ShardSessionRecord.Builder builder = record.toBuilder();
-        if (nodeId == null) {
-            builder.clearPickedBy();
-        } else {
-            builder.setPickedBy(nodeId);
-        }
-        ShardSessionRecord updatedRecord = builder.build();
-        workByNode.put(record.getIndex(), updatedRecord);
-        return updatedRecord;
+    @Override
+    protected Iterator<ShardSessionRecord> allRecords() {
+        return unmodifiableIterator(workByNode.values().iterator());
     }
 
-    private ShardProcessingSession asSession(ShardSessionRecord record) {
+    @Override
+    protected void write(ShardSessionRecord session) {
+        workByNode.put(session.getIndex(), session);
+    }
+
+    @Override
+    protected Optional<ShardSessionRecord> find(ShardIndex index) {
+        return Optional.ofNullable(workByNode.get(index));
+    }
+
+    @Override
+    protected ShardProcessingSession asSession(ShardSessionRecord record) {
         return new InMemoryShardSession(record);
     }
 
