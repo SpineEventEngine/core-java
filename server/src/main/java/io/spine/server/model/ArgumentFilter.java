@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
@@ -29,13 +30,18 @@ import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
 import static io.spine.string.Stringifiers.fromString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -70,20 +76,66 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      */
     public static ArgumentFilter createFilter(Method method) {
         Subscribe annotation = method.getAnnotation(Subscribe.class);
-        ByField byFieldFilter = annotation.filter();
-        String rawFieldPath = byFieldFilter.path();
-        if (rawFieldPath.isEmpty()) {
-            return acceptingAll();
+        checkAnnotated(method, annotation);
+        @Nullable Where where = filterAnnotationOf(method);
+        @Nullable ByField byField = annotation.filter();
+        boolean byFieldEmpty = byField.path().isEmpty();
+        String fieldPath;
+        String value;
+        if (where != null) {
+            fieldPath = where.field();
+            value = where.equals();
+            checkState(
+                    byFieldEmpty,
+                    "The subscriber method `%s()` has `@%s` and `@%s`" +
+                            " annotations at the same time." +
+                            " Please use only one, preferring `%s` because `%s` is deprecated.",
+                    method.getName(), ByField.class.getName(), Where.class.getName(),
+                    Where.class.getName(), ByField.class.getName()
+            );
+        } else {
+            if (byFieldEmpty) {
+                return acceptingAll();
+            }
+            fieldPath = byField.path();
+            value = byField.value();
         }
-        Field field = Field.parse(rawFieldPath);
-        Class<Message> firstParam = AbstractHandlerMethod.firstParamType(method);
-        Class<?> fieldType = field.findType(firstParam).orElseThrow(
+        Class<Message> paramType = firstParamType(method);
+        Field field = Field.parse(fieldPath);
+        Class<?> fieldType = field.findType(paramType).orElseThrow(
                 () -> newIllegalStateException(
-                        "The message with type `%s` does not have the field `%s`.",
-                        firstParam.getName(), field)
+                        "The message with the type `%s` does not have the field `%s`.",
+                        paramType.getName(), field)
         );
-        Object expectedValue = fromString(byFieldFilter.value(), fieldType);
+        Object expectedValue = fromString(value, fieldType);
         return acceptingOnly(field.path(), expectedValue);
+    }
+
+    private static @Nullable Where filterAnnotationOf(Method method) {
+        Parameter firstParam = firstParameterOf(method);
+        return firstParam.getAnnotation(Where.class);
+    }
+
+    private static Parameter firstParameterOf(Method method) {
+        Parameter[] parameters = method.getParameters();
+        checkArgument(parameters.length >= 1,
+                      "The method `%s.%s()` does not have parameters.",
+                      method.getDeclaringClass().getName(), method.getName());
+        return parameters[0];
+    }
+
+    private static void checkAnnotated(Method method, @Nullable Subscribe annotation) {
+        checkArgument(annotation != null,
+                      "The method `%s.%s()` must be annotated with `@%s`.",
+                      method.getDeclaringClass().getName(),
+                      method.getName(),
+                      Subscribe.class.getName()
+        );
+    }
+
+    @VisibleForTesting
+    @Nullable Object expectedValue() {
+        return expectedValue;
     }
 
     /**

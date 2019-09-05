@@ -1,0 +1,104 @@
+/*
+ * Copyright 2019, TeamDev. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.server.model;
+
+import com.google.common.testing.NullPointerTester;
+import io.spine.base.EventMessage;
+import io.spine.base.FieldPath;
+import io.spine.server.model.given.filter.BeanAdded;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.model.ArgumentFilter.createFilter;
+import static io.spine.server.model.given.filter.Bucket.everythingElse;
+import static io.spine.server.model.given.filter.Bucket.onlyBeans;
+import static io.spine.server.model.given.filter.Bucket.onlyPeas;
+import static io.spine.server.model.given.filter.Legume.BEAN;
+import static io.spine.server.model.given.filter.Legume.PEA;
+
+@DisplayName("`ArgumentFilter` should")
+class ArgumentFilterTest {
+
+    @Test
+    @DisplayName("pass null-tolerance check")
+    void nullTolerance() {
+        new NullPointerTester()
+                .setDefault(FieldPath.class, FieldPath.getDefaultInstance())
+                .testAllPublicStaticMethods(ArgumentFilter.class);
+    }
+
+    @Test
+    @DisplayName("create instance for `@Where` annotation")
+    void onWhere() {
+        ArgumentFilter filter = createFilter(onlyPeas());
+        assertThat(filter.acceptsAll())
+                .isFalse();
+        assertThat(filter.pathLength())
+                .isEqualTo(1);
+        assertThat(filter.expectedValue())
+                .isEqualTo(PEA);
+        assertThat(filter.test(peasAdded()))
+                .isTrue();
+        assertThat(filter.test(beansAdded()))
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("create instance for `@ByField` annotation")
+    void onByField() {
+        ArgumentFilter filter = createFilter(onlyBeans());
+        assertThat(filter.acceptsAll())
+                .isFalse();
+        assertThat(filter.pathLength())
+                .isEqualTo(1);
+        assertThat(filter.expectedValue())
+                .isEqualTo(BEAN);
+        assertThat(filter.test(beansAdded()))
+                .isTrue();
+        assertThat(filter.test(peasAdded()))
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("create empty filter if not annotated")
+    void emptyFilter() {
+        ArgumentFilter filter = createFilter(everythingElse());
+        assertThat(filter.acceptsAll())
+                .isTrue();
+        assertThat(filter.pathLength())
+                .isEqualTo(0);
+    }
+
+    private static EventMessage peasAdded() {
+        return BeanAdded
+                .newBuilder()
+                .setKind(PEA)
+                .build();
+    }
+
+    private static EventMessage beansAdded() {
+        return BeanAdded
+                .newBuilder()
+                .setKind(BEAN)
+                .build();
+    }
+}
