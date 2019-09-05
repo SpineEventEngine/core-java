@@ -23,7 +23,7 @@ package io.spine.server.model;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DupEventFilterValueWhere;
-import io.spine.server.model.given.map.DuplicatingCommandHandlers;
+import io.spine.server.model.given.map.DuplicateCommandHandlers;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
 import io.spine.server.model.given.method.OneParamSignature;
 import io.spine.server.model.given.method.StubHandler;
@@ -60,7 +60,7 @@ class HandlerMapTest {
         @DisplayName("duplicate message classes in handlers")
         void rejectDuplicateHandlers() {
             assertDuplicate(
-                    () -> create(DuplicatingCommandHandlers.class, new CommandHandlerSignature())
+                    () -> create(DuplicateCommandHandlers.class, new CommandHandlerSignature())
             );
         }
 
