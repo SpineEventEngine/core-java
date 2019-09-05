@@ -79,6 +79,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         ShardSessionRecord updatedRecord = record
                 .toBuilder()
                 .setPickedBy(nodeId)
+                .setWhenLastPicked(currentTime())
                 .build();
         write(updatedRecord);
         return updatedRecord;
