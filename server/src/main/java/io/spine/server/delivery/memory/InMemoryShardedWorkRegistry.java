@@ -28,9 +28,11 @@ import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.collect.Iterators.unmodifiableIterator;
 import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
@@ -59,8 +61,8 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
     }
 
     @Override
-    protected Iterable<ShardSessionRecord> allRecords() {
-        return workByNode.values();
+    protected Iterator<ShardSessionRecord> allRecords() {
+        return unmodifiableIterator(workByNode.values().iterator());
     }
 
     @Override

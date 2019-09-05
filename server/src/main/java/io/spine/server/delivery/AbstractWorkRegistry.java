@@ -27,8 +27,10 @@ import com.google.protobuf.util.Durations;
 import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
 
+import java.util.Iterator;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.between;
 import static io.spine.base.Time.currentTime;
 
@@ -44,6 +46,9 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
     public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+        checkNotNull(index);
+        checkNotNull(nodeId);
+
         Optional<ShardSessionRecord> record = find(index);
         if (record.isPresent()) {
             ShardSessionRecord existingRecord = record.get();
@@ -81,8 +86,9 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
     public Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
+        checkNotNull(inactivityPeriod);
         ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
-        for (ShardSessionRecord record : allRecords()) {
+        allRecords().forEachRemaining(record -> {
             if (record.hasPickedBy()) {
                 Timestamp whenPicked = record.getWhenLastPicked();
                 Duration elapsed = between(whenPicked, currentTime());
@@ -93,7 +99,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
                     resultBuilder.add(record.getIndex());
                 }
             }
-        }
+        });
         return resultBuilder.build();
     }
 
@@ -110,7 +116,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     /**
      * Obtains all the session records associated with this registry.
      */
-    protected abstract Iterable<ShardSessionRecord> allRecords();
+    protected abstract Iterator<ShardSessionRecord> allRecords();
 
     /**
      * Stores the given session.
