@@ -76,7 +76,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.8-SNAPSHOT</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -130,7 +130,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.8-SNAPSHOT</version>
     <scope>test</scope>
   </dependency>
   <dependency>
