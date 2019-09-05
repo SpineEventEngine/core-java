@@ -38,7 +38,7 @@ abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelo
 
     /**
      * This field is also is used by {@link SubscriberSignature} to avoid repeated scanning in
-     * the overriden {@link #paramSpecs()}.
+     * the overridden {@link #paramSpecs()}.
      */
     static final ImmutableSet<EventAcceptingMethodParams>
             PARAM_SPEC = ImmutableSet.copyOf(EventAcceptingMethodParams.values());

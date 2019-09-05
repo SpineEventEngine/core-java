@@ -25,8 +25,12 @@ import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DupEventFilterValueWhere;
 import io.spine.server.model.given.map.DuplicatingCommandHandlers;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
+import io.spine.server.model.given.method.OneParamSignature;
+import io.spine.server.model.given.method.StubHandler;
+import io.spine.server.type.EventClass;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
+import io.spine.test.event.ProjectStarred;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,9 +57,9 @@ class HandlerMapTest {
     class DuplicateHandler {
 
         @Test
-        @DisplayName("duplicating message classes in handlers")
+        @DisplayName("duplicate message classes in handlers")
         void rejectDuplicateHandlers() {
-            assertDuplication(
+            assertDuplicate(
                     () -> create(DuplicatingCommandHandlers.class, new CommandHandlerSignature())
             );
         }
@@ -63,13 +67,13 @@ class HandlerMapTest {
         @Test
         @DisplayName("the same value of the filtered event field (ByField)")
         void rejectFilterFieldDuplication() {
-            assertDuplication(() -> asProjectionClass(DupEventFilterValue.class));
+            assertDuplicate(() -> asProjectionClass(DupEventFilterValue.class));
         }
 
         @Test
         @DisplayName("the same value of the filtered event field (Where)")
         void rejectFilterFieldDuplicationWhere() {
-            assertDuplication(() -> asProjectionClass(DupEventFilterValueWhere.class));
+            assertDuplicate(() -> asProjectionClass(DupEventFilterValueWhere.class));
         }
 
         @Test
@@ -81,8 +85,17 @@ class HandlerMapTest {
             );
         }
 
-        void assertDuplication(Runnable runnable) {
+        void assertDuplicate(Runnable runnable) {
             assertThrows(DuplicateHandlerMethodError.class, runnable::run);
         }
+    }
+
+    @Test
+    @DisplayName("fail if no method found")
+    void failIfNotFound() {
+        HandlerMap<EventClass, ?, ?> map = create(StubHandler.class,
+                                                  new OneParamSignature());
+        assertThrows(IllegalStateException.class,
+                     () -> map.handlerOf(EventClass.from(ProjectStarred.class)));
     }
 }

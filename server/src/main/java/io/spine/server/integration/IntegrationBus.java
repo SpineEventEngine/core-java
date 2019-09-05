@@ -228,7 +228,7 @@ public class IntegrationBus
             Subscriber subscriber = subscriberHub.get(channelId);
             ExternalMessageObserver observer = observerFor(cls);
             subscriber.addObserver(observer);
-            notifyOfUpdatedNeeds();
+            notifyTypesChanged();
         }
     }
 
@@ -263,13 +263,13 @@ public class IntegrationBus
     }
 
     /**
-     * Notifies other parts of the application that this integration bus instance now requests
-     * for a different set of message types.
+     * Notifies other Bounded Contexts that this integration bus instance now requests a different
+     * set of message types.
      *
      * <p>Sends out an instance of {@linkplain RequestForExternalMessages
      * request for external messages} for that purpose.
      */
-    private void notifyOfUpdatedNeeds() {
+    private void notifyTypesChanged() {
         ImmutableSet<ExternalMessageType> needs = subscriberHub
                 .ids()
                 .stream()
@@ -279,16 +279,17 @@ public class IntegrationBus
                         .setWrapperTypeUrl(EVENT.value())
                         .buildPartial())
                 .collect(toImmutableSet());
-        configurationBroadcast.onNeedsUpdated(needs);
+        configurationBroadcast.onTypesChanged(needs);
     }
 
     /**
-     * Notifies other parts of the application about the types requested by this integration bus.
+     * Notifies other Bounded Contexts of the application about the types requested by this Context.
      *
-     * <p>Sends out an instance of {@linkplain RequestForExternalMessages
-     * request for external messages} for that purpose.
+     * <p>The {@code IntegrationBus} sends a {@link RequestForExternalMessages}. The request
+     * triggers other Contexts to send their requests. As the result, all the Contexts know about
+     * the needs of all the Contexts.
      */
-    void notifyOfCurrentNeeds() {
+    void notifyOthers() {
         configurationBroadcast.send();
     }
 
@@ -322,7 +323,7 @@ public class IntegrationBus
         super.close();
 
         configurationChangeObserver.close();
-        notifyOfUpdatedNeeds();
+        notifyTypesChanged();
 
         subscriberHub.close();
         publisherHub.close();

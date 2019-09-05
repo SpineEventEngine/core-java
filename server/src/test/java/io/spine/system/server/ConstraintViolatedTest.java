@@ -33,7 +33,6 @@ import io.spine.system.server.test.ValidatedId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.blackbox.SingleTenantBlackBoxContext;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,8 +44,6 @@ class ConstraintViolatedTest {
 
     @MuteLogging
     @Test
-    @Disabled       // due to an exception which should not be thrown in parallel with the event
-                    // see https://github.com/SpineEventEngine/core-java/issues/1094
     @DisplayName("an entity state is set to an invalid value as a result of an event")
     void afterEvent() {
         String invalidText = "123-non numerical";
@@ -70,9 +67,6 @@ class ConstraintViolatedTest {
 
     @MuteLogging
     @Test
-    @Disabled       // due to an exception which should not be thrown in parallel with the event
-                    // see https://github.com/SpineEventEngine/core-java/issues/1094
-
     @DisplayName("an entity state is set to an invalid value as a result of a command")
     void afterCommand() {
         SingleTenantBlackBoxContext context = BlackBoxBoundedContext

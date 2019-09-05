@@ -25,10 +25,10 @@ import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.command.CreateProject;
 
 /**
- * This class is not valid because it declares two command handlers that
- * accept the same command type.
+ * This class is not valid because it declares two command handlers which accept the same command
+ * type.
  */
-public class DuplicatingCommandHandlers {
+public class DuplicateCommandHandlers {
 
     @Assign
     ProjectCreated on(CreateProject cmd) {
