@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.given.map.DupEventFilterValue;
+import io.spine.server.model.given.map.DupEventFilterValueWhere;
 import io.spine.server.model.given.map.DuplicatingCommandHandlers;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
 import io.spine.string.StringifierRegistry;
@@ -60,9 +61,15 @@ class HandlerMapTest {
         }
 
         @Test
-        @DisplayName("the same value of the filtered event field")
+        @DisplayName("the same value of the filtered event field (ByField)")
         void rejectFilterFieldDuplication() {
             assertDuplication(() -> asProjectionClass(DupEventFilterValue.class));
+        }
+
+        @Test
+        @DisplayName("the same value of the filtered event field (Where)")
+        void rejectFilterFieldDuplicationWhere() {
+            assertDuplication(() -> asProjectionClass(DupEventFilterValueWhere.class));
         }
 
         @Test

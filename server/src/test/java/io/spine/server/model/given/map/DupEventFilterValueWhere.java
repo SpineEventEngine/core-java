@@ -29,24 +29,25 @@ import io.spine.test.projection.event.Int32Imported;
 import static io.spine.testing.Tests.halt;
 
 /**
- * Valid projection class which filters events by values.
+ * This projection class is not valid because values used in the filtering subscriber
+ * annotations evaluate to the same field value (even though that the string values are different).
  */
-public final class FilteredSubscription
+public final class DupEventFilterValueWhere
         extends Projection<String, SavedString, SavedString.Builder> {
 
     private static final String VALUE_FIELD_PATH = "value";
 
-    private FilteredSubscription(String id) {
+    private DupEventFilterValueWhere(String id) {
         super(id);
     }
 
     @Subscribe
-    void only100(@Where(field = VALUE_FIELD_PATH, equals = "100") Int32Imported event) {
+    void onString1(@Where(field = VALUE_FIELD_PATH, equals = "1") Int32Imported event) {
         halt();
     }
 
     @Subscribe
-    void only500(@Where(field = VALUE_FIELD_PATH, equals = "500") Int32Imported event) {
+    void onStringOne(@Where(field = VALUE_FIELD_PATH, equals = "+1") Int32Imported event) {
         halt();
     }
 }

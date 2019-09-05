@@ -56,6 +56,7 @@ public class Bucket {
         peas = peas + e.getNumber();
     }
 
+    @SuppressWarnings("deprecation") // to be migrated during removal of `@ByField`.
     @Subscribe(filter = @ByField(path = "kind", value = "BEAN"))
     void onlyBeans(BeanAdded e) {
         beans = beans + e.getNumber();

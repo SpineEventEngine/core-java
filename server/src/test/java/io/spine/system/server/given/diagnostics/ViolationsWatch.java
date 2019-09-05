@@ -23,8 +23,8 @@ package io.spine.system.server.given.diagnostics;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
@@ -47,11 +47,10 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
     public static final WatchId DEFAULT = WatchId.generate();
     private static final String LAST_MESSAGE_TYPE_PATH = "last_message.type_url";
 
-    @Subscribe(filter = @ByField(
-            path = LAST_MESSAGE_TYPE_PATH,
-            value = "type.spine.io/spine.system.server.test.TextValidated"
-    ))
-    void onInvalidText(ConstraintViolated event) {
+    @Subscribe
+    void onInvalidText(@Where(field = LAST_MESSAGE_TYPE_PATH,
+                              equals = "type.spine.io/spine.system.server.test.TextValidated")
+                       ConstraintViolated event) {
         List<ConstraintViolation> violations = event.getViolationList();
         checkArgument(violations.size() == 1);
         ConstraintViolation violation = violations.get(0);
@@ -62,11 +61,11 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
         builder().setInvalidText(stringValue);
     }
 
-    @Subscribe(filter = @ByField(
-            path = LAST_MESSAGE_TYPE_PATH,
-            value = "type.spine.io/spine.system.server.test.StartVerification"
-    ))
-    void onInvalidVerification(ConstraintViolated event) {
+    @Subscribe
+    void onInvalidVerification(
+            @Where(field = LAST_MESSAGE_TYPE_PATH,
+                    equals = "type.spine.io/spine.system.server.test.StartVerification")
+            ConstraintViolated event) {
         List<ConstraintViolation> violations = event.getViolationList();
         checkArgument(violations.size() == 1);
         ConstraintViolation violation = violations.get(0);

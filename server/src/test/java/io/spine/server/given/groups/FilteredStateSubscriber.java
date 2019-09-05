@@ -27,6 +27,7 @@ import io.spine.server.given.organizations.Organization;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SuppressWarnings("deprecation")
 public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
     @Subscribe(

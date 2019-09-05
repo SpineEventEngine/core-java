@@ -18,35 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.map;
+package io.spine.server.given.groups;
 
 import io.spine.core.Subscribe;
 import io.spine.core.Where;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.given.SavedString;
-import io.spine.test.projection.event.Int32Imported;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.given.organizations.Organization;
 
-import static io.spine.testing.Tests.halt;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Valid projection class which filters events by values.
- */
-public final class FilteredSubscription
-        extends Projection<String, SavedString, SavedString.Builder> {
-
-    private static final String VALUE_FIELD_PATH = "value";
-
-    private FilteredSubscription(String id) {
-        super(id);
-    }
+public class FilteredStateSubscriberWhere extends AbstractEventSubscriber {
 
     @Subscribe
-    void only100(@Where(field = VALUE_FIELD_PATH, equals = "100") Int32Imported event) {
-        halt();
-    }
-
-    @Subscribe
-    void only500(@Where(field = VALUE_FIELD_PATH, equals = "500") Int32Imported event) {
-        halt();
+    void on(@Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
+                    Organization organization) {
+        fail(FilteredStateSubscriberWhere.class.getSimpleName() +
+                     " should not be able to receive any updates.");
     }
 }

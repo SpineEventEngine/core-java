@@ -20,8 +20,8 @@
 
 package io.spine.server.projection.given.cls;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.PairImported;
@@ -39,13 +39,13 @@ public final class DifferentFieldSubscription
         super(id);
     }
 
-    @Subscribe(filter = @ByField(path = "integer", value = "42"))
-    void onInt(PairImported event) {
+    @Subscribe
+    void onInt(@Where(field = "integer", equals = "42") PairImported event) {
         halt();
     }
 
-    @Subscribe(filter = @ByField(path = "str", value = "42"))
-    void onString(PairImported event) {
+    @Subscribe
+    void onString(@Where(field = "str", equals = "42") PairImported event) {
         halt();
     }
 }
