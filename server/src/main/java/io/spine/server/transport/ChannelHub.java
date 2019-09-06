@@ -21,13 +21,12 @@ package io.spine.server.transport;
 
 import io.spine.annotation.SPI;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
-import static java.util.Collections.synchronizedMap;
 import static java.util.Collections.unmodifiableSet;
 
 /**
@@ -40,7 +39,7 @@ import static java.util.Collections.unmodifiableSet;
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
 
     private final TransportFactory transportFactory;
-    private final Map<ChannelId, C> channels = synchronizedMap(new HashMap<>());
+    private final Map<ChannelId, C> channels = new ConcurrentHashMap<>();
 
     protected ChannelHub(TransportFactory transportFactory) {
         this.transportFactory = transportFactory;
@@ -51,9 +50,22 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
     }
 
     /**
+     * Checks if this channel hub contains a channel with a given ID.
+     *
+     * @param id
+     *         the ID of the channel
+     * @return {@code true} if such a channel is established in this hub, {@code false} otherwise
+     * @see #get(ChannelId)
+     */
+    public boolean hasChannel(ChannelId id) {
+        return channels.containsKey(id);
+    }
+
+    /**
      * Creates a new channel under the specified ID.
      *
      * @param id
+     *         the ID of the channel to create
      * @return the created channel.
      */
     protected abstract C newChannel(ChannelId id);
@@ -68,8 +80,8 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      *         the identifier of the resulting channel
      * @return a channel with the key
      */
-    public synchronized C get(ChannelId channelId) {
-        C channel = channels.computeIfAbsent(channelId, targetType1 -> newChannel(channelId));
+    public C get(ChannelId channelId) {
+        C channel = channels.computeIfAbsent(channelId, this::newChannel);
         return channel;
     }
 

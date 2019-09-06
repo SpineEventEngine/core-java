@@ -28,6 +28,7 @@ import io.spine.core.Event;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.PublisherHub;
+import io.spine.server.transport.SubscriberHub;
 import io.spine.server.type.EventClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -55,10 +56,16 @@ final class BusAdapter {
      */
     private final PublisherHub publisherHub;
 
+    /**
+     * The subscriber hub, used to identify types of events received by this Context.
+     */
+    private final SubscriberHub subscriberHub;
+
     private BusAdapter(Builder builder) {
         this.targetBus = builder.targetBus;
         this.boundedContextName = builder.boundedContextName;
         this.publisherHub = builder.publisherHub;
+        this.subscriberHub = builder.subscriberHub;
     }
 
     /**
@@ -90,7 +97,7 @@ final class BusAdapter {
         Class<? extends EventMessage> eventClass = (Class<? extends EventMessage>) messageClass;
         EventClass eventType = EventClass.from(eventClass);
         EventDispatcher result = new DomesticEventPublisher(
-                boundedContextName, publisherHub, eventType
+                boundedContextName, publisherHub, subscriberHub, eventType
         );
         return result;
     }
@@ -135,9 +142,15 @@ final class BusAdapter {
         private EventBus targetBus;
         private BoundedContextName boundedContextName;
         private PublisherHub publisherHub;
+        private SubscriberHub subscriberHub;
 
         Builder setPublisherHub(PublisherHub publisherHub) {
             this.publisherHub = checkNotNull(publisherHub);
+            return this;
+        }
+
+        Builder setSubscriberHub(SubscriberHub subscriberHub) {
+            this.subscriberHub = checkNotNull(subscriberHub);
             return this;
         }
 
@@ -155,6 +168,7 @@ final class BusAdapter {
             checkNotNull(targetBus);
             checkNotNull(boundedContextName);
             checkNotNull(publisherHub);
+            checkNotNull(subscriberHub);
 
             BusAdapter result = new BusAdapter(this);
             return result;

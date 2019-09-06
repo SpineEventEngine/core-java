@@ -29,6 +29,7 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
+import io.spine.server.transport.SubscriberHub;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -52,14 +53,17 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
 
     private final BoundedContextName originContextName;
     private final PublisherHub publisherHub;
+    private final SubscriberHub subscriberHub;
     private final Set<EventClass> eventClasses;
 
     DomesticEventPublisher(BoundedContextName originContextName,
                            PublisherHub publisherHub,
+                           SubscriberHub subscriberHub,
                            EventClass messageClass) {
         super();
         this.originContextName = checkNotNull(originContextName);
         this.publisherHub = checkNotNull(publisherHub);
+        this.subscriberHub = checkNotNull(subscriberHub);
         this.eventClasses = ImmutableSet.of(messageClass);
     }
 
@@ -77,8 +81,11 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
 
         TypeUrl eventType = TypeUrl.of(eventClass.value());
         ChannelId channelId = channelIdFor(eventType);
-        Publisher channel = publisherHub.get(channelId);
-        channel.publish(AnyPacker.pack(event.id()), msg);
+        boolean eventFromUpstream = subscriberHub.hasChannel(channelId);
+        if (!eventFromUpstream) {
+            Publisher channel = publisherHub.get(channelId);
+            channel.publish(AnyPacker.pack(event.id()), msg);
+        }
     }
 
     @Override

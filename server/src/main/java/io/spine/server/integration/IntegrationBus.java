@@ -145,6 +145,7 @@ public class IntegrationBus
         return BusAdapter
                 .newBuilder()
                 .setPublisherHub(publisherHub)
+                .setSubscriberHub(subscriberHub)
                 .setBoundedContextName(context.name())
                 .setTargetBus(context.eventBus())
                 .build();
