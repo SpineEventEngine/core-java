@@ -25,7 +25,7 @@ import io.spine.core.Where;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.given.organizations.Organization;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static io.spine.testing.Tests.halt;
 
 /**
  * This class declares invalid subscriber because filtering of states is not allowed.
@@ -35,9 +35,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FilteredStateSubscriberWhere extends AbstractEventSubscriber {
 
     @Subscribe
-    void on(@Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
-                    Organization organization) {
-        fail(FilteredStateSubscriberWhere.class.getSimpleName() +
-                     " should not be able to receive any updates.");
+    void on(
+            @Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
+            Organization organization) {
+        halt();
     }
 }
