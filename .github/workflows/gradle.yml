@@ -1,4 +1,4 @@
-name: Java CI
+name: Tests on Windows
 
 on:
   pull_request:
@@ -20,5 +20,5 @@ jobs:
     - name: Pull config
       run: git submodule update --init --recursive
 
-    - name: Build with Gradle
+    - name: Run tests with Gradle
       run: gradlew.bat build
