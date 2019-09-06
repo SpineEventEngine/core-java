@@ -35,7 +35,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * project is {@code mary@ackme.net}:
  * <pre>{@code
  * \@Subscribe
- * void on(@Where(field = "owner.email" equals = "mary@ackme.net") ProjectCreated e) { ... }
+ * void on(@Where(field = "owner.email", equals = "mary@ackme.net") ProjectCreated e) { ... }
  * }</pre>
  *
  * <p><em>NOTE:</em> This syntax applies only to events. Filtering state subscriptions
