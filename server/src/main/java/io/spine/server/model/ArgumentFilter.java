@@ -143,11 +143,7 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      * Tells if the passed filter works on the same field as this one.
      */
     boolean sameField(ArgumentFilter another) {
-        if (field == null) {
-            return another.field == null;
-        }
-        boolean result = field.equals(another.field);
-        return result;
+        return Objects.equals(field, another.field);
     }
 
     /** Obtains the depth of the filtered field. */
