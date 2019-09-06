@@ -48,9 +48,10 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
     private static final String LAST_MESSAGE_TYPE_PATH = "last_message.type_url";
 
     @Subscribe
-    void onInvalidText(@Where(field = LAST_MESSAGE_TYPE_PATH,
-                              equals = "type.spine.io/spine.system.server.test.TextValidated")
-                       ConstraintViolated event) {
+    void onInvalidText(
+            @Where(field = LAST_MESSAGE_TYPE_PATH,
+                   equals = "type.spine.io/spine.system.server.test.TextValidated")
+            ConstraintViolated event) {
         List<ConstraintViolation> violations = event.getViolationList();
         checkArgument(violations.size() == 1);
         ConstraintViolation violation = violations.get(0);
@@ -64,7 +65,7 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
     @Subscribe
     void onInvalidVerification(
             @Where(field = LAST_MESSAGE_TYPE_PATH,
-                    equals = "type.spine.io/spine.system.server.test.StartVerification")
+                   equals = "type.spine.io/spine.system.server.test.StartVerification")
             ConstraintViolated event) {
         List<ConstraintViolation> violations = event.getViolationList();
         checkArgument(violations.size() == 1);
