@@ -27,7 +27,7 @@
 
 ext {
     // The version of the modules in this project.
-    versionToPublish = '1.0.8-SNAPSHOT'
+    versionToPublish = '1.0.9-SNAPSHOT'
 
     // Depend on `base` for the general definitions and a model compiler.
     spineBaseVersion = '1.0.8-SNAPSHOT'
