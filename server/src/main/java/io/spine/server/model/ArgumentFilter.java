@@ -55,6 +55,15 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
     @SuppressWarnings("Immutable") // Values are primitives.
     private final @Nullable Object expectedValue;
 
+    private ArgumentFilter(FieldPath path, Object expectedValue) {
+        this.field = path.getFieldNameCount() > 0
+                     ? Field.withPath(path)
+                     : null;
+        this.expectedValue = field != null
+                             ? expectedValue
+                             : null;
+    }
+
     /**
      * Creates a new filter which accepts only the passed value of the specified field.
      */
@@ -168,15 +177,6 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
             return 0;
         }
         return field.path().getFieldNameCount();
-    }
-
-    private ArgumentFilter(FieldPath path, Object expectedValue) {
-        this.field = path.getFieldNameCount() > 0
-            ? Field.withPath(path)
-            : null;
-        this.expectedValue = field != null
-            ? expectedValue
-            : null;
     }
 
     /** Tells if this filter accepts all the events. */
