@@ -79,21 +79,14 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         Subscribe annotation = method.getAnnotation(Subscribe.class);
         checkAnnotated(method, annotation);
         @Nullable Where where = filterAnnotationOf(method);
-        @Nullable ByField byField = annotation.filter();
+        ByField byField = annotation.filter();
         boolean byFieldEmpty = byField.path().isEmpty();
         String fieldPath;
         String value;
         if (where != null) {
             fieldPath = where.field();
             value = where.equals();
-            checkState(
-                    byFieldEmpty,
-                    "The subscriber method `%s()` has `@%s` and `@%s`" +
-                            " annotations at the same time." +
-                            " Please use only one, preferring `%s` because `%s` is deprecated.",
-                    method.getName(), ByField.class.getName(), Where.class.getName(),
-                    Where.class.getName(), ByField.class.getName()
-            );
+            checkNoByFieldAnnotation(byFieldEmpty, method);
         } else {
             if (byFieldEmpty) {
                 return acceptingAll();
@@ -101,6 +94,29 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
             fieldPath = byField.path();
             value = byField.value();
         }
+        return createFilter(method, fieldPath, value);
+    }
+
+    /**
+     * Ensures that the method does not have {@code ByField} annotation and {@code Where}
+     * parameter annotation at the same time.
+     */
+    private static void checkNoByFieldAnnotation(boolean byFieldEmpty, Method method) {
+        String where = Where.class.getName();
+        String byField = ByField.class.getName();
+        checkState(
+                byFieldEmpty,
+                "The subscriber method `%s()` has `@%s` and `@%s`" +
+                        " annotations at the same time." +
+                        " Please use only one, preferring `%s` because `%s` is deprecated.",
+                method.getName(), byField, where, where, byField
+        );
+    }
+
+    /**
+     * Creates a filter for the method using string values found in the annotation for the method.
+     */
+    private static ArgumentFilter createFilter(Method method, String fieldPath, String value) {
         Class<Message> paramType = firstParamType(method);
         Field field = Field.parse(fieldPath);
         Class<?> fieldType = field.findType(paramType).orElseThrow(
