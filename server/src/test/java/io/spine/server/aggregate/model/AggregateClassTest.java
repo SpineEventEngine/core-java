@@ -62,7 +62,10 @@ class AggregateClassTest {
                 .containsExactlyElementsIn(EventClass.setOf(
                         TankEmpty.class,
                         Rejections.EngineAlreadyStopped.class,
-                        Rejections.EngineAlreadyStarted.class
+                        Rejections.EngineAlreadyStarted.class,
+                        EmissionTestStarted.class,
+                        EmissionTestStopped.class,
+                        Rejections.CannotStartEmissionTest.class
                 ));
     }
 

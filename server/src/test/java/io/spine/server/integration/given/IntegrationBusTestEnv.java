@@ -23,7 +23,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
@@ -55,11 +54,7 @@ public class IntegrationBusTestEnv {
     @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers() {
         BoundedContext boundedContext = newContext();
-        AbstractEventSubscriber eventSubscriber = new ProjectEventsSubscriber();
-        boundedContext.integrationBus()
-                      .register(eventSubscriber);
-        boundedContext.eventBus()
-                      .register(eventSubscriber);
+        boundedContext.registerEventDispatcher(new ProjectEventsSubscriber());
         boundedContext.register(DefaultRepository.of(ProjectCountAggregate.class));
         boundedContext.register(DefaultRepository.of(ProjectWizard.class));
         return boundedContext;
@@ -73,16 +68,18 @@ public class IntegrationBusTestEnv {
     }
 
     public static BoundedContext contextWithProjectCreatedNeeds() {
-        BoundedContext result = newContext();
-        result.integrationBus()
-              .register(new ProjectEventsSubscriber());
+        BoundedContext result = BoundedContext
+                .singleTenant(newUuid())
+                .addEventDispatcher(new ProjectEventsSubscriber())
+                .build();
         return result;
     }
 
     public static BoundedContext contextWithProjectStartedNeeds() {
-        BoundedContext result = newContext();
-        result.integrationBus()
-              .register(new ProjectStartedExtSubscriber());
+        BoundedContext result = BoundedContext
+                .singleTenant(newUuid())
+                .addEventDispatcher(new ProjectStartedExtSubscriber())
+                .build();
         return result;
     }
 

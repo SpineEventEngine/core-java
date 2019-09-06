@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
@@ -46,6 +47,7 @@ import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
 import io.spine.testdata.Sample;
 import io.spine.testing.SlowTest;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -104,6 +106,8 @@ public class EventBusTest {
     @AfterEach
     void tearDown() throws Exception {
         context.close();
+        ServerEnvironment.instance()
+                         .reset();
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
@@ -412,9 +416,10 @@ public class EventBusTest {
         }
     }
 
+    @MuteLogging
     @Test
     @DisplayName("not dispatch domestic event to external handler")
-    void domesticEventToExternalMethod() {
+    void domesticEventToExternalMetho() {
         EBExternalTaskAddedSubscriber subscriber = new EBExternalTaskAddedSubscriber();
         eventBus.register(subscriber);
 
@@ -426,8 +431,8 @@ public class EventBusTest {
                 .setTask(task)
                 .build();
         Event event = eventFactory.createEvent(eventMessage);
-        eventBus.post(event, StreamObservers.noOpObserver());
-        assertFalse(subscriber.receivedExternalMessage());
+        assertThrows(IllegalArgumentException.class,
+                     () -> eventBus.post(event, StreamObservers.noOpObserver()));
     }
 
     /**

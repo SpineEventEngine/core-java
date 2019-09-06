@@ -23,6 +23,7 @@ package io.spine.server.integration;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
 import io.spine.server.transport.PublisherHub;
+import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.server.type.EventClass;
 import io.spine.test.integration.event.ItgProjectCreated;
@@ -44,10 +45,13 @@ class DomesticEventPublisherTest {
     private static final EventClass TARGET_EVENT_CLASS = EventClass.from(ItgProjectCreated.class);
 
     private PublisherHub publisherHub;
+    private SubscriberHub subscriberHub;
 
     @BeforeEach
     void setUp() {
-        publisherHub = new PublisherHub(InMemoryTransportFactory.newInstance());
+        InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
+        publisherHub = new PublisherHub(transport);
+        subscriberHub = new SubscriberHub(transport);
     }
 
     @Test
@@ -56,6 +60,7 @@ class DomesticEventPublisherTest {
         new NullPointerTester()
                 .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
                 .setDefault(PublisherHub.class, publisherHub)
+                .setDefault(SubscriberHub.class, subscriberHub)
                 .setDefault(EventClass.class, TARGET_EVENT_CLASS)
                 .testConstructors(DomesticEventPublisher.class, PACKAGE);
     }
@@ -64,7 +69,7 @@ class DomesticEventPublisherTest {
     @DisplayName("dispatch only one event type")
     void dispatchSingleEvent() {
         DomesticEventPublisher publisher = new DomesticEventPublisher(
-                assumingTests(), publisherHub, TARGET_EVENT_CLASS
+                assumingTests(), publisherHub, subscriberHub, TARGET_EVENT_CLASS
         );
         Set<EventClass> classes = publisher.messageClasses();
         assertThat(classes).containsExactly(TARGET_EVENT_CLASS);
@@ -74,7 +79,7 @@ class DomesticEventPublisherTest {
     @DisplayName("dispatch no external events")
     void dispatchNoExternalEvents() {
         DomesticEventPublisher publisher = new DomesticEventPublisher(
-                assumingTests(), publisherHub, TARGET_EVENT_CLASS
+                assumingTests(), publisherHub, subscriberHub, TARGET_EVENT_CLASS
         );
         Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
