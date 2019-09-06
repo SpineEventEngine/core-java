@@ -20,8 +20,8 @@
 
 package io.spine.server.projection.given.cls;
 
-import io.spine.core.ByField;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.Int32Imported;
@@ -41,13 +41,13 @@ public final class DuplicateValueSubscription
         super(id);
     }
 
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "1"))
-    void onString1(Int32Imported event) {
+    @Subscribe
+    void onString1(@Where(field = VALUE_FIELD_PATH, equals = "1") Int32Imported event) {
         halt();
     }
 
-    @Subscribe(filter = @ByField(path = VALUE_FIELD_PATH, value = "+1"))
-    void onStringOne(Int32Imported event) {
+    @Subscribe
+    void onStringOne(@Where(field = VALUE_FIELD_PATH, equals = "+1") Int32Imported event) {
         halt();
     }
 }

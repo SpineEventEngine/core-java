@@ -32,6 +32,7 @@ import static io.spine.testing.Tests.halt;
  * This projection class is not valid because values used in the filtering subscriber
  * annotations evaluate to the same field value (even though that the string values are different).
  */
+@SuppressWarnings("deprecation")
 public final class DupEventFilterValue
         extends Projection<String, SavedString, SavedString.Builder> {
 

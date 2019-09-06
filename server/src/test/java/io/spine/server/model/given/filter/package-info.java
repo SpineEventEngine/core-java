@@ -18,35 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.map;
-
-import io.spine.core.Subscribe;
-import io.spine.core.Where;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.given.SavedString;
-import io.spine.test.projection.event.Int32Imported;
-
-import static io.spine.testing.Tests.halt;
-
 /**
- * Valid projection class which filters events by values.
+ * Test environment classes for {@link io.spine.server.model.ArgumentFilterTest}.
  */
-public final class FilteredSubscription
-        extends Projection<String, SavedString, SavedString.Builder> {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given.filter;
 
-    private static final String VALUE_FIELD_PATH = "value";
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    private FilteredSubscription(String id) {
-        super(id);
-    }
-
-    @Subscribe
-    void only100(@Where(field = VALUE_FIELD_PATH, equals = "100") Int32Imported event) {
-        halt();
-    }
-
-    @Subscribe
-    void only500(@Where(field = VALUE_FIELD_PATH, equals = "500") Int32Imported event) {
-        halt();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

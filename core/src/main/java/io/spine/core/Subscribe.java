@@ -151,6 +151,9 @@ public @interface Subscribe {
      *
      * <p>If the {@link ByField#path() @ByField.path} if empty, the filter is not
      * applied.
+     *
+     * @deprecated please use {@link Where @Where} annotation for the first method parameter.
      */
+    @Deprecated
     ByField filter() default @ByField(path = "", value = "");
 }
